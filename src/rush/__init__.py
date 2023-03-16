@@ -16,3 +16,11 @@ def send_local_image(path: str, spec: DocumentSpec):
         pass
     else:
         return config.inject.send_local_image(path, spec)
+    
+def send_text_document(content: str, spec: DocumentSpec):
+    print(config.inject)
+    if not config.inject:
+        pass
+    else:
+        print("SEND 1")
+        return config.inject.send_text_document(content, spec)

@@ -1,7 +1,7 @@
 #!/usr/bin/python3.9
 import rush.monkey
 from rush.config import config
-from typing import Dict, List
+from typing import Dict, List, TypedDict, Optional, Callable, Any
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from flask import request
@@ -21,7 +21,13 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-sessions: Dict[str, AgentExecutor] = {}
+
+class Session(TypedDict):
+    agent: Any
+    process_response: Optional[Callable[[Any], str]]
+
+
+sessions: Dict[str, Session] = {}
 
 
 def capture_mention(string: str, agents: List[str]):
@@ -60,57 +66,66 @@ def connect():
             emit('document', {"spec": spec,
                  'content': image_data})
 
+    def send_text_document(text: str, spec: DocumentSpec):
+        spec["type"] = "text"
+        emit('document', {"spec": spec,
+                          'content': text})
+
     callback_manager = CallbackManager(
         [UiCallbackHandler(emit, config.bot_name), OpenAICallbackHandler()])
 
-
     rush_inject = RushInject(
-        callback_manager=callback_manager, send_local_image=send_local_image)
+        callback_manager=callback_manager, send_local_image=send_local_image, send_text_document=send_text_document)
+
+    # TODO lock config object until inject release
+    config.inject = rush_inject
 
     module = __import__(config.module)
-    #TODO lock config object until inject release
-    config.inject = rush_inject
 
     if not hasattr(module, "load_agent"):
         raise ValueError("File does not expose a load_agent function")
 
     load_agent = module.load_agent
-
     id = request.sid
 
-    sessions[id] = load_agent()
+    session = {}
+    agent = load_agent()
+    session["agent"] = agent
 
-    config.inject = None
+    if hasattr(module, "process_response"):
+        session["process_response"] = module.process_response
 
-    agent = sessions[id]
+    sessions[id] = session
 
-    tools = agent.tools
+    # config.inject = None
 
-    agents = [{"id": tool.name, "display": tool.name, "description": tool.description}
-              for tool in tools]
-
-    emit("agents", agents)
+    if hasattr(agent, "tools"):
+        tools = agent.tools
+        agents = [{"id": tool.name, "display": tool.name, "description": tool.description}
+                  for tool in tools]
+        emit("agents", agents)
 
 
 @socketio.on('message')
 def message(message):
     id = request.sid
-    agent = sessions[id]
+    session = sessions[id]
+    agent = session["agent"]
     if not agent:
         return
 
     agent.callback_manager.handlers[0].reset_memory()
 
     input = message["data"].strip()
-    tools = agent.tools
-    agents = [tool.name for tool in tools]
-    input, agent_mention = capture_mention(input, agents)
 
-    if agent_mention:
+    if hasattr(agent, "tools"):
+        tools = agent.tools
+        agents = [tool.name for tool in tools]
+        input, agent_mention = capture_mention(input, agents)
+
         agent_to_call_list = [
             tool for tool in tools if tool.name == agent_mention]
         agent_to_call = agent_to_call_list[0]
-
         agent_name = agent_mention
     else:
         agent_to_call = agent
@@ -118,10 +133,15 @@ def message(message):
 
     agent.callback_manager.handlers[0].tool_sequence = [agent_name]
 
+    input_key = agent_to_call.input_keys[0]
+    raw_res = agent_to_call({input_key: input})
+
+    if "process_response" in session:
+        res = session["process_response"](raw_res)
+    else:
+        output_key = agent_to_call.output_keys[0]
+        res = raw_res[output_key]
     try:
-
-        res = agent_to_call({"input": input})['output']
-
         emit("message", {
             "author": agent_name,
             "content": res,

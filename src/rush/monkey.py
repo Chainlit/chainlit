@@ -1,8 +1,12 @@
 from typing import Any, Dict, List, Optional
 import langchain
 from langchain.llms import base as llm_base
+from langchain.chat_models.base import BaseChatModel
 from langchain.callbacks import base as cb_base
-from langchain.schema import LLMResult
+from langchain.schema import (
+    LLMResult,
+    PromptValue,
+)
 
 
 def cbh_on_llm_cache(
@@ -43,7 +47,7 @@ def get_llm_settings(llm: llm_base.BaseLLM, stop: Optional[List[str]] = None):
             "frequency_penalty": llm.frequency_penalty,
             "presence_penalty": llm.presence_penalty,
         }
-    elif llm.__class__.__name__ == "OpenAIChat":
+    elif llm.__class__.__name__ == "ChatOpenAI":
         return {
             "model_name": llm.model_name,
         }
@@ -111,3 +115,25 @@ def generate(
 
 
 llm_base.BaseLLM.generate = generate
+
+
+def generate_prompt(
+    self, prompts: List[PromptValue], stop: Optional[List[str]] = None
+) -> LLMResult:
+    prompt_messages = [p.to_messages() for p in prompts]
+    prompt_strings = [p.to_string() for p in prompts]
+    llm_settings = get_llm_settings(self, stop)
+
+    self.callback_manager.on_llm_start(
+        {"name": self.__class__.__name__}, prompt_strings, verbose=self.verbose, llm_settings=llm_settings
+    )
+    try:
+        output = self.generate(prompt_messages, stop=stop)
+    except (KeyboardInterrupt, Exception) as e:
+        self.callback_manager.on_llm_error(e, verbose=self.verbose)
+        raise e
+    self.callback_manager.on_llm_end(output, verbose=self.verbose)
+    return output
+
+
+BaseChatModel.generate_prompt = generate_prompt

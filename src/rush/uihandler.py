@@ -40,7 +40,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         self.emit("message", {
             "author": bot_name,
             "content": message,
-            "indent": len(self.queue),
+            "indent": max(len(self.queue), 1),
             "error": error,
             "prompts": prompts,
             "llm_settings": llm_settings,
@@ -121,9 +121,10 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(outputs)
         template.update(kwargs)
         self.process(template)
-        if "text" in outputs:
+        output_key = list(outputs.keys())[0]
+        if output_key:
             prompts = self.prompts.pop() if self.prompts else None
-            self.add_message(outputs["text"], prompts)
+            self.add_message(outputs[output_key], prompts)
 
 
     def on_chain_error(
