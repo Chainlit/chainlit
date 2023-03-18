@@ -7,6 +7,7 @@ from langchain.schema import (
     LLMResult,
     PromptValue,
 )
+from rush.sdk import LLMSettings
 
 
 def cbh_on_llm_cache(
@@ -38,19 +39,18 @@ cb_base.BaseCallbackManager.on_llm_cache = cbm_on_llm_cache
 
 def get_llm_settings(llm: llm_base.BaseLLM, stop: Optional[List[str]] = None):
     if llm.__class__.__name__ == "OpenAI":
-        return {
-            "model_name": llm.model_name,
-            "stop": stop,
-            "temperature": llm.temperature,
-            "max_tokens": llm.max_tokens,
-            "top_p": llm.top_p,
-            "frequency_penalty": llm.frequency_penalty,
-            "presence_penalty": llm.presence_penalty,
-        }
+        return LLMSettings(model_name=llm.model_name,
+                           stop=stop,
+                           temperature=llm.temperature,
+                           max_tokens=llm.max_tokens,
+                           top_p=llm.top_p,
+                           frequency_penalty=llm.frequency_penalty,
+                           presence_penalty=llm.presence_penalty,
+                           )
     elif llm.__class__.__name__ == "ChatOpenAI":
-        return {
-            "model_name": llm.model_name,
-        }
+        return LLMSettings(model_name=llm.model_name,
+                           stop=stop,
+                           )
     else:
         return None
 

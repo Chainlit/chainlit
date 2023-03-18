@@ -1,8 +1,12 @@
 """Callback Handler that logs to streamlit."""
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+if TYPE_CHECKING:
+    from rush.sdk import Rush
 import inspect
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
+from rush.config import config
 
 NALLOWLIST = ['on_chain_start', 'on_chain_end']
 
@@ -10,16 +14,15 @@ NALLOWLIST = ['on_chain_start', 'on_chain_end']
 class UiCallbackHandler(BaseCallbackHandler):
     """Callback Handler that logs to streamlit."""
 
+    rush: Rush
     always_verbose: bool = True
-    default_name: str
 
-    def __init__(self, emit, default_name) -> None:
+    def __init__(self, rush) -> None:
         self.memory = {}
         self.queue = []
         self.prompts = []
         self.llm_settings = None
-        self.emit = emit
-        self.default_name = default_name
+        self.rush = rush
         self.tool_sequence = []
 
     def reset_memory(self) -> None:
@@ -36,15 +39,16 @@ class UiCallbackHandler(BaseCallbackHandler):
 
     def add_message(self, message, prompts: Optional[List[str]] = None, error=False):
         llm_settings = self.llm_settings if prompts else None
-        bot_name = self.tool_sequence[-1] if self.tool_sequence else self.default_name
-        self.emit("message", {
-            "author": bot_name,
-            "content": message,
-            "indent": max(len(self.queue), 1),
-            "error": error,
-            "prompts": prompts,
-            "llm_settings": llm_settings,
-        })
+        bot_name = self.tool_sequence[-1] if self.tool_sequence else config.bot_name
+        self.rush.send_message(
+            author=bot_name,
+            content=message,
+            indent=max(
+                len(self.queue), 1),
+            is_error=error,
+            prompts=prompts,
+            llm_settings=llm_settings
+        )
 
     def process(self, event_action):
         event, action = event_action["func_name"].rsplit("_", 1)
@@ -125,7 +129,6 @@ class UiCallbackHandler(BaseCallbackHandler):
         if output_key:
             prompts = self.prompts.pop() if self.prompts else None
             self.add_message(outputs[output_key], prompts)
-
 
     def on_chain_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any

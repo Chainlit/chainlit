@@ -7,3 +7,9 @@ venv
 node_modules
 
 .DS_Store
+
+__pycache__
+
+.ipynb_checkpoints
+
+.langchain.db

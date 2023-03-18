@@ -1,19 +1,15 @@
 #!/usr/bin/python3.9
 import rush.monkey
 from rush.config import config
+from rush.sdk import Rush
 from typing import Dict, List, TypedDict, Optional, Callable, Any
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from flask import request
 from flask_cors import CORS
-from rush.uihandler import UiCallbackHandler
-from langchain.agents.agent import AgentExecutor
 from langchain import OpenAI
 import langchain
 from langchain.cache import SQLiteCache
-from langchain.callbacks.base import CallbackManager
-from langchain.callbacks import OpenAICallbackHandler
-from rush.inject import RushInject, DocumentSpec
 
 langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
 
@@ -24,6 +20,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 class Session(TypedDict):
     agent: Any
+    predict: Optional[Callable[[str], str]]
     process_response: Optional[Callable[[Any], str]]
 
 
@@ -59,74 +56,54 @@ def connect():
     if not config.module:
         raise ValueError("Missing module")
 
-    def send_local_image(path: str, spec: DocumentSpec):
-        with open(path, 'rb') as f:
-            image_data = f.read()
-            spec["type"] = "image"
-            emit('document', {"spec": spec,
-                 'content': image_data})
-
-    def send_text_document(text: str, spec: DocumentSpec):
-        spec["type"] = "text"
-        emit('document', {"spec": spec,
-                          'content': text})
-
-    callback_manager = CallbackManager(
-        [UiCallbackHandler(emit, config.bot_name), OpenAICallbackHandler()])
-
-    rush_inject = RushInject(
-        callback_manager=callback_manager, send_local_image=send_local_image, send_text_document=send_text_document)
-
-    # TODO lock config object until inject release
-    config.inject = rush_inject
-
+    session = {}  # type: Session
     module = __import__(config.module)
 
     if not hasattr(module, "load_agent"):
-        raise ValueError("File does not expose a load_agent function")
+        load_agent = None
+    else:
+        load_agent = module.load_agent
+        agent = load_agent()
+        session["agent"] = agent
+        if hasattr(agent, "tools"):
+            tools = agent.tools
+            agents = [{"id": tool.name, "display": tool.name, "description": tool.description}
+                      for tool in tools]
+            emit("agents", agents)
 
-    load_agent = module.load_agent
-    id = request.sid
+    if not hasattr(module, "predict"):
+        predict = None
+    else:
+        predict = module.predict
+        session["predict"] = predict
 
-    session = {}
-    agent = load_agent()
-    session["agent"] = agent
+    if not load_agent and not predict:
+        raise ValueError(
+            "Module does not expose a load_agent or predict function")
 
     if hasattr(module, "process_response"):
         session["process_response"] = module.process_response
 
+    id = request.sid
     sessions[id] = session
 
-    # config.inject = None
 
-    if hasattr(agent, "tools"):
-        tools = agent.tools
-        agents = [{"id": tool.name, "display": tool.name, "description": tool.description}
-                  for tool in tools]
-        emit("agents", agents)
-
-
-@socketio.on('message')
-def message(message):
-    id = request.sid
-    session = sessions[id]
-    agent = session["agent"]
-    if not agent:
-        return
-
+def run_agent(agent: Any, input_str: str):
     agent.callback_manager.handlers[0].reset_memory()
-
-    input = message["data"].strip()
 
     if hasattr(agent, "tools"):
         tools = agent.tools
         agents = [tool.name for tool in tools]
-        input, agent_mention = capture_mention(input, agents)
+        input_str, agent_mention = capture_mention(input_str, agents)
 
         agent_to_call_list = [
             tool for tool in tools if tool.name == agent_mention]
-        agent_to_call = agent_to_call_list[0]
-        agent_name = agent_mention
+        if agent_to_call_list:
+            agent_to_call = agent_to_call_list[0]
+            agent_name = agent_mention
+        else:
+            agent_to_call = agent
+            agent_name = config.bot_name  
     else:
         agent_to_call = agent
         agent_name = config.bot_name
@@ -134,29 +111,31 @@ def message(message):
     agent.callback_manager.handlers[0].tool_sequence = [agent_name]
 
     input_key = agent_to_call.input_keys[0]
-    raw_res = agent_to_call({input_key: input})
+    raw_res = agent_to_call({input_key: input_str})
+    output_key = agent_to_call.output_keys[0]
+    return raw_res, agent_name, output_key
 
-    if "process_response" in session:
-        res = session["process_response"](raw_res)
-    else:
-        output_key = agent_to_call.output_keys[0]
-        res = raw_res[output_key]
-    try:
-        emit("message", {
-            "author": agent_name,
-            "content": res,
-            "indent": 0,
-            "final": True,
-        })
-        # emit("debug", agent.callback_manager.handlers[0].memory or None)
+
+@socketio.on('message')
+def message(message):
+    input_str = message["data"].strip()
+
+    id = request.sid
+    session = sessions[id]
+
+    if "agent" in session:
+        sdk = Rush(emit=emit)
+        agent = session["agent"]
+        raw_res, agent_name, output_key = run_agent(agent, input_str)
+        if "process_response" in session:
+            res = session["process_response"](raw_res)
+        else:
+            res = raw_res[output_key]
+        sdk.send_message(author=agent_name, content=res, final=True)
         emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
-    except Exception as e:
-        emit("message", {
-            "author": agent_name,
-            "content": f"Error: {str(e)}",
-            "indent": 0,
-            "error": True
-        })
+    elif "predict" in session:
+        session["predict"](input_str)
+        return
 
 
 def run():
