@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from langchain.callbacks.base import CallbackManager
 from langchain.callbacks import OpenAICallbackHandler
-from rush.uihandler import UiCallbackHandler
+from chainlit.uihandler import UiCallbackHandler
 
 DocumentType = Literal["image", "text"]
 DocumentDisplay = Literal["embbed", "side", "fullscreen"]
@@ -29,7 +29,7 @@ class DocumentSpec():
     type: DocumentDisplay
 
 
-class Rush:
+class Chainlit:
     emit: Any
 
     def __init__(self, emit) -> None:
@@ -38,7 +38,7 @@ class Rush:
     def callback_manager(self, handlers=None):
         if self.emit is not None:
             return CallbackManager(
-                [UiCallbackHandler(rush=self), OpenAICallbackHandler()])
+                [UiCallbackHandler(sdk=self), OpenAICallbackHandler()])
         else:
             if handlers is None:
                 return None

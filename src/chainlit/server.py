@@ -1,19 +1,22 @@
-#!/usr/bin/python3.9
-import rush.monkey
-from rush.config import config
-from rush.sdk import Rush
-from typing import Dict, List, TypedDict, Optional, Callable, Any
-from flask import Flask
+import sys
+import os
+if 'langchain' in sys.modules:
+    from chainlit.lc import monkey
+
+from chainlit.lc.utils import run_agent
+from chainlit.config import config
+from chainlit.sdk import Chainlit
+from typing import Dict, TypedDict, Optional, Callable, Any
+from flask import Flask, send_from_directory
 from flask_socketio import SocketIO, emit
 from flask import request
 from flask_cors import CORS
 from langchain import OpenAI
-import langchain
-from langchain.cache import SQLiteCache
 
-langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
+root_dir = os.path.dirname(os.path.abspath(__file__))
+build_dir = os.path.join(root_dir, "frontend/dist")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -27,19 +30,20 @@ class Session(TypedDict):
 sessions: Dict[str, Session] = {}
 
 
-def capture_mention(string: str, agents: List[str]):
-    string = string.lower()
-    mention = None
-    for agent in agents:
-        to_capture = ("@"+agent).lower()
-        if to_capture in string:
-            string = string.replace(to_capture, "").strip()
-            mention = agent
-    return string, mention
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if config.headless:
+        return "Headless"
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/completion', methods=['POST'])
 def completion():
+    # todo use api instead of langchain
     data = request.json
     llm_settings = data["settings"]
     if "stop" in llm_settings:
@@ -88,34 +92,6 @@ def connect():
     sessions[id] = session
 
 
-def run_agent(agent: Any, input_str: str):
-    agent.callback_manager.handlers[0].reset_memory()
-
-    if hasattr(agent, "tools"):
-        tools = agent.tools
-        agents = [tool.name for tool in tools]
-        input_str, agent_mention = capture_mention(input_str, agents)
-
-        agent_to_call_list = [
-            tool for tool in tools if tool.name == agent_mention]
-        if agent_to_call_list:
-            agent_to_call = agent_to_call_list[0]
-            agent_name = agent_mention
-        else:
-            agent_to_call = agent
-            agent_name = config.bot_name  
-    else:
-        agent_to_call = agent
-        agent_name = config.bot_name
-
-    agent.callback_manager.handlers[0].tool_sequence = [agent_name]
-
-    input_key = agent_to_call.input_keys[0]
-    raw_res = agent_to_call({input_key: input_str})
-    output_key = agent_to_call.output_keys[0]
-    return raw_res, agent_name, output_key
-
-
 @socketio.on('message')
 def message(message):
     input_str = message["data"].strip()
@@ -124,7 +100,7 @@ def message(message):
     session = sessions[id]
 
     if "agent" in session:
-        sdk = Rush(emit=emit)
+        sdk = Chainlit(emit=emit)
         agent = session["agent"]
         raw_res, agent_name, output_key = run_agent(agent, input_str)
         if "process_response" in session:
@@ -139,4 +115,4 @@ def message(message):
 
 
 def run():
-    return socketio.run(app)
+    socketio.run(app)

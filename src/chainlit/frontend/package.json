@@ -1,0 +1,43 @@
+{
+  "name": "chat-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.11.9",
+    "@mui/lab": "^5.0.0-alpha.122",
+    "@mui/material": "^5.11.10",
+    "draft-js": "^0.11.7",
+    "formik": "^2.2.9",
+    "mui-chips-input": "^2.0.0",
+    "react": "^18.2.0",
+    "react-code-blocks": "^0.0.9-0",
+    "react-contenteditable": "^3.3.7",
+    "react-dom": "^18.2.0",
+    "react-json-view": "^1.21.3",
+    "react-mentions-continued": "^5.0.1",
+    "react-router-dom": "^6.8.1",
+    "react-spreadsheet": "^0.7.7",
+    "react-string-replace": "^1.1.0",
+    "recoil": "^0.7.6",
+    "scheduler": "^0.23.0",
+    "socket.io-client": "^4.6.1",
+    "vite-tsconfig-paths": "^4.0.5",
+    "yup": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/draft-js": "^0.11.10",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^3.1.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  }
+}

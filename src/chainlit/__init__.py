@@ -1,7 +1,7 @@
-from rush.sdk import Rush, LLMSettings
-from rush.server import socketio
+from chainlit.sdk import Chainlit, LLMSettings
+from chainlit.server import socketio
 
-sdk = Rush(socketio.emit)
+sdk = Chainlit(socketio.emit)
 
 send_message = sdk.send_message
 send_local_image = sdk.send_local_image

@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from chainlit.sdk import LLMSettings
 import langchain
 from langchain.llms import base as llm_base
 from langchain.chat_models.base import BaseChatModel
@@ -7,7 +8,9 @@ from langchain.schema import (
     LLMResult,
     PromptValue,
 )
-from rush.sdk import LLMSettings
+from langchain.cache import SQLiteCache
+
+langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
 
 
 def cbh_on_llm_cache(

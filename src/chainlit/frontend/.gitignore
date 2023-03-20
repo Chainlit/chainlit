@@ -1,17 +1,3 @@
-build
-
-*.egg-info
-
-venv
-
-.DS_Store
-
-__pycache__
-
-.ipynb_checkpoints
-
-.langchain.db
-
 # Logs
 logs
 *.log

@@ -1,28 +1,26 @@
-"""Callback Handler that logs to streamlit."""
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
-    from rush.sdk import Rush
+    from chainlit.sdk import Chainlit
 import inspect
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
-from rush.config import config
+from chainlit.config import config
 
 NALLOWLIST = ['on_chain_start', 'on_chain_end']
 
 
 class UiCallbackHandler(BaseCallbackHandler):
-    """Callback Handler that logs to streamlit."""
 
-    rush: Rush
+    sdk: Chainlit
     always_verbose: bool = True
 
-    def __init__(self, rush) -> None:
+    def __init__(self, sdk) -> None:
         self.memory = {}
         self.queue = []
         self.prompts = []
         self.llm_settings = None
-        self.rush = rush
+        self.sdk = sdk
         self.tool_sequence = []
 
     def reset_memory(self) -> None:
@@ -40,7 +38,7 @@ class UiCallbackHandler(BaseCallbackHandler):
     def add_message(self, message, prompts: Optional[List[str]] = None, error=False):
         llm_settings = self.llm_settings if prompts else None
         bot_name = self.tool_sequence[-1] if self.tool_sequence else config.bot_name
-        self.rush.send_message(
+        self.sdk.send_message(
             author=bot_name,
             content=message,
             indent=max(
