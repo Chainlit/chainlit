@@ -2,7 +2,7 @@ import { Box, Grid, Stack, Typography } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { agentState } from "state/chat";
 import AgentTile from "./agentTile";
-import VerticalLogo from "assets/vertical_logo.svg";
+import {LogoFull} from "components/logo";
 
 const Home = () => {
   const agents = useRecoilValue(agentState);
@@ -30,7 +30,7 @@ const Home = () => {
       </Box>
     );
   } else {
-    agentGrid = <img style={{ width: "50%", margin: "auto", opacity: .9 }} src={VerticalLogo} />;
+    agentGrid = <LogoFull />;
   }
 
   return (

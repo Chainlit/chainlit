@@ -27,7 +27,7 @@ setup(
     keywords=['langchain', 'ui', 'gen ai', 'chat ui'],
     classifiers=[],
     package_data={
-      'chainlit': ['frontend/dist','frontend/dist/assets/*'],
+      'chainlit': ['frontend/dist/*','frontend/dist/assets/*'],
     },
     include_package_data=True,
 )

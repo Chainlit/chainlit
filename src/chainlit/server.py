@@ -105,8 +105,10 @@ def message(message):
         raw_res, agent_name, output_key = run_agent(agent, input_str)
         if "process_response" in session:
             res = session["process_response"](raw_res)
-        else:
+        elif output_key is not None:
             res = raw_res[output_key]
+        else:
+            res = raw_res
         sdk.send_message(author=agent_name, content=res, final=True)
         emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
     elif "predict" in session:

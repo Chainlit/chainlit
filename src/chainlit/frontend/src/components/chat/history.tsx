@@ -17,6 +17,8 @@ const History = () => {
     );
   }
 
+  let previousAuthor = ""
+
   useEffect(() => {
     if (!ref.current) {
       return;
@@ -36,11 +38,14 @@ const History = () => {
         sx={{
           maxHeight: "100%",
           overflow: "scroll",
+          pt: 1,
         }}
       >
-        {messages.map((m, i) => (
-          <Message message={m} key={i} />
-        ))}
+        {messages.map((m, i) => {
+          const showAvatar = m.author !== previousAuthor || m.final 
+          previousAuthor = m.author
+          return <Message message={m} showAvatar={showAvatar} key={i} />
+  })}
       </Box>
     );
   } else {

@@ -22,6 +22,8 @@ class UiCallbackHandler(BaseCallbackHandler):
         self.llm_settings = None
         self.sdk = sdk
         self.tool_sequence = []
+        self.all_sequence = []
+        self.prev_indent = 0
 
     def reset_memory(self) -> None:
         self.memory = {}
@@ -29,20 +31,32 @@ class UiCallbackHandler(BaseCallbackHandler):
         self.llm_settings = None
         self.queue = []
         self.tool_sequence = []
+        self.all_sequence = []
+        self.prev_indent = 0
 
-    def add_tool_in_sequence(self, tool: str):
-        if self.tool_sequence and self.tool_sequence[-1] == tool:
-            return
-        self.tool_sequence.append(tool)
+    def add_in_sequence(self, name: str, is_tool=False):
+        self.all_sequence.append(name)
+        if is_tool:
+            if self.tool_sequence and self.tool_sequence[-1] == name:
+                return
+            self.tool_sequence.append(name)
+
+    def pop_sequence(self, is_tool=False):
+        if self.all_sequence:
+            self.all_sequence.pop()
+        if is_tool:
+            if self.tool_sequence:
+                self.tool_sequence.pop()
 
     def add_message(self, message, prompts: Optional[List[str]] = None, error=False):
         llm_settings = self.llm_settings if prompts else None
-        bot_name = self.tool_sequence[-1] if self.tool_sequence else config.bot_name
+        bot_name = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else config.bot_name
+        indent = len(self.tool_sequence) + 1
+
         self.sdk.send_message(
             author=bot_name,
             content=message,
-            indent=max(
-                len(self.queue), 1),
+            indent=indent,
             is_error=error,
             prompts=prompts,
             llm_settings=llm_settings
@@ -116,6 +130,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(inputs)
         template.update(kwargs)
         self.process(template)
+        self.add_in_sequence(serialized["name"])
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         func_name = inspect.stack()[0][3]
@@ -124,9 +139,11 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(kwargs)
         self.process(template)
         output_key = list(outputs.keys())[0]
+        print("chainend", self.tool_sequence)
         if output_key:
             prompts = self.prompts.pop() if self.prompts else None
             self.add_message(outputs[output_key], prompts)
+        self.pop_sequence()
 
     def on_chain_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -136,6 +153,8 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update({'error': error})
         template.update(kwargs)
         self.process(template)
+        self.add_message(str(error), error=True)
+        self.pop_sequence()
 
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
@@ -146,7 +165,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update({'action': inputs})
         template.update(kwargs)
         self.process(template)
-        self.add_tool_in_sequence(serialized["name"])
+        self.add_in_sequence(serialized["name"], is_tool=True)
         # self.add_message(inputs["input"], False)
 
     def on_tool_end(
@@ -163,10 +182,9 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update({'output': output})
         template.update(kwargs)
         # prompts = self.prompts.pop() if self.prompts else None
-        # self.add_message(f"{output}", prompts)
+        # self.add_message(output)
         self.process(template)
-        if self.tool_sequence:
-            self.tool_sequence.pop()
+        self.pop_sequence(is_tool=True)
 
     def on_tool_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -178,8 +196,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(kwargs)
         self.process(template)
         self.add_message(str(error), error=True)
-        if self.tool_sequence:
-            self.tool_sequence.pop()
+        self.pop_sequence(is_tool=True)
 
     def on_text(self, text: str, **kwargs: Any) -> None:
         pass
@@ -193,7 +210,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(kwargs)
         # prompts = self.prompts.pop() if self.prompts else None
         # self.add_message(action.log, prompts=prompts)
-        self.add_tool_in_sequence(action.tool)
+        # self.add_tool_in_sequence(action.tool)
 
     def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> None:
         """Run on agent end."""
@@ -201,7 +218,7 @@ class UiCallbackHandler(BaseCallbackHandler):
         # template = {'func_name': func_name}
         # template.update({'finish': finish})
         # template.update(kwargs)
-        if self.tool_sequence:
-            self.tool_sequence.pop()
+        # if self.tool_sequence:
+        #     self.tool_sequence.pop()
         # prompts = self.prompts.pop() if self.prompts else None
         # self.add_message(f"{finish.log}", prompts=prompts)

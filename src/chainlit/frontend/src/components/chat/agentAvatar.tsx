@@ -19,7 +19,12 @@ function stringToHslColor(str: string, s: number, l: number) {
   return "hsl(" + h + ", " + s + "%, " + l + "%)";
 }
 
-export const getAgentColor = (agent: string) => stringToHslColor(agent, 50, 70)
+export const getAgentColor = (agent: string) => {
+  if (agent === "User") {
+    return "primary.main";
+  }
+  return stringToHslColor(agent, 50, 50);
+};
 
 const AgentAvatar = ({ agent }: Props) => {
   const children = onlyCapitalLetters(agent);
@@ -32,7 +37,7 @@ const AgentAvatar = ({ agent }: Props) => {
           width: "30px",
           borderRadius: "0.125rem",
           bgcolor: getAgentColor(agent),
-          color: "black",
+          color: "white",
           fontSize: "1em",
         }}
       >

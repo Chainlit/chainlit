@@ -13,12 +13,14 @@ import AgentAvatar, { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/artifact/view";
 import { CodeBlock, dracula } from "react-code-blocks";
+import ReactMarkdown from "react-markdown";
 
 interface Props {
   message: IMessage;
+  showAvatar?: boolean;
 }
 
-const Message = ({ message }: Props) => {
+const Message = ({ message, showAvatar }: Props) => {
   const [hover, setHover] = useState(false);
   const documents = useRecoilValue(documentsState);
   const setPlayground = useSetRecoilState(playgroundState);
@@ -35,8 +37,9 @@ const Message = ({ message }: Props) => {
       : message.prompts
     : undefined;
 
-  const editButton = prompt && (
+  const editButton = prompt && !message.final && (
     <IconButton
+      color="primary"
       onClick={() =>
         setPlayground({
           llmSettings: message.llm_settings!,
@@ -61,12 +64,16 @@ const Message = ({ message }: Props) => {
       }}
     >
       {editButton}
-      {/* <IconButton disabled>
-        <ThumbUp sx={{width: "16px", height: "16px"}} />
-      </IconButton>
-      <IconButton disabled>
-        <ThumbDown sx={{width: "16px", height: "16px"}} />
-      </IconButton> */}
+      {message.final && (
+        <IconButton>
+          <ThumbUp sx={{ width: "16px", height: "16px" }} />
+        </IconButton>
+      )}
+      {message.final && (
+        <IconButton>
+          <ThumbDown sx={{ width: "16px", height: "16px" }} />
+        </IconButton>
+      )}
     </Stack>
   );
 
@@ -85,32 +92,47 @@ const Message = ({ message }: Props) => {
           // px: 2,
           boxSizing: "border-box",
           mx: "auto",
-          py: "18px",
+          py: "10px",
           maxWidth: "48rem",
           display: "flex",
           flexDirection: "column",
           position: "relative",
-          pl: (message.indent || 0) * 2,
         }}
       >
-                {/* <Typography sx={{
+        {hover && buttons}
+        <Stack direction="row" mb={1}>
+          <Box width="100px">
+           
+              <Typography
+                noWrap
+                sx={{
+                  width: "100px",
                   fontSize: "12px",
                   fontWeight: 700,
                   letterSpacing: ".08em",
-                  lineHeight: "16px",
+                  lineHeight: "1.5rem",
                   textTransform: "uppercase",
-                  position: "absolute",
-                  transform: "translateX(-100%)"
-            }}>{message.author}</Typography> */}
-        {hover && buttons}
-        <Stack direction="row" spacing={2}>
-          <Stack alignItems="center" spacing={1}>            
-            <AgentAvatar agent={message.author} />
+                  color: getAgentColor(message.author),
+                }}
+              >
+                {showAvatar && message.author}
+              </Typography>
+          </Box>
+          <Stack
+            alignItems="center"
+            spacing={1}
+            sx={{
+              pl: (message.indent || 0) * 2,
+            }}
+          >
+            {/* {showAvatar && <Box width="5px" height="5px" borderRadius="50%" bgcolor={getAgentColor(message.author)} />} */}
             {!!message.indent && (
               <Box
                 width="1px"
                 flexGrow={1}
                 bgcolor={getAgentColor(message.author)}
+                mr={2}
+                mt="4px"
               />
             )}
           </Stack>
@@ -149,6 +171,7 @@ const Message = ({ message }: Props) => {
                   </Link>
                 )
               )}
+
             {message.language && (
               <CodeBlock
                 text={message.content.trim()}

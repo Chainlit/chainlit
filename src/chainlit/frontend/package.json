@@ -22,6 +22,7 @@
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.2.0",
     "react-json-view": "^1.21.3",
+    "react-markdown": "^8.0.6",
     "react-mentions-continued": "^5.0.1",
     "react-router-dom": "^6.8.1",
     "react-spreadsheet": "^0.7.7",

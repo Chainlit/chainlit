@@ -25,7 +25,7 @@ def main(log_level="error"):
 
 @main.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.option("--headless", default=False, envvar="CHAINLIT_HEADLESS")
+@click.option("--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.option("--bot_name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
 @click.argument("args", nargs=-1)
 def main_run(target: str, headless: bool, bot_name: str, args=None, **kwargs):

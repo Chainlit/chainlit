@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Logo from "assets/logo.svg";
+import { Logo } from "components/logo";
 import AgentAvatar from "./chat/agentAvatar";
 import StepsToggle from "./chat/stepsToggle";
 import { Link, useLocation } from "react-router-dom";
@@ -42,8 +42,8 @@ export default function TopBar() {
           borderBottomColor: (theme) => theme.palette.divider,
         }}
       >
-        <Stack alignItems="center" direction="row" spacing={2}>
-          <img width={35} src={Logo} />
+        <Stack alignItems="center" direction="row">
+          <Logo />
           <Nav />
         </Stack>
         <Stack
