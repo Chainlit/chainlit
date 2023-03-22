@@ -8,7 +8,6 @@ import {
 import {
   MentionsInput,
   Mention,
-  SuggestionDataItem,
 } from "react-mentions-continued";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";

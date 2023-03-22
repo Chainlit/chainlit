@@ -17,3 +17,8 @@ export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
   const completion = await res.text();
   return completion;
 };
+
+export const startNewChat = async () => {
+  socket.disconnect();
+  socket.connect();
+};

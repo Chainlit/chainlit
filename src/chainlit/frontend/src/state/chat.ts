@@ -44,6 +44,8 @@ export interface IDocument {
   spec: IDocumentSpec;
 }
 
+export type IDocuments = Record<string, IDocument>
+
 export interface IAgent {
   id: string;
   display: string;
@@ -55,7 +57,7 @@ export const messagesState = atom<IMessage[]>({
   default: [],
 });
 
-export const documentsState = atom<Record<string, IDocument>>({
+export const documentsState = atom<IDocuments>({
   key: "Documents",
   default: {},
 });

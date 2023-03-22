@@ -3,10 +3,9 @@ import { useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import { displayStepsState, messagesState } from "state/chat";
 import Message from "./message";
-import DocumentSideView from "components/document/sideView";
 import Home from "./home";
 
-const History = () => {
+const Messages = () => {
   const ref = useRef<HTMLDivElement>();
   let messages = useRecoilValue(messagesState);
   const displaySteps = useRecoilValue(displayStepsState);
@@ -38,7 +37,6 @@ const History = () => {
         sx={{
           maxHeight: "100%",
           overflow: "scroll",
-          pt: 1,
         }}
       >
         {messages.map((m, i) => {
@@ -53,4 +51,4 @@ const History = () => {
   }
 };
 
-export default History;
+export default Messages;

@@ -139,7 +139,6 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(kwargs)
         self.process(template)
         output_key = list(outputs.keys())[0]
-        print("chainend", self.tool_sequence)
         if output_key:
             prompts = self.prompts.pop() if self.prompts else None
             self.add_message(outputs[output_key], prompts)

@@ -5,7 +5,6 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Logo } from "components/logo";
 import AgentAvatar from "./chat/agentAvatar";
-import StepsToggle from "./chat/stepsToggle";
 import { Link, useLocation } from "react-router-dom";
 
 function Nav() {
@@ -52,7 +51,6 @@ export default function TopBar() {
           direction="row"
           spacing={1}
         >
-          <StepsToggle />
           <AgentAvatar agent="User" />
         </Stack>
       </Toolbar>

@@ -24,7 +24,7 @@ const StepsToggle = ({ sx }: Props) => {
       }
       label={
         <Typography color="text.secondary" variant="caption">
-          Display steps
+          Show steps
         </Typography>
       }
     />

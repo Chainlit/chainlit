@@ -1,5 +1,5 @@
-import { Box, Typography, Drawer } from "@mui/material";
-import History from "./history";
+import { Box, Typography, Tooltip, IconButton } from "@mui/material";
+import Messages from "./messages";
 import Input from "./input";
 import { socket } from "api";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -12,8 +12,8 @@ import {
 import Loading from "./loading";
 import { Stack } from "@mui/system";
 import Playground from "components/playground";
-import { styled, useTheme } from "@mui/material/styles";
 import DocumentSideView from "components/document/sideView";
+import ChatTopBar from "./topBar";
 
 const agentRegexp = /(@\[\w*\]\((\w*)\))/;
 
@@ -26,7 +26,6 @@ const clean = (str: string, regexp: RegExp, prefix = "") => {
   }
   return str;
 };
-
 
 const Chat = () => {
   const tokenCount = useRecoilValue(tokenCountState);
@@ -73,20 +72,15 @@ const Chat = () => {
   );
 
   return (
-    <Box
-      display="flex"
-      // flexDirection="column"
-      flexGrow={1}
-      width="100%"
-      overflow="scroll"
-    >
-        <Playground />
-        <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
+    <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
+      <Playground />
+      <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
         <Loading />
-        <History />
+        <ChatTopBar />
+        <Messages />
         {inputBox}
-        </Box>
-        <DocumentSideView />
+      </Box>
+      <DocumentSideView />
     </Box>
   );
 };

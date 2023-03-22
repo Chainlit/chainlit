@@ -7,5 +7,5 @@ const defaultTheme =
 
 export const themeState = atom<"dark" | "light">({
   key: "Theme",
-  default: "dark",
+  default: defaultTheme,
 });

@@ -92,6 +92,10 @@ def connect():
     sessions[id] = session
 
 
+@socketio.on('disconnect')
+def disconnect():
+    session = sessions.pop(request.sid)
+
 @socketio.on('message')
 def message(message):
     input_str = message["data"].strip()
