@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
-    from chainlit.sdk import Chainlit
+    from chainlit import Chainlit
 import inspect
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
-from chainlit.config import config
 
 NALLOWLIST = ['on_chain_start', 'on_chain_end']
 
@@ -50,7 +49,7 @@ class UiCallbackHandler(BaseCallbackHandler):
 
     def add_message(self, message, prompt: str = None, error=False):
         llm_settings = self.llm_settings if prompt else None
-        bot_name = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else config.bot_name
+        bot_name = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else "Default"
         indent = len(self.tool_sequence) + 1
 
         self.sdk.send_message(

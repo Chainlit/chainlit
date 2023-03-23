@@ -1,21 +1,8 @@
 from setuptools import setup, find_packages
-from setuptools.command.install import install
 
 VERSION = '0.0.1'
 DESCRIPTION = ''
 LONG_DESCRIPTION = ''
-
-
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-
-    def run(self):
-        from subprocess import call
-        import os
-        install.run(self)
-        fpath = os.path.join(self.install_lib, "chainlit")
-        call(["prisma", 'db', 'push'],
-             cwd=fpath)
 
 
 setup(
@@ -28,9 +15,6 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': ['chainlit=chainlit.cli:main'],
-    },
-    cmdclass={
-        'install': PostInstallCommand,
     },
     install_requires=[
         "langchain>=0.0.109",

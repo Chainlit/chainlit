@@ -3,7 +3,6 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 from chainlit.config import config
-from chainlit.server import run
 import webbrowser
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
@@ -21,30 +20,6 @@ def main(log_level="error"):
         LOGGER.warning(
             "Setting the log level using the --log_level flag is unsupported."
         )
-
-
-@main.command("run")
-@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.option("--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
-@click.option("--bot_name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
-@click.argument("args", nargs=-1)
-def main_run(target: str, headless: bool, bot_name: str, args=None, **kwargs):
-    _, extension = os.path.splitext(target)
-    if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
-        if extension[1:] == "":
-            raise click.BadArgumentUsage(
-                "Chainlit requires raw Python (.py) files, but the provided file has no extension."
-            )
-        else:
-            raise click.BadArgumentUsage(
-                f"Chainlit requires raw Python (.py) files, not {extension}."
-            )
-
-    if not os.path.exists(target):
-        raise click.BadParameter(f"File does not exist: {target}")
-
-    _main_run(prepare_import(target), headless,
-              bot_name, args, flag_options=kwargs)
 
 
 def prepare_import(path):
@@ -76,10 +51,38 @@ def prepare_import(path):
     return ".".join(module_name[::-1]) + ext
 
 
+@main.command("run")
+@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
+@click.option("--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
+@click.option("--db_path", default=None, envvar="CHAINLIT_DB_PATH")
+@click.option("--cache_path", default=".langchain.db", envvar="CHAINLIT_CACHE_PATH")
+@click.option("--bot_name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
+@click.argument("args", nargs=-1)
+def main_run(target, headless, bot_name, db_path, cache_path, args=None, **kwargs):
+    _, extension = os.path.splitext(target)
+    if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
+        if extension[1:] == "":
+            raise click.BadArgumentUsage(
+                "Chainlit requires raw Python (.py) files, but the provided file has no extension."
+            )
+        else:
+            raise click.BadArgumentUsage(
+                f"Chainlit requires raw Python (.py) files, not {extension}."
+            )
+
+    if not os.path.exists(target):
+        raise click.BadParameter(f"File does not exist: {target}")
+
+    config.module = prepare_import(target)
+    config.headless = headless
+    config.db_path = db_path
+    config.cache_path = cache_path
+    config.bot_name = bot_name
+
+    _main_run(args, flag_options=kwargs)
+
+
 def _main_run(
-    module,
-    headless,
-    bot_name,
     args: Optional[List[str]] = None,
     flag_options: Optional[Dict[str, Any]] = None,
 ) -> None:
@@ -89,9 +92,8 @@ def _main_run(
     if flag_options is None:
         flag_options = {}
 
-    config.module = module
-    config.headless = headless
-    config.bot_name = bot_name
     if not config.headless:
         webbrowser.open("http://127.0.0.1:5000")
+
+    from chainlit.server import run
     run()

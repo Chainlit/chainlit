@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional
 from chainlit.types import LLMSettings
+from chainlit.config import config
 import langchain
 from langchain.llms import base as llm_base
 from langchain.chat_models.base import BaseChatModel
@@ -8,10 +9,6 @@ from langchain.schema import (
     LLMResult,
     PromptValue,
 )
-from langchain.cache import SQLiteCache
-
-langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
-
 
 def cbh_on_llm_cache(
     self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any

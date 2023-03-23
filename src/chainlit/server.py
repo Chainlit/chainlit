@@ -1,18 +1,20 @@
+from flask_cors import CORS
+from flask import request
+from flask_socketio import SocketIO, emit
+from flask import Flask, send_from_directory
+from chainlit.db import Project, Conversation
+from chainlit import Chainlit
+from chainlit.config import config
+from chainlit.lc.utils import run_agent
+from chainlit.session import Session, sessions
 import sys
 import os
 import importlib.util
-if 'langchain' in sys.modules:
+
+LANGCHAIN_INSTALLED = 'langchain' in sys.modules
+if LANGCHAIN_INSTALLED:
     from chainlit.lc import monkey
 
-from chainlit.session import Session, sessions
-from chainlit.lc.utils import run_agent
-from chainlit.config import config
-from chainlit import Chainlit
-from chainlit.db import Project, Conversation
-from flask import Flask, send_from_directory
-from flask_socketio import SocketIO, emit
-from flask import request
-from flask_cors import CORS
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
@@ -121,8 +123,15 @@ def message(message):
 
 
 def run():
+    if LANGCHAIN_INSTALLED:
+        import langchain
+        from langchain.cache import SQLiteCache
+        if config.cache_path:
+            langchain.llm_cache = SQLiteCache(database_path=config.cache_path)
+
     project = Project.prisma().find_unique(where={"name": config.module})
     if project is None:
         project = Project.prisma().create(data={"name": config.module})
     config.project = project
+
     socketio.run(app)
