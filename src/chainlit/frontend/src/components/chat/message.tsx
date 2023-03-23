@@ -31,19 +31,13 @@ const Message = ({ message, showAvatar }: Props) => {
     ? new RegExp(`(${documentNames.join("|")})`)
     : undefined;
 
-  const prompt = message.prompts
-    ? Array.isArray(message.prompts)
-      ? message.prompts[0]
-      : message.prompts
-    : undefined;
-
-  const editButton = prompt && !message.final && (
+  const editButton = message.prompt && !message.final && (
     <IconButton
       color="primary"
       onClick={() =>
         setPlayground({
           llmSettings: message.llm_settings!,
-          prompt: prompt,
+          prompt: message.prompt!,
           completion: message.content,
         })
       }

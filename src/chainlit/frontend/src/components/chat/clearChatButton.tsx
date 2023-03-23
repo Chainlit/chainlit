@@ -41,13 +41,15 @@ export default function ClearChatButton() {
   return (
     <div>
       <Tooltip title="Clear messages">
-        <IconButton
-          disabled={messages.length === 0}
-          edge="end"
-          onClick={handleClickOpen}
-        >
-          <DeleteOutline />
-        </IconButton>
+        <span>
+          <IconButton
+            disabled={messages.length === 0}
+            edge="end"
+            onClick={handleClickOpen}
+          >
+            <DeleteOutline />
+          </IconButton>
+        </span>
       </Tooltip>
       <Dialog
         open={open}

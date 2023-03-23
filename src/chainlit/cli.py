@@ -73,7 +73,7 @@ def prepare_import(path):
     if sys.path[0] != path:
         sys.path.insert(0, path)
 
-    return ".".join(module_name[::-1])
+    return ".".join(module_name[::-1]) + ext
 
 
 def _main_run(

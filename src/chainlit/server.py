@@ -1,17 +1,18 @@
 import sys
 import os
+import importlib.util
 if 'langchain' in sys.modules:
     from chainlit.lc import monkey
 
+from chainlit.session import Session, sessions
 from chainlit.lc.utils import run_agent
 from chainlit.config import config
-from chainlit.sdk import Chainlit
-from typing import Dict, TypedDict, Optional, Callable, Any
+from chainlit import Chainlit
+from chainlit.db import Project, Conversation
 from flask import Flask, send_from_directory
 from flask_socketio import SocketIO, emit
 from flask import request
 from flask_cors import CORS
-from langchain import OpenAI
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
@@ -19,15 +20,6 @@ build_dir = os.path.join(root_dir, "frontend/dist")
 app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
-
-class Session(TypedDict):
-    agent: Any
-    predict: Optional[Callable[[str], str]]
-    process_response: Optional[Callable[[Any], str]]
-
-
-sessions: Dict[str, Session] = {}
 
 
 @app.route('/', defaults={'path': ''})
@@ -43,6 +35,7 @@ def serve(path):
 
 @app.route('/completion', methods=['POST'])
 def completion():
+    from langchain import OpenAI
     # todo use api instead of langchain
     data = request.json
     llm_settings = data["settings"]
@@ -60,8 +53,13 @@ def connect():
     if not config.module:
         raise ValueError("Missing module")
 
-    session = {}  # type: Session
-    module = __import__(config.module)
+    id = request.sid
+    session = {"emit": emit}  # type: Session
+    sessions[id] = session
+
+    spec = importlib.util.spec_from_file_location(id, config.module)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
 
     if not hasattr(module, "load_agent"):
         load_agent = None
@@ -88,13 +86,15 @@ def connect():
     if hasattr(module, "process_response"):
         session["process_response"] = module.process_response
 
-    id = request.sid
-    sessions[id] = session
+    Conversation.prisma().create(
+        data={"session_id": id, "project_id": config.project.id})
 
 
 @socketio.on('disconnect')
 def disconnect():
-    session = sessions.pop(request.sid)
+    if request.sid in sessions:
+        session = sessions.pop(request.sid)
+
 
 @socketio.on('message')
 def message(message):
@@ -104,7 +104,7 @@ def message(message):
     session = sessions[id]
 
     if "agent" in session:
-        sdk = Chainlit(emit=emit)
+        sdk = Chainlit(emit=emit, session_id=id)
         agent = session["agent"]
         raw_res, agent_name, output_key = run_agent(agent, input_str)
         if "process_response" in session:
@@ -121,4 +121,8 @@ def message(message):
 
 
 def run():
+    project = Project.prisma().find_unique(where={"name": config.module})
+    if project is None:
+        project = Project.prisma().create(data={"name": config.module})
+    config.project = project
     socketio.run(app)

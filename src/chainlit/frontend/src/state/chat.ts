@@ -22,9 +22,8 @@ export interface IMessage {
   language?: string;
   indent?: number;
   final?: boolean;
-  error?: boolean;
-  artifact?: string;
-  prompts?: string[] | string;
+  is_error?: boolean;
+  prompt?: string;
   llm_settings?: ILLMSettings;
 }
 

@@ -48,8 +48,8 @@ class UiCallbackHandler(BaseCallbackHandler):
             if self.tool_sequence:
                 self.tool_sequence.pop()
 
-    def add_message(self, message, prompts: Optional[List[str]] = None, error=False):
-        llm_settings = self.llm_settings if prompts else None
+    def add_message(self, message, prompt: str = None, error=False):
+        llm_settings = self.llm_settings if prompt else None
         bot_name = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else config.bot_name
         indent = len(self.tool_sequence) + 1
 
@@ -58,7 +58,7 @@ class UiCallbackHandler(BaseCallbackHandler):
             content=message,
             indent=indent,
             is_error=error,
-            prompts=prompts,
+            prompt=prompt,
             llm_settings=llm_settings
         )
 

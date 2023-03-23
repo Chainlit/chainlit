@@ -30,8 +30,8 @@ const AgentTile = ({ agent }: Props) => {
           overflow: "hidden",
           textOverflow: "ellipsis",
           display: "-webkit-box",
-          "-webkit-line-clamp": "2",
-          "-webkit-box-orient": "vertical",
+          WebkitLineClamp: "2",
+          WebkitBoxOrient: "vertical",
           width: "100%",
         }}
       >

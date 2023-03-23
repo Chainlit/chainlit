@@ -1,0 +1,40 @@
+datasource db {
+    provider = "sqlite"
+    url      = "file:database.db"
+}
+
+generator client {
+    provider  = "prisma-client-py"
+    interface = "sync"
+    recursive_type_depth = 5
+}
+
+model Project {
+    id            Int            @id @default(autoincrement())
+    created_at    DateTime       @default(now())
+    name          String         @unique
+    conversations Conversation[]
+}
+
+model Conversation {
+    id         Int       @id @default(autoincrement())
+    created_at DateTime  @default(now())
+    session_id  String    @unique
+    messages   Message[]
+    project_id Int
+    project    Project   @relation(fields: [project_id], references: [id])
+}
+
+model Message {
+    id              Int          @id @default(autoincrement())
+    conversation_id String
+    conversation    Conversation @relation(fields: [conversation_id], references: [session_id])
+    final           Boolean      @default(false)
+    is_error        Boolean      @default(false)
+    indent          Int          @default(0)
+    author          String
+    content         String
+    human_feedback  Int?
+    language        String?
+    prompt          String?
+}

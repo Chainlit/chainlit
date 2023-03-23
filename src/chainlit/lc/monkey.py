@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional
-from chainlit.sdk import LLMSettings
+from chainlit.types import LLMSettings
 import langchain
 from langchain.llms import base as llm_base
 from langchain.chat_models.base import BaseChatModel

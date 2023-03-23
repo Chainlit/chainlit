@@ -75,7 +75,7 @@ function App() {
     socket.removeAllListeners();
 
     socket.on("message", (message: IMessage) => {
-      if (message.final || message.error) {
+      if (message.final || message.is_error) {
         setLoading(false);
       }
       setMessages((oldMessages) => [...oldMessages, message]);

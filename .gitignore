@@ -11,6 +11,7 @@ __pycache__
 .ipynb_checkpoints
 
 .langchain.db
+database.db
 
 # Logs
 logs
