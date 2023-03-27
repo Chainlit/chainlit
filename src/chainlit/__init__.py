@@ -5,6 +5,7 @@ from langchain.callbacks import OpenAICallbackHandler
 from chainlit.uihandler import UiCallbackHandler
 from chainlit.session import sessions
 from chainlit.types import DocumentDisplay, DocumentSpec, LLMSettings
+from chainlit.db import create_message
 
 
 def get_session_id() -> Union[str, None]:
@@ -82,6 +83,8 @@ class Chainlit:
             "llm_settings": llm_settings.to_dict(),
             "final": final,
         }
+
+        # create_message(self.session_id, msg)
 
         self.emit("message", msg)
 

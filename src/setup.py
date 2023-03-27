@@ -23,6 +23,7 @@ setup(
         "flask_socketio>=5.3.3",
         "flask_cors>=3.0.10",
         "prisma>=0.8.2",
+        "python-graphql-client>=0.4.3",
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
     python_requires='>=3.7',

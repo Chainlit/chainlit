@@ -2,11 +2,12 @@ from flask_cors import CORS
 from flask import request
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
-from chainlit.db import Project, Conversation
+from chainlit.db import Project, Conversation, get_conversations
 from chainlit import Chainlit
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
+from chainlit.client import GqlClient
 import sys
 import os
 import importlib.util
@@ -50,13 +51,33 @@ def completion():
     return completion
 
 
+@app.route('/conversations', methods=['GET'])
+def conversations():
+    return get_conversations()
+
+
+@app.route('/auth', methods=['GET'])
+def project():
+    return {"anonymous": config.project_id is None, "projectId": config.project_id}
+
+
 @socketio.on('connect')
 def connect():
     if not config.module:
         raise ValueError("Missing module")
 
+    access_token = request.headers.get("Authorization")
+
+    if config.project_id and not access_token:
+        return False
+
+    if config.project_id:
+        client = GqlClient(access_token=access_token)
+    else:
+        client = None
+
     id = request.sid
-    session = {"emit": emit}  # type: Session
+    session = {"emit": emit, "client": client}  # type: Session
     sessions[id] = session
 
     spec = importlib.util.spec_from_file_location(id, config.module)
@@ -88,8 +109,8 @@ def connect():
     if hasattr(module, "process_response"):
         session["process_response"] = module.process_response
 
-    Conversation.prisma().create(
-        data={"session_id": id, "project_id": config.project.id})
+    if session["client"]:
+       session["client"].create_conversation(config.project_id, id)
 
 
 @socketio.on('disconnect')
@@ -134,4 +155,4 @@ def run():
         project = Project.prisma().create(data={"name": config.module})
     config.project = project
 
-    socketio.run(app)
+    socketio.run(app, port=5000)

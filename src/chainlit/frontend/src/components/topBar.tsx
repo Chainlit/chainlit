@@ -4,15 +4,15 @@ import Toolbar from "@mui/material/Toolbar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Logo } from "components/logo";
-import AgentAvatar from "./chat/agentAvatar";
 import { Link, useLocation } from "react-router-dom";
+import UserAvatar from "./chat/userAvatar";
 
 function Nav() {
   const location = useLocation();
 
   const tabs = [
     { to: "/", label: "Chat" },
-    { to: "/documents", label: "Documents" },
+    { to: "/dataset", label: "Dataset" },
   ];
 
   const value = tabs.findIndex((t) => location.pathname === t.to);
@@ -35,7 +35,7 @@ export default function TopBar() {
     <AppBar elevation={0} color="transparent" position="static">
       <Toolbar
         sx={{
-          height: "60px",
+          minHeight: "60px !important",
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
           borderBottomColor: (theme) => theme.palette.divider,
@@ -51,7 +51,7 @@ export default function TopBar() {
           direction="row"
           spacing={1}
         >
-          <AgentAvatar agent="User" />
+          <UserAvatar />
         </Stack>
       </Toolbar>
     </AppBar>

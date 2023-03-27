@@ -4,8 +4,8 @@ datasource db {
 }
 
 generator client {
-    provider  = "prisma-client-py"
-    interface = "sync"
+    provider             = "prisma-client-py"
+    interface            = "sync"
     recursive_type_depth = 5
 }
 
@@ -19,7 +19,7 @@ model Project {
 model Conversation {
     id         Int       @id @default(autoincrement())
     created_at DateTime  @default(now())
-    session_id  String    @unique
+    session_id String    @unique
     messages   Message[]
     project_id Int
     project    Project   @relation(fields: [project_id], references: [id])
@@ -37,4 +37,5 @@ model Message {
     human_feedback  Int?
     language        String?
     prompt          String?
+    llm_settings    String?
 }

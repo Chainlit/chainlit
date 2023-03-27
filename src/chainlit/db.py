@@ -1,26 +1,58 @@
 import os
+import json
 from subprocess import call
 from pathlib import Path
 from prisma import Prisma
 from prisma.models import Conversation, Project, Message
 from chainlit.config import config
 
-PACKAGE_ROOT = Path(os.path.join(__file__, '..')).resolve()
+db = None
 
-if config.db_path is None:
-    db_file_path = os.path.join(PACKAGE_ROOT, "database.db")
-else:
-    db_file_path = config.db_path
+def init_db():
+    global db
 
-database_url = f'file:{db_file_path}'
+    if config.db_path is None:
+        raise ValueError("Config db path is None")
 
-os.environ["DATABASE_URL"] = database_url
+    PACKAGE_ROOT = Path(os.path.join(__file__, '..')).resolve()
 
-if not os.path.exists(db_file_path):
+    database_url = f'file:{config.db_path}'
+    os.environ["DATABASE_URL"] = database_url
+
     call(["prisma", 'db', 'push'],
          cwd=PACKAGE_ROOT)
 
-db = Prisma(auto_register=True, datasource={
-    'url': database_url,
-})
-db.connect()
+    db = Prisma(auto_register=True, datasource={
+        'url': database_url,
+    })
+    db.connect()
+
+
+
+def create_message(conversation_id: str, msg: dict):
+    msg = msg.copy()
+    if "llm_settings" in msg:
+        msg["llm_settings"] = json.dumps(msg["llm_settings"])
+    msg["conversation_id"] = conversation_id
+    return Message.prisma().create(data=msg)
+
+
+def get_conversations():
+    conversations = Conversation.prisma().find_many(include={
+        "messages": True
+    })
+
+    json_conversations = []
+
+    for c in conversations:
+        if not c.messages:
+            continue
+        messages = []
+        for m in c.messages:
+            if m.llm_settings:
+                m.llm_settings = json.loads(m.llm_settings)
+            messages.append(m.dict())
+        conversation = c.dict(exclude={"messages": True})
+        conversation["messages"] = messages
+        json_conversations.append(conversation)
+    return json_conversations

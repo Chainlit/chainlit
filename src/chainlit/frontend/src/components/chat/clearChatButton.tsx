@@ -12,7 +12,6 @@ import {
 } from "state/chat";
 import { DeleteOutline } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
-import { startNewChat } from "api";
 import { useState } from "react";
 
 export default function ClearChatButton() {
@@ -31,7 +30,8 @@ export default function ClearChatButton() {
   };
 
   const handleConfirm = () => {
-    startNewChat();
+    window.socket?.disconnect();
+    window.socket?.connect();
     setMessages([]);
     setDocuments({});
     setSideView(undefined);

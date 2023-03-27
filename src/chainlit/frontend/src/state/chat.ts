@@ -43,7 +43,7 @@ export interface IDocument {
   spec: IDocumentSpec;
 }
 
-export type IDocuments = Record<string, IDocument>
+export type IDocuments = Record<string, IDocument>;
 
 export interface IAgent {
   id: string;
@@ -98,5 +98,17 @@ export const documentSideViewState = atom<IDocument | undefined>({
 
 export const playgroundSettingsState = atom<ILLMSettings | undefined>({
   key: "PlaygroundSettings",
+  default: undefined,
+});
+
+export const authState = atom<
+  { anonymous: boolean; projectId?: string } | undefined
+>({
+  key: "ProjectId",
+  default: undefined,
+});
+
+export const accessTokenState = atom<string | undefined>({
+  key: "AccessToken",
   default: undefined,
 });

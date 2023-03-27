@@ -3,11 +3,13 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 from chainlit.config import config
+from chainlit.db import init_db
 import webbrowser
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
 LOG_LEVELS = ("error", "warning", "info", "debug")
 
+cwd = os.getcwd()
 
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
 @click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
@@ -53,12 +55,13 @@ def prepare_import(path):
 
 @main.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.option("--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
-@click.option("--db_path", default=None, envvar="CHAINLIT_DB_PATH")
-@click.option("--cache_path", default=".langchain.db", envvar="CHAINLIT_CACHE_PATH")
-@click.option("--bot_name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
+@click.option("-p", "--project-id", envvar="CHAINLIT_PROJECT_ID")
+@click.option("-h","--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
+@click.option("-d", "--db-path", default=f"{cwd}/.database.db", envvar="CHAINLIT_DB_PATH")
+@click.option("-c", "--cache-path", default=f"{cwd}/.langchain.db", envvar="CHAINLIT_CACHE_PATH")
+@click.option("-n", "--bot-name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
 @click.argument("args", nargs=-1)
-def main_run(target, headless, bot_name, db_path, cache_path, args=None, **kwargs):
+def main_run(target, project_id, headless, bot_name, db_path, cache_path, args=None, **kwargs):
     _, extension = os.path.splitext(target)
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
@@ -74,10 +77,13 @@ def main_run(target, headless, bot_name, db_path, cache_path, args=None, **kwarg
         raise click.BadParameter(f"File does not exist: {target}")
 
     config.module = prepare_import(target)
+    config.project_id = project_id
     config.headless = headless
     config.db_path = db_path
     config.cache_path = cache_path
     config.bot_name = bot_name
+
+    init_db()
 
     _main_run(args, flag_options=kwargs)
 

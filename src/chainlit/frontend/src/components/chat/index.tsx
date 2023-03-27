@@ -1,19 +1,24 @@
-import { Box, Typography, Tooltip, IconButton } from "@mui/material";
+import { server } from "api";
+import { Box } from "@mui/material";
 import Messages from "./messages";
-import Input from "./input";
-import { socket } from "api";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
+  accessTokenState,
+  agentState,
+  documentsState,
+  IDocument,
   IMessage,
   loadingState,
   messagesState,
   tokenCountState,
 } from "state/chat";
 import Loading from "./loading";
-import { Stack } from "@mui/system";
 import Playground from "components/playground";
 import DocumentSideView from "components/document/sideView";
 import ChatTopBar from "./topBar";
+import InputBox from "./inputBox";
+import { useEffect } from "react";
+import io from "socket.io-client";
 
 const agentRegexp = /(@\[\w*\]\((\w*)\))/;
 
@@ -28,9 +33,41 @@ const clean = (str: string, regexp: RegExp, prefix = "") => {
 };
 
 const Chat = () => {
-  const tokenCount = useRecoilValue(tokenCountState);
+  const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
+  const setDocuments = useSetRecoilState(documentsState);
+  const setTokenCount = useSetRecoilState(tokenCountState);
+  const setAgents = useSetRecoilState(agentState);
+
+  useEffect(() => {
+    if (window.socket) return;
+
+    window.socket = io(server, {
+      extraHeaders: {
+        Authorization: accessToken || "",
+      },
+    });
+
+    window.socket.on("message", (message: IMessage) => {
+      if (message.final || message.is_error) {
+        setLoading(false);
+      }
+      setMessages((oldMessages) => [...oldMessages, message]);
+    });
+    window.socket.on("document", (document: IDocument) => {
+      setDocuments((old) => ({
+        ...old,
+        ...{ [document.spec.name]: document },
+      }));
+    });
+    window.socket.on("total_tokens", (count: any) => {
+      setTokenCount(count);
+    });
+    window.socket.on("agents", (agents: any) => {
+      setAgents(agents);
+    });
+  }, []);
 
   const onSubmit = (msg: string) => {
     msg = clean(msg, agentRegexp, "@");
@@ -41,35 +78,8 @@ const Chat = () => {
     };
     setMessages((oldMessages) => [...oldMessages, message]);
     setLoading(true);
-    socket.emit("message", { data: msg });
+    window.socket?.emit("message", { data: msg });
   };
-
-  const inputBox = (
-    <Box
-      display="flex"
-      flexDirection="column"
-      sx={{
-        pt: 2,
-        boxSizing: "border-box",
-        width: "100%",
-        minHeight: "100px",
-        maxWidth: "48rem",
-        m: "auto",
-        justifyContent: "center",
-      }}
-    >
-      <Input onSubmit={onSubmit} />
-      <Stack flexDirection="row" alignItems="center">
-        <Typography
-          sx={{ ml: "auto" }}
-          color="text.secondary"
-          variant="caption"
-        >
-          Token count: {tokenCount}
-        </Typography>
-      </Stack>
-    </Box>
-  );
 
   return (
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
@@ -78,7 +88,7 @@ const Chat = () => {
         <Loading />
         <ChatTopBar />
         <Messages />
-        {inputBox}
+        <InputBox onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />
     </Box>

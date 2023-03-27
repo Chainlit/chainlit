@@ -1,60 +1,46 @@
 import { Box } from "@mui/material";
 import "./App.css";
-import Chat from "components/chat/index";
 import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
 } from "react-router-dom";
 import { useEffect } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  agentState,
-  documentsState,
-  debugState,
-  IMessage,
-  loadingState,
-  messagesState,
-  tokenCountState,
-  IDocument,
-} from "state/chat";
-import { socket } from "api";
-import TopBar from "components/topBar";
-import DocumentView from "components/artifact/view";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { authState, accessTokenState } from "state/chat";
+import { getAuth } from "api";
 import theme from "theme";
 import { ThemeProvider } from "@mui/material";
 import { themeState } from "state/theme";
+import { useAuth0 } from "@auth0/auth0-react";
+import Home from "pages/Home";
+import Document from "pages/Document";
+import Login from "pages/Login";
+import AuthCallback from "pages/AuthCallback";
+import { Socket } from "socket.io-client";
+
+declare global {
+  interface Window {
+    socket: Socket | undefined
+  }
+}
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          flexGrow: 1,
-        }}
-      >
-        <TopBar />
-        <Chat />
-      </Box>
-    ),
+    element: <Home />,
   },
   {
     path: "/document/:name",
-    element: (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          flexGrow: 1,
-        }}
-      >
-        <TopBar />
-        <DocumentView />
-      </Box>
-    ),
+    element: <Document />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/api/auth/callback",
+    element: <AuthCallback />,
   },
   {
     path: "*",
@@ -63,43 +49,31 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const themeVariant = useRecoilValue(themeState)
-  const setMessages = useSetRecoilState(messagesState);
-  const setDocuments = useSetRecoilState(documentsState);
-  const setTokenCount = useSetRecoilState(tokenCountState);
-  const setDebug = useSetRecoilState(debugState);
-  const setLoading = useSetRecoilState(loadingState);
-  const setAgents = useSetRecoilState(agentState);
+  const themeVariant = useRecoilValue(themeState);
+
+  const [auth, setAuth] = useRecoilState(authState);
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
-    socket.removeAllListeners();
-
-    socket.on("message", (message: IMessage) => {
-      if (message.final || message.is_error) {
-        setLoading(false);
-      }
-      setMessages((oldMessages) => [...oldMessages, message]);
-    });
-
-    socket.on("document", (document: IDocument) => {
-      setDocuments((old) => ({
-        ...old,
-        ...{ [document.spec.name]: document },
-      }));
-    });
-
-    socket.on("debug", (debug: any) => {
-      setDebug((old) => [...old, debug]);
-    });
-
-    socket.on("total_tokens", (count: any) => {
-      setTokenCount(count);
-    });
-
-    socket.on("agents", (agents: any) => {
-      setAgents(agents);
-    });
+    if (auth === undefined) {
+      getAuth().then((res) => setAuth(res));
+    }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && accessToken === undefined) {
+      getAccessTokenSilently({
+        authorizationParams: {
+          audience: "chainlit-cloud"
+        }
+      }).then((token) => setAccessToken(token));
+    }
+  }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
+
+  if (auth === undefined) {
+    return null;
+  }
 
   return (
     <ThemeProvider theme={theme(themeVariant)}>

@@ -1,9 +1,17 @@
-import io from "socket.io-client";
 import { ILLMSettings } from "state/chat";
 
-const server = "http://127.0.0.1:5000";
+export const server = "http://127.0.0.1:5000";
 
-export const socket = io(server);
+export const getAuth = async () => {
+  const res = await fetch(`${server}/auth`, {
+    headers: {
+      "content-type": "application/json",
+    },
+    method: "GET",
+  });
+
+  return res.json();
+};
 
 export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
   const res = await fetch(`${server}/completion`, {
@@ -18,7 +26,14 @@ export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
   return completion;
 };
 
-export const startNewChat = async () => {
-  socket.disconnect();
-  socket.connect();
+export const getConversations = async () => {
+  const res = await fetch(`${server}/conversations`, {
+    headers: {
+      "content-type": "application/json",
+    },
+    method: "GET",
+  });
+
+  const conversations = await res.json();
+  return conversations;
 };
