@@ -2,12 +2,11 @@ from flask_cors import CORS
 from flask import request
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
-from chainlit.db import Project, Conversation, get_conversations
 from chainlit import Chainlit
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
-from chainlit.client import GqlClient
+from chainlit.client import CloudClient, LocalClient
 import sys
 import os
 import importlib.util
@@ -51,14 +50,9 @@ def completion():
     return completion
 
 
-@app.route('/conversations', methods=['GET'])
-def conversations():
-    return get_conversations()
-
-
-@app.route('/auth', methods=['GET'])
-def project():
-    return {"anonymous": config.project_id is None, "projectId": config.project_id}
+@app.route('/project/settings', methods=['GET'])
+def project_settings():
+    return {"anonymous": not config.auth, "projectId": config.project_id, "chainlitServer": config.chainlit_server}
 
 
 @socketio.on('connect')
@@ -66,21 +60,32 @@ def connect():
     if not config.module:
         raise ValueError("Missing module")
 
-    access_token = request.headers.get("Authorization")
+    session_id = request.sid
+    client = None
+    conversation_id = sessions.get(session_id, {}).get("conversation_id")
 
-    if config.project_id and not access_token:
-        return False
+    if config.auth:
+        access_token = request.headers.get("Authorization")
+        if not config.project_id or not access_token:
+            return False
+        client = CloudClient(project_id=config.project_id, access_token=access_token,
+                             url=config.chainlit_server)
+        try:
+            if not conversation_id:
+                conversation_id = client.create_conversation(session_id)
+        except Exception as e:
+            print("Connection refused:", e)
+            return False
+    # elif config.chainlit_env == "development":
+    #     client = LocalClient(project_id=config.module)
+    #     if not conversation_id:
+    #         conversation_id = client.create_conversation(session_id)
 
-    if config.project_id:
-        client = GqlClient(access_token=access_token)
-    else:
-        client = None
+    session = {"emit": emit, "client": client,
+               "conversation_id": conversation_id}  # type: Session
+    sessions[session_id] = session
 
-    id = request.sid
-    session = {"emit": emit, "client": client}  # type: Session
-    sessions[id] = session
-
-    spec = importlib.util.spec_from_file_location(id, config.module)
+    spec = importlib.util.spec_from_file_location(session_id, config.module)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
@@ -109,9 +114,6 @@ def connect():
     if hasattr(module, "process_response"):
         session["process_response"] = module.process_response
 
-    if session["client"]:
-       session["client"].create_conversation(config.project_id, id)
-
 
 @socketio.on('disconnect')
 def disconnect():
@@ -121,15 +123,31 @@ def disconnect():
 
 @socketio.on('message')
 def message(message):
-    input_str = message["data"].strip()
+    input_str = message["content"].strip()
+    author = message["author"]
 
     id = request.sid
     session = sessions[id]
 
+    if session["client"]:
+        session["client"].create_message(
+            {
+                "conversationId": session["conversation_id"],
+                "author": author,
+                "content": input_str,
+                "authorIsUser": True,
+            }
+        )
+
     if "agent" in session:
-        sdk = Chainlit(emit=emit, session_id=id)
+        sdk = Chainlit(session)
         agent = session["agent"]
-        raw_res, agent_name, output_key = run_agent(agent, input_str)
+        try:
+            raw_res, agent_name, output_key = run_agent(agent, input_str)
+        except Exception as e:
+            sdk.send_message(author="Chainlit", content=str(e), final=True)
+            return
+
         if "process_response" in session:
             res = session["process_response"](raw_res)
         elif output_key is not None:
@@ -147,12 +165,8 @@ def run():
     if LANGCHAIN_INSTALLED:
         import langchain
         from langchain.cache import SQLiteCache
-        if config.cache_path:
-            langchain.llm_cache = SQLiteCache(database_path=config.cache_path)
-
-    project = Project.prisma().find_unique(where={"name": config.module})
-    if project is None:
-        project = Project.prisma().create(data={"name": config.module})
-    config.project = project
+        if config.lc_cache_path:
+            langchain.llm_cache = SQLiteCache(
+                database_path=config.lc_cache_path)
 
     socketio.run(app, port=5000)

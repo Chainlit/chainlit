@@ -6,14 +6,18 @@ import Tab from "@mui/material/Tab";
 import { Logo } from "components/logo";
 import { Link, useLocation } from "react-router-dom";
 import UserAvatar from "./chat/userAvatar";
+import { projectSettingsState } from "state/chat";
+import { useRecoilValue } from "recoil";
 
 function Nav() {
   const location = useLocation();
+  const pSettings = useRecoilValue(projectSettingsState);
 
-  const tabs = [
-    { to: "/", label: "Chat" },
-    { to: "/dataset", label: "Dataset" },
-  ];
+  const tabs = [{ to: "/", label: "Chat" }];
+
+  if (pSettings?.projectId) {
+    tabs.push({ to: "/dataset", label: "Dataset" });
+  }
 
   const value = tabs.findIndex((t) => location.pathname === t.to);
 

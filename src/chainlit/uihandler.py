@@ -49,11 +49,11 @@ class UiCallbackHandler(BaseCallbackHandler):
 
     def add_message(self, message, prompt: str = None, error=False):
         llm_settings = self.llm_settings if prompt else None
-        bot_name = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else "Default"
+        author = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else "Default"
         indent = len(self.tool_sequence) + 1
 
         self.sdk.send_message(
-            author=bot_name,
+            author=author,
             content=message,
             indent=indent,
             is_error=error,

@@ -10,7 +10,7 @@ import {
   documentsState,
   messagesState,
 } from "state/chat";
-import { DeleteOutline } from "@mui/icons-material";
+import { Refresh } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 
@@ -47,7 +47,7 @@ export default function ClearChatButton() {
             edge="end"
             onClick={handleClickOpen}
           >
-            <DeleteOutline />
+            <Refresh />
           </IconButton>
         </span>
       </Tooltip>

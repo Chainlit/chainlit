@@ -2,14 +2,15 @@ import click
 import os
 import sys
 from typing import Any, Dict, List, Optional
-from chainlit.config import config
-from chainlit.db import init_db
+from chainlit.config import load_config
+from chainlit.local_db import init_local_db
 import webbrowser
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
 LOG_LEVELS = ("error", "warning", "info", "debug")
 
-cwd = os.getcwd()
+root = os.getcwd()
+
 
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
 @click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
@@ -56,12 +57,9 @@ def prepare_import(path):
 @main.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
 @click.option("-p", "--project-id", envvar="CHAINLIT_PROJECT_ID")
-@click.option("-h","--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
-@click.option("-d", "--db-path", default=f"{cwd}/.database.db", envvar="CHAINLIT_DB_PATH")
-@click.option("-c", "--cache-path", default=f"{cwd}/.langchain.db", envvar="CHAINLIT_CACHE_PATH")
-@click.option("-n", "--bot-name", default="Chatbot", envvar="CHAINLIT_BOT_NAME")
+@click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.argument("args", nargs=-1)
-def main_run(target, project_id, headless, bot_name, db_path, cache_path, args=None, **kwargs):
+def main_run(target, project_id, headless, args=None, **kwargs):
     _, extension = os.path.splitext(target)
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
@@ -76,19 +74,26 @@ def main_run(target, project_id, headless, bot_name, db_path, cache_path, args=N
     if not os.path.exists(target):
         raise click.BadParameter(f"File does not exist: {target}")
 
+    config = load_config(root)
+
     config.module = prepare_import(target)
-    config.project_id = project_id
+
+    if project_id:
+        config.project_id = project_id
+
     config.headless = headless
-    config.db_path = db_path
-    config.cache_path = cache_path
-    config.bot_name = bot_name
 
-    init_db()
+    if config.env:
+        os.environ.update(config.env)
 
-    _main_run(args, flag_options=kwargs)
+    if not config.auth and config.project_id is None and config.chainlit_env == "development":
+        init_local_db()
+
+    _main_run(headless, args, flag_options=kwargs)
 
 
 def _main_run(
+    headless: bool = False,
     args: Optional[List[str]] = None,
     flag_options: Optional[Dict[str, Any]] = None,
 ) -> None:
@@ -98,7 +103,7 @@ def _main_run(
     if flag_options is None:
         flag_options = {}
 
-    if not config.headless:
+    if not headless:
         webbrowser.open("http://127.0.0.1:5000")
 
     from chainlit.server import run

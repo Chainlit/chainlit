@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 const typography = {
-  fontFamily: ["Poppins", "sans-serif"].join(","),
+  fontFamily: ["Inter", "sans-serif"].join(","),
 };
 
 const components = {

@@ -29,10 +29,10 @@ def run_agent(agent: Any, input_str: str):
             agent.callback_manager.handlers[0].tool_sequence = [agent_name]
         else:
             agent_to_call = agent
-            agent_name = config.bot_name
+            agent_name = config.chatbot_name
     else:
         agent_to_call = agent
-        agent_name = config.bot_name
+        agent_name = config.chatbot_name
 
     if hasattr(agent_to_call, "input_keys"):
         input_key = agent_to_call.input_keys[0]

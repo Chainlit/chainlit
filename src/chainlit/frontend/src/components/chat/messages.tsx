@@ -12,7 +12,7 @@ const Messages = () => {
 
   if (!displaySteps) {
     messages = messages.filter(
-      (m) => m.final || m.error || m.author === "User"
+      (m) => m.final || m.authorIsUser
     );
   }
 

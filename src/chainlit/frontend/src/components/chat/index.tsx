@@ -1,5 +1,5 @@
 import { server } from "api";
-import { Box } from "@mui/material";
+import { Alert, Box } from "@mui/material";
 import Messages from "./messages";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
@@ -17,8 +17,9 @@ import Playground from "components/playground";
 import DocumentSideView from "components/document/sideView";
 import ChatTopBar from "./topBar";
 import InputBox from "./inputBox";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import io from "socket.io-client";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const agentRegexp = /(@\[\w*\]\((\w*)\))/;
 
@@ -33,12 +34,14 @@ const clean = (str: string, regexp: RegExp, prefix = "") => {
 };
 
 const Chat = () => {
+  const { user } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
   const setDocuments = useSetRecoilState(documentsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAgents = useSetRecoilState(agentState);
+  const [socketError, setSocketError] = useState(false);
 
   useEffect(() => {
     if (window.socket) return;
@@ -49,8 +52,16 @@ const Chat = () => {
       },
     });
 
+    window.socket.on("connection", () => {
+      setSocketError(false);
+    });
+
+    window.socket.on("connect_error", () => {
+      setSocketError(true);
+    });
+
     window.socket.on("message", (message: IMessage) => {
-      if (message.final || message.is_error) {
+      if (message.final || message.isError) {
         setLoading(false);
       }
       setMessages((oldMessages) => [...oldMessages, message]);
@@ -58,7 +69,7 @@ const Chat = () => {
     window.socket.on("document", (document: IDocument) => {
       setDocuments((old) => ({
         ...old,
-        ...{ [document.spec.name]: document },
+        ...{ [document.name]: document },
       }));
     });
     window.socket.on("total_tokens", (count: any) => {
@@ -73,13 +84,25 @@ const Chat = () => {
     msg = clean(msg, agentRegexp, "@");
 
     const message: IMessage = {
-      author: "User",
+      author: user?.name || "Anonymous",
+      authorIsUser: true,
       content: msg,
     };
+
     setMessages((oldMessages) => [...oldMessages, message]);
     setLoading(true);
-    window.socket?.emit("message", { data: msg });
+    window.socket?.emit("message", message);
   };
+
+  if (socketError)
+    return (
+      <Box display="flex" width="100%">
+        <Alert sx={{ m: "auto" }} variant="filled" severity="error">
+          You are not a member of this project. Please contact the project
+          owner.
+        </Alert>
+      </Box>
+    );
 
   return (
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">

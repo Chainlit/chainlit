@@ -40,7 +40,6 @@ const Home = () => {
       sx={{
         maxHeight: "100%",
         overflowY: "scroll",
-        maxWidth: "48rem",
         width: "100%",
         m: "auto",
       }}

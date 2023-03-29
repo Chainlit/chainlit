@@ -63,7 +63,7 @@ const DocumentSideView = () => {
   return (
     <Drawer open={!!document}>
       <Stack direction="row" alignItems="center">
-        <Typography fontSize="18px">{document?.spec.name}</Typography>
+        <Typography fontSize="18px">{document?.name}</Typography>
         <IconButton
           edge="end"
           sx={{ ml: "auto" }}

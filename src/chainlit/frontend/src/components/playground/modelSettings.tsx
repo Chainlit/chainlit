@@ -11,9 +11,9 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useEffect } from "react";
 
 const models = {
+  GPT4: ["gpt-4"],
   "Chat GPT": ["gpt-3.5-turbo"],
   GPT3: ["text-davinci-003", "text-davinci-002"],
-  Codex: ["code-davinci-002"],
 };
 
 const ModelSettings = () => {

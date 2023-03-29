@@ -18,13 +18,14 @@ export interface IPlaygroundState {
 
 export interface IMessage {
   author: string;
+  authorIsUser?: boolean;
   content: string;
   language?: string;
   indent?: number;
   final?: boolean;
-  is_error?: boolean;
+  isError?: boolean;
   prompt?: string;
-  llm_settings?: ILLMSettings;
+  llmSettings?: ILLMSettings;
 }
 
 export enum DocumentType {
@@ -32,15 +33,13 @@ export enum DocumentType {
   txt = "text",
 }
 
-export interface IDocumentSpec {
-  name: string;
-  display: "embed" | "side" | "fullscreen";
-  type: DocumentType;
-}
-
 export interface IDocument {
-  content: any;
-  spec: IDocumentSpec;
+  id?: string;
+  url?: string;
+  content?: any;
+  name: string;
+  type: DocumentType;
+  display: "embed" | "side" | "fullscreen";
 }
 
 export type IDocuments = Record<string, IDocument>;
@@ -49,6 +48,12 @@ export interface IAgent {
   id: string;
   display: string;
   description: string;
+}
+
+export interface IDatasetFilters {
+  authorEmail?: string;
+  search?: string;
+  feedback?: number;
 }
 
 export const messagesState = atom<IMessage[]>({
@@ -101,14 +106,20 @@ export const playgroundSettingsState = atom<ILLMSettings | undefined>({
   default: undefined,
 });
 
-export const authState = atom<
-  { anonymous: boolean; projectId?: string } | undefined
+export const projectSettingsState = atom<
+  | { anonymous: boolean; chainlitServer: string; projectId?: string }
+  | undefined
 >({
-  key: "ProjectId",
+  key: "ProjectSettings",
   default: undefined,
 });
 
 export const accessTokenState = atom<string | undefined>({
   key: "AccessToken",
   default: undefined,
+});
+
+export const datasetFiltersState = atom<IDatasetFilters>({
+  key: "DatasetFilters",
+  default: {},
 });

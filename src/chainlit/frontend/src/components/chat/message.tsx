@@ -8,12 +8,11 @@ import {
   IMessage,
   playgroundState,
 } from "state/chat";
-import { Edit, ThumbDown, ThumbUp } from "@mui/icons-material";
-import AgentAvatar, { getAgentColor } from "./agentAvatar";
+import { Edit, ThumbDownAltOutlined, ThumbUpOutlined } from "@mui/icons-material";
+import { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/artifact/view";
 import { CodeBlock, dracula } from "react-code-blocks";
-import ReactMarkdown from "react-markdown";
 
 interface Props {
   message: IMessage;
@@ -30,17 +29,16 @@ const Message = ({ message, showAvatar }: Props) => {
   const documentRegexp = documentNames.length
     ? new RegExp(`(${documentNames.join("|")})`)
     : undefined;
-
   const editButton = message.prompt && !message.final && (
     <IconButton
       color="primary"
-      onClick={() =>
+      onClick={() => {
         setPlayground({
-          llmSettings: message.llm_settings!,
+          llmSettings: message.llmSettings!,
           prompt: message.prompt!,
           completion: message.content,
-        })
-      }
+        });
+      }}
     >
       <Edit sx={{ width: "16px", height: "16px" }} />
     </IconButton>
@@ -60,12 +58,12 @@ const Message = ({ message, showAvatar }: Props) => {
       {editButton}
       {message.final && (
         <IconButton>
-          <ThumbUp sx={{ width: "16px", height: "16px" }} />
+          <ThumbUpOutlined sx={{ width: "16px", height: "16px" }} />
         </IconButton>
       )}
       {message.final && (
         <IconButton>
-          <ThumbDown sx={{ width: "16px", height: "16px" }} />
+          <ThumbDownAltOutlined sx={{ width: "16px", height: "16px" }} />
         </IconButton>
       )}
     </Stack>
@@ -87,7 +85,7 @@ const Message = ({ message, showAvatar }: Props) => {
           boxSizing: "border-box",
           mx: "auto",
           py: "10px",
-          maxWidth: "48rem",
+          maxWidth: "55rem",
           display: "flex",
           flexDirection: "column",
           position: "relative",
@@ -95,22 +93,21 @@ const Message = ({ message, showAvatar }: Props) => {
       >
         {hover && buttons}
         <Stack direction="row" mb={1}>
-          <Box width="100px">
-           
-              <Typography
-                noWrap
-                sx={{
-                  width: "100px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  letterSpacing: ".08em",
-                  lineHeight: "1.5rem",
-                  textTransform: "uppercase",
-                  color: getAgentColor(message.author),
-                }}
-              >
-                {showAvatar && message.author}
-              </Typography>
+          <Box width="100px" pr={2}>
+            <Typography
+              noWrap
+              sx={{
+                width: "100px",
+                fontSize: "12px",
+                fontWeight: 700,
+                letterSpacing: ".08em",
+                lineHeight: "1.5rem",
+                textTransform: "uppercase",
+                color: getAgentColor(message.author),
+              }}
+            >
+              {showAvatar && message.author}
+            </Typography>
           </Box>
           <Stack
             alignItems="center"
@@ -148,18 +145,18 @@ const Message = ({ message, showAvatar }: Props) => {
                   <Link
                     key={i}
                     onClick={() => {
-                      if (documents[match].spec.display === "side") {
+                      if (documents[match].display === "side") {
                         setSideView(documents[match]);
                       }
                     }}
                     component={RRLink}
                     to={
-                      documents[match].spec.display === "fullscreen"
+                      documents[match].display === "fullscreen"
                         ? `/document/${match}`
                         : "#"
                     }
                   >
-                    {documents[match].spec.display === "embed"
+                    {documents[match].display === "embed"
                       ? renderDocument(documents[match], true)
                       : match}
                   </Link>

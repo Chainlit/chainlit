@@ -16,11 +16,3 @@ class LLMSettings():
     top_p: int = 1
     frequency_penalty: int = 0
     presence_penalty: int = 0
-
-
-@dataclass_json
-@dataclass
-class DocumentSpec():
-    name: str
-    display: DocumentType
-    type: DocumentDisplay

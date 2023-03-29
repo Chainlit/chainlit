@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { authState, accessTokenState } from "state/chat";
-import { getAuth } from "api";
+import { accessTokenState, projectSettingsState } from "state/chat";
+import { getProjectSettings } from "api";
 import theme from "theme";
 import { ThemeProvider } from "@mui/material";
 import { themeState } from "state/theme";
@@ -18,10 +18,11 @@ import Document from "pages/Document";
 import Login from "pages/Login";
 import AuthCallback from "pages/AuthCallback";
 import { Socket } from "socket.io-client";
+import Dataset from "pages/Dataset";
 
 declare global {
   interface Window {
-    socket: Socket | undefined
+    socket: Socket | undefined;
   }
 }
 
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/dataset",
+    element: <Dataset />,
   },
   {
     path: "/document/:name",
@@ -51,13 +56,13 @@ const router = createBrowserRouter([
 function App() {
   const themeVariant = useRecoilValue(themeState);
 
-  const [auth, setAuth] = useRecoilState(authState);
+  const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently, logout } = useAuth0();
 
   useEffect(() => {
-    if (auth === undefined) {
-      getAuth().then((res) => setAuth(res));
+    if (pSettings === undefined) {
+      getProjectSettings().then((res) => setPSettings(res));
     }
   }, []);
 
@@ -65,13 +70,21 @@ function App() {
     if (isAuthenticated && accessToken === undefined) {
       getAccessTokenSilently({
         authorizationParams: {
-          audience: "chainlit-cloud"
-        }
-      }).then((token) => setAccessToken(token));
+          audience: "chainlit-cloud",
+        },
+      })
+        .then((token) => setAccessToken(token))
+        .catch((err) =>
+          logout({
+            logoutParams: {
+              returnTo: window.location.origin,
+            },
+          })
+        );
     }
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
 
-  if (auth === undefined) {
+  if (pSettings === undefined) {
     return null;
   }
 

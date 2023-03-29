@@ -1,22 +1,25 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { documentsState, DocumentType, IDocument } from "state/chat";
+import DocumentText from "./documentText";
 
 export const renderDocument = (document: IDocument, embedded = false) => {
-  switch (document.spec.type) {
+  switch (document.type) {
     case DocumentType.img:
+      const src =
+        document.url || URL.createObjectURL(new Blob([document.content]));
       return (
         <img
           style={{
             maxWidth: embedded ? "300px" : "100%",
             borderRadius: "0.2rem",
           }}
-          src={URL.createObjectURL(new Blob([document.content]))}
+          src={src}
         />
       );
     case DocumentType.txt:
-      return <Typography whiteSpace="initial" color="text.primary">{document.content}</Typography>;
+      return <DocumentText document={document} />;
     default:
       return null;
   }

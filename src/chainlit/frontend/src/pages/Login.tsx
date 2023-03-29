@@ -2,22 +2,22 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import { authState } from "state/chat";
+import { projectSettingsState } from "state/chat";
 
 export default function Login() {
   const { loginWithRedirect, user } = useAuth0();
-  const auth = useRecoilValue(authState);
+  const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (auth && !auth.anonymous && !user) {
+    if (pSettings && !pSettings.anonymous && !user) {
       loginWithRedirect({
         authorizationParams: {
           audience: "chainlit-cloud"
         }
       });
     } else navigate("/");
-  }, [auth, user]);
+  }, [pSettings, user]);
 
   return null;
 }
