@@ -1,7 +1,7 @@
 import { server } from "api";
 import { Alert, Box } from "@mui/material";
 import Messages from "./messages";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   accessTokenState,
   agentState,
@@ -36,9 +36,9 @@ const clean = (str: string, regexp: RegExp, prefix = "") => {
 const Chat = () => {
   const { user } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
-  const setMessages = useSetRecoilState(messagesState);
+  const [messages, setMessages] = useRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
-  const setDocuments = useSetRecoilState(documentsState);
+  const [documents, setDocuments] = useRecoilState(documentsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAgents = useSetRecoilState(agentState);
   const [socketError, setSocketError] = useState(false);
@@ -98,8 +98,7 @@ const Chat = () => {
     return (
       <Box display="flex" width="100%">
         <Alert sx={{ m: "auto" }} variant="filled" severity="error">
-          You are not a member of this project. Please contact the project
-          owner.
+          Could not reach the server.
         </Alert>
       </Box>
     );
@@ -110,7 +109,7 @@ const Chat = () => {
       <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
         <Loading />
         <ChatTopBar />
-        <Messages />
+        <Messages documents={documents} messages={messages} />
         <InputBox onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />

@@ -4,7 +4,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import {
   documentSideViewState,
   documentsState,
@@ -13,10 +13,11 @@ import {
 import { Refresh } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ClearChatButton() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const messages = useRecoilValue(messagesState);
   const setMessages = useSetRecoilState(messagesState);
   const setDocuments = useSetRecoilState(documentsState);
   const setSideView = useSetRecoilState(documentSideViewState);
@@ -35,6 +36,7 @@ export default function ClearChatButton() {
     setMessages([]);
     setDocuments({});
     setSideView(undefined);
+    navigate("/");
     handleClose();
   };
 
@@ -43,7 +45,6 @@ export default function ClearChatButton() {
       <Tooltip title="Clear messages">
         <span>
           <IconButton
-            disabled={messages.length === 0}
             edge="end"
             onClick={handleClickOpen}
           >

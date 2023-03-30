@@ -19,6 +19,8 @@ import Login from "pages/Login";
 import AuthCallback from "pages/AuthCallback";
 import { Socket } from "socket.io-client";
 import Dataset from "pages/Dataset";
+import Conversation from "pages/Conversation";
+import CloudProvider from "components/cloudProvider";
 
 declare global {
   interface Window {
@@ -30,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/conversations/:id",
+    element: <CloudProvider><Conversation /></CloudProvider>,
   },
   {
     path: "/dataset",

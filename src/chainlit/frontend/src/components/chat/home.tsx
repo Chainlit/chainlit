@@ -1,4 +1,4 @@
-import { Box, Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { agentState } from "state/chat";
 import AgentTile from "./agentTile";

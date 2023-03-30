@@ -1,10 +1,10 @@
 import { Box, IconButton, Link, Stack, Typography } from "@mui/material";
 import { Link as RRLink } from "react-router-dom";
 import reactStringReplace from "react-string-replace";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import {
   documentSideViewState,
-  documentsState,
+  IDocuments,
   IMessage,
   playgroundState,
 } from "state/chat";
@@ -19,12 +19,12 @@ import FeedbackButtons from "./feedbackButtons";
 
 interface Props {
   message: IMessage;
+  documents: IDocuments
   showAvatar?: boolean;
 }
 
-const Message = ({ message, showAvatar }: Props) => {
+const Message = ({ message, documents, showAvatar }: Props) => {
   const [hover, setHover] = useState(false);
-  const documents = useRecoilValue(documentsState);
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(documentSideViewState);
 

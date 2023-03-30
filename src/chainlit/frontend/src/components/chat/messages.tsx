@@ -1,22 +1,24 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
-import { displayStepsState, messagesState } from "state/chat";
+import { displayStepsState, IDocuments, IMessage } from "state/chat";
 import Message from "./message";
 import Home from "./home";
 
-const Messages = () => {
+interface Props {
+  messages: IMessage[];
+  documents: IDocuments;
+}
+
+const Messages = ({ messages, documents }: Props) => {
   const ref = useRef<HTMLDivElement>();
-  let messages = useRecoilValue(messagesState);
   const displaySteps = useRecoilValue(displayStepsState);
 
   if (!displaySteps) {
-    messages = messages.filter(
-      (m) => m.final || m.authorIsUser
-    );
+    messages = messages.filter((m) => m.final || m.authorIsUser);
   }
 
-  let previousAuthor = ""
+  let previousAuthor = "";
 
   useEffect(() => {
     if (!ref.current) {
@@ -40,10 +42,10 @@ const Messages = () => {
         }}
       >
         {messages.map((m, i) => {
-          const showAvatar = m.author !== previousAuthor || m.final 
-          previousAuthor = m.author
-          return <Message message={m} showAvatar={showAvatar} key={i} />
-  })}
+          const showAvatar = m.author !== previousAuthor || m.final;
+          previousAuthor = m.author;
+          return <Message message={m} documents={documents} showAvatar={showAvatar} key={i} />;
+        })}
       </Box>
     );
   } else {

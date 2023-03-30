@@ -17,7 +17,7 @@ export interface IPlaygroundState {
 }
 
 export interface IMessage {
-  id: number;
+  id?: number;
   author: string;
   authorIsUser?: boolean;
   content: string;

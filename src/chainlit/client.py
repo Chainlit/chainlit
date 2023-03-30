@@ -90,11 +90,12 @@ class CloudClient(BaseClient):
         return int(res['data']['createConversation']["id"])
 
     def create_message(self, variables: dict):
-        mutation = """mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $final: Boolean, $isError: Boolean, $indent: Int) {
-            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, final: $final, isError: $isError, indent: $indent) {
+        mutation = """mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $final: Boolean, $isError: Boolean, $indent: Int, $authorIsUser: Boolean) {
+            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, final: $final, isError: $isError, indent: $indent, authorIsUser: $authorIsUser) {
                 id
             }
         }"""
+        print("\n\n", variables, "\n\n")
         res = self.mutation(mutation, variables)
         return int(res['data']['createMessage']["id"])
 

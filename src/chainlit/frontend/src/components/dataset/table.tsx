@@ -58,11 +58,8 @@ const serializeDate = (timestamp: number) => {
     hour: "numeric",
     minute: "numeric",
   };
-  return new Date(timestamp).toLocaleDateString(
-    undefined,
-    dateOptions
-  );
-}
+  return new Date(timestamp).toLocaleDateString(undefined, dateOptions);
+};
 
 export default function ConversationTable() {
   const df = useRecoilValue(datasetFiltersState);
@@ -88,7 +85,7 @@ export default function ConversationTable() {
     return <Alert severity="error">{error.message}</Alert>;
   }
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return <Typography color="text.primary">Loading...</Typography>;
   }
 
   const pageInfo = data.conversations.pageInfo;
@@ -129,17 +126,17 @@ export default function ConversationTable() {
   const RowText = ({ text, col }: any) => {
     return (
       // <Tooltip title={text}>
-        <Typography
-          noWrap
-          sx={{
-            width: col.width,
-            minWidth: col.minWidth,
-            fontSize: "0.875rem",
-          }}
-          color="text.primary"
-        >
-          {text}
-        </Typography>
+      <Typography
+        noWrap
+        sx={{
+          width: col.width,
+          minWidth: col.minWidth,
+          fontSize: "0.875rem",
+        }}
+        color="text.primary"
+      >
+        {text}
+      </Typography>
       // </Tooltip>
     );
   };
@@ -174,7 +171,7 @@ export default function ConversationTable() {
             minWidth: columns["Actions"].minWidth,
           }}
         >
-          <OpenConversationButton />
+          <OpenConversationButton conversationId={conversation.id} />
           <DeleteConversationButton
             conversationId={conversation.id}
             onDelete={() => refetch()}
