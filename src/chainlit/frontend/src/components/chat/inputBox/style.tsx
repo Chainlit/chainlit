@@ -6,11 +6,12 @@ const fontFamily = "Inter"
 const fontSize = "16px"
 
 export const inputStyle = (theme: Theme) => ({
+  flexGrow: 1,
   control: {
     display: "flex",
     height: "50px",
     backgroundColor: theme.palette.background.paper,
-    borderRadius: ".375rem",
+    borderRadius: theme.shape.borderRadius,
     border,
     fontSize: "16px",
   },
@@ -31,7 +32,6 @@ export const inputStyle = (theme: Theme) => ({
   "&singleLine": {
     highlighter: {
       border: "none",
-      padding: "0 16px",
       display: "flex",
       margin: "auto",
       fontFamily,
@@ -47,7 +47,6 @@ export const inputStyle = (theme: Theme) => ({
       height: "100%",
       top: 0,
       left: 1,
-      padding: "0 16px",
     },
   },
   suggestions: {

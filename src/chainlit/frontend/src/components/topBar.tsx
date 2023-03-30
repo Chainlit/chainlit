@@ -17,6 +17,7 @@ function Nav() {
 
   if (pSettings?.projectId) {
     tabs.push({ to: "/dataset", label: "Dataset" });
+    tabs.push({ to: "/test", label: "Test" });
   }
 
   const value = tabs.findIndex((t) => location.pathname === t.to);

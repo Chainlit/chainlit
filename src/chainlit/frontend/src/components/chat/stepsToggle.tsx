@@ -3,7 +3,7 @@ import { displayStepsState } from "state/chat";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { Typography } from "@mui/material";
-import { SxProps } from "@mui/system";
+import { SxProps } from "@mui/material";
 
 interface Props {
   sx?: SxProps;

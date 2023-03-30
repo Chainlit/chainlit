@@ -1,50 +1,73 @@
 import { Send } from "@mui/icons-material";
 import { IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import { useState } from "react";
-import { useRecoilValue } from "recoil";
-import { loadingState } from "state/chat";
-
-const borderColor = "rgba(32,33,35,.5) !important";
-const borderWidth = "1px !important";
-const boxShadow = "0 0 transparent, 0 0 transparent,0 0 10px rgba(0,0,0,.1)";
+import { useCallback, useRef, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { historyOpenedState, loadingState } from "state/chat";
+import HistoryButton from "components/chat/historyButton";
 
 interface Props {
   onSubmit: (message: string) => void;
 }
 
+const borderWidth = 0;
+const borderColor = "transparent";
+
 const Input = ({ onSubmit }: Props) => {
+  const ref = useRef<any>();
+  const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
   const [value, setValue] = useState("");
-  const submit = () => {
+
+  const submit = useCallback(() => {
     if (value === "" || loading) {
       return;
     }
     onSubmit(value);
     setValue("");
-  };
+  }, [value, loading, setValue, onSubmit]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+      } else if (e.key === "ArrowUp") {
+        hSetOpen(true);
+      }
+    },
+    [submit, hSetOpen]
+  );
+
+  const onHistoryClick = useCallback((content: string) => {
+    if (ref.current) {
+      setValue(content);
+    }
+  }, []);
 
   return (
     <TextField
+      ref={ref}
+      autoFocus
+      variant="standard"
       autoComplete="false"
-      variant="outlined"
+      placeholder="Type your message here..."
       disabled={loading}
       onChange={(e) => setValue(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          submit();
-        }
-      }}
+      onKeyDown={handleKeyDown}
       value={value}
       fullWidth
       InputProps={{
+        disableUnderline: true,
+        startAdornment: (
+          <InputAdornment sx={{ ml: 1, color: "text.secondary" }} position="start">
+            <HistoryButton onClick={onHistoryClick} />
+          </InputAdornment>
+        ),
         endAdornment: (
           <InputAdornment
             position="end"
-            sx={{
-              color: "rgba(142,142,160,1)",
-            }}
+            sx={{ mr: 1, color: "text.secondary" }}
           >
             <IconButton
               disabled={loading}
@@ -58,18 +81,16 @@ const Input = ({ onSubmit }: Props) => {
       }}
       sx={{
         backgroundColor: "background.paper",
-        borderRadius: ".375rem",
-        boxShadow,
+        borderRadius: 1,
+
         input: {
           height: "27px",
-          paddingLeft: "1rem",
           paddingBottom: "0.75rem",
           paddingTop: "0.75rem",
           color: "text.primary",
-          fontFamily: "Inter",
         },
         fieldset: {
-          borderRadius: ".375rem",
+          borderRadius: 1,
           borderWidth,
           borderColor: borderColor,
         },

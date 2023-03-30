@@ -56,7 +56,7 @@ export default function AuthorSelect() {
         >
           <MenuItem value={"All"}>All</MenuItem>
           {members.map((m: any) => (
-            <MenuItem value={m.user.email}>{m.user.email}</MenuItem>
+            <MenuItem key={m.user.id} value={m.user.email}>{m.user.email}</MenuItem>
           ))}
         </Select>
       </FormControl>

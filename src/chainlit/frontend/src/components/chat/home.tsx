@@ -38,6 +38,7 @@ const Home = () => {
       display="flex"
       flexGrow={1}
       sx={{
+        maxWidth: "55rem",
         maxHeight: "100%",
         overflowY: "scroll",
         width: "100%",

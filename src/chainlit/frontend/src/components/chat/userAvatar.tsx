@@ -29,7 +29,7 @@ export default function UserAvatar() {
   }
 
   return (
-    <span>
+    <div>
       <IconButton
         edge="end"
         onClick={handleClick}
@@ -51,7 +51,6 @@ export default function UserAvatar() {
           elevation: 0,
           sx: {
             overflow: "visible",
-            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             mt: 1.5,
             "& .MuiAvatar-root": {
               width: 32,
@@ -101,6 +100,6 @@ export default function UserAvatar() {
           Logout
         </MenuItem>
       </Menu>
-    </span>
+    </div>
   );
 }

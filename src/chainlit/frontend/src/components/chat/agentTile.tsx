@@ -27,6 +27,7 @@ const AgentTile = ({ agent }: Props) => {
         textAlign="center"
         color="text.secondary"
         sx={{
+          minHeight: "48px",
           overflow: "hidden",
           textOverflow: "ellipsis",
           display: "-webkit-box",

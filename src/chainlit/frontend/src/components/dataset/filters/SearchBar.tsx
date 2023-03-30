@@ -15,8 +15,9 @@ const Search = styled("div")(({ theme }) => ({
   position: "relative",
   color: theme.palette.text.primary,
   borderRadius: "4px",
+  border: `${theme.palette.divider} solid 1px`,
   "&:hover": {
-    outline: `${theme.palette.divider} solid 1px`
+    border: `${theme.palette.primary} solid 1px !important`,
   },
 
   marginLeft: 0,
@@ -49,8 +50,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function SearchBar({}: Props) {
   const [df, setDf] = useRecoilState(datasetFiltersState);
 
-  const handleChange = (event: any) => {
-    const value = (event.target.value as string).trim();
+  const handleChange = (value: string) => {
+    value = value.trim();
     const search = value === "" ? undefined : value;
     setDf({ ...df, search });
   };
@@ -80,7 +81,7 @@ export default function SearchBar({}: Props) {
       <StyledInputBase
         placeholder="Search messages..."
         inputProps={{ "aria-label": "search", ref: inputRef }}
-        onChange={_onChange}
+        onChange={(e) => _onChange(e.target.value)}
       />
       <SearchIconWrapper>
         <IconButton onClick={clear}>

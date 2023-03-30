@@ -1,19 +1,9 @@
-import InfiniteLoader from "react-window-infinite-loader";
-import { FixedSizeList } from "react-window";
 import { gql, useQuery } from "@apollo/client";
 import { useRecoilValue } from "recoil";
 import { datasetFiltersState, projectSettingsState } from "state/chat";
-import {
-  Alert,
-  Box,
-  Stack,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Stack, Tooltip, Typography } from "@mui/material";
+import InfiniteLoader from "react-window-infinite-loader";
+import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import DeleteConversationButton from "./deleteConversationButton";
 import OpenConversationButton from "./openConversationButton";
@@ -22,7 +12,6 @@ import { useEffect } from "react";
 const ConversationsQuery = gql`
   query (
     $first: Int
-    $after: ID
     $projectId: String!
     $withFeedback: Int
     $authorEmail: String
@@ -30,7 +19,6 @@ const ConversationsQuery = gql`
   ) {
     conversations(
       first: $first
-      after: $after
       projectId: $projectId
       withFeedback: $withFeedback
       authorEmail: $authorEmail
@@ -44,6 +32,7 @@ const ConversationsQuery = gql`
         cursor
         node {
           id
+          createdAt
           documentCount
           messageCount
           author {
@@ -60,6 +49,20 @@ const ConversationsQuery = gql`
 `;
 
 const BATCH_SIZE = 50;
+
+const serializeDate = (timestamp: number) => {
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  };
+  return new Date(timestamp).toLocaleDateString(
+    undefined,
+    dateOptions
+  );
+}
 
 export default function ConversationTable() {
   const df = useRecoilValue(datasetFiltersState);
@@ -87,46 +90,57 @@ export default function ConversationTable() {
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
+
   const pageInfo = data.conversations.pageInfo;
   const conversations = data.conversations.edges.map((e: any) => e.node);
   const itemCount = conversations.length;
 
+  if (itemCount === 0) {
+    return <Alert severity="info">No result</Alert>;
+  }
+
   const columns = {
+    Id: {
+      minWidth: "60px",
+      width: "5%",
+    },
     Author: {
       minWidth: "130px",
       width: "25%",
     },
-    "Input": {
+    Input: {
       minWidth: "200px",
-      width: "40%",
+      width: "35%",
     },
-    "Messages": {
-      minWidth: "80px",
-      width: "12.5%",
+    Date: {
+      minWidth: "120px",
+      width: "25%",
     },
-    "Documents": {
-      minWidth: "80px",
-      width: "12.5%",
-    },
+    // Messages: {
+    //   minWidth: "80px",
+    //   width: "12.5%",
+    // },
     Actions: {
       minWidth: "80px",
       width: "10%",
     },
   };
 
-  const RowText = ({ text, width }: any) => {
+  const RowText = ({ text, col }: any) => {
     return (
-      <Tooltip title={text}>
+      // <Tooltip title={text}>
         <Typography
           noWrap
           sx={{
-            width: width,
+            width: col.width,
+            minWidth: col.minWidth,
+            fontSize: "0.875rem",
           }}
           color="text.primary"
         >
           {text}
         </Typography>
-      </Tooltip>
+      // </Tooltip>
     );
   };
 
@@ -141,26 +155,23 @@ export default function ConversationTable() {
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <RowText
-          text={conversation.author.email}
-          width={columns["Author"].width}
-        />
+        <RowText text={conversation.id} col={columns["Id"]} />
+        <RowText text={conversation.author.email} col={columns["Author"]} />
         <RowText
           text={conversation.messages[0].content}
-          width={columns["Input"].width}
+          col={columns["Input"]}
         />
         <RowText
-          text={conversation.messageCount}
-          width={columns["Messages"].width}
+          text={serializeDate(conversation.createdAt)}
+          col={columns["Date"]}
         />
-        <RowText
-          text={conversation.documentCount}
-          width={columns["Documents"].width}
-        />
+        {/* <RowText text={conversation.messageCount} col={columns["Messages"]} /> */}
+
         <Stack
           direction="row"
           sx={{
             width: columns["Actions"].width,
+            minWidth: columns["Actions"].minWidth,
           }}
         >
           <OpenConversationButton />
@@ -173,52 +184,58 @@ export default function ConversationTable() {
     );
   };
 
+  const Header = Object.keys(columns).map((key) => (
+    <Typography
+      sx={{
+        fontSize: "0.875rem",
+        // @ts-ignore
+        width: columns[key].width,
+        // @ts-ignore
+        minWidth: columns[key].minWidth,
+      }}
+      color="primary.dark"
+    >
+      {key}
+    </Typography>
+  ));
+
   return (
-    <Box sx={{ height: "100%" }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
+          height: "40px",
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        {Object.keys(columns).map((key) => (
-          <Typography
-            sx={{
-              // @ts-ignore
-              width: columns[key].width,
-            }}
-            color="primary.dark"
-          >
-            {key}
-          </Typography>
-        ))}
+        {Header}
       </Box>
-      <AutoSizer>
-        {({ height, width }) => (
-          <TableBody>
-            <InfiniteLoader
-              isItemLoaded={(index) => conversations[index]}
-              itemCount={itemCount}
-              loadMoreItems={(startIndex, stopIndex) => {
-                pageInfo.hasNextPage &&
-                  fetchMore({
-                    variables: {
-                      first: BATCH_SIZE,
-                      cursor: pageInfo.endCursor,
-                      projectId: pSettings?.projectId,
-                      withFeedback: df.feedback,
-                      authorEmail: df.authorEmail,
-                      search: df.search,
-                    },
-                  });
-              }}
-            >
-              {({ onItemsRendered, ref }) => (
+      <Box flexGrow={1}>
+        <InfiniteLoader
+          isItemLoaded={(index) => conversations[index]}
+          itemCount={itemCount}
+          loadMoreItems={(startIndex, stopIndex) => {
+            pageInfo.hasNextPage &&
+              fetchMore({
+                variables: {
+                  first: BATCH_SIZE,
+                  cursor: pageInfo.endCursor,
+                  projectId: pSettings?.projectId,
+                  withFeedback: df.feedback,
+                  authorEmail: df.authorEmail,
+                  search: df.search,
+                },
+              });
+          }}
+        >
+          {({ onItemsRendered, ref }) => (
+            <AutoSizer>
+              {({ height, width }) => (
                 <FixedSizeList
                   height={height!}
                   width={width!}
-                  itemSize={73}
+                  itemSize={50}
                   itemCount={itemCount}
                   onItemsRendered={onItemsRendered}
                   ref={ref}
@@ -226,10 +243,10 @@ export default function ConversationTable() {
                   {Row}
                 </FixedSizeList>
               )}
-            </InfiniteLoader>
-          </TableBody>
-        )}
-      </AutoSizer>
+            </AutoSizer>
+          )}
+        </InfiniteLoader>
+      </Box>
     </Box>
   );
 }

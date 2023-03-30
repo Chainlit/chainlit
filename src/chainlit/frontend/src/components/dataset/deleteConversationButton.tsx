@@ -61,13 +61,14 @@ export default function DeleteConversationButton({
 
   return (
     <div>
-      <Tooltip title="Delete conversation">
-        <span>
-          <IconButton color="error" onClick={handleClickOpen}>
+      {/* <Tooltip title="Delete conversation">
+        <span> */}
+          <IconButton size="small" color="error" onClick={handleClickOpen}>
             <DeleteOutline />
           </IconButton>
-        </span>
-      </Tooltip>
+        {/* </span>
+      </Tooltip> */}
+      {open &&
       <Dialog
         open={open}
         onClose={handleClose}
@@ -89,7 +90,7 @@ export default function DeleteConversationButton({
             Agree
           </LoadingButton>
         </DialogActions>
-      </Dialog>
+      </Dialog>}
     </div>
   );
 }

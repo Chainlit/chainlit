@@ -17,9 +17,11 @@ export interface IPlaygroundState {
 }
 
 export interface IMessage {
+  id: number;
   author: string;
   authorIsUser?: boolean;
   content: string;
+  humanFeedback?: number;
   language?: string;
   indent?: number;
   final?: boolean;
@@ -58,6 +60,7 @@ export interface IDatasetFilters {
 
 export const messagesState = atom<IMessage[]>({
   key: "Messages",
+  dangerouslyAllowMutability: true,
   default: [],
 });
 
@@ -107,8 +110,7 @@ export const playgroundSettingsState = atom<ILLMSettings | undefined>({
 });
 
 export const projectSettingsState = atom<
-  | { anonymous: boolean; chainlitServer: string; projectId?: string }
-  | undefined
+  { anonymous: boolean; chainlitServer: string; projectId?: string } | undefined
 >({
   key: "ProjectSettings",
   default: undefined,
@@ -122,4 +124,9 @@ export const accessTokenState = atom<string | undefined>({
 export const datasetFiltersState = atom<IDatasetFilters>({
   key: "DatasetFilters",
   default: {},
+});
+
+export const historyOpenedState = atom<boolean>({
+  key: "HistoryOpened",
+  default: false,
 });

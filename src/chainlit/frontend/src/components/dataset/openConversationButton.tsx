@@ -5,12 +5,12 @@ interface Props {}
 
 export default function OpenConversationButton({}: Props) {
   return (
-    <Tooltip title="Open conversation">
-      <span>
-        <IconButton color="primary">
+    // <Tooltip title="Open conversation">
+    //   <span>
+        <IconButton size="small" color="primary">
           <OpenInNew />
         </IconButton>
-      </span>
-    </Tooltip>
+    //   </span>
+    // </Tooltip>
   );
 }

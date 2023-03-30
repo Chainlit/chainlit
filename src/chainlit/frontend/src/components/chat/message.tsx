@@ -8,11 +8,14 @@ import {
   IMessage,
   playgroundState,
 } from "state/chat";
-import { Edit, ThumbDownAltOutlined, ThumbUpOutlined } from "@mui/icons-material";
+import {
+  Edit
+} from "@mui/icons-material";
 import { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/artifact/view";
 import { CodeBlock, dracula } from "react-code-blocks";
+import FeedbackButtons from "./feedbackButtons";
 
 interface Props {
   message: IMessage;
@@ -56,16 +59,7 @@ const Message = ({ message, showAvatar }: Props) => {
       }}
     >
       {editButton}
-      {message.final && (
-        <IconButton>
-          <ThumbUpOutlined sx={{ width: "16px", height: "16px" }} />
-        </IconButton>
-      )}
-      {message.final && (
-        <IconButton>
-          <ThumbDownAltOutlined sx={{ width: "16px", height: "16px" }} />
-        </IconButton>
-      )}
+      {message.final && <FeedbackButtons message={message} />}
     </Stack>
   );
 
@@ -81,7 +75,6 @@ const Message = ({ message, showAvatar }: Props) => {
       <Box
         sx={{
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          // px: 2,
           boxSizing: "border-box",
           mx: "auto",
           py: "10px",

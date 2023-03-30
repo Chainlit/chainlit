@@ -1,7 +1,7 @@
-import { Box, Typography, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { tokenCountState } from "state/chat";
-import Input from "./input";
+import Input from "./_oldinput";
 
 interface Props {
   onSubmit: (message: string) => void;
@@ -25,7 +25,7 @@ export default function InputBox({ onSubmit }: Props) {
       }}
     >
       <Input onSubmit={onSubmit} />
-      <Stack flexDirection="row" alignItems="center">
+      {/* <Stack flexDirection="row" alignItems="center">
         <Typography
           sx={{ ml: "auto" }}
           color="text.secondary"
@@ -33,7 +33,7 @@ export default function InputBox({ onSubmit }: Props) {
         >
           Token count: {tokenCount}
         </Typography>
-      </Stack>
+      </Stack> */}
     </Box>
   );
 }

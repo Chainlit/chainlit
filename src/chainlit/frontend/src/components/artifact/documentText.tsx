@@ -9,27 +9,29 @@ interface Props {
 export default function DocumentText({ document }: Props) {
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState(false);
+  const [text, setText] = useState("");
 
   useEffect(() => {
     if (fetching || !document.url) return;
     setFetching(true);
     fetch(document.url!)
       .then((res) => res.text())
-      .then((text) => {
-        document.content = text;
+      .then((_text) => {
+        setText(_text)
         setFetching(false);
       })
       .catch((err) => {
+        setText("")
         setError(true);
         setFetching(false);
       });
   }, [document]);
 
-  const text = fetching ? "Loading..." : error ? "Error" : document.content;
+  const content = fetching ? "Loading..." : error ? "Error" : text ? text : document.content;
 
   return (
     <Typography whiteSpace="initial" color="text.primary">
-      {text}
+      {content}
     </Typography>
   );
 }
