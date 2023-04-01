@@ -95,7 +95,6 @@ class CloudClient(BaseClient):
                 id
             }
         }"""
-        print("\n\n", variables, "\n\n")
         res = self.mutation(mutation, variables)
         return int(res['data']['createMessage']["id"])
 

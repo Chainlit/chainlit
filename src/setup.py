@@ -14,7 +14,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
     entry_points={
-        'console_scripts': ['chainlit=chainlit.cli:main'],
+        'console_scripts': ['chainlit=chainlit.cli:cli'],
     },
     install_requires=[
         "langchain>=0.0.109",
@@ -22,7 +22,7 @@ setup(
         "flask>=2.2.3",
         "flask_socketio>=5.3.3",
         "flask_cors>=3.0.10",
-        "prisma>=0.8.2",
+        # "prisma>=0.8.2",
         "python-graphql-client>=0.4.3",
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'

@@ -1,10 +1,40 @@
-import click
-import os
-import sys
-from typing import Any, Dict, List, Optional
-from chainlit.config import load_config
-from chainlit.local_db import init_local_db
+
+try:
+    import chainlit.lc.monkey
+    LANGCHAIN_INSTALLED = True
+except ImportError:
+    LANGCHAIN_INSTALLED = False
+
+# from gunicorn.app.wsgiapp import WSGIApplication
+import importlib.util
 import webbrowser
+# from chainlit.local_db import init_local_db
+from chainlit.config import load_config
+import os
+import click
+import sys
+
+
+# class StandaloneApplication(WSGIApplication):
+#     def __init__(self, app_uri, options=None):
+#         self.options = options or {}
+#         self.app_uri = app_uri
+#         super().__init__()
+
+#     def load_config(self):
+#         config = {
+#             key: value
+#             for key, value in self.options.items()
+#             if key in self.cfg.settings and value is not None
+#         }
+#         for key, value in config.items():
+#             self.cfg.set(key.lower(), value)
+
+#     # def load(self):
+#     #     from gevent import monkey
+#     #     monkey.patch_all()
+#     #     return self.application
+
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
 LOG_LEVELS = ("error", "warning", "info", "debug")
@@ -13,9 +43,9 @@ root = os.getcwd()
 
 
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
-@click.option("--log_level", show_default=True, type=click.Choice(LOG_LEVELS))
+@click.option("--log-level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Chainlit")
-def main(log_level="error"):
+def cli(log_level="error"):
     if log_level:
         from logger import get_logger
 
@@ -54,12 +84,12 @@ def prepare_import(path):
     return ".".join(module_name[::-1]) + ext
 
 
-@main.command("run")
+@cli.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
 @click.option("-p", "--project-id", envvar="CHAINLIT_PROJECT_ID")
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.argument("args", nargs=-1)
-def main_run(target, project_id, headless, args=None, **kwargs):
+def run_chainlit(target, project_id, headless, args=None, **kwargs):
     _, extension = os.path.splitext(target)
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
@@ -76,35 +106,52 @@ def main_run(target, project_id, headless, args=None, **kwargs):
 
     config = load_config(root)
 
-    config.module = prepare_import(target)
+    if LANGCHAIN_INSTALLED:
+        import langchain
+        from langchain.cache import SQLiteCache
+        if config.lc_cache_path:
+            langchain.llm_cache = SQLiteCache(
+                database_path=config.lc_cache_path)
+
+    config.module_name = prepare_import(target)
+
+    spec = importlib.util.spec_from_file_location(
+        config.module_name, config.module_name)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    config.module = module
 
     if project_id:
         config.project_id = project_id
 
     config.headless = headless
 
-    if config.env:
-        os.environ.update(config.env)
-
-    if not config.auth and config.project_id is None and config.chainlit_env == "development":
-        init_local_db()
-
-    _main_run(headless, args, flag_options=kwargs)
-
-
-def _main_run(
-    headless: bool = False,
-    args: Optional[List[str]] = None,
-    flag_options: Optional[Dict[str, Any]] = None,
-) -> None:
-    if args is None:
-        args = []
-
-    if flag_options is None:
-        flag_options = {}
-
-    if not headless:
+    if not headless and config.chainlit_env == "development":
         webbrowser.open("http://127.0.0.1:5000")
 
-    from chainlit.server import run
-    run()
+    # if not config.auth and config.project_id is None and config.chainlit_env == "development":
+    #     init_local_db()
+
+    from chainlit.server import socketio, app
+    socketio.run(app, port=5000, debug=True, use_reloader=False)
+
+
+# def _main_run(
+#     args: Optional[List[str]] = None,
+#     flag_options: Optional[Dict[str, Any]] = None,
+# ) -> None:
+#     if args is None:
+#         args = []
+
+#     if flag_options is None:
+#         flag_options = {}
+
+
+#     # from chainlit.server import app
+#     # options = {
+#     #     "bind": "0.0.0.0:5000",
+#     #     # "workers": (multiprocessing.cpu_count() * 2) + 1,
+#     #     "workers": 1,
+#     #     "worker_class": "geventwebsocket.gunicorn.workers.GeventWebSocketWorker",
+#     # }
+#     # StandaloneApplication("chainlit.server:app", options).run()

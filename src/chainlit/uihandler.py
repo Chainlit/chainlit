@@ -14,7 +14,7 @@ class UiCallbackHandler(BaseCallbackHandler):
     sdk: Chainlit
     always_verbose: bool = True
 
-    def __init__(self, sdk) -> None:
+    def __init__(self, sdk: Chainlit) -> None:
         self.memory = {}
         self.queue = []
         self.prompts = []
@@ -91,13 +91,15 @@ class UiCallbackHandler(BaseCallbackHandler):
         template.update(kwargs)
         self.process(template)
         self.prompts += prompts
-        self.llm_settings = kwargs['llm_settings']
+        if 'llm_settings' in kwargs:
+            self.llm_settings = kwargs['llm_settings']
 
     def on_llm_cache(
             self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ):
         self.prompts += prompts
-        self.llm_settings = kwargs['llm_settings']
+        if 'llm_settings' in kwargs:
+            self.llm_settings = kwargs['llm_settings']
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Do nothing."""

@@ -1,4 +1,4 @@
-import { server } from "api";
+import { postMessage, server } from "api";
 import { Alert, Box } from "@mui/material";
 import Messages from "./messages";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -91,7 +91,8 @@ const Chat = () => {
 
     setMessages((oldMessages) => [...oldMessages, message]);
     setLoading(true);
-    window.socket?.emit("message", message);
+    postMessage(message.author, msg);
+    // window.socket?.emit("message", message);
   };
 
   if (socketError)

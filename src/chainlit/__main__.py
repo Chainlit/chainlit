@@ -1,4 +1,4 @@
-from cli import main
+from chainlit.cli import cli
 
 if __name__ == "__main__":
-    main(prog_name="chainlit")
+    cli(prog_name="chainlit")

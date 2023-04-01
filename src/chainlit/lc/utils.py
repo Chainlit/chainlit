@@ -14,8 +14,6 @@ def capture_mention(string: str, agents: List[str]):
 
 
 def run_agent(agent: Any, input_str: str):
-    agent.callback_manager.handlers[0].reset_memory()
-
     if hasattr(agent, "tools"):
         tools = agent.tools
         agents = [tool.name for tool in tools]

@@ -25,3 +25,18 @@ export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
   const completion = await res.text();
   return completion;
 };
+
+export const postMessage = async (
+  author: string,
+  content: string
+) => {
+  const res = await fetch(`${server}/message`, {
+    headers: {
+      "content-type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({ sessionId: window.socket!.id, author, content }),
+  });
+
+  return res.json();
+};

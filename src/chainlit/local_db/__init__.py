@@ -17,7 +17,7 @@ def seed_data():
     project = Project.prisma().find_unique(where={"name": config.module})
     if project is None:
         project = Project.prisma().create(
-            data={"name": config.module, "authorId": user.id})
+            data={"name": config.module_name, "authorId": user.id})
         UserToProject.prisma().create(
             data={"userId": user.id, "projectId": project.id})
 

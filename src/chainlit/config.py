@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import os
-from typing import Optional, Dict, Literal
+from typing import Optional, Dict, Literal, Any
 import json
 import jsonschema
 
@@ -9,12 +9,16 @@ config_schema = {
     "properties": {
         "chatbot_name": {"type": "string"},
         "project_id": {"type": "string"},
-        "auth": {"type": "boolean"},
-        "lc_cache_path": {"type": "string"},
         "env": {
             "type": "object"
-        }
+        },
+        "user_env": {
+            "type": "object"
+        },
+        "auth": {"type": "boolean"},
+        "lc_cache_path": {"type": "string"},
     },
+    "required": ["project_id", "chatbot_name", "env", "auth"]
 }
 
 chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
@@ -33,10 +37,12 @@ class Config:
     project_id: Optional[str] = None
     auth: bool = True
     env: Optional[Dict[str, str]] = None
+    user_env: Optional[Dict[str, str]] = None
     lc_cache_path: str = None
     local_db_path: str = None
     headless: bool = False,
-    module: Optional[str] = None
+    module_name: Optional[str] = None
+    module: Any = None
 
 
 def load_config(root: str):
