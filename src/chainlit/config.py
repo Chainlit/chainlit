@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import os
-from typing import Optional, Dict, Literal, Any
+from typing import Optional, Dict, Literal, Any, Callable
 import json
 import jsonschema
 
@@ -37,6 +37,9 @@ class Config:
     project_id: Optional[str] = None
     auth: bool = True
     env: Optional[Dict[str, str]] = None
+    on_message: Optional[Callable[[str], Any]] = None
+    lc_postprocess: Optional[Callable] = None
+    lc_factory: Optional[Callable] = None
     user_env: Optional[Dict[str, str]] = None
     lc_cache_path: str = None
     local_db_path: str = None
@@ -50,10 +53,10 @@ def load_config(root: str):
 
     try:
         with open(f'{root}/chainlit.json', "r") as f:
-            config = json.load(f)
+            _config = json.load(f)
             jsonschema.validate(config, config_schema)
             config = Config(chainlit_env=chainlit_env, root=root,
-                            chainlit_server=chainlit_server ** config)
+                            chainlit_server=chainlit_server, **_config)
     except FileNotFoundError:
         config = Config(chainlit_env=chainlit_env,
                         chainlit_server=chainlit_server, root=root)

@@ -1,6 +1,6 @@
 import builtins
-from chainlit.types import DocumentDisplay, LLMSettings
 from typing import TYPE_CHECKING, Union
+from chainlit.types import DocumentDisplay, LLMSettings
 if TYPE_CHECKING:
     from chainlit.sdk import Chainlit
 
@@ -54,3 +54,21 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
     if sdk:
         sdk.send_message(author, content, prompt, language,
                          indent, is_error, final, llm_settings)
+
+
+def langchain_factory(func):
+    from chainlit.config import config
+    config.lc_factory = func
+    return func
+
+
+def langchain_postprocess(func):
+    from chainlit.config import config
+    config.lc_postprocess = func
+    return func
+
+
+def on_message(func):
+    from chainlit.config import config
+    config.on_message = func
+    return func

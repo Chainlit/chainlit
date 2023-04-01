@@ -56,11 +56,10 @@ def connect():
     session_id = request.sid
     client = None
     user_env = None
-    conversation_id = sessions.get(session_id, {}).get("conversation_id")
 
     if config.user_env:
         if request.headers.get("user-env"):
-            user_env["user_env"] = json.loads(request.headers.get("user-env"))
+            user_env = json.loads(request.headers.get("user-env"))
         else:
             return False
 
@@ -70,12 +69,6 @@ def connect():
             return False
         client = CloudClient(project_id=config.project_id, access_token=access_token,
                              url=config.chainlit_server)
-        try:
-            if not conversation_id:
-                conversation_id = client.create_conversation(session_id)
-        except Exception as e:
-            print("Connection refused:", e)
-            return False
     # elif config.chainlit_env == "development":
     #     client = LocalClient(project_id=config.module_name)
     #     if not conversation_id:
@@ -87,17 +80,14 @@ def connect():
     session = {
         "emit": _emit,
         "client": client,
-        "conversation_id": conversation_id,
+        "conversation_id": None,
         "user_env": user_env
     }  # type: Session
     sessions[session_id] = session
 
-    if not hasattr(config.module, "load_agent"):
-        load_agent = None
-    else:
-        load_agent = config.module.load_agent
+    if config.lc_factory:
         with UserEnv(session["user_env"]):
-            agent = load_agent()
+            agent = config.lc_factory()
             session["agent"] = agent
 
         # if hasattr(agent, "tools"):
@@ -106,18 +96,9 @@ def connect():
         #               for tool in tools]
         #     emit("agents", agents)
 
-    if not hasattr(config.module, "predict"):
-        predict = None
-    else:
-        predict = config.module.predict
-        session["predict"] = predict
-
-    if not load_agent and not predict:
+    if not config.lc_factory and not config.on_message:
         raise ValueError(
-            "Module does not expose a load_agent or predict function")
-
-    if hasattr(config.module, "process_response"):
-        session["process_response"] = config.module.process_response
+            "Module does not expose a langchain factory or on_nessage function")
 
 
 @socketio.on('disconnect')
@@ -126,7 +107,6 @@ def disconnect():
         session = sessions.pop(request.sid)
 
 
-# @socketio.on('message')
 @app.route('/message', methods=['POST'])
 def message():
     body = request.json
@@ -137,6 +117,10 @@ def message():
     session = sessions[session_id]
 
     if session["client"]:
+        if not session["conversation_id"]:
+            session["conversation_id"] = session["client"].create_conversation(
+                session_id)
+
         session["client"].create_message(
             {
                 "conversationId": session["conversation_id"],
@@ -164,21 +148,20 @@ def message():
                              content=str(e), final=True)
             raise e
 
-        if "process_response" in session:
+        if config.lc_postprocess:
             with UserEnv(session["user_env"]):
                 with SDK(sdk):
-                    res = session["process_response"](raw_res)
+                    res = config.lc_postprocess(raw_res)
         elif output_key is not None:
             res = raw_res[output_key]
         else:
             res = raw_res
         sdk.send_message(author=agent_name, content=res, final=True)
         # emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
-    elif "predict" in session:
+    elif config.on_message:
         with UserEnv(session["user_env"]):
             with SDK(sdk):
-                session["predict"](input_str)
+                config.on_message(input_str)
 
     print("EXIT", session_id)
     return {"success": True}
-

@@ -119,6 +119,7 @@ def run_chainlit(target, project_id, headless, args=None, **kwargs):
         config.module_name, config.module_name)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    
     config.module = module
 
     if project_id:
