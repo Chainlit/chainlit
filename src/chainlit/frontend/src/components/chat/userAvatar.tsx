@@ -12,9 +12,12 @@ import {
 import { Logout } from "@mui/icons-material";
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useRecoilValue } from "recoil";
+import { projectSettingsState } from "state/chat";
 
 export default function UserAvatar() {
   const { user, logout } = useAuth0();
+  const pSettings = useRecoilValue(projectSettingsState);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -24,8 +27,20 @@ export default function UserAvatar() {
     setAnchorEl(null);
   };
 
+  if (!pSettings?.dev && !user) {
+    return (
+      <Button
+        target="_blank"
+        href="https://cloud.chainlit.io"
+        variant="outlined"
+      >
+        Chainlit Cloud
+      </Button>
+    );
+  }
+
   if (!user) {
-    return <Button variant="contained">Signup</Button>;
+    return null;
   }
 
   return (

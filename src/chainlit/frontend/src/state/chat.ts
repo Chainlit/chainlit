@@ -109,15 +109,13 @@ export const playgroundSettingsState = atom<ILLMSettings | undefined>({
   default: undefined,
 });
 
-export const projectSettingsState = atom<
-  | {
+export const projectSettingsState = atom<{
       anonymous: boolean;
       chainlitServer: string;
       projectId?: string;
       userEnv?: string[];
       dev: boolean;
-    }
-  | undefined
+    } | undefined
 >({
   key: "ProjectSettings",
   default: undefined,
