@@ -67,10 +67,11 @@ def completion():
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
     return {
-        "anonymous": not config.auth,
+        "anonymous": config.public,
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
-        "userEnv": config.user_env
+        "userEnv": config.user_env,
+        "dev": config.chainlit_env == "development",
     }
 
 
@@ -86,7 +87,7 @@ def connect():
         else:
             return False
 
-    if config.auth:
+    if not config.public:
         access_token = request.headers.get("Authorization")
         if not config.project_id or not access_token:
             return False

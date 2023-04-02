@@ -1,25 +1,34 @@
-from dataclasses import dataclass
 import os
-from typing import Optional, Dict, Literal, Any, Callable
-import json
-import jsonschema
+from typing import Optional, Dict, Literal, Any, Callable, List
+import tomli
+from pydantic.dataclasses import dataclass
 
-config_schema = {
-    "type": "object",
-    "properties": {
-        "chatbot_name": {"type": "string"},
-        "project_id": {"type": "string"},
-        "env": {
-            "type": "object"
-        },
-        "user_env": {
-            "type": "object"
-        },
-        "auth": {"type": "boolean"},
-        "lc_cache_path": {"type": "string"},
-    },
-    "required": ["project_id", "chatbot_name", "env", "auth"]
-}
+root = os.getcwd()
+chainlit_config_dir = os.path.join(root, ".chainlit")
+chainlit_config_file = os.path.join(chainlit_config_dir, "config.toml")
+
+default_config_str = """[project]
+# Name of the app and chatbot.
+name = "Chatbot"
+
+# If true (default), the app will be available to anonymous users (once deployed).
+# If false, users will need to authenticate and be part of the project to use the app.
+public = true
+
+# The project ID (found on https://cloud.chainlit.com).
+# If provided, all the message data will be stored in the cloud.
+# The project ID is required when public is set to false.
+#id = ""
+
+[env]
+# Environment variables to be loaded.
+env = {}
+
+# List of environment variables to be provided by each user to use the app.
+user_env = []
+"""
+
+
 
 chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
 if chainlit_env == "development":
@@ -29,43 +38,62 @@ else:
 
 
 @dataclass
-class Config:
-    chainlit_env: Literal['development', 'production']
+class ChainlitConfig:
     root: str
+    chainlit_env: Literal['development', 'production']
     chainlit_server: str
-    chatbot_name: str = "Chatbot"
+    chatbot_name: str
+    public: bool
+    user_env: List[str]
+    lc_cache_path: str
+    local_db_path: str
     project_id: Optional[str] = None
-    auth: bool = True
-    env: Optional[Dict[str, str]] = None
     on_message: Optional[Callable[[str], Any]] = None
     lc_postprocess: Optional[Callable] = None
     lc_factory: Optional[Callable] = None
-    user_env: Optional[Dict[str, str]] = None
-    lc_cache_path: str = None
-    local_db_path: str = None
-    headless: bool = False,
     module_name: Optional[str] = None
     module: Any = None
 
 
-def load_config(root: str):
-    global config
+def load_config():
+    if not os.path.exists(chainlit_config_file):
+        os.makedirs(chainlit_config_dir, exist_ok=True)
+        with open(chainlit_config_file, 'w') as f:
+            f.write(default_config_str)
+            print("Created default config file at", chainlit_config_file)
 
-    try:
-        with open(f'{root}/chainlit.json', "r") as f:
-            _config = json.load(f)
-            jsonschema.validate(config, config_schema)
-            config = Config(chainlit_env=chainlit_env, root=root,
-                            chainlit_server=chainlit_server, **_config)
-    except FileNotFoundError:
-        config = Config(chainlit_env=chainlit_env,
-                        chainlit_server=chainlit_server, root=root)
+    with open(chainlit_config_file, "rb") as f:
+        toml_dict = tomli.load(f)
 
-    if not config.lc_cache_path:
-        config.lc_cache_path = os.path.join(root, ".langchain.db")
-        config.local_db_path = os.path.join(root, ".local.db")
+        env = toml_dict.get("env", {}).get("env")
+        if env:
+            os.environ.update(env)
+
+        chatbot_name = toml_dict.get("project", {}).get("name")
+        project_id = toml_dict.get("project", {}).get("id")
+        public = toml_dict.get("project", {}).get("public")
+
+        if not public and not project_id:
+            raise ValueError("Project ID is required when public is set to false.")
+
+        user_env = toml_dict.get("env", {}).get("user_env")
+
+        lc_cache_path = os.path.join(chainlit_config_dir, ".langchain.db")
+        local_db_path = os.path.join(chainlit_config_dir, ".local.db")
+
+        config = ChainlitConfig(
+            root=root,
+            chainlit_env=chainlit_env,
+            chainlit_server=chainlit_server,
+            chatbot_name=chatbot_name,
+            public=public,
+            user_env=user_env,
+            lc_cache_path=lc_cache_path,
+            local_db_path=local_db_path,
+            project_id=project_id,
+            )
 
     return config
 
 
-config = None  # type: Config
+config = load_config()

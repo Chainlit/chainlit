@@ -10,7 +10,7 @@ export default function CloudProvider({ children }: Props) {
   const accessToken = useRecoilValue(accessTokenState);
   const pSettings = useRecoilValue(projectSettingsState);
 
-  if (!accessToken || !pSettings?.chainlitServer) return null;
+  if (!accessToken || pSettings?.anonymous || !pSettings?.chainlitServer) return null;
 
   const apolloClient = new ApolloClient({
     uri: `${pSettings.chainlitServer}/api/graphql`,

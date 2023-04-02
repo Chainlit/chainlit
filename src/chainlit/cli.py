@@ -9,7 +9,7 @@ except ImportError:
 import importlib.util
 import webbrowser
 # from chainlit.local_db import init_local_db
-from chainlit.config import load_config
+from chainlit.config import config
 import os
 import click
 import sys
@@ -38,8 +38,6 @@ import sys
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
 LOG_LEVELS = ("error", "warning", "info", "debug")
-
-root = os.getcwd()
 
 
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
@@ -86,10 +84,9 @@ def prepare_import(path):
 
 @cli.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.option("-p", "--project-id", envvar="CHAINLIT_PROJECT_ID")
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.argument("args", nargs=-1)
-def run_chainlit(target, project_id, headless, args=None, **kwargs):
+def run_chainlit(target, headless, args=None, **kwargs):
     _, extension = os.path.splitext(target)
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
@@ -104,8 +101,6 @@ def run_chainlit(target, project_id, headless, args=None, **kwargs):
     if not os.path.exists(target):
         raise click.BadParameter(f"File does not exist: {target}")
 
-    config = load_config(root)
-
     if LANGCHAIN_INSTALLED:
         import langchain
         from langchain.cache import SQLiteCache
@@ -119,13 +114,8 @@ def run_chainlit(target, project_id, headless, args=None, **kwargs):
         config.module_name, config.module_name)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    
+
     config.module = module
-
-    if project_id:
-        config.project_id = project_id
-
-    config.headless = headless
 
     if not headless and config.chainlit_env == "development":
         webbrowser.open("http://127.0.0.1:5000")

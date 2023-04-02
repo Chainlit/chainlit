@@ -1,5 +1,5 @@
 from typing import List, Optional, Literal
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
 DocumentType = Literal["image", "text"]
