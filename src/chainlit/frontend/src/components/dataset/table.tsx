@@ -7,18 +7,20 @@ import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import DeleteConversationButton from "./deleteConversationButton";
 import OpenConversationButton from "./openConversationButton";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 const ConversationsQuery = gql`
   query (
     $first: Int
     $projectId: String!
+    $cursor: String
     $withFeedback: Int
     $authorEmail: String
     $search: String
   ) {
     conversations(
       first: $first
+      cursor: $cursor
       projectId: $projectId
       withFeedback: $withFeedback
       authorEmail: $authorEmail
@@ -47,6 +49,19 @@ const ConversationsQuery = gql`
     }
   }
 `;
+
+const updateQuery = (previousResult: any, { fetchMoreResult }: any) => {
+  if (!fetchMoreResult) {
+    return previousResult;
+  }
+
+  const previousEdges = previousResult.conversations.edges;
+  const fetchMoreEdges = fetchMoreResult.conversations.edges;
+
+  fetchMoreResult.conversations.edges = [...previousEdges, ...fetchMoreEdges];
+
+  return { ...fetchMoreResult };
+};
 
 const BATCH_SIZE = 50;
 
@@ -81,6 +96,24 @@ export default function ConversationTable() {
     refetch();
   }, [df]);
 
+  const pageInfo = data?.conversations.pageInfo;
+
+  const loadMoreItems = useCallback(() => {
+    if (data && fetchMore && pageInfo.hasNextPage) {
+      fetchMore({
+        updateQuery,
+        variables: {
+          first: BATCH_SIZE,
+          cursor: pageInfo.endCursor,
+          projectId: pSettings?.projectId,
+          withFeedback: df.feedback,
+          authorEmail: df.authorEmail,
+          search: df.search,
+        },
+      });
+    }
+  }, [pageInfo, fetchMore, pSettings, df, updateQuery, data]);
+
   if (error) {
     return <Alert severity="error">{error.message}</Alert>;
   }
@@ -88,7 +121,6 @@ export default function ConversationTable() {
     return <Typography color="text.primary">Loading...</Typography>;
   }
 
-  const pageInfo = data.conversations.pageInfo;
   const conversations = data.conversations.edges.map((e: any) => e.node);
   const itemCount = conversations.length;
 
@@ -209,30 +241,18 @@ export default function ConversationTable() {
         {Header}
       </Box>
       <Box flexGrow={1}>
-        <InfiniteLoader
-          isItemLoaded={(index) => conversations[index]}
-          itemCount={itemCount}
-          loadMoreItems={(startIndex, stopIndex) => {
-            pageInfo.hasNextPage &&
-              fetchMore({
-                variables: {
-                  first: BATCH_SIZE,
-                  cursor: pageInfo.endCursor,
-                  projectId: pSettings?.projectId,
-                  withFeedback: df.feedback,
-                  authorEmail: df.authorEmail,
-                  search: df.search,
-                },
-              });
-          }}
-        >
-          {({ onItemsRendered, ref }) => (
-            <AutoSizer>
-              {({ height, width }) => (
+        <AutoSizer>
+          {({ height, width }) => (
+            <InfiniteLoader
+              isItemLoaded={(index) => conversations[index]}
+              itemCount={pageInfo.hasNextPage ? itemCount + 1 : itemCount}
+              loadMoreItems={loadMoreItems}
+            >
+              {({ onItemsRendered, ref }) => (
                 <FixedSizeList
                   height={height!}
                   width={width!}
-                  itemSize={50}
+                  itemSize={55}
                   itemCount={itemCount}
                   onItemsRendered={onItemsRendered}
                   ref={ref}
@@ -240,9 +260,9 @@ export default function ConversationTable() {
                   {Row}
                 </FixedSizeList>
               )}
-            </AutoSizer>
+            </InfiniteLoader>
           )}
-        </InfiniteLoader>
+        </AutoSizer>
       </Box>
     </Box>
   );

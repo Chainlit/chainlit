@@ -19,7 +19,7 @@ export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
       "content-type": "application/json",
     },
     method: "POST",
-    body: JSON.stringify({ prompt, settings }),
+    body: JSON.stringify({ prompt, settings, userEnv: {} }),
   });
 
   const completion = await res.text();

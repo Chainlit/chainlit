@@ -5,7 +5,7 @@ from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
 from chainlit.env import UserEnv, SDK
-from chainlit.client import CloudClient, LocalClient
+from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 import os
 import json
@@ -32,23 +32,46 @@ def serve(path):
 
 @app.route('/completion', methods=['POST'])
 def completion():
-    from langchain import OpenAI
-    # todo use api instead of langchain
-    # todo env
+    import openai
     data = request.json
-    llm_settings = data["settings"]
-    if "stop" in llm_settings:
-        stop = llm_settings.pop("stop")
-    else:
-        stop = None
-    llm = OpenAI(**llm_settings)
-    completion = llm(data["prompt"], stop=stop)
-    return completion
+    with UserEnv(data["userEnv"]):
+        llm_settings = data["settings"]
+        if "stop" in llm_settings:
+            stop = llm_settings.pop("stop")
+        else:
+            stop = None
+
+        if "model_name" in llm_settings:
+            model_name = llm_settings.pop("model_name")
+        else:
+            model_name = None
+
+        if model_name in ["gpt-3.5-turbo", "gpt-4"]:
+            response = openai.ChatCompletion.create(
+                model=model_name,
+                messages=[{"role": "user", "content": data["prompt"]}],
+                stop=stop,
+                **llm_settings,
+            )
+            return response["choices"][0]["message"]["content"]
+        else:
+            response = openai.Completion.create(
+                model=model_name,
+                prompt=data["prompt"],
+                stop=stop,
+                **llm_settings
+            )
+            return response["choices"][0]["text"]
 
 
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
-    return {"anonymous": not config.auth, "projectId": config.project_id, "chainlitServer": config.chainlit_server, "userEnv": config.user_env}
+    return {
+        "anonymous": not config.auth,
+        "projectId": config.project_id,
+        "chainlitServer": config.chainlit_server,
+        "userEnv": config.user_env
+    }
 
 
 @socketio.on('connect')

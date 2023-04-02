@@ -17,11 +17,12 @@ setup(
         'console_scripts': ['chainlit=chainlit.cli:cli'],
     },
     install_requires=[
-        "langchain>=0.0.109",
         "dataclasses_json>=0.5.7",
         "flask>=2.2.3",
         "flask_socketio>=5.3.3",
         "flask_cors>=3.0.10",
+        "click>=8.1.3",
+        "openai>=0.27.2",
         # "prisma>=0.8.2",
         "python-graphql-client>=0.4.3",
     ],  # add any additional packages that

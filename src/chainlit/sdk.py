@@ -1,8 +1,8 @@
 from typing import Union, Optional
 import os
-from langchain.callbacks.base import CallbackManager
-from langchain.callbacks import OpenAICallbackHandler
-from chainlit.uihandler import UiCallbackHandler
+# from langchain.callbacks.base import CallbackManager
+# from langchain.callbacks import OpenAICallbackHandler
+# from chainlit.uihandler import UiCallbackHandler
 from chainlit.session import Session
 from chainlit.types import DocumentDisplay, LLMSettings, DocumentType
 from chainlit.client import BaseClient
@@ -31,15 +31,15 @@ class Chainlit:
             return None
         return self.session["conversation_id"]
 
-    def callback_manager(self, handlers=None):
-        if self.emit is not None:
-            return CallbackManager(
-                [UiCallbackHandler(sdk=self), OpenAICallbackHandler()])
-        else:
-            if handlers is None:
-                return None
-            else:
-                return CallbackManager(handlers)
+    # def callback_manager(self, handlers=None):
+    #     if self.emit is not None:
+    #         return CallbackManager(
+    #             [UiCallbackHandler(sdk=self), OpenAICallbackHandler()])
+    #     else:
+    #         if handlers is None:
+    #             return None
+    #         else:
+    #             return CallbackManager(handlers)
 
     def send_document(self, ext: str, content: bytes, name: str, type: DocumentType, display: DocumentDisplay):
         if self.client and self.conversation_id:
