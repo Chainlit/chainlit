@@ -32,7 +32,7 @@ const Message = ({ message, documents, showAvatar }: Props) => {
   const documentRegexp = documentNames.length
     ? new RegExp(`(${documentNames.join("|")})`)
     : undefined;
-  const editButton = message.prompt && !message.final && (
+  const editButton = message.prompt && (
     <IconButton
       color="primary"
       onClick={() => {

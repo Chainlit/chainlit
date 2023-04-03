@@ -49,7 +49,7 @@ class Chainlit:
         else:
             document = {
                 "name": name,
-                "content": content,
+                "content": content.decode("utf-8") if type == "text" else content,
                 "type": type,
                 "display": display,
             }

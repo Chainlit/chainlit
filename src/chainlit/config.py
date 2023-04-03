@@ -15,7 +15,7 @@ name = "Chatbot"
 # If false, users will need to authenticate and be part of the project to use the app.
 public = true
 
-# The project ID (found on https://cloud.chainlit.com).
+# The project ID (found on https://cloud.chainlit.io).
 # If provided, all the message data will be stored in the cloud.
 # The project ID is required when public is set to false.
 #id = ""
@@ -32,9 +32,10 @@ user_env = []
 
 chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
 if chainlit_env == "development":
-    chainlit_server = "http://localhost:3000"
+    # chainlit_server = "http://localhost:3000"
+    chainlit_server = "https://cloud.chainlit.io"
 else:
-    chainlit_server = "https://cloud.chainlit.com"
+    chainlit_server = "https://cloud.chainlit.io"
 
 
 @dataclass
@@ -54,14 +55,17 @@ class ChainlitConfig:
     module_name: Optional[str] = None
     module: Any = None
 
-
-def load_config():
+def init_config(log=False):
     if not os.path.exists(chainlit_config_file):
         os.makedirs(chainlit_config_dir, exist_ok=True)
         with open(chainlit_config_file, 'w') as f:
             f.write(default_config_str)
             print("Created default config file at", chainlit_config_file)
+    elif log:
+        print("Config file already exists at", chainlit_config_file)
 
+def load_config():
+    init_config()
     with open(chainlit_config_file, "rb") as f:
         toml_dict = tomli.load(f)
 

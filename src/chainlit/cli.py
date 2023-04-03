@@ -9,7 +9,7 @@ except ImportError:
 import importlib.util
 import webbrowser
 # from chainlit.local_db import init_local_db
-from chainlit.config import config
+from chainlit.config import config, init_config
 import os
 import click
 import sys
@@ -43,7 +43,7 @@ LOG_LEVELS = ("error", "warning", "info", "debug")
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
 @click.option("--log-level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Chainlit")
-def cli(log_level="error"):
+def cli(log_level="info"):
     if log_level:
         from logger import get_logger
 
@@ -126,6 +126,11 @@ def run_chainlit(target, headless, args=None, **kwargs):
     from chainlit.server import socketio, app
     socketio.run(app, port=5000, debug=True, use_reloader=False)
 
+
+@cli.command("init")
+@click.argument("args", nargs=-1)
+def chainlit_init(args=None, **kwargs):
+    init_config(log=True)
 
 # def _main_run(
 #     args: Optional[List[str]] = None,

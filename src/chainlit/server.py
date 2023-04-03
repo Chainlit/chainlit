@@ -158,34 +158,34 @@ def message():
 
     sdk = Chainlit(session)
 
-    if "agent" in session:
-        agent = session["agent"]
-        try:
+    try:
+        if "agent" in session:
+            agent = session["agent"]
             from chainlit.lc.callback import LangchainCallback
             with LangchainCallback(sdk):
                 with UserEnv(session["user_env"]):
                     with SDK(sdk):
                         raw_res, agent_name, output_key = run_agent(
                             agent, input_str)
-        except Exception as e:
-            sdk.send_message(author="Error", is_error=True,
-                             content=str(e), final=True)
-            raise e
 
-        if config.lc_postprocess:
+
+            if config.lc_postprocess:
+                with UserEnv(session["user_env"]):
+                    with SDK(sdk):
+                        res = config.lc_postprocess(raw_res)
+            elif output_key is not None:
+                res = raw_res[output_key]
+            else:
+                res = raw_res
+            sdk.send_message(author=agent_name, content=res, final=True)
+            # emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
+        elif config.on_message:
             with UserEnv(session["user_env"]):
                 with SDK(sdk):
-                    res = config.lc_postprocess(raw_res)
-        elif output_key is not None:
-            res = raw_res[output_key]
-        else:
-            res = raw_res
-        sdk.send_message(author=agent_name, content=res, final=True)
-        # emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
-    elif config.on_message:
-        with UserEnv(session["user_env"]):
-            with SDK(sdk):
-                config.on_message(input_str)
-
+                    config.on_message(input_str)
+    except Exception as e:
+        sdk.send_message(author="Error", is_error=True,
+                            content=str(e), final=True)
+        raise e
     print("EXIT", session_id)
     return {"success": True}
