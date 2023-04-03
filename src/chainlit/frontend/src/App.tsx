@@ -6,9 +6,9 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { useEffect } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { accessTokenState, projectSettingsState } from "state/chat";
-import { getProjectSettings } from "api";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { accessTokenState, projectSettingsState, roleState } from "state/chat";
+import { getProjectSettings, getRole } from "api";
 import theme from "theme";
 import { ThemeProvider } from "@mui/material";
 import { themeState } from "state/theme";
@@ -21,6 +21,7 @@ import { Socket } from "socket.io-client";
 import Dataset from "pages/Dataset";
 import Conversation from "pages/Conversation";
 import CloudProvider from "components/cloudProvider";
+import Env from "pages/Env";
 
 declare global {
   interface Window {
@@ -34,8 +35,16 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
+    path: "/env",
+    element: <Env />,
+  },
+  {
     path: "/conversations/:id",
-    element: <CloudProvider><Conversation /></CloudProvider>,
+    element: (
+      <CloudProvider>
+        <Conversation />
+      </CloudProvider>
+    ),
   },
   {
     path: "/dataset",
@@ -64,6 +73,7 @@ function App() {
 
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+  const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth0();
 
   useEffect(() => {
@@ -89,6 +99,20 @@ function App() {
         );
     }
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
+
+  useEffect(() => {
+    if (!accessToken || !pSettings?.projectId) {
+      return;
+    }
+    getRole(pSettings.chainlitServer, accessToken, pSettings.projectId)
+      .then(async ({ role }: any) => {
+        setRole(role);
+      })
+      .catch((err) => {
+        console.log(err);
+        setRole("ANONYMOUS");
+      });
+  }, [accessToken, pSettings]);
 
   if (pSettings === undefined) {
     return null;

@@ -20,12 +20,12 @@ public = true
 # The project ID is required when public is set to false.
 #id = ""
 
-[env]
-# Environment variables to be loaded.
-env = {}
-
 # List of environment variables to be provided by each user to use the app.
 user_env = []
+
+[env]
+# Environment variables to be loaded.
+#OPENAI_API_KEY = "..."
 """
 
 
@@ -65,7 +65,7 @@ def load_config():
     with open(chainlit_config_file, "rb") as f:
         toml_dict = tomli.load(f)
 
-        env = toml_dict.get("env", {}).get("env")
+        env = toml_dict.get("env", {})
         if env:
             os.environ.update(env)
 
@@ -76,7 +76,7 @@ def load_config():
         if not public and not project_id:
             raise ValueError("Project ID is required when public is set to false.")
 
-        user_env = toml_dict.get("env", {}).get("user_env")
+        user_env = toml_dict.get("project", {}).get("user_env")
 
         lc_cache_path = os.path.join(chainlit_config_dir, ".langchain.db")
         local_db_path = os.path.join(chainlit_config_dir, ".local.db")

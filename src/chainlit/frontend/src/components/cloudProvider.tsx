@@ -1,22 +1,23 @@
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { useAuth } from "hooks/auth";
 import { useRecoilValue } from "recoil";
-import { accessTokenState, projectSettingsState } from "state/chat";
+import { projectSettingsState } from "state/chat";
 
 interface Props {
   children: JSX.Element;
 }
 
 export default function CloudProvider({ children }: Props) {
-  const accessToken = useRecoilValue(accessTokenState);
   const pSettings = useRecoilValue(projectSettingsState);
+  const { isProjectMember, accessToken } = useAuth();
 
-  if (!accessToken || pSettings?.anonymous || !pSettings?.chainlitServer) return null;
+  if (!pSettings?.chainlitServer || !isProjectMember) return null;
 
   const apolloClient = new ApolloClient({
     uri: `${pSettings.chainlitServer}/api/graphql`,
     cache: new InMemoryCache(),
     headers: {
-      Authorization: accessToken,
+      Authorization: accessToken!,
     },
   });
 

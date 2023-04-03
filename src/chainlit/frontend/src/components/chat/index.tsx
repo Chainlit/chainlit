@@ -11,6 +11,7 @@ import {
   loadingState,
   messagesState,
   tokenCountState,
+  userEnvState,
 } from "state/chat";
 import Loading from "./loading";
 import Playground from "components/playground";
@@ -20,6 +21,7 @@ import InputBox from "./inputBox";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useAuth0 } from "@auth0/auth0-react";
+import { toast } from "react-hot-toast";
 
 const agentRegexp = /(@\[\w*\]\((\w*)\))/;
 
@@ -36,6 +38,7 @@ const clean = (str: string, regexp: RegExp, prefix = "") => {
 const Chat = () => {
   const { user } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
+  const userEnv = useRecoilValue(userEnvState);
   const [messages, setMessages] = useRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
   const [documents, setDocuments] = useRecoilState(documentsState);
@@ -44,11 +47,15 @@ const Chat = () => {
   const [socketError, setSocketError] = useState(false);
 
   useEffect(() => {
-    if (window.socket) return;
+    if (window.socket) {
+      window.socket.disconnect();
+      window.socket.removeAllListeners();
+    };
 
     window.socket = io(server, {
       extraHeaders: {
         Authorization: accessToken || "",
+        "user-env": JSON.stringify(userEnv),
       },
     });
 
@@ -56,7 +63,7 @@ const Chat = () => {
       setSocketError(false);
     });
 
-    window.socket.on("connect_error", () => {
+    window.socket.on("connect_error", (err) => {
       setSocketError(true);
     });
 
@@ -78,7 +85,7 @@ const Chat = () => {
     window.socket.on("agents", (agents: any) => {
       setAgents(agents);
     });
-  }, []);
+  }, [userEnv]);
 
   const onSubmit = (msg: string) => {
     msg = clean(msg, agentRegexp, "@");
@@ -91,7 +98,11 @@ const Chat = () => {
 
     setMessages((oldMessages) => [...oldMessages, message]);
     setLoading(true);
-    postMessage(message.author, msg);
+    try {
+      postMessage(message.author, msg);
+    } catch (err: any) {
+      toast.error(err);
+    }
     // window.socket?.emit("message", message);
   };
 

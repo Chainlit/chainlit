@@ -25,6 +25,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { Close, Restore } from "@mui/icons-material";
 import ModelSettings from "./modelSettings";
 import { getCompletion } from "api";
+import { toast } from "react-hot-toast";
 
 const styleMap = {
   COMPLETION: {
@@ -96,8 +97,8 @@ export default function Playground() {
       setLoading(true);
       const completion = await getCompletion(prompt, settings);
       setState(insertCompletion(state, completion));
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      toast.error(err.message)
     } finally {
       setLoading(false);
     }

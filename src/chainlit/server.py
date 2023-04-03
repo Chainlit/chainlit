@@ -67,7 +67,7 @@ def completion():
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
     return {
-        "anonymous": config.public,
+        "public": config.public,
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
         "userEnv": config.user_env,
@@ -87,10 +87,10 @@ def connect():
         else:
             return False
 
-    if not config.public:
-        access_token = request.headers.get("Authorization")
-        if not config.project_id or not access_token:
-            return False
+    access_token = request.headers.get("Authorization")
+    if not config.public and not access_token:
+        return False
+    elif access_token and config.project_id:
         client = CloudClient(project_id=config.project_id, access_token=access_token,
                              url=config.chainlit_server)
     # elif config.chainlit_env == "development":

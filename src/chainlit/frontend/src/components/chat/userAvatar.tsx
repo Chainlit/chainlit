@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/chat";
+import { Link } from "react-router-dom";
 
 export default function UserAvatar() {
   const { user, logout } = useAuth0();
@@ -27,14 +28,10 @@ export default function UserAvatar() {
     setAnchorEl(null);
   };
 
-  if (!pSettings?.dev && !user) {
+  if (!user) {
     return (
-      <Button
-        target="_blank"
-        href="https://cloud.chainlit.io"
-        variant="outlined"
-      >
-        Chainlit Cloud
+      <Button component={Link} to="/login" variant="outlined">
+        Login
       </Button>
     );
   }
@@ -52,6 +49,9 @@ export default function UserAvatar() {
         aria-controls={open ? "account-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        sx={{
+          p: 0,
+        }}
       >
         <Avatar sx={{ width: 32, height: 32 }} src={user.picture || undefined}>
           {user.name?.[0]}

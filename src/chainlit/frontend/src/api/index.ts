@@ -40,3 +40,16 @@ export const postMessage = async (
 
   return res.json();
 };
+
+export const getRole = async (chainlitServer: string, accessToken: string, projectId: string) => {
+  const res = await fetch(`${chainlitServer}/api/role`, {
+    headers: {
+      "content-type": "application/json",
+      Authorization: accessToken,
+    },
+    method: "POST",
+    body: JSON.stringify({ projectId }),
+  });
+
+  return res.json();
+}
