@@ -1,11 +1,11 @@
 from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
-import json
 import uuid
-from prisma.models import Message, Conversation
 import requests
-from typing import Any
 from chainlit.types import DocumentType
+# from prisma.models import Message, Conversation
+# import json
+# from typing import Any
 
 
 class BaseClient(ABC):
@@ -141,52 +141,52 @@ class CloudClient(BaseClient):
     #     return res['data']['conversations']
 
 
-class LocalClient(BaseClient):
-    def __init__(self, project_id: str):
-        self.project_id = project_id
+# class LocalClient(BaseClient):
+#     def __init__(self, project_id: str):
+#         self.project_id = project_id
 
-    def create_message(self, msg: dict):
-        msg = msg.copy()
-        if "llmSettings" in msg:
-            msg["llmSettings"] = json.dumps(msg["llmSettings"])
-        res = Message.prisma().create(data=msg)
-        return res.id
+#     def create_message(self, msg: dict):
+#         msg = msg.copy()
+#         if "llmSettings" in msg:
+#             msg["llmSettings"] = json.dumps(msg["llmSettings"])
+#         res = Message.prisma().create(data=msg)
+#         return res.id
 
-    def create_conversation(self, session_id: str):
-        res = Conversation.prisma().create(
-            data={"projectId": self.project_id, "sessionId": session_id})
-        return res.id
+#     def create_conversation(self, session_id: str):
+#         res = Conversation.prisma().create(
+#             data={"projectId": self.project_id, "sessionId": session_id})
+#         return res.id
 
-    def upload_document(self, name: str, file_name: str, content: Any) -> int:
-        return super().upload_document(name, content, file_name)
+#     def upload_document(self, name: str, file_name: str, content: Any) -> int:
+#         return super().upload_document(name, content, file_name)
 
-    # def get_conversations(self, project_id: str, first: int = None, after: int = None):
-    #     skip = 0 if after is None else 1
-    #     conversations = Conversation.prisma().find_many(
-    #         take=first,
-    #         skip=skip,
-    #         cursor={
-    #             "id": after
-    #         },
-    #         include={
-    #             "messages": True
-    #         },
-    #         where={
-    #             "projectId": project_id
-    #         }
-    #     )
+#     # def get_conversations(self, project_id: str, first: int = None, after: int = None):
+#     #     skip = 0 if after is None else 1
+#     #     conversations = Conversation.prisma().find_many(
+#     #         take=first,
+#     #         skip=skip,
+#     #         cursor={
+#     #             "id": after
+#     #         },
+#     #         include={
+#     #             "messages": True
+#     #         },
+#     #         where={
+#     #             "projectId": project_id
+#     #         }
+#     #     )
 
-    #     json_conversations = []
+#     #     json_conversations = []
 
-    #     for c in conversations:
-    #         if not c.messages:
-    #             continue
-    #         messages = []
-    #         for m in c.messages:
-    #             if m.llmSettings:
-    #                 m.llmSettings = json.loads(m.llmSettings)
-    #             messages.append(m.dict())
-    #         conversation = c.dict(exclude={"messages": True})
-    #         conversation["messages"] = messages
-    #         json_conversations.append(conversation)
-    #     print(json_conversations)
+#     #     for c in conversations:
+#     #         if not c.messages:
+#     #             continue
+#     #         messages = []
+#     #         for m in c.messages:
+#     #             if m.llmSettings:
+#     #                 m.llmSettings = json.loads(m.llmSettings)
+#     #             messages.append(m.dict())
+#     #         conversation = c.dict(exclude={"messages": True})
+#     #         conversation["messages"] = messages
+#     #         json_conversations.append(conversation)
+#     #     print(json_conversations)

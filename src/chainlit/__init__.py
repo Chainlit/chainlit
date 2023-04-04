@@ -1,5 +1,5 @@
 import builtins
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
 if TYPE_CHECKING:
     from chainlit.sdk import Chainlit
@@ -108,16 +108,16 @@ def langchain_factory(func):
     return func
 
 
-def langchain_postprocess(func):
+def langchain_postprocess(func: Callable[[Any], str]):
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
     The decorated function takes the raw output of the LangChain object and return a string as the final response.
 
     Args:
-        func (Callable): The post-processing function to apply after generating a response.
+        func (Callable[[Any], str]): The post-processing function to apply after generating a response.
 
     Returns:
-        Callable: The decorated post-processing function.
+        Callable[[Any], str]: The decorated post-processing function.
     """
     from chainlit.config import config
     config.lc_postprocess = func
