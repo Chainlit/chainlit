@@ -1,6 +1,12 @@
 
+from chainlit.config import config, init_config
 try:
     import chainlit.lc.monkey
+    from langchain.cache import SQLiteCache
+    import langchain
+    if config.lc_cache_path:
+        langchain.llm_cache = SQLiteCache(
+            database_path=config.lc_cache_path)
     LANGCHAIN_INSTALLED = True
 except ImportError:
     LANGCHAIN_INSTALLED = False
@@ -9,11 +15,16 @@ except ImportError:
 import importlib.util
 import webbrowser
 # from chainlit.local_db import init_local_db
-from chainlit.config import config, init_config
+from chainlit.markdown import init_markdown
+from chainlit.watch import watch_dir
 import os
 import click
 import sys
+import logging
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 # class StandaloneApplication(WSGIApplication):
 #     def __init__(self, app_uri, options=None):
@@ -82,11 +93,26 @@ def prepare_import(path):
     return ".".join(module_name[::-1]) + ext
 
 
+def load_module(target: str):
+    if not os.path.exists(target):
+        raise click.BadParameter(f"File does not exist: {target}")
+
+    config.module_name = prepare_import(target)
+
+    spec = importlib.util.spec_from_file_location(
+        config.module_name, config.module_name)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    config.module = module
+
+
 @cli.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
+@click.option("-w", "--watch", default=False, is_flag=True, envvar="CHAINLIT_WATCH")
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.argument("args", nargs=-1)
-def run_chainlit(target, headless, args=None, **kwargs):
+def run_chainlit(target, watch, headless, args=None, **kwargs):
     _, extension = os.path.splitext(target)
     if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
         if extension[1:] == "":
@@ -98,24 +124,12 @@ def run_chainlit(target, headless, args=None, **kwargs):
                 f"Chainlit requires raw Python (.py) files, not {extension}."
             )
 
-    if not os.path.exists(target):
-        raise click.BadParameter(f"File does not exist: {target}")
+    load_module(target)
 
-    if LANGCHAIN_INSTALLED:
-        import langchain
-        from langchain.cache import SQLiteCache
-        if config.lc_cache_path:
-            langchain.llm_cache = SQLiteCache(
-                database_path=config.lc_cache_path)
+    if watch:
+        watch_dir()
 
-    config.module_name = prepare_import(target)
-
-    spec = importlib.util.spec_from_file_location(
-        config.module_name, config.module_name)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    config.module = module
+    init_markdown(config.root)
 
     if not headless and config.chainlit_env == "development":
         webbrowser.open("http://127.0.0.1:5000")

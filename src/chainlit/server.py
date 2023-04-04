@@ -7,6 +7,7 @@ from chainlit.session import Session, sessions
 from chainlit.env import UserEnv, SDK
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
+from chainlit.markdown import get_markdown_str
 import os
 import json
 
@@ -64,11 +65,14 @@ def completion():
 
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
+
+
     return {
         "public": config.public,
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
         "userEnv": config.user_env,
+        "chainlitMd": get_markdown_str(config.root),
         "dev": config.chainlit_env == "development",
     }
 

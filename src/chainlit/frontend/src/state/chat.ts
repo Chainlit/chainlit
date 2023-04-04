@@ -114,6 +114,7 @@ export const projectSettingsState = atom<{
       chainlitServer: string;
       projectId?: string;
       userEnv?: string[];
+      chainlitMd?: string;
       dev: boolean;
     } | undefined
 >({

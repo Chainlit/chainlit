@@ -1,6 +1,6 @@
 import { ILLMSettings } from "state/chat";
 
-export const server = "http://127.0.0.1:5000";
+export const server = "";
 
 export const getProjectSettings = async () => {
   const res = await fetch(`${server}/project/settings`, {

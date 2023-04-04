@@ -24,6 +24,7 @@ setup(
         "click>=8.1.3",
         "openai>=0.27.2",
         "toml-config>=0.1.3",
+        "watchdog>=3.0.0",
         # "prisma>=0.8.2",
         "python-graphql-client>=0.4.3",
     ],  # add any additional packages that

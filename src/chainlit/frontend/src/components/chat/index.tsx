@@ -1,4 +1,4 @@
-import { postMessage, server } from "api";
+import { getProjectSettings, postMessage, server } from "api";
 import { Alert, Box } from "@mui/material";
 import Messages from "./messages";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -10,6 +10,7 @@ import {
   IMessage,
   loadingState,
   messagesState,
+  projectSettingsState,
   tokenCountState,
   userEnvState,
 } from "state/chat";
@@ -22,6 +23,7 @@ import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { toast } from "react-hot-toast";
+import useClearChat from "hooks/clearChat";
 
 const agentRegexp = /(@\[\w*\]\((\w*)\))/;
 
@@ -45,6 +47,8 @@ const Chat = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAgents = useSetRecoilState(agentState);
   const [socketError, setSocketError] = useState(false);
+  const setPSettings = useSetRecoilState(projectSettingsState);
+  const clearChat = useClearChat();
 
   useEffect(() => {
     if (window.socket) {
@@ -65,6 +69,11 @@ const Chat = () => {
 
     window.socket.on("connect_error", (err) => {
       setSocketError(true);
+    });
+
+    window.socket.on("reload", (err) => {
+      clearChat();
+      getProjectSettings().then((res) => setPSettings(res));
     });
 
     window.socket.on("message", (message: IMessage) => {
@@ -98,7 +107,7 @@ const Chat = () => {
     try {
       await postMessage(message.author, msg);
     } catch (err: any) {
-      toast.error(err);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
