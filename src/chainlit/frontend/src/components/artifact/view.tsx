@@ -4,7 +4,7 @@ import { useRecoilValue } from "recoil";
 import { documentsState, DocumentType, IDocument } from "state/chat";
 import DocumentText from "./documentText";
 
-export const renderDocument = (document: IDocument, embedded = false) => {
+export const renderDocument = (document: IDocument, inline = false) => {
   switch (document.type) {
     case DocumentType.img:
       const src =
@@ -12,7 +12,7 @@ export const renderDocument = (document: IDocument, embedded = false) => {
       return (
         <img
           style={{
-            maxWidth: embedded ? "300px" : "100%",
+            maxWidth: inline ? "300px" : "100%",
             borderRadius: "0.2rem",
           }}
           src={src}

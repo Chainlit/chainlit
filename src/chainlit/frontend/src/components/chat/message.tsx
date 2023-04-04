@@ -144,12 +144,12 @@ const Message = ({ message, documents, showAvatar }: Props) => {
                     }}
                     component={RRLink}
                     to={
-                      documents[match].display === "fullscreen"
+                      documents[match].display === "page"
                         ? `/document/${match}`
                         : "#"
                     }
                   >
-                    {documents[match].display === "embed"
+                    {documents[match].display === "inline"
                       ? renderDocument(documents[match], true)
                       : match}
                   </Link>

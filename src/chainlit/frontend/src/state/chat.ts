@@ -41,7 +41,7 @@ export interface IDocument {
   content?: any;
   name: string;
   type: DocumentType;
-  display: "embed" | "side" | "fullscreen";
+  display: "inline" | "side" | "page";
 }
 
 export type IDocuments = Record<string, IDocument>;

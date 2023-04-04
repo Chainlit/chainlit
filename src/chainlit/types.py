@@ -3,7 +3,7 @@ from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
 DocumentType = Literal["image", "text"]
-DocumentDisplay = Literal["embbed", "side", "fullscreen"]
+DocumentDisplay = Literal["inline", "side", "page"]
 
 
 @dataclass_json

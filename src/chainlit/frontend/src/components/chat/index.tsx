@@ -50,7 +50,7 @@ const Chat = () => {
     if (window.socket) {
       window.socket.disconnect();
       window.socket.removeAllListeners();
-    };
+    }
 
     window.socket = io(server, {
       extraHeaders: {
@@ -68,9 +68,6 @@ const Chat = () => {
     });
 
     window.socket.on("message", (message: IMessage) => {
-      if (message.final || message.isError) {
-        setLoading(false);
-      }
       setMessages((oldMessages) => [...oldMessages, message]);
     });
     window.socket.on("document", (document: IDocument) => {
@@ -102,8 +99,9 @@ const Chat = () => {
       postMessage(message.author, msg);
     } catch (err: any) {
       toast.error(err);
+    } finally {
+      setLoading(false);
     }
-    // window.socket?.emit("message", message);
   };
 
   if (socketError)
