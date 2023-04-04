@@ -84,7 +84,7 @@ const Chat = () => {
     });
   }, [userEnv]);
 
-  const onSubmit = (msg: string) => {
+  const onSubmit = async (msg: string) => {
     msg = clean(msg, agentRegexp, "@");
 
     const message: IMessage = {
@@ -96,7 +96,7 @@ const Chat = () => {
     setMessages((oldMessages) => [...oldMessages, message]);
     setLoading(true);
     try {
-      postMessage(message.author, msg);
+      await postMessage(message.author, msg);
     } catch (err: any) {
       toast.error(err);
     } finally {
