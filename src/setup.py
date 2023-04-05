@@ -33,7 +33,7 @@ setup(
     keywords=['langchain', 'ui', 'gen ai', 'chat ui'],
     classifiers=[],
     package_data={
-        'chainlit': ['frontend/dist/*', 'frontend/dist/assets/*', 'schema.prisma'],
+        'chainlit': ['frontend/dist/*', 'frontend/dist/assets/*', 'LICENSE'],
     },
     include_package_data=True,
 )

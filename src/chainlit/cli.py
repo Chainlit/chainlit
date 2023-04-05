@@ -26,6 +26,8 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
+PORT = 8000
+
 # class StandaloneApplication(WSGIApplication):
 #     def __init__(self, app_uri, options=None):
 #         self.options = options or {}
@@ -132,13 +134,13 @@ def run_chainlit(target, watch, headless, args=None, **kwargs):
     init_markdown(config.root)
 
     if not headless and config.chainlit_env == "development":
-        webbrowser.open("http://127.0.0.1:5000")
+        webbrowser.open(f"http://127.0.0.1:{PORT}")
 
     # if not config.auth and config.project_id is None and config.chainlit_env == "development":
     #     init_local_db()
 
     from chainlit.server import socketio, app
-    socketio.run(app, port=5000, debug=True, use_reloader=False)
+    socketio.run(app, port=PORT, debug=True, use_reloader=False)
 
 
 @cli.command("init")
