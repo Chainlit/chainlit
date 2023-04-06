@@ -10,6 +10,7 @@ import { useAuth } from "hooks/auth";
 import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/chat";
 import { Key } from "@mui/icons-material";
+import ThemeButton from "themeButton";
 
 function Nav() {
   const { isProjectMember } = useAuth();
@@ -68,6 +69,7 @@ export default function TopBar() {
               </IconButton>
             </Tooltip>
           )}
+          <ThemeButton />
           <UserAvatar />
         </Stack>
       </Toolbar>

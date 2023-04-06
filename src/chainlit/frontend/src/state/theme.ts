@@ -5,7 +5,11 @@ const defaultTheme =
     ? "dark"
     : "light";
 
+const preferredTheme = localStorage.getItem("themeVariant");
+
+const theme = preferredTheme ? (preferredTheme as any) : defaultTheme;
+
 export const themeState = atom<"dark" | "light">({
   key: "Theme",
-  default: defaultTheme,
+  default: theme,
 });
