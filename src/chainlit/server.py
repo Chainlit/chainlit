@@ -4,7 +4,7 @@ from flask_socketio import SocketIO
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
-from chainlit.env import UserEnv, SDK
+from chainlit.env import UserEnv
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
@@ -103,6 +103,7 @@ def connect():
         socketio.emit(event, data, to=session_id)
 
     session = {
+        "id": session_id,
         "emit": _emit,
         "client": client,
         "conversation_id": None,
@@ -111,6 +112,7 @@ def connect():
     sessions[session_id] = session
 
     if config.lc_factory:
+        __chainlit_sdk__ = Chainlit(session)
         with UserEnv(session["user_env"]):
             agent = config.lc_factory()
             session["agent"] = agent
@@ -137,10 +139,9 @@ def stop():
     print("STOPPING")
     if config.on_stop:
         session = sessions[request.sid]
-        sdk = Chainlit(session)
+        __chainlit_sdk__ = Chainlit(session)
         with UserEnv(session["user_env"]):
-            with SDK(sdk):
-                config.on_stop()
+            config.on_stop()
 
 
 @app.route('/message', methods=['POST'])
@@ -168,35 +169,31 @@ def message():
 
     print("ENTER", session_id)
 
-    sdk = Chainlit(session)
+    __chainlit_sdk__ = Chainlit(session)
 
     try:
         if "agent" in session:
             agent = session["agent"]
-            from chainlit.lc.callback import LangchainCallback
-            with LangchainCallback(sdk):
-                with UserEnv(session["user_env"]):
-                    with SDK(sdk):
-                        raw_res, agent_name, output_key = run_agent(
-                            agent, input_str)
+            with UserEnv(session["user_env"]):
+                raw_res, agent_name, output_key = run_agent(
+                    agent, input_str)
 
             if config.lc_postprocess:
                 with UserEnv(session["user_env"]):
-                    with SDK(sdk):
-                        res = config.lc_postprocess(raw_res)
+                    res = config.lc_postprocess(raw_res)
             elif output_key is not None:
                 res = raw_res[output_key]
             else:
                 res = raw_res
-            sdk.send_message(author=agent_name, content=res, final=True)
+            __chainlit_sdk__.send_message(
+                author=agent_name, content=res, final=True)
             # emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
         elif config.on_message:
             with UserEnv(session["user_env"]):
-                with SDK(sdk):
-                    config.on_message(input_str)
+                config.on_message(input_str)
     except Exception as e:
-        sdk.send_message(author="Error", is_error=True,
-                         content=str(e), final=True)
+        __chainlit_sdk__.send_message(author="Error", is_error=True,
+                                      content=str(e), final=True)
         raise e
     print("EXIT", session_id)
     return {"success": True}

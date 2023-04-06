@@ -1,30 +1,36 @@
-
 import gevent
-from gevent import monkey, sleep
+from gevent import monkey
 monkey.patch_all()
 
 from chainlit.config import config, init_config, load_module
-try:
-    import chainlit.lc.monkey
-    from langchain.cache import SQLiteCache
-    import langchain
-    if config.lc_cache_path:
-        print("LangChain cached enabled: ", config.lc_cache_path)
-        langchain.llm_cache = SQLiteCache(
-            database_path=config.lc_cache_path)
-    LANGCHAIN_INSTALLED = True
-except ImportError:
-    LANGCHAIN_INSTALLED = False
-
-# from gunicorn.app.wsgiapp import WSGIApplication
 import webbrowser
-# from chainlit.local_db import init_local_db
 from chainlit.markdown import init_markdown
 from chainlit.watch import watch_dir
 import os
 import click
 import sys
 import logging
+
+try:
+    import chainlit.lc.monkey
+    from langchain.callbacks import get_callback_manager
+    from chainlit.uihandler import UiCallbackHandler
+    from langchain.cache import SQLiteCache
+    import langchain
+
+    if config.lc_cache_path:
+        print("LangChain cached enabled: ", config.lc_cache_path)
+        langchain.llm_cache = SQLiteCache(
+            database_path=config.lc_cache_path)
+
+    get_callback_manager()._callback_manager.add_handler(UiCallbackHandler())
+
+    LANGCHAIN_INSTALLED = True
+except ImportError:
+    LANGCHAIN_INSTALLED = False
+
+# from gunicorn.app.wsgiapp import WSGIApplication
+# from chainlit.local_db import init_local_db
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',

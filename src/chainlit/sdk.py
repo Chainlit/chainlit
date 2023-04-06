@@ -1,11 +1,10 @@
 from typing import Union, Optional
 import os
-# from langchain.callbacks.base import CallbackManager
-# from langchain.callbacks import OpenAICallbackHandler
-# from chainlit.uihandler import UiCallbackHandler
 from chainlit.session import Session
 from chainlit.types import DocumentDisplay, LLMSettings, DocumentType
 from chainlit.client import BaseClient
+import inspect
+
 
 class Chainlit:
     session: Optional[Session]
@@ -101,3 +100,14 @@ class Chainlit:
         if self.emit is None:
             return
         self.emit("total_tokens", count)
+
+
+def get_sdk() -> Union[Chainlit, None]:
+    attr = "__chainlit_sdk__"
+    candidates = [i[0].f_locals.get(attr) for i in inspect.stack()]
+    sdk = None
+    for candidate in candidates:
+        if candidate:
+            sdk = candidate
+            break
+    return sdk

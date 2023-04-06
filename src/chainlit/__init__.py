@@ -1,8 +1,5 @@
-import builtins
-from typing import TYPE_CHECKING, Union, Callable, Any
+from typing import Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
-if TYPE_CHECKING:
-    from chainlit.sdk import Chainlit
 
 # def get_session_id() -> Union[str, None]:
 #     names = [i[0].f_globals["__name__"] for i in inspect.stack()]
@@ -23,14 +20,11 @@ if TYPE_CHECKING:
 #         print("No chainlit session found")
 
 
-def _get_sdk() -> Union['Chainlit', None]:
-    attr = "__chainlit_sdk__"
-    if hasattr(builtins, attr):
-        return getattr(builtins, attr)
+
 
 
 # def callback_manager(handlers=None):
-#     sdk = _get_sdk()
+#     sdk = get_sdk()
 #     if sdk:
 #         return sdk.callback_manager(handlers)
 #     else:
@@ -48,7 +42,8 @@ def send_text_document(text: str, name: str, display: DocumentDisplay = "side"):
         display (DocumentDisplay, optional): Determines how the document should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
-    sdk = _get_sdk()
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
     if sdk:
         sdk.send_text_document(text, name, display)
 
@@ -64,7 +59,8 @@ def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
         display (DocumentDisplay, optional): Determines how the image should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
-    sdk = _get_sdk()
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
     if sdk:
         sdk.send_local_image(path, name, display)
 
@@ -84,7 +80,8 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
         final (bool, optional): Whether the message is the final answer (vs a chain of thought step).
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
     """
-    sdk = _get_sdk()
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
     if sdk:
         sdk.send_message(author, content, prompt, language,
                          indent, is_error, final, llm_settings)
@@ -138,6 +135,7 @@ def on_message(func):
     from chainlit.config import config
     config.on_message = func
     return func
+
 
 def on_stop(func):
     """

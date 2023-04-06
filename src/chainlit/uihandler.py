@@ -1,58 +1,122 @@
-from __future__ import annotations
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
-if TYPE_CHECKING:
-    from chainlit import Chainlit
-import inspect
+from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
-
-NALLOWLIST = ['on_chain_start', 'on_chain_end']
+from chainlit.sdk import get_sdk
+from chainlit.config import config
+from chainlit.types import LLMSettings
 
 
 class UiCallbackHandler(BaseCallbackHandler):
 
-    sdk: Chainlit
+    prompts_per_session: Dict[str, List[str]]
+    llm_settings_per_session: Dict[str, LLMSettings]
+    tool_sequence_per_session: Dict[str, List[str]]
+    sequence_per_session: Dict[str, List[str]]
+    last_prompt_per_session: Dict[str, Union[str, None]]
+
     always_verbose: bool = True
 
-    def __init__(self, sdk: Chainlit) -> None:
-        self.memory = {}
-        self.queue = []
-        self.prompts = []
-        self.llm_settings = None
-        self.sdk = sdk
-        self.tool_sequence = []
-        self.all_sequence = []
-        self.prev_indent = 0
-
-    def reset_memory(self) -> None:
-        self.memory = {}
-        self.prompts = []
-        self.llm_settings = None
-        self.queue = []
-        self.tool_sequence = []
-        self.all_sequence = []
-        self.prev_indent = 0
+    def __init__(self) -> None:
+        self.prompts_per_session = {}
+        self.llm_settings_per_session = {}
+        self.tool_sequence_per_session = {}
+        self.sequence_per_session = {}
+        self.last_prompt_per_session = {}
 
     def add_in_sequence(self, name: str, is_tool=False):
-        self.all_sequence.append(name)
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+
+        session_id = sdk.session["id"]
+
+        if session_id not in self.sequence_per_session:
+            self.sequence_per_session[session_id] = []
+
+        if session_id not in self.tool_sequence_per_session:
+            self.tool_sequence_per_session[session_id] = []
+
+        sequence = self.sequence_per_session[session_id]
+        tool_sequence = self.tool_sequence_per_session[session_id]
+
+        sequence.append(name)
         if is_tool:
-            if self.tool_sequence and self.tool_sequence[-1] == name:
+            if tool_sequence and tool_sequence[-1] == name:
                 return
-            self.tool_sequence.append(name)
+            tool_sequence.append(name)
 
     def pop_sequence(self, is_tool=False):
-        if self.all_sequence:
-            self.all_sequence.pop()
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+
+        session_id = sdk.session["id"]
+
+        if session_id in self.sequence_per_session and self.sequence_per_session[session_id]:
+            self.sequence_per_session[session_id].pop()
+
         if is_tool:
-            if self.tool_sequence:
-                self.tool_sequence.pop()
+            if session_id in self.tool_sequence_per_session and self.tool_sequence_per_session[session_id]:
+                self.tool_sequence_per_session[session_id].pop()
+
+    def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+
+        session_id = sdk.session["id"]
+
+        if session_id not in self.prompts_per_session:
+            self.prompts_per_session[session_id] = []
+
+        self.prompts_per_session[session_id].append(prompt)
+
+        if llm_settings:
+            self.llm_settings_per_session[session_id] = llm_settings
+
+    def pop_prompt(self):
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+
+        session_id = sdk.session["id"]
+
+        if session_id in self.prompts_per_session and self.prompts_per_session[session_id]:
+            self.last_prompt_per_session[session_id] = self.prompts_per_session[session_id].pop(
+            )
+
+    def get_last_prompt(self):
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+
+        session_id = sdk.session["id"]
+
+        last_prompt = self.last_prompt_per_session[session_id] if session_id in self.last_prompt_per_session else None
+        return last_prompt
 
     def add_message(self, message, prompt: str = None, error=False):
-        llm_settings = self.llm_settings if prompt else None
-        author = self.tool_sequence[-1] if self.tool_sequence else self.all_sequence[-1] if self.all_sequence else "Default"
-        indent = len(self.tool_sequence) + 1
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
 
-        self.sdk.send_message(
+        llm_settings = self.llm_settings_per_session.get(
+            sdk.session["id"]) if prompt else None
+
+        tool_sequence = self.tool_sequence_per_session.get(sdk.session["id"])
+        all_sequence = self.sequence_per_session.get(sdk.session["id"])
+
+        if tool_sequence:
+            author = tool_sequence[-1]
+            indent = len(tool_sequence) + 1
+        elif all_sequence:
+            author = all_sequence[-1]
+            indent = 0
+        else:
+            author = config.chatbot_name
+            indent = 0
+
+        sdk.send_message(
             author=author,
             content=message,
             indent=indent,
@@ -61,45 +125,15 @@ class UiCallbackHandler(BaseCallbackHandler):
             llm_settings=llm_settings
         )
 
-    def process(self, event_action):
-        event, action = event_action["func_name"].rsplit("_", 1)
-
-        if action in ["start", "action"]:
-            item = event_action
-            item.update({
-                "calls": [],
-            })
-            if not self.queue:
-                self.queue.append(item)
-            else:
-                self.queue[-1]["calls"].append(item)
-                self.queue.append(item)
-        elif action in ["end", "finish"]:
-            if len(self.queue) == 1:
-                self.memory = self.queue.pop()
-            elif len(self.queue):
-                ended = self.queue.pop()
-                ended.update(event_action)
-
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update(serialized)
-        template.update({'prompts': prompts})
-        template.update(kwargs)
-        self.process(template)
-        self.prompts += prompts
-        if 'llm_settings' in kwargs:
-            self.llm_settings = kwargs['llm_settings']
+        self.add_prompt(prompts[0], kwargs.get('llm_settings'))
 
     def on_llm_cache(
             self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ):
-        self.prompts += prompts
-        if 'llm_settings' in kwargs:
-            self.llm_settings = kwargs['llm_settings']
+        self.add_prompt(prompts[0], kwargs.get('llm_settings'))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Do nothing."""
@@ -107,64 +141,34 @@ class UiCallbackHandler(BaseCallbackHandler):
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Do nothing."""
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'response': response})
-        template.update(kwargs)
-        self.process(template)
+        self.pop_prompt()
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'error': error})
-        template.update(kwargs)
-        self.process(template)
+        pass
 
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update(serialized)
-        template.update(inputs)
-        template.update(kwargs)
-        self.process(template)
         self.add_in_sequence(serialized["name"])
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update(outputs)
-        template.update(kwargs)
-        self.process(template)
         output_key = list(outputs.keys())[0]
         if output_key:
-            prompts = self.prompts.pop() if self.prompts else None
-            self.add_message(outputs[output_key], prompts)
+            prompt = self.get_last_prompt()
+            self.add_message(outputs[output_key], prompt)
         self.pop_sequence()
 
     def on_chain_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'error': error})
-        template.update(kwargs)
-        self.process(template)
         self.add_message(str(error), error=True)
         self.pop_sequence()
 
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update(serialized)
-        template.update({'action': inputs})
-        template.update(kwargs)
-        self.process(template)
         self.add_in_sequence(serialized["name"], is_tool=True)
         # self.add_message(inputs["input"], False)
 
@@ -175,26 +179,14 @@ class UiCallbackHandler(BaseCallbackHandler):
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'observation_prefix': observation_prefix})
-        template.update({'llm_prefix': llm_prefix})
-        template.update({'output': output})
-        template.update(kwargs)
         # prompts = self.prompts.pop() if self.prompts else None
         # self.add_message(output)
-        self.process(template)
         self.pop_sequence(is_tool=True)
 
     def on_tool_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Do nothing."""
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'error': error})
-        template.update(kwargs)
-        self.process(template)
         self.add_message(str(error), error=True)
         self.pop_sequence(is_tool=True)
 
@@ -204,21 +196,13 @@ class UiCallbackHandler(BaseCallbackHandler):
         #     self.add_message(f"Information: {text}")
 
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
-        func_name = inspect.stack()[0][3]
-        template = {'func_name': func_name}
-        template.update({'action': action})
-        template.update(kwargs)
+        pass
         # prompts = self.prompts.pop() if self.prompts else None
         # self.add_message(action.log, prompts=prompts)
         # self.add_tool_in_sequence(action.tool)
 
     def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> None:
         """Run on agent end."""
-        # func_name = inspect.stack()[0][3]
-        # template = {'func_name': func_name}
-        # template.update({'finish': finish})
-        # template.update(kwargs)
-        # if self.tool_sequence:
-        #     self.tool_sequence.pop()
+        pass
         # prompts = self.prompts.pop() if self.prompts else None
         # self.add_message(f"{finish.log}", prompts=prompts)

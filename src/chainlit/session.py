@@ -3,6 +3,7 @@ from chainlit.client import BaseClient
 
 
 class Session(TypedDict):
+    id: str
     emit: Callable[[str, Any], None]
     conversation_id: Optional[str]
     agent: Any
