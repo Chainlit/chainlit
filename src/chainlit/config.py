@@ -2,6 +2,8 @@ import os
 from typing import Optional, Literal, Any, Callable, List
 import tomli
 from pydantic.dataclasses import dataclass
+import importlib.util
+import click
 
 root = os.getcwd()
 chainlit_config_dir = os.path.join(root, ".chainlit")
@@ -29,7 +31,6 @@ user_env = []
 """
 
 
-
 chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
 if chainlit_env == "development":
     # chainlit_server = "http://localhost:3000"
@@ -49,11 +50,13 @@ class ChainlitConfig:
     lc_cache_path: str
     local_db_path: str
     project_id: Optional[str] = None
+    on_stop: Optional[Callable] = None
     on_message: Optional[Callable[[str], Any]] = None
     lc_postprocess: Optional[Callable] = None
     lc_factory: Optional[Callable] = None
     module_name: Optional[str] = None
     module: Any = None
+
 
 def init_config(log=False):
     if not os.path.exists(chainlit_config_file):
@@ -63,6 +66,19 @@ def init_config(log=False):
             print("Created default config file at", chainlit_config_file)
     elif log:
         print("Config file already exists at", chainlit_config_file)
+
+
+def load_module(target: str):
+    if not os.path.exists(target):
+        raise click.BadParameter(f"File does not exist: {target}")
+
+    spec = importlib.util.spec_from_file_location(
+        target, target)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    config.module = module
+
 
 def load_config():
     init_config()
@@ -78,7 +94,8 @@ def load_config():
         public = toml_dict.get("project", {}).get("public")
 
         if not public and not project_id:
-            raise ValueError("Project ID is required when public is set to false.")
+            raise ValueError(
+                "Project ID is required when public is set to false.")
 
         user_env = toml_dict.get("project", {}).get("user_env")
 
@@ -95,7 +112,7 @@ def load_config():
             lc_cache_path=lc_cache_path,
             local_db_path=local_db_path,
             project_id=project_id,
-            )
+        )
 
     return config
 

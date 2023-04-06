@@ -138,3 +138,11 @@ def on_message(func):
     from chainlit.config import config
     config.on_message = func
     return func
+
+def on_stop(func):
+    """
+    Framework agnostic decorator to react to the stop event.
+    """
+    from chainlit.config import config
+    config.on_stop = func
+    return func

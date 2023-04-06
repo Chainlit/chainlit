@@ -1,6 +1,6 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from chainlit.config import config
+from chainlit.config import config, load_module
 from chainlit.server import socketio
 import os
 
@@ -17,6 +17,8 @@ class ChangeHandler(FileSystemEventHandler):
 
         if (new - old) > 0.5:
             print(f'event type: {event.event_type}  path : {event.src_path}')
+            if config.module_name:
+                load_module(config.module_name)
             socketio.emit("reload", {})
 
         old = new

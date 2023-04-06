@@ -1,10 +1,15 @@
 
-from chainlit.config import config, init_config
+import gevent
+from gevent import monkey, sleep
+monkey.patch_all()
+
+from chainlit.config import config, init_config, load_module
 try:
     import chainlit.lc.monkey
     from langchain.cache import SQLiteCache
     import langchain
     if config.lc_cache_path:
+        print("LangChain cached enabled: ", config.lc_cache_path)
         langchain.llm_cache = SQLiteCache(
             database_path=config.lc_cache_path)
     LANGCHAIN_INSTALLED = True
@@ -12,7 +17,6 @@ except ImportError:
     LANGCHAIN_INSTALLED = False
 
 # from gunicorn.app.wsgiapp import WSGIApplication
-import importlib.util
 import webbrowser
 # from chainlit.local_db import init_local_db
 from chainlit.markdown import init_markdown
@@ -66,7 +70,7 @@ def cli(log_level="info"):
         )
 
 
-def prepare_import(path):
+def _prepare_import(path):
     """Given a filename this will try to calculate the python path, add it
     to the search path and return the actual module name that is expected.
     """
@@ -95,20 +99,6 @@ def prepare_import(path):
     return ".".join(module_name[::-1]) + ext
 
 
-def load_module(target: str):
-    if not os.path.exists(target):
-        raise click.BadParameter(f"File does not exist: {target}")
-
-    config.module_name = prepare_import(target)
-
-    spec = importlib.util.spec_from_file_location(
-        config.module_name, config.module_name)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    config.module = module
-
-
 @cli.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
 @click.option("-w", "--watch", default=False, is_flag=True, envvar="CHAINLIT_WATCH")
@@ -125,6 +115,8 @@ def run_chainlit(target, watch, headless, args=None, **kwargs):
             raise click.BadArgumentUsage(
                 f"Chainlit requires raw Python (.py) files, not {extension}."
             )
+
+    config.module_name = _prepare_import(target)
 
     load_module(target)
 

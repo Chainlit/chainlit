@@ -8,29 +8,29 @@ import {
   IMessage,
   playgroundState,
 } from "state/chat";
-import {
-  Edit
-} from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
 import { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/artifact/view";
 import { CodeBlock, dracula } from "react-code-blocks";
 import FeedbackButtons from "./feedbackButtons";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 interface Props {
   message: IMessage;
-  documents: IDocuments
+  documents: IDocuments;
   showAvatar?: boolean;
+  isLast?: boolean;
 }
 
-const Message = ({ message, documents, showAvatar }: Props) => {
+const Message = ({ message, documents, showAvatar, isLast }: Props) => {
   const [hover, setHover] = useState(false);
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(documentSideViewState);
 
   const documentNames = Object.keys(documents);
   const documentRegexp = documentNames.length
-    ? new RegExp(`(${documentNames.join("|")})`)
+    ? new RegExp(`(${documentNames.join("|")})`, "g")
     : undefined;
   const editButton = message.prompt && (
     <IconButton
@@ -63,6 +63,8 @@ const Message = ({ message, documents, showAvatar }: Props) => {
     </Stack>
   );
 
+  const content = message.content.trim();
+
   return (
     <Box
       sx={{
@@ -74,7 +76,8 @@ const Message = ({ message, documents, showAvatar }: Props) => {
     >
       <Box
         sx={{
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          borderBottom: (theme) =>
+            isLast ? undefined : `1px solid ${theme.palette.divider}`,
           boxSizing: "border-box",
           mx: "auto",
           py: "10px",
@@ -97,6 +100,7 @@ const Message = ({ message, documents, showAvatar }: Props) => {
                 lineHeight: "1.5rem",
                 textTransform: "uppercase",
                 color: getAgentColor(message.author),
+                // marginTop: "16px",
               }}
             >
               {showAvatar && message.author}
@@ -123,42 +127,64 @@ const Message = ({ message, documents, showAvatar }: Props) => {
           <Typography
             sx={{
               flexGrow: 1,
-              whiteSpace: "pre-wrap",
               minHeight: "20px",
               fontSize: "1rem",
               lineHeight: "1.5rem",
               fontFamily: "Inter",
+              marginTop: message.language ? 0 : "-16px",
             }}
           >
-            {!message.language &&
-              reactStringReplace(
-                message.content.trim(),
-                documentRegexp,
-                (match, i) => (
-                  <Link
-                    key={i}
-                    onClick={() => {
-                      if (documents[match].display === "side") {
-                        setSideView(documents[match]);
-                      }
-                    }}
-                    component={RRLink}
-                    to={
-                      documents[match].display === "page"
-                        ? `/document/${match}`
-                        : "#"
+            {!message.language && !documentRegexp && (
+              <ReactMarkdown>{content}</ReactMarkdown>
+            )}
+            {!message.language && documentRegexp && (
+              <ReactMarkdown
+                components={{
+                  a({ node, className, children, ...props }) {
+                    const documentName = children[0] as string;
+                    const document = documents[documentName];
+
+                    if (!document) {
+                      return (
+                        <Link {...props} target="_blank">
+                          {children}
+                        </Link>
+                      );
                     }
-                  >
-                    {documents[match].display === "inline"
-                      ? renderDocument(documents[match], true)
-                      : match}
-                  </Link>
-                )
-              )}
+
+                    if (document.display === "inline") {
+                      return renderDocument(document, true);
+                    }
+
+                    return (
+                      <Link
+                        onClick={() => {
+                          if (document.display === "side") {
+                            setSideView(document);
+                          }
+                        }}
+                        component={RRLink}
+                        to={
+                          document.display === "page"
+                            ? `/document/${documentName}`
+                            : "#"
+                        }
+                      >
+                        {children}
+                      </Link>
+                    );
+                  },
+                }}
+              >
+                {content.replaceAll(documentRegexp, (match) => {
+                  return `[${match}](${match})`;
+                })}
+              </ReactMarkdown>
+            )}
 
             {message.language && (
               <CodeBlock
-                text={message.content.trim()}
+                text={content}
                 language={message.language}
                 showLineNumbers={false}
                 theme={dracula}

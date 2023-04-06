@@ -113,20 +113,14 @@ const Chat = () => {
     }
   };
 
-  if (socketError)
-    return (
-      <Box display="flex" width="100%">
-        <Alert sx={{ m: "auto" }} variant="filled" severity="error">
-          Could not reach the server.
-        </Alert>
-      </Box>
-    );
-
   return (
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
       <Playground />
       <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
         <Loading />
+        {socketError && (
+          <Alert severity="error">Could not reach the server.</Alert>
+        )}
         <ChatTopBar />
         <Messages documents={documents} messages={messages} />
         <InputBox onSubmit={onSubmit} />

@@ -17,7 +17,7 @@ build_dir = os.path.join(root_dir, "frontend/dist")
 
 app = Flask(__name__, static_folder=build_dir)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 
 @app.route('/', defaults={'path': ''})
@@ -65,13 +65,12 @@ def completion():
 
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
-
-
     return {
         "public": config.public,
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
         "userEnv": config.user_env,
+        "stoppable": bool(config.on_stop),
         "chainlitMd": get_markdown_str(config.root),
         "dev": config.chainlit_env == "development",
     }
@@ -133,6 +132,17 @@ def disconnect():
         session = sessions.pop(request.sid)
 
 
+@socketio.on('stop')
+def stop():
+    print("STOPPING")
+    if config.on_stop:
+        session = sessions[request.sid]
+        sdk = Chainlit(session)
+        with UserEnv(session["user_env"]):
+            with SDK(sdk):
+                config.on_stop()
+
+
 @app.route('/message', methods=['POST'])
 def message():
     body = request.json
@@ -170,7 +180,6 @@ def message():
                         raw_res, agent_name, output_key = run_agent(
                             agent, input_str)
 
-
             if config.lc_postprocess:
                 with UserEnv(session["user_env"]):
                     with SDK(sdk):
@@ -187,7 +196,7 @@ def message():
                     config.on_message(input_str)
     except Exception as e:
         sdk.send_message(author="Error", is_error=True,
-                            content=str(e), final=True)
+                         content=str(e), final=True)
         raise e
     print("EXIT", session_id)
     return {"success": True}

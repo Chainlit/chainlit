@@ -4,6 +4,7 @@ import { useRecoilValue } from "recoil";
 import { displayStepsState, IDocuments, IMessage } from "state/chat";
 import Message from "./message";
 import Home from "./home";
+import StopButton from "./stopButton";
 
 interface Props {
   messages: IMessage[];
@@ -35,16 +36,26 @@ const Messages = ({ messages, documents }: Props) => {
     return (
       <Box
         ref={ref}
+        position="relative"
         flexGrow={1}
         sx={{
           maxHeight: "100%",
           overflow: "scroll",
         }}
       >
+        <StopButton />
         {messages.map((m, i) => {
           const showAvatar = m.author !== previousAuthor || m.final;
           previousAuthor = m.author;
-          return <Message message={m} documents={documents} showAvatar={showAvatar} key={i} />;
+          return (
+            <Message
+              message={m}
+              documents={documents}
+              showAvatar={showAvatar}
+              key={i}
+              isLast={i === messages.length - 1}
+            />
+          );
         })}
       </Box>
     );
