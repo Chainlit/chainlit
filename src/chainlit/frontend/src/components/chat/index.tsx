@@ -85,8 +85,8 @@ const Chat = () => {
         ...{ [document.name]: document },
       }));
     });
-    window.socket.on("total_tokens", (count: any) => {
-      setTokenCount(count);
+    window.socket.on("token_usage", (count: number) => {
+      setTokenCount((old) => old + count);
     });
     window.socket.on("agents", (agents: any) => {
       setAgents(agents);

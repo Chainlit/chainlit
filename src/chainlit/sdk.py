@@ -99,7 +99,7 @@ class Chainlit:
     def update_token_count(self, count: int):
         if self.emit is None:
             return
-        self.emit("total_tokens", count)
+        self.emit("token_usage", count)
 
 
 def get_sdk() -> Union[Chainlit, None]:

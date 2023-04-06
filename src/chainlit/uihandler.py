@@ -106,15 +106,14 @@ class UiCallbackHandler(BaseCallbackHandler):
         tool_sequence = self.tool_sequence_per_session.get(sdk.session["id"])
         all_sequence = self.sequence_per_session.get(sdk.session["id"])
 
+        indent = len(all_sequence) if all_sequence else 0
+
         if tool_sequence:
             author = tool_sequence[-1]
-            indent = len(tool_sequence) + 1
         elif all_sequence:
             author = all_sequence[-1]
-            indent = 0
         else:
             author = config.chatbot_name
-            indent = 0
 
         sdk.send_message(
             author=author,
@@ -142,6 +141,14 @@ class UiCallbackHandler(BaseCallbackHandler):
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Do nothing."""
         self.pop_prompt()
+        sdk = get_sdk()
+        if not sdk or not sdk.session:
+            return
+        if response.llm_output is not None:
+            if "token_usage" in response.llm_output:
+                token_usage = response.llm_output["token_usage"]
+                if "total_tokens" in token_usage:
+                    sdk.update_token_count(token_usage["total_tokens"])
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
