@@ -70,7 +70,6 @@ def project_settings():
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
         "userEnv": config.user_env,
-        "stoppable": bool(config.on_stop),
         "chainlitMd": get_markdown_str(config.root),
         "dev": config.chainlit_env == "development",
     }
@@ -140,12 +139,46 @@ def disconnect():
 
 @socketio.on('stop')
 def stop():
-    print("STOPPING")
-    if config.on_stop:
-        session = sessions[request.sid]
+    session = sessions.get(request.sid)
+
+    if config.on_stop and session:
         __chainlit_sdk__ = Chainlit(session)
         with UserEnv(session["user_env"]):
             config.on_stop()
+
+    if session and session.get("task"):
+        task = session.get("task")
+        task.kill()
+        task.join()
+        session["task"] = None
+
+
+def process_message(session: Session, input_str: str):
+    __chainlit_sdk__ = Chainlit(session)
+    print("ENTER", session["id"])
+    try:
+        if "agent" in session:
+            agent = session["agent"]
+            with UserEnv(session["user_env"]):
+                raw_res, agent_name, output_key = run_agent(
+                    agent, input_str)
+
+            if config.lc_postprocess:
+                with UserEnv(session["user_env"]):
+                    res = config.lc_postprocess(raw_res)
+            elif output_key is not None:
+                res = raw_res[output_key]
+            else:
+                res = raw_res
+            __chainlit_sdk__.send_message(
+                author=agent_name, content=res, final=True)
+        elif config.on_message:
+            with UserEnv(session["user_env"]):
+                config.on_message(input_str)
+    except Exception as e:
+        __chainlit_sdk__.send_message(author="Error", is_error=True,
+                                      content=str(e), final=True)
+    print("EXIT", session["id"])
 
 
 @app.route('/message', methods=['POST'])
@@ -171,32 +204,9 @@ def message():
             }
         )
 
-    print("ENTER", session_id)
-
-    __chainlit_sdk__ = Chainlit(session)
-
-    try:
-        if "agent" in session:
-            agent = session["agent"]
-            with UserEnv(session["user_env"]):
-                raw_res, agent_name, output_key = run_agent(
-                    agent, input_str)
-
-            if config.lc_postprocess:
-                with UserEnv(session["user_env"]):
-                    res = config.lc_postprocess(raw_res)
-            elif output_key is not None:
-                res = raw_res[output_key]
-            else:
-                res = raw_res
-            __chainlit_sdk__.send_message(
-                author=agent_name, content=res, final=True)
-        elif config.on_message:
-            with UserEnv(session["user_env"]):
-                config.on_message(input_str)
-    except Exception as e:
-        __chainlit_sdk__.send_message(author="Error", is_error=True,
-                                      content=str(e), final=True)
-        raise e
-    print("EXIT", session_id)
+    task = socketio.start_background_task(process_message, session, input_str)
+    print(task)
+    session["task"] = task
+    task.join()
+    session["task"] = None
     return {"success": True}

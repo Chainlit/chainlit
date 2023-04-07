@@ -6,7 +6,7 @@ export default function StopButton() {
   const pSettings = useRecoilValue(projectSettingsState);
   const [loading, setLoading] = useRecoilState(loadingState);
 
-  if (!loading || !pSettings?.stoppable) {
+  if (!loading) {
     return null;
   }
 
