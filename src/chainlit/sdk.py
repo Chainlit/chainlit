@@ -36,16 +36,6 @@ class Chainlit:
             return None
         return self.session["conversation_id"]
 
-    # def callback_manager(self, handlers=None):
-    #     if self.emit is not None:
-    #         return CallbackManager(
-    #             [UiCallbackHandler(sdk=self), OpenAICallbackHandler()])
-    #     else:
-    #         if handlers is None:
-    #             return None
-    #         else:
-    #             return CallbackManager(handlers)
-
     def send_document(self, ext: str, content: bytes, name: str, type: DocumentType, display: DocumentDisplay):
         if self.client and self.conversation_id:
             url = self.client.upload_document(ext=ext, content=content)
@@ -102,7 +92,14 @@ class Chainlit:
             msg["id"] = message_id
         self.emit("message", msg)
 
-    def send_prompt(self, author: str, content: str):
+    def send_prompt_timeout(self, author: str):
+        self.send_message(
+            author=author, content="Prompt timed out", is_error=True, final=True)
+
+        if self.emit:
+            self.emit("prompt_timeout", {})
+
+    def send_prompt(self, author: str, content: str, timeout=60):
         if self.prompt is None:
             return
 
@@ -118,19 +115,23 @@ class Chainlit:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
 
-        res = self.prompt("prompt", msg)
+        try:
+            res = self.prompt({"msg": msg, "timeout": timeout}, timeout)
 
-        if self.client and self.conversation_id:
-            res_msg = {
-                "conversationId": self.conversation_id,
-                "author": res["author"],
-                "content": res["content"],
-                "final": True
+            if self.client and self.conversation_id:
+                res_msg = {
+                    "conversationId": self.conversation_id,
+                    "author": res["author"],
+                    "content": res["content"],
+                    "final": True
 
-            }
-            self.client.create_message(res_msg)
+                }
+                self.client.create_message(res_msg)
 
-        return res
+                return res
+        except TimeoutError as e:
+            self.send_prompt_timeout(author)
+            raise e
 
     def update_token_count(self, count: int):
         if self.emit is None:

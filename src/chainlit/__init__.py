@@ -1,32 +1,6 @@
 from typing import Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
 
-# def get_session_id() -> Union[str, None]:
-#     names = [i[0].f_globals["__name__"] for i in inspect.stack()]
-
-#     for name in names:
-#         if name in sessions:
-#             return name
-
-#     return None
-
-
-# def populate_session(cl: 'Chainlit'):
-#     session_id = get_session_id()
-#     if session_id:
-#         print(f"chainlit session: {session_id}")
-#         cl.session = sessions[session_id]
-#     else:
-#         print("No chainlit session found")
-
-
-# def callback_manager(handlers=None):
-#     sdk = get_sdk()
-#     if sdk:
-#         return sdk.callback_manager(handlers)
-#     else:
-#         return None
-
 
 def send_text_document(text: str, name: str, display: DocumentDisplay = "side"):
     """
@@ -84,13 +58,25 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
                          indent, is_error, final, llm_settings)
 
 
-def send_prompt(author: str, content: str):
+def send_prompt(author: str, content: str, timeout=60):
     """
+    Send a question to the chatbot UI that the user must answer before continuing.
+    Not to be confused with LLMs prompts.
+    If the user does not answer in time (see timeout), a TimeoutError is raised and a message indicating the timeout is sent.
+    If a project ID is configured, the messages will be uploaded to the cloud storage.
+
+    Args:
+        author (str): The author of the prompt, this will be used in the UI.
+        content (str): The content of the prompt.
+        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
+
+    Returns:
+        PromptResponse: The response from the user include "msg" and "author".
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        return sdk.send_prompt(author, content)
+        return sdk.send_prompt(author=author, content=content, timeout=timeout)
 
 
 def langchain_factory(func):

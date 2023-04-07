@@ -1,10 +1,13 @@
 from typing import Dict, TypedDict, Optional, Callable, Any
 from chainlit.client import BaseClient
 
+class PromptResponse(TypedDict):
+    content: str
+    author: str
 
 class Session(TypedDict):
     id: str
-    prompt: Callable[[str, Any], str]
+    prompt: Callable[[Any, Optional[int]], PromptResponse]
     emit: Callable[[str, Any], None]
     conversation_id: Optional[str]
     agent: Any

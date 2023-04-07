@@ -24,7 +24,6 @@ def run_agent(agent: Any, input_str: str):
         if agent_to_call_list:
             agent_to_call = agent_to_call_list[0]
             agent_name = agent_mention
-            agent.callback_manager.handlers[0].tool_sequence = [agent_name]
         else:
             agent_to_call = agent
             agent_name = config.chatbot_name

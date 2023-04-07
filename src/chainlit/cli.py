@@ -13,10 +13,10 @@ import logging
 
 try:
     import chainlit.lc.monkey
+    import langchain
     from langchain.callbacks import get_callback_manager
     from chainlit.uihandler import UiCallbackHandler
     from langchain.cache import SQLiteCache
-    import langchain
 
     if config.lc_cache_path:
         print("LangChain cached enabled: ", config.lc_cache_path)

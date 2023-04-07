@@ -101,8 +101,8 @@ def connect():
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
 
-    def _prompt(event, data):
-        return socketio.call(event, data, to=session_id)
+    def _prompt(data, timeout):
+        return socketio.call("prompt", data, timeout=timeout, to=session_id)
 
     session = {
         "id": session_id,
@@ -140,14 +140,21 @@ def disconnect():
 @socketio.on('stop')
 def stop():
     session = sessions.get(request.sid)
+    if not session:
+        return
 
-    if config.on_stop and session:
+    task = session.get("task")
+
+    if task:
         __chainlit_sdk__ = Chainlit(session)
-        with UserEnv(session["user_env"]):
-            config.on_stop()
 
-    if session and session.get("task"):
-        task = session.get("task")
+        if config.on_stop:
+            with UserEnv(session["user_env"]):
+                config.on_stop()
+
+        __chainlit_sdk__.send_message(
+            author="System", content="Conversation stopped by the user.", final=True)
+
         task.kill()
         task.join()
         session["task"] = None
