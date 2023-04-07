@@ -19,6 +19,12 @@ class Chainlit:
         return self.session["emit"]
 
     @property
+    def prompt(self):
+        if not hasattr(self, "session") or "prompt" not in self.session:
+            return None
+        return self.session["prompt"]
+
+    @property
     def client(self) -> Union[BaseClient, None]:
         if not hasattr(self, "session") or "client" not in self.session:
             return None
@@ -95,6 +101,36 @@ class Chainlit:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
         self.emit("message", msg)
+
+    def send_prompt(self, author: str, content: str):
+        if self.prompt is None:
+            return
+
+        msg = {
+            "conversationId": self.conversation_id,
+            "author": author,
+            "content": content,
+            "waitForAnswer": True,
+            "final": True
+        }
+
+        if self.client and self.conversation_id:
+            message_id = self.client.create_message(msg)
+            msg["id"] = message_id
+
+        res = self.prompt("prompt", msg)
+
+        if self.client and self.conversation_id:
+            res_msg = {
+                "conversationId": self.conversation_id,
+                "author": res["author"],
+                "content": res["content"],
+                "final": True
+
+            }
+            self.client.create_message(res_msg)
+
+        return res
 
     def update_token_count(self, count: int):
         if self.emit is None:

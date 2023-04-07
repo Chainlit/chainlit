@@ -79,6 +79,13 @@ const Chat = () => {
     window.socket.on("message", (message: IMessage) => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
+
+    window.socket.on("prompt", (message, callback) => {
+      setMessages((oldMessages) => [...oldMessages, message]);
+      setLoading(false);
+      console.log(callback);
+    });
+
     window.socket.on("document", (document: IDocument) => {
       setDocuments((old) => ({
         ...old,

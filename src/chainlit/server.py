@@ -102,9 +102,13 @@ def connect():
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
 
+    def _prompt(event, data):
+        return socketio.call(event, data, to=session_id)
+
     session = {
         "id": session_id,
         "emit": _emit,
+        "prompt": _prompt,
         "client": client,
         "conversation_id": None,
         "user_env": user_env
@@ -187,7 +191,6 @@ def message():
                 res = raw_res
             __chainlit_sdk__.send_message(
                 author=agent_name, content=res, final=True)
-            # emit("total_tokens", agent.callback_manager.handlers[1].total_tokens)
         elif config.on_message:
             with UserEnv(session["user_env"]):
                 config.on_message(input_str)

@@ -20,9 +20,6 @@ from chainlit.types import DocumentDisplay, LLMSettings
 #         print("No chainlit session found")
 
 
-
-
-
 # def callback_manager(handlers=None):
 #     sdk = get_sdk()
 #     if sdk:
@@ -85,6 +82,15 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
     if sdk:
         sdk.send_message(author, content, prompt, language,
                          indent, is_error, final, llm_settings)
+
+
+def send_prompt(author: str, content: str):
+    """
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        return sdk.send_prompt(author, content)
 
 
 def langchain_factory(func):
