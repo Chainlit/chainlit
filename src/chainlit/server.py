@@ -33,7 +33,7 @@ def completion():
     import openai
     data = request.json
     llm_settings = data["settings"]
-    user_env = data.get("user_env", {})
+    user_env = data.get("userEnv", {})
 
     api_key = user_env.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
 

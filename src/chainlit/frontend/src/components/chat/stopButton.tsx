@@ -1,9 +1,8 @@
 import { Button } from "@mui/material";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { loadingState, projectSettingsState } from "state/chat";
+import { useRecoilState } from "recoil";
+import { loadingState } from "state/chat";
 
 export default function StopButton() {
-  const pSettings = useRecoilValue(projectSettingsState);
   const [loading, setLoading] = useRecoilState(loadingState);
 
   if (!loading) {

@@ -13,13 +13,13 @@ export const getProjectSettings = async () => {
   return res.json();
 };
 
-export const getCompletion = async (prompt: string, settings: ILLMSettings) => {
+export const getCompletion = async (prompt: string, settings: ILLMSettings, userEnv={}) => {
   const res = await fetch(`${server}/completion`, {
     headers: {
       "content-type": "application/json",
     },
     method: "POST",
-    body: JSON.stringify({ prompt, settings, userEnv: {} }),
+    body: JSON.stringify({ prompt, settings, userEnv }),
   });
 
   const completion = await res.text();

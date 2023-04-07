@@ -2,7 +2,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { playgroundSettingsState, playgroundState } from "state/chat";
+import { playgroundSettingsState, playgroundState, userEnvState } from "state/chat";
 import { useEffect, useState } from "react";
 import {
   Editor,
@@ -39,6 +39,7 @@ export default function Playground() {
   const playground = useRecoilValue(playgroundState);
   const setPlayground = useSetRecoilState(playgroundState);
   const settings = useRecoilValue(playgroundSettingsState);
+  const userEnv = useRecoilValue(userEnvState);
   const setPlaygroundSettings = useSetRecoilState(playgroundSettingsState);
   const [state, setState] = useState(EditorState.createEmpty());
   const [loading, setLoading] = useState(false);
@@ -95,7 +96,7 @@ export default function Playground() {
     const prompt = state.getCurrentContent().getPlainText();
     try {
       setLoading(true);
-      const completion = await getCompletion(prompt, settings);
+      const completion = await getCompletion(prompt, settings, userEnv);
       setState(insertCompletion(state, completion));
     } catch (err: any) {
       toast.error(err.message)
