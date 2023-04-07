@@ -64,10 +64,12 @@ const Chat = () => {
     });
 
     window.socket.on("connection", () => {
+      console.log("connected")
       setSocketError(false);
     });
 
     window.socket.on("connect_error", (err) => {
+      console.error("failed to connect", err)
       setSocketError(true);
     });
 

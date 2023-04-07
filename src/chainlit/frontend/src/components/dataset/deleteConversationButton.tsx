@@ -4,7 +4,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { DeleteOutline } from "@mui/icons-material";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { gql, useMutation } from "@apollo/client";

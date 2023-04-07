@@ -1,4 +1,4 @@
-import { History } from "@mui/icons-material";
+import HistoryIcon from "@mui/icons-material/History";
 import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { historyOpenedState, projectSettingsState } from "state/chat";
@@ -188,7 +188,7 @@ function _HistoryButton({ onClick }: Props) {
           onClick={(e) => setOpen(!open)}
           ref={ref}
         >
-          <History />
+          <HistoryIcon />
         </IconButton>
       </Tooltip>
     </div>

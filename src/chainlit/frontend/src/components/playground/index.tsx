@@ -2,7 +2,11 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { playgroundSettingsState, playgroundState, userEnvState } from "state/chat";
+import {
+  playgroundSettingsState,
+  playgroundState,
+  userEnvState,
+} from "state/chat";
 import { useEffect, useState } from "react";
 import {
   Editor,
@@ -22,7 +26,8 @@ import {
 } from "@mui/material";
 import { OrderedSet } from "immutable";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Close, Restore } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
+import RestoreIcon from "@mui/icons-material/Restore";
 import ModelSettings from "./modelSettings";
 import { getCompletion } from "api";
 import { toast } from "react-hot-toast";
@@ -99,7 +104,7 @@ export default function Playground() {
       const completion = await getCompletion(prompt, settings, userEnv);
       setState(insertCompletion(state, completion));
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -124,7 +129,7 @@ export default function Playground() {
           Prompt playground
         </Typography>
         <IconButton sx={{ ml: "auto" }} onClick={handleClose}>
-          <Close />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column" }}>
@@ -166,7 +171,7 @@ export default function Playground() {
           </LoadingButton>
           <Tooltip title="Restore original">
             <IconButton onClick={restore}>
-              <Restore />
+              <RestoreIcon />
             </IconButton>
           </Tooltip>
         </Stack>

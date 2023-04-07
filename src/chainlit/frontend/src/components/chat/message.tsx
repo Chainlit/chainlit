@@ -8,7 +8,7 @@ import {
   IMessage,
   playgroundState,
 } from "state/chat";
-import { Edit } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/Edit";
 import { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/artifact/view";
@@ -43,7 +43,7 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
         });
       }}
     >
-      <Edit sx={{ width: "16px", height: "16px" }} />
+      <EditIcon sx={{ width: "16px", height: "16px" }} />
     </IconButton>
   );
 

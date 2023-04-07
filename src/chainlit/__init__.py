@@ -1,5 +1,21 @@
+import inspect
 from typing import Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
+
+
+def wrap_user_function(user_function):
+    def wrapper(*args):
+        # Get the parameter names of the user-defined function
+        user_function_params = list(
+            inspect.signature(user_function).parameters.keys())
+
+        # Create a dictionary of parameter names and their corresponding values from *args
+        params_values = {param_name: arg for param_name,
+                         arg in zip(user_function_params, args)}
+
+        # Call the user-defined function with the arguments
+        return user_function(**params_values)
+    return wrapper
 
 
 def send_text_document(text: str, name: str, display: DocumentDisplay = "side"):
@@ -93,7 +109,7 @@ def langchain_factory(func):
         Callable[[Dict[str, str]], Any]: The decorated factory function.
     """
     from chainlit.config import config
-    config.lc_factory = func
+    config.lc_factory = wrap_user_function(func)
     return func
 
 
@@ -109,7 +125,7 @@ def langchain_postprocess(func: Callable[[Any], str]):
         Callable[[Any, Dict[str, str]], str]: The decorated post-processing function.
     """
     from chainlit.config import config
-    config.lc_postprocess = func
+    config.lc_postprocess = wrap_user_function(func)
     return func
 
 
@@ -125,7 +141,7 @@ def on_message(func):
         Callable[[str, Dict[str, str]], Any]: The decorated on_message function.
     """
     from chainlit.config import config
-    config.on_message = func
+    config.on_message = wrap_user_function(func)
     return func
 
 
@@ -140,5 +156,5 @@ def on_stop(func):
         Callable[[Dict[str, str]], Any]: The decorated stop hook.
     """
     from chainlit.config import config
-    config.on_stop = func
+    config.on_stop = wrap_user_function(func)
     return func

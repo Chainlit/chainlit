@@ -18,7 +18,6 @@ app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
-
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):

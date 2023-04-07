@@ -1,16 +1,14 @@
 import CloudProvider from "components/cloudProvider";
-import {
-  ThumbDownAltOutlined,
-  ThumbUpAltOutlined,
-  ThumbDownAlt,
-  ThumbUpAlt,
-} from "@mui/icons-material";
 import { IconButton, Stack } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
 import { IMessage } from "state/chat";
 import toast from "react-hot-toast";
 import { getErrorMessage } from "helpers/apollo";
 import { useState } from "react";
+import ThumbDownAlt from "@mui/icons-material/ThumbDownAlt";
+import ThumbDownAltOutlined from "@mui/icons-material/ThumbDownAltOutlined";
+import ThumbUpAlt from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpAltOutlined from "@mui/icons-material/ThumbUpAltOutlined";
 
 const size = "16px";
 

@@ -1,4 +1,5 @@
-import { DarkModeOutlined, LightModeOutlined } from "@mui/icons-material";
+import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
+import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import { IconButton } from "@mui/material";
 import { useRecoilState } from "recoil";
 import { themeState } from "state/theme";

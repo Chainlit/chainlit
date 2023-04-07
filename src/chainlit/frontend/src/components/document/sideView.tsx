@@ -1,4 +1,4 @@
-import { Close } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   IconButton,
   Box,
@@ -69,7 +69,7 @@ const DocumentSideView = () => {
           sx={{ ml: "auto" }}
           onClick={() => setSideView(undefined)}
         >
-          <Close />
+          <CloseIcon />
         </IconButton>
       </Stack>
 

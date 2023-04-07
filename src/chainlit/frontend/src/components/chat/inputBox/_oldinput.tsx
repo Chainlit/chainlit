@@ -1,4 +1,4 @@
-import { Send } from "@mui/icons-material";
+import SendIcon from "@mui/icons-material/Send";
 import { IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useRef, useState } from "react";
@@ -74,7 +74,7 @@ const Input = ({ onSubmit }: Props) => {
               color="inherit"
               onClick={() => submit()}
             >
-              <Send />
+              <SendIcon />
             </IconButton>
           </InputAdornment>
         ),

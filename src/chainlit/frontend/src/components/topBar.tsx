@@ -9,8 +9,8 @@ import UserAvatar from "./chat/userAvatar";
 import { useAuth } from "hooks/auth";
 import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/chat";
-import { Key } from "@mui/icons-material";
 import ThemeButton from "themeButton";
+import KeyIcon from "@mui/icons-material/Key";
 
 function Nav() {
   const { isProjectMember } = useAuth();
@@ -65,7 +65,7 @@ export default function TopBar() {
           {requiredKeys && (
             <Tooltip title="API keys">
               <IconButton component={Link} to="/env">
-                <Key />
+                <KeyIcon />
               </IconButton>
             </Tooltip>
           )}

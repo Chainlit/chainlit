@@ -5,7 +5,7 @@ import InputBase from "@mui/material/InputBase";
 import { debounce } from "lodash";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
-import { Close } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useRecoilState } from "recoil";
 import { datasetFiltersState } from "state/chat";
 
@@ -85,7 +85,7 @@ export default function SearchBar({}: Props) {
       />
       <SearchIconWrapper>
         <IconButton onClick={clear}>
-          <Close />
+          <CloseIcon />
         </IconButton>
       </SearchIconWrapper>
     </Search>

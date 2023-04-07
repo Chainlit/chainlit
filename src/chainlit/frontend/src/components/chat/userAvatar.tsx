@@ -9,7 +9,7 @@ import {
   ListItem,
   Button,
 } from "@mui/material";
-import { Logout } from "@mui/icons-material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRecoilValue } from "recoil";
@@ -110,7 +110,7 @@ export default function UserAvatar() {
           }}
         >
           <ListItemIcon>
-            <Logout fontSize="small" />
+            <LogoutIcon fontSize="small" />
           </ListItemIcon>
           Logout
         </MenuItem>

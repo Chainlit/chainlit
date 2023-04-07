@@ -1,4 +1,4 @@
-from watchdog.observers import Observer
+from watchdog_gevent.observers import GeventObserver
 from watchdog.events import FileSystemEventHandler
 from chainlit.config import config, load_module
 from chainlit.server import socketio
@@ -31,6 +31,7 @@ def watch_dir():
         return
     watching = True
     event_handler = ChangeHandler()
-    observer = Observer()
-    observer.schedule(event_handler, config.root, recursive=False)
+    observer = GeventObserver()
+    print(config.root)
+    observer.schedule(event_handler, config.root, recursive=True)
     observer.start()

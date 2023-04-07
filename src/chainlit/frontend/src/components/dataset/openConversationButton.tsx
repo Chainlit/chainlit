@@ -1,4 +1,4 @@
-import { OpenInNew } from "@mui/icons-material";
+import OpenInNew from "@mui/icons-material/OpenInNew";
 import { IconButton, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
 
