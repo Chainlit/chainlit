@@ -100,13 +100,13 @@ const Chat = () => {
     window.socket.on("agents", (agents: any) => {
       setAgents(agents);
     });
-  }, [userEnv]);
+  }, [userEnv, accessToken]);
 
   const onSubmit = async (msg: string) => {
     msg = clean(msg, agentRegexp, "@");
 
     const message: IMessage = {
-      author: user?.name || "Anonymous",
+      author: user?.name || "User",
       authorIsUser: true,
       content: msg,
     };

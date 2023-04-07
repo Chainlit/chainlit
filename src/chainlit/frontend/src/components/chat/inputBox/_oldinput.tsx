@@ -1,7 +1,7 @@
 import SendIcon from "@mui/icons-material/Send";
 import { IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { historyOpenedState, loadingState } from "state/chat";
 import HistoryButton from "components/chat/historyButton";
@@ -18,6 +18,13 @@ const Input = ({ onSubmit }: Props) => {
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
   const [value, setValue] = useState("");
+
+  useEffect(() => {
+    if (ref.current && !loading) {
+      ref.current.querySelector("input")?.focus();
+    }
+  }, [loading]);
+
 
   const submit = useCallback(() => {
     if (value === "" || loading) {

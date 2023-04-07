@@ -59,7 +59,7 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
       }}
     >
       {editButton}
-      {message.final && <FeedbackButtons message={message} />}
+      {message.final && message.id && <FeedbackButtons message={message} />}
     </Stack>
   );
 

@@ -32,6 +32,12 @@ const Input = ({ onSubmit }: Props) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (ref.current && !loading) {
+      ref.current.focus();
+    }
+  }, [loading]);
+
   const submit = useCallback(() => {
     if (value === "" || loading) {
       return;
