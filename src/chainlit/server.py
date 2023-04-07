@@ -1,15 +1,14 @@
+import os
+import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
-from chainlit.env import UserEnv
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
-import os
-import json
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,34 +32,39 @@ def serve(path):
 def completion():
     import openai
     data = request.json
-    with UserEnv(data["userEnv"]):
-        llm_settings = data["settings"]
-        if "stop" in llm_settings:
-            stop = llm_settings.pop("stop")
-        else:
-            stop = None
+    llm_settings = data["settings"]
+    user_env = data.get("user_env", {})
 
-        if "model_name" in llm_settings:
-            model_name = llm_settings.pop("model_name")
-        else:
-            model_name = None
+    api_key = user_env.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
 
-        if model_name in ["gpt-3.5-turbo", "gpt-4"]:
-            response = openai.ChatCompletion.create(
-                model=model_name,
-                messages=[{"role": "user", "content": data["prompt"]}],
-                stop=stop,
-                **llm_settings,
-            )
-            return response["choices"][0]["message"]["content"]
-        else:
-            response = openai.Completion.create(
-                model=model_name,
-                prompt=data["prompt"],
-                stop=stop,
-                **llm_settings
-            )
-            return response["choices"][0]["text"]
+    if "stop" in llm_settings:
+        stop = llm_settings.pop("stop")
+    else:
+        stop = None
+
+    if "model_name" in llm_settings:
+        model_name = llm_settings.pop("model_name")
+    else:
+        model_name = None
+
+    if model_name in ["gpt-3.5-turbo", "gpt-4"]:
+        response = openai.ChatCompletion.create(
+            api_key=api_key,
+            model=model_name,
+            messages=[{"role": "user", "content": data["prompt"]}],
+            stop=stop,
+            **llm_settings,
+        )
+        return response["choices"][0]["message"]["content"]
+    else:
+        response = openai.Completion.create(
+            api_key=api_key,
+            model=model_name,
+            prompt=data["prompt"],
+            stop=stop,
+            **llm_settings
+        )
+        return response["choices"][0]["text"]
 
 
 @app.route('/project/settings', methods=['GET'])
@@ -79,7 +83,7 @@ def project_settings():
 def connect():
     session_id = request.sid
     client = None
-    user_env = None
+    user_env = {}
 
     if config.user_env:
         if request.headers.get("user-env"):
@@ -95,8 +99,6 @@ def connect():
                              url=config.chainlit_server)
     # elif config.chainlit_env == "development":
     #     client = LocalClient(project_id=config.module_name)
-    #     if not conversation_id:
-    #         conversation_id = client.create_conversation(session_id)
 
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
@@ -116,9 +118,8 @@ def connect():
 
     if config.lc_factory:
         __chainlit_sdk__ = Chainlit(session)
-        with UserEnv(session["user_env"]):
-            agent = config.lc_factory()
-            session["agent"] = agent
+        agent = config.lc_factory(user_env)
+        session["agent"] = agent
 
         # if hasattr(agent, "tools"):
         #     tools = agent.tools
@@ -149,8 +150,7 @@ def stop():
         __chainlit_sdk__ = Chainlit(session)
 
         if config.on_stop:
-            with UserEnv(session["user_env"]):
-                config.on_stop()
+            config.on_stop(session["user_env"])
 
         __chainlit_sdk__.send_message(
             author="System", content="Conversation stopped by the user.", final=True)
@@ -162,17 +162,14 @@ def stop():
 
 def process_message(session: Session, input_str: str):
     __chainlit_sdk__ = Chainlit(session)
-    print("ENTER", session["id"])
     try:
         if "agent" in session:
             agent = session["agent"]
-            with UserEnv(session["user_env"]):
-                raw_res, agent_name, output_key = run_agent(
-                    agent, input_str)
+            raw_res, agent_name, output_key = run_agent(
+                agent, input_str)
 
             if config.lc_postprocess:
-                with UserEnv(session["user_env"]):
-                    res = config.lc_postprocess(raw_res)
+                res = config.lc_postprocess(raw_res, session["user_env"])
             elif output_key is not None:
                 res = raw_res[output_key]
             else:
@@ -180,12 +177,10 @@ def process_message(session: Session, input_str: str):
             __chainlit_sdk__.send_message(
                 author=agent_name, content=res, final=True)
         elif config.on_message:
-            with UserEnv(session["user_env"]):
-                config.on_message(input_str)
+            config.on_message(input_str, session["user_env"])
     except Exception as e:
         __chainlit_sdk__.send_message(author="Error", is_error=True,
                                       content=str(e), final=True)
-    print("EXIT", session["id"])
 
 
 @app.route('/message', methods=['POST'])
@@ -212,8 +207,8 @@ def message():
         )
 
     task = socketio.start_background_task(process_message, session, input_str)
-    print(task)
     session["task"] = task
     task.join()
     session["task"] = None
+
     return {"success": True}

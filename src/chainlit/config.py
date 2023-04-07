@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Literal, Any, Callable, List
+from typing import Optional, Literal, Any, Callable, List, Dict
 import tomli
 from pydantic.dataclasses import dataclass
 import importlib.util
@@ -50,10 +50,10 @@ class ChainlitConfig:
     lc_cache_path: str
     local_db_path: str
     project_id: Optional[str] = None
-    on_stop: Optional[Callable] = None
-    on_message: Optional[Callable[[str], Any]] = None
-    lc_postprocess: Optional[Callable] = None
-    lc_factory: Optional[Callable] = None
+    on_stop: Optional[Callable[[Dict[str, str]], Any]] = None
+    on_message: Optional[Callable[[str, Dict[str, str]], Any]] = None
+    lc_postprocess: Optional[Callable[[Any, Dict[str, str]], Any]] = None
+    lc_factory: Optional[Callable[[Dict[str, str]], Any]] = None
     module_name: Optional[str] = None
     module: Any = None
 
