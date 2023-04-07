@@ -20,7 +20,7 @@ export interface IMessage {
   id?: number;
   author: string;
   authorIsUser?: boolean;
-  waitForUser?: boolean;
+  waitForAnswer?: boolean;
   content: string;
   humanFeedback?: number;
   language?: string;

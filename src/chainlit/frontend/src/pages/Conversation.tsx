@@ -20,7 +20,7 @@ const ConversationQuery = gql`
         indent
         author
         content
-        waitForUser
+        waitForAnswer
         humanFeedback
         language
         prompt
