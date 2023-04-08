@@ -1,37 +1,48 @@
+import os
 from watchdog_gevent.observers import GeventObserver
 from watchdog.events import FileSystemEventHandler
 from chainlit.config import config, load_module
 from chainlit.server import socketio
-import os
 
-old = 0
-watching = False
+last_modified_time = 0
+is_watching = False
 
 
 class ChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        global old
+        global last_modified_time
 
+        # Get the modified time of the file
         statbuf = os.stat(event.src_path)
-        new = statbuf.st_mtime
+        current_modified_time = statbuf.st_mtime
 
-        if (new - old) > 0.5:
+        # Check if the file was modified more than 0.5 seconds ago
+        if (current_modified_time - last_modified_time) > 0.5:
             print(f'event type: {event.event_type}  path : {event.src_path}')
+            
+            # Load the module if the module name is specified in the config
             if config.module_name:
                 load_module(config.module_name)
+            
+            # Emit a "reload" event to the socket
             socketio.emit("reload", {})
 
-        old = new
+        last_modified_time = current_modified_time
 
 
-def watch_dir():
-    global watching
+def watch_directory():
+    global is_watching
 
-    if watching:
+    # Return if already watching
+    if is_watching:
         return
-    watching = True
+    
+    is_watching = True
     event_handler = ChangeHandler()
     observer = GeventObserver()
-    print(config.root)
+        
+    # Schedule the observer to watch the directory recursively
     observer.schedule(event_handler, config.root, recursive=True)
+    
+    # Start the observer
     observer.start()

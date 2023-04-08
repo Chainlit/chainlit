@@ -10,7 +10,6 @@ from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
 
-
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
 
@@ -18,6 +17,7 @@ app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
+# Serve static files
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
@@ -26,7 +26,7 @@ def serve(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
-
+# Handle completion requests
 @app.route('/completion', methods=['POST'])
 def completion():
     import openai
@@ -36,15 +36,8 @@ def completion():
 
     api_key = user_env.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
 
-    if "stop" in llm_settings:
-        stop = llm_settings.pop("stop")
-    else:
-        stop = None
-
-    if "model_name" in llm_settings:
-        model_name = llm_settings.pop("model_name")
-    else:
-        model_name = None
+    stop = llm_settings.pop("stop", None)
+    model_name = llm_settings.pop("model_name", None)
 
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         response = openai.ChatCompletion.create(
@@ -65,7 +58,7 @@ def completion():
         )
         return response["choices"][0]["text"]
 
-
+# Get project settings
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
     return {
@@ -77,7 +70,7 @@ def project_settings():
         "dev": config.chainlit_env == "development",
     }
 
-
+# Handle socket connection
 @socketio.on('connect')
 def connect():
     session_id = request.sid
@@ -96,8 +89,6 @@ def connect():
     elif access_token and config.project_id:
         client = CloudClient(project_id=config.project_id, access_token=access_token,
                              url=config.chainlit_server)
-    # elif config.chainlit_env == "development":
-    #     client = LocalClient(project_id=config.module_name)
 
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
@@ -120,23 +111,17 @@ def connect():
         agent = config.lc_factory(user_env)
         session["agent"] = agent
 
-        # if hasattr(agent, "tools"):
-        #     tools = agent.tools
-        #     agents = [{"id": tool.name, "display": tool.name, "description": tool.description}
-        #               for tool in tools]
-        #     emit("agents", agents)
-
     if not config.lc_factory and not config.on_message:
         raise ValueError(
             "Module does not expose a langchain factory or on_nessage function")
 
-
+# Handle socket disconnection
 @socketio.on('disconnect')
 def disconnect():
     if request.sid in sessions:
         session = sessions.pop(request.sid)
 
-
+# Handle stop event
 @socketio.on('stop')
 def stop():
     session = sessions.get(request.sid)
@@ -158,7 +143,7 @@ def stop():
         task.join()
         session["task"] = None
 
-
+# Process message
 def process_message(session: Session, input_str: str):
     __chainlit_sdk__ = Chainlit(session)
     try:
@@ -181,7 +166,7 @@ def process_message(session: Session, input_str: str):
         __chainlit_sdk__.send_message(author="Error", is_error=True,
                                       content=str(e), final=True)
 
-
+# Handle message event
 @app.route('/message', methods=['POST'])
 def message():
     body = request.json

@@ -27,12 +27,10 @@ setup(
         "watchdog>=3.0.0",
         "watchdog_gevent>=0.1.1",
         "gevent>=22.10.2",
-        # "prisma>=0.8.2",
         "python-graphql-client>=0.4.3",
-    ],  # add any additional packages that
-    # needs to be installed along with your package. Eg: 'caer'
+    ],
     python_requires='>=3.7',
-    keywords=['langchain', 'ui', 'gen ai', 'chat ui'],
+    keywords=['langchain', 'ui', 'gen ai', 'chat ui', 'chatbot ui'],
     classifiers=[],
     package_data={
         'chainlit': ['frontend/dist/*', 'frontend/dist/assets/*', 'LICENSE'],

@@ -1,9 +1,7 @@
 from typing import Dict, TypedDict, Optional, Callable, Any
 from chainlit.client import BaseClient
+from chainlit.types import PromptResponse
 
-class PromptResponse(TypedDict):
-    content: str
-    author: str
 
 class Session(TypedDict):
     id: str

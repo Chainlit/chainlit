@@ -5,9 +5,10 @@ from pydantic.dataclasses import dataclass
 import importlib.util
 import click
 
+# Define paths and default configuration string
 root = os.getcwd()
-chainlit_config_dir = os.path.join(root, ".chainlit")
-chainlit_config_file = os.path.join(chainlit_config_dir, "config.toml")
+config_dir = os.path.join(root, ".chainlit")
+config_file = os.path.join(config_dir, "config.toml")
 
 default_config_str = """[project]
 # Name of the app and chatbot.
@@ -30,14 +31,13 @@ user_env = []
 #OPENAI_API_KEY = "..."
 """
 
-
+# Set environment and server URL
 chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
 if chainlit_env == "development":
     # chainlit_server = "http://localhost:3000"
     chainlit_server = "https://cloud.chainlit.io"
 else:
     chainlit_server = "https://cloud.chainlit.io"
-
 
 @dataclass
 class ChainlitConfig:
@@ -57,50 +57,51 @@ class ChainlitConfig:
     module_name: Optional[str] = None
     module: Any = None
 
-
 def init_config(log=False):
-    if not os.path.exists(chainlit_config_file):
-        os.makedirs(chainlit_config_dir, exist_ok=True)
-        with open(chainlit_config_file, 'w') as f:
+    """Initialize the configuration file if it doesn't exist."""
+    if not os.path.exists(config_file):
+        os.makedirs(config_dir, exist_ok=True)
+        with open(config_file, 'w') as f:
             f.write(default_config_str)
-            print("Created default config file at", chainlit_config_file)
+            print("Created default config file at", config_file)
     elif log:
-        print("Config file already exists at", chainlit_config_file)
-
+        print("Config file already exists at", config_file)
 
 def load_module(target: str):
+    """Load the specified module."""
     if not os.path.exists(target):
         raise click.BadParameter(f"File does not exist: {target}")
 
-    spec = importlib.util.spec_from_file_location(
-        target, target)
+    spec = importlib.util.spec_from_file_location(target, target)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
     config.module = module
 
-
 def load_config():
+    """Load the configuration from the config file."""
     init_config()
-    with open(chainlit_config_file, "rb") as f:
+    with open(config_file, "rb") as f:
         toml_dict = tomli.load(f)
 
+        # Load environment variables
         env = toml_dict.get("env", {})
         if env:
             os.environ.update(env)
 
-        chatbot_name = toml_dict.get("project", {}).get("name")
-        project_id = toml_dict.get("project", {}).get("id")
-        public = toml_dict.get("project", {}).get("public")
+        # Load project settings
+        project_settings = toml_dict.get("project", {})
+        chatbot_name = project_settings.get("name")
+        project_id = project_settings.get("id")
+        public = project_settings.get("public")
+        user_env = project_settings.get("user_env")
 
         if not public and not project_id:
-            raise ValueError(
-                "Project ID is required when public is set to false.")
+            raise ValueError("Project ID is required when public is set to false.")
 
-        user_env = toml_dict.get("project", {}).get("user_env")
-
-        lc_cache_path = os.path.join(chainlit_config_dir, ".langchain.db")
-        local_db_path = os.path.join(chainlit_config_dir, ".local.db")
+        # Set cache and database paths
+        lc_cache_path = os.path.join(config_dir, ".langchain.db")
+        local_db_path = os.path.join(config_dir, ".local.db")
 
         config = ChainlitConfig(
             root=root,
@@ -115,6 +116,5 @@ def load_config():
         )
 
     return config
-
 
 config = load_config()

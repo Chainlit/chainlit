@@ -6,8 +6,8 @@ from chainlit.config import config
 from chainlit.types import LLMSettings
 
 
-class UiCallbackHandler(BaseCallbackHandler):
-
+class ChainlitCallbackHandler(BaseCallbackHandler):
+    # Initialize dictionaries to store session data
     prompts_per_session: Dict[str, List[str]]
     llm_settings_per_session: Dict[str, LLMSettings]
     tool_sequence_per_session: Dict[str, List[str]]
@@ -30,6 +30,7 @@ class UiCallbackHandler(BaseCallbackHandler):
 
         session_id = sdk.session["id"]
 
+        # Initialize session sequences if not already present
         if session_id not in self.sequence_per_session:
             self.sequence_per_session[session_id] = []
 
@@ -52,6 +53,7 @@ class UiCallbackHandler(BaseCallbackHandler):
 
         session_id = sdk.session["id"]
 
+        # Remove the last element from the sequences
         if session_id in self.sequence_per_session and self.sequence_per_session[session_id]:
             self.sequence_per_session[session_id].pop()
 
@@ -66,6 +68,7 @@ class UiCallbackHandler(BaseCallbackHandler):
 
         session_id = sdk.session["id"]
 
+        # Initialize session prompts if not already present
         if session_id not in self.prompts_per_session:
             self.prompts_per_session[session_id] = []
 
@@ -81,9 +84,9 @@ class UiCallbackHandler(BaseCallbackHandler):
 
         session_id = sdk.session["id"]
 
+        # Remove the last prompt from the session
         if session_id in self.prompts_per_session and self.prompts_per_session[session_id]:
-            self.last_prompt_per_session[session_id] = self.prompts_per_session[session_id].pop(
-            )
+            self.last_prompt_per_session[session_id] = self.prompts_per_session[session_id].pop()
 
     def get_last_prompt(self):
         sdk = get_sdk()
@@ -123,6 +126,8 @@ class UiCallbackHandler(BaseCallbackHandler):
             prompt=prompt,
             llm_settings=llm_settings
         )
+
+    # Callbacks for various events
 
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
@@ -177,7 +182,6 @@ class UiCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["name"], is_tool=True)
-        # self.add_message(inputs["input"], False)
 
     def on_tool_end(
         self,
@@ -186,8 +190,6 @@ class UiCallbackHandler(BaseCallbackHandler):
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        # prompts = self.prompts.pop() if self.prompts else None
-        # self.add_message(output)
         self.pop_sequence(is_tool=True)
 
     def on_tool_error(
@@ -199,17 +201,10 @@ class UiCallbackHandler(BaseCallbackHandler):
 
     def on_text(self, text: str, **kwargs: Any) -> None:
         pass
-        # if 'is_relevant' in kwargs and kwargs['is_relevant']:
-        #     self.add_message(f"Information: {text}")
 
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
         pass
-        # prompts = self.prompts.pop() if self.prompts else None
-        # self.add_message(action.log, prompts=prompts)
-        # self.add_tool_in_sequence(action.tool)
 
     def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> None:
         """Run on agent end."""
         pass
-        # prompts = self.prompts.pop() if self.prompts else None
-        # self.add_message(f"{finish.log}", prompts=prompts)

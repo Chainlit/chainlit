@@ -10,33 +10,37 @@ class Chainlit:
     session: Optional[Session]
 
     def __init__(self, session: Session = None) -> None:
+        """Initialize Chainlit with an optional session."""
         self.session = session
+
+    def _get_session_property(self, property_name: str):
+        """Helper method to get a property from the session."""
+        if not hasattr(self, "session") or property_name not in self.session:
+            return None
+        return self.session[property_name]
 
     @property
     def emit(self):
-        if not hasattr(self, "session") or "emit" not in self.session:
-            return None
-        return self.session["emit"]
+        """Get the 'emit' property from the session."""
+        return self._get_session_property("emit")
 
     @property
     def prompt(self):
-        if not hasattr(self, "session") or "prompt" not in self.session:
-            return None
-        return self.session["prompt"]
+        """Get the 'prompt' property from the session."""
+        return self._get_session_property("prompt")
 
     @property
     def client(self) -> Union[BaseClient, None]:
-        if not hasattr(self, "session") or "client" not in self.session:
-            return None
-        return self.session["client"]
+        """Get the 'client' property from the session."""
+        return self._get_session_property("client")
 
     @property
     def conversation_id(self):
-        if not hasattr(self, "session") or "conversation_id" not in self.session:
-            return None
-        return self.session["conversation_id"]
+        """Get the 'conversation_id' property from the session."""
+        return self._get_session_property("conversation_id")
 
     def send_document(self, ext: str, content: bytes, name: str, type: DocumentType, display: DocumentDisplay):
+        """Send a document to the client."""
         if self.client and self.conversation_id:
             url = self.client.upload_document(ext=ext, content=content)
             document = self.client.create_document(
@@ -48,11 +52,14 @@ class Chainlit:
                 "type": type,
                 "display": display,
             }
-        self.emit('document', document)
+        if self.emit:
+            self.emit('document', document)
 
     def send_local_image(self, path: str, name: str, display: DocumentDisplay = "side"):
-        if self.emit is None:
+        """Send a local image to the client."""
+        if not self.emit:
             return
+
         with open(path, 'rb') as f:
             _, ext = os.path.splitext(path)
             type = "image"
@@ -60,14 +67,17 @@ class Chainlit:
             self.send_document(ext, image_data, name, type, display)
 
     def send_text_document(self, text: str, name: str, display: DocumentDisplay = "side"):
-        if self.emit is None:
+        """Send a text document to the client."""
+        if not self.emit:
             return
+
         type = "text"
         ext = ".txt"
         self.send_document(ext, bytes(text, "utf-8"), name, type, display)
 
     def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, final=False, llm_settings: LLMSettings = None):
-        if self.emit is None:
+        """Send a message to the client."""
+        if not self.emit:
             return
 
         if llm_settings is None and prompt is not None:
@@ -93,6 +103,7 @@ class Chainlit:
         self.emit("message", msg)
 
     def send_prompt_timeout(self, author: str):
+        """Send a prompt timeout message to the client."""
         self.send_message(
             author=author, content="Prompt timed out", is_error=True, final=True)
 
@@ -100,7 +111,8 @@ class Chainlit:
             self.emit("prompt_timeout", {})
 
     def send_prompt(self, author: str, content: str, timeout=60):
-        if self.prompt is None:
+        """Send a prompt to the client and wait for a response."""
+        if not self.prompt:
             return
 
         msg = {
@@ -134,12 +146,14 @@ class Chainlit:
             raise e
 
     def update_token_count(self, count: int):
-        if self.emit is None:
+        """Update the token count for the client."""
+        if not self.emit:
             return
         self.emit("token_usage", count)
 
 
 def get_sdk() -> Union[Chainlit, None]:
+    """Get the Chainlit SDK instance from the current call stack."""
     attr = "__chainlit_sdk__"
     candidates = [i[0].f_locals.get(attr) for i in inspect.stack()]
     sdk = None

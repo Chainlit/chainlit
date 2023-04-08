@@ -1,6 +1,6 @@
 import os
 
-default_markdown_str = """# Welcome to Chainlit! 🚀🤖
+DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
 
 Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
 
@@ -22,8 +22,8 @@ def init_markdown(root: str):
 
     if not os.path.exists(chainlit_md_file):
         with open(chainlit_md_file, 'w') as f:
-            f.write(default_markdown_str)
-            print("Created default chainlit markdown file at ", chainlit_md_file)
+            f.write(DEFAULT_MARKDOWN_STR)
+            print(f"Created default chainlit markdown file at {chainlit_md_file}")
 
 
 def get_markdown_str(root: str):
@@ -32,3 +32,5 @@ def get_markdown_str(root: str):
         with open(chainlit_md_path) as f:
             chainlit_md = f.read()
             return chainlit_md
+    else:
+        return None

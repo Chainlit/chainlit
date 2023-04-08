@@ -3,7 +3,17 @@ from typing import Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
 
 
-def wrap_user_function(user_function):
+def wrap_user_function(user_function: Callable) -> Callable:
+    """
+    Wraps a user-defined function to accept arguments as a dictionary.
+
+    Args:
+        user_function (Callable): The user-defined function to wrap.
+
+    Returns:
+        Callable: The wrapped function.
+    """
+
     def wrapper(*args):
         # Get the parameter names of the user-defined function
         user_function_params = list(
@@ -15,6 +25,7 @@ def wrap_user_function(user_function):
 
         # Call the user-defined function with the arguments
         return user_function(**params_values)
+
     return wrapper
 
 
@@ -95,7 +106,7 @@ def send_prompt(author: str, content: str, timeout=60):
         return sdk.send_prompt(author=author, content=content, timeout=timeout)
 
 
-def langchain_factory(func):
+def langchain_factory(func: Callable) -> Callable:
     """
     Plug and play decorator for the LangChain library.
     The decorated function should instantiate a new LangChain instance (Chain, Agent...).
@@ -113,7 +124,7 @@ def langchain_factory(func):
     return func
 
 
-def langchain_postprocess(func: Callable[[Any], str]):
+def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
     The decorated function takes the raw output of the LangChain object and return a string as the final response.
@@ -129,7 +140,7 @@ def langchain_postprocess(func: Callable[[Any], str]):
     return func
 
 
-def on_message(func):
+def on_message(func: Callable) -> Callable:
     """
     Framework agnostic decorator to react to messages coming from the UI.
     The decorated function is called every time a new message is received.
@@ -145,7 +156,7 @@ def on_message(func):
     return func
 
 
-def on_stop(func):
+def on_stop(func: Callable) -> Callable:
     """
     Hook to react to the user stopping a conversation.
 

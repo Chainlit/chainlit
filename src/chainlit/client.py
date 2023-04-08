@@ -1,11 +1,9 @@
+from typing import Dict, Any
 from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
 import uuid
 import requests
 from chainlit.types import DocumentType
-# from prisma.models import Message, Conversation
-# import json
-# from typing import Any
 
 
 class BaseClient(ABC):
@@ -16,7 +14,7 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    def create_message(self, variables: dict) -> int:
+    def create_message(self, variables: Dict[str, Any]) -> int:
         pass
 
     @abstractmethod
@@ -26,41 +24,6 @@ class BaseClient(ABC):
     @abstractmethod
     def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str) -> int:
         pass
-
-
-conversations_query = """query ($first: Int, $after: ID, $projectId: String!) {
-    conversations(first: $first, after: $after, projectId: $projectId) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      edges {
-        cursor
-        node {
-          id
-          createdAt
-          author {
-            name,
-            email
-          }
-        messages {
-            id
-            author
-            content
-            createdAt
-            language
-            prompt
-            llmSettings
-            final
-            isError
-            indent
-        }
-        }
-      }
-    }
-  }
-`;"""
-
 
 class CloudClient(BaseClient):
     def __init__(self, project_id: str, access_token: str, url: str):
@@ -73,33 +36,52 @@ class CloudClient(BaseClient):
         self.client = GraphqlClient(
             endpoint=graphql_endpoint, headers=self.headers)
 
-    def query(self, query, variables={}):
+    def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+        """
+        Execute a GraphQL query.
+
+        :param query: The GraphQL query string.
+        :param variables: A dictionary of variables for the query.
+        :return: The response data as a dictionary.
+        """
         return self.client.execute(query=query, variables=variables)
 
-    def mutation(self, mutation, variables={}):
+    def mutation(self, mutation: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+        """
+        Execute a GraphQL mutation.
+
+        :param mutation: The GraphQL mutation string.
+        :param variables: A dictionary of variables for the mutation.
+        :return: The response data as a dictionary.
+        """
         return self.client.execute(query=mutation, variables=variables)
 
-    def create_conversation(self, session_id: str):
-        mutation = """mutation ($projectId: String!, $sessionId: String!) {
+    def create_conversation(self, session_id: str) -> int:
+        mutation = """
+        mutation ($projectId: String!, $sessionId: String!) {
             createConversation(projectId: $projectId, sessionId: $sessionId) {
                 id
             }
-        }"""
+        }
+        """
         variables = {"projectId": self.project_id, "sessionId": session_id}
         res = self.mutation(mutation, variables)
         return int(res['data']['createConversation']["id"])
 
-    def create_message(self, variables: dict):
-        mutation = """mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $final: Boolean, $isError: Boolean, $indent: Int, $authorIsUser: Boolean) {
-            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, final: $final, isError: $isError, indent: $indent, authorIsUser: $authorIsUser) {
+    def create_message(self, variables: Dict[str, Any]) -> int:
+        mutation = """
+        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $final: Boolean, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean) {
+            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, final: $final, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer) {
                 id
             }
-        }"""
+        }
+        """
         res = self.mutation(mutation, variables)
         return int(res['data']['createMessage']["id"])
 
-    def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str):
-        mutation = """mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!) {
+    def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str) -> Dict[str, Any]:
+        mutation = """
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!) {
             createDocument(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display) {
                 id,
                 type,
@@ -107,7 +89,8 @@ class CloudClient(BaseClient):
                 name,
                 display
             }
-        }"""
+        }
+        """
         variables = {
             "conversationId": conversation_id,
             "type": type,
@@ -118,7 +101,7 @@ class CloudClient(BaseClient):
         res = self.mutation(mutation, variables)
         return res['data']['createDocument']
 
-    def upload_document(self, ext: str, content: bytes):
+    def upload_document(self, ext: str, content: bytes) -> str:
         id = f'{uuid.uuid4()}{ext}'
         url = f'{self.url}/api/upload'
         body = {'projectId': self.project_id, 'fileName': id}
@@ -134,59 +117,3 @@ class CloudClient(BaseClient):
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
         return url
-
-    # def get_conversations(self, project_id: str, first: int = None, after: int = None) -> int:
-    #     variables = {"projectId": project_id, "first": first, "after": after}
-    #     res = self.query(conversations_query, variables)
-    #     return res['data']['conversations']
-
-
-# class LocalClient(BaseClient):
-#     def __init__(self, project_id: str):
-#         self.project_id = project_id
-
-#     def create_message(self, msg: dict):
-#         msg = msg.copy()
-#         if "llmSettings" in msg:
-#             msg["llmSettings"] = json.dumps(msg["llmSettings"])
-#         res = Message.prisma().create(data=msg)
-#         return res.id
-
-#     def create_conversation(self, session_id: str):
-#         res = Conversation.prisma().create(
-#             data={"projectId": self.project_id, "sessionId": session_id})
-#         return res.id
-
-#     def upload_document(self, name: str, file_name: str, content: Any) -> int:
-#         return super().upload_document(name, content, file_name)
-
-#     # def get_conversations(self, project_id: str, first: int = None, after: int = None):
-#     #     skip = 0 if after is None else 1
-#     #     conversations = Conversation.prisma().find_many(
-#     #         take=first,
-#     #         skip=skip,
-#     #         cursor={
-#     #             "id": after
-#     #         },
-#     #         include={
-#     #             "messages": True
-#     #         },
-#     #         where={
-#     #             "projectId": project_id
-#     #         }
-#     #     )
-
-#     #     json_conversations = []
-
-#     #     for c in conversations:
-#     #         if not c.messages:
-#     #             continue
-#     #         messages = []
-#     #         for m in c.messages:
-#     #             if m.llmSettings:
-#     #                 m.llmSettings = json.loads(m.llmSettings)
-#     #             messages.append(m.dict())
-#     #         conversation = c.dict(exclude={"messages": True})
-#     #         conversation["messages"] = messages
-#     #         json_conversations.append(conversation)
-#     #     print(json_conversations)
