@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "cypress": "^12.9.0",
+    "dotenv": "^16.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "test": "npx ts-node ./scripts/e2e.ts"
+  }
+}

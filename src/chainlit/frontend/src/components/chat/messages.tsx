@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import { displayStepsState, IDocuments, IMessage } from "state/chat";
 import Message from "./message";
-import Home from "./home";
+import WelcomeScreen from "./welcomeScreen";
 import StopButton from "./stopButton";
 
 interface Props {
@@ -60,7 +60,7 @@ const Messages = ({ messages, documents }: Props) => {
       </Box>
     );
   } else {
-    return <Home />;
+    return <WelcomeScreen />;
   }
 };
 

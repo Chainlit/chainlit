@@ -3,7 +3,7 @@ import { useRecoilValue } from "recoil";
 import { accessTokenState, roleState } from "state/chat";
 
 export const useAuth = () => {
-  const { isAuthenticated, isLoading, user } = useAuth0();
+  const { isAuthenticated, ...other } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
   const role = useRecoilValue(roleState);
 
@@ -13,8 +13,7 @@ export const useAuth = () => {
     role,
     accessToken,
     isAuthenticated,
-    isLoading,
-    user,
     isProjectMember,
+    ...other,
   };
 };

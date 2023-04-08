@@ -103,8 +103,6 @@ const Chat = () => {
   }, [userEnv, accessToken]);
 
   const onSubmit = async (msg: string) => {
-    msg = clean(msg, agentRegexp, "@");
-
     const message: IMessage = {
       author: user?.name || "User",
       authorIsUser: true,

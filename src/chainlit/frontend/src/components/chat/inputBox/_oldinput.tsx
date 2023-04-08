@@ -55,6 +55,7 @@ const Input = ({ onSubmit }: Props) => {
   return (
     <TextField
       ref={ref}
+      id="chat-input"
       autoFocus
       variant="standard"
       autoComplete="false"

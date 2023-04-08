@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Alert, Box } from "@mui/material";
 import "./App.css";
 import {
   createBrowserRouter,
@@ -12,7 +12,6 @@ import { getProjectSettings, getRole } from "api";
 import theme from "theme";
 import { ThemeProvider } from "@mui/material";
 import { themeState } from "state/theme";
-import { useAuth0 } from "@auth0/auth0-react";
 import Home from "pages/Home";
 import Document from "pages/Document";
 import Login from "pages/Login";
@@ -22,6 +21,7 @@ import Dataset from "pages/Dataset";
 import Conversation from "pages/Conversation";
 import CloudProvider from "components/cloudProvider";
 import Env from "pages/Env";
+import { useAuth } from "hooks/auth";
 
 declare global {
   interface Window {
@@ -74,7 +74,8 @@ function App() {
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
-  const { isAuthenticated, getAccessTokenSilently, logout } = useAuth0();
+  const { isProjectMember, isAuthenticated, getAccessTokenSilently, logout } =
+    useAuth();
 
   useEffect(() => {
     if (pSettings === undefined) {
@@ -116,6 +117,10 @@ function App() {
 
   if (pSettings === undefined) {
     return null;
+  }
+
+  if (!pSettings.public && !isProjectMember) {
+    return <Alert severity="error">You are not part of this project.</Alert>;
   }
 
   return (

@@ -2,9 +2,18 @@ build
 
 *.egg-info
 
+.env
+
 venv
 
 .DS_Store
+
+.chainlit
+chainlit.md
+
+cypress/screenshots
+cypress/videos
+cypress/downloads
 
 __pycache__
 
@@ -12,6 +21,8 @@ __pycache__
 
 .langchain.db
 database.db
+
+.chroma
 
 # Logs
 logs

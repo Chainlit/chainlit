@@ -2,7 +2,7 @@ import os
 import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, ConnectionRefusedError
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
@@ -81,11 +81,11 @@ def connect():
         if request.headers.get("user-env"):
             user_env = json.loads(request.headers.get("user-env"))
         else:
-            return False
+            raise ConnectionRefusedError("Missing user environment")
 
     access_token = request.headers.get("Authorization")
     if not config.public and not access_token:
-        return False
+        raise ConnectionRefusedError("No access token provided")
     elif access_token and config.project_id:
         client = CloudClient(project_id=config.project_id, access_token=access_token,
                              url=config.chainlit_server)
