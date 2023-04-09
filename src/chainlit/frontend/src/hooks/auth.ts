@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRecoilValue } from "recoil";
-import { accessTokenState, roleState } from "state/chat";
+import { accessTokenState, roleState } from "state/user";
 
 export const useAuth = () => {
   const { isAuthenticated, ...other } = useAuth0();

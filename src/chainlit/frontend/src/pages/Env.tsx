@@ -6,12 +6,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import TopBar from "components/topBar";
+import TopBar from "components/header";
 import { useFormik } from "formik";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { projectSettingsState, userEnvState } from "state/chat";
+import { projectSettingsState } from "state/project";
+import { userEnvState } from "state/user";
 import * as yup from "yup";
 
 export default function Env() {

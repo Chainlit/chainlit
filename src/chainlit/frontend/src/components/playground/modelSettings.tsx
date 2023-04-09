@@ -1,5 +1,5 @@
 import { Stack, Box, ListSubheader } from "@mui/material";
-import { ILLMSettings, playgroundSettingsState } from "state/chat";
+import { ILLMSettings } from "state/chat";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -7,8 +7,9 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 import Slider from "components/slider";
 import { MuiChipsInput } from "mui-chips-input";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import { useEffect } from "react";
+import { playgroundSettingsState } from "state/playground";
 
 const models = {
   GPT4: ["gpt-4"],
@@ -17,8 +18,7 @@ const models = {
 };
 
 const ModelSettings = () => {
-  const settings = useRecoilValue(playgroundSettingsState);
-  const setSettings = useSetRecoilState(playgroundSettingsState);
+  const [settings, setSettings] = useRecoilState(playgroundSettingsState);
 
   const schema = yup.object({
     model_name: yup.string(),

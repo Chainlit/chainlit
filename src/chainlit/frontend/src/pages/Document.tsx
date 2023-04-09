@@ -1,4 +1,4 @@
-import DocumentView from "components/artifact/view";
+import DocumentView from "components/document/view";
 import Page from "pages/Page";
 
 export default function Document() {

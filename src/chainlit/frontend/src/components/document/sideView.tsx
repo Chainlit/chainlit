@@ -7,9 +7,9 @@ import {
   Stack,
 } from "@mui/material";
 import { styled, Theme, CSSObject } from "@mui/material/styles";
-import { renderDocument } from "components/artifact/view";
+import { renderDocument } from "components/document/view";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { documentSideViewState } from "state/chat";
+import { documentSideViewState } from "state/document";
 
 const drawerWidth = 400;
 

@@ -3,16 +3,10 @@ import { Alert, Box } from "@mui/material";
 import Messages from "./messages";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
-  accessTokenState,
-  agentState,
-  documentsState,
-  IDocument,
   IMessage,
   loadingState,
   messagesState,
-  projectSettingsState,
   tokenCountState,
-  userEnvState,
 } from "state/chat";
 import Loading from "./loading";
 import Playground from "components/playground";
@@ -24,18 +18,9 @@ import io from "socket.io-client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { toast } from "react-hot-toast";
 import useClearChat from "hooks/clearChat";
-
-const agentRegexp = /(@\[\w*\]\((\w*)\))/;
-
-const clean = (str: string, regexp: RegExp, prefix = "") => {
-  while (str.match(regexp)) {
-    const [before, match, entity, after] = str.split(regexp);
-    if (match && entity) {
-      str = str.replace(match, prefix + entity);
-    }
-  }
-  return str;
-};
+import { accessTokenState, userEnvState } from "state/user";
+import { IDocument, documentsState } from "state/document";
+import { projectSettingsState } from "state/project";
 
 const Chat = () => {
   const { user } = useAuth0();
@@ -45,7 +30,6 @@ const Chat = () => {
   const setLoading = useSetRecoilState(loadingState);
   const [documents, setDocuments] = useRecoilState(documentsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
-  const setAgents = useSetRecoilState(agentState);
   const [socketError, setSocketError] = useState(false);
   const setPSettings = useSetRecoilState(projectSettingsState);
   const clearChat = useClearChat();
@@ -64,12 +48,12 @@ const Chat = () => {
     });
 
     window.socket.on("connection", () => {
-      console.log("connected")
+      console.log("connected");
       setSocketError(false);
     });
 
     window.socket.on("connect_error", (err) => {
-      console.error("failed to connect", err)
+      console.error("failed to connect", err);
       setSocketError(true);
     });
 
@@ -96,9 +80,6 @@ const Chat = () => {
     });
     window.socket.on("token_usage", (count: number) => {
       setTokenCount((old) => old + count);
-    });
-    window.socket.on("agents", (agents: any) => {
-      setAgents(agents);
     });
   }, [userEnv, accessToken]);
 

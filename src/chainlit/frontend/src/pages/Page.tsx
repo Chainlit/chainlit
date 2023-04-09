@@ -1,13 +1,11 @@
 import { Alert, Box } from "@mui/material";
-import TopBar from "components/topBar";
+import Header from "components/header";
 import { useRecoilValue } from "recoil";
-import {
-  projectSettingsState,
-  userEnvState,
-} from "state/chat";
+import { projectSettingsState } from "state/project";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "hooks/auth";
+import { userEnvState } from "state/user";
 
 type Props = {
   children: JSX.Element;
@@ -35,8 +33,8 @@ const Page = ({ children }: Props) => {
     }
   }, [pSettings, userEnv]);
 
-  if (isPrivate && !isProjectMember) {
-    return null;
+  if (isPrivate && role && !isProjectMember) {
+    return <Alert severity="error">You are not part of this project.</Alert>;
   }
 
   const renderAnonymousWarning =
@@ -50,7 +48,7 @@ const Page = ({ children }: Props) => {
         flexGrow: 1,
       }}
     >
-      <TopBar />
+      <Header />
       {renderAnonymousWarning && (
         <Alert severity="info">
           You are currently logged in as an anonymous user. You will not be able

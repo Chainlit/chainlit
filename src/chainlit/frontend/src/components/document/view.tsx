@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import { documentsState, DocumentType, IDocument } from "state/chat";
-import DocumentText from "./documentText";
+import { documentsState, DocumentType, IDocument } from "state/document";
+import DocumentText from "./text";
 
 export const renderDocument = (document: IDocument, inline = false) => {
   switch (document.type) {

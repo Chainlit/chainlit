@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { useAuth } from "hooks/auth";
 import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/chat";
+import { projectSettingsState } from "state/project";
 
 interface Props {
   children: JSX.Element;

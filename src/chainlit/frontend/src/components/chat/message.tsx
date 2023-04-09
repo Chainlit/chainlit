@@ -1,17 +1,13 @@
 import { Box, IconButton, Link, Stack, Typography } from "@mui/material";
 import { Link as RRLink } from "react-router-dom";
-import reactStringReplace from "react-string-replace";
 import { useSetRecoilState } from "recoil";
-import {
-  documentSideViewState,
-  IDocuments,
-  IMessage,
-  playgroundState,
-} from "state/chat";
+import { IMessage } from "state/chat";
+import { documentSideViewState, IDocuments } from "state/document";
+import { playgroundState } from "state/playground";
 import EditIcon from "@mui/icons-material/Edit";
 import { getAgentColor } from "./agentAvatar";
 import { useState } from "react";
-import { renderDocument } from "components/artifact/view";
+import { renderDocument } from "components/document/view";
 import { CodeBlock, dracula } from "react-code-blocks";
 import FeedbackButtons from "./feedbackButtons";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
@@ -102,7 +98,6 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
                 lineHeight: "1.5rem",
                 textTransform: "uppercase",
                 color: getAgentColor(message.author),
-                // marginTop: "16px",
               }}
             >
               {showAvatar && message.author}

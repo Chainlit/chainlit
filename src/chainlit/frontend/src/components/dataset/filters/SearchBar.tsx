@@ -1,13 +1,12 @@
-import { ChangeEventHandler, useRef } from "react";
+import { useRef } from "react";
 import { styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
-
 import { debounce } from "lodash";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useRecoilState } from "recoil";
-import { datasetFiltersState } from "state/chat";
+import { datasetFiltersState } from "state/dataset";
 
 interface Props {}
 

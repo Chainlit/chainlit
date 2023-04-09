@@ -5,8 +5,7 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
   playgroundSettingsState,
   playgroundState,
-  userEnvState,
-} from "state/chat";
+} from "state/playground";
 import { useEffect, useState } from "react";
 import {
   Editor,
@@ -31,6 +30,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import ModelSettings from "./modelSettings";
 import { getCompletion } from "api";
 import { toast } from "react-hot-toast";
+import { userEnvState } from "state/user";
 
 const styleMap = {
   COMPLETION: {

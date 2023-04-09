@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { tokenCountState } from "state/chat";
-import Input from "./_oldinput";
+import Input from "./input";
 
 interface Props {
   onSubmit: (message: string) => void;

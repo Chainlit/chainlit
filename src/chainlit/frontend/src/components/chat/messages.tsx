@@ -1,10 +1,11 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
-import { displayStepsState, IDocuments, IMessage } from "state/chat";
+import { displayStepsState, IMessage } from "state/chat";
 import Message from "./message";
 import WelcomeScreen from "./welcomeScreen";
 import StopButton from "./stopButton";
+import { IDocuments } from "state/document";
 
 interface Props {
   messages: IMessage[];

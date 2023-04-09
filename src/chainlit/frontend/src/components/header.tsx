@@ -8,7 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 import UserAvatar from "./chat/userAvatar";
 import { useAuth } from "hooks/auth";
 import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/chat";
+import { projectSettingsState } from "state/project";
 import ThemeButton from "themeButton";
 import KeyIcon from "@mui/icons-material/Key";
 
@@ -38,7 +38,7 @@ function Nav() {
   );
 }
 
-export default function TopBar() {
+export default function Header() {
   const pSettings = useRecoilValue(projectSettingsState);
   const requiredKeys = !!pSettings?.userEnv?.length;
 

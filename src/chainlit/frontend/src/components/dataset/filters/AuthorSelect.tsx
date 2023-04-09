@@ -4,8 +4,9 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { datasetFiltersState, projectSettingsState } from "state/chat";
 import { gql, useQuery } from "@apollo/client";
+import { datasetFiltersState } from "state/dataset";
+import { projectSettingsState } from "state/project";
 
 const MembersQuery = gql`
   query ($projectId: String!) {

@@ -1,11 +1,12 @@
 import HistoryIcon from "@mui/icons-material/History";
 import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { historyOpenedState, projectSettingsState } from "state/chat";
+import { historyOpenedState } from "state/chat";
 import CloudProvider from "components/cloudProvider";
 import { memo, useEffect, useRef, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
+import { projectSettingsState } from "state/project";
 
 const ConversationsQuery = gql`
   query ($first: Int, $projectId: String!, $authorEmail: String) {

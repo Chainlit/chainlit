@@ -16,8 +16,8 @@ function runCommand(command: string, cwd = ROOT) {
 }
 
 export function installChainlit() {
-  // runCommand("npm run build", FRONTEND_DIR);
-  // runCommand("pip3 install ./src");
+  runCommand("npm run build", FRONTEND_DIR);
+  runCommand("pip3 install ./src");
 }
 
 export function runCypressSpec(example: string) {

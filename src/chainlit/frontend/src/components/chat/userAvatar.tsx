@@ -13,7 +13,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/chat";
+import { projectSettingsState } from "state/project";
 import { Link } from "react-router-dom";
 
 export default function UserAvatar() {

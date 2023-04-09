@@ -4,7 +4,7 @@ import ChatTopBar from "components/chat/topBar";
 import Page from "pages/Page";
 import { useParams } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
-import { IDocuments } from "state/chat";
+import { IDocuments } from "state/document";
 import DocumentSideView from "components/document/sideView";
 import Playground from "components/playground";
 

@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { IDocument } from "state/chat";
+import { IDocument } from "state/document";
 
 interface Props {
   document: IDocument;

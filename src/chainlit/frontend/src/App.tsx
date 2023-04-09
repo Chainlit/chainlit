@@ -1,4 +1,4 @@
-import { Alert, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import "./App.css";
 import {
   createBrowserRouter,
@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { useEffect } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { accessTokenState, projectSettingsState, roleState } from "state/chat";
+import { accessTokenState, roleState } from "state/user";
 import { getProjectSettings, getRole } from "api";
 import theme from "theme";
 import { ThemeProvider } from "@mui/material";
@@ -22,6 +22,7 @@ import Conversation from "pages/Conversation";
 import CloudProvider from "components/cloudProvider";
 import Env from "pages/Env";
 import { useAuth } from "hooks/auth";
+import { projectSettingsState } from "state/project";
 
 declare global {
   interface Window {
@@ -117,10 +118,6 @@ function App() {
 
   if (pSettings === undefined) {
     return null;
-  }
-
-  if (!pSettings.public && (role && !isProjectMember)) {
-    return <Alert severity="error">You are not part of this project.</Alert>;
   }
 
   return (

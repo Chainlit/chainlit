@@ -1,42 +1,30 @@
-import {
-  Box,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { MentionsInput, Mention } from "react-mentions-continued";
+import SendIcon from "@mui/icons-material/Send";
+import { IconButton, TextField } from "@mui/material";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { agentState, historyOpenedState, loadingState } from "state/chat";
-import { inputStyle, mentionStyle } from "./style";
-import AgentAvatar from "../agentAvatar";
+import { historyOpenedState, loadingState } from "state/chat";
 import HistoryButton from "components/chat/historyButton";
 
 interface Props {
   onSubmit: (message: string) => void;
 }
 
+const borderWidth = 0;
+const borderColor = "transparent";
+
 const Input = ({ onSubmit }: Props) => {
-  const ref = useRef<HTMLInputElement>();
+  const ref = useRef<any>();
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
-  const agents = useRecoilValue(agentState);
   const [value, setValue] = useState("");
-  const theme = useTheme();
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.focus();
-    }
-  }, []);
 
   useEffect(() => {
     if (ref.current && !loading) {
-      ref.current.focus();
+      ref.current.querySelector("input")?.focus();
     }
   }, [loading]);
+
 
   const submit = useCallback(() => {
     if (value === "" || loading) {
@@ -44,70 +32,90 @@ const Input = ({ onSubmit }: Props) => {
     }
     onSubmit(value);
     setValue("");
-  }, [value, loading, onSubmit]);
+  }, [value, loading, setValue, onSubmit]);
 
-  const renderAgentSuggestionItem = useCallback((suggestion: any) => {
-    const agent = agents?.find((a) => a.id === suggestion.id);
-    if (!agent) {
-      return null;
-    }
-    return (
-      <ListItem>
-        <ListItemAvatar>
-          <AgentAvatar agent={agent.id} />
-        </ListItemAvatar>
-        <ListItemText
-          primary={<Typography color="text.primary">{agent.id}</Typography>}
-          // secondary={agent.description}
-        />
-      </ListItem>
-    );
-  }, []);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+      } else if (e.key === "ArrowUp") {
+        hSetOpen(true);
+      }
+    },
+    [submit, hSetOpen]
+  );
 
   const onHistoryClick = useCallback((content: string) => {
     if (ref.current) {
       setValue(content);
-      window.requestAnimationFrame(() => {
-        ref.current!.focus();
-      });
     }
   }, []);
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      bgcolor="background.paper"
-      borderRadius={1}
-    >
-      <HistoryButton onClick={onHistoryClick} />
-      <MentionsInput
-        inputRef={ref}
-        style={inputStyle(theme)}
-        placeholder="Type here..."
-        singleLine
-        forceSuggestionsAboveCursor
-        value={value}
-        onChange={(e: any) => setValue(e.target.value)}
-        onKeyDown={(e: any) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            submit();
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            hSetOpen(true);
-          }
-        }}
-      >
-        <Mention
-          style={mentionStyle(theme)}
-          trigger="@"
-          displayTransform={(id: string, display: string) => "@" + display}
-          data={agents || []}
-          renderSuggestion={renderAgentSuggestionItem}
-        />
-      </MentionsInput>
-    </Box>
+    <TextField
+      ref={ref}
+      id="chat-input"
+      autoFocus
+      variant="standard"
+      autoComplete="false"
+      placeholder="Type your message here..."
+      disabled={loading}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={handleKeyDown}
+      value={value}
+      fullWidth
+      InputProps={{
+        disableUnderline: true,
+        startAdornment: (
+          <InputAdornment sx={{ ml: 1, color: "text.secondary" }} position="start">
+            <HistoryButton onClick={onHistoryClick} />
+          </InputAdornment>
+        ),
+        endAdornment: (
+          <InputAdornment
+            position="end"
+            sx={{ mr: 1, color: "text.secondary" }}
+          >
+            <IconButton
+              disabled={loading}
+              color="inherit"
+              onClick={() => submit()}
+            >
+              <SendIcon />
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        backgroundColor: "background.paper",
+        borderRadius: 1,
+
+        input: {
+          height: "27px",
+          paddingBottom: "0.75rem",
+          paddingTop: "0.75rem",
+          color: "text.primary",
+        },
+        fieldset: {
+          borderRadius: 1,
+          borderWidth,
+          borderColor: borderColor,
+        },
+        "&:hover .MuiOutlinedInput-notchedOutline": {
+          borderWidth,
+          borderColor: borderColor,
+        },
+        "&:focus .MuiOutlinedInput-notchedOutline": {
+          borderWidth,
+          borderColor: borderColor,
+        },
+        "&:active .MuiOutlinedInput-notchedOutline": {
+          borderWidth,
+          borderColor: borderColor,
+        },
+      }}
+    />
   );
 };
 

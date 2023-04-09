@@ -1,6 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
 import { useRecoilValue } from "recoil";
-import { datasetFiltersState, projectSettingsState } from "state/chat";
 import { Alert, Box, Stack, Tooltip, Typography } from "@mui/material";
 import InfiniteLoader from "react-window-infinite-loader";
 import { FixedSizeList } from "react-window";
@@ -8,6 +7,8 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import DeleteConversationButton from "./deleteConversationButton";
 import OpenConversationButton from "./openConversationButton";
 import { useCallback, useEffect } from "react";
+import { datasetFiltersState } from "state/dataset";
+import { projectSettingsState } from "state/project";
 
 const ConversationsQuery = gql`
   query (

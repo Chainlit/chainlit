@@ -1,6 +1,6 @@
 import { Box, Link } from "@mui/material";
 import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/chat";
+import { projectSettingsState } from "state/project";
 import { LogoFull } from "components/logo";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
