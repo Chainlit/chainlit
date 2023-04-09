@@ -75,8 +75,7 @@ function App() {
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
-  const { isProjectMember, isAuthenticated,role, getAccessTokenSilently, logout } =
-    useAuth();
+  const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
 
   useEffect(() => {
     if (pSettings === undefined) {
@@ -92,13 +91,14 @@ function App() {
         },
       })
         .then((token) => setAccessToken(token))
-        .catch((err) =>
+        .catch((err) => {
+          console.error(err);
           logout({
             logoutParams: {
               returnTo: window.location.origin,
             },
-          })
-        );
+          });
+        });
     }
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
 

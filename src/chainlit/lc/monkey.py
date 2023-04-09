@@ -91,6 +91,7 @@ def generate(
         missing_prompt_idxs,
         missing_prompts,
     ) = llm_base.get_prompts(params, prompts)
+
     if len(missing_prompts) > 0:
         self.callback_manager.on_llm_start(
             {"name": self.__class__.__name__}, missing_prompts, verbose=self.verbose, llm_settings=llm_settings,

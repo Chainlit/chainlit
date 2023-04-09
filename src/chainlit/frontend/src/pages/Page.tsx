@@ -12,7 +12,8 @@ type Props = {
 };
 
 const Page = ({ children }: Props) => {
-  const { isProjectMember, isAuthenticated, isLoading, role } = useAuth();
+  const { isProjectMember, isAuthenticated, isLoading, role, accessToken } =
+    useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
   const userEnv = useRecoilValue(userEnvState);
@@ -32,6 +33,10 @@ const Page = ({ children }: Props) => {
       }
     }
   }, [pSettings, userEnv]);
+
+  if (isPrivate && !accessToken) {
+    return null;
+  }
 
   if (isPrivate && role && !isProjectMember) {
     return <Alert severity="error">You are not part of this project.</Alert>;

@@ -113,7 +113,7 @@ def connect():
 
     if not config.lc_factory and not config.on_message:
         raise ValueError(
-            "Module does not expose a langchain factory or on_nessage function")
+            "Module does not expose a @langchain_factory or @on_message function")
 
 # Handle socket disconnection
 @socketio.on('disconnect')
