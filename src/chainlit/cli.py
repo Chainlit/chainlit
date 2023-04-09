@@ -104,7 +104,6 @@ def run_chainlit(target, watch, headless, debug, args=None, **kwargs):
         webbrowser.open(f"http://127.0.0.1:{PORT}")
 
     from chainlit.server import socketio, app
-    print("Chainlit server started")
     socketio.run(app, port=PORT, debug=debug, use_reloader=False)
 
 

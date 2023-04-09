@@ -1,6 +1,6 @@
 import { submitMessage } from "./utils";
 
-describe("LangChain QA", () => {
+describe("LangChain MRKL", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
     cy.intercept("/message").as("message");
@@ -11,21 +11,16 @@ describe("LangChain QA", () => {
   it("should work locally", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage(
-      "What is the U.S. Department of Justice doing to combat the crimes of Russian oligarchs?"
+      "Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?"
     );
     cy.get("#chat-loading").should("exist");
     cy.wait(["@message"]);
     cy.get("#chat-loading").should("not.exist");
-    const messages = cy.get(".message");
+    let messages = cy.get(".message");
     messages.should("have.length", 2);
-
-    messages.eq(1).should("contain", "Sources: 3-pl");
-
-    const links = cy.get(".document-link");
-    links.eq(0).should("contain", "3-pl");
-    links.eq(0).click();
-
-    const sideView = cy.get("#side-view-content");
-    sideView.should("exist");
+    cy.get("#steps-toggle").click();
+    cy.wait(1000);
+    messages = cy.get(".message");
+    messages.should("have.length", 8);
   });
 });

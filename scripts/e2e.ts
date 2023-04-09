@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { installChainlit, runChainlit, runCypressSpec } from "./utils";
 
-const examples = ["lc_qa"];
+const examples = ["openai_sql", "lc_mrkl", "lc_qa"];
 
 async function runTest(example: string) {
   let childProcess;
@@ -22,4 +22,11 @@ async function main() {
   }
 }
 
-main();
+main()
+  .then(() => {
+    console.log("Done!");
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

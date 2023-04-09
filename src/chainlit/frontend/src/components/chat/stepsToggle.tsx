@@ -18,6 +18,7 @@ const StepsToggle = ({ sx }: Props) => {
       sx={sx}
       control={
         <Switch
+          id="steps-toggle"
           checked={display}
           onChange={(e) => setDisplay(e.target.checked)}
         />

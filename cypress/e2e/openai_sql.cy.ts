@@ -1,6 +1,6 @@
 import { submitMessage } from "./utils";
 
-describe("LangChain QA", () => {
+describe("OpenAI SQL", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
     cy.intercept("/message").as("message");
@@ -11,7 +11,7 @@ describe("LangChain QA", () => {
   it("should work locally", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage(
-      "What is the U.S. Department of Justice doing to combat the crimes of Russian oligarchs?"
+      "How many minutes of video were watched"
     );
     cy.get("#chat-loading").should("exist");
     cy.wait(["@message"]);
@@ -19,13 +19,6 @@ describe("LangChain QA", () => {
     const messages = cy.get(".message");
     messages.should("have.length", 2);
 
-    messages.eq(1).should("contain", "Sources: 3-pl");
-
-    const links = cy.get(".document-link");
-    links.eq(0).should("contain", "3-pl");
-    links.eq(0).click();
-
-    const sideView = cy.get("#side-view-content");
-    sideView.should("exist");
+    messages.eq(1).should("contain", "SELECT");
   });
 });

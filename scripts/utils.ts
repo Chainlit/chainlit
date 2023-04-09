@@ -16,8 +16,8 @@ function runCommand(command: string, cwd = ROOT) {
 }
 
 export function installChainlit() {
-  runCommand("npm run build", FRONTEND_DIR);
-  runCommand("pip3 install ./src");
+  // runCommand("npm run build", FRONTEND_DIR);
+  // runCommand("pip3 install ./src");
 }
 
 export function runCypressSpec(example: string) {
@@ -32,18 +32,25 @@ export async function runChainlit(example: string) {
     const child = spawn("chainlit", ["run", example_file, "-h"], {
       cwd: example_dir,
       env: process.env,
+      stdio: "inherit",
     });
 
     setTimeout(() => {
+      // todo listen for stdout. passing process.env makes stdout silent for some reason.
       resolve(child);
     }, 3000);
 
-    child.stderr.on("data", (data) => {
+
+    child.stderr?.on("data", (data) => {
       reject(data.toString());
     });
 
-    child.on("exit", function (code?: number) {
-      reject("child process exited with code " + code?.toString());
+    child.on("error", (error) => {
+      reject(error.message);
+    });
+
+    child.on("exit", function (code) {
+      reject("child process exited with code " + code);
     });
   });
 }

@@ -32,6 +32,7 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
   const documentRegexp = documentNames.length
     ? new RegExp(`(${documentNames.join("|")})`, "g")
     : undefined;
+
   const editButton = message.prompt && (
     <IconButton
       color="primary"
@@ -71,6 +72,7 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
         color: "text.primary",
         backgroundColor: "transparent",
       }}
+      className="message"
       onMouseEnter={(e) => setHover(true)}
       onMouseLeave={(e) => setHover(false)}
     >
@@ -158,6 +160,7 @@ const Message = ({ message, documents, showAvatar, isLast }: Props) => {
 
                     return (
                       <Link
+                        className="document-link"
                         onClick={() => {
                           if (document.display === "side") {
                             setSideView(document);

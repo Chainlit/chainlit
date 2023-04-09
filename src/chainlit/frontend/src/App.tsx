@@ -74,7 +74,7 @@ function App() {
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
-  const { isProjectMember, isAuthenticated, getAccessTokenSilently, logout } =
+  const { isProjectMember, isAuthenticated,role, getAccessTokenSilently, logout } =
     useAuth();
 
   useEffect(() => {
@@ -119,7 +119,7 @@ function App() {
     return null;
   }
 
-  if (!pSettings.public && !isProjectMember) {
+  if (!pSettings.public && (role && !isProjectMember)) {
     return <Alert severity="error">You are not part of this project.</Alert>;
   }
 

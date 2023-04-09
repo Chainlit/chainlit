@@ -73,7 +73,7 @@ const DocumentSideView = () => {
         </IconButton>
       </Stack>
 
-      <Box mt="1.5rem">{document && renderDocument(document)}</Box>
+      <Box mt="1.5rem" id="side-view-content">{document && renderDocument(document)}</Box>
     </Drawer>
   );
 };
