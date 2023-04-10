@@ -146,10 +146,6 @@ export default function ConversationTable() {
       minWidth: "120px",
       width: "25%",
     },
-    // Messages: {
-    //   minWidth: "80px",
-    //   width: "12.5%",
-    // },
     Actions: {
       minWidth: "80px",
       width: "10%",
@@ -158,7 +154,6 @@ export default function ConversationTable() {
 
   const RowText = ({ text, col }: any) => {
     return (
-      // <Tooltip title={text}>
       <Typography
         noWrap
         sx={{
@@ -170,7 +165,6 @@ export default function ConversationTable() {
       >
         {text}
       </Typography>
-      // </Tooltip>
     );
   };
 
@@ -195,8 +189,6 @@ export default function ConversationTable() {
           text={serializeDate(conversation.createdAt)}
           col={columns["Date"]}
         />
-        {/* <RowText text={conversation.messageCount} col={columns["Messages"]} /> */}
-
         <Stack
           direction="row"
           sx={{

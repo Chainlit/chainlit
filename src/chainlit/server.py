@@ -137,7 +137,7 @@ def stop():
             config.on_stop(session["user_env"])
 
         __chainlit_sdk__.send_message(
-            author="System", content="Conversation stopped by the user.", final=True)
+            author="System", content="Conversation stopped by the user.")
 
         task.kill()
         task.join()
@@ -159,12 +159,12 @@ def process_message(session: Session, input_str: str):
             else:
                 res = raw_res
             __chainlit_sdk__.send_message(
-                author=agent_name, content=res, final=True)
+                author=agent_name, content=res)
         elif config.on_message:
             config.on_message(input_str, session["user_env"])
     except Exception as e:
         __chainlit_sdk__.send_message(author="Error", is_error=True,
-                                      content=str(e), final=True)
+                                      content=str(e))
 
 # Handle message event
 @app.route('/message', methods=['POST'])

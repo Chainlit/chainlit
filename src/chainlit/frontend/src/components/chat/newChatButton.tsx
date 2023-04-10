@@ -4,13 +4,12 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useClearChat from "hooks/clearChat";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import AddIcon from "@mui/icons-material/Add";
 
-export default function ClearChatButton() {
+export default function NewChatButton() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const clearChat = useClearChat();
@@ -31,13 +30,9 @@ export default function ClearChatButton() {
 
   return (
     <div>
-      <Tooltip title="Clear messages">
-        <span>
-          <IconButton edge="end" onClick={handleClickOpen}>
-            <RefreshIcon />
-          </IconButton>
-        </span>
-      </Tooltip>
+      <Button onClick={handleClickOpen} startIcon={<AddIcon />}>
+        New Chat
+      </Button>
       <Dialog
         open={open}
         onClose={handleClose}

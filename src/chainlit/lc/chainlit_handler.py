@@ -5,6 +5,7 @@ from chainlit.sdk import get_sdk
 from chainlit.config import config
 from chainlit.types import LLMSettings
 
+IGNORE_LIST = ["AgentExecutor"]
 
 class ChainlitCallbackHandler(BaseCallbackHandler):
     # Initialize dictionaries to store session data
@@ -117,6 +118,9 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
             author = all_sequence[-1]
         else:
             author = config.chatbot_name
+
+        if author in IGNORE_LIST:
+            return
 
         sdk.send_message(
             author=author,

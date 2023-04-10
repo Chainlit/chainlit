@@ -37,6 +37,5 @@ def main(message: str, env):
         language="sql",
         content=content,
         prompt=fromatted_prompt,
-        final=True, 
         llm_settings=LLMSettings(model_name=model_name, **settings)
     )

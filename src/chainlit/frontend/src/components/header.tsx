@@ -19,8 +19,7 @@ function Nav() {
   const tabs = [{ to: "/", label: "Chat" }];
 
   if (isProjectMember) {
-    tabs.push({ to: "/dataset", label: "Dataset" });
-    tabs.push({ to: "/test", label: "Test" });
+    tabs.push({ to: "/dataset", label: "History" });
   }
 
   const value = tabs.findIndex((t) => location.pathname === t.to);

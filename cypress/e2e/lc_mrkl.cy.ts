@@ -13,14 +13,12 @@ describe("LangChain MRKL", () => {
     submitMessage(
       "Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?"
     );
-    cy.get("#chat-loading").should("exist");
+    cy.get("#llmchain-loading").should("exist")
     cy.wait(["@message"]);
-    cy.get("#chat-loading").should("not.exist");
     let messages = cy.get(".message");
     messages.should("have.length", 2);
-    cy.get("#steps-toggle").click();
-    cy.wait(1000);
+    cy.get("#llmchain-done").click()
     messages = cy.get(".message");
-    messages.should("have.length", 8);
+    messages.should("have.length.above", 2);
   });
 });

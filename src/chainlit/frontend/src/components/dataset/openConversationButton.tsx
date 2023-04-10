@@ -1,5 +1,5 @@
-import OpenInNew from "@mui/icons-material/OpenInNew";
-import { IconButton, Tooltip } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -8,17 +8,13 @@ interface Props {
 
 export default function OpenConversationButton({ conversationId }: Props) {
   return (
-    // <Tooltip title="Open conversation">
-    //   <span>
     <IconButton
       component={Link}
       to={`/conversations/${conversationId}`}
       size="small"
       color="primary"
     >
-      <OpenInNew />
+      <VisibilityIcon />
     </IconButton>
-    //   </span>
-    // </Tooltip>
   );
 }

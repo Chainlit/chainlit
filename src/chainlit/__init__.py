@@ -63,7 +63,7 @@ def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
         sdk.send_local_image(path, name, display)
 
 
-def send_message(author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, final=False, llm_settings: LLMSettings = None):
+def send_message(author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None):
     """
     Send a message to the chatbot UI.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
@@ -73,16 +73,15 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
         content (str): The content of the message.
         prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
-        indent (int, optional): Number of indents to add to the message in the UI.
+        indent (int, optional): If positive, the message will be nested in the UI.
         is_error (bool, optional): Whether the message indicates an error.
-        final (bool, optional): Whether the message is the final answer (vs a chain of thought step).
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(author, content, prompt, language,
-                         indent, is_error, final, llm_settings)
+        sdk.send_message(author=author, content=content, prompt=prompt, language=language,
+                         indent=indent, is_error=is_error, llm_settings=llm_settings)
 
 
 def send_prompt(author: str, content: str, timeout=60):

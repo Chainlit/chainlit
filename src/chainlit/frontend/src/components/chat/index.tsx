@@ -1,6 +1,6 @@
 import { getProjectSettings, postMessage, server } from "api";
 import { Alert, Box } from "@mui/material";
-import Messages from "./messages";
+import MessageContainer from "./message/container";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   IMessage,
@@ -8,7 +8,6 @@ import {
   messagesState,
   tokenCountState,
 } from "state/chat";
-import Loading from "./loading";
 import Playground from "components/playground";
 import DocumentSideView from "components/document/sideView";
 import ChatTopBar from "./topBar";
@@ -105,12 +104,11 @@ const Chat = () => {
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
       <Playground />
       <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
-        <Loading />
         {socketError && (
           <Alert severity="error">Could not reach the server.</Alert>
         )}
         <ChatTopBar />
-        <Messages documents={documents} messages={messages} />
+        <MessageContainer documents={documents} messages={messages} />
         <InputBox onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />

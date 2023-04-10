@@ -1,6 +1,5 @@
 import { Box } from "@mui/material";
-import Messages from "components/chat/messages";
-import ChatTopBar from "components/chat/topBar";
+import MessageContainer from "components/chat/message/container";
 import Page from "pages/Page";
 import { useParams } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
@@ -15,7 +14,6 @@ const ConversationQuery = gql`
       createdAt
       messages {
         id
-        final
         isError
         indent
         author
@@ -62,8 +60,8 @@ export default function Conversation() {
           flexDirection="column"
           overflow="scroll"
         >
-          <ChatTopBar />
-          <Messages
+          <Box my={2} />
+          <MessageContainer
             documents={documents}
             messages={data.conversation.messages}
           />

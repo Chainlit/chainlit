@@ -13,9 +13,7 @@ describe("OpenAI SQL", () => {
     submitMessage(
       "How many minutes of video were watched"
     );
-    cy.get("#chat-loading").should("exist");
     cy.wait(["@message"]);
-    cy.get("#chat-loading").should("not.exist");
     const messages = cy.get(".message");
     messages.should("have.length", 2);
 

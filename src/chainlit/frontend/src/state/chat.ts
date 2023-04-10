@@ -19,10 +19,13 @@ export interface IMessage {
   humanFeedback?: number;
   language?: string;
   indent?: number;
-  final?: boolean;
   isError?: boolean;
   prompt?: string;
   llmSettings?: ILLMSettings;
+}
+
+export interface INestedMessage extends IMessage {
+  subMessages?: IMessage[];
 }
 
 export const messagesState = atom<IMessage[]>({
@@ -38,11 +41,6 @@ export const tokenCountState = atom<number>({
 
 export const loadingState = atom<boolean>({
   key: "Loading",
-  default: false,
-});
-
-export const displayStepsState = atom<boolean>({
-  key: "DisplaySteps",
   default: false,
 });
 

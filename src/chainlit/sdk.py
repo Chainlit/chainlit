@@ -75,7 +75,7 @@ class Chainlit:
         ext = ".txt"
         self.send_document(ext, bytes(text, "utf-8"), name, type, display)
 
-    def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, final=False, llm_settings: LLMSettings = None):
+    def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None):
         """Send a message to the client."""
         if not self.emit:
             return
@@ -95,7 +95,6 @@ class Chainlit:
             "isError": is_error,
             "prompt": prompt,
             "llmSettings": llm_settings,
-            "final": final,
         }
         if self.client and self.conversation_id:
             message_id = self.client.create_message(msg)
@@ -105,7 +104,7 @@ class Chainlit:
     def send_prompt_timeout(self, author: str):
         """Send a prompt timeout message to the client."""
         self.send_message(
-            author=author, content="Prompt timed out", is_error=True, final=True)
+            author=author, content="Prompt timed out", is_error=True)
 
         if self.emit:
             self.emit("prompt_timeout", {})
@@ -120,7 +119,6 @@ class Chainlit:
             "author": author,
             "content": content,
             "waitForAnswer": True,
-            "final": True
         }
 
         if self.client and self.conversation_id:
@@ -135,7 +133,6 @@ class Chainlit:
                     "conversationId": self.conversation_id,
                     "author": res["author"],
                     "content": res["content"],
-                    "final": True
 
                 }
                 self.client.create_message(res_msg)
