@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useClearChat from "hooks/clearChat";
 import AddIcon from "@mui/icons-material/Add";
+import { Box } from "@mui/material";
 
 export default function NewChatButton() {
   const navigate = useNavigate();
@@ -29,8 +30,8 @@ export default function NewChatButton() {
   };
 
   return (
-    <div>
-      <Button onClick={handleClickOpen} startIcon={<AddIcon />}>
+    <Box color="text.primary">
+      <Button color="inherit" onClick={handleClickOpen} startIcon={<AddIcon />}>
         New Chat
       </Button>
       <Dialog
@@ -53,6 +54,6 @@ export default function NewChatButton() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }

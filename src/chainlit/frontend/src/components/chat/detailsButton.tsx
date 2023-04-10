@@ -1,7 +1,8 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { INestedMessage } from "state/chat";
-import { Button, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+import GreyButton from "components/greyButton";
 
 interface Props {
   message: INestedMessage;
@@ -37,20 +38,24 @@ export default function DetailsButton({
   }
 
   return (
-    <Button
+    <GreyButton
       id={id}
-      color={loading ? "success" : "primary"}
+      disableElevation
+      disableRipple
+      sx={{
+        textTransform: "none",
+      }}
+      color="primary"
       startIcon={
         loading ? <CircularProgress color="inherit" size={18} /> : undefined
       }
-      size="large"
-      variant="outlined"
+      variant="contained"
       endIcon={
         tool ? opened ? <ExpandLessIcon /> : <ExpandMoreIcon /> : undefined
       }
       onClick={tool ? onClick : undefined}
     >
       {text}
-    </Button>
+    </GreyButton>
   );
 }

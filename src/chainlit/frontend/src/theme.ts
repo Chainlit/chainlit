@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import Grey from "@mui/material/colors/grey";
 
 const typography = {
   fontFamily: ["Inter", "sans-serif"].join(","),
@@ -10,7 +11,7 @@ const components = {
       disableElevation: true,
       disableRipple: true,
       sx: {
-        textTransform: "capitalize",
+        textTransform: "none",
       },
     },
   },
@@ -95,5 +96,16 @@ const lightTheme = createTheme({
 
 const theme = (variant: "dark" | "light") =>
   variant === "dark" ? darkTheme : lightTheme;
+
+export const greyButtonTheme = createTheme({
+  components,
+  typography,
+  palette: {
+    primary: {
+      main: Grey[300],
+      contrastText: "black",
+    },
+  },
+});
 
 export default theme;
