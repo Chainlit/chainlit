@@ -19,13 +19,6 @@ export default function StopButton() {
       color="error"
       variant="contained"
       onClick={handleClick}
-      sx={{
-        bottom: "80px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        position: "fixed",
-        zIndex: 10,
-      }}
     >
       Stop
     </Button>

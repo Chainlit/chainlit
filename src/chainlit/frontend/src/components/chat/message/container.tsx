@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { IMessage, INestedMessage } from "state/chat";
 import WelcomeScreen from "components/chat/welcomeScreen";
-import StopButton from "components/chat/stopButton";
 import { IDocuments } from "state/document";
 import Messages from "./messages";
 
@@ -72,7 +71,6 @@ const MessageContainer = ({ messages, documents }: Props) => {
           overflow: "scroll",
         }}
       >
-        <StopButton />
         <Messages indent={0} messages={nestedMessages} documents={documents} />
       </Box>
     );
