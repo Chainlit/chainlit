@@ -36,7 +36,6 @@ PORT = 8000
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
 LOG_LEVELS = ("error", "warning", "info", "debug")
 
-
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
 @click.option("--log-level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Chainlit")
@@ -102,10 +101,14 @@ def run_chainlit(target, watch, headless, debug, args=None, **kwargs):
     if watch:
         watch_directory()
 
-    if not headless and config.chainlit_env == "development":
-        webbrowser.open(f"http://127.0.0.1:{PORT}")
-
     from chainlit.server import socketio, app
+
+    def open_browser(headless: bool):
+        if not headless and config.chainlit_env == "development":
+            socketio.sleep(2)
+            webbrowser.open(f"http://127.0.0.1:{PORT}")
+    
+    socketio.start_background_task(open_browser, headless)
     socketio.run(app, port=PORT, debug=debug, use_reloader=False)
 
 
