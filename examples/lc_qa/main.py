@@ -1,7 +1,7 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
-from langchain.chains import VectorDBQAWithSourcesChain
+from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -43,14 +43,12 @@ messages = [
 prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
 
+
 @langchain_factory
 def load():
-    chain = VectorDBQAWithSourcesChain.from_chain_type(
-        ChatOpenAI(temperature=0),
-        chain_type="stuff",
-        vectorstore=docsearch,
-        chain_type_kwargs=chain_type_kwargs,
-    )
+    chain = RetrievalQAWithSourcesChain.from_chain_type(ChatOpenAI(
+        temperature=0), chain_type="stuff", retriever=docsearch.as_retriever())
+
     return chain
 
 

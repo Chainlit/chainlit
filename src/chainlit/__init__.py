@@ -3,7 +3,7 @@ from typing import Callable, Any
 from chainlit.types import DocumentDisplay, LLMSettings
 
 
-def wrap_user_function(user_function: Callable) -> Callable:
+def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
     Wraps a user-defined function to accept arguments as a dictionary.
 
@@ -15,6 +15,8 @@ def wrap_user_function(user_function: Callable) -> Callable:
     """
 
     def wrapper(*args):
+        from chainlit.sdk import get_sdk
+        sdk = get_sdk()
         # Get the parameter names of the user-defined function
         user_function_params = list(
             inspect.signature(user_function).parameters.keys())
@@ -23,8 +25,15 @@ def wrap_user_function(user_function: Callable) -> Callable:
         params_values = {param_name: arg for param_name,
                          arg in zip(user_function_params, args)}
 
-        # Call the user-defined function with the arguments
-        return user_function(**params_values)
+        if with_task and sdk:
+            sdk.task_start()
+
+        try:
+            # Call the user-defined function with the arguments
+            return user_function(**params_values)
+        finally:
+            if with_task and sdk:
+                sdk.task_end()
 
     return wrapper
 
@@ -84,25 +93,24 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
                          indent=indent, is_error=is_error, llm_settings=llm_settings)
 
 
-def send_prompt(author: str, content: str, timeout=60):
+def ask_user(author: str, content: str, timeout=60, raise_on_timeout=False):
     """
     Send a question to the chatbot UI that the user must answer before continuing.
-    Not to be confused with LLMs prompts.
-    If the user does not answer in time (see timeout), a TimeoutError is raised and a message indicating the timeout is sent.
+    If the user does not answer in time (see timeout)
     If a project ID is configured, the messages will be uploaded to the cloud storage.
 
     Args:
         author (str): The author of the prompt, this will be used in the UI.
         content (str): The content of the prompt.
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
-
+        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     Returns:
-        PromptResponse: The response from the user include "msg" and "author".
+        PromptResponse: The response from the user include "msg" and "author" or None.
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        return sdk.send_prompt(author=author, content=content, timeout=timeout)
+        return sdk.send_ask_user(author=author, content=content, timeout=timeout, raise_on_timeout=raise_on_timeout)
 
 
 def langchain_factory(func: Callable) -> Callable:
@@ -152,6 +160,21 @@ def on_message(func: Callable) -> Callable:
     """
     from chainlit.config import config
     config.on_message = wrap_user_function(func)
+    return func
+
+
+def on_chat_start(func: Callable) -> Callable:
+    """
+    Hook to react to the user websocket connection.
+
+    Args:
+        func (Callable[[Dict[str, str]], Any]): The connection hook to execute. Takes the user env as parameter.
+
+    Returns:
+        Callable[[Dict[str, str]], Any]: The decorated hook.
+    """
+    from chainlit.config import config
+    config.on_chat_start = wrap_user_function(func, with_task=True)
     return func
 
 

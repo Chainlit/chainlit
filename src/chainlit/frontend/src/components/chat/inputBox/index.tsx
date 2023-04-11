@@ -5,9 +5,10 @@ import Input from "./input";
 
 interface Props {
   onSubmit: (message: string) => void;
+  onReply: (message: string) => void;
 }
 
-export default function InputBox({ onSubmit }: Props) {
+export default function InputBox({ onSubmit, onReply }: Props) {
   const tokenCount = useRecoilValue(tokenCountState);
 
   return (
@@ -24,16 +25,18 @@ export default function InputBox({ onSubmit }: Props) {
         justifyContent: "center",
       }}
     >
-      <Input onSubmit={onSubmit} />
-      {tokenCount > 0 && <Stack flexDirection="row" alignItems="center">
-        <Typography
-          sx={{ ml: "auto" }}
-          color="text.secondary"
-          variant="caption"
-        >
-          Token usage: {tokenCount}
-        </Typography>
-      </Stack>}
+      <Input onSubmit={onSubmit} onReply={onReply} />
+      {tokenCount > 0 && (
+        <Stack flexDirection="row" alignItems="center">
+          <Typography
+            sx={{ ml: "auto" }}
+            color="text.secondary"
+            variant="caption"
+          >
+            Token usage: {tokenCount}
+          </Typography>
+        </Stack>
+      )}
     </Box>
   );
 }

@@ -51,6 +51,7 @@ class ChainlitConfig:
     local_db_path: str
     project_id: Optional[str] = None
     on_stop: Optional[Callable[[Dict[str, str]], Any]] = None
+    on_chat_start: Optional[Callable[[Dict[str, str]], Any]] = None
     on_message: Optional[Callable[[str, Dict[str, str]], Any]] = None
     lc_postprocess: Optional[Callable[[Any, Dict[str, str]], Any]] = None
     lc_factory: Optional[Callable[[Dict[str, str]], Any]] = None

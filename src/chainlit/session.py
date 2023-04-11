@@ -1,11 +1,11 @@
-from typing import Dict, TypedDict, Optional, Callable, Any
+from typing import Dict, TypedDict, Optional, Callable, Any, Union
 from chainlit.client import BaseClient
-from chainlit.types import PromptResponse
+from chainlit.types import AskResponse
 
 
 class Session(TypedDict):
     id: str
-    prompt: Callable[[Any, Optional[int]], PromptResponse]
+    ask_user: Callable[[Any, Optional[int]], Union[AskResponse, None]]
     emit: Callable[[str, Any], None]
     conversation_id: Optional[str]
     agent: Any

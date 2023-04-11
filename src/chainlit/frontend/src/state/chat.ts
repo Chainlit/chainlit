@@ -28,6 +28,11 @@ export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
 }
 
+export interface IAsk {
+  callback: (payload: { content: string; author: string }) => void;
+  timeout: number;
+}
+
 export const messagesState = atom<IMessage[]>({
   key: "Messages",
   dangerouslyAllowMutability: true,
@@ -47,4 +52,9 @@ export const loadingState = atom<boolean>({
 export const historyOpenedState = atom<boolean>({
   key: "HistoryOpened",
   default: false,
+});
+
+export const askUserState = atom<IAsk | undefined>({
+  key: "AskUser",
+  default: undefined,
 });

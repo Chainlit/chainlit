@@ -3,20 +3,22 @@ import { IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { historyOpenedState, loadingState } from "state/chat";
+import { askUserState, historyOpenedState, loadingState } from "state/chat";
 import HistoryButton from "components/chat/historyButton";
 
 interface Props {
   onSubmit: (message: string) => void;
+  onReply: (message: string) => void;
 }
 
 const borderWidth = 0;
 const borderColor = "transparent";
 
-const Input = ({ onSubmit }: Props) => {
+const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<any>();
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
+  const askUser = useRecoilValue(askUserState);
   const [value, setValue] = useState("");
 
   useEffect(() => {
@@ -25,14 +27,17 @@ const Input = ({ onSubmit }: Props) => {
     }
   }, [loading]);
 
-
   const submit = useCallback(() => {
     if (value === "" || loading) {
       return;
     }
-    onSubmit(value);
+    if (askUser) {
+      onReply(value);
+    } else {
+      onSubmit(value);
+    }
     setValue("");
-  }, [value, loading, setValue, onSubmit]);
+  }, [value, loading, setValue, askUser, onSubmit]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -68,7 +73,10 @@ const Input = ({ onSubmit }: Props) => {
       InputProps={{
         disableUnderline: true,
         startAdornment: (
-          <InputAdornment sx={{ ml: 1, color: "text.secondary" }} position="start">
+          <InputAdornment
+            sx={{ ml: 1, color: "text.secondary" }}
+            position="start"
+          >
             <HistoryButton onClick={onHistoryClick} />
           </InputAdornment>
         ),

@@ -93,13 +93,13 @@ def connect():
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
 
-    def _prompt(data, timeout):
-        return socketio.call("prompt", data, timeout=timeout, to=session_id)
+    def _ask_user(data, timeout):
+        return socketio.call("ask", data, timeout=timeout, to=session_id)
 
     session = {
         "id": session_id,
         "emit": _emit,
-        "prompt": _prompt,
+        "ask_user": _ask_user,
         "client": client,
         "conversation_id": None,
         "user_env": user_env
@@ -111,9 +111,15 @@ def connect():
         agent = config.lc_factory(user_env)
         session["agent"] = agent
 
-    if not config.lc_factory and not config.on_message:
+    if not config.lc_factory and not config.on_message and not config.on_chat_start:
         raise ValueError(
-            "Module does not expose a @langchain_factory or @on_message function")
+            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function")
+    
+    if config.on_chat_start:
+        def _on_chat_start(user_env):
+            __chainlit_sdk__ = Chainlit(session)
+            config.on_chat_start(user_env)
+        session["task"] = socketio.start_background_task(_on_chat_start, user_env)
 
 # Handle socket disconnection
 @socketio.on('disconnect')
@@ -147,8 +153,11 @@ def stop():
 def process_message(session: Session, input_str: str):
     __chainlit_sdk__ = Chainlit(session)
     try:
+        __chainlit_sdk__.task_start()
         if "agent" in session:
             agent = session["agent"]
+            if agent is None:
+                raise ValueError("LangChain agent is None")
             raw_res, agent_name, output_key = run_agent(
                 agent, input_str)
 
@@ -165,6 +174,8 @@ def process_message(session: Session, input_str: str):
     except Exception as e:
         __chainlit_sdk__.send_message(author="Error", is_error=True,
                                       content=str(e))
+    finally:
+        __chainlit_sdk__.task_end()
 
 # Handle message event
 @app.route('/message', methods=['POST'])
@@ -175,7 +186,6 @@ def message():
     author = body["author"]
 
     session = sessions[session_id]
-
     if session["client"]:
         if not session["conversation_id"]:
             session["conversation_id"] = session["client"].create_conversation(

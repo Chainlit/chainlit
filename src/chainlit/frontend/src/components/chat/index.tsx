@@ -4,6 +4,7 @@ import MessageContainer from "./message/container";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   IMessage,
+  askUserState,
   loadingState,
   messagesState,
   tokenCountState,
@@ -24,6 +25,7 @@ import { projectSettingsState } from "state/project";
 const Chat = () => {
   const { user } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
+  const [askUser, setAskUser] = useRecoilState(askUserState);
   const userEnv = useRecoilValue(userEnvState);
   const [messages, setMessages] = useRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
@@ -56,6 +58,14 @@ const Chat = () => {
       setSocketError(true);
     });
 
+    window.socket.on("task_start", (err) => {
+      setLoading(true);
+    });
+
+    window.socket.on("task_end", (err) => {
+      setLoading(false);
+    });
+
     window.socket.on("reload", (err) => {
       clearChat();
       getProjectSettings().then((res) => setPSettings(res));
@@ -65,10 +75,15 @@ const Chat = () => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    window.socket.on("prompt", (message, callback) => {
-      setMessages((oldMessages) => [...oldMessages, message]);
+    window.socket.on("ask", ({ msg, timeout }, callback) => {
+      setAskUser({ timeout, callback });
+      setMessages((oldMessages) => [...oldMessages, msg]);
       setLoading(false);
-      console.log(callback);
+    });
+
+    window.socket.on("ask_timeout", () => {
+      setAskUser(undefined);
+      setLoading(false);
     });
 
     window.socket.on("document", (document: IDocument) => {
@@ -90,14 +105,25 @@ const Chat = () => {
     };
 
     setMessages((oldMessages) => [...oldMessages, message]);
-    setLoading(true);
     try {
       await postMessage(message.author, msg);
     } catch (err: any) {
       toast.error(err.message);
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const onReply = async (msg: string) => {
+    if (!askUser) return;
+    const message = {
+      author: user?.name || "User",
+      authorIsUser: true,
+      content: msg,
+    };
+
+    askUser.callback({ author: message.author, content: message.content });
+
+    setMessages((oldMessages) => [...oldMessages, message]);
+    setAskUser(undefined);
   };
 
   return (
@@ -109,7 +135,7 @@ const Chat = () => {
         )}
         <ChatTopBar />
         <MessageContainer documents={documents} messages={messages} />
-        <InputBox onSubmit={onSubmit} />
+        <InputBox onReply={onReply} onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />
     </Box>

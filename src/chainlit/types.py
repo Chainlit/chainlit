@@ -6,7 +6,7 @@ DocumentType = Literal["image", "text"]
 DocumentDisplay = Literal["inline", "side", "page"]
 
 
-class PromptResponse(TypedDict):
+class AskResponse(TypedDict):
     content: str
     author: str
 

@@ -3,6 +3,7 @@ import os
 from chainlit.session import Session
 from chainlit.types import DocumentDisplay, LLMSettings, DocumentType
 from chainlit.client import BaseClient
+from socketio.exceptions import TimeoutError
 import inspect
 
 
@@ -25,9 +26,9 @@ class Chainlit:
         return self._get_session_property("emit")
 
     @property
-    def prompt(self):
-        """Get the 'prompt' property from the session."""
-        return self._get_session_property("prompt")
+    def ask_user(self):
+        """Get the 'ask_user' property from the session."""
+        return self._get_session_property("ask_user")
 
     @property
     def client(self) -> Union[BaseClient, None]:
@@ -101,17 +102,17 @@ class Chainlit:
             msg["id"] = message_id
         self.emit("message", msg)
 
-    def send_prompt_timeout(self, author: str):
+    def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the client."""
         self.send_message(
-            author=author, content="Prompt timed out", is_error=True)
+            author=author, content="Ask timed out", is_error=True)
 
         if self.emit:
-            self.emit("prompt_timeout", {})
+            self.emit("ask_timeout", {})
 
-    def send_prompt(self, author: str, content: str, timeout=60):
+    def send_ask_user(self, author: str, content: str, timeout=60, raise_on_timeout=False):
         """Send a prompt to the client and wait for a response."""
-        if not self.prompt:
+        if not self.ask_user:
             return
 
         msg = {
@@ -126,27 +127,46 @@ class Chainlit:
             msg["id"] = message_id
 
         try:
-            res = self.prompt({"msg": msg, "timeout": timeout}, timeout)
-
-            if self.client and self.conversation_id:
+            self.task_end()
+            res = self.ask_user({"msg": msg, "timeout": timeout}, timeout)
+            if self.client and self.conversation_id and res:
                 res_msg = {
                     "conversationId": self.conversation_id,
                     "author": res["author"],
+                    "authorIsUser": True,
                     "content": res["content"],
-
                 }
                 self.client.create_message(res_msg)
 
-                return res
+            return res
         except TimeoutError as e:
-            self.send_prompt_timeout(author)
-            raise e
+            self.send_ask_timeout(author)
+            if raise_on_timeout:
+                raise e
+        finally:
+            self.task_start()
 
     def update_token_count(self, count: int):
         """Update the token count for the client."""
         if not self.emit:
             return
         self.emit("token_usage", count)
+
+    def task_start(self):
+        """
+        Send a task start message to the chatbot UI.
+
+        """
+        if self.emit:
+            self.emit('task_start', {})
+
+    def task_end(self):
+        """
+        Send a task end message to the chatbot UI.
+
+        """
+        if self.emit:
+            self.emit('task_end', {})
 
 
 def get_sdk() -> Union[Chainlit, None]:

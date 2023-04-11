@@ -1,4 +1,11 @@
-import { Box, IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Link,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Link as RRLink } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { INestedMessage, loadingState } from "state/chat";
@@ -13,6 +20,7 @@ import FeedbackButtons from "components/chat/feedbackButtons";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import DetailsButton from "components/chat/detailsButton";
 import Messages from "./messages";
+import WaitForResponse from "../waitForResponse";
 
 interface Props {
   message: INestedMessage;
@@ -96,22 +104,28 @@ const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
         }}
       >
         {hover && buttons}
-        <Stack direction="row" mb={1} pl={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}>
-         <Box width={authorBoxWidth} pr={2}>
-            <Typography
-              noWrap
-              sx={{
-                width: authorBoxWidth,
-                fontSize: "12px",
-                fontWeight: 700,
-                letterSpacing: ".08em",
-                lineHeight: "1.5rem",
-                textTransform: "uppercase",
-                color: getAgentColor(message.author),
-              }}
-            >
-              {showAvatar && message.author}
-            </Typography>
+        <Stack
+          direction="row"
+          mb={1}
+          pl={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
+        >
+          <Box width={authorBoxWidth} pr={2}>
+            <Tooltip title={message.author}>
+              <Typography
+                noWrap
+                sx={{
+                  width: authorBoxWidth,
+                  fontSize: "12.5px",
+                  fontWeight: 500,
+                  letterSpacing: ".08em",
+                  lineHeight: "1.5rem",
+                  textTransform: "uppercase",
+                  color: getAgentColor(message.author),
+                }}
+              >
+                {showAvatar && message.author}
+              </Typography>
+            </Tooltip>
           </Box>
           {!!message.indent && (
             <Box
@@ -197,6 +211,9 @@ const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
               onClick={() => setShowDetails(!showDetails)}
               loading={isLoading}
             />
+            {!isLoading && isLast && message.waitForAnswer && (
+              <WaitForResponse />
+            )}
           </Stack>
         </Stack>
       </Box>
