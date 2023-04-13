@@ -165,7 +165,7 @@ def on_message(func: Callable) -> Callable:
 
 def on_chat_start(func: Callable) -> Callable:
     """
-    Hook to react to the user websocket connection.
+    Hook to react to the user websocket connection event.
 
     Args:
         func (Callable[[Dict[str, str]], Any]): The connection hook to execute. Takes the user env as parameter.

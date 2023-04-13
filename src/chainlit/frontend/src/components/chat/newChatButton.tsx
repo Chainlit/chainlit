@@ -40,11 +40,10 @@ export default function NewChatButton() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Clear messages?"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{"Create a new chat?"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            This will clear the current messages and start a new conversation.
-            The messages will still be available in the history.
+            This will clear the current messages and start a new pristine chat.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

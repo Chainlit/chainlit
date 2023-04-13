@@ -7,39 +7,43 @@ import {
   Typography,
 } from "@mui/material";
 import { Link as RRLink } from "react-router-dom";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { INestedMessage, loadingState } from "state/chat";
+import { useSetRecoilState } from "recoil";
+import { INestedMessage } from "state/chat";
 import { documentSideViewState, IDocuments } from "state/document";
 import { playgroundState } from "state/playground";
 import EditIcon from "@mui/icons-material/Edit";
 import { getAgentColor } from "../agentAvatar";
 import { useState } from "react";
 import { renderDocument } from "components/document/view";
-import { CodeBlock, dracula } from "react-code-blocks";
 import FeedbackButtons from "components/chat/feedbackButtons";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import DetailsButton from "components/chat/detailsButton";
 import Messages from "./messages";
 import WaitForResponse from "../waitForResponse";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Props {
   message: INestedMessage;
   documents: IDocuments;
   indent: number;
   showAvatar?: boolean;
-  isLast?: boolean;
+  isRunning?: boolean;
 }
 
 const authorBoxWidth = 70;
 
-const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
+const Message = ({
+  message,
+  documents,
+  indent,
+  showAvatar,
+  isRunning,
+}: Props) => {
   const [hover, setHover] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const loading = useRecoilValue(loadingState);
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(documentSideViewState);
-
-  const isLoading = loading && isLast;
 
   const documentNames = Object.keys(documents);
   const documentRegexp = documentNames.length
@@ -79,7 +83,17 @@ const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
     </Stack>
   );
 
-  const content = message.content.trim();
+  let content = message.content.trim();
+
+  if (documentRegexp) {
+    content = content.replaceAll(documentRegexp, (match) => {
+      return `[${match}](${match})`;
+    });
+  }
+
+  if (message.language) {
+    content = `\`\`\`${message.language}\n${content}\n\`\`\``;
+  }
 
   return (
     <Box
@@ -135,85 +149,83 @@ const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
               mt="4px"
             />
           )}
-          <Stack alignItems="flex-start">
+          <Stack alignItems="flex-start" flexGrow={1}>
             <Typography
               sx={{
-                flexGrow: 1,
+                width: "100%",
                 minHeight: "20px",
                 fontSize: "1rem",
                 lineHeight: "1.5rem",
                 fontFamily: "Inter",
-                marginTop: message.language ? 0 : "-16px",
+                marginTop: "-16px",
               }}
             >
-              {!message.language && !documentRegexp && (
-                <ReactMarkdown>{content}</ReactMarkdown>
-              )}
-              {!message.language && documentRegexp && (
-                <ReactMarkdown
-                  components={{
-                    a({ node, className, children, ...props }) {
-                      const documentName = children[0] as string;
-                      const document = documents[documentName];
+              <ReactMarkdown
+                components={{
+                  a({ node, className, children, ...props }) {
+                    const documentName = children[0] as string;
+                    const document = documents[documentName];
 
-                      if (!document) {
-                        return (
-                          <Link {...props} target="_blank">
-                            {children}
-                          </Link>
-                        );
-                      }
-
-                      if (document.display === "inline") {
-                        return renderDocument(document, true);
-                      }
-
+                    if (!document) {
                       return (
-                        <Link
-                          className="document-link"
-                          onClick={() => {
-                            if (document.display === "side") {
-                              setSideView(document);
-                            }
-                          }}
-                          component={RRLink}
-                          to={
-                            document.display === "page"
-                              ? `/document/${documentName}`
-                              : "#"
-                          }
-                        >
+                        <Link {...props} target="_blank">
                           {children}
                         </Link>
                       );
-                    },
-                  }}
-                >
-                  {content.replaceAll(documentRegexp, (match) => {
-                    return `[${match}](${match})`;
-                  })}
-                </ReactMarkdown>
-              )}
+                    }
 
-              {message.language && (
-                <CodeBlock
-                  text={content}
-                  language={message.language}
-                  showLineNumbers={false}
-                  theme={dracula}
-                  wrapLongLines
-                />
-              )}
+                    if (document.display === "inline") {
+                      return renderDocument(document, true);
+                    }
+
+                    return (
+                      <Link
+                        className="document-link"
+                        onClick={() => {
+                          if (document.display === "side") {
+                            setSideView(document);
+                          }
+                        }}
+                        component={RRLink}
+                        to={
+                          document.display === "page"
+                            ? `/document/${documentName}`
+                            : "#"
+                        }
+                      >
+                        {children}
+                      </Link>
+                    );
+                  },
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || "");
+                    return !inline && match ? (
+                      <SyntaxHighlighter
+                        {...props}
+                        children={String(children).replace(/\n$/, "")}
+                        style={a11yDark}
+                        wrapLongLines
+                        language={match[1]}
+                        PreTag="div"
+                      />
+                    ) : (
+                      <code {...props} className={className}>
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              >
+                {content}
+              </ReactMarkdown>
             </Typography>
             <DetailsButton
               message={message}
               opened={showDetails}
               onClick={() => setShowDetails(!showDetails)}
-              loading={isLoading}
+              loading={isRunning}
             />
-            {!isLoading && isLast && message.waitForAnswer && (
-              <WaitForResponse />
-            )}
+            {!isRunning && message.waitForAnswer && <WaitForResponse />}
           </Stack>
         </Stack>
       </Box>
@@ -222,6 +234,7 @@ const Message = ({ message, documents, indent, showAvatar, isLast }: Props) => {
           messages={message.subMessages}
           documents={documents}
           indent={indent + 1}
+          isRunning={isRunning}
         />
       )}
     </Box>
