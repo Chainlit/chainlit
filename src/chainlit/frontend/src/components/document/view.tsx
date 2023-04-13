@@ -12,8 +12,10 @@ export const renderDocument = (document: IDocument, inline = false) => {
       return (
         <img
           style={{
+            marginTop: inline ? "0.5rem" : 0,
             maxWidth: inline ? "300px" : "100%",
             borderRadius: "0.2rem",
+            objectFit: "cover"
           }}
           src={src}
         />

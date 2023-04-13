@@ -29,6 +29,7 @@ export default function Messages({ messages, documents, indent, isRunning }: Pro
             key={i}
             indent={indent}
             isRunning={_isRunning}
+            isLast={isLast}
           />
         );
       })}

@@ -15,16 +15,15 @@ import ChatTopBar from "./topBar";
 import InputBox from "./inputBox";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
-import { useAuth0 } from "@auth0/auth0-react";
 import { toast } from "react-hot-toast";
 import useClearChat from "hooks/clearChat";
-import { accessTokenState, userEnvState } from "state/user";
+import { userEnvState } from "state/user";
 import { IDocument, documentsState } from "state/document";
 import { projectSettingsState } from "state/project";
+import { useAuth } from "hooks/auth";
 
 const Chat = () => {
-  const { user } = useAuth0();
-  const accessToken = useRecoilValue(accessTokenState);
+  const { user, accessToken, isAuthenticated, isLoading } = useAuth();
   const [askUser, setAskUser] = useRecoilState(askUserState);
   const userEnv = useRecoilValue(userEnvState);
   const [messages, setMessages] = useRecoilState(messagesState);
@@ -36,9 +35,12 @@ const Chat = () => {
   const clearChat = useClearChat();
 
   useEffect(() => {
+    if (isLoading || (isAuthenticated && !accessToken)) return;
+
     if (window.socket) {
-      window.socket.disconnect();
       window.socket.removeAllListeners();
+      window.socket.disconnect();
+      window.socket.connect();
     }
 
     window.socket = io(server, {
@@ -48,7 +50,7 @@ const Chat = () => {
       },
     });
 
-    window.socket.on("connection", () => {
+    window.socket.on("connect", () => {
       console.log("connected");
       setSocketError(false);
     });
@@ -95,7 +97,7 @@ const Chat = () => {
     window.socket.on("token_usage", (count: number) => {
       setTokenCount((old) => old + count);
     });
-  }, [userEnv, accessToken]);
+  }, [userEnv, accessToken, isAuthenticated, isLoading]);
 
   const onSubmit = async (msg: string) => {
     const message: IMessage = {

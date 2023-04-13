@@ -29,6 +29,7 @@ interface Props {
   indent: number;
   showAvatar?: boolean;
   isRunning?: boolean;
+  isLast?: boolean;
 }
 
 const authorBoxWidth = 70;
@@ -39,6 +40,7 @@ const Message = ({
   indent,
   showAvatar,
   isRunning,
+  isLast,
 }: Props) => {
   const [hover, setHover] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -225,7 +227,7 @@ const Message = ({
               onClick={() => setShowDetails(!showDetails)}
               loading={isRunning}
             />
-            {!isRunning && message.waitForAnswer && <WaitForResponse />}
+            {!isRunning && isLast && message.waitForAnswer && <WaitForResponse />}
           </Stack>
         </Stack>
       </Box>

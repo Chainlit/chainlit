@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 DESCRIPTION = ''
 LONG_DESCRIPTION = ''
 
@@ -23,7 +23,7 @@ setup(
         "flask_cors>=3.0.10",
         "click>=8.1.3",
         "openai>=0.27.2",
-        "toml-config>=0.1.3",
+        "tomli>=2.0.1",
         "watchdog>=3.0.0",
         "watchdog_gevent>=0.1.1",
         "gevent>=22.10.2",

@@ -70,6 +70,10 @@ def project_settings():
         "dev": config.chainlit_env == "development",
     }
 
+def _on_chat_start(user_env, session):
+    __chainlit_sdk__ = Chainlit(session)
+    config.on_chat_start(user_env)
+
 # Handle socket connection
 @socketio.on('connect')
 def connect():
@@ -116,16 +120,17 @@ def connect():
             "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function")
     
     if config.on_chat_start:
-        def _on_chat_start(user_env):
-            __chainlit_sdk__ = Chainlit(session)
-            config.on_chat_start(user_env)
-        session["task"] = socketio.start_background_task(_on_chat_start, user_env)
+        task = socketio.start_background_task(_on_chat_start, user_env, session)
+        session["task"] = task
 
 # Handle socket disconnection
 @socketio.on('disconnect')
 def disconnect():
     if request.sid in sessions:
         session = sessions.pop(request.sid)
+        if session.get("task"):
+            session["task"].kill()
+            session["task"].join()
 
 # Handle stop event
 @socketio.on('stop')
