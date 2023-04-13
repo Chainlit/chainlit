@@ -27,6 +27,8 @@ setup(
         "watchdog>=3.0.0",
         "watchdog_gevent>=0.1.1",
         "gevent>=22.10.2",
+        "gevent-websocket>=0.10.1",
+        "pydantic>=1.10.6",
         "python-graphql-client>=0.4.3",
     ],
     python_requires='>=3.7',
