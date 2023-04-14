@@ -10,6 +10,13 @@ export interface ILLMSettings {
   presence_penalty: number;
 }
 
+export interface IChat {
+  createdAt: number;
+  messages: {
+    content: string;
+  }[];
+}
+
 export interface IMessage {
   id?: number;
   author: string;

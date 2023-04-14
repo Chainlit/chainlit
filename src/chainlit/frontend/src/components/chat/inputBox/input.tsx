@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { askUserState, historyOpenedState, loadingState } from "state/chat";
-import HistoryButton from "components/chat/historyButton";
+import HistoryButton from "components/chat/history";
 
 interface Props {
   onSubmit: (message: string) => void;

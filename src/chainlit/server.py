@@ -1,4 +1,5 @@
 import os
+import logging
 import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
@@ -177,6 +178,7 @@ def process_message(session: Session, input_str: str):
         elif config.on_message:
             config.on_message(input_str, session["user_env"])
     except Exception as e:
+        logging.exception(e)
         __chainlit_sdk__.send_message(author="Error", is_error=True,
                                       content=str(e))
     finally:

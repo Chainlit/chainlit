@@ -1,4 +1,5 @@
 import os
+import logging
 from watchdog_gevent.observers import GeventObserver
 from watchdog.events import FileSystemEventHandler
 from chainlit.config import config, load_module
@@ -18,7 +19,7 @@ class ChangeHandler(FileSystemEventHandler):
 
         # Check if the file was modified more than 0.5 seconds ago
         if (current_modified_time - last_modified_time) > 0.5:
-            print(f'event type: {event.event_type}  path : {event.src_path}')
+            logging.info(f'event type: {event.event_type} path : {event.src_path}')
             
             # Load the module if the module name is specified in the config
             if config.module_name:

@@ -4,6 +4,7 @@ import tomli
 from pydantic.dataclasses import dataclass
 import importlib.util
 import click
+import logging
 
 # Define paths and default configuration string
 root = os.getcwd()
@@ -64,9 +65,9 @@ def init_config(log=False):
         os.makedirs(config_dir, exist_ok=True)
         with open(config_file, 'w') as f:
             f.write(default_config_str)
-            print("Created default config file at", config_file)
+            logging.info(f"Created default config file at {config_file}")
     elif log:
-        print("Config file already exists at", config_file)
+        logging.info(f"Config file already exists at {config_file}")
 
 def load_module(target: str):
     """Load the specified module."""

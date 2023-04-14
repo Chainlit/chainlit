@@ -1,72 +1,39 @@
 import HistoryIcon from "@mui/icons-material/History";
 import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { historyOpenedState } from "state/chat";
-import CloudProvider from "components/cloudProvider";
-import { memo, useEffect, useRef, useState } from "react";
-import { gql, useQuery } from "@apollo/client";
-import { useAuth0 } from "@auth0/auth0-react";
-import { projectSettingsState } from "state/project";
-
-const ConversationsQuery = gql`
-  query ($first: Int, $projectId: String!, $authorEmail: String) {
-    conversations(
-      first: $first
-      projectId: $projectId
-      authorEmail: $authorEmail
-    ) {
-      edges {
-        cursor
-        node {
-          id
-          createdAt
-          messages {
-            content
-          }
-        }
-      }
-    }
-  }
-`;
+import { useRecoilState } from "recoil";
+import { IChat, historyOpenedState } from "state/chat";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   onClick: (content: string) => void;
+  onOpen: () => void;
+  chats?: IChat[];
 }
 
-function _HistoryButton({ onClick }: Props) {
-  const { user } = useAuth0();
-  const pSettings = useRecoilValue(projectSettingsState);
+export default function HistoryButton({ onClick, onOpen, chats }: Props) {
   const [open, setOpen] = useRecoilState(historyOpenedState);
   const ref = useRef<any>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { data, loading, error, refetch } = useQuery(ConversationsQuery, {
-    variables: {
-      first: 10,
-      projectId: pSettings?.projectId,
-      authorEmail: user?.email,
-    },
-  });
 
   useEffect(() => {
     if (open) {
       if (ref.current) {
         setAnchorEl(ref.current);
-        refetch();
+        onOpen();
       }
     }
   }, [open]);
 
-  const conversations = data?.conversations.edges.map((e: any) => e.node);
   const history: Record<
     string,
     {
-      id: number;
+      key: number;
       hour: string;
       content: string;
     }[]
   > = {};
 
-  conversations?.forEach((c: any) => {
+  chats?.forEach((c) => {
     const dateOptions: Intl.DateTimeFormatOptions = {
       weekday: "long",
       year: "numeric",
@@ -86,7 +53,7 @@ function _HistoryButton({ onClick }: Props) {
       minute: "numeric",
     };
     history[date].push({
-      id: c.id,
+      key: c.createdAt,
       hour: new Date(c.createdAt).toLocaleTimeString(undefined, timeOptions),
       content: c.messages[0].content,
     });
@@ -99,6 +66,7 @@ function _HistoryButton({ onClick }: Props) {
       //@ts-ignore
       <div key={date} disabled>
         <Typography
+          color="primary"
           sx={{
             fontSize: "12px",
             fontWeight: 700,
@@ -121,7 +89,7 @@ function _HistoryButton({ onClick }: Props) {
             onClick(h.content);
           }}
           disableRipple
-          key={h.id}
+          key={h.key}
           sx={{ p: 2, alignItems: "baseline" }}
         >
           <Typography
@@ -168,7 +136,7 @@ function _HistoryButton({ onClick }: Props) {
           mt: -2,
           overflow: "visible",
           maxHeight: "60vh",
-          maxWidth: "280px",
+          width: "250px",
           overflowY: "scroll",
         },
       }}
@@ -185,7 +153,7 @@ function _HistoryButton({ onClick }: Props) {
       <Tooltip title="Show history">
         <IconButton
           color="inherit"
-          disabled={!conversations}
+          disabled={!chats}
           onClick={(e) => setOpen(!open)}
           ref={ref}
         >
@@ -195,11 +163,3 @@ function _HistoryButton({ onClick }: Props) {
     </div>
   );
 }
-
-export default memo(function HistoryButton({ onClick }: Props) {
-  return (
-    <CloudProvider>
-      <_HistoryButton onClick={onClick} />
-    </CloudProvider>
-  );
-});

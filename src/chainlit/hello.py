@@ -9,5 +9,5 @@ def main(env):
     if res:
         send_message(
             author=bot_name,
-            content=f"Your name is: {res['content']}",
+            content=f"Your name is: {res['content']}.\nChainlit installation is working!",
         )

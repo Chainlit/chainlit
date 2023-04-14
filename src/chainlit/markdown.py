@@ -1,4 +1,5 @@
 import os
+import logging
 
 DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
 
@@ -23,7 +24,7 @@ def init_markdown(root: str):
     if not os.path.exists(chainlit_md_file):
         with open(chainlit_md_file, 'w') as f:
             f.write(DEFAULT_MARKDOWN_STR)
-            print(f"Created default chainlit markdown file at {chainlit_md_file}")
+            logging.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 
 
 def get_markdown_str(root: str):

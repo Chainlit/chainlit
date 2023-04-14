@@ -3,7 +3,6 @@ from gevent import monkey
 monkey.patch_all()
 
 import logging
-import sys
 import click
 import os
 import webbrowser
@@ -12,14 +11,19 @@ from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
 
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
 try:
     import langchain
     from langchain.cache import SQLiteCache
 
     if config.lc_cache_path:
-        print("LangChain cache enabled: ", config.lc_cache_path)
         langchain.llm_cache = SQLiteCache(
             database_path=config.lc_cache_path)
+        if not os.path.exists(config.lc_cache_path):
+            logging.info(f"LangChain cache enabled: {config.lc_cache_path}")
 
     import chainlit.lc.monkey
     from langchain.callbacks import get_callback_manager
@@ -34,16 +38,12 @@ except ImportError:
 PORT = 8000
 
 ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
-LOG_LEVELS = ("error", "warning", "info", "debug")
+
 
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
-@click.option("--log-level", show_default=True, type=click.Choice(LOG_LEVELS))
 @click.version_option(prog_name="Chainlit")
-def cli(log_level="error"):
-    if log_level:
-        logging.basicConfig(level=log_level,
-                            format='%(asctime)s - %(message)s',
-                            datefmt='%Y-%m-%d %H:%M:%S')
+def cli():
+    return
 
 
 def run_chainlit(target: str, watch=False, headless=False, debug=False, args=None, **kwargs):
@@ -72,7 +72,7 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
         if not headless and config.chainlit_env == "development":
             socketio.sleep(2)
             webbrowser.open(f"http://127.0.0.1:{PORT}")
-    
+
     socketio.start_background_task(open_browser, headless)
     socketio.run(app, port=PORT, debug=debug, use_reloader=False)
 

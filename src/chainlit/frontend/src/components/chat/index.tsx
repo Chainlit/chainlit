@@ -21,6 +21,7 @@ import { userEnvState } from "state/user";
 import { IDocument, documentsState } from "state/document";
 import { projectSettingsState } from "state/project";
 import { useAuth } from "hooks/auth";
+import useLocalChatHistory from "hooks/localChatHistory";
 
 const Chat = () => {
   const { user, accessToken, isAuthenticated, isLoading } = useAuth();
@@ -31,8 +32,9 @@ const Chat = () => {
   const [documents, setDocuments] = useRecoilState(documentsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [socketError, setSocketError] = useState(false);
-  const setPSettings = useSetRecoilState(projectSettingsState);
+  const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const clearChat = useClearChat();
+  const { persistChatLocally } = useLocalChatHistory();
 
   useEffect(() => {
     if (isLoading || (isAuthenticated && !accessToken)) return;
@@ -105,6 +107,10 @@ const Chat = () => {
       authorIsUser: true,
       content: msg,
     };
+
+    if (!isAuthenticated || !pSettings?.projectId) {
+      persistChatLocally(msg);
+    }
 
     setMessages((oldMessages) => [...oldMessages, message]);
     try {
