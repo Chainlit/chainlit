@@ -72,7 +72,7 @@ def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
         sdk.send_local_image(path, name, display)
 
 
-def send_message(author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None):
+def send_message(author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None, end_stream=False):
     """
     Send a message to the chatbot UI.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
@@ -85,12 +85,13 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
         indent (int, optional): If positive, the message will be nested in the UI.
         is_error (bool, optional): Whether the message indicates an error.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
+        end_stream (bool, optional): Pass True if this message was streamed.
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_message(author=author, content=content, prompt=prompt, language=language,
-                         indent=indent, is_error=is_error, llm_settings=llm_settings)
+                         indent=indent, is_error=is_error, llm_settings=llm_settings, end_stream=end_stream)
 
 
 def ask_user(author: str, content: str, timeout=60, raise_on_timeout=False):
@@ -111,6 +112,35 @@ def ask_user(author: str, content: str, timeout=60, raise_on_timeout=False):
     sdk = get_sdk()
     if sdk:
         return sdk.send_ask_user(author=author, content=content, timeout=timeout, raise_on_timeout=raise_on_timeout)
+
+
+def start_stream(author: str, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
+    """
+    Start a streamed message.
+
+    Args:
+        author (str): The author of the prompt, this will be used in the UI.
+        indent (int, optional): If positive, the message will be nested in the UI.
+        language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
+        llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        return sdk.stream_start(author=author, indent=indent, llm_settings=llm_settings)
+
+
+def send_token(token: str):
+    """
+    Start a token belonging to a message.
+
+    Args:
+        token (str): The token to send.
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        return sdk.send_token(token)
 
 
 def langchain_factory(func: Callable) -> Callable:

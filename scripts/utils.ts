@@ -29,7 +29,7 @@ export async function runChainlit(example: string) {
     const example_dir = join(EXAMPLES_DIR, example);
     const example_file = "main.py";
 
-    const child = spawn("chainlit", ["run", example_file, "-h"], {
+    const child = spawn("chainlit", ["run", example_file, "-h", "-w"], {
       cwd: example_dir,
       env: process.env,
       stdio: "inherit",

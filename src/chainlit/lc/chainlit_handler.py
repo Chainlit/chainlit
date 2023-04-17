@@ -46,7 +46,8 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        sdk.stream_start(author, indent, llm_settings)
+        sdk.stream_start(author=author, indent=indent,
+                         llm_settings=llm_settings)
         self.stream_per_session[session_id] = ""
 
     def send_token(self, token: str):
@@ -188,7 +189,6 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
         self.add_prompt(prompts[0], kwargs.get('llm_settings'))
-        self.start_stream()
 
     def on_llm_cache(
             self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
@@ -197,8 +197,10 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Do nothing."""
-        if self.is_streaming():
-            self.send_token(token)
+        if not self.is_streaming():
+            self.start_stream()
+
+        self.send_token(token)
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Do nothing."""

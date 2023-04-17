@@ -171,11 +171,11 @@ class Chainlit:
         if self.emit:
             self.emit('task_end', {})
 
-    def stream_start(self, author: str, indent: int, llm_settings: LLMSettings = None):
+    def stream_start(self, author: str, indent: int, language: str = None, llm_settings: LLMSettings = None):
         """
         """
         if self.emit:
-            self.emit('stream_start', {"author": author, "indent": indent, "content": "",
+            self.emit('stream_start', {"author": author, "indent": indent, "language": language, "content": "",
                       "llmSettings": llm_settings.to_dict() if llm_settings else None})
 
     def send_token(self, token: str):

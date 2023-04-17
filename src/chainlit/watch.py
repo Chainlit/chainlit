@@ -17,10 +17,15 @@ class ChangeHandler(FileSystemEventHandler):
         statbuf = os.stat(event.src_path)
         current_modified_time = statbuf.st_mtime
 
+        file_ext = os.path.splitext(event.src_path)[1]
+
+        if not file_ext in [".py", ".md"]:
+            return
+
         # Check if the file was modified more than 0.5 seconds ago
         if (current_modified_time - last_modified_time) > 0.5:
             logging.info(f'event type: {event.event_type} path : {event.src_path}')
-            
+
             # Load the module if the module name is specified in the config
             if config.module_name:
                 load_module(config.module_name)
