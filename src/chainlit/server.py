@@ -19,6 +19,8 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 # Serve static files
+
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
@@ -28,6 +30,8 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 # Handle completion requests
+
+
 @app.route('/completion', methods=['POST'])
 def completion():
     import openai
@@ -60,6 +64,8 @@ def completion():
         return response["choices"][0]["text"]
 
 # Get project settings
+
+
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
     return {
@@ -71,11 +77,14 @@ def project_settings():
         "dev": config.chainlit_env == "development",
     }
 
+
 def _on_chat_start(user_env, session):
     __chainlit_sdk__ = Chainlit(session)
     config.on_chat_start(user_env)
 
 # Handle socket connection
+
+
 @socketio.on('connect')
 def connect():
     session_id = request.sid
@@ -119,12 +128,15 @@ def connect():
     if not config.lc_factory and not config.on_message and not config.on_chat_start:
         raise ValueError(
             "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function")
-    
+
     if config.on_chat_start:
-        task = socketio.start_background_task(_on_chat_start, user_env, session)
+        task = socketio.start_background_task(
+            _on_chat_start, user_env, session)
         session["task"] = task
 
 # Handle socket disconnection
+
+
 @socketio.on('disconnect')
 def disconnect():
     if request.sid in sessions:
@@ -134,6 +146,8 @@ def disconnect():
             session["task"].join()
 
 # Handle stop event
+
+
 @socketio.on('stop')
 def stop():
     session = sessions.get(request.sid)
@@ -156,10 +170,27 @@ def stop():
         session["task"] = None
 
 # Process message
-def process_message(session: Session, input_str: str):
+
+
+def process_message(session: Session, author: str, input_str: str):
     __chainlit_sdk__ = Chainlit(session)
     try:
         __chainlit_sdk__.task_start()
+
+        if session["client"]:
+            if not session["conversation_id"]:
+                session["conversation_id"] = session["client"].create_conversation(
+                    session_id=session["id"])
+
+            session["client"].create_message(
+                {
+                    "conversationId": session["conversation_id"],
+                    "author": author,
+                    "content": input_str,
+                    "authorIsUser": True,
+                }
+            )
+
         if "agent" in session:
             agent = session["agent"]
             if agent is None:
@@ -185,6 +216,8 @@ def process_message(session: Session, input_str: str):
         __chainlit_sdk__.task_end()
 
 # Handle message event
+
+
 @app.route('/message', methods=['POST'])
 def message():
     body = request.json
@@ -193,21 +226,9 @@ def message():
     author = body["author"]
 
     session = sessions[session_id]
-    if session["client"]:
-        if not session["conversation_id"]:
-            session["conversation_id"] = session["client"].create_conversation(
-                session_id)
 
-        session["client"].create_message(
-            {
-                "conversationId": session["conversation_id"],
-                "author": author,
-                "content": input_str,
-                "authorIsUser": True,
-            }
-        )
-
-    task = socketio.start_background_task(process_message, session, input_str)
+    task = socketio.start_background_task(
+        process_message, session, author, input_str)
     session["task"] = task
     task.join()
     session["task"] = None

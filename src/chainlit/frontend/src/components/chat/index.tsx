@@ -79,6 +79,22 @@ const Chat = () => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
+    window.socket.on("stream_start", (message: IMessage) => {
+      setMessages((oldMessages) => [...oldMessages, message]);
+    });
+
+    window.socket.on("stream_token", (token: string) => {
+      setMessages((oldMessages) => {
+        const lastMessage = { ...oldMessages[oldMessages.length - 1] };
+        lastMessage.content += token;
+        return [...oldMessages.slice(0, -1), lastMessage];
+      });
+    });
+
+    window.socket.on("stream_end", (message: IMessage) => {
+      setMessages((oldMessages) => [...oldMessages.slice(0, -1), message]);
+    });
+
     window.socket.on("ask", ({ msg, timeout }, callback) => {
       setAskUser({ timeout, callback });
       setMessages((oldMessages) => [...oldMessages, msg]);

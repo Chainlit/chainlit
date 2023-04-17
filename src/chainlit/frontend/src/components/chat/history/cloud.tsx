@@ -1,6 +1,6 @@
 import { useRecoilValue } from "recoil";
 import CloudProvider from "components/cloudProvider";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { projectSettingsState } from "state/project";
 import HistoryButton from "./button";
@@ -33,9 +33,9 @@ interface Props {
 function _CloudHistoryButton({ onClick }: Props) {
   const { user } = useAuth0();
   const pSettings = useRecoilValue(projectSettingsState);
-  const { data, loading, error, refetch } = useQuery(ConversationsQuery, {
+  const [fetch, { loading, data, refetch }] = useLazyQuery(ConversationsQuery, {
     variables: {
-      first: 50,
+      first: 30,
       projectId: pSettings?.projectId,
       authorEmail: user?.email,
     },
@@ -47,6 +47,7 @@ function _CloudHistoryButton({ onClick }: Props) {
 }
 
 export default function CloudHistoryButton({ onClick }: Props) {
+
   return (
     <CloudProvider>
       <_CloudHistoryButton onClick={onClick} />

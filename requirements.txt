@@ -11,3 +11,4 @@ gevent>=22.10.2
 gevent-websocket>=0.10.1
 python-graphql-client>=0.4.3
 pydantic>=1.10.6
+tiktoken>=0.3.3

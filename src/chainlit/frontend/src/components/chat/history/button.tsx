@@ -123,6 +123,25 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     });
   });
 
+  if (menuEls.length === 0) {
+    menuEls.push(
+      //@ts-ignore
+      <div disabled>
+        <Typography
+          color="text.secondary"
+          sx={{
+            fontSize: "12px",
+            fontWeight: 700,
+            padding: "16px 12px",
+            textTransform: "uppercase",
+          }}
+        >
+          Such empty...
+        </Typography>
+      </div>
+    );
+  }
+
   const menu = (
     <Menu
       autoFocus

@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { useAuth } from "hooks/auth";
+import { memo } from "react";
 import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/project";
 
@@ -7,7 +8,7 @@ interface Props {
   children: JSX.Element;
 }
 
-export default function CloudProvider({ children }: Props) {
+export default memo(function CloudProvider({ children }: Props) {
   const pSettings = useRecoilValue(projectSettingsState);
   const { isProjectMember, accessToken } = useAuth();
 
@@ -22,4 +23,4 @@ export default function CloudProvider({ children }: Props) {
   });
 
   return <ApolloProvider client={apolloClient}>{children}</ApolloProvider>;
-}
+});

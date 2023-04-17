@@ -76,7 +76,7 @@ class Chainlit:
         ext = ".txt"
         self.send_document(ext, bytes(text, "utf-8"), name, type, display)
 
-    def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None):
+    def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None, end_stream=False):
         """Send a message to the client."""
         if not self.emit:
             return
@@ -100,7 +100,10 @@ class Chainlit:
         if self.client and self.conversation_id:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
-        self.emit("message", msg)
+        if end_stream:
+            self.stream_end(msg)
+        else:
+            self.emit("message", msg)
 
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the client."""
@@ -167,6 +170,25 @@ class Chainlit:
         """
         if self.emit:
             self.emit('task_end', {})
+
+    def stream_start(self, author: str, indent: int, llm_settings: LLMSettings = None):
+        """
+        """
+        if self.emit:
+            self.emit('stream_start', {"author": author, "indent": indent, "content": "",
+                      "llmSettings": llm_settings.to_dict() if llm_settings else None})
+
+    def send_token(self, token: str):
+        """
+        """
+        if self.emit:
+            self.emit('stream_token', token)
+
+    def stream_end(self, msg):
+        """
+        """
+        if self.emit:
+            self.emit('stream_end', msg)
 
 
 def get_sdk() -> Union[Chainlit, None]:
