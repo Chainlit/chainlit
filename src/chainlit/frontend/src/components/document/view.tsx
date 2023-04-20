@@ -4,7 +4,7 @@ import { useRecoilValue } from "recoil";
 import { documentsState, DocumentType, IDocument } from "state/document";
 import DocumentText from "./text";
 
-export const renderDocument = (document: IDocument, inline = false) => {
+export const renderDocument = (document: IDocument) => {
   switch (document.type) {
     case DocumentType.img:
       const src =
@@ -12,8 +12,8 @@ export const renderDocument = (document: IDocument, inline = false) => {
       return (
         <img
           style={{
-            marginTop: inline ? "0.5rem" : 0,
-            maxWidth: inline ? "300px" : "100%",
+            marginTop: 0,
+            width: "100%",
             borderRadius: "0.2rem",
             objectFit: "cover"
           }}
@@ -44,8 +44,9 @@ const DocumentView = () => {
       flexGrow={1}
       p={3}
       boxSizing="border-box"
-      width="100%"
+      mx="auto"
       sx={{
+        maxWidth: "55rem",
         maxHeight: "100%",
         overflow: "scroll",
       }}

@@ -66,7 +66,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       //@ts-ignore
       <div key={date} disabled>
         <Typography
-          color="primary"
+          color="text.primary"
           sx={{
             fontSize: "12px",
             fontWeight: 700,
@@ -98,10 +98,12 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
               fontWeight: 700,
               flexBasis: "64px",
             }}
+            color="text.secondary"
           >
             {h.hour}
           </Typography>
           <Typography
+            color="text.secondary"
             sx={{
               whiteSpace: "pre-wrap",
               fontSize: "14px",

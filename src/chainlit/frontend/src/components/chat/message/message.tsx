@@ -1,27 +1,16 @@
-import {
-  Box,
-  IconButton,
-  Link,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { Link as RRLink } from "react-router-dom";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useSetRecoilState } from "recoil";
 import { INestedMessage } from "state/chat";
-import { documentSideViewState, IDocuments } from "state/document";
+import { IDocuments } from "state/document";
 import { playgroundState } from "state/playground";
 import EditIcon from "@mui/icons-material/Edit";
-import { getAgentColor } from "../agentAvatar";
 import { useState } from "react";
-import { renderDocument } from "components/document/view";
-import FeedbackButtons from "components/chat/feedbackButtons";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import DetailsButton from "components/chat/detailsButton";
+import FeedbackButtons from "components/chat/message/feedbackButtons";
+import DetailsButton from "components/chat/message/detailsButton";
 import Messages from "./messages";
-import WaitForResponse from "../waitForResponse";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import WaitForResponse from "./waitForResponse";
+import MessageContent from "./content";
+import { getAuthorColor } from "helpers/color";
 
 interface Props {
   message: INestedMessage;
@@ -45,12 +34,6 @@ const Message = ({
   const [hover, setHover] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const setPlayground = useSetRecoilState(playgroundState);
-  const setSideView = useSetRecoilState(documentSideViewState);
-
-  const documentNames = Object.keys(documents);
-  const documentRegexp = documentNames.length
-    ? new RegExp(`(${documentNames.join("|")})`, "g")
-    : undefined;
 
   const editButton = message.prompt && (
     <IconButton
@@ -84,18 +67,6 @@ const Message = ({
       )}
     </Stack>
   );
-
-  let content = message.content.trim();
-
-  if (documentRegexp) {
-    content = content.replaceAll(documentRegexp, (match) => {
-      return `[${match}](${match})`;
-    });
-  }
-
-  if (message.language) {
-    content = `\`\`\`${message.language}\n${content}\n\`\`\``;
-  }
 
   return (
     <Box
@@ -136,7 +107,7 @@ const Message = ({
                   letterSpacing: ".08em",
                   lineHeight: "1.5rem",
                   textTransform: "uppercase",
-                  color: getAgentColor(message.author),
+                  color: getAuthorColor(message.author),
                 }}
               >
                 {showAvatar && message.author}
@@ -146,88 +117,26 @@ const Message = ({
           {!!message.indent && (
             <Box
               width="1px"
-              bgcolor={getAgentColor(message.author)}
+              bgcolor={getAuthorColor(message.author)}
               mr={2}
               mt="4px"
             />
           )}
           <Stack alignItems="flex-start" flexGrow={1}>
-            <Typography
-              sx={{
-                width: "100%",
-                minHeight: "20px",
-                fontSize: "1rem",
-                lineHeight: "1.5rem",
-                fontFamily: "Inter",
-                marginTop: "-16px",
-              }}
-            >
-              <ReactMarkdown
-                components={{
-                  a({ node, className, children, ...props }) {
-                    const documentName = children[0] as string;
-                    const document = documents[documentName];
-
-                    if (!document) {
-                      return (
-                        <Link {...props} target="_blank">
-                          {children}
-                        </Link>
-                      );
-                    }
-
-                    if (document.display === "inline") {
-                      return renderDocument(document, true);
-                    }
-
-                    return (
-                      <Link
-                        className="document-link"
-                        onClick={() => {
-                          if (document.display === "side") {
-                            setSideView(document);
-                          }
-                        }}
-                        component={RRLink}
-                        to={
-                          document.display === "page"
-                            ? `/document/${documentName}`
-                            : "#"
-                        }
-                      >
-                        {children}
-                      </Link>
-                    );
-                  },
-                  code({ node, inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
-                      <SyntaxHighlighter
-                        {...props}
-                        children={String(children).replace(/\n$/, "")}
-                        style={a11yDark}
-                        wrapLongLines
-                        language={match[1]}
-                        PreTag="div"
-                      />
-                    ) : (
-                      <code {...props} className={className}>
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {content}
-              </ReactMarkdown>
-            </Typography>
+            <MessageContent
+              documents={documents}
+              content={message.content}
+              language={message.language}
+            />
             <DetailsButton
               message={message}
               opened={showDetails}
               onClick={() => setShowDetails(!showDetails)}
               loading={isRunning}
             />
-            {!isRunning && isLast && message.waitForAnswer && <WaitForResponse />}
+            {!isRunning && isLast && message.waitForAnswer && (
+              <WaitForResponse />
+            )}
           </Stack>
         </Stack>
       </Box>

@@ -9,7 +9,7 @@ import { Stack, Typography } from "@mui/material";
 
 const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   height: 3,
-  width: 200,
+  flexGrow: 1,
   borderRadius: 4,
   [`&.${linearProgressClasses.colorPrimary}`]: {
     backgroundColor:
@@ -48,7 +48,7 @@ export default function WaitForResponse() {
   const progress = (remaining / askUser.timeout) * 100;
 
   return (
-    <Stack id="wait-for-response" direction="row" spacing={1} alignItems="center">
+    <Stack width="100%" id="wait-for-response" direction="row" spacing={1} alignItems="center">
       <BorderLinearProgress variant="determinate" value={progress} />
       <Typography color="text.secondary" fontWeight={500}>
         {remaining}s left
