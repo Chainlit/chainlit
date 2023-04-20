@@ -12,12 +12,14 @@ import WaitForResponse from "./waitForResponse";
 import MessageContent from "./content";
 import { getAuthorColor } from "helpers/color";
 import UploadButton from "./uploadButton";
+import MessageTime from "./time";
 
 interface Props {
   message: INestedMessage;
   documents: IDocuments;
   indent: number;
   showAvatar?: boolean;
+  showBorder?: boolean;
   isRunning?: boolean;
   isLast?: boolean;
 }
@@ -29,6 +31,7 @@ const Message = ({
   documents,
   indent,
   showAvatar,
+  showBorder,
   isRunning,
   isLast,
 }: Props) => {
@@ -81,10 +84,8 @@ const Message = ({
     >
       <Box
         sx={{
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           boxSizing: "border-box",
           mx: "auto",
-          py: "10px",
           maxWidth: "55rem",
           display: "flex",
           flexDirection: "column",
@@ -94,8 +95,12 @@ const Message = ({
         {hover && buttons}
         <Stack
           direction="row"
-          mb={1}
-          pl={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
+          ml={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
+          sx={{
+            py: 2,
+            borderBottom: (theme) =>
+              showBorder ? `1px solid ${theme.palette.divider}` : "none",
+          }}
         >
           <Box width={authorBoxWidth} pr={2}>
             <Tooltip title={message.author}>
@@ -114,16 +119,21 @@ const Message = ({
                 {showAvatar && message.author}
               </Typography>
             </Tooltip>
+            <MessageTime timestamp={message.createdAt} />
           </Box>
           {!!message.indent && (
             <Box
               width="1px"
-              bgcolor={getAuthorColor(message.author)}
               mr={2}
               mt="4px"
+              borderLeft={`1px solid ${getAuthorColor(message.author)}`}
             />
           )}
-          <Stack alignItems="flex-start" flexGrow={1}>
+          <Stack
+            alignItems="flex-start"
+            flexGrow={1}
+            spacing={1}
+          >
             <MessageContent
               documents={documents}
               content={message.content}

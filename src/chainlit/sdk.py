@@ -1,11 +1,14 @@
 from typing import Union, Optional
 import os
+import time
 from chainlit.session import Session
 from chainlit.types import DocumentDisplay, LLMSettings, DocumentType, AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
 
+def current_milli_time():
+    return round(time.time() * 1000)
 
 class Chainlit:
     session: Optional[Session]
@@ -94,6 +97,9 @@ class Chainlit:
         if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
+
+        msg["createdAt"] = current_milli_time()
+
         if end_stream:
             self.stream_end(msg)
         else:
@@ -121,6 +127,8 @@ class Chainlit:
         if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
+
+        msg["createdAt"] = current_milli_time()
 
         try:
             self.task_end()

@@ -74,7 +74,7 @@ def init():
 
 @cl.langchain_postprocess
 def process_response(res):
-    output = res["answer"]
+    answer = res["answer"]
     sources = res["sources"]
 
     # Get the metadata and texts from the user session
@@ -83,12 +83,14 @@ def process_response(res):
 
     if sources:
         # Add the sources to the message
-        output += f"\nSources: {sources}"
+        answer += f"\nSources: {sources}"
         # Add the sources to the message
         for source in sources.split(","):
             name = source.strip()
+            # Get the index of the source document
             index = [m["source"] for m in metadatas].index(name)
+            text = texts[index]
             # Send the source document referenced in the message
-            cl.send_text_document(text=texts[index], name=name)
+            cl.send_text_document(text=text, name=name)
 
-    return output
+    return answer

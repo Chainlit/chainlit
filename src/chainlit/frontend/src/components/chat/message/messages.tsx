@@ -10,22 +10,31 @@ interface Props {
   isRunning?: boolean;
 }
 
-export default function Messages({ messages, documents, indent, isRunning }: Props) {
-  const loading = useRecoilValue(loadingState)
+export default function Messages({
+  messages,
+  documents,
+  indent,
+  isRunning,
+}: Props) {
+  const loading = useRecoilValue(loadingState);
   let previousAuthor = "";
 
   return (
     <>
       {messages.map((m, i) => {
-        const showAvatar = m.author !== previousAuthor;
-        previousAuthor = m.author;
         const isLast = i === messages.length - 1;
-        const _isRunning = isRunning === undefined ? loading && isLast : isRunning && isLast;
+        const showAvatar = m.author !== previousAuthor;
+        const nextAuthor = messages[i + 1]?.author;
+        const showBorder = m.author !== nextAuthor && (!isLast || !!indent);
+        previousAuthor = m.author;
+        const _isRunning =
+          isRunning === undefined ? loading && isLast : isRunning && isLast;
         return (
           <Message
             message={m}
             documents={documents}
             showAvatar={showAvatar}
+            showBorder={showBorder}
             key={i}
             indent={indent}
             isRunning={_isRunning}

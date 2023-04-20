@@ -121,6 +121,7 @@ const Chat = () => {
       author: user?.name || "User",
       authorIsUser: true,
       content: msg,
+      createdAt: Date.now(),
     };
 
     if (!isAuthenticated || !pSettings?.projectId) {
@@ -141,6 +142,7 @@ const Chat = () => {
       author: user?.name || "User",
       authorIsUser: true,
       content: msg,
+      createdAt: Date.now(),
     };
 
     askUser.callback({ author: message.author, content: message.content });

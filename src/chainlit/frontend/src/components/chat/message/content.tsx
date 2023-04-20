@@ -59,10 +59,10 @@ export default memo(function MessageContent({
           fontSize: "1rem",
           lineHeight: "1.5rem",
           fontFamily: "Inter",
-          marginTop: "-16px",
         }}
       >
         <ReactMarkdown
+          className="markdown-body"
           components={{
             a({ node, className, children, ...props }) {
               const documentName = children[0] as string;
