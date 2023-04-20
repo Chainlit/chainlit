@@ -1,7 +1,7 @@
 from typing import Union, Optional
 import os
 from chainlit.session import Session
-from chainlit.types import DocumentDisplay, LLMSettings, DocumentType
+from chainlit.types import DocumentDisplay, LLMSettings, DocumentType, AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
@@ -35,17 +35,12 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    @property
-    def conversation_id(self):
-        """Get the 'conversation_id' property from the session."""
-        return self._get_session_property("conversation_id")
-
     def send_document(self, ext: str, content: bytes, name: str, type: DocumentType, display: DocumentDisplay):
         """Send a document to the client."""
-        if self.client and self.conversation_id:
+        if self.client:
             url = self.client.upload_document(ext=ext, content=content)
             document = self.client.create_document(
-                conversation_id=self.conversation_id, name=name, url=url, type=type, display=display)
+                name=name, url=url, type=type, display=display)
         else:
             document = {
                 "name": name,
@@ -88,7 +83,6 @@ class Chainlit:
             llm_settings = llm_settings.to_dict()
 
         msg = {
-            "conversationId": self.conversation_id,
             "author": author,
             "content": content,
             "indent": indent,
@@ -97,7 +91,7 @@ class Chainlit:
             "prompt": prompt,
             "llmSettings": llm_settings,
         }
-        if self.client and self.conversation_id:
+        if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
         if end_stream:
@@ -108,38 +102,41 @@ class Chainlit:
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the client."""
         self.send_message(
-            author=author, content="Ask timed out", is_error=True)
+            author=author, content="Time out", is_error=True)
 
         if self.emit:
             self.emit("ask_timeout", {})
 
-    def send_ask_user(self, author: str, content: str, timeout=60, raise_on_timeout=False):
+    def send_ask_user(self, author: str, content: str, spec: AskSpec, raise_on_timeout=False):
         """Send a prompt to the client and wait for a response."""
         if not self.ask_user:
             return
 
         msg = {
-            "conversationId": self.conversation_id,
             "author": author,
             "content": content,
             "waitForAnswer": True,
         }
 
-        if self.client and self.conversation_id:
+        if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
 
         try:
             self.task_end()
-            res = self.ask_user({"msg": msg, "timeout": timeout}, timeout)
-            if self.client and self.conversation_id and res:
-                res_msg = {
-                    "conversationId": self.conversation_id,
-                    "author": res["author"],
-                    "authorIsUser": True,
-                    "content": res["content"],
-                }
-                self.client.create_message(res_msg)
+            res = self.ask_user(
+                {"msg": msg, "spec": spec.to_dict()}, spec.timeout)
+            if self.client and res:
+                if spec.type == "text":
+                    res_msg = {
+                        "author": res["author"],
+                        "authorIsUser": True,
+                        "content": res["content"],
+                    }
+                    self.client.create_message(res_msg)
+                elif spec.type == "file":
+                    # TODO: upload file to S3
+                    pass
 
             return res
         except TimeoutError as e:

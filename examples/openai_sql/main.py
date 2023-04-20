@@ -23,7 +23,7 @@ settings = {
 }
 
 @on_message
-def main(message: str, env):
+def main(message: str):
     fromatted_prompt = prompt.format(input=message)
     response = openai.Completion.create(
         model=model_name,
@@ -33,7 +33,6 @@ def main(message: str, env):
     content = response["choices"][0]["text"]
 
     send_message(
-        author="SQL chatbot",
         language="sql",
         content=content,
         prompt=fromatted_prompt,

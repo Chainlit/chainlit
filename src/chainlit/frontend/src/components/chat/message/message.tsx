@@ -11,6 +11,7 @@ import Messages from "./messages";
 import WaitForResponse from "./waitForResponse";
 import MessageContent from "./content";
 import { getAuthorColor } from "helpers/color";
+import UploadButton from "./uploadButton";
 
 interface Props {
   message: INestedMessage;
@@ -134,6 +135,7 @@ const Message = ({
               onClick={() => setShowDetails(!showDetails)}
               loading={isRunning}
             />
+            {!isRunning && isLast && message.waitForAnswer && <UploadButton />}
             {!isRunning && isLast && message.waitForAnswer && (
               <WaitForResponse />
             )}

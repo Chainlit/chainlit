@@ -21,6 +21,8 @@ const Input = ({ onSubmit, onReply }: Props) => {
   const askUser = useRecoilValue(askUserState);
   const [value, setValue] = useState("");
 
+  const disabled = loading || askUser?.spec.type === "file";
+
   useEffect(() => {
     if (ref.current && !loading) {
       ref.current.querySelector("input")?.focus();
@@ -28,7 +30,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
   }, [loading]);
 
   const submit = useCallback(() => {
-    if (value === "" || loading) {
+    if (value === "" || disabled) {
       return;
     }
     if (askUser) {
@@ -37,7 +39,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
       onSubmit(value);
     }
     setValue("");
-  }, [value, loading, setValue, askUser, onSubmit]);
+  }, [value, disabled, setValue, askUser, onSubmit]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -65,7 +67,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
       variant="standard"
       autoComplete="false"
       placeholder="Type your message here..."
-      disabled={loading}
+      disabled={disabled}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       value={value}
@@ -86,7 +88,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
             sx={{ mr: 1, color: "text.secondary" }}
           >
             <IconButton
-              disabled={loading}
+              disabled={disabled}
               color="inherit"
               onClick={() => submit()}
             >

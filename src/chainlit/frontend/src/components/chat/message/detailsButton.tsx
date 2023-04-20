@@ -27,14 +27,14 @@ export default function DetailsButton({
 
   const text = loading ? (tool ? `Using ${tool}` : "Running") : `Used ${tool}`;
 
-  let id = undefined;
+  let id = "";
   if (tool) {
     id = tool.toLowerCase();
-    if (loading) {
-      id += "-loading";
-    } else {
-      id += "-done";
-    }
+  }
+  if (loading) {
+    id += "-loading";
+  } else {
+    id += "-done";
   }
 
   return (

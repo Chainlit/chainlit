@@ -41,7 +41,7 @@ function _CloudHistoryButton({ onClick }: Props) {
     },
   });
 
-  const chats = data?.conversations.edges.map((e: any) => e.node);
+  const chats = data?.conversations.edges.map((e: any) => e.node).filter((c: any) => c.messages.length > 0);
 
   return <HistoryButton onClick={onClick} onOpen={refetch} chats={chats} />;
 }

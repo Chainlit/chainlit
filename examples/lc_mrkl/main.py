@@ -5,7 +5,7 @@ from chainlit import langchain_factory
 
 
 @langchain_factory
-def load(env):
+def load():
     llm = ChatOpenAI(temperature=0)
     llm1 = OpenAI(temperature=0)
     search = SerpAPIWrapper()

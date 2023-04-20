@@ -36,8 +36,13 @@ export interface INestedMessage extends IMessage {
 }
 
 export interface IAsk {
-  callback: (payload: { content: string; author: string }) => void;
-  timeout: number;
+  callback: (payload: any) => void;
+  spec: {
+    type: "text" | "file",
+    timeout: number,
+    accept?: string[],
+    max_size_mb?: number,
+  };
 }
 
 export const messagesState = atom<IMessage[]>({

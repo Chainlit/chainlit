@@ -8,6 +8,7 @@ from chainlit.types import DocumentType
 
 class BaseClient(ABC):
     project_id: str
+    session_id: str
 
     @abstractmethod
     def create_conversation(self, session_id: str) -> int:
@@ -25,9 +26,13 @@ class BaseClient(ABC):
     def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str) -> int:
         pass
 
+
 class CloudClient(BaseClient):
-    def __init__(self, project_id: str, access_token: str, url: str):
+    conversation_id: str = None
+
+    def __init__(self, project_id: str, session_id: str, access_token: str, url: str):
         self.project_id = project_id
+        self.session_id = session_id
         self.url = url
         self.headers = {
             "Authorization": access_token
@@ -68,7 +73,16 @@ class CloudClient(BaseClient):
         res = self.mutation(mutation, variables)
         return int(res['data']['createConversation']["id"])
 
+    def get_conversation_id(self):
+        if not self.conversation_id:
+            self.conversation_id = self.create_conversation(self.session_id)
+
+        return self.conversation_id
+
     def create_message(self, variables: Dict[str, Any]) -> int:
+        c_id = self.get_conversation_id()
+        variables["conversationId"] = c_id
+
         mutation = """
         mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean) {
             createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer) {
@@ -79,7 +93,9 @@ class CloudClient(BaseClient):
         res = self.mutation(mutation, variables)
         return int(res['data']['createMessage']["id"])
 
-    def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str) -> Dict[str, Any]:
+    def create_document(self, type: DocumentType, url: str, name: str, display: str) -> Dict[str, Any]:
+        c_id = self.get_conversation_id()
+
         mutation = """
         mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!) {
             createDocument(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display) {
@@ -92,7 +108,7 @@ class CloudClient(BaseClient):
         }
         """
         variables = {
-            "conversationId": conversation_id,
+            "conversationId": c_id,
             "type": type,
             "url": url,
             "name": name,

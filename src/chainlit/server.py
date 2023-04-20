@@ -7,6 +7,7 @@ from flask_socketio import SocketIO, ConnectionRefusedError
 from chainlit.config import config
 from chainlit.lc.utils import run_agent
 from chainlit.session import Session, sessions
+from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
@@ -77,11 +78,6 @@ def project_settings():
         "dev": config.chainlit_env == "development",
     }
 
-
-def _on_chat_start(user_env, session):
-    __chainlit_sdk__ = Chainlit(session)
-    config.on_chat_start(user_env)
-
 # Handle socket connection
 
 
@@ -101,7 +97,7 @@ def connect():
     if not config.public and not access_token:
         raise ConnectionRefusedError("No access token provided")
     elif access_token and config.project_id:
-        client = CloudClient(project_id=config.project_id, access_token=access_token,
+        client = CloudClient(project_id=config.project_id, session_id=session_id, access_token=access_token,
                              url=config.chainlit_server)
 
     def _emit(event, data):
@@ -115,23 +111,29 @@ def connect():
         "emit": _emit,
         "ask_user": _ask_user,
         "client": client,
-        "conversation_id": None,
         "user_env": user_env
     }  # type: Session
     sessions[session_id] = session
-
-    if config.lc_factory:
-        __chainlit_sdk__ = Chainlit(session)
-        agent = config.lc_factory(user_env)
-        session["agent"] = agent
 
     if not config.lc_factory and not config.on_message and not config.on_chat_start:
         raise ValueError(
             "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function")
 
-    if config.on_chat_start:
+    if config.lc_factory:
+        def instantiate_agent(session):
+            __chainlit_sdk__ = Chainlit(session)
+            agent = config.lc_factory()
+            session["agent"] = agent
         task = socketio.start_background_task(
-            _on_chat_start, user_env, session)
+            instantiate_agent, session)
+        session["task"] = task
+
+    if config.on_chat_start:
+        def _on_chat_start(session):
+            __chainlit_sdk__ = Chainlit(session)
+            config.on_chat_start()
+        task = socketio.start_background_task(
+            _on_chat_start, session)
         session["task"] = task
 
 # Handle socket disconnection
@@ -144,6 +146,9 @@ def disconnect():
         if session.get("task"):
             session["task"].kill()
             session["task"].join()
+    
+    if request.sid in user_sessions:
+        user_sessions.pop(request.sid)
 
 # Handle stop event
 
@@ -160,7 +165,7 @@ def stop():
         __chainlit_sdk__ = Chainlit(session)
 
         if config.on_stop:
-            config.on_stop(session["user_env"])
+            config.on_stop()
 
         __chainlit_sdk__.send_message(
             author="System", content="Conversation stopped by the user.")
@@ -178,13 +183,8 @@ def process_message(session: Session, author: str, input_str: str):
         __chainlit_sdk__.task_start()
 
         if session["client"]:
-            if not session["conversation_id"]:
-                session["conversation_id"] = session["client"].create_conversation(
-                    session_id=session["id"])
-
             session["client"].create_message(
                 {
-                    "conversationId": session["conversation_id"],
                     "author": author,
                     "content": input_str,
                     "authorIsUser": True,
@@ -199,7 +199,7 @@ def process_message(session: Session, author: str, input_str: str):
                 agent, input_str)
 
             if config.lc_postprocess:
-                res = config.lc_postprocess(raw_res, session["user_env"])
+                res = config.lc_postprocess(raw_res)
             elif output_key is not None:
                 res = raw_res[output_key]
             else:
@@ -207,7 +207,7 @@ def process_message(session: Session, author: str, input_str: str):
             __chainlit_sdk__.send_message(
                 author=agent_name, content=res)
         elif config.on_message:
-            config.on_message(input_str, session["user_env"])
+            config.on_message(input_str)
     except Exception as e:
         logging.exception(e)
         __chainlit_sdk__.send_message(author="Error", is_error=True,

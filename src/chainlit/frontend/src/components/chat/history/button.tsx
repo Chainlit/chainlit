@@ -103,7 +103,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
             {h.hour}
           </Typography>
           <Typography
-            color="text.secondary"
+            color="text.primary"
             sx={{
               whiteSpace: "pre-wrap",
               fontSize: "14px",

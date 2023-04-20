@@ -40,9 +40,7 @@ const Chat = () => {
     if (isLoading || (isAuthenticated && !accessToken)) return;
 
     if (window.socket) {
-      window.socket.removeAllListeners();
-      window.socket.disconnect();
-      window.socket.connect();
+      return
     }
 
     window.socket = io(server, {
@@ -95,8 +93,8 @@ const Chat = () => {
       setMessages((oldMessages) => [...oldMessages.slice(0, -1), message]);
     });
 
-    window.socket.on("ask", ({ msg, timeout }, callback) => {
-      setAskUser({ timeout, callback });
+    window.socket.on("ask", ({ msg, spec }, callback) => {
+      setAskUser({ spec, callback });
       setMessages((oldMessages) => [...oldMessages, msg]);
       setLoading(false);
     });
@@ -112,6 +110,7 @@ const Chat = () => {
         ...{ [document.name]: document },
       }));
     });
+
     window.socket.on("token_usage", (count: number) => {
       setTokenCount((old) => old + count);
     });

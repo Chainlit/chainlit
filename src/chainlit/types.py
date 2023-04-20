@@ -6,6 +6,29 @@ DocumentType = Literal["image", "text"]
 DocumentDisplay = Literal["inline", "side", "page"]
 
 
+@dataclass_json
+@dataclass
+class AskSpec():
+    timeout: int
+    type: Literal["text", "file"]
+
+
+@dataclass_json
+@dataclass
+class AskFileSpec(AskSpec):
+    accept: List[str]
+    max_size_mb: int
+
+
+@dataclass
+class File():
+    name: str
+    path: str
+    size: int
+    type: str
+    content: bytes
+
+
 class AskResponse(TypedDict):
     content: str
     author: str

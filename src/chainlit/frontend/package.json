@@ -22,6 +22,7 @@
     "mui-chips-input": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.0",
     "react-json-view": "^1.21.3",
     "react-markdown": "^8.0.6",

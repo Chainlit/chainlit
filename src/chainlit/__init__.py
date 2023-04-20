@@ -1,7 +1,12 @@
-import inspect
-from typing import Callable, Any
-from chainlit.types import DocumentDisplay, LLMSettings
+import gevent
+from gevent import monkey
+monkey.patch_all()
 
+import inspect
+from typing import Callable, Any, List, Union
+from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File
+from chainlit.config import config
+from chainlit.user_session import user_session
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
@@ -72,18 +77,17 @@ def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
         sdk.send_local_image(path, name, display)
 
 
-def send_message(author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None, end_stream=False):
+def send_message(content: str, author=config.chatbot_name, prompt: str = None, language: str = None, indent=0, llm_settings: LLMSettings = None, end_stream=False):
     """
     Send a message to the chatbot UI.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
 
     Args:
-        author (str): The author of the message, this will be used in the UI.
         content (str): The content of the message.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         indent (int, optional): If positive, the message will be nested in the UI.
-        is_error (bool, optional): Whether the message indicates an error.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         end_stream (bool, optional): Pass True if this message was streamed.
     """
@@ -91,35 +95,81 @@ def send_message(author: str, content: str, prompt: str = None, language: str = 
     sdk = get_sdk()
     if sdk:
         sdk.send_message(author=author, content=content, prompt=prompt, language=language,
-                         indent=indent, is_error=is_error, llm_settings=llm_settings, end_stream=end_stream)
+                         indent=indent, llm_settings=llm_settings, end_stream=end_stream)
 
 
-def ask_user(author: str, content: str, timeout=60, raise_on_timeout=False):
+def send_error_message(content: str, author=config.chatbot_name, indent=0):
     """
-    Send a question to the chatbot UI that the user must answer before continuing.
-    If the user does not answer in time (see timeout)
+    Send an error message to the chatbot UI.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
 
     Args:
-        author (str): The author of the prompt, this will be used in the UI.
-        content (str): The content of the prompt.
-        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
-        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
-    Returns:
-        PromptResponse: The response from the user include "msg" and "author" or None.
+        content (str): The content of the error.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        indent (int, optional): If positive, the message will be nested in the UI.
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        return sdk.send_ask_user(author=author, content=content, timeout=timeout, raise_on_timeout=raise_on_timeout)
+        sdk.send_message(author=author, content=content,
+                         is_error=True, indent=indent)
 
 
-def start_stream(author: str, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
+def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False):
+    """
+    Ask for the user input before continuing.
+    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
+    If a project ID is configured, the messages will be uploaded to the cloud storage.
+
+    Args:
+        content (str): The content of the prompt.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
+        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
+    Returns:
+        AskResponse: The response from the user include "msg" and "author" or None.
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        spec = AskSpec(type="text", timeout=timeout)
+        return sdk.send_ask_user(author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout)
+
+
+def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[File, None]:
+    """
+    Ask the user to upload a file before continuing.
+    If the user does not answer in time (see timeout)
+    If a project ID is configured, the messages will be uploaded to the cloud storage.
+
+    Args:
+        title (str): Text displayed above the upload button.
+        accept (List[str]): List of file extensions to accept like ["text/csv", "application/pdf"]
+        max_size_mb (int, optional): Maximum file size in MB.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
+        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
+    Returns:
+        FileContent: The file content or None.
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        spec = AskFileSpec(type="file", accept=accept,
+                           max_size_mb=max_size_mb, timeout=timeout)
+        res = sdk.send_ask_user(author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout)
+        if res:
+            return File(**res)
+        else:
+            return None
+
+
+def start_stream(author=config.chatbot_name, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
     """
     Start a streamed message.
 
     Args:
-        author (str): The author of the prompt, this will be used in the UI.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         indent (int, optional): If positive, the message will be nested in the UI.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
@@ -127,7 +177,7 @@ def start_stream(author: str, indent: int = 0, language: str = None, llm_setting
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        return sdk.stream_start(author=author, indent=indent, llm_settings=llm_settings)
+        return sdk.stream_start(author=author, indent=indent, language=language, llm_settings=llm_settings)
 
 
 def send_token(token: str):
@@ -157,7 +207,7 @@ def langchain_factory(func: Callable) -> Callable:
         Callable[[Dict[str, str]], Any]: The decorated factory function.
     """
     from chainlit.config import config
-    config.lc_factory = wrap_user_function(func)
+    config.lc_factory = wrap_user_function(func, with_task=True)
     return func
 
 

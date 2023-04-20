@@ -39,13 +39,13 @@ export default function WaitForResponse() {
     };
   }, [askUser]);
 
-  if (!askUser || !askUser.timeout) return null;
+  if (!askUser || !askUser.spec.timeout) return null;
 
-  const remaining = askUser.timeout - elapsed;
+  const remaining = askUser.spec.timeout - elapsed;
 
   if (!remaining) return null;
 
-  const progress = (remaining / askUser.timeout) * 100;
+  const progress = (remaining / askUser.spec.timeout) * 100;
 
   return (
     <Stack width="100%" id="wait-for-response" direction="row" spacing={1} alignItems="center">

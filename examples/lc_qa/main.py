@@ -8,18 +8,10 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from chainlit import send_text_document, langchain_factory, langchain_postprocess
+import chainlit as cl
 
-with open('./state_of_the_union.txt') as f:
-    state_of_the_union = f.read()
 
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-texts = text_splitter.split_text(state_of_the_union)
-
-embeddings = OpenAIEmbeddings()
-
-metadatas = [{"source": f"{i}-pl"} for i in range(len(texts))]
-docsearch = Chroma.from_texts(texts, embeddings, metadatas=metadatas)
 
 system_template = """Use the following pieces of context to answer the users question. 
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -44,24 +36,59 @@ prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
 
 
-@langchain_factory
-def load():
+@cl.langchain_factory
+def init():
+    file = None
+
+    # Wait for the user to upload a file
+    while file == None:
+        file = cl.ask_for_file(
+            title="Please upload a text file to begin!", accept=["text/plain"])
+
+    # Decode the file
+    text = file.content.decode("utf-8")
+
+    # Split the text into chunks
+    texts = text_splitter.split_text(text)
+
+    # Create a metadata for each chunk
+    metadatas = [{"source": f"{i}-pl"} for i in range(len(texts))]
+
+    # Create a Chroma vector store
+    embeddings = OpenAIEmbeddings()
+    docsearch = Chroma.from_texts(texts, embeddings, metadatas=metadatas)
+
+    # Create a chain that uses the Chroma vector store
     chain = RetrievalQAWithSourcesChain.from_chain_type(ChatOpenAI(
         temperature=0), chain_type="stuff", retriever=docsearch.as_retriever())
+
+    # Save the metadata and texts in the user session
+    cl.user_session.set("metadatas", metadatas)
+    cl.user_session.set("texts", texts)
+
+    # Let the user know that the system is ready
+    cl.send_message(f"`{file.name}` uploaded, you can now ask questions!")
 
     return chain
 
 
-@langchain_postprocess
+@cl.langchain_postprocess
 def process_response(res):
     output = res["answer"]
     sources = res["sources"]
+
+    # Get the metadata and texts from the user session
+    metadatas = cl.user_session.get("metadatas")
+    texts = cl.user_session.get("texts")
+
     if sources:
         # Add the sources to the message
         output += f"\nSources: {sources}"
+        # Add the sources to the message
         for source in sources.split(","):
             name = source.strip()
             index = [m["source"] for m in metadatas].index(name)
             # Send the source document referenced in the message
-            send_text_document(text=texts[index], name=name)
+            cl.send_text_document(text=texts[index], name=name)
+
     return output
