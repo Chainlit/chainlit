@@ -4,7 +4,7 @@ monkey.patch_all()
 
 import inspect
 from typing import Callable, Any, List, Union
-from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File
+from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse
 from chainlit.config import config
 from chainlit.user_session import user_session
 
@@ -115,7 +115,7 @@ def send_error_message(content: str, author=config.chatbot_name, indent=0):
                          is_error=True, indent=indent)
 
 
-def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False):
+def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False) -> Union[AskResponse, None]:
     """
     Ask for the user input before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.

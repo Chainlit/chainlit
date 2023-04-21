@@ -35,6 +35,7 @@
     "react-window": "^1.8.8",
     "react-window-infinite-loader": "^1.0.8",
     "recoil": "^0.7.6",
+    "remark-gfm": "^3.0.1",
     "socket.io-client": "^4.6.1",
     "vite-tsconfig-paths": "^4.0.5",
     "yup": "^1.0.2"
