@@ -111,7 +111,6 @@ const Message = ({
                   fontSize: "12.5px",
                   fontWeight: 500,
                   letterSpacing: ".08em",
-                  lineHeight: "1.5rem",
                   textTransform: "uppercase",
                   color: getAuthorColor(message.author),
                 }}
@@ -125,7 +124,6 @@ const Message = ({
             <Box
               width="1px"
               mr={2}
-              mt="4px"
               borderLeft={`1px solid ${getAuthorColor(message.author)}`}
             />
           )}
@@ -146,9 +144,6 @@ const Message = ({
               loading={isRunning}
             />
             {!isRunning && isLast && message.waitForAnswer && <UploadButton />}
-            {!isRunning && isLast && message.waitForAnswer && (
-              <WaitForResponse />
-            )}
           </Stack>
         </Stack>
       </Box>

@@ -50,6 +50,8 @@ export default memo(function MessageContent({
     documents,
   });
 
+  if(!preparedContent) return null;
+
   return (
     <Stack width="100%">
       <Typography

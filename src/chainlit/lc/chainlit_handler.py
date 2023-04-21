@@ -12,7 +12,6 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     # Initialize dictionaries to store session data
     prompts_per_session: Dict[str, List[str]]
     llm_settings_per_session: Dict[str, LLMSettings]
-    tool_sequence_per_session: Dict[str, List[str]]
     sequence_per_session: Dict[str, List[str]]
     last_prompt_per_session: Dict[str, Union[str, None]]
     stream_per_session: Dict[str, Union[str, None]]
@@ -22,7 +21,6 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     def __init__(self) -> None:
         self.prompts_per_session = {}
         self.llm_settings_per_session = {}
-        self.tool_sequence_per_session = {}
         self.sequence_per_session = {}
         self.last_prompt_per_session = {}
         self.stream_per_session = {}
@@ -65,7 +63,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         session_id = sdk.session["id"]
         self.stream_per_session[session_id] = None
 
-    def add_in_sequence(self, name: str, is_tool=False):
+    def add_in_sequence(self, name: str):
         sdk = get_sdk()
         if not sdk or not sdk.session:
             return
@@ -76,19 +74,11 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         if session_id not in self.sequence_per_session:
             self.sequence_per_session[session_id] = []
 
-        if session_id not in self.tool_sequence_per_session:
-            self.tool_sequence_per_session[session_id] = []
-
         sequence = self.sequence_per_session[session_id]
-        tool_sequence = self.tool_sequence_per_session[session_id]
 
         sequence.append(name)
-        if is_tool:
-            if tool_sequence and tool_sequence[-1] == name:
-                return
-            tool_sequence.append(name)
 
-    def pop_sequence(self, is_tool=False):
+    def pop_sequence(self):
         sdk = get_sdk()
         if not sdk or not sdk.session:
             return
@@ -98,10 +88,6 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         # Remove the last element from the sequences
         if session_id in self.sequence_per_session and self.sequence_per_session[session_id]:
             self.sequence_per_session[session_id].pop()
-
-        if is_tool:
-            if session_id in self.tool_sequence_per_session and self.tool_sequence_per_session[session_id]:
-                self.tool_sequence_per_session[session_id].pop()
 
     def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
         sdk = get_sdk()
@@ -139,20 +125,18 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         session_id = sdk.session["id"]
 
         last_prompt = self.last_prompt_per_session[session_id] if session_id in self.last_prompt_per_session else None
+        self.last_prompt_per_session[session_id] = None
         return last_prompt
 
     def get_message_params(self, sdk: Chainlit):
         llm_settings = self.llm_settings_per_session.get(
             sdk.session["id"])
 
-        tool_sequence = self.tool_sequence_per_session.get(sdk.session["id"])
         all_sequence = self.sequence_per_session.get(sdk.session["id"])
 
         indent = len(all_sequence) if all_sequence else 0
 
-        if tool_sequence:
-            author = tool_sequence[-1]
-        elif all_sequence:
+        if all_sequence:
             author = all_sequence[-1]
         else:
             author = config.chatbot_name
@@ -223,9 +207,9 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["name"])
+        self.add_message("")
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
-
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.get_last_prompt()
@@ -241,7 +225,8 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"], is_tool=True)
+        self.add_in_sequence(serialized["name"])
+        self.add_message("")
 
     def on_tool_end(
         self,
@@ -250,14 +235,16 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        self.pop_sequence(is_tool=True)
+        prompt = self.get_last_prompt()
+        self.add_message(output, prompt)
+        self.pop_sequence()
 
     def on_tool_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Do nothing."""
         self.add_message(str(error), error=True)
-        self.pop_sequence(is_tool=True)
+        self.pop_sequence()
 
     def on_text(self, text: str, **kwargs: Any) -> None:
         pass

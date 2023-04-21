@@ -10,7 +10,6 @@ describe("Ask User", () => {
   it("should work locally", () => {
     cy.get("#welcome-screen").should("exist");
     cy.get(".message").should("have.length", 1);
-    cy.get("#wait-for-response").should("exist");
     submitMessage("Jeeves");
     cy.wait(2000);
     cy.get(".message").should("have.length", 3);

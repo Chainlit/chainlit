@@ -21,27 +21,29 @@ export default function Messages({
 
   return (
     <>
-      {messages.map((m, i) => {
-        const isLast = i === messages.length - 1;
-        const showAvatar = m.author !== previousAuthor;
-        const nextAuthor = messages[i + 1]?.author;
-        const showBorder = m.author !== nextAuthor && (!isLast || !!indent);
-        previousAuthor = m.author;
-        const _isRunning =
+      {messages
+        .filter((m) => m.content || m.subMessages?.length)
+        .map((m, i) => {
+          const isLast = i === messages.length - 1;
+          const _isRunning =
           isRunning === undefined ? loading && isLast : isRunning && isLast;
-        return (
-          <Message
-            message={m}
-            documents={documents}
-            showAvatar={showAvatar}
-            showBorder={showBorder}
-            key={i}
-            indent={indent}
-            isRunning={_isRunning}
-            isLast={isLast}
-          />
-        );
-      })}
+          const showAvatar = m.author !== previousAuthor;
+          const nextAuthor = messages[i + 1]?.author;
+          const showBorder = m.author !== nextAuthor && (!isLast || !!indent);
+          previousAuthor = m.author;
+          return (
+            <Message
+              message={m}
+              documents={documents}
+              showAvatar={showAvatar}
+              showBorder={showBorder}
+              key={i}
+              indent={indent}
+              isRunning={_isRunning}
+              isLast={isLast}
+            />
+          );
+        })}
     </>
   );
 }
