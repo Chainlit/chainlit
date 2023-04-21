@@ -139,12 +139,12 @@ def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on
 def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[File, None]:
     """
     Ask the user to upload a file before continuing.
-    If the user does not answer in time (see timeout)
+    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
 
     Args:
         title (str): Text displayed above the upload button.
-        accept (List[str]): List of file extensions to accept like ["text/csv", "application/pdf"]
+        accept (List[str]): List of mime type to accept like ["text/csv", "application/pdf"]
         max_size_mb (int, optional): Maximum file size in MB.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
