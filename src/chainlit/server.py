@@ -195,15 +195,19 @@ def process_message(session: Session, author: str, input_str: str):
             agent = session["agent"]
             if agent is None:
                 raise ValueError("LangChain agent is None")
-            raw_res, agent_name, output_key = run_agent(
-                agent, input_str)
-
-            if config.lc_postprocess:
-                res = config.lc_postprocess(raw_res)
-            elif output_key is not None:
-                res = raw_res[output_key]
+            agent_name = config.chatbot_name
+            if config.lc_run:
+                res = config.lc_run(agent, input_str)
             else:
-                res = raw_res
+                raw_res, output_key = run_agent(
+                    agent, input_str)
+
+                if config.lc_postprocess:
+                    res = config.lc_postprocess(raw_res)
+                elif output_key is not None:
+                    res = raw_res[output_key]
+                else:
+                    res = raw_res
             __chainlit_sdk__.send_message(
                 author=agent_name, content=res)
         elif config.on_message:

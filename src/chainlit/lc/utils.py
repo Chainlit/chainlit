@@ -1,8 +1,5 @@
 from typing import Any
-from chainlit.config import config
-
 def run_agent(agent: Any, input_str: str):
-    agent_name = config.chatbot_name
 
     if hasattr(agent, "input_keys"):
         input_key = agent.input_keys[0]
@@ -15,4 +12,4 @@ def run_agent(agent: Any, input_str: str):
     else:
         output_key = None
 
-    return raw_res, agent_name, output_key
+    return raw_res, output_key

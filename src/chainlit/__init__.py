@@ -201,10 +201,10 @@ def langchain_factory(func: Callable) -> Callable:
     The per user instance is called every time a new message is received.
 
     Args:
-        func (Callable[[Dict[str, str]], Any]): The factory function to create a new LangChain instance. Takes the user env as parameter.
+        func (Callable[[], Any]): The factory function to create a new LangChain instance.
 
     Returns:
-        Callable[[Dict[str, str]], Any]: The decorated factory function.
+        Callable[[], Any]: The decorated factory function.
     """
     from chainlit.config import config
     config.lc_factory = wrap_user_function(func, with_task=True)
@@ -217,10 +217,10 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     The decorated function takes the raw output of the LangChain object and return a string as the final response.
 
     Args:
-        func (Callable[[Any, Dict[str, str]], str]): The post-processing function to apply after generating a response. Takes the response and the user env as parameters.
+        func (Callable[[Any], str]): The post-processing function to apply after generating a response. Takes the response as parameter.
 
     Returns:
-        Callable[[Any, Dict[str, str]], str]: The decorated post-processing function.
+        Callable[[Any], str]: The decorated post-processing function.
     """
     from chainlit.config import config
     config.lc_postprocess = wrap_user_function(func)
@@ -233,13 +233,27 @@ def on_message(func: Callable) -> Callable:
     The decorated function is called every time a new message is received.
 
     Args:
-        func (Callable[[str, Dict[str, str]], Any]): The function to be called when a new message is received. Takes the input message and the user env as parameters.
+        func (Callable[[str], Any]): The function to be called when a new message is received. Takes the input message.
 
     Returns:
-        Callable[[str, Dict[str, str]], Any]: The decorated on_message function.
+        Callable[[str], Any]: The decorated on_message function.
     """
     from chainlit.config import config
     config.on_message = wrap_user_function(func)
+    return func
+
+def langchain_run(func: Callable) -> Callable:
+    """
+    Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
+    Use when your agent run method has custom parameters.
+    Args:
+        func (Callable[[Any, str], Any]): The function to be called when a new message is received. Takes the agent and user input as parameters.
+
+    Returns:
+        Callable[[Any, str], Any]: The decorated function.
+    """
+    from chainlit.config import config
+    config.lc_run = wrap_user_function(func)
     return func
 
 
@@ -248,10 +262,10 @@ def on_chat_start(func: Callable) -> Callable:
     Hook to react to the user websocket connection event.
 
     Args:
-        func (Callable[[Dict[str, str]], Any]): The connection hook to execute. Takes the user env as parameter.
+        func (Callable[], Any]): The connection hook to execute.
 
     Returns:
-        Callable[[Dict[str, str]], Any]: The decorated hook.
+        Callable[], Any]: The decorated hook.
     """
     from chainlit.config import config
     config.on_chat_start = wrap_user_function(func, with_task=True)
@@ -263,10 +277,10 @@ def on_stop(func: Callable) -> Callable:
     Hook to react to the user stopping a conversation.
 
     Args:
-        func (Callable[[Dict[str, str]], Any]): The stop hook to execute. Takes the user env as parameter.
+        func (Callable[[], Any]): The stop hook to execute.
 
     Returns:
-        Callable[[Dict[str, str]], Any]: The decorated stop hook.
+        Callable[[], Any]: The decorated stop hook.
     """
     from chainlit.config import config
     config.on_stop = wrap_user_function(func)

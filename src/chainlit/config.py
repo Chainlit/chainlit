@@ -54,6 +54,7 @@ class ChainlitConfig:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
+    lc_run: Optional[Callable[[Any, str], Any]] = None
     lc_postprocess: Optional[Callable[[Any], Any]] = None
     lc_factory: Optional[Callable[[], Any]] = None
     module_name: Optional[str] = None
