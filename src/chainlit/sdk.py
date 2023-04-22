@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 import os
 import time
 from chainlit.session import Session
@@ -7,8 +7,10 @@ from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
 
+
 def current_milli_time():
     return round(time.time() * 1000)
+
 
 class Chainlit:
     session: Optional[Session]
@@ -73,6 +75,18 @@ class Chainlit:
         type = "text"
         ext = ".txt"
         self.send_document(ext, bytes(text, "utf-8"), name, type, display)
+
+    def send_action(self, name: str, trigger: str, description=""):
+        """Send an action to the client."""
+        if not self.emit:
+            return
+
+        action = {
+            "name": name,
+            "trigger": trigger,
+            "description": description,
+        }
+        self.emit('action', action)
 
     def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None, end_stream=False):
         """Send a message to the client."""

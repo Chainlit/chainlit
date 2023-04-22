@@ -34,6 +34,12 @@ class AskResponse(TypedDict):
     author: str
 
 
+class Action(TypedDict):
+    name: str
+    trigger: str
+    description: str
+
+
 @dataclass_json
 @dataclass
 class LLMSettings():

@@ -6,6 +6,7 @@ import { gql, useQuery } from "@apollo/client";
 import { IDocuments } from "state/document";
 import DocumentSideView from "components/document/sideView";
 import Playground from "components/playground";
+import { IActions } from "state/action";
 
 const ConversationQuery = gql`
   query ($id: ID!) {
@@ -50,6 +51,8 @@ export default function Conversation() {
   const documents: IDocuments = {};
   data.conversation.documents.forEach((d: any) => (documents[d.name] = d));
 
+  const actions: IActions = {};
+
   return (
     <Page>
       <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
@@ -62,6 +65,7 @@ export default function Conversation() {
         >
           <Box my={2} />
           <MessageContainer
+            actions={actions}
             documents={documents}
             messages={data.conversation.messages}
           />

@@ -1,3 +1,4 @@
+import { IAction } from "state/action";
 import { ILLMSettings } from "state/chat";
 
 // export const server = "http://127.0.0.1:8000";
@@ -14,7 +15,11 @@ export const getProjectSettings = async () => {
   return res.json();
 };
 
-export const getCompletion = async (prompt: string, settings: ILLMSettings, userEnv={}) => {
+export const getCompletion = async (
+  prompt: string,
+  settings: ILLMSettings,
+  userEnv = {}
+) => {
   const res = await fetch(`${server}/completion`, {
     headers: {
       "content-type": "application/json",
@@ -27,10 +32,7 @@ export const getCompletion = async (prompt: string, settings: ILLMSettings, user
   return completion;
 };
 
-export const postMessage = async (
-  author: string,
-  content: string
-) => {
+export const postMessage = async (author: string, content: string) => {
   const res = await fetch(`${server}/message`, {
     headers: {
       "content-type": "application/json",
@@ -42,7 +44,23 @@ export const postMessage = async (
   return res.json();
 };
 
-export const getRole = async (chainlitServer: string, accessToken: string, projectId: string) => {
+export const callAction = async (action: IAction) => {
+  const res = await fetch(`${server}/action`, {
+    headers: {
+      "content-type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({ sessionId: window.socket!.id, action }),
+  });
+
+  return res.json();
+};
+
+export const getRole = async (
+  chainlitServer: string,
+  accessToken: string,
+  projectId: string
+) => {
   const res = await fetch(`${chainlitServer}/api/role`, {
     headers: {
       "content-type": "application/json",
@@ -53,4 +71,4 @@ export const getRole = async (chainlitServer: string, accessToken: string, proje
   });
 
   return res.json();
-}
+};

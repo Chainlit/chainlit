@@ -1,25 +1,33 @@
-import { Link as RRLink } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import remarkGfm from 'remark-gfm'
+import remarkGfm from "remark-gfm";
 import { Typography, Link, Stack } from "@mui/material";
-import { IDocuments, documentSideViewState } from "state/document";
-import { useSetRecoilState } from "recoil";
+import { IDocuments } from "state/document";
 import InlinedDocuments from "./inlined";
 import { memo } from "react";
+import { IActions } from "state/action";
+import DocumentRef from "./documentRef";
+import ActionRef from "./actionRef";
 
 interface Props {
   content: string;
   language?: string;
   documents: IDocuments;
+  actions: IActions;
 }
 
-function prepareContent({ documents, content, language }: Props) {
+function prepareContent({ documents, actions, content, language }: Props) {
   const documentNames = Object.keys(documents);
   const documentRegexp = documentNames.length
     ? new RegExp(`(${documentNames.join("|")})`, "g")
     : undefined;
+
+  const actionContents = Object.values(actions).map(a => a.trigger);
+  const actionRegexp = actionContents.length
+    ? new RegExp(`(${actionContents.join("|")})`, "g")
+    : undefined;
+
   let preparedContent = content.trim();
   const inlinedDocuments: IDocuments = {};
 
@@ -29,6 +37,12 @@ function prepareContent({ documents, content, language }: Props) {
         inlinedDocuments[match] = documents[match];
       }
       return `[${match}](${match})`;
+    });
+  }
+
+  if (actionRegexp) {
+    preparedContent = preparedContent.replaceAll(actionRegexp, (match) => {
+      return `[${match}](${match.replace(" ", "_")})`;
     });
   }
 
@@ -42,16 +56,17 @@ function prepareContent({ documents, content, language }: Props) {
 export default memo(function MessageContent({
   content,
   documents,
+  actions,
   language,
 }: Props) {
-  const setSideView = useSetRecoilState(documentSideViewState);
   const { preparedContent, inlinedDocuments } = prepareContent({
     content,
     language,
     documents,
+    actions,
   });
 
-  if(!preparedContent) return null;
+  if (!preparedContent) return null;
 
   return (
     <Stack width="100%">
@@ -69,39 +84,23 @@ export default memo(function MessageContent({
           className="markdown-body"
           components={{
             a({ node, className, children, ...props }) {
-              const documentName = children[0] as string;
-              const document = documents[documentName];
+              const name = children[0] as string;
+              const document = documents[name];
+              const action = Object.values(actions).find(
+                (a) => a.trigger === name
+              );
 
-              if (!document) {
+              if (document) {
+                return <DocumentRef document={document} />;
+              } else if (action) {
+                return <ActionRef action={action} />;
+              } else {
                 return (
                   <Link {...props} target="_blank">
                     {children}
                   </Link>
                 );
               }
-
-              if (document.display === "inline") {
-                return <span style={{ fontWeight: 700 }}>{children}</span>;
-              }
-
-              return (
-                <Link
-                  className="document-link"
-                  onClick={() => {
-                    if (document.display === "side") {
-                      setSideView(document);
-                    }
-                  }}
-                  component={RRLink}
-                  to={
-                    document.display === "page"
-                      ? `/document/${documentName}`
-                      : "#"
-                  }
-                >
-                  {children}
-                </Link>
-              );
             },
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");

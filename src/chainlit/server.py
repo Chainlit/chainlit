@@ -11,6 +11,7 @@ from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
+from chainlit.types import Action
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
@@ -146,7 +147,7 @@ def disconnect():
         if session.get("task"):
             session["task"].kill()
             session["task"].join()
-    
+
     if request.sid in user_sessions:
         user_sessions.pop(request.sid)
 
@@ -233,6 +234,30 @@ def message():
 
     task = socketio.start_background_task(
         process_message, session, author, input_str)
+    session["task"] = task
+    task.join()
+    session["task"] = None
+
+    return {"success": True}
+
+
+def process_action(session: Session, action: Action):
+    __chainlit_sdk__ = Chainlit(session)
+    callback = config.action_callbacks.get(action["name"])
+    if callback:
+        callback(action)
+
+
+@app.route('/action', methods=['POST'])
+def on_action():
+    body = request.json
+    session_id = body["sessionId"]
+    action = body["action"]
+
+    session = sessions[session_id]
+
+    task = socketio.start_background_task(
+        process_action, session, action)
     session["task"] = task
     task.join()
     session["task"] = None

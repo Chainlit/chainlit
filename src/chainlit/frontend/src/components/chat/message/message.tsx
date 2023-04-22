@@ -8,15 +8,16 @@ import { useState } from "react";
 import FeedbackButtons from "components/chat/message/feedbackButtons";
 import DetailsButton from "components/chat/message/detailsButton";
 import Messages from "./messages";
-import WaitForResponse from "./waitForResponse";
 import MessageContent from "./content";
 import { getAuthorColor } from "helpers/color";
 import UploadButton from "./uploadButton";
 import MessageTime from "./time";
+import { IActions } from "state/action";
 
 interface Props {
   message: INestedMessage;
   documents: IDocuments;
+  actions: IActions;
   indent: number;
   showAvatar?: boolean;
   showBorder?: boolean;
@@ -29,6 +30,7 @@ const authorBoxWidth = 70;
 const Message = ({
   message,
   documents,
+  actions,
   indent,
   showAvatar,
   showBorder,
@@ -127,12 +129,9 @@ const Message = ({
               borderLeft={`1px solid ${getAuthorColor(message.author)}`}
             />
           )}
-          <Stack
-            alignItems="flex-start"
-            flexGrow={1}
-            spacing={1}
-          >
+          <Stack alignItems="flex-start" flexGrow={1} spacing={1}>
             <MessageContent
+              actions={actions}
               documents={documents}
               content={message.content}
               language={message.language}
@@ -150,6 +149,7 @@ const Message = ({
       {message.subMessages && showDetails && (
         <Messages
           messages={message.subMessages}
+          actions={actions}
           documents={documents}
           indent={indent + 1}
           isRunning={isRunning}

@@ -50,6 +50,7 @@ class ChainlitConfig:
     user_env: List[str]
     lc_cache_path: str
     local_db_path: str
+    action_callbacks: Dict[str, Callable[[Any], Any]]
     project_id: Optional[str] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
@@ -108,6 +109,7 @@ def load_config():
 
         config = ChainlitConfig(
             root=root,
+            action_callbacks={},
             chainlit_env=chainlit_env,
             chainlit_server=chainlit_server,
             chatbot_name=chatbot_name,

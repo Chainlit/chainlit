@@ -22,6 +22,7 @@ import { IDocument, documentsState } from "state/document";
 import { projectSettingsState } from "state/project";
 import { useAuth } from "hooks/auth";
 import useLocalChatHistory from "hooks/localChatHistory";
+import { IAction, actionState } from "state/action";
 
 const Chat = () => {
   const { user, accessToken, isAuthenticated, isLoading } = useAuth();
@@ -30,6 +31,7 @@ const Chat = () => {
   const [messages, setMessages] = useRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
   const [documents, setDocuments] = useRecoilState(documentsState);
+  const [actions, setActions] = useRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [socketError, setSocketError] = useState(false);
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
@@ -40,7 +42,7 @@ const Chat = () => {
     if (isLoading || (isAuthenticated && !accessToken)) return;
 
     if (window.socket) {
-      return
+      return;
     }
 
     window.socket = io(server, {
@@ -111,6 +113,13 @@ const Chat = () => {
       }));
     });
 
+    window.socket.on("action", (action: IAction) => {
+      setActions((old) => ({
+        ...old,
+        ...{ [action.name]: action },
+      }));
+    });
+
     window.socket.on("token_usage", (count: number) => {
       setTokenCount((old) => old + count);
     });
@@ -159,7 +168,11 @@ const Chat = () => {
           <Alert severity="error">Could not reach the server.</Alert>
         )}
         <ChatTopBar />
-        <MessageContainer documents={documents} messages={messages} />
+        <MessageContainer
+          actions={actions}
+          documents={documents}
+          messages={messages}
+        />
         <InputBox onReply={onReply} onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />

@@ -4,9 +4,10 @@ monkey.patch_all()
 
 import inspect
 from typing import Callable, Any, List, Union
-from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse
+from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
 from chainlit.config import config
 from chainlit.user_session import user_session
+
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
@@ -157,11 +158,27 @@ def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.cha
     if sdk:
         spec = AskFileSpec(type="file", accept=accept,
                            max_size_mb=max_size_mb, timeout=timeout)
-        res = sdk.send_ask_user(author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout)
+        res = sdk.send_ask_user(
+            author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout)
         if res:
             return File(**res)
         else:
             return None
+
+
+def send_action(name: str, trigger: str, description=""):
+    """
+    Send an action to the chatbot UI.
+    Args:
+        name (str): The name of the action to send.
+        trigger (str): The text that should trigger the action when clicked.
+        description (str, optional): The description of the action. Defaults to "".
+    """
+    from chainlit.sdk import get_sdk
+    sdk = get_sdk()
+    if sdk:
+        sdk.send_action(name=name, trigger=trigger,
+                        description=description)
 
 
 def start_stream(author=config.chatbot_name, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
@@ -242,6 +259,7 @@ def on_message(func: Callable) -> Callable:
     config.on_message = wrap_user_function(func)
     return func
 
+
 def langchain_run(func: Callable) -> Callable:
     """
     Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
@@ -285,3 +303,16 @@ def on_stop(func: Callable) -> Callable:
     from chainlit.config import config
     config.on_stop = wrap_user_function(func)
     return func
+
+
+def action(name: str) -> Callable:
+    """
+    Callback to call when an action is triggered in the UI.
+    """
+    
+    def decorator(func: Callable[[Action], Any]):
+        from chainlit.config import config
+        config.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        return func
+
+    return decorator

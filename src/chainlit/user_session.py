@@ -15,6 +15,8 @@ class UserSession():
         user_session = user_sessions[sdk.session["id"]]
         user_session["id"] = sdk.session["id"]
         user_session["env"] = sdk.session["user_env"]
+        if "agent" in sdk.session:
+            user_session["agent"] = sdk.session["agent"]
 
         return user_session.get(key)
 

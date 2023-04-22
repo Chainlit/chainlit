@@ -4,10 +4,12 @@ import { IMessage, INestedMessage } from "state/chat";
 import WelcomeScreen from "components/chat/welcomeScreen";
 import { IDocuments } from "state/document";
 import Messages from "./messages";
+import { IActions } from "state/action";
 
 interface Props {
   messages: IMessage[];
   documents: IDocuments;
+  actions: IActions
 }
 
 function nestMessages(messages: IMessage[]): INestedMessage[] {
@@ -44,7 +46,7 @@ function nestMessages(messages: IMessage[]): INestedMessage[] {
   return nestedMessages;
 }
 
-const MessageContainer = ({ messages, documents }: Props) => {
+const MessageContainer = ({ messages, documents, actions }: Props) => {
   const ref = useRef<HTMLDivElement>();
 
   const nestedMessages = nestMessages(messages);
@@ -71,7 +73,7 @@ const MessageContainer = ({ messages, documents }: Props) => {
           overflow: "scroll",
         }}
       >
-        <Messages indent={0} messages={nestedMessages} documents={documents} />
+        <Messages indent={0} messages={nestedMessages} documents={documents} actions={actions} />
       </Box>
     );
   } else {
