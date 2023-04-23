@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IMessage, INestedMessage } from "state/chat";
 import WelcomeScreen from "components/chat/welcomeScreen";
 import { IDocuments } from "state/document";
@@ -9,7 +9,7 @@ import { IActions } from "state/action";
 interface Props {
   messages: IMessage[];
   documents: IDocuments;
-  actions: IActions
+  actions: IActions;
 }
 
 function nestMessages(messages: IMessage[]): INestedMessage[] {
@@ -48,11 +48,12 @@ function nestMessages(messages: IMessage[]): INestedMessage[] {
 
 const MessageContainer = ({ messages, documents, actions }: Props) => {
   const ref = useRef<HTMLDivElement>();
+  const [autoScroll, setAutoScroll] = useState(true);
 
   const nestedMessages = nestMessages(messages);
 
   useEffect(() => {
-    if (!ref.current) {
+    if (!ref.current || !autoScroll) {
       return;
     }
     const messages = Array.from(ref.current.querySelectorAll(".message"));
@@ -60,25 +61,45 @@ const MessageContainer = ({ messages, documents, actions }: Props) => {
     if (lastChild) {
       lastChild.scrollIntoView();
     }
-  }, [nestedMessages]);
+  }, [nestedMessages, autoScroll]);
 
-  if (nestedMessages.length) {
-    return (
-      <Box
-        ref={ref}
-        position="relative"
-        flexGrow={1}
-        sx={{
-          maxHeight: "100%",
-          overflow: "scroll",
-        }}
-      >
-        <Messages indent={0} messages={nestedMessages} documents={documents} actions={actions} />
-      </Box>
-    );
-  } else {
-    return <WelcomeScreen />;
-  }
+  useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = ref.current!;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+      setAutoScroll(atBottom);
+    };
+    ref.current.addEventListener("scroll", handleScroll);
+    return () => {
+      ref.current?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  return (
+    <Box
+      ref={ref}
+      position="relative"
+      flexGrow={1}
+      sx={{
+        maxHeight: "100%",
+        overflow: "scroll",
+      }}
+    >
+      {nestedMessages.length && (
+        <Messages
+          indent={0}
+          messages={nestedMessages}
+          documents={documents}
+          actions={actions}
+        />
+      )}
+      {!nestedMessages.length && <WelcomeScreen />}
+    </Box>
+  );
 };
 
 export default MessageContainer;

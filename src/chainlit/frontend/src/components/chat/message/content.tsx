@@ -42,7 +42,8 @@ function prepareContent({ documents, actions, content, language }: Props) {
 
   if (actionRegexp) {
     preparedContent = preparedContent.replaceAll(actionRegexp, (match) => {
-      return `[${match}](${match.replace(" ", "_")})`;
+      // spaces break markdown links. The address in the link is not used anyway
+      return `[${match}](${match.replaceAll(" ", "_")})`;
     });
   }
 

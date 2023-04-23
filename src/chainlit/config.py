@@ -1,8 +1,9 @@
 import os
+import sys
 from typing import Optional, Literal, Any, Callable, List, Dict
 import tomli
 from pydantic.dataclasses import dataclass
-import importlib.util
+from importlib import machinery
 import click
 import logging
 
@@ -40,6 +41,7 @@ if chainlit_env == "development":
 else:
     chainlit_server = "https://cloud.chainlit.io"
 
+
 @dataclass
 class ChainlitConfig:
     root: str
@@ -61,6 +63,7 @@ class ChainlitConfig:
     module_name: Optional[str] = None
     module: Any = None
 
+
 def init_config(log=False):
     """Initialize the configuration file if it doesn't exist."""
     if not os.path.exists(config_file):
@@ -71,16 +74,24 @@ def init_config(log=False):
     elif log:
         logging.info(f"Config file already exists at {config_file}")
 
+
 def load_module(target: str):
     """Load the specified module."""
     if not os.path.exists(target):
         raise click.BadParameter(f"File does not exist: {target}")
 
-    spec = importlib.util.spec_from_file_location(target, target)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Get the target's directory
+    target_dir = os.path.dirname(os.path.abspath(target))
 
-    config.module = module
+    # Add the target's directory to the Python path
+    sys.path.insert(0, target_dir)
+
+    loader = machinery.SourceFileLoader(target, target)
+    config.module = loader.load_module()
+
+    # Remove the target's directory from the Python path
+    sys.path.pop(0)
+
 
 def load_config():
     """Load the configuration from the config file."""
@@ -101,7 +112,8 @@ def load_config():
         user_env = project_settings.get("user_env")
 
         if not public and not project_id:
-            raise ValueError("Project ID is required when public is set to false.")
+            raise ValueError(
+                "Project ID is required when public is set to false.")
 
         # Set cache and database paths
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
@@ -121,5 +133,6 @@ def load_config():
         )
 
     return config
+
 
 config = load_config()
