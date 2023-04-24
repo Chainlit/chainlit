@@ -61,7 +61,12 @@ export default function Conversation() {
           flexGrow={1}
           display="flex"
           flexDirection="column"
-          overflow="scroll"
+          overflow="auto"
+          boxSizing="border-box"
+          px={{
+            xs: 2,
+            md: 0,
+          }}
         >
           <Box my={2} />
           <MessageContainer

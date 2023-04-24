@@ -24,11 +24,8 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.0",
-    "react-json-view": "^1.21.3",
     "react-markdown": "^8.0.6",
-    "react-mentions-continued": "^5.0.1",
     "react-router-dom": "^6.8.1",
-    "react-spreadsheet": "^0.7.7",
     "react-string-replace": "^1.1.0",
     "react-syntax-highlighter": "^15.5.0",
     "react-virtualized-auto-sizer": "^1.0.9",
@@ -37,10 +34,10 @@
     "recoil": "^0.7.6",
     "remark-gfm": "^3.0.1",
     "socket.io-client": "^4.6.1",
-    "vite-tsconfig-paths": "^4.0.5",
     "yup": "^1.0.2"
   },
   "devDependencies": {
+    "vite-tsconfig-paths": "^4.0.5",
     "@types/draft-js": "^0.11.10",
     "@types/lodash": "^4.14.192",
     "@types/react": "^18.0.27",

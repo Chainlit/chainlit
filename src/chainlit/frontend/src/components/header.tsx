@@ -11,6 +11,7 @@ import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/project";
 import ThemeButton from "themeButton";
 import KeyIcon from "@mui/icons-material/Key";
+import NewChatButton from "./chat/newChatButton";
 
 function Nav() {
   const { isProjectMember } = useAuth();
@@ -68,6 +69,7 @@ export default function Header() {
               </IconButton>
             </Tooltip>
           )}
+          <NewChatButton />
           <ThemeButton />
           <UserAvatar />
         </Stack>

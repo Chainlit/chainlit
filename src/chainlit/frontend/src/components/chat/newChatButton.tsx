@@ -31,7 +31,7 @@ export default function NewChatButton() {
 
   return (
     <Box color="text.primary">
-      <Button color="inherit" onClick={handleClickOpen} startIcon={<AddIcon />}>
+      <Button color="inherit" variant="outlined" onClick={handleClickOpen} startIcon={<AddIcon />}>
         New Chat
       </Button>
       <Dialog

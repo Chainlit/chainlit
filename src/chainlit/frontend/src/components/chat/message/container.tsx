@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { IMessage, INestedMessage } from "state/chat";
-import WelcomeScreen from "components/chat/welcomeScreen";
 import { IDocuments } from "state/document";
 import Messages from "./messages";
 import { IActions } from "state/action";
@@ -10,6 +9,8 @@ interface Props {
   messages: IMessage[];
   documents: IDocuments;
   actions: IActions;
+  autoScroll?: boolean;
+  setAutoSroll?: (autoScroll: boolean) => void;
 }
 
 function nestMessages(messages: IMessage[]): INestedMessage[] {
@@ -46,10 +47,8 @@ function nestMessages(messages: IMessage[]): INestedMessage[] {
   return nestedMessages;
 }
 
-const MessageContainer = ({ messages, documents, actions }: Props) => {
+const MessageContainer = ({ messages, documents, actions, autoScroll, setAutoSroll }: Props) => {
   const ref = useRef<HTMLDivElement>();
-  const [autoScroll, setAutoScroll] = useState(true);
-
   const nestedMessages = nestMessages(messages);
 
   useEffect(() => {
@@ -61,17 +60,17 @@ const MessageContainer = ({ messages, documents, actions }: Props) => {
     if (lastChild) {
       lastChild.scrollIntoView();
     }
-  }, [nestedMessages, autoScroll]);
+  }, [messages, autoScroll]);
 
   useEffect(() => {
-    if (!ref.current) {
+    if (!ref.current || !setAutoSroll) {
       return;
     }
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = ref.current!;
       const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-      setAutoScroll(atBottom);
+      setAutoSroll(atBottom);
     };
     ref.current.addEventListener("scroll", handleScroll);
     return () => {
@@ -83,21 +82,17 @@ const MessageContainer = ({ messages, documents, actions }: Props) => {
     <Box
       ref={ref}
       position="relative"
+      display="flex"
+      flexDirection="column"
+      overflow="auto"
       flexGrow={1}
-      sx={{
-        maxHeight: "100%",
-        overflow: "scroll",
-      }}
     >
-      {nestedMessages.length && (
-        <Messages
-          indent={0}
-          messages={nestedMessages}
-          documents={documents}
-          actions={actions}
-        />
-      )}
-      {!nestedMessages.length && <WelcomeScreen />}
+      <Messages
+        indent={0}
+        messages={nestedMessages}
+        documents={documents}
+        actions={actions}
+      />
     </Box>
   );
 };

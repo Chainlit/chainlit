@@ -11,9 +11,8 @@ import {
 } from "state/chat";
 import Playground from "components/playground";
 import DocumentSideView from "components/document/sideView";
-import ChatTopBar from "./topBar";
 import InputBox from "./inputBox";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import io from "socket.io-client";
 import { toast } from "react-hot-toast";
 import useClearChat from "hooks/clearChat";
@@ -23,6 +22,7 @@ import { projectSettingsState } from "state/project";
 import { useAuth } from "hooks/auth";
 import useLocalChatHistory from "hooks/localChatHistory";
 import { IAction, actionState } from "state/action";
+import WelcomeScreen from "components/chat/welcomeScreen";
 
 const Chat = () => {
   const { user, accessToken, isAuthenticated, isLoading } = useAuth();
@@ -37,6 +37,7 @@ const Chat = () => {
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const clearChat = useClearChat();
   const { persistChatLocally } = useLocalChatHistory();
+  const [autoScroll, setAutoScroll] = useState(true);
 
   useEffect(() => {
     if (isLoading || (isAuthenticated && !accessToken)) return;
@@ -125,54 +126,73 @@ const Chat = () => {
     });
   }, [userEnv, accessToken, isAuthenticated, isLoading]);
 
-  const onSubmit = async (msg: string) => {
-    const message: IMessage = {
-      author: user?.name || "User",
-      authorIsUser: true,
-      content: msg,
-      createdAt: Date.now(),
-    };
+  const onSubmit = useCallback(
+    async (msg: string) => {
+      const message: IMessage = {
+        author: user?.name || "User",
+        authorIsUser: true,
+        content: msg,
+        createdAt: Date.now(),
+      };
 
-    if (!isAuthenticated || !pSettings?.projectId) {
-      persistChatLocally(msg);
-    }
+      if (!isAuthenticated || !pSettings?.projectId) {
+        persistChatLocally(msg);
+      }
 
-    setMessages((oldMessages) => [...oldMessages, message]);
-    try {
-      await postMessage(message.author, msg);
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
+      setAutoScroll(true);
+      setMessages((oldMessages) => [...oldMessages, message]);
+      try {
+        await postMessage(message.author, msg);
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    },
+    [user, isAuthenticated, pSettings]
+  );
 
-  const onReply = async (msg: string) => {
-    if (!askUser) return;
-    const message = {
-      author: user?.name || "User",
-      authorIsUser: true,
-      content: msg,
-      createdAt: Date.now(),
-    };
+  const onReply = useCallback(
+    async (msg: string) => {
+      if (!askUser) return;
+      const message = {
+        author: user?.name || "User",
+        authorIsUser: true,
+        content: msg,
+        createdAt: Date.now(),
+      };
 
-    askUser.callback({ author: message.author, content: message.content });
+      askUser.callback({ author: message.author, content: message.content });
 
-    setMessages((oldMessages) => [...oldMessages, message]);
-    setAskUser(undefined);
-  };
+      setAutoScroll(true);
+      setMessages((oldMessages) => [...oldMessages, message]);
+      setAskUser(undefined);
+    },
+    [askUser, user]
+  );
 
   return (
-    <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
+    <Box display="flex" width="100%" height="0" flexGrow={1}>
       <Playground />
-      <Box flexGrow={1} display="flex" flexDirection="column" overflow="scroll">
+      <Box
+        display="flex"
+        flexDirection="column"
+        width="100%"
+        boxSizing="border-box"
+        px={2}
+      >
         {socketError && (
           <Alert severity="error">Could not reach the server.</Alert>
         )}
-        <ChatTopBar />
-        <MessageContainer
-          actions={actions}
-          documents={documents}
-          messages={messages}
-        />
+        <Box my={2} />
+        {!!messages.length && (
+          <MessageContainer
+            actions={actions}
+            documents={documents}
+            messages={messages}
+            autoScroll={autoScroll}
+            setAutoSroll={setAutoScroll}
+          />
+        )}
+        {!messages.length && <WelcomeScreen />}
         <InputBox onReply={onReply} onSubmit={onSubmit} />
       </Box>
       <DocumentSideView />

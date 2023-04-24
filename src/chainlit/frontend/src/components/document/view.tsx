@@ -47,8 +47,6 @@ const DocumentView = () => {
       mx="auto"
       sx={{
         maxWidth: "55rem",
-        maxHeight: "100%",
-        overflow: "scroll",
       }}
     >
       {renderDocument(document)}

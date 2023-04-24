@@ -59,6 +59,12 @@ const Input = ({ onSubmit, onReply }: Props) => {
     }
   }, []);
 
+  const endAdornment = (
+    <IconButton disabled={disabled} color="inherit" onClick={() => submit()}>
+      <SendIcon />
+    </IconButton>
+  );
+
   return (
     <TextField
       ref={ref}
@@ -87,13 +93,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
             position="end"
             sx={{ mr: 1, color: "text.secondary" }}
           >
-            <IconButton
-              disabled={disabled}
-              color="inherit"
-              onClick={() => submit()}
-            >
-              <SendIcon />
-            </IconButton>
+            {endAdornment}
           </InputAdornment>
         ),
       }}

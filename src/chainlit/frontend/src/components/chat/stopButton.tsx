@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useRecoilState } from "recoil";
 import { loadingState } from "state/chat";
 
@@ -15,12 +15,10 @@ export default function StopButton() {
   };
 
   return (
-    <Button
-      color="error"
-      variant="contained"
-      onClick={handleClick}
-    >
-      Stop
-    </Button>
+    <Box margin="auto">
+      <Button color="error" variant="outlined" onClick={handleClick}>
+        Stop generation
+      </Button>
+    </Box>
   );
 }

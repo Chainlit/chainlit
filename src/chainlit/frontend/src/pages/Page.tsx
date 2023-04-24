@@ -50,7 +50,7 @@ const Page = ({ children }: Props) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        flexGrow: 1,
+        width: "100%",
       }}
     >
       <Header />

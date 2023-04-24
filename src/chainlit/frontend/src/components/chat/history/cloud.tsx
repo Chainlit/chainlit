@@ -47,7 +47,6 @@ function _CloudHistoryButton({ onClick }: Props) {
 }
 
 export default function CloudHistoryButton({ onClick }: Props) {
-
   return (
     <CloudProvider>
       <_CloudHistoryButton onClick={onClick} />

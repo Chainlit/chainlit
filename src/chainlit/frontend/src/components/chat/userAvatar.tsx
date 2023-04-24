@@ -28,13 +28,13 @@ export default function UserAvatar() {
     setAnchorEl(null);
   };
 
-  if (!user) {
-    return (
-      <Button component={Link} to="/login" variant="outlined">
-        Login
-      </Button>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <Button component={Link} to="/login" variant="outlined">
+  //       Login
+  //     </Button>
+  //   );
+  // }
 
   if (!user) {
     return null;

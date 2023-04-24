@@ -174,7 +174,6 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       <Tooltip title="Show history">
         <IconButton
           color="inherit"
-          disabled={!chats}
           onClick={(e) => setOpen(!open)}
           ref={ref}
         >
