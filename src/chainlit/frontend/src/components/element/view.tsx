@@ -1,39 +1,39 @@
 import { Box } from "@mui/material";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import { documentsState, DocumentType, IDocument } from "state/document";
-import DocumentText from "./text";
+import { elementState, ElementType, IElement } from "state/element";
+import TextElement from "./text";
 
-export const renderDocument = (document: IDocument) => {
-  switch (document.type) {
-    case DocumentType.img:
+export const renderElement = (element: IElement) => {
+  switch (element.type) {
+    case ElementType.img:
       const src =
-        document.url || URL.createObjectURL(new Blob([document.content]));
+        element.url || URL.createObjectURL(new Blob([element.content]));
       return (
         <img
           style={{
             marginTop: 0,
             width: "100%",
             borderRadius: "0.2rem",
-            objectFit: "cover"
+            objectFit: "cover",
           }}
           src={src}
         />
       );
-    case DocumentType.txt:
-      return <DocumentText document={document} />;
+    case ElementType.txt:
+      return <TextElement element={element} />;
     default:
       return null;
   }
 };
 
-const DocumentView = () => {
+const ElementView = () => {
   let { name } = useParams();
-  const documents = useRecoilValue(documentsState);
+  const elements = useRecoilValue(elementState);
 
-  const document = documents[name!];
+  const element = elements[name!];
 
-  if (!document) {
+  if (!element) {
     return <Navigate to="/" />;
   }
 
@@ -49,9 +49,9 @@ const DocumentView = () => {
         maxWidth: "55rem",
       }}
     >
-      {renderDocument(document)}
+      {renderElement(element)}
     </Box>
   );
 };
 
-export default DocumentView;
+export default ElementView;

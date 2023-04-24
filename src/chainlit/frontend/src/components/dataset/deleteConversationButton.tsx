@@ -81,7 +81,7 @@ export default function DeleteConversationButton({
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             This will delete the conversation as well as it's messages and
-            documents.
+            elements.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

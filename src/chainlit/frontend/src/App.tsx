@@ -13,7 +13,7 @@ import theme from "theme";
 import { ThemeProvider } from "@mui/material";
 import { themeState } from "state/theme";
 import Home from "pages/Home";
-import Document from "pages/Document";
+import Element from "pages/Element";
 import Login from "pages/Login";
 import AuthCallback from "pages/AuthCallback";
 import { Socket } from "socket.io-client";
@@ -52,8 +52,8 @@ const router = createBrowserRouter([
     element: <Dataset />,
   },
   {
-    path: "/document/:name",
-    element: <Document />,
+    path: "/element/:name",
+    element: <Element />,
   },
   {
     path: "/login",

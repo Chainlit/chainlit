@@ -1,7 +1,7 @@
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useSetRecoilState } from "recoil";
 import { INestedMessage } from "state/chat";
-import { IDocuments } from "state/document";
+import { IElements } from "state/element";
 import { playgroundState } from "state/playground";
 import EditIcon from "@mui/icons-material/Edit";
 import { useState } from "react";
@@ -16,7 +16,7 @@ import { IActions } from "state/action";
 
 interface Props {
   message: INestedMessage;
-  documents: IDocuments;
+  elements: IElements;
   actions: IActions;
   indent: number;
   showAvatar?: boolean;
@@ -29,7 +29,7 @@ const authorBoxWidth = 70;
 
 const Message = ({
   message,
-  documents,
+  elements,
   actions,
   indent,
   showAvatar,
@@ -132,7 +132,7 @@ const Message = ({
           <Stack alignItems="flex-start" flexGrow={1} spacing={1}>
             <MessageContent
               actions={actions}
-              documents={documents}
+              elements={elements}
               content={message.content}
               language={message.language}
             />
@@ -150,7 +150,7 @@ const Message = ({
         <Messages
           messages={message.subMessages}
           actions={actions}
-          documents={documents}
+          elements={elements}
           indent={indent + 1}
           isRunning={isRunning}
         />

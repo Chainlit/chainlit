@@ -1,19 +1,19 @@
-import { DocumentType, IDocuments } from "state/document";
+import { ElementType, IElements } from "state/element";
 import InlinedImageList from "./image";
 import { Stack } from "@mui/material";
 import InlinedTextList from "./text";
 
 interface Props {
-  inlined: IDocuments;
+  inlined: IElements;
 }
 
-export default function InlinedDocuments({ inlined }: Props) {
+export default function InlinedElements({ inlined }: Props) {
   if (!inlined || !Object.keys(inlined).length) {
     return null;
   }
 
   const images = Object.keys(inlined)
-    .filter((key) => inlined[key].type === DocumentType.img)
+    .filter((key) => inlined[key].type === ElementType.img)
     .map((k) => {
       return {
         src:
@@ -23,7 +23,7 @@ export default function InlinedDocuments({ inlined }: Props) {
     });
 
   const texts = Object.fromEntries(
-    Object.entries(inlined).filter(([k, v]) => v.type === DocumentType.txt)
+    Object.entries(inlined).filter(([k, v]) => v.type === ElementType.txt)
   );
 
   return (

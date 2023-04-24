@@ -1,12 +1,12 @@
 import { INestedMessage, loadingState } from "state/chat";
 import Message from "./message";
-import { IDocuments } from "state/document";
+import { IElements } from "state/element";
 import { useRecoilValue } from "recoil";
 import { IActions } from "state/action";
 
 interface Props {
   messages: INestedMessage[];
-  documents: IDocuments;
+  elements: IElements;
   actions: IActions;
   indent: number;
   isRunning?: boolean;
@@ -14,7 +14,7 @@ interface Props {
 
 export default function Messages({
   messages,
-  documents,
+  elements,
   actions,
   indent,
   isRunning,
@@ -37,7 +37,7 @@ export default function Messages({
           return (
             <Message
               message={m}
-              documents={documents}
+              elements={elements}
               actions={actions}
               showAvatar={showAvatar}
               showBorder={showBorder}

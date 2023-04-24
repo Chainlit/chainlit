@@ -1,5 +1,5 @@
 import openai
-from chainlit import on_message, send_message, LLMSettings
+import chainlit as cl
 import os
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
@@ -22,7 +22,7 @@ settings = {
     "stop": ["```"]
 }
 
-@on_message
+@cl.on_message
 def main(message: str):
     fromatted_prompt = prompt.format(input=message)
     response = openai.Completion.create(
@@ -32,9 +32,9 @@ def main(message: str):
     )
     content = response["choices"][0]["text"]
 
-    send_message(
+    cl.send_message(
         language="sql",
         content=content,
         prompt=fromatted_prompt,
-        llm_settings=LLMSettings(model_name=model_name, **settings)
+        llm_settings=cl.LLMSettings(model_name=model_name, **settings)
     )

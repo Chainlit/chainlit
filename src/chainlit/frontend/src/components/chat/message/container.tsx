@@ -1,13 +1,13 @@
 import { Box } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { IMessage, INestedMessage } from "state/chat";
-import { IDocuments } from "state/document";
+import { IElements } from "state/element";
 import Messages from "./messages";
 import { IActions } from "state/action";
 
 interface Props {
   messages: IMessage[];
-  documents: IDocuments;
+  elements: IElements;
   actions: IActions;
   autoScroll?: boolean;
   setAutoSroll?: (autoScroll: boolean) => void;
@@ -47,7 +47,7 @@ function nestMessages(messages: IMessage[]): INestedMessage[] {
   return nestedMessages;
 }
 
-const MessageContainer = ({ messages, documents, actions, autoScroll, setAutoSroll }: Props) => {
+const MessageContainer = ({ messages, elements, actions, autoScroll, setAutoSroll }: Props) => {
   const ref = useRef<HTMLDivElement>();
   const nestedMessages = nestMessages(messages);
 
@@ -90,7 +90,7 @@ const MessageContainer = ({ messages, documents, actions, autoScroll, setAutoSro
       <Messages
         indent={0}
         messages={nestedMessages}
-        documents={documents}
+        elements={elements}
         actions={actions}
       />
     </Box>

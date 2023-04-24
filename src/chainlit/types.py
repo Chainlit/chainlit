@@ -2,8 +2,8 @@ from typing import List, TypedDict, Optional, Literal
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
-DocumentType = Literal["image", "text"]
-DocumentDisplay = Literal["inline", "side", "page"]
+ElementType = Literal["image", "text"]
+ElementDisplay = Literal["inline", "side", "page"]
 
 
 @dataclass_json

@@ -2,7 +2,7 @@ from typing import Union, Optional, Callable
 import os
 import time
 from chainlit.session import Session
-from chainlit.types import DocumentDisplay, LLMSettings, DocumentType, AskSpec
+from chainlit.types import ElementDisplay, LLMSettings, ElementType, AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
@@ -40,23 +40,23 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    def send_document(self, ext: str, content: bytes, name: str, type: DocumentType, display: DocumentDisplay):
-        """Send a document to the client."""
+    def send_element(self, ext: str, content: bytes, name: str, type: ElementType, display: ElementDisplay):
+        """Send an element to the client."""
         if self.client:
-            url = self.client.upload_document(ext=ext, content=content)
-            document = self.client.create_document(
+            url = self.client.upload_element(ext=ext, content=content)
+            element = self.client.create_element(
                 name=name, url=url, type=type, display=display)
         else:
-            document = {
+            element = {
                 "name": name,
                 "content": content.decode("utf-8") if type == "text" else content,
                 "type": type,
                 "display": display,
             }
         if self.emit:
-            self.emit('document', document)
+            self.emit('element', element)
 
-    def send_local_image(self, path: str, name: str, display: DocumentDisplay = "side"):
+    def send_local_image(self, path: str, name: str, display: ElementDisplay = "side"):
         """Send a local image to the client."""
         if not self.emit:
             return
@@ -65,16 +65,16 @@ class Chainlit:
             _, ext = os.path.splitext(path)
             type = "image"
             image_data = f.read()
-            self.send_document(ext, image_data, name, type, display)
+            self.send_element(ext, image_data, name, type, display)
 
-    def send_text_document(self, text: str, name: str, display: DocumentDisplay = "side"):
-        """Send a text document to the client."""
+    def send_text(self, text: str, name: str, display: ElementDisplay = "side"):
+        """Send a text element to the client."""
         if not self.emit:
             return
 
         type = "text"
         ext = ".txt"
-        self.send_document(ext, bytes(text, "utf-8"), name, type, display)
+        self.send_element(ext, bytes(text, "utf-8"), name, type, display)
 
     def send_action(self, name: str, trigger: str, description=""):
         """Send an action to the client."""

@@ -87,10 +87,10 @@ def process_response(res):
         # Add the sources to the message
         for source in sources.split(","):
             name = source.strip()
-            # Get the index of the source document
+            # Get the index of the source
             index = [m["source"] for m in metadatas].index(name)
             text = texts[index]
-            # Send the source document referenced in the message
-            cl.send_text_document(text=text, name=name)
+            # Send the source referenced in the message
+            cl.send_text(text=text, name=name)
 
     return answer

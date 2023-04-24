@@ -1,15 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  IconButton,
-  Box,
-  BoxProps,
-  Typography,
-  Stack,
-} from "@mui/material";
+import { IconButton, Box, BoxProps, Typography, Stack } from "@mui/material";
 import { styled, Theme, CSSObject } from "@mui/material/styles";
-import { renderDocument } from "components/document/view";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { documentSideViewState } from "state/document";
+import { renderElement } from "components/element/view";
+import { useRecoilState } from "recoil";
+import { sideViewState } from "state/element";
 
 const drawerWidth = 400;
 
@@ -46,7 +40,6 @@ const Drawer = styled(Box, {
   borderRadius: 0,
   flexShrink: 0,
   color: theme.palette.text.primary,
-  // borderLeft: `1px solid ${theme.palette.divider}`,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
   ...(open && {
@@ -57,25 +50,26 @@ const Drawer = styled(Box, {
   }),
 }));
 
-const DocumentSideView = () => {
-  const setSideView = useSetRecoilState(documentSideViewState);
-  const document = useRecoilValue(documentSideViewState);
+const SideView = () => {
+  const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
   return (
-    <Drawer open={!!document}>
+    <Drawer open={!!sideViewElement}>
       <Stack direction="row" alignItems="center">
-        <Typography fontSize="18px">{document?.name}</Typography>
+        <Typography fontSize="18px">{sideViewElement?.name}</Typography>
         <IconButton
           edge="end"
           sx={{ ml: "auto" }}
-          onClick={() => setSideView(undefined)}
+          onClick={() => setSideViewElement(undefined)}
         >
           <CloseIcon />
         </IconButton>
       </Stack>
 
-      <Box mt="1.5rem" id="side-view-content">{document && renderDocument(document)}</Box>
+      <Box mt="1.5rem" id="side-view-content">
+        {sideViewElement && renderElement(sideViewElement)}
+      </Box>
     </Drawer>
   );
 };
 
-export default DocumentSideView;
+export default SideView;

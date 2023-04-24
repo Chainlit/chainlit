@@ -4,7 +4,7 @@ monkey.patch_all()
 
 import inspect
 from typing import Callable, Any, List, Union
-from chainlit.types import DocumentDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
+from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
 from chainlit.config import config
 from chainlit.user_session import user_session
 
@@ -44,24 +44,24 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     return wrapper
 
 
-def send_text_document(text: str, name: str, display: DocumentDisplay = "side"):
+def send_text(text: str, name: str, display: ElementDisplay = "side"):
     """
-    Send a text document to the chatbot UI.
-    If a project ID is configured, the document will be uploaded to the cloud storage.
+    Send a text element to the chatbot UI.
+    If a project ID is configured, the element will be uploaded to the cloud storage.
 
     Args:
-        text (str): The content of the text document.
-        name (str): The name of the text document to be displayed in the UI.
-        display (DocumentDisplay, optional): Determines how the document should be displayed in the UI.
+        text (str): The content of the text element.
+        name (str): The name of the text element to be displayed in the UI.
+        display (ElementDisplay, optional): Determines how the element should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
     from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
-        sdk.send_text_document(text, name, display)
+        sdk.send_text(text, name, display)
 
 
-def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
+def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
     """
     Send a local image to the chatbot UI.
     If a project ID is configured, the image will be uploaded to the cloud storage.
@@ -69,7 +69,7 @@ def send_local_image(path: str, name: str, display: DocumentDisplay = "side"):
     Args:
         path (str): The local file path of the image.
         name (str): The name of the image to be displayed in the UI.
-        display (DocumentDisplay, optional): Determines how the image should be displayed in the UI.
+        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
     from chainlit.sdk import get_sdk

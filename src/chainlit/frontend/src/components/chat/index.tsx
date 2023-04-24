@@ -10,14 +10,14 @@ import {
   tokenCountState,
 } from "state/chat";
 import Playground from "components/playground";
-import DocumentSideView from "components/document/sideView";
+import SideView from "components/element/sideView";
 import InputBox from "./inputBox";
 import { useCallback, useEffect, useState } from "react";
 import io from "socket.io-client";
 import { toast } from "react-hot-toast";
 import useClearChat from "hooks/clearChat";
 import { userEnvState } from "state/user";
-import { IDocument, documentsState } from "state/document";
+import { IElement, elementState } from "state/element";
 import { projectSettingsState } from "state/project";
 import { useAuth } from "hooks/auth";
 import useLocalChatHistory from "hooks/localChatHistory";
@@ -30,7 +30,7 @@ const Chat = () => {
   const userEnv = useRecoilValue(userEnvState);
   const [messages, setMessages] = useRecoilState(messagesState);
   const setLoading = useSetRecoilState(loadingState);
-  const [documents, setDocuments] = useRecoilState(documentsState);
+  const [elements, setElements] = useRecoilState(elementState);
   const [actions, setActions] = useRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [socketError, setSocketError] = useState(false);
@@ -107,10 +107,10 @@ const Chat = () => {
       setLoading(false);
     });
 
-    window.socket.on("document", (document: IDocument) => {
-      setDocuments((old) => ({
+    window.socket.on("element", (element: IElement) => {
+      setElements((old) => ({
         ...old,
-        ...{ [document.name]: document },
+        ...{ [element.name]: element },
       }));
     });
 
@@ -184,7 +184,7 @@ const Chat = () => {
         {!!messages.length && (
           <MessageContainer
             actions={actions}
-            documents={documents}
+            elements={elements}
             messages={messages}
             autoScroll={autoScroll}
             setAutoSroll={setAutoScroll}
@@ -193,7 +193,7 @@ const Chat = () => {
         {!messages.length && <WelcomeScreen />}
         <InputBox onReply={onReply} onSubmit={onSubmit} />
       </Box>
-      <DocumentSideView />
+      <SideView />
     </Box>
   );
 };

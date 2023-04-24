@@ -3,8 +3,8 @@ import MessageContainer from "components/chat/message/container";
 import Page from "pages/Page";
 import { useParams } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
-import { IDocuments } from "state/document";
-import DocumentSideView from "components/document/sideView";
+import { IElements } from "state/element";
+import SideView from "components/element/sideView";
 import Playground from "components/playground";
 import { IActions } from "state/action";
 
@@ -26,7 +26,7 @@ const ConversationQuery = gql`
         llmSettings
         authorIsUser
       }
-      documents {
+      elements {
         type
         name
         url
@@ -48,8 +48,8 @@ export default function Conversation() {
     return null;
   }
 
-  const documents: IDocuments = {};
-  data.conversation.documents.forEach((d: any) => (documents[d.name] = d));
+  const elements: IElements = {};
+  data.conversation.elements.forEach((d: any) => (elements[d.name] = d));
 
   const actions: IActions = {};
 
@@ -71,11 +71,11 @@ export default function Conversation() {
           <Box my={1} />
           <MessageContainer
             actions={actions}
-            documents={documents}
+            elements={elements}
             messages={data.conversation.messages}
           />
         </Box>
-        <DocumentSideView />
+        <SideView />
       </Box>
     </Page>
   );

@@ -1,10 +1,10 @@
 from langchain import OpenAI, LLMMathChain, SerpAPIWrapper
 from langchain.agents import initialize_agent, Tool
 from langchain.chat_models import ChatOpenAI
-from chainlit import langchain_factory
+import chainlit as cl
 
 
-@langchain_factory
+@cl.langchain_factory
 def load():
     llm = ChatOpenAI(temperature=0)
     llm1 = OpenAI(temperature=0)

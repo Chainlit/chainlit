@@ -1,10 +1,9 @@
-import CircleIcon from "@mui/icons-material/Circle";
 import { Alert, AlertTitle, Stack } from "@mui/material";
-import DocumentText from "components/document/text";
-import { IDocuments } from "state/document";
+import TextElement from "components/element/text";
+import { IElements } from "state/element";
 
 interface Props {
-  items: IDocuments;
+  items: IElements;
 }
 
 export default function InlinedTextList({ items }: Props) {
@@ -14,7 +13,7 @@ export default function InlinedTextList({ items }: Props) {
         return (
           <Alert color="info" key={k} icon={false}>
             <AlertTitle>{k}</AlertTitle>
-            <DocumentText document={v} />
+            <TextElement element={v} />
           </Alert>
         );
       })}

@@ -3,38 +3,38 @@ import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import remarkGfm from "remark-gfm";
 import { Typography, Link, Stack } from "@mui/material";
-import { IDocuments } from "state/document";
-import InlinedDocuments from "./inlined";
+import { IElements } from "state/element";
+import InlinedElements from "./inlined";
 import { memo } from "react";
 import { IActions } from "state/action";
-import DocumentRef from "./documentRef";
+import ElementRef from "./elementRef";
 import ActionRef from "./actionRef";
 
 interface Props {
   content: string;
   language?: string;
-  documents: IDocuments;
+  elements: IElements;
   actions: IActions;
 }
 
-function prepareContent({ documents, actions, content, language }: Props) {
-  const documentNames = Object.keys(documents);
-  const documentRegexp = documentNames.length
-    ? new RegExp(`(${documentNames.join("|")})`, "g")
+function prepareContent({ elements, actions, content, language }: Props) {
+  const elementNames = Object.keys(elements);
+  const elementRegexp = elementNames.length
+    ? new RegExp(`(${elementNames.join("|")})`, "g")
     : undefined;
 
-  const actionContents = Object.values(actions).map(a => a.trigger);
+  const actionContents = Object.values(actions).map((a) => a.trigger);
   const actionRegexp = actionContents.length
     ? new RegExp(`(${actionContents.join("|")})`, "g")
     : undefined;
 
   let preparedContent = content.trim();
-  const inlinedDocuments: IDocuments = {};
+  const inlinedelements: IElements = {};
 
-  if (documentRegexp) {
-    preparedContent = preparedContent.replaceAll(documentRegexp, (match) => {
-      if (documents[match].display === "inline") {
-        inlinedDocuments[match] = documents[match];
+  if (elementRegexp) {
+    preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
+      if (elements[match].display === "inline") {
+        inlinedelements[match] = elements[match];
       }
       return `[${match}](${match})`;
     });
@@ -51,19 +51,19 @@ function prepareContent({ documents, actions, content, language }: Props) {
     preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
   }
 
-  return { preparedContent, inlinedDocuments };
+  return { preparedContent, inlinedelements };
 }
 
 export default memo(function MessageContent({
   content,
-  documents,
+  elements,
   actions,
   language,
 }: Props) {
-  const { preparedContent, inlinedDocuments } = prepareContent({
+  const { preparedContent, inlinedelements } = prepareContent({
     content,
     language,
-    documents,
+    elements,
     actions,
   });
 
@@ -86,13 +86,13 @@ export default memo(function MessageContent({
           components={{
             a({ node, className, children, ...props }) {
               const name = children[0] as string;
-              const document = documents[name];
+              const element = elements[name];
               const action = Object.values(actions).find(
                 (a) => a.trigger === name
               );
 
-              if (document) {
-                return <DocumentRef document={document} />;
+              if (element) {
+                return <ElementRef element={element} />;
               } else if (action) {
                 return <ActionRef action={action} />;
               } else {
@@ -125,7 +125,7 @@ export default memo(function MessageContent({
           {preparedContent}
         </ReactMarkdown>
       </Typography>
-      <InlinedDocuments inlined={inlinedDocuments} />
+      <InlinedElements inlined={inlinedelements} />
     </Stack>
   );
 });

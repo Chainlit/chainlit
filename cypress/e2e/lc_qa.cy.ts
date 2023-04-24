@@ -23,8 +23,8 @@ describe("LangChain Document QA", () => {
 
     messages.eq(3).should("contain", "Sources: 3-pl");
 
-    cy.get(".document-link").eq(0).should("contain", "3-pl");
-    cy.get(".document-link").eq(0).click();
+    cy.get(".element-link").eq(0).should("contain", "3-pl");
+    cy.get(".element-link").eq(0).click();
 
     const sideView = cy.get("#side-view-content");
     sideView.should("exist");

@@ -3,7 +3,7 @@ from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
 import uuid
 import requests
-from chainlit.types import DocumentType
+from chainlit.types import ElementType
 
 
 class BaseClient(ABC):
@@ -19,11 +19,11 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    def upload_document(self, ext: str, content: bytes) -> int:
+    def upload_element(self, ext: str, content: bytes) -> int:
         pass
 
     @abstractmethod
-    def create_document(self, conversation_id: str, type: DocumentType, url: str, name: str, display: str) -> int:
+    def create_element(self, conversation_id: str, type: ElementType, url: str, name: str, display: str) -> int:
         pass
 
 
@@ -93,12 +93,12 @@ class CloudClient(BaseClient):
         res = self.mutation(mutation, variables)
         return int(res['data']['createMessage']["id"])
 
-    def create_document(self, type: DocumentType, url: str, name: str, display: str) -> Dict[str, Any]:
+    def create_element(self, type: ElementType, url: str, name: str, display: str) -> Dict[str, Any]:
         c_id = self.get_conversation_id()
 
         mutation = """
         mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!) {
-            createDocument(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display) {
                 id,
                 type,
                 url,
@@ -115,9 +115,9 @@ class CloudClient(BaseClient):
             "display": display
         }
         res = self.mutation(mutation, variables)
-        return res['data']['createDocument']
+        return res['data']['createElement']
 
-    def upload_document(self, ext: str, content: bytes) -> str:
+    def upload_element(self, ext: str, content: bytes) -> str:
         id = f'{uuid.uuid4()}{ext}'
         url = f'{self.url}/api/upload'
         body = {'projectId': self.project_id, 'fileName': id}

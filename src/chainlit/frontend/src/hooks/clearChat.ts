@@ -3,19 +3,19 @@ import {
   messagesState,
   tokenCountState,
 } from "state/chat";
-import { documentSideViewState, documentsState } from "state/document";
+import { sideViewState, elementState } from "state/element";
 
 export default function useClearChat() {
   const setMessages = useSetRecoilState(messagesState);
-  const setDocuments = useSetRecoilState(documentsState);
-  const setSideView = useSetRecoilState(documentSideViewState);
+  const setElements = useSetRecoilState(elementState);
+  const setSideView = useSetRecoilState(sideViewState);
   const setTokenCount = useSetRecoilState(tokenCountState);
 
   return () => {
     window.socket?.disconnect();
     window.socket?.connect();
     setMessages([]);
-    setDocuments({});
+    setElements({});
     setSideView(undefined);
     setTokenCount(0);
   };

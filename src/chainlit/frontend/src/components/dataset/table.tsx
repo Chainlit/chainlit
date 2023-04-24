@@ -36,7 +36,7 @@ const ConversationsQuery = gql`
         node {
           id
           createdAt
-          documentCount
+          elementCount
           messageCount
           author {
             name

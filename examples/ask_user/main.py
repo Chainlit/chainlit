@@ -1,10 +1,10 @@
-from chainlit import send_message, ask_for_input, on_chat_start
+import chainlit as cl
 
 
-@on_chat_start
+@cl.on_chat_start
 def main():
-    res = ask_for_input(content="What is your name?", timeout=10)
+    res = cl.ask_for_input(content="What is your name?", timeout=10)
     if res:
-        send_message(
+        cl.send_message(
             content=f"Your name is: {res['content']}",
         )
