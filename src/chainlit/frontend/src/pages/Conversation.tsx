@@ -68,7 +68,7 @@ export default function Conversation() {
             md: 0,
           }}
         >
-          <Box my={2} />
+          <Box my={1} />
           <MessageContainer
             actions={actions}
             documents={documents}

@@ -179,10 +179,8 @@ const Chat = () => {
         boxSizing="border-box"
         px={2}
       >
-        {socketError && (
-          <Alert severity="error">Could not reach the server.</Alert>
-        )}
-        <Box my={2} />
+        <Box my={1} />
+        {socketError && <Alert severity="error">Could not reach the server.</Alert>}
         {!!messages.length && (
           <MessageContainer
             actions={actions}
