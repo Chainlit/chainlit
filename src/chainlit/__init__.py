@@ -7,6 +7,7 @@ from typing import Callable, Any, List, Union
 from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
 from chainlit.config import config
 from chainlit.user_session import user_session
+from chainlit.sdk import get_sdk
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
@@ -21,7 +22,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
 
     def wrapper(*args):
-        from chainlit.sdk import get_sdk
+
         sdk = get_sdk()
         # Get the parameter names of the user-defined function
         user_function_params = list(
@@ -55,7 +56,6 @@ def send_text(text: str, name: str, display: ElementDisplay = "side"):
         display (ElementDisplay, optional): Determines how the element should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_text(text, name, display)
@@ -72,7 +72,6 @@ def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
         display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_local_image(path, name, display)
@@ -92,7 +91,6 @@ def send_message(content: str, author=config.chatbot_name, prompt: str = None, l
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         end_stream (bool, optional): Pass True if this message was streamed.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_message(author=author, content=content, prompt=prompt, language=language,
@@ -109,7 +107,6 @@ def send_error_message(content: str, author=config.chatbot_name, indent=0):
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         indent (int, optional): If positive, the message will be nested in the UI.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_message(author=author, content=content,
@@ -130,7 +127,6 @@ def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on
     Returns:
         AskResponse: The response from the user include "msg" and "author" or None.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         spec = AskSpec(type="text", timeout=timeout)
@@ -153,7 +149,6 @@ def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.cha
     Returns:
         FileContent: The file content or None.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         spec = AskFileSpec(type="file", accept=accept,
@@ -174,7 +169,6 @@ def send_action(name: str, trigger: str, description=""):
         trigger (str): The text that should trigger the action when clicked.
         description (str, optional): The description of the action. Defaults to "".
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         sdk.send_action(name=name, trigger=trigger,
@@ -191,7 +185,6 @@ def start_stream(author=config.chatbot_name, indent: int = 0, language: str = No
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         return sdk.stream_start(author=author, indent=indent, language=language, llm_settings=llm_settings)
@@ -199,12 +192,11 @@ def start_stream(author=config.chatbot_name, indent: int = 0, language: str = No
 
 def send_token(token: str):
     """
-    Start a token belonging to a message.
+    Send a token belonging to the currently streamed message.
 
     Args:
         token (str): The token to send.
     """
-    from chainlit.sdk import get_sdk
     sdk = get_sdk()
     if sdk:
         return sdk.send_token(token)

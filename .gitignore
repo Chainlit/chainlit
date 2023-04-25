@@ -1,8 +1,11 @@
 build
+dist
 
 *.egg-info
 
 .env
+
+poetry.lock
 
 venv
 
