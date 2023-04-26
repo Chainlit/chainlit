@@ -6,11 +6,6 @@ from chainlit.config import config, init_config, load_module
 from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
 
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
 try:
     import langchain
     from langchain.cache import SQLiteCache

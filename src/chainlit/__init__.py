@@ -2,12 +2,26 @@ import gevent
 from gevent import monkey
 monkey.patch_all()
 
-import inspect
-from typing import Callable, Any, List, Union
-from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
-from chainlit.config import config
-from chainlit.user_session import user_session
+
 from chainlit.sdk import get_sdk
+from chainlit.user_session import user_session
+from chainlit.config import config
+from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
+from typing import Callable, Any, List, Union
+import inspect
+from dotenv import load_dotenv
+import logging
+import os
+
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+
+if env_found:
+    logging.info("Loaded .env file")
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
@@ -301,10 +315,11 @@ def action(name: str) -> Callable:
     """
     Callback to call when an action is triggered in the UI.
     """
-    
+
     def decorator(func: Callable[[Action], Any]):
         from chainlit.config import config
-        config.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        config.action_callbacks[name] = wrap_user_function(
+            func, with_task=True)
         return func
 
     return decorator

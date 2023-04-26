@@ -27,10 +27,6 @@ public = true
 
 # List of environment variables to be provided by each user to use the app.
 user_env = []
-
-[env]
-# Environment variables to be loaded.
-#OPENAI_API_KEY = "..."
 """
 
 # Set environment and server URL
@@ -98,11 +94,6 @@ def load_config():
     init_config()
     with open(config_file, "rb") as f:
         toml_dict = tomli.load(f)
-
-        # Load environment variables
-        env = toml_dict.get("env", {})
-        if env:
-            os.environ.update(env)
 
         # Load project settings
         project_settings = toml_dict.get("project", {})

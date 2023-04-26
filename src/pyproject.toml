@@ -4,6 +4,7 @@ version = "0.1.0"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "Prototype, debug and share LLM Agents in a few lines of code!"
 authors = ["Chainlit"]
+homepage = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = [
     "**/frontend/**/*",
@@ -17,7 +18,7 @@ include = [
 chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
-python = "^3.7.1"
+python = "^3.8"
 dataclasses_json = "^0.5.7"
 flask = "^2.2.3"
 flask_socketio = "^5.3.3"
@@ -31,6 +32,7 @@ gevent = "^22.10.2"
 gevent_websocket = "^0.10.1"
 pydantic = "^1.10.6"
 python-graphql-client = "^0.4.3"
+python-dotenv = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]
