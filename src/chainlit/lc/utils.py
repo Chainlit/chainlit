@@ -1,5 +1,5 @@
 from typing import Any
-def run_agent(agent: Any, input_str: str):
+def run_langchain_agent(agent: Any, input_str: str):
 
     if hasattr(agent, "input_keys"):
         input_key = agent.input_keys[0]

@@ -62,6 +62,7 @@ export default function Header() {
           direction="row"
           spacing={2}
         >
+          <NewChatButton />
           {requiredKeys && (
             <Tooltip title="API keys">
               <IconButton component={Link} to="/env">
@@ -69,7 +70,6 @@ export default function Header() {
               </IconButton>
             </Tooltip>
           )}
-          <NewChatButton />
           <ThemeButton />
           <UserAvatar />
         </Stack>

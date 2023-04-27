@@ -6,7 +6,7 @@ monkey.patch_all()
 from chainlit.sdk import get_sdk
 from chainlit.user_session import user_session
 from chainlit.config import config
-from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, File, AskResponse, Action
+from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
 from typing import Callable, Any, List, Union
 import inspect
 from dotenv import load_dotenv
@@ -147,7 +147,7 @@ def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on
         return sdk.send_ask_user(author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout)
 
 
-def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[File, None]:
+def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[AskFileResponse, None]:
     """
     Ask the user to upload a file before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
@@ -170,7 +170,7 @@ def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.cha
         res = sdk.send_ask_user(
             author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout)
         if res:
-            return File(**res)
+            return AskFileResponse(**res)
         else:
             return None
 

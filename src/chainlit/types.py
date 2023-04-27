@@ -9,6 +9,7 @@ ElementDisplay = Literal["inline", "side", "page"]
 @dataclass_json
 @dataclass
 class AskSpec():
+    """Specification for asking the user."""
     timeout: int
     type: Literal["text", "file"]
 
@@ -16,22 +17,23 @@ class AskSpec():
 @dataclass_json
 @dataclass
 class AskFileSpec(AskSpec):
+    """Specification for asking the user for a file."""
     accept: List[str]
     max_size_mb: int
-
-
-@dataclass
-class File():
-    name: str
-    path: str
-    size: int
-    type: str
-    content: bytes
 
 
 class AskResponse(TypedDict):
     content: str
     author: str
+
+
+@dataclass
+class AskFileResponse():
+    name: str
+    path: str
+    size: int
+    type: str
+    content: bytes
 
 
 class Action(TypedDict):

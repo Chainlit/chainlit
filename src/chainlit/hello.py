@@ -1,3 +1,5 @@
+# This is a simple example of a chainlit script.
+
 from chainlit import send_message, ask_for_input, on_chat_start
 
 

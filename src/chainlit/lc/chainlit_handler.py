@@ -9,16 +9,22 @@ IGNORE_LIST = ["AgentExecutor"]
 
 
 class ChainlitCallbackHandler(BaseCallbackHandler):
-    # Initialize dictionaries to store session data
+    # Keep track of the formatted prompts to display them in the prompt playground.
     prompts_per_session: Dict[str, List[str]]
+    # Keep track of the LLM settings for the last prompt
     llm_settings_per_session: Dict[str, LLMSettings]
+    # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
     sequence_per_session: Dict[str, List[str]]
+    # Keep track of the last prompt for each session
     last_prompt_per_session: Dict[str, Union[str, None]]
-    stream_per_session: Dict[str, Union[str, None]]
+    # Keep track of whether the session is streaming or not
+    stream_per_session: Dict[str, bool]
 
+    # We want to handler to be called on every message
     always_verbose: bool = True
 
     def __init__(self) -> None:
+        # Initialize dictionaries to store session data
         self.prompts_per_session = {}
         self.llm_settings_per_session = {}
         self.sequence_per_session = {}
@@ -27,15 +33,15 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def is_streaming(self) -> bool:
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
-        return session_id in self.stream_per_session and self.stream_per_session[session_id] is not None
+        return self.stream_per_session.get(session_id, False)
 
     def start_stream(self):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
@@ -46,26 +52,26 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
         sdk.stream_start(author=author, indent=indent,
                          llm_settings=llm_settings)
-        self.stream_per_session[session_id] = ""
+        self.stream_per_session[session_id] = True
 
     def send_token(self, token: str):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         sdk.send_token(token)
 
     def end_stream(self):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
-        self.stream_per_session[session_id] = None
+        self.stream_per_session[session_id] = False
 
     def add_in_sequence(self, name: str):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
@@ -80,7 +86,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def pop_sequence(self):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
@@ -91,7 +97,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
@@ -107,7 +113,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def pop_prompt(self):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
@@ -117,14 +123,14 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
             self.last_prompt_per_session[session_id] = self.prompts_per_session[session_id].pop(
             )
 
-    def get_last_prompt(self):
+    def consume_last_prompt(self):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         session_id = sdk.session["id"]
 
-        last_prompt = self.last_prompt_per_session[session_id] if session_id in self.last_prompt_per_session else None
+        last_prompt = self.last_prompt_per_session.get(session_id)
         self.last_prompt_per_session[session_id] = None
         return last_prompt
 
@@ -132,12 +138,12 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         llm_settings = self.llm_settings_per_session.get(
             sdk.session["id"])
 
-        all_sequence = self.sequence_per_session.get(sdk.session["id"])
+        sequence = self.sequence_per_session.get(sdk.session["id"])
 
-        indent = len(all_sequence) if all_sequence else 0
+        indent = len(sequence) if sequence else 0
 
-        if all_sequence:
-            author = all_sequence[-1]
+        if sequence:
+            author = sequence[-1]
         else:
             author = config.chatbot_name
 
@@ -145,7 +151,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
     def add_message(self, message, prompt: str = None, error=False):
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
 
         author, indent, llm_settings = self.get_message_params(sdk)
@@ -190,7 +196,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         """Do nothing."""
         self.pop_prompt()
         sdk = get_sdk()
-        if not sdk or not sdk.session:
+        if not sdk:
             return
         if response.llm_output is not None:
             if "token_usage" in response.llm_output:
@@ -212,7 +218,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
-            prompt = self.get_last_prompt()
+            prompt = self.consume_last_prompt()
             self.add_message(outputs[output_key], prompt)
         self.pop_sequence()
 
@@ -235,7 +241,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        prompt = self.get_last_prompt()
+        prompt = self.consume_last_prompt()
         self.add_message(output, prompt)
         self.pop_sequence()
 

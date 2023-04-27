@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, ConnectionRefusedError
 from chainlit.config import config
-from chainlit.lc.utils import run_agent
+from chainlit.lc.utils import run_langchain_agent
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
@@ -20,22 +20,21 @@ app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
-# Serve static files
-
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    """Serve the UI."""
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
-# Handle completion requests
-
 
 @app.route('/completion', methods=['POST'])
 def completion():
+    """Handle a completion request from the prompt playground."""
+
     import openai
     data = request.json
     llm_settings = data["settings"]
@@ -65,11 +64,10 @@ def completion():
         )
         return response["choices"][0]["text"]
 
-# Get project settings
-
 
 @app.route('/project/settings', methods=['GET'])
 def project_settings():
+    """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return {
         "public": config.public,
         "projectId": config.project_id,
@@ -79,31 +77,38 @@ def project_settings():
         "dev": config.chainlit_env == "development",
     }
 
-# Handle socket connection
-
 
 @socketio.on('connect')
 def connect():
+    """Handle socket connection."""
+
     session_id = request.sid
     client = None
     user_env = {}
 
     if config.user_env:
+        # Check if requested user environment variables are provided
         if request.headers.get("user-env"):
             user_env = json.loads(request.headers.get("user-env"))
-        else:
-            raise ConnectionRefusedError("Missing user environment")
+            for key in config.user_env:
+                if key not in user_env:
+                    raise ConnectionRefusedError(
+                        "Missing user environment variable: " + key)
 
     access_token = request.headers.get("Authorization")
     if not config.public and not access_token:
+        # Refuse connection if the app is private and no access token is provided
         raise ConnectionRefusedError("No access token provided")
     elif access_token and config.project_id:
+        # Create the cloud client
         client = CloudClient(project_id=config.project_id, session_id=session_id, access_token=access_token,
                              url=config.chainlit_server)
 
+    # Function to send a message to this particular session
     def _emit(event, data):
         socketio.emit(event, data, to=session_id)
 
+    # Function to ask the user a question
     def _ask_user(data, timeout):
         return socketio.call("ask", data, timeout=timeout, to=session_id)
 
@@ -122,40 +127,49 @@ def connect():
 
     if config.lc_factory:
         def instantiate_agent(session):
+            """Instantiate the langchain agent and store it in the session."""
             __chainlit_sdk__ = Chainlit(session)
             agent = config.lc_factory()
             session["agent"] = agent
+
+        # Instantiate the agent in a background task since the connection is not yet accepted
         task = socketio.start_background_task(
             instantiate_agent, session)
         session["task"] = task
 
     if config.on_chat_start:
         def _on_chat_start(session):
+            """Call the on_chat_start function provided by the developer."""
             __chainlit_sdk__ = Chainlit(session)
             config.on_chat_start()
+
+        # Send the ask in a backgroudn task since the connection is not yet accepted
         task = socketio.start_background_task(
             _on_chat_start, session)
         session["task"] = task
 
-# Handle socket disconnection
-
 
 @socketio.on('disconnect')
 def disconnect():
+    """Handle socket disconnection."""
+
     if request.sid in sessions:
+        # Clean up the session
         session = sessions.pop(request.sid)
-        if session.get("task"):
-            session["task"].kill()
-            session["task"].join()
+        task = session.get("task")
+        if task:
+            # If a background task is running, kill it
+            task.kill()
 
     if request.sid in user_sessions:
+        # Clean up the user session
         user_sessions.pop(request.sid)
-
-# Handle stop event
 
 
 @socketio.on('stop')
 def stop():
+    """Handle a stop request from the client."""
+
     session = sessions.get(request.sid)
     if not session:
         return
@@ -175,15 +189,23 @@ def stop():
         task.join()
         session["task"] = None
 
-# Process message
+
+def need_session(id: str):
+    session = sessions.get(id)
+    if not session:
+        raise ValueError("Session not found")
+    return session
 
 
 def process_message(session: Session, author: str, input_str: str):
+    """Process a message from the user."""
+
     __chainlit_sdk__ = Chainlit(session)
     try:
         __chainlit_sdk__.task_start()
 
         if session["client"]:
+            # If cloud is enabled, persist the message
             session["client"].create_message(
                 {
                     "author": author,
@@ -192,26 +214,32 @@ def process_message(session: Session, author: str, input_str: str):
                 }
             )
 
-        if "agent" in session:
-            agent = session["agent"]
-            if agent is None:
-                raise ValueError("LangChain agent is None")
-            agent_name = config.chatbot_name
+        langchain_agent = session.get("agent")
+        if langchain_agent:
+            # If a langchain agent is available, run it
             if config.lc_run:
-                res = config.lc_run(agent, input_str)
+                # If the developer provided a custom run function, use it
+                res = config.lc_run(langchain_agent, input_str)
             else:
-                raw_res, output_key = run_agent(
-                    agent, input_str)
+                # Otherwise, use the default run function
+                raw_res, output_key = run_langchain_agent(
+                    langchain_agent, input_str)
 
                 if config.lc_postprocess:
+                    # If the developer provided a custom postprocess function, use it
                     res = config.lc_postprocess(raw_res)
                 elif output_key is not None:
+                    # Use the output key if provided
                     res = raw_res[output_key]
                 else:
+                    # Otherwise, use the raw response
                     res = raw_res
+            # Finally, send the response to the user
             __chainlit_sdk__.send_message(
-                author=agent_name, content=res)
+                author=config.chatbot_name, content=res)
+
         elif config.on_message:
+            # If no langchain agent is available, call the on_message function provided by the developer
             config.on_message(input_str)
     except Exception as e:
         logging.exception(e)
@@ -220,17 +248,17 @@ def process_message(session: Session, author: str, input_str: str):
     finally:
         __chainlit_sdk__.task_end()
 
-# Handle message event
-
 
 @app.route('/message', methods=['POST'])
 def message():
+    """Handle a message from the UI."""
+
     body = request.json
     session_id = body["sessionId"]
     input_str = body["content"].strip()
     author = body["author"]
 
-    session = sessions[session_id]
+    session = need_session(session_id)
 
     task = socketio.start_background_task(
         process_message, session, author, input_str)
@@ -246,15 +274,19 @@ def process_action(session: Session, action: Action):
     callback = config.action_callbacks.get(action["name"])
     if callback:
         callback(action)
+    else:
+        logging.warning("No callback found for action %s", action["name"])
 
 
 @app.route('/action', methods=['POST'])
 def on_action():
+    """Handle an action call from the UI."""
+
     body = request.json
     session_id = body["sessionId"]
     action = body["action"]
 
-    session = sessions[session_id]
+    session = need_session(session_id)
 
     task = socketio.start_background_task(
         process_action, session, action)

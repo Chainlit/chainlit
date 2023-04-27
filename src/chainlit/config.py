@@ -2,17 +2,20 @@ import os
 import sys
 from typing import Optional, Literal, Any, Callable, List, Dict
 import tomli
+from chainlit.types import Action
 from pydantic.dataclasses import dataclass
 from importlib import machinery
 import click
 import logging
 
-# Define paths and default configuration string
+# Get the directory the script is running from
 root = os.getcwd()
+
 config_dir = os.path.join(root, ".chainlit")
 config_file = os.path.join(config_dir, "config.toml")
 
-default_config_str = """[project]
+# Default config file created if none exists
+DEFAULT_CONFIG_STR = """[project]
 # Name of the app and chatbot.
 name = "Chatbot"
 
@@ -38,26 +41,36 @@ else:
     chainlit_server = "https://cloud.chainlit.io"
 
 
-@dataclass
+@dataclass()
 class ChainlitConfig:
-    root: str
     chainlit_env: Literal['development', 'production']
+    # Chainlit server URL. Used only for cloud features
     chainlit_server: str
+    # Name of the app and chatbot. Used as the default message author.
     chatbot_name: str
+    # Whether the app is available to anonymous users or only to team members.
     public: bool
+    # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: List[str]
+    # Path to the local langchain cache database
     lc_cache_path: str
-    local_db_path: str
-    action_callbacks: Dict[str, Callable[[Any], Any]]
+    # Developer defined callbacks for each action. Key is the action name, value is the callback function.
+    action_callbacks: Dict[str, Callable[[Action], Any]]
+    # Directory where the Chainlit project is located
+    root = root
+    # Enables Cloud features if provided
     project_id: Optional[str] = None
+    # Name of the module (python file) used in the run command
+    module_name: Optional[str] = None
+    # Module object loaded from the module_name
+    module: Any = None
+    # Bunch of callbacks defined by the developer
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
     lc_run: Optional[Callable[[Any, str], Any]] = None
     lc_postprocess: Optional[Callable[[Any], Any]] = None
     lc_factory: Optional[Callable[[], Any]] = None
-    module_name: Optional[str] = None
-    module: Any = None
 
 
 def init_config(log=False):
@@ -65,7 +78,7 @@ def init_config(log=False):
     if not os.path.exists(config_file):
         os.makedirs(config_dir, exist_ok=True)
         with open(config_file, 'w') as f:
-            f.write(default_config_str)
+            f.write(DEFAULT_CONFIG_STR)
             logging.info(f"Created default config file at {config_file}")
     elif log:
         logging.info(f"Config file already exists at {config_file}")
@@ -106,12 +119,10 @@ def load_config():
             raise ValueError(
                 "Project ID is required when public is set to false.")
 
-        # Set cache and database paths
+        # Set cache path
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
-        local_db_path = os.path.join(config_dir, ".local.db")
 
         config = ChainlitConfig(
-            root=root,
             action_callbacks={},
             chainlit_env=chainlit_env,
             chainlit_server=chainlit_server,
@@ -119,7 +130,6 @@ def load_config():
             public=public,
             user_env=user_env,
             lc_cache_path=lc_cache_path,
-            local_db_path=local_db_path,
             project_id=project_id,
         )
 

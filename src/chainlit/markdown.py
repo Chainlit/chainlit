@@ -1,6 +1,7 @@
 import os
 import logging
 
+# Default chainlit.md file created if none exists
 DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
 
 Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
@@ -19,6 +20,7 @@ To modify the welcome screen, edit the `chainlit.md` file at the root of your pr
 
 
 def init_markdown(root: str):
+    """Initialize the chainlit.md file if it doesn't exist."""
     chainlit_md_file = os.path.join(root, "chainlit.md")
 
     if not os.path.exists(chainlit_md_file):
@@ -28,6 +30,7 @@ def init_markdown(root: str):
 
 
 def get_markdown_str(root: str):
+    """Get the chainlit.md file as a string."""
     chainlit_md_path = os.path.join(root, "chainlit.md")
     if os.path.exists(chainlit_md_path):
         with open(chainlit_md_path) as f:
