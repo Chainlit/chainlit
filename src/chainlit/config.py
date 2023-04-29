@@ -30,6 +30,12 @@ public = true
 
 # List of environment variables to be provided by each user to use the app.
 user_env = []
+
+# Hide the chain of thought details from the user in the UI.
+hide_cot = false
+
+# Limit the number of requests per user.
+#request_limit = "10 per day"
 """
 
 # Set environment and server URL
@@ -52,12 +58,16 @@ class ChainlitConfig:
     public: bool
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: List[str]
+    # Hide the chain of thought details from the user in the UI.
+    hide_cot: bool
     # Path to the local langchain cache database
     lc_cache_path: str
     # Developer defined callbacks for each action. Key is the action name, value is the callback function.
     action_callbacks: Dict[str, Callable[[Action], Any]]
     # Directory where the Chainlit project is located
     root = root
+    # Limit the number of requests per user.
+    request_limit: Optional[str] = None
     # Enables Cloud features if provided
     project_id: Optional[str] = None
     # Name of the module (python file) used in the run command
@@ -71,6 +81,7 @@ class ChainlitConfig:
     lc_run: Optional[Callable[[Any, str], Any]] = None
     lc_postprocess: Optional[Callable[[Any], Any]] = None
     lc_factory: Optional[Callable[[], Any]] = None
+    lc_rename: Optional[Callable[[str], str]] = None
 
 
 def init_config(log=False):
@@ -114,6 +125,8 @@ def load_config():
         project_id = project_settings.get("id")
         public = project_settings.get("public")
         user_env = project_settings.get("user_env")
+        hide_cot = project_settings.get("hide_cot", False)
+        request_limit = project_settings.get("request_limit", "")
 
         if not public and not project_id:
             raise ValueError(
@@ -124,6 +137,8 @@ def load_config():
 
         config = ChainlitConfig(
             action_callbacks={},
+            request_limit=request_limit,
+            hide_cot=hide_cot,
             chainlit_env=chainlit_env,
             chainlit_server=chainlit_server,
             chatbot_name=chatbot_name,

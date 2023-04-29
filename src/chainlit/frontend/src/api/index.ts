@@ -28,6 +28,10 @@ export const getCompletion = async (
     body: JSON.stringify({ prompt, settings, userEnv }),
   });
 
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+
   const completion = await res.text();
   return completion;
 };
@@ -41,6 +45,10 @@ export const postMessage = async (author: string, content: string) => {
     body: JSON.stringify({ sessionId: window.socket!.id, author, content }),
   });
 
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+
   return res.json();
 };
 
@@ -52,6 +60,10 @@ export const callAction = async (action: IAction) => {
     method: "POST",
     body: JSON.stringify({ sessionId: window.socket!.id, action }),
   });
+
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
 
   return res.json();
 };

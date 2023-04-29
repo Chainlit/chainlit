@@ -3,6 +3,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { INestedMessage } from "state/chat";
 import { CircularProgress } from "@mui/material";
 import GreyButton from "components/greyButton";
+import { useRecoilValue } from "recoil";
+import { projectSettingsState } from "state/project";
 
 interface Props {
   message: INestedMessage;
@@ -17,11 +19,14 @@ export default function DetailsButton({
   onClick,
   loading,
 }: Props) {
+  const pSettings = useRecoilValue(projectSettingsState)
   const tool = message.subMessages?.length
     ? message.subMessages[0].author
     : undefined;
 
-  if (!loading && !tool) {
+  const show = !loading && !tool
+
+  if (show || pSettings?.hideCot) {
     return null;
   }
 
@@ -29,7 +34,7 @@ export default function DetailsButton({
 
   let id = "";
   if (tool) {
-    id = tool.toLowerCase();
+    id = tool.trim().toLowerCase().replaceAll(" ", "-");
   }
   if (loading) {
     id += "-loading";

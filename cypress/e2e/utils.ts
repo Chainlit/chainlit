@@ -1,3 +1,4 @@
 export function submitMessage(message: string) {
-  cy.get(`#chat-input`).type(`${message}{enter}`);
+  cy.wait(1000);
+  cy.get(`#chat-input`).should("not.be.disabled").type(`${message}{enter}`);
 }

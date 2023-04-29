@@ -4,6 +4,8 @@ import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, ConnectionRefusedError
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from chainlit.config import config
 from chainlit.lc.utils import run_langchain_agent
 from chainlit.session import Session, sessions
@@ -20,6 +22,12 @@ app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -32,6 +40,7 @@ def serve(path):
 
 
 @app.route('/completion', methods=['POST'])
+@limiter.limit(config.request_limit)
 def completion():
     """Handle a completion request from the prompt playground."""
 
@@ -73,6 +82,7 @@ def project_settings():
         "projectId": config.project_id,
         "chainlitServer": config.chainlit_server,
         "userEnv": config.user_env,
+        "hideCot": config.hide_cot,
         "chainlitMd": get_markdown_str(config.root),
         "dev": config.chainlit_env == "development",
     }
@@ -182,15 +192,16 @@ def stop():
         if config.on_stop:
             config.on_stop()
 
+        task.kill()
+        session["task"] = None
+
         __chainlit_sdk__.send_message(
             author="System", content="Conversation stopped by the user.")
 
-        task.kill()
-        task.join()
-        session["task"] = None
-
 
 def need_session(id: str):
+    """Return the session with the given id."""
+
     session = sessions.get(id)
     if not session:
         raise ValueError("Session not found")
@@ -250,6 +261,7 @@ def process_message(session: Session, author: str, input_str: str):
 
 
 @app.route('/message', methods=['POST'])
+@limiter.limit(config.request_limit)
 def message():
     """Handle a message from the UI."""
 
@@ -279,6 +291,7 @@ def process_action(session: Session, action: Action):
 
 
 @app.route('/action', methods=['POST'])
+@limiter.limit(config.request_limit)
 def on_action():
     """Handle an action call from the UI."""
 

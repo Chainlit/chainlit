@@ -132,8 +132,9 @@ export default function Playground() {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column" }}>
+      <DialogContent  sx={{ display: "flex", flexDirection: "column" }}>
         <Stack
+          id="playground"
           direction="row"
           spacing={2}
           sx={{ overflowY: "scroll", flexGrow: 1 }}

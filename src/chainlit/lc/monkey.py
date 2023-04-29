@@ -1,40 +1,12 @@
 import langchain
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from chainlit.types import LLMSettings
 from langchain.llms import base as llm_base
 from langchain.chat_models.base import BaseChatModel
-from langchain.callbacks import base as cb_base
 from langchain.schema import (
     LLMResult,
     PromptValue,
 )
-
-def cbh_on_llm_cache(
-    self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
-) -> Any:
-    pass
-
-
-cb_base.BaseCallbackHandler.on_llm_cache = cbh_on_llm_cache
-
-
-def cbm_on_llm_cache(
-    self,
-    serialized: Dict[str, Any],
-    prompts: List[str],
-    verbose: bool = False,
-    **kwargs: Any
-) -> None:
-    if not hasattr(self, "handlers"):
-        return
-    for handler in self.handlers:
-        if not handler.ignore_llm:
-            if verbose or handler.always_verbose:
-                handler.on_llm_cache(serialized, prompts, **kwargs)
-
-
-cb_base.BaseCallbackManager.on_llm_cache = cbm_on_llm_cache
-
 
 def get_llm_settings(llm: llm_base.BaseLLM, stop: Optional[List[str]] = None):
     if llm.__class__.__name__ == "OpenAI":
@@ -60,6 +32,7 @@ def generate(
     """Run the LLM on the given prompt and input."""
     # If string is passed in directly no errors will be raised but outputs will
     # not make sense.
+
     if not isinstance(prompts, list):
         raise ValueError(
             "Argument 'prompts' is expected to be of type List[str], received"
@@ -106,10 +79,11 @@ def generate(
             existing_prompts, llm_string, missing_prompt_idxs, new_results, prompts
         )
     else:
-        self.callback_manager.on_llm_cache(
+        self.callback_manager.on_llm_start(
             {"name": self.__class__.__name__}, prompts, verbose=self.verbose, llm_settings=llm_settings,
         )
         llm_output = {}
+        self.callback_manager.on_llm_end(LLMResult(generations=[], llm_output=llm_output), verbose=self.verbose)
     generations = [existing_prompts[i] for i in range(len(prompts))]
     return LLMResult(generations=generations, llm_output=llm_output)
 

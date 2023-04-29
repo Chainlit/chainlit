@@ -143,7 +143,10 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         indent = len(sequence) if sequence else 0
 
         if sequence:
-            author = sequence[-1]
+            if config.lc_rename:
+                author = config.lc_rename(sequence[-1])
+            else:
+                author = sequence[-1]
         else:
             author = config.chatbot_name
 
@@ -180,11 +183,6 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     ) -> None:
         self.add_prompt(prompts[0], kwargs.get('llm_settings'))
 
-    def on_llm_cache(
-            self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
-    ):
-        self.add_prompt(prompts[0], kwargs.get('llm_settings'))
-
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Do nothing."""
         if not self.is_streaming():
@@ -213,6 +211,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["name"])
+        # Useful to display details button in the UI
         self.add_message("")
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:

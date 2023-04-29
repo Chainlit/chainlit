@@ -2,16 +2,15 @@ import gevent
 from gevent import monkey
 monkey.patch_all()
 
-
-from chainlit.sdk import get_sdk
-from chainlit.user_session import user_session
-from chainlit.config import config
-from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
-from typing import Callable, Any, List, Union
-import inspect
-from dotenv import load_dotenv
-import logging
 import os
+import logging
+from dotenv import load_dotenv
+import inspect
+from typing import Callable, Any, List, Union
+from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
+from chainlit.config import config
+from chainlit.user_session import user_session
+from chainlit.sdk import get_sdk
 
 
 logging.basicConfig(level=logging.INFO,
@@ -278,6 +277,20 @@ def langchain_run(func: Callable) -> Callable:
     """
     from chainlit.config import config
     config.lc_run = wrap_user_function(func)
+    return func
+
+
+def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
+    """
+    Useful to rename the LangChain tools/chains used in the agent and display more friendly author names in the UI.
+    Args:
+        func (Callable[[str], str]): The function to be called to rename a tool/chain. Takes the original tool/chain name as parameter.
+
+    Returns:
+        Callable[[Any, str], Any]: The decorated function.
+    """
+    from chainlit.config import config
+    config.lc_rename = wrap_user_function(func)
     return func
 
 

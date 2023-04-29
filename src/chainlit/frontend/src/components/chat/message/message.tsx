@@ -43,6 +43,7 @@ const Message = ({
 
   const editButton = message.prompt && (
     <IconButton
+      id="playground-button"
       color="primary"
       onClick={() => {
         setPlayground({

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "0.1.0"
+version = "0.1.1"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "Prototype, debug and share LLM Agents in a few lines of code!"
 authors = ["Chainlit"]
@@ -23,6 +23,7 @@ dataclasses_json = "^0.5.7"
 flask = "^2.2.3"
 flask_socketio = "^5.3.3"
 flask_cors = "^3.0.10"
+flask-limiter = "^3.3.0"
 click = "^8.1.3"
 openai = "^0.27.2"
 tomli = "^2.0.1"
