@@ -1,5 +1,5 @@
-import time
 from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
+import time
 import requests
 import logging
 import sys
@@ -33,19 +33,29 @@ def store_credentials(credentials: Dict):
         f.write(json.dumps(credentials))
 
 
+def is_logged_in():
+    """
+    Returns true if the user is logged in
+    """
+    if not os.path.exists(get_credentials_path()):
+        return False
+    with open(get_credentials_path(), "r") as f:
+        credentials = json.loads(f.read())
+        if time.time() - credentials["created_at"] > credentials["expires_in"]:
+            logging.info("Token expired.")
+            return False
+        return True
+
+
 def get_access_token():
     """
     Returns the credentials from the credentials file
     """
-    if not os.path.exists(get_credentials_path()):
+    if not is_logged_in():
         login()
         return get_access_token()
     with open(get_credentials_path(), "r") as f:
         credentials = json.loads(f.read())
-        if time.time() - credentials["created_at"] > credentials["expires_in"]:
-            logging.info("Token expired, logging in again")
-            login()
-            return get_access_token()
         return credentials["access_token"]
 
 
@@ -78,6 +88,10 @@ def login():
     """
     Runs the device authorization flow and stores the user object in memory
     """
+    if is_logged_in():
+        logging.info("You are already logged in")
+        return
+
     device_code_payload = {
         'client_id': AUTH0_CLIENT_ID,
         'scope': 'openid profile'
