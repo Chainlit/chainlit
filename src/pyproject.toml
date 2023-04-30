@@ -34,6 +34,7 @@ gevent_websocket = "^0.10.1"
 pydantic = "^1.10.6"
 python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
+auth0-python = "^4.1.1"
 
 [build-system]
 requires = ["poetry-core"]

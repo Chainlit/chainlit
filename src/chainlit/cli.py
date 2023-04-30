@@ -1,10 +1,12 @@
 import logging
 import click
 import os
+import sys
 import webbrowser
 from chainlit.config import config, init_config, load_module
 from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
+from chainlit.auth import login, logout
 
 # Check if LangChain is installed and set up cache and callback handler
 try:
@@ -100,6 +102,18 @@ def chainlit_hello(args=None, **kwargs):
     hello_path = os.path.join(dir_path, "hello.py")
     run_chainlit(hello_path)
 
+
+@cli.command("login")
+@click.argument("args", nargs=-1)
+def chainlit_login(args=None, **kwargs):
+    login()
+    sys.exit(0)
+
+@cli.command("logout")
+@click.argument("args", nargs=-1)
+def chainlit_logout(args=None, **kwargs):
+    logout()
+    sys.exit(0)
 
 # Define the "init" command for Chainlit CLI
 @cli.command("init")
