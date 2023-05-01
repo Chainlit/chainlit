@@ -10,9 +10,3 @@ export const Logo = () => {
   const src = themeVariant === "light" ? LogoBlack : LogoWhite;
   return <img src={src} width={40} />;
 };
-
-export const LogoFull = () => {
-  const themeVariant = useRecoilValue(themeState);
-  const src = themeVariant === "light" ? LogoFullBlack : LogoFullWhite;
-  return <img src={src} width="80%" style={{margin: "auto", maxWidth: "40rem"}} />;
-};

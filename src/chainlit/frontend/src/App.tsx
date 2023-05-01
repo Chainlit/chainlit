@@ -23,6 +23,7 @@ import CloudProvider from "components/cloudProvider";
 import Env from "pages/Env";
 import { useAuth } from "hooks/auth";
 import { projectSettingsState } from "state/project";
+import Badge from "components/badge";
 
 declare global {
   interface Window {
@@ -79,7 +80,10 @@ function App() {
 
   useEffect(() => {
     if (pSettings === undefined) {
-      getProjectSettings().then((res) => setPSettings(res));
+      getProjectSettings().then((res) => {
+        document.title = res.appTitle;
+        setPSettings(res);
+      });
     }
   }, []);
 
@@ -122,6 +126,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme(themeVariant)}>
+      <Badge />
       <Box
         display="flex"
         bgcolor="background.default"

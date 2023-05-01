@@ -85,6 +85,7 @@ def project_settings():
         "hideCot": config.hide_cot,
         "chainlitMd": get_markdown_str(config.root),
         "dev": config.chainlit_env == "development",
+        "appTitle": config.chatbot_name,
     }
 
 

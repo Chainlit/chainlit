@@ -1,7 +1,6 @@
 import { Box, Link } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { projectSettingsState } from "state/project";
-import { LogoFull } from "components/logo";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -59,9 +58,7 @@ const WelcomeScreen = () => {
           >
             {pSettings?.chainlitMd}
           </ReactMarkdown>
-        ) : (
-          <LogoFull />
-        )}
+        ) : null}
       </Box>
     </Box>
   );

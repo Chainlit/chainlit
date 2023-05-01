@@ -5,10 +5,11 @@ export const projectSettingsState = atom<
       public: boolean;
       chainlitServer: string;
       hideCot: boolean;
+      dev: boolean;
+      appTitle: string;
       projectId?: string;
       userEnv?: string[];
       chainlitMd?: string;
-      dev: boolean;
     }
   | undefined
 >({

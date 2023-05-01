@@ -53,7 +53,6 @@ export default function Header() {
         }}
       >
         <Stack alignItems="center" direction="row">
-          <Logo />
           <Nav />
         </Stack>
         <Stack
