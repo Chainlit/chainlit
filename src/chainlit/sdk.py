@@ -51,8 +51,9 @@ class Chainlit:
         if self.client:
             # Cloud is enabled, upload the element to S3
             url = self.client.upload_element(ext=ext, content=content)
-            element = self.client.create_element(
-                name=name, url=url, type=type, display=display)
+            if url:
+                element = self.client.create_element(
+                    name=name, url=url, type=type, display=display)
         else:
             element = {
                 "name": name,
@@ -60,7 +61,7 @@ class Chainlit:
                 "type": type,
                 "display": display,
             }
-        if self.emit:
+        if self.emit and element:
             self.emit('element', element)
 
     def send_local_image(self, path: str, name: str, display: ElementDisplay = "side"):

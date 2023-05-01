@@ -6,7 +6,9 @@ import webbrowser
 from chainlit.config import config, init_config, load_module
 from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
-from chainlit.auth import login, logout
+from chainlit.cli.auth import login, logout
+from chainlit.cli.deploy import deploy
+from chainlit.cli.utils import check_file
 
 # Check if LangChain is installed and set up cache and callback handler
 try:
@@ -32,9 +34,6 @@ except ImportError:
 # Set the default port for the server
 PORT = 8000
 
-# Define accepted file extensions for Chainlit
-ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
-
 
 # Create the main command group for Chainlit CLI
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
@@ -45,19 +44,7 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str, watch=False, headless=False, debug=False, args=None, **kwargs):
-    _, extension = os.path.splitext(target)
-
-    # Check file extension
-    if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
-        if extension[1:] == "":
-            raise click.BadArgumentUsage(
-                "Chainlit requires raw Python (.py) files, but the provided file has no extension."
-            )
-        else:
-            raise click.BadArgumentUsage(
-                f"Chainlit requires raw Python (.py) files, not {extension}."
-            )
-
+    check_file(target)
     # Load the module provided by the user
     config.module_name = target
     load_module(config.module_name)
@@ -90,11 +77,18 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="CHAINLIT_DEBUG")
 @click.argument("args", nargs=-1)
-def run_chainlit_command(target, watch, headless, debug, args=None, **kwargs):
+def chainlit_run(target, watch, headless, debug, args=None, **kwargs):
     run_chainlit(target, watch, headless, debug, args, **kwargs)
 
 
-# Define the "hello" command for Chainlit CLI
+@cli.command("deploy")
+@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
+@click.argument("args", nargs=-1)
+def chainlit_deploy(target, args=None, **kwargs):
+    raise NotImplementedError("Deploy is not yet implemented")
+    deploy(target)
+
+
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
@@ -109,13 +103,13 @@ def chainlit_login(args=None, **kwargs):
     login()
     sys.exit(0)
 
+
 @cli.command("logout")
 @click.argument("args", nargs=-1)
 def chainlit_logout(args=None, **kwargs):
     logout()
     sys.exit(0)
 
-# Define the "init" command for Chainlit CLI
 @cli.command("init")
 @click.argument("args", nargs=-1)
 def chainlit_init(args=None, **kwargs):

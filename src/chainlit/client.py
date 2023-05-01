@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import uuid
 import requests
 from chainlit.types import ElementType
+import logging
 
 
 class BaseClient(ABC):
@@ -119,17 +120,27 @@ class CloudClient(BaseClient):
 
     def upload_element(self, ext: str, content: bytes) -> str:
         id = f'{uuid.uuid4()}{ext}'
-        url = f'{self.url}/api/upload'
+        url = f'{self.url}/api/upload/file'
         body = {'projectId': self.project_id, 'fileName': id}
 
         res = requests.post(url, json=body, headers=self.headers)
-        upload_details = res.json()
+
+        if not res.ok:
+            logging.error(f"Failed to upload file: {res.text}")
+            return ""
+
+        json_res = res.json()
+        upload_details = json_res['post']
+        permanent_url = json_res['permanentUrl']
+
         files = {'file': content}
 
         upload_response = requests.post(
             upload_details['url'], data=upload_details['fields'], files=files)
+
         if not upload_response.ok:
-            return False
+            logging.error(f"Failed to upload file: {res.text}")
+            return ""
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
-        return url
+        return permanent_url

@@ -97,8 +97,6 @@ def init_config(log=False):
 
 def load_module(target: str):
     """Load the specified module."""
-    if not os.path.exists(target):
-        raise click.BadParameter(f"File does not exist: {target}")
 
     # Get the target's directory
     target_dir = os.path.dirname(os.path.abspath(target))

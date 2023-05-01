@@ -11,7 +11,7 @@ from typing import Dict
 
 AUTH0_DOMAIN = 'auth.chainlit.io'
 AUTH0_CLIENT_ID = 'ADo93BBXDn8Z35lEi8arCWiR7C0ncrjx'
-ALGORITHMS = ['RS256']
+ALGORITHMS = ['HS256']
 
 
 def get_credentials_path():
@@ -94,7 +94,8 @@ def login():
 
     device_code_payload = {
         'client_id': AUTH0_CLIENT_ID,
-        'scope': 'openid profile'
+        'scope': 'openid profile email',
+        'audience': "chainlit-cloud",
     }
     device_code_response = requests.post(
         'https://{}/oauth/device/code'.format(AUTH0_DOMAIN), data=device_code_payload)
@@ -111,7 +112,7 @@ def login():
     token_payload = {
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
         'device_code': device_code_data['device_code'],
-        'client_id': AUTH0_CLIENT_ID
+        'client_id': AUTH0_CLIENT_ID,
     }
 
     authenticated = False
@@ -124,7 +125,7 @@ def login():
             user = validate_token(token_data['id_token'])
             token_data["created_at"] = time.time()
             store_credentials(token_data)
-            logging.info(f"Logged in as {user['name']}")
+            logging.info(f"Logged in as {user['email']}")
             authenticated = True
         elif token_data['error'] not in ('authorization_pending', 'slow_down'):
             logging.error(token_data['error_description'])
