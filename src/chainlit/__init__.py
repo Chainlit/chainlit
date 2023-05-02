@@ -9,11 +9,15 @@ from chainlit.sdk import get_sdk
 from chainlit.user_session import user_session
 from chainlit.config import config
 from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
+from chainlit.telemetry import trace
+from chainlit.version import __version__
 from typing import Callable, Any, List, Union
 import inspect
 from dotenv import load_dotenv
 import logging
 import os
+
+
 
 
 logging.basicConfig(level=logging.INFO,
@@ -65,7 +69,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
 
     return wrapper
 
-
+@trace
 def send_text(text: str, name: str, display: ElementDisplay = "side"):
     """
     Send a text element to the chatbot UI.
@@ -81,7 +85,7 @@ def send_text(text: str, name: str, display: ElementDisplay = "side"):
     if sdk:
         sdk.send_text(text, name, display)
 
-
+@trace
 def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
     """
     Send a local image to the chatbot UI.
@@ -97,7 +101,7 @@ def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
     if sdk:
         sdk.send_local_image(path, name, display)
 
-
+@trace
 def send_message(content: str, author=config.chatbot_name, prompt: str = None, language: str = None, indent=0, llm_settings: LLMSettings = None, end_stream=False):
     """
     Send a message to the chatbot UI.
@@ -117,7 +121,7 @@ def send_message(content: str, author=config.chatbot_name, prompt: str = None, l
         sdk.send_message(author=author, content=content, prompt=prompt, language=language,
                          indent=indent, llm_settings=llm_settings, end_stream=end_stream)
 
-
+@trace
 def send_error_message(content: str, author=config.chatbot_name, indent=0):
     """
     Send an error message to the chatbot UI.
@@ -133,7 +137,7 @@ def send_error_message(content: str, author=config.chatbot_name, indent=0):
         sdk.send_message(author=author, content=content,
                          is_error=True, indent=indent)
 
-
+@trace
 def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False) -> Union[AskResponse, None]:
     """
     Ask for the user input before continuing.
@@ -153,7 +157,7 @@ def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on
         spec = AskSpec(type="text", timeout=timeout)
         return sdk.send_ask_user(author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout)
 
-
+@trace
 def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[AskFileResponse, None]:
     """
     Ask the user to upload a file before continuing.
@@ -181,7 +185,7 @@ def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.cha
         else:
             return None
 
-
+@trace
 def send_action(name: str, trigger: str, description=""):
     """
     Send an action to the chatbot UI.
@@ -195,7 +199,7 @@ def send_action(name: str, trigger: str, description=""):
         sdk.send_action(name=name, trigger=trigger,
                         description=description)
 
-
+@trace
 def start_stream(author=config.chatbot_name, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
     """
     Start a streamed message.
@@ -210,7 +214,7 @@ def start_stream(author=config.chatbot_name, indent: int = 0, language: str = No
     if sdk:
         return sdk.stream_start(author=author, indent=indent, language=language, llm_settings=llm_settings)
 
-
+@trace
 def send_token(token: str):
     """
     Send a token belonging to the currently streamed message.
@@ -222,7 +226,7 @@ def send_token(token: str):
     if sdk:
         return sdk.send_token(token)
 
-
+@trace
 def langchain_factory(func: Callable) -> Callable:
     """
     Plug and play decorator for the LangChain library.
@@ -240,7 +244,7 @@ def langchain_factory(func: Callable) -> Callable:
     config.lc_factory = wrap_user_function(func, with_task=True)
     return func
 
-
+@trace
 def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
@@ -256,7 +260,7 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     config.lc_postprocess = wrap_user_function(func)
     return func
 
-
+@trace
 def on_message(func: Callable) -> Callable:
     """
     Framework agnostic decorator to react to messages coming from the UI.
@@ -272,7 +276,7 @@ def on_message(func: Callable) -> Callable:
     config.on_message = wrap_user_function(func)
     return func
 
-
+@trace
 def langchain_run(func: Callable) -> Callable:
     """
     Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
@@ -287,7 +291,7 @@ def langchain_run(func: Callable) -> Callable:
     config.lc_run = wrap_user_function(func)
     return func
 
-
+@trace
 def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     """
     Useful to rename the LangChain tools/chains used in the agent and display more friendly author names in the UI.
@@ -301,7 +305,7 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     config.lc_rename = wrap_user_function(func)
     return func
 
-
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -316,7 +320,7 @@ def on_chat_start(func: Callable) -> Callable:
     config.on_chat_start = wrap_user_function(func, with_task=True)
     return func
 
-
+@trace
 def on_stop(func: Callable) -> Callable:
     """
     Hook to react to the user stopping a conversation.
@@ -330,7 +334,6 @@ def on_stop(func: Callable) -> Callable:
     from chainlit.config import config
     config.on_stop = wrap_user_function(func)
     return func
-
 
 def action(name: str) -> Callable:
     """

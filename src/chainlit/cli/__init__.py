@@ -8,7 +8,7 @@ from chainlit.markdown import init_markdown
 from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
-
+from chainlit.telemetry import trace_event
 
 # Set the default port for the server
 PORT = 8000
@@ -57,6 +57,7 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="CHAINLIT_DEBUG")
 @click.argument("args", nargs=-1)
 def chainlit_run(target, watch, headless, debug, args=None, **kwargs):
+    trace_event("chainlit run")
     run_chainlit(target, watch, headless, debug, args, **kwargs)
 
 
@@ -64,6 +65,7 @@ def chainlit_run(target, watch, headless, debug, args=None, **kwargs):
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
 @click.argument("args", nargs=-1)
 def chainlit_deploy(target, args=None, **kwargs):
+    trace_event("chainlit deploy")
     raise NotImplementedError("Deploy is not yet implemented")
     deploy(target)
 
@@ -71,6 +73,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
+    trace_event("chainlit hello")
     dir_path = os.path.dirname(os.path.realpath(__file__))
     hello_path = os.path.join(dir_path, "hello.py")
     run_chainlit(hello_path)
@@ -79,6 +82,7 @@ def chainlit_hello(args=None, **kwargs):
 @cli.command("login")
 @click.argument("args", nargs=-1)
 def chainlit_login(args=None, **kwargs):
+    trace_event("chainlit login")
     login()
     sys.exit(0)
 
@@ -86,6 +90,7 @@ def chainlit_login(args=None, **kwargs):
 @cli.command("logout")
 @click.argument("args", nargs=-1)
 def chainlit_logout(args=None, **kwargs):
+    trace_event("chainlit logout")
     logout()
     sys.exit(0)
 
@@ -93,4 +98,5 @@ def chainlit_logout(args=None, **kwargs):
 @cli.command("init")
 @click.argument("args", nargs=-1)
 def chainlit_init(args=None, **kwargs):
+    trace_event("chainlit init")
     init_config(log=True)

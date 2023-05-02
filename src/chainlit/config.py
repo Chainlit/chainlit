@@ -5,7 +5,6 @@ import tomli
 from chainlit.types import Action
 from pydantic.dataclasses import dataclass
 from importlib import machinery
-import click
 import logging
 
 # Get the directory the script is running from
@@ -22,6 +21,9 @@ name = "Chatbot"
 # If true (default), the app will be available to anonymous users (once deployed).
 # If false, users will need to authenticate and be part of the project to use the app.
 public = true
+
+# Whether to enable telemetry (default: true). No personal data is collected.
+enable_telemetry = true
 
 # The project ID (found on https://cloud.chainlit.io).
 # If provided, all the message data will be stored in the cloud.
@@ -56,6 +58,8 @@ class ChainlitConfig:
     chatbot_name: str
     # Whether the app is available to anonymous users or only to team members.
     public: bool
+    # Whether to enable telemetry. No personal data is collected.
+    enable_telemetry: bool
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: List[str]
     # Hide the chain of thought details from the user in the UI.
@@ -122,6 +126,7 @@ def load_config():
         chatbot_name = project_settings.get("name")
         project_id = project_settings.get("id")
         public = project_settings.get("public")
+        enable_telemetry = project_settings.get("enable_telemetry", False)
         user_env = project_settings.get("user_env")
         hide_cot = project_settings.get("hide_cot", False)
         request_limit = project_settings.get("request_limit", "")
@@ -141,6 +146,7 @@ def load_config():
             chainlit_server=chainlit_server,
             chatbot_name=chatbot_name,
             public=public,
+            enable_telemetry=enable_telemetry,
             user_env=user_env,
             lc_cache_path=lc_cache_path,
             project_id=project_id,
