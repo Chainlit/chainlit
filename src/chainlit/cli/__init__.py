@@ -1,4 +1,3 @@
-import logging
 import click
 import os
 import sys
@@ -10,26 +9,6 @@ from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 
-# Check if LangChain is installed and set up cache and callback handler
-try:
-    import langchain
-    from langchain.cache import SQLiteCache
-
-    if config.lc_cache_path:
-        langchain.llm_cache = SQLiteCache(
-            database_path=config.lc_cache_path)
-        if not os.path.exists(config.lc_cache_path):
-            logging.info(f"LangChain cache enabled: {config.lc_cache_path}")
-
-    import chainlit.lc.monkey
-    from langchain.callbacks import get_callback_manager
-    from chainlit.lc.chainlit_handler import ChainlitCallbackHandler
-
-    get_callback_manager()._callback_manager.add_handler(ChainlitCallbackHandler())
-
-    LANGCHAIN_INSTALLED = True
-except ImportError:
-    LANGCHAIN_INSTALLED = False
 
 # Set the default port for the server
 PORT = 8000
@@ -109,6 +88,7 @@ def chainlit_login(args=None, **kwargs):
 def chainlit_logout(args=None, **kwargs):
     logout()
     sys.exit(0)
+
 
 @cli.command("init")
 @click.argument("args", nargs=-1)

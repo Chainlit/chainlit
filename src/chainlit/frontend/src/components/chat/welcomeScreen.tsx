@@ -14,7 +14,7 @@ const WelcomeScreen = () => {
       <Box
         id="welcome-screen"
         sx={{
-          maxWidth: "55rem",
+          maxWidth: "60rem",
           width: "100%",
           m: "auto",
           color: "text.primary",

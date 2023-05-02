@@ -21,7 +21,7 @@ export default function InputBox({ onSubmit, onReply }: Props) {
       sx={{
         boxSizing: "border-box",
         width: "100%",
-        maxWidth: "55rem",
+        maxWidth: "60rem",
         m: "auto",
         justifyContent: "center",
       }}

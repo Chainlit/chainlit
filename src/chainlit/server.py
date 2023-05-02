@@ -29,6 +29,7 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):

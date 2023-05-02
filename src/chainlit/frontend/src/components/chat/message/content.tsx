@@ -36,7 +36,7 @@ function prepareContent({ elements, actions, content, language }: Props) {
       if (elements[match].display === "inline") {
         inlinedelements[match] = elements[match];
       }
-      return `[${match}](${match})`;
+      return `[${match}](${match.replaceAll(" ", "_")})`;
     });
   }
 

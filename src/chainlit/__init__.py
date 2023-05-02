@@ -2,15 +2,18 @@ import gevent
 from gevent import monkey
 monkey.patch_all()
 
-import os
-import logging
-from dotenv import load_dotenv
-import inspect
-from typing import Callable, Any, List, Union
-from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
-from chainlit.config import config
-from chainlit.user_session import user_session
+from chainlit.lc import monkey
+monkey.patch()
+
 from chainlit.sdk import get_sdk
+from chainlit.user_session import user_session
+from chainlit.config import config
+from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
+from typing import Callable, Any, List, Union
+import inspect
+from dotenv import load_dotenv
+import logging
+import os
 
 
 logging.basicConfig(level=logging.INFO,
@@ -51,6 +54,11 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         try:
             # Call the user-defined function with the arguments
             return user_function(**params_values)
+        except Exception as e:
+            logging.exception(e)
+            if sdk:
+                sdk.send_message(author="Error", is_error=True,
+                                 content=str(e))
         finally:
             if with_task and sdk:
                 sdk.task_end()

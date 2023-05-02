@@ -89,7 +89,7 @@ const Message = ({
         sx={{
           boxSizing: "border-box",
           mx: "auto",
-          maxWidth: "55rem",
+          maxWidth: "60rem",
           display: "flex",
           flexDirection: "column",
           position: "relative",

@@ -19,7 +19,7 @@ export default function StopButton() {
   return (
     <Box margin="auto">
       <Button color="error" variant="outlined" onClick={handleClick}>
-        Stop generation
+        Stop task
       </Button>
     </Box>
   );

@@ -8,7 +8,7 @@ export default function Conversation() {
       display="flex"
       flexDirection="column"
       width="100%"
-      maxWidth="55rem"
+      maxWidth="60rem"
       mx="auto"
       flexGrow={1}
     >

@@ -46,7 +46,7 @@ const ElementView = () => {
       boxSizing="border-box"
       mx="auto"
       sx={{
-        maxWidth: "55rem",
+        maxWidth: "60rem",
       }}
     >
       {renderElement(element)}

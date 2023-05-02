@@ -73,7 +73,7 @@ export default function Env() {
         flexGrow={1}
         gap={2}
         sx={{
-          maxWidth: "55rem",
+          maxWidth: "60rem",
           width: "100%",
           mx: "auto",
         }}
