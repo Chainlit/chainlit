@@ -13,7 +13,7 @@ def get_gitignore_patterns():
     if not os.path.exists(".gitignore"):
         return patterns
 
-    with open(".gitignore", "r") as gitignore_file:
+    with open(".gitignore", "r", encoding="utf-8") as gitignore_file:
         for line in gitignore_file:
             line = line.strip()
             if line and not line.startswith("#"):

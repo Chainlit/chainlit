@@ -88,7 +88,7 @@ def init_config(log=False):
     """Initialize the configuration file if it doesn't exist."""
     if not os.path.exists(config_file):
         os.makedirs(config_dir, exist_ok=True)
-        with open(config_file, 'w') as f:
+        with open(config_file, 'w', encoding="utf-8") as f:
             f.write(DEFAULT_CONFIG_STR)
             logging.info(f"Created default config file at {config_file}")
     elif log:

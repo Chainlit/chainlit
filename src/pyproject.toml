@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "0.1.1"
+version = "0.1.2"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "Prototype, debug and share LLM Agents in a few lines of code!"
 authors = ["Chainlit"]
@@ -35,6 +35,7 @@ pydantic = "^1.10.6"
 python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
 auth0-python = "^4.1.1"
+uptrace = "^1.17.0"
 
 [build-system]
 requires = ["poetry-core"]

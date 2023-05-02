@@ -29,7 +29,7 @@ def store_credentials(credentials: Dict):
     """
     if not os.path.exists(os.path.dirname(get_credentials_path())):
         os.makedirs(os.path.dirname(get_credentials_path()))
-    with open(get_credentials_path(), "w") as f:
+    with open(get_credentials_path(), "w", encoding="utf-8") as f:
         f.write(json.dumps(credentials))
 
 
@@ -39,7 +39,7 @@ def is_logged_in():
     """
     if not os.path.exists(get_credentials_path()):
         return False
-    with open(get_credentials_path(), "r") as f:
+    with open(get_credentials_path(), "r", encoding="utf-8") as f:
         credentials = json.loads(f.read())
         if time.time() - credentials["created_at"] > credentials["expires_in"]:
             logging.info("Token expired.")
@@ -54,7 +54,7 @@ def get_access_token():
     if not is_logged_in():
         login()
         return get_access_token()
-    with open(get_credentials_path(), "r") as f:
+    with open(get_credentials_path(), "r", encoding="utf-8") as f:
         credentials = json.loads(f.read())
         return credentials["access_token"]
 

@@ -24,7 +24,7 @@ def init_markdown(root: str):
     chainlit_md_file = os.path.join(root, "chainlit.md")
 
     if not os.path.exists(chainlit_md_file):
-        with open(chainlit_md_file, 'w') as f:
+        with open(chainlit_md_file, 'w', encoding="utf-8") as f:
             f.write(DEFAULT_MARKDOWN_STR)
             logging.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 
@@ -33,7 +33,7 @@ def get_markdown_str(root: str):
     """Get the chainlit.md file as a string."""
     chainlit_md_path = os.path.join(root, "chainlit.md")
     if os.path.exists(chainlit_md_path):
-        with open(chainlit_md_path) as f:
+        with open(chainlit_md_path, encoding="utf-8") as f:
             chainlit_md = f.read()
             return chainlit_md
     else:
