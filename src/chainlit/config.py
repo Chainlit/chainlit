@@ -22,13 +22,13 @@ name = "Chatbot"
 # If false, users will need to authenticate and be part of the project to use the app.
 public = true
 
-# Whether to enable telemetry (default: true). No personal data is collected.
-enable_telemetry = true
-
 # The project ID (found on https://cloud.chainlit.io).
 # If provided, all the message data will be stored in the cloud.
 # The project ID is required when public is set to false.
 #id = ""
+
+# Whether to enable telemetry (default: true). No personal data is collected.
+enable_telemetry = true
 
 # List of environment variables to be provided by each user to use the app.
 user_env = []
@@ -120,13 +120,21 @@ def load_config():
     init_config()
     with open(config_file, "rb") as f:
         toml_dict = tomli.load(f)
-
         # Load project settings
         project_settings = toml_dict.get("project", {})
+
+        # If the developer did not explicitly opt out of telemetry, enable it
+        enable_telemetry = project_settings.get("enable_telemetry")
+        if enable_telemetry is None:
+            enable_telemetry = True
+
+        if enable_telemetry:
+            logging.info(
+                "Telemetry is enabled. No personal data is collected.")
+
         chatbot_name = project_settings.get("name")
         project_id = project_settings.get("id")
         public = project_settings.get("public")
-        enable_telemetry = project_settings.get("enable_telemetry", False)
         user_env = project_settings.get("user_env")
         hide_cot = project_settings.get("hide_cot", False)
         request_limit = project_settings.get("request_limit", "")

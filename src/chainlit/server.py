@@ -14,6 +14,7 @@ from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
 from chainlit.types import Action
+from chainlit.telemetry import trace
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
@@ -42,6 +43,7 @@ def serve(path):
 
 @app.route('/completion', methods=['POST'])
 @limiter.limit(config.request_limit)
+@trace
 def completion():
     """Handle a completion request from the prompt playground."""
 
@@ -264,6 +266,7 @@ def process_message(session: Session, author: str, input_str: str):
 
 @app.route('/message', methods=['POST'])
 @limiter.limit(config.request_limit)
+@trace
 def message():
     """Handle a message from the UI."""
 
@@ -294,6 +297,7 @@ def process_action(session: Session, action: Action):
 
 @app.route('/action', methods=['POST'])
 @limiter.limit(config.request_limit)
+@trace
 def on_action():
     """Handle an action call from the UI."""
 

@@ -2,6 +2,7 @@ import click
 import os
 import sys
 import webbrowser
+import logging
 from chainlit.config import config, init_config, load_module
 from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
@@ -55,9 +56,15 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
 @click.option("-w", "--watch", default=False, is_flag=True, envvar="CHAINLIT_WATCH")
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="CHAINLIT_DEBUG")
+@click.option("-c", "--ci", default=False, is_flag=True, envvar="CHAINLIT_CI")
 @click.argument("args", nargs=-1)
-def chainlit_run(target, watch, headless, debug, args=None, **kwargs):
-    trace_event("chainlit run")
+def chainlit_run(target, watch, headless, debug, ci, args=None, **kwargs):
+    if ci:
+        logging.info("Running in CI mode")
+        config.enable_telemetry = False
+    else:
+        trace_event("chainlit run")
+
     run_chainlit(target, watch, headless, debug, args, **kwargs)
 
 
