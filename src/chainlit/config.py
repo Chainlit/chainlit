@@ -5,7 +5,8 @@ import tomli
 from chainlit.types import Action
 from pydantic.dataclasses import dataclass
 from importlib import machinery
-import logging
+from chainlit.logger import logger
+
 
 # Get the directory the script is running from
 root = os.getcwd()
@@ -94,9 +95,9 @@ def init_config(log=False):
         os.makedirs(config_dir, exist_ok=True)
         with open(config_file, 'w', encoding="utf-8") as f:
             f.write(DEFAULT_CONFIG_STR)
-            logging.info(f"Created default config file at {config_file}")
+            logger.info(f"Created default config file at {config_file}")
     elif log:
-        logging.info(f"Config file already exists at {config_file}")
+        logger.info(f"Config file already exists at {config_file}")
 
 
 def load_module(target: str):
@@ -129,7 +130,7 @@ def load_config():
             enable_telemetry = True
 
         if enable_telemetry:
-            logging.info(
+            logger.info(
                 "Telemetry is enabled. No personal data is collected.")
 
         chatbot_name = project_settings.get("name")

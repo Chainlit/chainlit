@@ -1,6 +1,6 @@
-from chainlit.config import config
 import os
-import logging
+from chainlit.config import config
+from chainlit.logger import logger
 
 # Check if LangChain is installed and set up cache and callback handler
 def patch():
@@ -12,7 +12,7 @@ def patch():
             langchain.llm_cache = SQLiteCache(
                 database_path=config.lc_cache_path)
             if not os.path.exists(config.lc_cache_path):
-                logging.info(f"LangChain cache enabled: {config.lc_cache_path}")
+                logger.info(f"LangChain cache enabled: {config.lc_cache_path}")
 
         # New callback handler architecture
         if langchain.__version__ > "0.0.153":

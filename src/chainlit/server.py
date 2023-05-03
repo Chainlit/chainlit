@@ -1,5 +1,4 @@
 import os
-import logging
 import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
@@ -15,6 +14,7 @@ from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
 from chainlit.types import Action
 from chainlit.telemetry import trace
+from chainlit.logger import logger
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
@@ -257,7 +257,7 @@ def process_message(session: Session, author: str, input_str: str):
             # If no langchain agent is available, call the on_message function provided by the developer
             config.on_message(input_str)
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
         __chainlit_sdk__.send_message(author="Error", is_error=True,
                                       content=str(e))
     finally:
@@ -292,7 +292,7 @@ def process_action(session: Session, action: Action):
     if callback:
         callback(action)
     else:
-        logging.warning("No callback found for action %s", action["name"])
+        logger.warning("No callback found for action %s", action["name"])
 
 
 @app.route('/action', methods=['POST'])

@@ -1,5 +1,5 @@
 import os
-import logging
+from chainlit.logger import logger
 
 # Default chainlit.md file created if none exists
 DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
@@ -26,7 +26,7 @@ def init_markdown(root: str):
     if not os.path.exists(chainlit_md_file):
         with open(chainlit_md_file, 'w', encoding="utf-8") as f:
             f.write(DEFAULT_MARKDOWN_STR)
-            logging.info(f"Created default chainlit markdown file at {chainlit_md_file}")
+            logger.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 
 
 def get_markdown_str(root: str):

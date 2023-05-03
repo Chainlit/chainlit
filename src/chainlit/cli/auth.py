@@ -1,13 +1,14 @@
 from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
 import time
 import requests
-import logging
 import sys
 import time
 import webbrowser
 import os
 import json
 from typing import Dict
+from chainlit.logger import logger
+
 
 AUTH0_DOMAIN = 'auth.chainlit.io'
 AUTH0_CLIENT_ID = 'ADo93BBXDn8Z35lEi8arCWiR7C0ncrjx'
@@ -42,7 +43,7 @@ def is_logged_in():
     with open(get_credentials_path(), "r", encoding="utf-8") as f:
         credentials = json.loads(f.read())
         if time.time() - credentials["created_at"] > credentials["expires_in"]:
-            logging.info("Token expired.")
+            logger.info("Token expired.")
             return False
         return True
 
@@ -79,9 +80,9 @@ def logout():
     """
     if os.path.exists(get_credentials_path()):
         os.remove(get_credentials_path())
-        logging.info("Logged out")
+        logger.info("Logged out")
     else:
-        logging.error("You are not logged in")
+        logger.error("You are not logged in")
 
 
 def login():
@@ -89,7 +90,7 @@ def login():
     Runs the device authorization flow and stores the user object in memory
     """
     if is_logged_in():
-        logging.info("You are already logged in")
+        logger.info("You are already logged in")
         return
 
     device_code_payload = {
@@ -101,13 +102,13 @@ def login():
         'https://{}/oauth/device/code'.format(AUTH0_DOMAIN), data=device_code_payload)
 
     if device_code_response.status_code != 200:
-        logging.error("Error generating the device code")
-        logging.error(device_code_response.json())
+        logger.error("Error generating the device code")
+        logger.error(device_code_response.json())
         sys.exit(1)
 
     device_code_data = device_code_response.json()
     webbrowser.open(device_code_data['verification_uri_complete'])
-    logging.info(f"Enter the following code: {device_code_data['user_code']}")
+    logger.info(f"Enter the following code: {device_code_data['user_code']}")
 
     token_payload = {
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
@@ -125,10 +126,10 @@ def login():
             user = validate_token(token_data['id_token'])
             token_data["created_at"] = time.time()
             store_credentials(token_data)
-            logging.info(f"Logged in as {user['email']}")
+            logger.info(f"Logged in as {user['email']}")
             authenticated = True
         elif token_data['error'] not in ('authorization_pending', 'slow_down'):
-            logging.error(token_data['error_description'])
+            logger.error(token_data['error_description'])
             sys.exit(1)
         else:
             time.sleep(device_code_data['interval'])

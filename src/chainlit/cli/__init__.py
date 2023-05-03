@@ -2,7 +2,6 @@ import click
 import os
 import sys
 import webbrowser
-import logging
 from chainlit.config import config, init_config, load_module
 from chainlit.watch import watch_directory
 from chainlit.markdown import init_markdown
@@ -10,6 +9,7 @@ from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
+from chainlit.logger import logger
 
 # Set the default port for the server
 PORT = 8000
@@ -60,7 +60,7 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
 @click.argument("args", nargs=-1)
 def chainlit_run(target, watch, headless, debug, ci, args=None, **kwargs):
     if ci:
-        logging.info("Running in CI mode")
+        logger.info("Running in CI mode")
         config.enable_telemetry = False
     else:
         trace_event("chainlit run")

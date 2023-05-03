@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import uuid
 import requests
 from chainlit.types import ElementType
-import logging
+from chainlit.logger import logger
 
 
 class BaseClient(ABC):
@@ -126,7 +126,7 @@ class CloudClient(BaseClient):
         res = requests.post(url, json=body, headers=self.headers)
 
         if not res.ok:
-            logging.error(f"Failed to upload file: {res.text}")
+            logger.error(f"Failed to upload file: {res.text}")
             return ""
 
         json_res = res.json()
@@ -139,7 +139,7 @@ class CloudClient(BaseClient):
             upload_details['url'], data=upload_details['fields'], files=files)
 
         if not upload_response.ok:
-            logging.error(f"Failed to upload file: {res.text}")
+            logger.error(f"Failed to upload file: {res.text}")
             return ""
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'

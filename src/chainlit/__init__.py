@@ -11,23 +11,18 @@ from chainlit.config import config
 from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
 from chainlit.telemetry import trace
 from chainlit.version import __version__
+from chainlit.logger import logger
 from typing import Callable, Any, List, Union
 import inspect
 from dotenv import load_dotenv
-import logging
 import os
 
 
 
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
 if env_found:
-    logging.info("Loaded .env file")
+    logger.info("Loaded .env file")
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
@@ -59,7 +54,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             # Call the user-defined function with the arguments
             return user_function(**params_values)
         except Exception as e:
-            logging.exception(e)
+            logger.exception(e)
             if sdk:
                 sdk.send_message(author="Error", is_error=True,
                                  content=str(e))
