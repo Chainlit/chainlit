@@ -2,7 +2,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { installChainlit, runChainlit, runCypressSpec } from "./utils";
 
-const examples = ["action", "ask_user", "elements", "upload_file", "lc_rename"];
+const examples = [
+  "action",
+  "ask_user",
+  "elements",
+  "upload_file",
+  "lc_rename",
+  "lc_qa",
+  "openai_sql",
+];
 
 async function runTest(example: string) {
   let childProcess;
