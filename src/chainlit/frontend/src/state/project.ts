@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export const projectSettingsState = atom<
   | {
@@ -13,6 +13,6 @@ export const projectSettingsState = atom<
     }
   | undefined
 >({
-  key: "ProjectSettings",
-  default: undefined,
+  key: 'ProjectSettings',
+  default: undefined
 });

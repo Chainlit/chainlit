@@ -1,6 +1,6 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const { loginWithRedirect, isAuthenticated } = useAuth0();
@@ -10,10 +10,10 @@ export default function Login() {
     if (!isAuthenticated) {
       loginWithRedirect({
         authorizationParams: {
-          audience: "chainlit-cloud"
+          audience: 'chainlit-cloud'
         }
       });
-    } else navigate("/");
+    } else navigate('/');
   }, [isAuthenticated]);
 
   return null;

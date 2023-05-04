@@ -4,29 +4,33 @@ import {
   Button,
   InputLabel,
   TextField,
-  Typography,
-} from "@mui/material";
-import TopBar from "components/header";
-import { useFormik } from "formik";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
-import { userEnvState } from "state/user";
-import * as yup from "yup";
+  Typography
+} from '@mui/material';
+import TopBar from 'components/header';
+import { useFormik } from 'formik';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { projectSettingsState } from 'state/project';
+import { userEnvState } from 'state/user';
+import * as yup from 'yup';
 
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
   const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
 
-  const requiredKeys = pSettings?.userEnv!;
+  if (!pSettings?.userEnv || !pSettings?.userEnv) {
+    return null;
+  }
+
+  const requiredKeys = pSettings.userEnv;
 
   const initialValues: Record<string, string> = {};
   const _schema: Record<string, yup.StringSchema> = {};
 
   requiredKeys.forEach((key) => {
-    initialValues[key] = userEnv[key] || "";
+    initialValues[key] = userEnv[key] || '';
     _schema[key] = yup.string().required();
   });
 
@@ -36,11 +40,11 @@ export default function Env() {
     initialValues,
     validationSchema: schema,
     onSubmit: async (values) => {
-        localStorage.setItem("userEnv", JSON.stringify(values));
-        setUserEnv(values);
-        toast.success("Saved successfully")
-        navigate("/")
-    },
+      localStorage.setItem('userEnv', JSON.stringify(values));
+      setUserEnv(values);
+      toast.success('Saved successfully');
+      navigate('/');
+    }
   });
 
   const renderInput = (key: string) => {
@@ -61,9 +65,9 @@ export default function Env() {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1
       }}
     >
       <TopBar />
@@ -73,9 +77,9 @@ export default function Env() {
         flexGrow={1}
         gap={2}
         sx={{
-          maxWidth: "60rem",
-          width: "100%",
-          mx: "auto",
+          maxWidth: '60rem',
+          width: '100%',
+          mx: 'auto'
         }}
       >
         <Typography

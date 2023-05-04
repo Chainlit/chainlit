@@ -1,8 +1,8 @@
-import HistoryIcon from "@mui/icons-material/History";
-import { IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { useRecoilState } from "recoil";
-import { IChat, historyOpenedState } from "state/chat";
-import { useEffect, useRef, useState } from "react";
+import HistoryIcon from '@mui/icons-material/History';
+import { IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import { useRecoilState } from 'recoil';
+import { IChat, historyOpenedState } from 'state/chat';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   onClick: (content: string) => void;
@@ -35,10 +35,10 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   chats?.forEach((c) => {
     const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     };
     const date = new Date(c.createdAt).toLocaleDateString(
       undefined,
@@ -49,13 +49,13 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     }
 
     const timeOptions: Intl.DateTimeFormatOptions = {
-      hour: "numeric",
-      minute: "numeric",
+      hour: 'numeric',
+      minute: 'numeric'
     };
     history[date].push({
       key: c.createdAt,
       hour: new Date(c.createdAt).toLocaleTimeString(undefined, timeOptions),
-      content: c.messages[0].content,
+      content: c.messages[0].content
     });
   });
 
@@ -63,15 +63,14 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   Object.keys(history).forEach((date) => {
     menuEls.push(
-      //@ts-ignore
-      <div key={date} disabled>
+      <div key={date} data-disabled>
         <Typography
           color="text.primary"
           sx={{
-            fontSize: "12px",
+            fontSize: '12px',
             fontWeight: 700,
-            padding: "16px 12px",
-            textTransform: "uppercase",
+            padding: '16px 12px',
+            textTransform: 'uppercase'
           }}
         >
           {date}
@@ -90,13 +89,13 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
           }}
           disableRipple
           key={h.key}
-          sx={{ p: 2, alignItems: "baseline" }}
+          sx={{ p: 2, alignItems: 'baseline' }}
         >
           <Typography
             sx={{
-              fontSize: "12px",
+              fontSize: '12px',
               fontWeight: 700,
-              flexBasis: "64px",
+              flexBasis: '64px'
             }}
             color="text.secondary"
           >
@@ -105,17 +104,17 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
           <Typography
             color="text.primary"
             sx={{
-              whiteSpace: "pre-wrap",
-              fontSize: "14px",
-              maxHeight: "50px",
-              display: "-webkit-box",
-              WebkitLineClamp: "2",
-              WebkitBoxOrient: "vertical",
-              flexBasis: "calc(100% - 60px)",
+              whiteSpace: 'pre-wrap',
+              fontSize: '14px',
+              maxHeight: '50px',
+              display: '-webkit-box',
+              WebkitLineClamp: '2',
+              WebkitBoxOrient: 'vertical',
+              flexBasis: 'calc(100% - 60px)',
               flexGrow: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: "24px",
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              lineHeight: '24px'
             }}
           >
             {h.content}
@@ -127,15 +126,14 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   if (menuEls.length === 0) {
     menuEls.push(
-      //@ts-ignore
-      <div disabled>
+      <div data-disabled>
         <Typography
           color="text.secondary"
           sx={{
-            fontSize: "12px",
+            fontSize: '12px',
             fontWeight: 700,
-            padding: "16px 12px",
-            textTransform: "uppercase",
+            padding: '16px 12px',
+            textTransform: 'uppercase'
           }}
         >
           Such empty...
@@ -155,14 +153,14 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
         elevation: 0,
         sx: {
           mt: -2,
-          overflow: "visible",
-          maxHeight: "60vh",
-          width: "250px",
-          overflowY: "scroll",
-        },
+          overflow: 'visible',
+          maxHeight: '60vh',
+          width: '250px',
+          overflowY: 'scroll'
+        }
       }}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       {menuEls}
     </Menu>
@@ -172,11 +170,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     <div>
       {menu}
       <Tooltip title="Show history">
-        <IconButton
-          color="inherit"
-          onClick={(e) => setOpen(!open)}
-          ref={ref}
-        >
+        <IconButton color="inherit" onClick={() => setOpen(!open)} ref={ref}>
           <HistoryIcon />
         </IconButton>
       </Tooltip>

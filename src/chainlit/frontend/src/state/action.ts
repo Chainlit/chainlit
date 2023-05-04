@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export interface IAction {
   name: string;
@@ -9,6 +9,6 @@ export interface IAction {
 export type IActions = Record<string, IAction>;
 
 export const actionState = atom<IActions>({
-  key: "Actions",
-  default: {},
+  key: 'Actions',
+  default: {}
 });

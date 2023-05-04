@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export interface IDatasetFilters {
   authorEmail?: string;
@@ -7,6 +7,6 @@ export interface IDatasetFilters {
 }
 
 export const datasetFiltersState = atom<IDatasetFilters>({
-  key: "DatasetFilters",
-  default: {},
+  key: 'DatasetFilters',
+  default: {}
 });

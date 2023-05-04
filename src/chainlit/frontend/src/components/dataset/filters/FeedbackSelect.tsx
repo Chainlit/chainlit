@@ -7,12 +7,12 @@ import { useRecoilState } from 'recoil';
 import { datasetFiltersState } from 'state/dataset';
 
 export default function FeedbackSelect() {
-  const [df, setDf] = useRecoilState(datasetFiltersState)
+  const [df, setDf] = useRecoilState(datasetFiltersState);
 
   const handleChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as unknown as number
-    const feedback = value === 0 ? undefined : value
-    setDf({ ...df, feedback })
+    const value = event.target.value as unknown as number;
+    const feedback = value === 0 ? undefined : value;
+    setDf({ ...df, feedback });
   };
 
   return (

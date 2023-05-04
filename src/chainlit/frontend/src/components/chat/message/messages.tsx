@@ -1,8 +1,8 @@
-import { INestedMessage, loadingState } from "state/chat";
-import Message from "./message";
-import { IElements } from "state/element";
-import { useRecoilValue } from "recoil";
-import { IActions } from "state/action";
+import { INestedMessage, loadingState } from 'state/chat';
+import Message from './message';
+import { IElements } from 'state/element';
+import { useRecoilValue } from 'recoil';
+import { IActions } from 'state/action';
 
 interface Props {
   messages: INestedMessage[];
@@ -17,10 +17,10 @@ export default function Messages({
   elements,
   actions,
   indent,
-  isRunning,
+  isRunning
 }: Props) {
   const loading = useRecoilValue(loadingState);
-  let previousAuthor = "";
+  let previousAuthor = '';
 
   return (
     <>
@@ -29,7 +29,7 @@ export default function Messages({
         .map((m, i) => {
           const isLast = i === messages.length - 1;
           const _isRunning =
-          isRunning === undefined ? loading && isLast : isRunning && isLast;
+            isRunning === undefined ? loading && isLast : isRunning && isLast;
           const showAvatar = m.author !== previousAuthor;
           const nextAuthor = messages[i + 1]?.author;
           const showBorder = m.author !== nextAuthor && (!isLast || !!indent);

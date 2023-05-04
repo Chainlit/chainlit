@@ -1,6 +1,6 @@
-import { Box } from "@mui/material";
-import Filters from "./filters";
-import ConversationTable from "./table";
+import { Box } from '@mui/material';
+import Filters from './filters';
+import ConversationTable from './table';
 
 export default function Conversation() {
   return (

@@ -1,9 +1,6 @@
-import { useSetRecoilState } from "recoil";
-import {
-  messagesState,
-  tokenCountState,
-} from "state/chat";
-import { sideViewState, elementState } from "state/element";
+import { useSetRecoilState } from 'recoil';
+import { messagesState, tokenCountState } from 'state/chat';
+import { sideViewState, elementState } from 'state/element';
 
 export default function useClearChat() {
   const setMessages = useSetRecoilState(messagesState);

@@ -1,7 +1,7 @@
-import { Button, Box, Tooltip } from "@mui/material";
-import { Logo } from "./logo";
-import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
+import { Button, Box, Tooltip } from '@mui/material';
+import { Logo } from './logo';
+import { useRecoilValue } from 'recoil';
+import { projectSettingsState } from 'state/project';
 
 export default function Badge() {
   const pSettings = useRecoilValue(projectSettingsState);
@@ -11,10 +11,10 @@ export default function Badge() {
   return (
     <Box
       sx={{
-        zIndex: "50",
-        position: "fixed",
-        bottom: "0",
-        right: "0",
+        zIndex: '50',
+        position: 'fixed',
+        bottom: '0',
+        right: '0'
       }}
     >
       <Tooltip title="Hosted with Chainlit">
@@ -22,7 +22,7 @@ export default function Badge() {
           variant="contained"
           sx={{
             borderRadius: 0,
-            borderTopLeftRadius: 4,
+            borderTopLeftRadius: 4
           }}
         >
           <Logo />

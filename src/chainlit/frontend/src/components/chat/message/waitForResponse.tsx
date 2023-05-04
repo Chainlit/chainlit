@@ -1,11 +1,11 @@
-import { styled } from "@mui/material/styles";
+import { styled } from '@mui/material/styles';
 import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
-import { askUserState } from "state/chat";
-import { useRecoilValue } from "recoil";
-import { useEffect, useState } from "react";
-import { Stack, Typography } from "@mui/material";
+  linearProgressClasses
+} from '@mui/material/LinearProgress';
+import { askUserState } from 'state/chat';
+import { useRecoilValue } from 'recoil';
+import { useEffect, useState } from 'react';
+import { Stack, Typography } from '@mui/material';
 
 const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   height: 3,
@@ -13,12 +13,12 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   borderRadius: 4,
   [`&.${linearProgressClasses.colorPrimary}`]: {
     backgroundColor:
-      theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
+      theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800]
   },
   [`& .${linearProgressClasses.bar}`]: {
     borderRadius: 4,
-    backgroundColor: theme.palette.primary.main,
-  },
+    backgroundColor: theme.palette.primary.main
+  }
 }));
 
 export default function WaitForResponse() {
@@ -48,7 +48,13 @@ export default function WaitForResponse() {
   const progress = (remaining / askUser.spec.timeout) * 100;
 
   return (
-    <Stack width="100%" id="wait-for-response" direction="row" spacing={1} alignItems="center">
+    <Stack
+      width="100%"
+      id="wait-for-response"
+      direction="row"
+      spacing={1}
+      alignItems="center"
+    >
       <BorderLinearProgress variant="determinate" value={progress} />
       <Typography color="text.secondary" fontWeight={500}>
         {remaining}s left

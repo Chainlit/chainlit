@@ -1,9 +1,9 @@
-import { useAuth } from "hooks/auth";
-import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
-import LocalHistoryButton from "./local";
-import CloudHistoryButton from "./cloud";
-import { memo } from "react";
+import { useAuth } from 'hooks/auth';
+import { useRecoilValue } from 'recoil';
+import { projectSettingsState } from 'state/project';
+import LocalHistoryButton from './local';
+import CloudHistoryButton from './cloud';
+import { memo } from 'react';
 
 interface Props {
   onClick: (content: string) => void;
@@ -18,4 +18,4 @@ export default memo(function ChatHistory({ onClick }: Props) {
   } else {
     return <LocalHistoryButton onClick={onClick} />;
   }
-})
+});

@@ -1,6 +1,6 @@
-import { Alert, AlertTitle, Stack } from "@mui/material";
-import TextElement from "components/element/text";
-import { IElements } from "state/element";
+import { Alert, AlertTitle, Stack } from '@mui/material';
+import TextElement from 'components/element/text';
+import { IElements } from 'state/element';
 
 interface Props {
   items: IElements;

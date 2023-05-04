@@ -1,15 +1,19 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
+
+type ThemeVariant = 'dark' | 'light';
 
 const defaultTheme =
-  window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 
-const preferredTheme = localStorage.getItem("themeVariant");
+const preferredTheme = localStorage.getItem(
+  'themeVariant'
+) as ThemeVariant | null;
 
-const theme = preferredTheme ? (preferredTheme as any) : defaultTheme;
+const theme = preferredTheme ? preferredTheme : defaultTheme;
 
-export const themeState = atom<"dark" | "light">({
-  key: "Theme",
-  default: theme,
+export const themeState = atom<ThemeVariant>({
+  key: 'Theme',
+  default: theme
 });

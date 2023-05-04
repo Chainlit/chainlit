@@ -1,11 +1,11 @@
-import { Alert, Box } from "@mui/material";
-import Header from "components/header";
-import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "hooks/auth";
-import { userEnvState } from "state/user";
+import { Alert, Box } from '@mui/material';
+import Header from 'components/header';
+import { useRecoilValue } from 'recoil';
+import { projectSettingsState } from 'state/project';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'hooks/auth';
+import { userEnvState } from 'state/user';
 
 type Props = {
   children: JSX.Element;
@@ -22,14 +22,14 @@ const Page = ({ children }: Props) => {
 
   useEffect(() => {
     if (isPrivate && !isAuthenticated && !isLoading) {
-      navigate("/login");
+      navigate('/login');
     }
   }, [pSettings, isAuthenticated, isLoading]);
 
   useEffect(() => {
     if (pSettings?.userEnv) {
-      for (const key of pSettings?.userEnv) {
-        if (!userEnv[key]) navigate("/env");
+      for (const key of pSettings.userEnv) {
+        if (!userEnv[key]) navigate('/env');
       }
     }
   }, [pSettings, userEnv]);
@@ -43,14 +43,14 @@ const Page = ({ children }: Props) => {
   }
 
   const renderAnonymousWarning =
-    !isPrivate && isAuthenticated && role === "ANONYMOUS";
+    !isPrivate && isAuthenticated && role === 'ANONYMOUS';
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%'
       }}
     >
       <Header />

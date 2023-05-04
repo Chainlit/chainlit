@@ -1,27 +1,34 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export enum ElementType {
-  img = "image",
-  txt = "text",
+  img = 'image',
+  txt = 'text'
 }
+
+type ElementContentType = {
+  [ElementType.img]: ArrayBuffer;
+  [ElementType.txt]: string;
+};
+
+type ValueOf<T> = T[keyof T];
 
 export interface IElement {
   id?: string;
   url?: string;
-  content?: any;
-  name: string;
   type: ElementType;
-  display: "inline" | "side" | "page";
+  content?: ValueOf<ElementContentType>;
+  name: string;
+  display: 'inline' | 'side' | 'page';
 }
 
 export type IElements = Record<string, IElement>;
 
 export const elementState = atom<IElements>({
-  key: "Elements",
-  default: {},
+  key: 'Elements',
+  default: {}
 });
 
 export const sideViewState = atom<IElement | undefined>({
-  key: "SideView",
-  default: undefined,
+  key: 'SideView',
+  default: undefined
 });

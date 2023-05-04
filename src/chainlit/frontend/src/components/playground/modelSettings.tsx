@@ -1,20 +1,20 @@
-import { Stack, Box, ListSubheader } from "@mui/material";
-import { ILLMSettings } from "state/chat";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import * as yup from "yup";
-import { useFormik } from "formik";
-import Slider from "components/slider";
-import { MuiChipsInput } from "mui-chips-input";
-import { useRecoilState } from "recoil";
-import { useEffect } from "react";
-import { playgroundSettingsState } from "state/playground";
+import { Stack, Box, ListSubheader } from '@mui/material';
+import { ILLMSettings } from 'state/chat';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
+import Slider from 'components/slider';
+import { MuiChipsInput } from 'mui-chips-input';
+import { useRecoilState } from 'recoil';
+import { useEffect } from 'react';
+import { playgroundSettingsState } from 'state/playground';
 
 const models = {
-  GPT4: ["gpt-4"],
-  "Chat GPT": ["gpt-3.5-turbo"],
-  GPT3: ["text-davinci-003", "text-davinci-002"],
+  GPT4: ['gpt-4'],
+  'Chat GPT': ['gpt-3.5-turbo'],
+  GPT3: ['text-davinci-003', 'text-davinci-002']
 };
 
 const ModelSettings = () => {
@@ -26,13 +26,13 @@ const ModelSettings = () => {
     temperature: yup.number().min(0).max(1),
     top_p: yup.number().min(0).max(1),
     frequency_penalty: yup.number().min(0).max(1),
-    presence_penalty: yup.number().min(0).max(1),
+    presence_penalty: yup.number().min(0).max(1)
   });
 
   const formik = useFormik({
-    initialValues: settings || ({} as any as ILLMSettings),
+    initialValues: settings || ({} as ILLMSettings),
     validationSchema: schema,
-    onSubmit: async (values) => {},
+    onSubmit: async () => undefined
   });
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const ModelSettings = () => {
         value={formik.values.model_name}
         onChange={formik.handleChange}
       >
-        {Object.entries(models).map(([category, models], i) => {
+        {Object.entries(models).map(([category, models]) => {
           const header = <ListSubheader>{category}</ListSubheader>;
           const items = models.map((m, i) => (
             <MenuItem key={i} value={m}>
@@ -91,7 +91,7 @@ const ModelSettings = () => {
             ? formik.values.stop
             : [formik.values.stop]
         }
-        onChange={(value) => formik.setFieldValue("stop", value)}
+        onChange={(value) => formik.setFieldValue('stop', value)}
       />
     </Box>
   );
@@ -133,7 +133,7 @@ const ModelSettings = () => {
   );
 
   return (
-    <Stack spacing={2} sx={{ width: "250px" }}>
+    <Stack spacing={2} sx={{ width: '250px' }}>
       {modelSelect}
       {temperature}
       {stopSequences}

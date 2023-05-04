@@ -1,10 +1,10 @@
-import SendIcon from "@mui/icons-material/Send";
-import { IconButton, TextField } from "@mui/material";
-import InputAdornment from "@mui/material/InputAdornment";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { askUserState, historyOpenedState, loadingState } from "state/chat";
-import HistoryButton from "components/chat/history";
+import SendIcon from '@mui/icons-material/Send';
+import { IconButton, TextField } from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { askUserState, historyOpenedState, loadingState } from 'state/chat';
+import HistoryButton from 'components/chat/history';
 
 interface Props {
   onSubmit: (message: string) => void;
@@ -12,25 +12,25 @@ interface Props {
 }
 
 const borderWidth = 0;
-const borderColor = "transparent";
+const borderColor = 'transparent';
 
 const Input = ({ onSubmit, onReply }: Props) => {
-  const ref = useRef<any>();
+  const ref = useRef<HTMLDivElement>(null);
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
-  const disabled = loading || askUser?.spec.type === "file";
+  const disabled = loading || askUser?.spec.type === 'file';
 
   useEffect(() => {
     if (ref.current && !loading) {
-      ref.current.querySelector("input")?.focus();
+      ref.current.querySelector('input')?.focus();
     }
   }, [loading]);
 
   const submit = useCallback(() => {
-    if (value === "" || disabled) {
+    if (value === '' || disabled) {
       return;
     }
     if (askUser) {
@@ -38,15 +38,15 @@ const Input = ({ onSubmit, onReply }: Props) => {
     } else {
       onSubmit(value);
     }
-    setValue("");
+    setValue('');
   }, [value, disabled, setValue, askUser, onSubmit]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
+      if (e.key === 'Enter') {
         e.preventDefault();
         submit();
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         hSetOpen(true);
       }
     },
@@ -82,7 +82,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
         disableUnderline: true,
         startAdornment: (
           <InputAdornment
-            sx={{ ml: 1, color: "text.secondary" }}
+            sx={{ ml: 1, color: 'text.secondary' }}
             position="start"
           >
             <HistoryButton onClick={onHistoryClick} />
@@ -91,39 +91,39 @@ const Input = ({ onSubmit, onReply }: Props) => {
         endAdornment: (
           <InputAdornment
             position="end"
-            sx={{ mr: 1, color: "text.secondary" }}
+            sx={{ mr: 1, color: 'text.secondary' }}
           >
             {endAdornment}
           </InputAdornment>
-        ),
+        )
       }}
       sx={{
-        backgroundColor: "background.paper",
+        backgroundColor: 'background.paper',
         borderRadius: 1,
 
         input: {
-          height: "27px",
-          paddingBottom: "0.75rem",
-          paddingTop: "0.75rem",
-          color: "text.primary",
+          height: '27px',
+          paddingBottom: '0.75rem',
+          paddingTop: '0.75rem',
+          color: 'text.primary'
         },
         fieldset: {
           borderRadius: 1,
           borderWidth,
-          borderColor: borderColor,
+          borderColor: borderColor
         },
-        "&:hover .MuiOutlinedInput-notchedOutline": {
+        '&:hover .MuiOutlinedInput-notchedOutline': {
           borderWidth,
-          borderColor: borderColor,
+          borderColor: borderColor
         },
-        "&:focus .MuiOutlinedInput-notchedOutline": {
+        '&:focus .MuiOutlinedInput-notchedOutline': {
           borderWidth,
-          borderColor: borderColor,
+          borderColor: borderColor
         },
-        "&:active .MuiOutlinedInput-notchedOutline": {
+        '&:active .MuiOutlinedInput-notchedOutline': {
           borderWidth,
-          borderColor: borderColor,
-        },
+          borderColor: borderColor
+        }
       }}
     />
   );

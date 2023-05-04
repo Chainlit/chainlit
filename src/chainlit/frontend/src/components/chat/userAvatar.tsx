@@ -6,19 +6,14 @@ import {
   Divider,
   ListItemIcon,
   Typography,
-  ListItem,
-  Button,
-} from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
-import { Link } from "react-router-dom";
+  ListItem
+} from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function UserAvatar() {
   const { user, logout } = useAuth0();
-  const pSettings = useRecoilValue(projectSettingsState);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -46,11 +41,11 @@ export default function UserAvatar() {
         edge="end"
         onClick={handleClick}
         size="small"
-        aria-controls={open ? "account-menu" : undefined}
+        aria-controls={open ? 'account-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
+        aria-expanded={open ? 'true' : undefined}
         sx={{
-          p: 0,
+          p: 0
         }}
       >
         <Avatar sx={{ width: 32, height: 32 }} src={user.picture || undefined}>
@@ -65,32 +60,32 @@ export default function UserAvatar() {
         PaperProps={{
           elevation: 0,
           sx: {
-            overflow: "visible",
+            overflow: 'visible',
             mt: 1.5,
-            "& .MuiAvatar-root": {
+            '& .MuiAvatar-root': {
               width: 32,
               height: 32,
               ml: -0.5,
-              mr: 1,
+              mr: 1
             },
-            "&:before": {
+            '&:before': {
               content: '""',
-              display: "block",
-              position: "absolute",
+              display: 'block',
+              position: 'absolute',
               top: 0,
               right: 14,
               width: 10,
               height: 10,
-              bgcolor: "background.paper",
-              transform: "translateY(-50%) rotate(45deg)",
-              zIndex: 0,
-            },
-          },
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0
+            }
+          }
         }}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <ListItem sx={{ display: "flex", flexDirection: "column" }}>
+        <ListItem sx={{ display: 'flex', flexDirection: 'column' }}>
           <Typography width="100%" fontSize="14px" fontWeight={700}>
             {user.name}
           </Typography>
@@ -103,8 +98,8 @@ export default function UserAvatar() {
           onClick={() => {
             logout({
               logoutParams: {
-                returnTo: window.location.origin,
-              },
+                returnTo: window.location.origin
+              }
             });
             handleClose();
           }}

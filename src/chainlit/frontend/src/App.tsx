@@ -1,29 +1,29 @@
-import { Box } from "@mui/material";
-import "./App.css";
+import { Box } from '@mui/material';
+import './App.css';
 import {
   createBrowserRouter,
   Navigate,
-  RouterProvider,
-} from "react-router-dom";
-import { useEffect } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { accessTokenState, roleState } from "state/user";
-import { getProjectSettings, getRole } from "api";
-import theme from "theme";
-import { ThemeProvider } from "@mui/material";
-import { themeState } from "state/theme";
-import Home from "pages/Home";
-import Element from "pages/Element";
-import Login from "pages/Login";
-import AuthCallback from "pages/AuthCallback";
-import { Socket } from "socket.io-client";
-import Dataset from "pages/Dataset";
-import Conversation from "pages/Conversation";
-import CloudProvider from "components/cloudProvider";
-import Env from "pages/Env";
-import { useAuth } from "hooks/auth";
-import { projectSettingsState } from "state/project";
-import Badge from "components/badge";
+  RouterProvider
+} from 'react-router-dom';
+import { useEffect } from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { accessTokenState, roleState } from 'state/user';
+import { getProjectSettings, getRole } from 'api';
+import theme from 'theme';
+import { ThemeProvider } from '@mui/material';
+import { themeState } from 'state/theme';
+import Home from 'pages/Home';
+import Element from 'pages/Element';
+import Login from 'pages/Login';
+import AuthCallback from 'pages/AuthCallback';
+import { Socket } from 'socket.io-client';
+import Dataset from 'pages/Dataset';
+import Conversation from 'pages/Conversation';
+import CloudProvider from 'components/cloudProvider';
+import Env from 'pages/Env';
+import { useAuth } from 'hooks/auth';
+import { projectSettingsState } from 'state/project';
+import Badge from 'components/badge';
 
 declare global {
   interface Window {
@@ -33,41 +33,41 @@ declare global {
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />,
+    path: '/',
+    element: <Home />
   },
   {
-    path: "/env",
-    element: <Env />,
+    path: '/env',
+    element: <Env />
   },
   {
-    path: "/conversations/:id",
+    path: '/conversations/:id',
     element: (
       <CloudProvider>
         <Conversation />
       </CloudProvider>
-    ),
+    )
   },
   {
-    path: "/dataset",
-    element: <Dataset />,
+    path: '/dataset',
+    element: <Dataset />
   },
   {
-    path: "/element/:name",
-    element: <Element />,
+    path: '/element/:name',
+    element: <Element />
   },
   {
-    path: "/login",
-    element: <Login />,
+    path: '/login',
+    element: <Login />
   },
   {
-    path: "/api/auth/callback",
-    element: <AuthCallback />,
+    path: '/api/auth/callback',
+    element: <AuthCallback />
   },
   {
-    path: "*",
-    element: <Navigate replace to="/" />,
-  },
+    path: '*',
+    element: <Navigate replace to="/" />
+  }
 ]);
 
 function App() {
@@ -91,16 +91,16 @@ function App() {
     if (isAuthenticated && accessToken === undefined) {
       getAccessTokenSilently({
         authorizationParams: {
-          audience: "chainlit-cloud",
-        },
+          audience: 'chainlit-cloud'
+        }
       })
         .then((token) => setAccessToken(token))
         .catch((err) => {
           console.error(err);
           logout({
             logoutParams: {
-              returnTo: window.location.origin,
-            },
+              returnTo: window.location.origin
+            }
           });
         });
     }
@@ -111,12 +111,12 @@ function App() {
       return;
     }
     getRole(pSettings.chainlitServer, accessToken, pSettings.projectId)
-      .then(async ({ role }: any) => {
+      .then(async ({ role }) => {
         setRole(role);
       })
       .catch((err) => {
         console.log(err);
-        setRole("ANONYMOUS");
+        setRole('ANONYMOUS');
       });
   }, [accessToken, pSettings]);
 

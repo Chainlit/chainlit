@@ -1,8 +1,8 @@
-import { Box, Stack, Typography } from "@mui/material";
-import { useRecoilValue } from "recoil";
-import { tokenCountState } from "state/chat";
-import Input from "./input";
-import StopButton from "../stopButton";
+import { Box, Stack, Typography } from '@mui/material';
+import { useRecoilValue } from 'recoil';
+import { tokenCountState } from 'state/chat';
+import Input from './input';
+import StopButton from '../stopButton';
 
 interface Props {
   onSubmit: (message: string) => void;
@@ -19,11 +19,11 @@ export default function InputBox({ onSubmit, onReply }: Props) {
       gap={2}
       py={2}
       sx={{
-        boxSizing: "border-box",
-        width: "100%",
-        maxWidth: "60rem",
-        m: "auto",
-        justifyContent: "center",
+        boxSizing: 'border-box',
+        width: '100%',
+        maxWidth: '60rem',
+        m: 'auto',
+        justifyContent: 'center'
       }}
     >
       <StopButton />
@@ -32,7 +32,7 @@ export default function InputBox({ onSubmit, onReply }: Props) {
         {tokenCount > 0 && (
           <Stack flexDirection="row" alignItems="center">
             <Typography
-              sx={{ ml: "auto" }}
+              sx={{ ml: 'auto' }}
               color="text.secondary"
               variant="caption"
             >

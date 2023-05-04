@@ -1,16 +1,16 @@
-import CloudProvider from "components/cloudProvider";
-import { IconButton, Stack } from "@mui/material";
-import { gql, useMutation } from "@apollo/client";
-import { IMessage } from "state/chat";
-import toast from "react-hot-toast";
-import { getErrorMessage } from "helpers/apollo";
-import { useState } from "react";
-import ThumbDownAlt from "@mui/icons-material/ThumbDownAlt";
-import ThumbDownAltOutlined from "@mui/icons-material/ThumbDownAltOutlined";
-import ThumbUpAlt from "@mui/icons-material/ThumbUpAlt";
-import ThumbUpAltOutlined from "@mui/icons-material/ThumbUpAltOutlined";
+import CloudProvider from 'components/cloudProvider';
+import { IconButton, Stack } from '@mui/material';
+import { gql, useMutation } from '@apollo/client';
+import { IMessage } from 'state/chat';
+import toast from 'react-hot-toast';
+import { getErrorMessage } from 'helpers/apollo';
+import { useState } from 'react';
+import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
+import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
+import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
+import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
 
-const size = "16px";
+const size = '16px';
 
 const SetHumanFeedbackMutation = gql`
   mutation ($messageId: ID!, $humanFeedback: Int!) {
@@ -37,21 +37,21 @@ function _FeedbackButtons({ message }: Props) {
         setHumanFeedbackMutation({
           variables: {
             messageId: message.id,
-            humanFeedback: value,
-          },
+            humanFeedback: value
+          }
         }),
         {
-          loading: "Updating...",
-          success: "Feedback updated!",
+          loading: 'Updating...',
+          success: 'Feedback updated!',
           error: (err) => {
             return <span>{getErrorMessage(err)}</span>;
-          },
+          }
         }
       );
       setFeedback(value);
       message.humanFeedback = value;
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   };
 

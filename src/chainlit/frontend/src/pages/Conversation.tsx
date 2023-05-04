@@ -1,12 +1,12 @@
-import { Box } from "@mui/material";
-import MessageContainer from "components/chat/message/container";
-import Page from "pages/Page";
-import { useParams } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
-import { IElements } from "state/element";
-import SideView from "components/element/sideView";
-import Playground from "components/playground";
-import { IActions } from "state/action";
+import { Box } from '@mui/material';
+import MessageContainer from 'components/chat/message/container';
+import Page from 'pages/Page';
+import { useParams } from 'react-router-dom';
+import { gql, useQuery } from '@apollo/client';
+import { IElements } from 'state/element';
+import SideView from 'components/element/sideView';
+import Playground from 'components/playground';
+import { IActions } from 'state/action';
 
 const ConversationQuery = gql`
   query ($id: ID!) {
@@ -40,8 +40,8 @@ export default function Conversation() {
   const { id } = useParams();
   const { data, error } = useQuery(ConversationQuery, {
     variables: {
-      id: id,
-    },
+      id: id
+    }
   });
 
   if (!data || error) {
@@ -65,7 +65,7 @@ export default function Conversation() {
           boxSizing="border-box"
           px={{
             xs: 2,
-            md: 0,
+            md: 0
           }}
         >
           <Box my={1} />

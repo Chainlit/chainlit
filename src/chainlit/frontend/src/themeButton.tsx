@@ -1,8 +1,8 @@
-import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
-import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
-import { IconButton } from "@mui/material";
-import { useRecoilState } from "recoil";
-import { themeState } from "state/theme";
+import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import { IconButton } from '@mui/material';
+import { useRecoilState } from 'recoil';
+import { themeState } from 'state/theme';
 
 export default function ThemeButton() {
   const [themeVariant, setThemeVariant] = useRecoilState(themeState);
@@ -10,12 +10,12 @@ export default function ThemeButton() {
   return (
     <IconButton
       onClick={() => {
-        const variant = themeVariant === "light" ? "dark" : "light";
-        localStorage.setItem("themeVariant", variant);
+        const variant = themeVariant === 'light' ? 'dark' : 'light';
+        localStorage.setItem('themeVariant', variant);
         setThemeVariant(variant);
       }}
     >
-      {themeVariant === "light" ? <DarkModeOutlined /> : <LightModeOutlined />}
+      {themeVariant === 'light' ? <DarkModeOutlined /> : <LightModeOutlined />}
     </IconButton>
   );
 }

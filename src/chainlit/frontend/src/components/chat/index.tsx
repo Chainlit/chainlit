@@ -1,28 +1,28 @@
-import { getProjectSettings, postMessage, server } from "api";
-import { Alert, Box } from "@mui/material";
-import MessageContainer from "./message/container";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { getProjectSettings, postMessage, server } from 'api';
+import { Alert, Box } from '@mui/material';
+import MessageContainer from './message/container';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   IMessage,
   askUserState,
   loadingState,
   messagesState,
-  tokenCountState,
-} from "state/chat";
-import Playground from "components/playground";
-import SideView from "components/element/sideView";
-import InputBox from "./inputBox";
-import { useCallback, useEffect, useState } from "react";
-import io from "socket.io-client";
-import { toast } from "react-hot-toast";
-import useClearChat from "hooks/clearChat";
-import { userEnvState } from "state/user";
-import { IElement, elementState } from "state/element";
-import { projectSettingsState } from "state/project";
-import { useAuth } from "hooks/auth";
-import useLocalChatHistory from "hooks/localChatHistory";
-import { IAction, actionState } from "state/action";
-import WelcomeScreen from "components/chat/welcomeScreen";
+  tokenCountState
+} from 'state/chat';
+import Playground from 'components/playground';
+import SideView from 'components/element/sideView';
+import InputBox from './inputBox';
+import { useCallback, useEffect, useState } from 'react';
+import io from 'socket.io-client';
+import { toast } from 'react-hot-toast';
+import useClearChat from 'hooks/clearChat';
+import { userEnvState } from 'state/user';
+import { IElement, elementState } from 'state/element';
+import { projectSettingsState } from 'state/project';
+import { useAuth } from 'hooks/auth';
+import useLocalChatHistory from 'hooks/localChatHistory';
+import { IAction, actionState } from 'state/action';
+import WelcomeScreen from 'components/chat/welcomeScreen';
 
 const Chat = () => {
   const { user, accessToken, isAuthenticated, isLoading } = useAuth();
@@ -48,43 +48,43 @@ const Chat = () => {
 
     window.socket = io(server, {
       extraHeaders: {
-        Authorization: accessToken || "",
-        "user-env": JSON.stringify(userEnv),
-      },
+        Authorization: accessToken || '',
+        'user-env': JSON.stringify(userEnv)
+      }
     });
 
-    window.socket.on("connect", () => {
-      console.log("connected");
+    window.socket.on('connect', () => {
+      console.log('connected');
       setSocketError(false);
     });
 
-    window.socket.on("connect_error", (err) => {
-      console.error("failed to connect", err);
+    window.socket.on('connect_error', (err) => {
+      console.error('failed to connect', err);
       setSocketError(true);
     });
 
-    window.socket.on("task_start", (err) => {
+    window.socket.on('task_start', () => {
       setLoading(true);
     });
 
-    window.socket.on("task_end", (err) => {
+    window.socket.on('task_end', () => {
       setLoading(false);
     });
 
-    window.socket.on("reload", (err) => {
+    window.socket.on('reload', () => {
       clearChat();
       getProjectSettings().then((res) => setPSettings(res));
     });
 
-    window.socket.on("message", (message: IMessage) => {
+    window.socket.on('message', (message: IMessage) => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    window.socket.on("stream_start", (message: IMessage) => {
+    window.socket.on('stream_start', (message: IMessage) => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    window.socket.on("stream_token", (token: string) => {
+    window.socket.on('stream_token', (token: string) => {
       setMessages((oldMessages) => {
         const lastMessage = { ...oldMessages[oldMessages.length - 1] };
         lastMessage.content += token;
@@ -92,36 +92,36 @@ const Chat = () => {
       });
     });
 
-    window.socket.on("stream_end", (message: IMessage) => {
+    window.socket.on('stream_end', (message: IMessage) => {
       setMessages((oldMessages) => [...oldMessages.slice(0, -1), message]);
     });
 
-    window.socket.on("ask", ({ msg, spec }, callback) => {
+    window.socket.on('ask', ({ msg, spec }, callback) => {
       setAskUser({ spec, callback });
       setMessages((oldMessages) => [...oldMessages, msg]);
       setLoading(false);
     });
 
-    window.socket.on("ask_timeout", () => {
+    window.socket.on('ask_timeout', () => {
       setAskUser(undefined);
       setLoading(false);
     });
 
-    window.socket.on("element", (element: IElement) => {
+    window.socket.on('element', (element: IElement) => {
       setElements((old) => ({
         ...old,
-        ...{ [element.name]: element },
+        ...{ [element.name]: element }
       }));
     });
 
-    window.socket.on("action", (action: IAction) => {
+    window.socket.on('action', (action: IAction) => {
       setActions((old) => ({
         ...old,
-        ...{ [action.name]: action },
+        ...{ [action.name]: action }
       }));
     });
 
-    window.socket.on("token_usage", (count: number) => {
+    window.socket.on('token_usage', (count: number) => {
       setTokenCount((old) => old + count);
     });
   }, [userEnv, accessToken, isAuthenticated, isLoading]);
@@ -129,10 +129,10 @@ const Chat = () => {
   const onSubmit = useCallback(
     async (msg: string) => {
       const message: IMessage = {
-        author: user?.name || "User",
+        author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
 
       if (!isAuthenticated || !pSettings?.projectId) {
@@ -143,8 +143,10 @@ const Chat = () => {
       setMessages((oldMessages) => [...oldMessages, message]);
       try {
         await postMessage(message.author, msg);
-      } catch (err: any) {
-        toast.error(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error(err.message);
+        }
       }
     },
     [user, isAuthenticated, pSettings]
@@ -154,10 +156,10 @@ const Chat = () => {
     async (msg: string) => {
       if (!askUser) return;
       const message = {
-        author: user?.name || "User",
+        author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
 
       askUser.callback({ author: message.author, content: message.content });
@@ -180,7 +182,9 @@ const Chat = () => {
         px={2}
       >
         <Box my={1} />
-        {socketError && <Alert severity="error">Could not reach the server.</Alert>}
+        {socketError && (
+          <Alert severity="error">Could not reach the server.</Alert>
+        )}
         {!!messages.length && (
           <MessageContainer
             actions={actions}

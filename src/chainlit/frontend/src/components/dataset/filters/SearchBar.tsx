@@ -1,57 +1,55 @@
-import { useRef } from "react";
-import { styled } from "@mui/material/styles";
-import InputBase from "@mui/material/InputBase";
-import { debounce } from "lodash";
-import SearchIcon from "@mui/icons-material/Search";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import { useRecoilState } from "recoil";
-import { datasetFiltersState } from "state/dataset";
+import { useRef } from 'react';
+import { styled } from '@mui/material/styles';
+import InputBase from '@mui/material/InputBase';
+import { debounce } from 'lodash';
+import SearchIcon from '@mui/icons-material/Search';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import { useRecoilState } from 'recoil';
+import { datasetFiltersState } from 'state/dataset';
 
-interface Props {}
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
   color: theme.palette.text.primary,
-  borderRadius: "4px",
+  borderRadius: '4px',
   border: `${theme.palette.divider} solid 1px`,
-  "&:hover": {
-    border: `${theme.palette.primary} solid 1px !important`,
+  '&:hover': {
+    border: `${theme.palette.primary} solid 1px !important`
   },
 
   marginLeft: 0,
-  display: "flex",
-  [theme.breakpoints.up("sm")]: {
-    width: "auto",
-  },
+  display: 'flex',
+  [theme.breakpoints.up('sm')]: {
+    width: 'auto'
+  }
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+const SearchIconWrapper = styled('div')(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
+  color: 'inherit',
+  '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(3)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('md')]: {
+      width: '20ch'
+    }
+  }
 }));
 
-export default function SearchBar({}: Props) {
+export default function SearchBar() {
   const [df, setDf] = useRecoilState(datasetFiltersState);
 
   const handleChange = (value: string) => {
     value = value.trim();
-    const search = value === "" ? undefined : value;
+    const search = value === '' ? undefined : value;
     setDf({ ...df, search });
   };
 
@@ -59,9 +57,9 @@ export default function SearchBar({}: Props) {
   const inputRef = useRef<HTMLInputElement>();
 
   const clear = () => {
-    _onChange("");
+    _onChange('');
     if (inputRef.current) {
-      inputRef.current.value = "";
+      inputRef.current.value = '';
     }
   };
 
@@ -69,17 +67,17 @@ export default function SearchBar({}: Props) {
     <Search>
       <SearchIconWrapper
         sx={{
-          position: "absolute",
-          pointerEvents: "none",
-          height: "100%",
-          paddingX: 1,
+          position: 'absolute',
+          pointerEvents: 'none',
+          height: '100%',
+          paddingX: 1
         }}
       >
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInputBase
         placeholder="Search messages..."
-        inputProps={{ "aria-label": "search", ref: inputRef }}
+        inputProps={{ 'aria-label': 'search', ref: inputRef }}
         onChange={(e) => _onChange(e.target.value)}
       />
       <SearchIconWrapper>

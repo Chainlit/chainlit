@@ -1,7 +1,7 @@
-import { ElementType, IElements } from "state/element";
-import InlinedImageList from "./image";
-import { Stack } from "@mui/material";
-import InlinedTextList from "./text";
+import { ElementType, IElements } from 'state/element';
+import InlinedImageList from './image';
+import { Stack } from '@mui/material';
+import InlinedTextList from './text';
 
 interface Props {
   inlined: IElements;
@@ -17,8 +17,9 @@ export default function InlinedElements({ inlined }: Props) {
     .map((k) => {
       return {
         src:
-          inlined[k].url || URL.createObjectURL(new Blob([inlined[k].content])),
-        title: inlined[k].name,
+          inlined[k].url ||
+          URL.createObjectURL(new Blob([inlined[k].content!])),
+        title: inlined[k].name
       };
     });
 

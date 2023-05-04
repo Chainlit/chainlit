@@ -1,42 +1,39 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  playgroundSettingsState,
-  playgroundState,
-} from "state/playground";
-import { useEffect, useState } from "react";
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { playgroundSettingsState, playgroundState } from 'state/playground';
+import { useEffect, useState } from 'react';
 import {
   Editor,
   EditorState,
   ContentState,
   Modifier,
-  SelectionState,
-} from "draft-js";
-import "draft-js/dist/Draft.css";
+  SelectionState
+} from 'draft-js';
+import 'draft-js/dist/Draft.css';
 import {
   Box,
   IconButton,
   Stack,
   Tooltip,
   Typography,
-  useTheme,
-} from "@mui/material";
-import { OrderedSet } from "immutable";
-import LoadingButton from "@mui/lab/LoadingButton";
-import CloseIcon from "@mui/icons-material/Close";
-import RestoreIcon from "@mui/icons-material/Restore";
-import ModelSettings from "./modelSettings";
-import { getCompletion } from "api";
-import { toast } from "react-hot-toast";
-import { userEnvState } from "state/user";
+  useTheme
+} from '@mui/material';
+import { OrderedSet } from 'immutable';
+import LoadingButton from '@mui/lab/LoadingButton';
+import CloseIcon from '@mui/icons-material/Close';
+import RestoreIcon from '@mui/icons-material/Restore';
+import ModelSettings from './modelSettings';
+import { getCompletion } from 'api';
+import { toast } from 'react-hot-toast';
+import { userEnvState } from 'state/user';
 
 const styleMap = {
   COMPLETION: {
-    backgroundColor: "#d2f4d3",
-    color: "black",
-  },
+    backgroundColor: '#d2f4d3',
+    color: 'black'
+  }
 };
 
 export default function Playground() {
@@ -77,16 +74,16 @@ export default function Playground() {
       anchorKey: key,
       anchorOffset: length,
       focusKey: key,
-      focusOffset: length,
+      focusOffset: length
     });
 
     const ncs = Modifier.insertText(
       contentState,
       selection,
-      "\n" + completion,
-      OrderedSet.of("COMPLETION")
+      '\n' + completion,
+      OrderedSet.of('COMPLETION')
     );
-    const es = EditorState.push(state, ncs, "insert-characters");
+    const es = EditorState.push(state, ncs, 'insert-characters');
     return EditorState.forceSelection(es, ncs.getSelectionAfter());
   };
 
@@ -103,8 +100,10 @@ export default function Playground() {
       setLoading(true);
       const completion = await getCompletion(prompt, settings, userEnv);
       setState(insertCompletion(state, completion));
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -117,40 +116,40 @@ export default function Playground() {
       PaperProps={{
         style: {
           backgroundColor: theme.palette.background.default,
-          backgroundImage: "none",
-        },
+          backgroundImage: 'none'
+        }
       }}
       onClose={handleClose}
       aria-labelledby="playground"
       aria-describedby="playground"
     >
-      <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography fontSize="18px" fontWeight={700}>
           Prompt playground
         </Typography>
-        <IconButton sx={{ ml: "auto" }} onClick={handleClose}>
+        <IconButton sx={{ ml: 'auto' }} onClick={handleClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent  sx={{ display: "flex", flexDirection: "column" }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
         <Stack
           id="playground"
           direction="row"
           spacing={2}
-          sx={{ overflowY: "scroll", flexGrow: 1 }}
+          sx={{ overflowY: 'scroll', flexGrow: 1 }}
         >
           <Box
             sx={{
-              fontFamily: "Inter",
-              fontSize: "16px",
-              lineHeight: "24px",
-              padding: "0.75rem",
+              fontFamily: 'Inter',
+              fontSize: '16px',
+              lineHeight: '24px',
+              padding: '0.75rem',
               border: (theme) => `1px solid ${theme.palette.divider}`,
-              borderRadius: "0.375rem",
-              overflowY: "auto",
-              width: "100%",
+              borderRadius: '0.375rem',
+              overflowY: 'auto',
+              width: '100%',
               flexGrow: 1,
-              caretColor: (theme) => theme.palette.text.primary,
+              caretColor: (theme) => theme.palette.text.primary
             }}
           >
             <Editor
@@ -165,7 +164,7 @@ export default function Playground() {
           <LoadingButton
             onClick={submit}
             variant="contained"
-            sx={{ padding: "6px 12px", height: "35px" }}
+            sx={{ padding: '6px 12px', height: '35px' }}
             loading={loading}
           >
             Submit

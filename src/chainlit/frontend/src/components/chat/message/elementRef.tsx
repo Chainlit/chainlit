@@ -1,7 +1,7 @@
-import { IElement, sideViewState } from "state/element";
-import { Link as RRLink } from "react-router-dom";
-import { Link } from "@mui/material";
-import { useSetRecoilState } from "recoil";
+import { IElement, sideViewState } from 'state/element';
+import { Link as RRLink } from 'react-router-dom';
+import { Link } from '@mui/material';
+import { useSetRecoilState } from 'recoil';
 
 interface Props {
   element: IElement;
@@ -10,7 +10,7 @@ interface Props {
 export default function ElementRef({ element }: Props) {
   const setSideView = useSetRecoilState(sideViewState);
 
-  if (element.display === "inline") {
+  if (element.display === 'inline') {
     return <span style={{ fontWeight: 700 }}>{element.name}</span>;
   }
 
@@ -18,12 +18,12 @@ export default function ElementRef({ element }: Props) {
     <Link
       className="element-link"
       onClick={() => {
-        if (element.display === "side") {
+        if (element.display === 'side') {
           setSideView(element);
         }
       }}
       component={RRLink}
-      to={element.display === "page" ? `/element/${element.name}` : "#"}
+      to={element.display === 'page' ? `/element/${element.name}` : '#'}
     >
       {element.name}
     </Link>

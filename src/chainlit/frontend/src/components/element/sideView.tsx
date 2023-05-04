@@ -1,30 +1,30 @@
-import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, Box, BoxProps, Typography, Stack } from "@mui/material";
-import { styled, Theme, CSSObject } from "@mui/material/styles";
-import { renderElement } from "components/element/view";
-import { useRecoilState } from "recoil";
-import { sideViewState } from "state/element";
+import CloseIcon from '@mui/icons-material/Close';
+import { IconButton, Box, BoxProps, Typography, Stack } from '@mui/material';
+import { styled, Theme, CSSObject } from '@mui/material/styles';
+import { renderElement } from 'components/element/view';
+import { useRecoilState } from 'recoil';
+import { sideViewState } from 'state/element';
 
 const drawerWidth = 400;
 
 const openedMixin = (theme: Theme): CSSObject => ({
-  padding: "1.5rem",
-  paddingTop: ".5rem",
+  padding: '1.5rem',
+  paddingTop: '.5rem',
   width: drawerWidth,
-  transition: theme.transitions.create("transform", {
+  transition: theme.transitions.create('transform', {
     easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
+    duration: theme.transitions.duration.enteringScreen
   }),
-  overflowX: "hidden",
+  overflowX: 'hidden'
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create("transform", {
+  transition: theme.transitions.create('transform', {
     easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
+    duration: theme.transitions.duration.leavingScreen
   }),
-  overflowX: "hidden",
-  width: 0,
+  overflowX: 'hidden',
+  width: 0
 });
 
 interface DrawerProps extends BoxProps {
@@ -32,22 +32,22 @@ interface DrawerProps extends BoxProps {
 }
 
 const Drawer = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "open",
+  shouldForwardProp: (prop) => prop !== 'open'
 })<DrawerProps>(({ theme, open }) => ({
   backgroundColor: theme.palette.background.paper,
-  display: "flex",
-  flexDirection: "column",
+  display: 'flex',
+  flexDirection: 'column',
   borderRadius: 0,
   flexShrink: 0,
   color: theme.palette.text.primary,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
+  whiteSpace: 'nowrap',
+  boxSizing: 'border-box',
   ...(open && {
-    ...openedMixin(theme),
+    ...openedMixin(theme)
   }),
   ...(!open && {
-    ...closedMixin(theme),
-  }),
+    ...closedMixin(theme)
+  })
 }));
 
 const SideView = () => {
@@ -58,7 +58,7 @@ const SideView = () => {
         <Typography fontSize="18px">{sideViewElement?.name}</Typography>
         <IconButton
           edge="end"
-          sx={{ ml: "auto" }}
+          sx={{ ml: 'auto' }}
           onClick={() => setSideViewElement(undefined)}
         >
           <CloseIcon />

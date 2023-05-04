@@ -1,14 +1,14 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import useClearChat from "hooks/clearChat";
-import AddIcon from "@mui/icons-material/Add";
-import { Box } from "@mui/material";
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useClearChat from 'hooks/clearChat';
+import AddIcon from '@mui/icons-material/Add';
+import { Box } from '@mui/material';
 
 export default function NewChatButton() {
   const navigate = useNavigate();
@@ -25,13 +25,18 @@ export default function NewChatButton() {
 
   const handleConfirm = () => {
     clearChat();
-    navigate("/");
+    navigate('/');
     handleClose();
   };
 
   return (
     <Box color="text.primary">
-      <Button color="inherit" variant="outlined" onClick={handleClickOpen} startIcon={<AddIcon />}>
+      <Button
+        color="inherit"
+        variant="outlined"
+        onClick={handleClickOpen}
+        startIcon={<AddIcon />}
+      >
         New Chat
       </Button>
       <Dialog
@@ -40,7 +45,9 @@ export default function NewChatButton() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Create a new chat?"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {'Create a new chat?'}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             This will clear the current messages and start a new pristine chat.

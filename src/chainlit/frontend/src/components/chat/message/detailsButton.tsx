@@ -1,10 +1,10 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { INestedMessage } from "state/chat";
-import { CircularProgress } from "@mui/material";
-import GreyButton from "components/greyButton";
-import { useRecoilValue } from "recoil";
-import { projectSettingsState } from "state/project";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { INestedMessage } from 'state/chat';
+import { CircularProgress } from '@mui/material';
+import GreyButton from 'components/greyButton';
+import { useRecoilValue } from 'recoil';
+import { projectSettingsState } from 'state/project';
 
 interface Props {
   message: INestedMessage;
@@ -17,32 +17,30 @@ export default function DetailsButton({
   message,
   opened,
   onClick,
-  loading,
+  loading
 }: Props) {
-  const pSettings = useRecoilValue(projectSettingsState)
+  const pSettings = useRecoilValue(projectSettingsState);
 
-  const nested = !!message.subMessages?.length
+  const nested = !!message.subMessages?.length;
 
-  const tool = nested
-    ? message.subMessages![0].author
-    : undefined;
+  const tool = nested ? message.subMessages![0].author : undefined;
 
-  const hide = (!loading && !nested) || pSettings?.hideCot
+  const hide = (!loading && !nested) || pSettings?.hideCot;
 
   if (hide) {
     return null;
   }
 
-  const text = loading ? (tool ? `Using ${tool}` : "Running") : `Used ${tool}`;
+  const text = loading ? (tool ? `Using ${tool}` : 'Running') : `Used ${tool}`;
 
-  let id = "";
+  let id = '';
   if (tool) {
-    id = tool.trim().toLowerCase().replaceAll(" ", "-");
+    id = tool.trim().toLowerCase().replaceAll(' ', '-');
   }
   if (loading) {
-    id += "-loading";
+    id += '-loading';
   } else {
-    id += "-done";
+    id += '-done';
   }
 
   return (
@@ -51,7 +49,7 @@ export default function DetailsButton({
       disableElevation
       disableRipple
       sx={{
-        textTransform: "none",
+        textTransform: 'none'
       }}
       color="primary"
       startIcon={
@@ -59,7 +57,13 @@ export default function DetailsButton({
       }
       variant="contained"
       endIcon={
-        (nested && tool) ? opened ? <ExpandLessIcon /> : <ExpandMoreIcon /> : undefined
+        nested && tool ? (
+          opened ? (
+            <ExpandLessIcon />
+          ) : (
+            <ExpandMoreIcon />
+          )
+        ) : undefined
       }
       onClick={tool ? onClick : undefined}
     >

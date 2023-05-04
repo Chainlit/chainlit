@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import HistoryButton from "./button";
-import useLocalChatHistory from "hooks/localChatHistory";
+import { useCallback } from 'react';
+import HistoryButton from './button';
+import useLocalChatHistory from 'hooks/localChatHistory';
 
 interface Props {
   onClick: (content: string) => void;

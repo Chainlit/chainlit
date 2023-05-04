@@ -1,7 +1,7 @@
-import { useCallback } from "react";
-import { IChat } from "state/chat";
+import { useCallback } from 'react';
+import { IChat } from 'state/chat';
 
-const KEY = "chatHistory";
+const KEY = 'chatHistory';
 const MAX_SIZE = 50;
 
 export default function useLocalChatHistory() {
@@ -18,9 +18,9 @@ export default function useLocalChatHistory() {
       createdAt: new Date().getTime(),
       messages: [
         {
-          content: message,
-        },
-      ],
+          content: message
+        }
+      ]
     };
 
     const chatHistory = getLocalChatHistory();

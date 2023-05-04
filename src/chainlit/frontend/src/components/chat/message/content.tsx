@@ -1,14 +1,14 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import remarkGfm from "remark-gfm";
-import { Typography, Link, Stack } from "@mui/material";
-import { IElements } from "state/element";
-import InlinedElements from "./inlined";
-import { memo } from "react";
-import { IActions } from "state/action";
-import ElementRef from "./elementRef";
-import ActionRef from "./actionRef";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Typography, Link, Stack } from '@mui/material';
+import { IElements } from 'state/element';
+import InlinedElements from './inlined';
+import { memo } from 'react';
+import { IActions } from 'state/action';
+import ElementRef from './elementRef';
+import ActionRef from './actionRef';
 
 interface Props {
   content: string;
@@ -20,12 +20,12 @@ interface Props {
 function prepareContent({ elements, actions, content, language }: Props) {
   const elementNames = Object.keys(elements);
   const elementRegexp = elementNames.length
-    ? new RegExp(`(${elementNames.join("|")})`, "g")
+    ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
   const actionContents = Object.values(actions).map((a) => a.trigger);
   const actionRegexp = actionContents.length
-    ? new RegExp(`(${actionContents.join("|")})`, "g")
+    ? new RegExp(`(${actionContents.join('|')})`, 'g')
     : undefined;
 
   let preparedContent = content.trim();
@@ -33,17 +33,17 @@ function prepareContent({ elements, actions, content, language }: Props) {
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
-      if (elements[match].display === "inline") {
+      if (elements[match].display === 'inline') {
         inlinedelements[match] = elements[match];
       }
-      return `[${match}](${match.replaceAll(" ", "_")})`;
+      return `[${match}](${match.replaceAll(' ', '_')})`;
     });
   }
 
   if (actionRegexp) {
     preparedContent = preparedContent.replaceAll(actionRegexp, (match) => {
       // spaces break markdown links. The address in the link is not used anyway
-      return `[${match}](${match.replaceAll(" ", "_")})`;
+      return `[${match}](${match.replaceAll(' ', '_')})`;
     });
   }
 
@@ -58,13 +58,13 @@ export default memo(function MessageContent({
   content,
   elements,
   actions,
-  language,
+  language
 }: Props) {
   const { preparedContent, inlinedelements } = prepareContent({
     content,
     language,
     elements,
-    actions,
+    actions
   });
 
   if (!preparedContent) return null;
@@ -73,18 +73,18 @@ export default memo(function MessageContent({
     <Stack width="100%">
       <Typography
         sx={{
-          width: "100%",
-          minHeight: "20px",
-          fontSize: "1rem",
-          lineHeight: "1.5rem",
-          fontFamily: "Inter",
+          width: '100%',
+          minHeight: '20px',
+          fontSize: '1rem',
+          lineHeight: '1.5rem',
+          fontFamily: 'Inter'
         }}
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           className="markdown-body"
           components={{
-            a({ node, className, children, ...props }) {
+            a({ children, ...props }) {
               const name = children[0] as string;
               const element = elements[name];
               const action = Object.values(actions).find(
@@ -103,12 +103,12 @@ export default memo(function MessageContent({
                 );
               }
             },
-            code({ node, inline, className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || "");
+            code({ inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || '');
               return !inline && match ? (
                 <SyntaxHighlighter
                   {...props}
-                  children={String(children).replace(/\n$/, "")}
+                  children={String(children).replace(/\n$/, '')}
                   style={a11yDark}
                   wrapLongLines
                   language={match[1]}
@@ -119,7 +119,7 @@ export default memo(function MessageContent({
                   {children}
                 </code>
               );
-            },
+            }
           }}
         >
           {preparedContent}

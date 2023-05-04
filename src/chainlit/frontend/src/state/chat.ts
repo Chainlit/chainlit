@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export interface ILLMSettings {
   model_name: string;
@@ -36,38 +36,51 @@ export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
 }
 
+export interface IAskResponse {
+  content: string;
+  author: string;
+}
+
+export interface IAskFileResponse {
+  name: string;
+  path?: string;
+  size: number;
+  type: string;
+  content: ArrayBuffer;
+}
+
 export interface IAsk {
-  callback: (payload: any) => void;
+  callback: (payload: IAskResponse | IAskFileResponse) => void;
   spec: {
-    type: "text" | "file",
-    timeout: number,
-    accept?: string[],
-    max_size_mb?: number,
+    type: 'text' | 'file';
+    timeout: number;
+    accept?: string[];
+    max_size_mb?: number;
   };
 }
 
 export const messagesState = atom<IMessage[]>({
-  key: "Messages",
+  key: 'Messages',
   dangerouslyAllowMutability: true,
-  default: [],
+  default: []
 });
 
 export const tokenCountState = atom<number>({
-  key: "TokenCount",
-  default: 0,
+  key: 'TokenCount',
+  default: 0
 });
 
 export const loadingState = atom<boolean>({
-  key: "Loading",
-  default: false,
+  key: 'Loading',
+  default: false
 });
 
 export const historyOpenedState = atom<boolean>({
-  key: "HistoryOpened",
-  default: false,
+  key: 'HistoryOpened',
+  default: false
 });
 
 export const askUserState = atom<IAsk | undefined>({
-  key: "AskUser",
-  default: undefined,
+  key: 'AskUser',
+  default: undefined
 });

@@ -1,45 +1,45 @@
-import { InputLabel, Stack } from "@mui/material";
-import Slider, { SliderProps } from "@mui/material/Slider";
-import { styled } from "@mui/material/styles";
+import { InputLabel, Stack } from '@mui/material';
+import Slider, { SliderProps } from '@mui/material/Slider';
+import { styled } from '@mui/material/styles';
 
 const StyledSlider = styled(Slider)({
-  width: "calc(100% - 7px)",
-  color: "#c5c5d2",
+  width: 'calc(100% - 7px)',
+  color: '#c5c5d2',
   height: 3,
-  "& .MuiSlider-track": {
-    border: "none",
+  '& .MuiSlider-track': {
+    border: 'none'
   },
-  "& .MuiSlider-thumb": {
+  '& .MuiSlider-thumb': {
     height: 14,
     width: 14,
-    backgroundColor: "#fff",
-    border: "2px solid currentColor",
-    "&:focus, &:hover, &.Mui-active, &.Mui-focusVisible": {
-      boxShadow: "inherit",
+    backgroundColor: '#fff',
+    border: '2px solid currentColor',
+    '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+      boxShadow: 'inherit'
     },
-    "&:before": {
-      display: "none",
-    },
+    '&:before': {
+      display: 'none'
+    }
   },
-  "& .MuiSlider-valueLabel": {
+  '& .MuiSlider-valueLabel': {
     lineHeight: 1.2,
     fontSize: 12,
-    background: "unset",
+    background: 'unset',
     padding: 0,
     width: 32,
     height: 32,
-    borderRadius: "50% 50% 50% 0",
-    backgroundColor: "#52af77",
-    transformOrigin: "bottom left",
-    transform: "translate(50%, -100%) rotate(-45deg) scale(0)",
-    "&:before": { display: "none" },
-    "&.MuiSlider-valueLabelOpen": {
-      transform: "translate(50%, -100%) rotate(-45deg) scale(1)",
+    borderRadius: '50% 50% 50% 0',
+    backgroundColor: '#52af77',
+    transformOrigin: 'bottom left',
+    transform: 'translate(50%, -100%) rotate(-45deg) scale(0)',
+    '&:before': { display: 'none' },
+    '&.MuiSlider-valueLabelOpen': {
+      transform: 'translate(50%, -100%) rotate(-45deg) scale(1)'
     },
-    "& > *": {
-      transform: "rotate(45deg)",
-    },
-  },
+    '& > *': {
+      transform: 'rotate(45deg)'
+    }
+  }
 });
 
 interface Props extends SliderProps {
@@ -58,4 +58,4 @@ const _Slider = ({ label, ...sliderProps }: Props) => {
   );
 };
 
-export default _Slider
+export default _Slider;

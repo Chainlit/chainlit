@@ -1,14 +1,14 @@
-import { gql, useQuery } from "@apollo/client";
-import { useRecoilValue } from "recoil";
-import { Alert, Box, Stack, Tooltip, Typography } from "@mui/material";
-import InfiniteLoader from "react-window-infinite-loader";
-import { FixedSizeList } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
-import DeleteConversationButton from "./deleteConversationButton";
-import OpenConversationButton from "./openConversationButton";
-import { useCallback, useEffect } from "react";
-import { datasetFiltersState } from "state/dataset";
-import { projectSettingsState } from "state/project";
+import { gql, useQuery } from '@apollo/client';
+import { useRecoilValue } from 'recoil';
+import { Alert, Box, Stack, Typography } from '@mui/material';
+import InfiniteLoader from 'react-window-infinite-loader';
+import { FixedSizeList } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import DeleteConversationButton from './deleteConversationButton';
+import OpenConversationButton from './openConversationButton';
+import { useCallback, useEffect } from 'react';
+import { datasetFiltersState } from 'state/dataset';
+import { projectSettingsState } from 'state/project';
 
 const ConversationsQuery = gql`
   query (
@@ -68,11 +68,11 @@ const BATCH_SIZE = 50;
 
 const serializeDate = (timestamp: number) => {
   const dateOptions: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
   };
   return new Date(timestamp).toLocaleDateString(undefined, dateOptions);
 };
@@ -88,8 +88,8 @@ export default function ConversationTable() {
         projectId: pSettings?.projectId,
         withFeedback: df.feedback,
         authorEmail: df.authorEmail,
-        search: df.search,
-      },
+        search: df.search
+      }
     }
   );
 
@@ -109,8 +109,8 @@ export default function ConversationTable() {
           projectId: pSettings?.projectId,
           withFeedback: df.feedback,
           authorEmail: df.authorEmail,
-          search: df.search,
-        },
+          search: df.search
+        }
       });
     }
   }, [pageInfo, fetchMore, pSettings, df, updateQuery, data]);
@@ -131,25 +131,25 @@ export default function ConversationTable() {
 
   const columns = {
     Id: {
-      minWidth: "60px",
-      width: "5%",
+      minWidth: '60px',
+      width: '5%'
     },
     Author: {
-      minWidth: "130px",
-      width: "25%",
+      minWidth: '130px',
+      width: '25%'
     },
     Input: {
-      minWidth: "200px",
-      width: "35%",
+      minWidth: '200px',
+      width: '35%'
     },
     Date: {
-      minWidth: "120px",
-      width: "25%",
+      minWidth: '120px',
+      width: '25%'
     },
     Actions: {
-      minWidth: "80px",
-      width: "10%",
-    },
+      minWidth: '80px',
+      width: '10%'
+    }
   };
 
   const RowText = ({ text, col }: any) => {
@@ -159,7 +159,7 @@ export default function ConversationTable() {
         sx={{
           width: col.width,
           minWidth: col.minWidth,
-          fontSize: "0.875rem",
+          fontSize: '0.875rem'
         }}
         color="text.primary"
       >
@@ -174,26 +174,26 @@ export default function ConversationTable() {
       <Box
         style={style}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          alignItems: 'center',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`
         }}
       >
-        <RowText text={conversation.id} col={columns["Id"]} />
-        <RowText text={conversation.author.email} col={columns["Author"]} />
+        <RowText text={conversation.id} col={columns['Id']} />
+        <RowText text={conversation.author.email} col={columns['Author']} />
         <RowText
           text={conversation.messages[0]?.content}
-          col={columns["Input"]}
+          col={columns['Input']}
         />
         <RowText
           text={serializeDate(conversation.createdAt)}
-          col={columns["Date"]}
+          col={columns['Date']}
         />
         <Stack
           direction="row"
           sx={{
-            width: columns["Actions"].width,
-            minWidth: columns["Actions"].minWidth,
+            width: columns['Actions'].width,
+            minWidth: columns['Actions'].minWidth
           }}
         >
           <OpenConversationButton conversationId={conversation.id} />
@@ -206,14 +206,12 @@ export default function ConversationTable() {
     );
   };
 
-  const Header = Object.keys(columns).map((key) => (
+  const Header = Object.entries(columns).map(([key, value]) => (
     <Typography
       sx={{
-        fontSize: "0.875rem",
-        // @ts-ignore
-        width: columns[key].width,
-        // @ts-ignore
-        minWidth: columns[key].minWidth,
+        fontSize: '0.875rem',
+        width: value.width,
+        minWidth: value.minWidth
       }}
       color="primary.dark"
     >
@@ -222,13 +220,13 @@ export default function ConversationTable() {
   ));
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          height: "40px",
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          alignItems: 'center',
+          height: '40px',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`
         }}
       >
         {Header}

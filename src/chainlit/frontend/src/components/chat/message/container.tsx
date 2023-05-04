@@ -1,9 +1,9 @@
-import { Box } from "@mui/material";
-import { useEffect, useRef } from "react";
-import { IMessage, INestedMessage } from "state/chat";
-import { IElements } from "state/element";
-import Messages from "./messages";
-import { IActions } from "state/action";
+import { Box } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import { IMessage, INestedMessage } from 'state/chat';
+import { IElements } from 'state/element';
+import Messages from './messages';
+import { IActions } from 'state/action';
 
 interface Props {
   messages: IMessage[];
@@ -47,7 +47,13 @@ function nestMessages(messages: IMessage[]): INestedMessage[] {
   return nestedMessages;
 }
 
-const MessageContainer = ({ messages, elements, actions, autoScroll, setAutoSroll }: Props) => {
+const MessageContainer = ({
+  messages,
+  elements,
+  actions,
+  autoScroll,
+  setAutoSroll
+}: Props) => {
   const ref = useRef<HTMLDivElement>();
   const nestedMessages = nestMessages(messages);
 
@@ -55,7 +61,7 @@ const MessageContainer = ({ messages, elements, actions, autoScroll, setAutoSrol
     if (!ref.current || !autoScroll) {
       return;
     }
-    const messages = Array.from(ref.current.querySelectorAll(".message"));
+    const messages = Array.from(ref.current.querySelectorAll('.message'));
     const lastChild = messages[messages.length - 1];
     if (lastChild) {
       lastChild.scrollIntoView();
@@ -68,13 +74,14 @@ const MessageContainer = ({ messages, elements, actions, autoScroll, setAutoSrol
     }
 
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = ref.current!;
+      if (!ref.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = ref.current;
       const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
       setAutoSroll(atBottom);
     };
-    ref.current.addEventListener("scroll", handleScroll);
+    ref.current.addEventListener('scroll', handleScroll);
     return () => {
-      ref.current?.removeEventListener("scroll", handleScroll);
+      ref.current?.removeEventListener('scroll', handleScroll);
     };
   }, []);
 

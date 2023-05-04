@@ -1,18 +1,18 @@
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { useSetRecoilState } from "recoil";
-import { INestedMessage } from "state/chat";
-import { IElements } from "state/element";
-import { playgroundState } from "state/playground";
-import EditIcon from "@mui/icons-material/Edit";
-import { useState } from "react";
-import FeedbackButtons from "components/chat/message/feedbackButtons";
-import DetailsButton from "components/chat/message/detailsButton";
-import Messages from "./messages";
-import MessageContent from "./content";
-import { getAuthorColor } from "helpers/color";
-import UploadButton from "./uploadButton";
-import MessageTime from "./time";
-import { IActions } from "state/action";
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { useSetRecoilState } from 'recoil';
+import { INestedMessage } from 'state/chat';
+import { IElements } from 'state/element';
+import { playgroundState } from 'state/playground';
+import EditIcon from '@mui/icons-material/Edit';
+import { useState } from 'react';
+import FeedbackButtons from 'components/chat/message/feedbackButtons';
+import DetailsButton from 'components/chat/message/detailsButton';
+import Messages from './messages';
+import MessageContent from './content';
+import { getAuthorColor } from 'helpers/color';
+import UploadButton from './uploadButton';
+import MessageTime from './time';
+import { IActions } from 'state/action';
 
 interface Props {
   message: INestedMessage;
@@ -35,7 +35,7 @@ const Message = ({
   showAvatar,
   showBorder,
   isRunning,
-  isLast,
+  isLast
 }: Props) => {
   const [hover, setHover] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -46,14 +46,15 @@ const Message = ({
       id="playground-button"
       color="primary"
       onClick={() => {
+        if (!message.prompt) return;
         setPlayground({
-          llmSettings: message.llmSettings!,
-          prompt: message.prompt!,
-          completion: message.content,
+          llmSettings: message.llmSettings,
+          prompt: message.prompt,
+          completion: message.content
         });
       }}
     >
-      <EditIcon sx={{ width: "16px", height: "16px" }} />
+      <EditIcon sx={{ width: '16px', height: '16px' }} />
     </IconButton>
   );
 
@@ -61,11 +62,11 @@ const Message = ({
     <Stack
       direction="row"
       sx={{
-        position: "absolute",
+        position: 'absolute',
         top: 0,
         right: 0,
         zIndex: 10,
-        transform: "translateX(100%)",
+        transform: 'translateX(100%)'
       }}
     >
       {editButton}
@@ -78,21 +79,21 @@ const Message = ({
   return (
     <Box
       sx={{
-        color: "text.primary",
-        backgroundColor: "transparent",
+        color: 'text.primary',
+        backgroundColor: 'transparent'
       }}
       className="message"
-      onMouseEnter={(e) => setHover(true)}
-      onMouseLeave={(e) => setHover(false)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
       <Box
         sx={{
-          boxSizing: "border-box",
-          mx: "auto",
-          maxWidth: "60rem",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
+          boxSizing: 'border-box',
+          mx: 'auto',
+          maxWidth: '60rem',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative'
         }}
       >
         {hover && buttons}
@@ -102,7 +103,7 @@ const Message = ({
           sx={{
             py: 2,
             borderBottom: (theme) =>
-              showBorder ? `1px solid ${theme.palette.divider}` : "none",
+              showBorder ? `1px solid ${theme.palette.divider}` : 'none'
           }}
         >
           <Box width={authorBoxWidth} pr={2}>
@@ -111,11 +112,11 @@ const Message = ({
                 noWrap
                 sx={{
                   width: authorBoxWidth,
-                  fontSize: "12.5px",
+                  fontSize: '12.5px',
                   fontWeight: 500,
-                  letterSpacing: ".08em",
-                  textTransform: "uppercase",
-                  color: getAuthorColor(message.author),
+                  letterSpacing: '.08em',
+                  textTransform: 'uppercase',
+                  color: getAuthorColor(message.author)
                 }}
               >
                 {showAvatar && message.author}
