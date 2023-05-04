@@ -1,2 +1,3 @@
 langchain
+tiktoken==0.3.3
 chromadb==0.3.11
