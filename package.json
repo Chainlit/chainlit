@@ -10,6 +10,7 @@
     "test": "npx ts-node ./scripts/e2e.ts",
     "prepare": "husky install",
     "checkUi": "cd src/chainlit/frontend && npm run lint && npm run format",
-    "checkPython": "black src"
+    "checkPython": "black src",
+    "installJSDeps": "npm install && cd src/chainlit/frontend && npm install"
   }
 }
