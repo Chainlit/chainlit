@@ -35,6 +35,6 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_OPENAI_API_KEY: "{{ secrets.OPENAI_API_KEY }}"
+          envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: Run tests
         run: npm test
