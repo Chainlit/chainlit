@@ -8,28 +8,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        node-version: [16.x]
-        python-version: ["3.8"]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Set up Python ${{ matrix.python-version }}
+          node-version: "16.15.0"
+      - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.8"
       - name: Install latest LangChain
         run: pip3 install langchain
       - name: Install JS dependencies
         run: npm run installJSDeps
       - name: Lint UI
         run: npm run checkUi
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_SERPAPI_API_KEY: ${{ secrets.envkey_SERPAPI_API_KEY }}
+          envkey_OPENAI_API_KEY: ${{ secrets.envkey_OPENAI_API_KEY }}
       - name: Run tests
         run: npm test
