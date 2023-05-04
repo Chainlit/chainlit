@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union
 import os
 import time
 from chainlit.session import Session

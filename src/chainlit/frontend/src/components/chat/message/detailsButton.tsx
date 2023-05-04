@@ -20,13 +20,16 @@ export default function DetailsButton({
   loading,
 }: Props) {
   const pSettings = useRecoilValue(projectSettingsState)
-  const tool = message.subMessages?.length
-    ? message.subMessages[0].author
+
+  const nested = !!message.subMessages?.length
+
+  const tool = nested
+    ? message.subMessages![0].author
     : undefined;
 
-  const show = !loading && !tool
+  const hide = (!loading && !nested) || pSettings?.hideCot
 
-  if (show || pSettings?.hideCot) {
+  if (hide) {
     return null;
   }
 
@@ -56,7 +59,7 @@ export default function DetailsButton({
       }
       variant="contained"
       endIcon={
-        tool ? opened ? <ExpandLessIcon /> : <ExpandMoreIcon /> : undefined
+        (nested && tool) ? opened ? <ExpandLessIcon /> : <ExpandMoreIcon /> : undefined
       }
       onClick={tool ? onClick : undefined}
     >

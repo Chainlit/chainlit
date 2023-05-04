@@ -100,8 +100,21 @@ def init_config(log=False):
         logger.info(f"Config file already exists at {config_file}")
 
 
+def reset_module_config():
+    if not config:
+        return
+
+    module_fields = ["on_stop", "on_chat_start", "on_message",
+                     "lc_run", "lc_postprocess", "lc_factory", "lc_rename"]
+
+    for field in module_fields:
+        setattr(config, field, None)
+
 def load_module(target: str):
     """Load the specified module."""
+
+    # Reset the config fields that belonged to the previous module
+    reset_module_config()
 
     # Get the target's directory
     target_dir = os.path.dirname(os.path.abspath(target))
@@ -165,3 +178,4 @@ def load_config():
 
 
 config = load_config()
+
