@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_SERPAPI_API_KEY: ${{ secrets.envkey_SERPAPI_API_KEY }}
-          envkey_OPENAI_API_KEY: ${{ secrets.envkey_OPENAI_API_KEY }}
+          envkey_SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: Run tests
         run: npm test
