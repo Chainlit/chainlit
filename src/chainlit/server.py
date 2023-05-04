@@ -31,23 +31,24 @@ limiter = Limiter(
 )
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
 def serve(path):
     """Serve the UI."""
-    if path != "" and os.path.exists(app.static_folder + '/' + path):
+    if path != "" and os.path.exists(app.static_folder + "/" + path):
         return send_from_directory(app.static_folder, path)
     else:
-        return send_from_directory(app.static_folder, 'index.html')
+        return send_from_directory(app.static_folder, "index.html")
 
 
-@app.route('/completion', methods=['POST'])
+@app.route("/completion", methods=["POST"])
 @limiter.limit(config.request_limit)
 @trace
 def completion():
     """Handle a completion request from the prompt playground."""
 
     import openai
+
     data = request.json
     llm_settings = data["settings"]
     user_env = data.get("userEnv", {})
@@ -72,12 +73,12 @@ def completion():
             model=model_name,
             prompt=data["prompt"],
             stop=stop,
-            **llm_settings
+            **llm_settings,
         )
         return response["choices"][0]["text"]
 
 
-@app.route('/project/settings', methods=['GET'])
+@app.route("/project/settings", methods=["GET"])
 def project_settings():
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return {
@@ -92,7 +93,7 @@ def project_settings():
     }
 
 
-@socketio.on('connect')
+@socketio.on("connect")
 def connect():
     """Handle socket connection."""
 
@@ -107,7 +108,8 @@ def connect():
             for key in config.user_env:
                 if key not in user_env:
                     raise ConnectionRefusedError(
-                        "Missing user environment variable: " + key)
+                        "Missing user environment variable: " + key
+                    )
 
     access_token = request.headers.get("Authorization")
     if not config.public and not access_token:
@@ -115,8 +117,12 @@ def connect():
         raise ConnectionRefusedError("No access token provided")
     elif access_token and config.project_id:
         # Create the cloud client
-        client = CloudClient(project_id=config.project_id, session_id=session_id, access_token=access_token,
-                             url=config.chainlit_server)
+        client = CloudClient(
+            project_id=config.project_id,
+            session_id=session_id,
+            access_token=access_token,
+            url=config.chainlit_server,
+        )
 
     # Function to send a message to this particular session
     def _emit(event, data):
@@ -131,15 +137,17 @@ def connect():
         "emit": _emit,
         "ask_user": _ask_user,
         "client": client,
-        "user_env": user_env
+        "user_env": user_env,
     }  # type: Session
     sessions[session_id] = session
 
     if not config.lc_factory and not config.on_message and not config.on_chat_start:
         raise ValueError(
-            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function")
+            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function"
+        )
 
     if config.lc_factory:
+
         def instantiate_agent(session):
             """Instantiate the langchain agent and store it in the session."""
             __chainlit_sdk__ = Chainlit(session)
@@ -147,23 +155,22 @@ def connect():
             session["agent"] = agent
 
         # Instantiate the agent in a background task since the connection is not yet accepted
-        task = socketio.start_background_task(
-            instantiate_agent, session)
+        task = socketio.start_background_task(instantiate_agent, session)
         session["task"] = task
 
     if config.on_chat_start:
+
         def _on_chat_start(session):
             """Call the on_chat_start function provided by the developer."""
             __chainlit_sdk__ = Chainlit(session)
             config.on_chat_start()
 
         # Send the ask in a backgroudn task since the connection is not yet accepted
-        task = socketio.start_background_task(
-            _on_chat_start, session)
+        task = socketio.start_background_task(_on_chat_start, session)
         session["task"] = task
 
 
-@socketio.on('disconnect')
+@socketio.on("disconnect")
 def disconnect():
     """Handle socket disconnection."""
 
@@ -180,7 +187,7 @@ def disconnect():
         user_sessions.pop(request.sid)
 
 
-@socketio.on('stop')
+@socketio.on("stop")
 def stop():
     """Handle a stop request from the client."""
 
@@ -200,7 +207,8 @@ def stop():
         session["task"] = None
 
         __chainlit_sdk__.send_message(
-            author="System", content="Conversation stopped by the user.")
+            author="System", content="Conversation stopped by the user."
+        )
 
 
 def need_session(id: str):
@@ -237,8 +245,7 @@ def process_message(session: Session, author: str, input_str: str):
                 res = config.lc_run(langchain_agent, input_str)
             else:
                 # Otherwise, use the default run function
-                raw_res, output_key = run_langchain_agent(
-                    langchain_agent, input_str)
+                raw_res, output_key = run_langchain_agent(langchain_agent, input_str)
 
                 if config.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
@@ -250,21 +257,19 @@ def process_message(session: Session, author: str, input_str: str):
                     # Otherwise, use the raw response
                     res = raw_res
             # Finally, send the response to the user
-            __chainlit_sdk__.send_message(
-                author=config.chatbot_name, content=res)
+            __chainlit_sdk__.send_message(author=config.chatbot_name, content=res)
 
         elif config.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
             config.on_message(input_str)
     except Exception as e:
         logger.exception(e)
-        __chainlit_sdk__.send_message(author="Error", is_error=True,
-                                      content=str(e))
+        __chainlit_sdk__.send_message(author="Error", is_error=True, content=str(e))
     finally:
         __chainlit_sdk__.task_end()
 
 
-@app.route('/message', methods=['POST'])
+@app.route("/message", methods=["POST"])
 @limiter.limit(config.request_limit)
 @trace
 def message():
@@ -277,8 +282,7 @@ def message():
 
     session = need_session(session_id)
 
-    task = socketio.start_background_task(
-        process_message, session, author, input_str)
+    task = socketio.start_background_task(process_message, session, author, input_str)
     session["task"] = task
     task.join()
     session["task"] = None
@@ -295,7 +299,7 @@ def process_action(session: Session, action: Action):
         logger.warning("No callback found for action %s", action["name"])
 
 
-@app.route('/action', methods=['POST'])
+@app.route("/action", methods=["POST"])
 @limiter.limit(config.request_limit)
 @trace
 def on_action():
@@ -307,8 +311,7 @@ def on_action():
 
     session = need_session(session_id)
 
-    task = socketio.start_background_task(
-        process_action, session, action)
+    task = socketio.start_background_task(process_action, session, action)
     session["task"] = task
     task.join()
     session["task"] = None

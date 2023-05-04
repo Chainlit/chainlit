@@ -24,12 +24,12 @@ class ChangeHandler(FileSystemEventHandler):
 
         # Check if the file was modified more than 0.5 seconds ago
         if (current_modified_time - last_modified_time) > 0.5:
-            logger.info(f'event type: {event.event_type} path : {event.src_path}')
+            logger.info(f"event type: {event.event_type} path : {event.src_path}")
 
             # Load the module if the module name is specified in the config
             if config.module_name:
                 load_module(config.module_name)
-            
+
             # Emit a "reload" event to the socket
             socketio.emit("reload", {})
 
@@ -42,13 +42,13 @@ def watch_directory():
     # Return if already watching
     if is_watching:
         return
-    
+
     is_watching = True
     event_handler = ChangeHandler()
     observer = GeventObserver()
-        
+
     # Schedule the observer to watch the directory recursively
     observer.schedule(event_handler, config.root, recursive=True)
-    
+
     # Start the observer
     observer.start()

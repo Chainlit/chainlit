@@ -36,17 +36,16 @@ def create_tar_gz_archive(archive_path, source_dir):
             for file in files:
                 file_path = os.path.join(root, file)
                 if not is_excluded(file_path, gitignore_patterns):
-                    tar_file.add(file_path, arcname=os.path.relpath(
-                        file_path, source_dir))
+                    tar_file.add(
+                        file_path, arcname=os.path.relpath(file_path, source_dir)
+                    )
 
 
 def upload_tar_gz_archive(access_token: str, archive_path: str):
-    url = f'{config.chainlit_server}/api/upload/deployment'
-    body = {'projectId': config.project_id}
+    url = f"{config.chainlit_server}/api/upload/deployment"
+    body = {"projectId": config.project_id}
 
-    headers = {
-        "Authorization": access_token
-    }
+    headers = {"Authorization": access_token}
 
     res = requests.post(url, json=body, headers=headers)
 
@@ -55,14 +54,15 @@ def upload_tar_gz_archive(access_token: str, archive_path: str):
 
     json_res = res.json()
 
-    upload_details = json_res['post']
-    permanent_url = json_res['permanentUrl']
+    upload_details = json_res["post"]
+    permanent_url = json_res["permanentUrl"]
 
-    files = {'file': open(archive_path, 'rb')}
+    files = {"file": open(archive_path, "rb")}
 
     upload_response = requests.post(
-        upload_details['url'], data=upload_details['fields'], files=files)
-    
+        upload_details["url"], data=upload_details["fields"], files=files
+    )
+
     if not upload_response.ok:
         raise Exception(f"Failed to upload archive: {res.text}")
 
@@ -73,7 +73,8 @@ def upload_tar_gz_archive(access_token: str, archive_path: str):
 def deploy(target: str):
     if not config.project_id:
         raise Exception(
-            "Project id not set in config. A project id is mandatory to deploy a chainlit app.")
+            "Project id not set in config. A project id is mandatory to deploy a chainlit app."
+        )
 
     check_file(target)
 
@@ -84,4 +85,3 @@ def deploy(target: str):
         source_dir = os.getcwd()
         create_tar_gz_archive(archive_path, source_dir)
         permanent_url, url = upload_tar_gz_archive(access_token, archive_path)
-        

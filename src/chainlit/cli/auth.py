@@ -1,4 +1,9 @@
-from auth0.authentication.token_verifier import TokenVerifier, AsymmetricSignatureVerifier
+from auth0.authentication.token_verifier import (
+    TokenVerifier,
+    AsymmetricSignatureVerifier,
+)
+from typing import Dict
+from chainlit.logger import logger
 import time
 import requests
 import sys
@@ -6,13 +11,11 @@ import time
 import webbrowser
 import os
 import json
-from typing import Dict
-from chainlit.logger import logger
 
 
-AUTH0_DOMAIN = 'auth.chainlit.io'
-AUTH0_CLIENT_ID = 'ADo93BBXDn8Z35lEi8arCWiR7C0ncrjx'
-ALGORITHMS = ['HS256']
+AUTH0_DOMAIN = "auth.chainlit.io"
+AUTH0_CLIENT_ID = "ADo93BBXDn8Z35lEi8arCWiR7C0ncrjx"
+ALGORITHMS = ["HS256"]
 
 
 def get_credentials_path():
@@ -66,11 +69,10 @@ def validate_token(token):
 
     :param token:
     """
-    jwks_url = 'https://{}/.well-known/jwks.json'.format(AUTH0_DOMAIN)
-    issuer = 'https://{}/'.format(AUTH0_DOMAIN)
+    jwks_url = "https://{}/.well-known/jwks.json".format(AUTH0_DOMAIN)
+    issuer = "https://{}/".format(AUTH0_DOMAIN)
     sv = AsymmetricSignatureVerifier(jwks_url)
-    tv = TokenVerifier(signature_verifier=sv, issuer=issuer,
-                       audience=AUTH0_CLIENT_ID)
+    tv = TokenVerifier(signature_verifier=sv, issuer=issuer, audience=AUTH0_CLIENT_ID)
     return tv.verify(token)
 
 
@@ -94,12 +96,13 @@ def login():
         return
 
     device_code_payload = {
-        'client_id': AUTH0_CLIENT_ID,
-        'scope': 'openid profile email',
-        'audience': "chainlit-cloud",
+        "client_id": AUTH0_CLIENT_ID,
+        "scope": "openid profile email",
+        "audience": "chainlit-cloud",
     }
     device_code_response = requests.post(
-        'https://{}/oauth/device/code'.format(AUTH0_DOMAIN), data=device_code_payload)
+        "https://{}/oauth/device/code".format(AUTH0_DOMAIN), data=device_code_payload
+    )
 
     if device_code_response.status_code != 200:
         logger.error("Error generating the device code")
@@ -107,29 +110,30 @@ def login():
         sys.exit(1)
 
     device_code_data = device_code_response.json()
-    webbrowser.open(device_code_data['verification_uri_complete'])
+    webbrowser.open(device_code_data["verification_uri_complete"])
     logger.info(f"Enter the following code: {device_code_data['user_code']}")
 
     token_payload = {
-        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
-        'device_code': device_code_data['device_code'],
-        'client_id': AUTH0_CLIENT_ID,
+        "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+        "device_code": device_code_data["device_code"],
+        "client_id": AUTH0_CLIENT_ID,
     }
 
     authenticated = False
     while not authenticated:
         token_response = requests.post(
-            'https://{}/oauth/token'.format(AUTH0_DOMAIN), data=token_payload)
+            "https://{}/oauth/token".format(AUTH0_DOMAIN), data=token_payload
+        )
 
         token_data = token_response.json()
         if token_response.status_code == 200:
-            user = validate_token(token_data['id_token'])
+            user = validate_token(token_data["id_token"])
             token_data["created_at"] = time.time()
             store_credentials(token_data)
             logger.info(f"Logged in as {user['email']}")
             authenticated = True
-        elif token_data['error'] not in ('authorization_pending', 'slow_down'):
-            logger.error(token_data['error_description'])
+        elif token_data["error"] not in ("authorization_pending", "slow_down"):
+            logger.error(token_data["error_description"])
             sys.exit(1)
         else:
-            time.sleep(device_code_data['interval'])
+            time.sleep(device_code_data["interval"])

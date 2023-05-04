@@ -52,7 +52,7 @@ else:
 
 @dataclass()
 class ChainlitConfig:
-    chainlit_env: Literal['development', 'production']
+    chainlit_env: Literal["development", "production"]
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     # Name of the app and chatbot. Used as the default message author.
@@ -93,7 +93,7 @@ def init_config(log=False):
     """Initialize the configuration file if it doesn't exist."""
     if not os.path.exists(config_file):
         os.makedirs(config_dir, exist_ok=True)
-        with open(config_file, 'w', encoding="utf-8") as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             f.write(DEFAULT_CONFIG_STR)
             logger.info(f"Created default config file at {config_file}")
     elif log:
@@ -104,11 +104,19 @@ def reset_module_config():
     if not config:
         return
 
-    module_fields = ["on_stop", "on_chat_start", "on_message",
-                     "lc_run", "lc_postprocess", "lc_factory", "lc_rename"]
+    module_fields = [
+        "on_stop",
+        "on_chat_start",
+        "on_message",
+        "lc_run",
+        "lc_postprocess",
+        "lc_factory",
+        "lc_rename",
+    ]
 
     for field in module_fields:
         setattr(config, field, None)
+
 
 def load_module(target: str):
     """Load the specified module."""
@@ -143,8 +151,7 @@ def load_config():
             enable_telemetry = True
 
         if enable_telemetry:
-            logger.info(
-                "Telemetry is enabled. No personal data is collected.")
+            logger.info("Telemetry is enabled. No personal data is collected.")
 
         chatbot_name = project_settings.get("name")
         project_id = project_settings.get("id")
@@ -154,8 +161,7 @@ def load_config():
         request_limit = project_settings.get("request_limit", "")
 
         if not public and not project_id:
-            raise ValueError(
-                "Project ID is required when public is set to false.")
+            raise ValueError("Project ID is required when public is set to false.")
 
         # Set cache path
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
@@ -178,4 +184,3 @@ def load_config():
 
 
 config = load_config()
-

@@ -4,7 +4,7 @@ from chainlit.sdk import get_sdk
 user_sessions: Dict[str, Dict] = {}
 
 
-class UserSession():
+class UserSession:
     """
     Developer facing user session class.
     Useful for the developer to store user specific data between calls.

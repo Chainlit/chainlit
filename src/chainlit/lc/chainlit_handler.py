@@ -50,8 +50,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        sdk.stream_start(author=author, indent=indent,
-                         llm_settings=llm_settings)
+        sdk.stream_start(author=author, indent=indent, llm_settings=llm_settings)
         self.stream_per_session[session_id] = True
 
     def send_token(self, token: str):
@@ -92,7 +91,10 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         session_id = sdk.session["id"]
 
         # Remove the last element from the sequences
-        if session_id in self.sequence_per_session and self.sequence_per_session[session_id]:
+        if (
+            session_id in self.sequence_per_session
+            and self.sequence_per_session[session_id]
+        ):
             self.sequence_per_session[session_id].pop()
 
     def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
@@ -119,9 +121,13 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         session_id = sdk.session["id"]
 
         # Remove the last prompt from the session
-        if session_id in self.prompts_per_session and self.prompts_per_session[session_id]:
-            self.last_prompt_per_session[session_id] = self.prompts_per_session[session_id].pop(
-            )
+        if (
+            session_id in self.prompts_per_session
+            and self.prompts_per_session[session_id]
+        ):
+            self.last_prompt_per_session[session_id] = self.prompts_per_session[
+                session_id
+            ].pop()
 
     def consume_last_prompt(self):
         sdk = get_sdk()
@@ -135,8 +141,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         return last_prompt
 
     def get_message_params(self, sdk: Chainlit):
-        llm_settings = self.llm_settings_per_session.get(
-            sdk.session["id"])
+        llm_settings = self.llm_settings_per_session.get(sdk.session["id"])
 
         sequence = self.sequence_per_session.get(sdk.session["id"])
 
@@ -163,7 +168,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
             return
 
         is_streaming = self.is_streaming()
-        if (is_streaming):
+        if is_streaming:
             self.end_stream()
 
         sdk.send_message(
@@ -173,7 +178,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
             is_error=error,
             prompt=prompt,
             llm_settings=llm_settings,
-            end_stream=is_streaming
+            end_stream=is_streaming,
         )
 
     # Callbacks for various events
@@ -181,7 +186,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
-        self.add_prompt(prompts[0], kwargs.get('llm_settings'))
+        self.add_prompt(prompts[0], kwargs.get("llm_settings"))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Do nothing."""

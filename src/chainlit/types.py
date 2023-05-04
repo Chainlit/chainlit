@@ -8,8 +8,9 @@ ElementDisplay = Literal["inline", "side", "page"]
 
 @dataclass_json
 @dataclass
-class AskSpec():
+class AskSpec:
     """Specification for asking the user."""
+
     timeout: int
     type: Literal["text", "file"]
 
@@ -18,6 +19,7 @@ class AskSpec():
 @dataclass
 class AskFileSpec(AskSpec):
     """Specification for asking the user for a file."""
+
     accept: List[str]
     max_size_mb: int
 
@@ -28,7 +30,7 @@ class AskResponse(TypedDict):
 
 
 @dataclass
-class AskFileResponse():
+class AskFileResponse:
     name: str
     path: str
     size: int
@@ -44,7 +46,7 @@ class Action(TypedDict):
 
 @dataclass_json
 @dataclass
-class LLMSettings():
+class LLMSettings:
     model_name: str = "text-davinci-003"
     stop: Optional[List[str]] = None
     temperature: float = 0

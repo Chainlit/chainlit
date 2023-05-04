@@ -24,7 +24,7 @@ def init_markdown(root: str):
     chainlit_md_file = os.path.join(root, "chainlit.md")
 
     if not os.path.exists(chainlit_md_file):
-        with open(chainlit_md_file, 'w', encoding="utf-8") as f:
+        with open(chainlit_md_file, "w", encoding="utf-8") as f:
             f.write(DEFAULT_MARKDOWN_STR)
             logger.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 

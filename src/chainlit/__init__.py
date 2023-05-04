@@ -1,22 +1,31 @@
 import gevent
 from gevent import monkey
+
 monkey.patch_all()
 
 from chainlit.lc import monkey
+
 monkey.patch()
 
 from chainlit.sdk import get_sdk
 from chainlit.user_session import user_session
 from chainlit.config import config
-from chainlit.types import ElementDisplay, LLMSettings, AskSpec, AskFileSpec, AskFileResponse, AskResponse, Action
+from chainlit.types import (
+    ElementDisplay,
+    LLMSettings,
+    AskSpec,
+    AskFileSpec,
+    AskFileResponse,
+    AskResponse,
+    Action,
+)
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
 from typing import Callable, Any, List, Union
-import inspect
 from dotenv import load_dotenv
+import inspect
 import os
-
 
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
@@ -37,15 +46,14 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
 
     def wrapper(*args):
-
         sdk = get_sdk()
         # Get the parameter names of the user-defined function
-        user_function_params = list(
-            inspect.signature(user_function).parameters.keys())
+        user_function_params = list(inspect.signature(user_function).parameters.keys())
 
         # Create a dictionary of parameter names and their corresponding values from *args
-        params_values = {param_name: arg for param_name,
-                         arg in zip(user_function_params, args)}
+        params_values = {
+            param_name: arg for param_name, arg in zip(user_function_params, args)
+        }
 
         if with_task and sdk:
             sdk.task_start()
@@ -56,13 +64,13 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         except Exception as e:
             logger.exception(e)
             if sdk:
-                sdk.send_message(author="Error", is_error=True,
-                                 content=str(e))
+                sdk.send_message(author="Error", is_error=True, content=str(e))
         finally:
             if with_task and sdk:
                 sdk.task_end()
 
     return wrapper
+
 
 @trace
 def send_text(text: str, name: str, display: ElementDisplay = "side"):
@@ -80,6 +88,7 @@ def send_text(text: str, name: str, display: ElementDisplay = "side"):
     if sdk:
         sdk.send_text(text, name, display)
 
+
 @trace
 def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
     """
@@ -96,8 +105,17 @@ def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
     if sdk:
         sdk.send_local_image(path, name, display)
 
+
 @trace
-def send_message(content: str, author=config.chatbot_name, prompt: str = None, language: str = None, indent=0, llm_settings: LLMSettings = None, end_stream=False):
+def send_message(
+    content: str,
+    author=config.chatbot_name,
+    prompt: str = None,
+    language: str = None,
+    indent=0,
+    llm_settings: LLMSettings = None,
+    end_stream=False,
+):
     """
     Send a message to the chatbot UI.
     If a project ID is configured, the messages will be uploaded to the cloud storage.
@@ -113,8 +131,16 @@ def send_message(content: str, author=config.chatbot_name, prompt: str = None, l
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(author=author, content=content, prompt=prompt, language=language,
-                         indent=indent, llm_settings=llm_settings, end_stream=end_stream)
+        sdk.send_message(
+            author=author,
+            content=content,
+            prompt=prompt,
+            language=language,
+            indent=indent,
+            llm_settings=llm_settings,
+            end_stream=end_stream,
+        )
+
 
 @trace
 def send_error_message(content: str, author=config.chatbot_name, indent=0):
@@ -129,11 +155,13 @@ def send_error_message(content: str, author=config.chatbot_name, indent=0):
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(author=author, content=content,
-                         is_error=True, indent=indent)
+        sdk.send_message(author=author, content=content, is_error=True, indent=indent)
+
 
 @trace
-def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False) -> Union[AskResponse, None]:
+def ask_for_input(
+    content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False
+) -> Union[AskResponse, None]:
     """
     Ask for the user input before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
@@ -150,10 +178,20 @@ def ask_for_input(content: str, author=config.chatbot_name, timeout=60, raise_on
     sdk = get_sdk()
     if sdk:
         spec = AskSpec(type="text", timeout=timeout)
-        return sdk.send_ask_user(author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout)
+        return sdk.send_ask_user(
+            author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout
+        )
+
 
 @trace
-def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.chatbot_name, timeout=90, raise_on_timeout=False) -> Union[AskFileResponse, None]:
+def ask_for_file(
+    title: str,
+    accept: List[str],
+    max_size_mb=2,
+    author=config.chatbot_name,
+    timeout=90,
+    raise_on_timeout=False,
+) -> Union[AskFileResponse, None]:
     """
     Ask the user to upload a file before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
@@ -171,14 +209,17 @@ def ask_for_file(title: str, accept: List[str], max_size_mb=2, author=config.cha
     """
     sdk = get_sdk()
     if sdk:
-        spec = AskFileSpec(type="file", accept=accept,
-                           max_size_mb=max_size_mb, timeout=timeout)
+        spec = AskFileSpec(
+            type="file", accept=accept, max_size_mb=max_size_mb, timeout=timeout
+        )
         res = sdk.send_ask_user(
-            author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout)
+            author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout
+        )
         if res:
             return AskFileResponse(**res)
         else:
             return None
+
 
 @trace
 def send_action(name: str, trigger: str, description=""):
@@ -191,11 +232,16 @@ def send_action(name: str, trigger: str, description=""):
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_action(name=name, trigger=trigger,
-                        description=description)
+        sdk.send_action(name=name, trigger=trigger, description=description)
+
 
 @trace
-def start_stream(author=config.chatbot_name, indent: int = 0, language: str = None, llm_settings: LLMSettings = None):
+def start_stream(
+    author=config.chatbot_name,
+    indent: int = 0,
+    language: str = None,
+    llm_settings: LLMSettings = None,
+):
     """
     Start a streamed message.
 
@@ -207,7 +253,10 @@ def start_stream(author=config.chatbot_name, indent: int = 0, language: str = No
     """
     sdk = get_sdk()
     if sdk:
-        return sdk.stream_start(author=author, indent=indent, language=language, llm_settings=llm_settings)
+        return sdk.stream_start(
+            author=author, indent=indent, language=language, llm_settings=llm_settings
+        )
+
 
 @trace
 def send_token(token: str):
@@ -220,6 +269,7 @@ def send_token(token: str):
     sdk = get_sdk()
     if sdk:
         return sdk.send_token(token)
+
 
 @trace
 def langchain_factory(func: Callable) -> Callable:
@@ -236,8 +286,10 @@ def langchain_factory(func: Callable) -> Callable:
         Callable[[], Any]: The decorated factory function.
     """
     from chainlit.config import config
+
     config.lc_factory = wrap_user_function(func, with_task=True)
     return func
+
 
 @trace
 def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
@@ -252,8 +304,10 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
         Callable[[Any], str]: The decorated post-processing function.
     """
     from chainlit.config import config
+
     config.lc_postprocess = wrap_user_function(func)
     return func
+
 
 @trace
 def on_message(func: Callable) -> Callable:
@@ -268,8 +322,10 @@ def on_message(func: Callable) -> Callable:
         Callable[[str], Any]: The decorated on_message function.
     """
     from chainlit.config import config
+
     config.on_message = wrap_user_function(func)
     return func
+
 
 @trace
 def langchain_run(func: Callable) -> Callable:
@@ -283,8 +339,10 @@ def langchain_run(func: Callable) -> Callable:
         Callable[[Any, str], Any]: The decorated function.
     """
     from chainlit.config import config
+
     config.lc_run = wrap_user_function(func)
     return func
+
 
 @trace
 def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
@@ -297,8 +355,10 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
         Callable[[Any, str], Any]: The decorated function.
     """
     from chainlit.config import config
+
     config.lc_rename = wrap_user_function(func)
     return func
+
 
 @trace
 def on_chat_start(func: Callable) -> Callable:
@@ -312,8 +372,10 @@ def on_chat_start(func: Callable) -> Callable:
         Callable[], Any]: The decorated hook.
     """
     from chainlit.config import config
+
     config.on_chat_start = wrap_user_function(func, with_task=True)
     return func
+
 
 @trace
 def on_stop(func: Callable) -> Callable:
@@ -327,8 +389,10 @@ def on_stop(func: Callable) -> Callable:
         Callable[[], Any]: The decorated stop hook.
     """
     from chainlit.config import config
+
     config.on_stop = wrap_user_function(func)
     return func
+
 
 def action(name: str) -> Callable:
     """
@@ -337,8 +401,8 @@ def action(name: str) -> Callable:
 
     def decorator(func: Callable[[Action], Any]):
         from chainlit.config import config
-        config.action_callbacks[name] = wrap_user_function(
-            func, with_task=True)
+
+        config.action_callbacks[name] = wrap_user_function(func, with_task=True)
         return func
 
     return decorator

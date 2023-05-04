@@ -23,7 +23,9 @@ def cli():
 
 
 # Define the function to run Chainlit with provided options
-def run_chainlit(target: str, watch=False, headless=False, debug=False, args=None, **kwargs):
+def run_chainlit(
+    target: str, watch=False, headless=False, debug=False, args=None, **kwargs
+):
     check_file(target)
     # Load the module provided by the user
     config.module_name = target
@@ -54,7 +56,9 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False, args=Non
 @cli.command("run")
 @click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
 @click.option("-w", "--watch", default=False, is_flag=True, envvar="CHAINLIT_WATCH")
-@click.option("-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS")
+@click.option(
+    "-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS"
+)
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="CHAINLIT_DEBUG")
 @click.option("-c", "--ci", default=False, is_flag=True, envvar="CHAINLIT_CI")
 @click.argument("args", nargs=-1)

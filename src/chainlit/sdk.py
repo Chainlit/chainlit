@@ -46,14 +46,22 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    def send_element(self, ext: str, content: bytes, name: str, type: ElementType, display: ElementDisplay):
+    def send_element(
+        self,
+        ext: str,
+        content: bytes,
+        name: str,
+        type: ElementType,
+        display: ElementDisplay,
+    ):
         """Send an element to the UI."""
         if self.client:
             # Cloud is enabled, upload the element to S3
             url = self.client.upload_element(ext=ext, content=content)
             if url:
                 element = self.client.create_element(
-                    name=name, url=url, type=type, display=display)
+                    name=name, url=url, type=type, display=display
+                )
         else:
             element = {
                 "name": name,
@@ -62,14 +70,14 @@ class Chainlit:
                 "display": display,
             }
         if self.emit and element:
-            self.emit('element', element)
+            self.emit("element", element)
 
     def send_local_image(self, path: str, name: str, display: ElementDisplay = "side"):
         """Send a local image to the UI."""
         if not self.emit:
             return
 
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             _, ext = os.path.splitext(path)
             type = "image"
             image_data = f.read()
@@ -94,9 +102,19 @@ class Chainlit:
             "trigger": trigger,
             "description": description,
         }
-        self.emit('action', action)
+        self.emit("action", action)
 
-    def send_message(self, author: str, content: str, prompt: str = None, language: str = None, indent=0, is_error=False, llm_settings: LLMSettings = None, end_stream=False):
+    def send_message(
+        self,
+        author: str,
+        content: str,
+        prompt: str = None,
+        language: str = None,
+        indent=0,
+        is_error=False,
+        llm_settings: LLMSettings = None,
+        end_stream=False,
+    ):
         """Send a message to the UI."""
         if not self.emit:
             return
@@ -129,13 +147,14 @@ class Chainlit:
 
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the UI."""
-        self.send_message(
-            author=author, content="Time out", is_error=True)
+        self.send_message(author=author, content="Time out", is_error=True)
 
         if self.emit:
             self.emit("ask_timeout", {})
 
-    def send_ask_user(self, author: str, content: str, spec: AskSpec, raise_on_timeout=False):
+    def send_ask_user(
+        self, author: str, content: str, spec: AskSpec, raise_on_timeout=False
+    ):
         """Send a prompt to the UI and wait for a response."""
         if not self.ask_user:
             return
@@ -156,8 +175,7 @@ class Chainlit:
             # End the task temporarily so that the User can answer the prompt
             self.task_end()
             # Send the prompt to the UI
-            res = self.ask_user(
-                {"msg": msg, "spec": spec.to_dict()}, spec.timeout)
+            res = self.ask_user({"msg": msg, "spec": spec.to_dict()}, spec.timeout)
             if self.client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
@@ -190,28 +208,42 @@ class Chainlit:
         Send a task start signal to the UI.
         """
         if self.emit:
-            self.emit('task_start', {})
+            self.emit("task_start", {})
 
     def task_end(self):
         """Send a task end signal to the UI."""
         if self.emit:
-            self.emit('task_end', {})
+            self.emit("task_end", {})
 
-    def stream_start(self, author: str, indent: int, language: str = None, llm_settings: LLMSettings = None):
+    def stream_start(
+        self,
+        author: str,
+        indent: int,
+        language: str = None,
+        llm_settings: LLMSettings = None,
+    ):
         """Send a stream start signal to the UI."""
         if self.emit:
-            self.emit('stream_start', {"author": author, "indent": indent, "language": language, "content": "",
-                      "llmSettings": llm_settings.to_dict() if llm_settings else None})
+            self.emit(
+                "stream_start",
+                {
+                    "author": author,
+                    "indent": indent,
+                    "language": language,
+                    "content": "",
+                    "llmSettings": llm_settings.to_dict() if llm_settings else None,
+                },
+            )
 
     def send_token(self, token: str):
         """Send a message token to the UI."""
         if self.emit:
-            self.emit('stream_token', token)
+            self.emit("stream_token", token)
 
     def stream_end(self, msg):
         """Send a stream end signal to the UI."""
         if self.emit:
-            self.emit('stream_end', msg)
+            self.emit("stream_end", msg)
 
 
 def get_sdk() -> Union[Chainlit, None]:

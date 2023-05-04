@@ -31,11 +31,12 @@ def patched_generate(
     if langchain.llm_cache is None or disregard_cache:
         # This happens when langchain.cache is None, but self.cache is True
         if self.cache is not None and self.cache:
-            raise ValueError(
-                "Asked to cache, but no cache found at `langchain.cache`."
-            )
+            raise ValueError("Asked to cache, but no cache found at `langchain.cache`.")
         self.callback_manager.on_llm_start(
-            {"name": self.__class__.__name__}, prompts, verbose=self.verbose, llm_settings=llm_settings,
+            {"name": self.__class__.__name__},
+            prompts,
+            verbose=self.verbose,
+            llm_settings=llm_settings,
         )
         try:
             output = self._generate(prompts, stop=stop)
@@ -55,7 +56,10 @@ def patched_generate(
 
     if len(missing_prompts) > 0:
         self.callback_manager.on_llm_start(
-            {"name": self.__class__.__name__}, missing_prompts, verbose=self.verbose, llm_settings=llm_settings,
+            {"name": self.__class__.__name__},
+            missing_prompts,
+            verbose=self.verbose,
+            llm_settings=llm_settings,
         )
         try:
             new_results = self._generate(missing_prompts, stop=stop)
@@ -69,11 +73,15 @@ def patched_generate(
     else:
         # PATCH
         self.callback_manager.on_llm_start(
-            {"name": self.__class__.__name__}, prompts, verbose=self.verbose, llm_settings=llm_settings,
+            {"name": self.__class__.__name__},
+            prompts,
+            verbose=self.verbose,
+            llm_settings=llm_settings,
         )
         llm_output = {}
         self.callback_manager.on_llm_end(
-            LLMResult(generations=[], llm_output=llm_output), verbose=self.verbose)
+            LLMResult(generations=[], llm_output=llm_output), verbose=self.verbose
+        )
     generations = [existing_prompts[i] for i in range(len(prompts))]
     return LLMResult(generations=generations, llm_output=llm_output)
 
@@ -90,7 +98,10 @@ def patched_generate_prompt(
     # PATCH
     llm_settings = get_llm_settings(self, stop)
     self.callback_manager.on_llm_start(
-        {"name": self.__class__.__name__}, prompt_strings, verbose=self.verbose, llm_settings=llm_settings
+        {"name": self.__class__.__name__},
+        prompt_strings,
+        verbose=self.verbose,
+        llm_settings=llm_settings,
     )
 
     try:

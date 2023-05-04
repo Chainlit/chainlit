@@ -1,6 +1,6 @@
-from typing import List, Optional
 import inspect
 import langchain
+from typing import List, Optional
 from langchain.llms.base import BaseLLM, update_cache, get_prompts
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema import (
@@ -24,9 +24,11 @@ chainlit_handler = ChainlitCallbackHandler()
 orig_configure = CallbackManager.configure
 
 
-def patched_configure(inheritable_callbacks: Callbacks = None,
-                      local_callbacks: Callbacks = None,
-                      verbose: bool = False):
+def patched_configure(
+    inheritable_callbacks: Callbacks = None,
+    local_callbacks: Callbacks = None,
+    verbose: bool = False,
+):
     cbm = orig_configure(inheritable_callbacks, local_callbacks, verbose)
     cbm.add_handler(chainlit_handler, False)
     return cbm
@@ -55,15 +57,11 @@ def patched_generate(
     callback_manager = CallbackManager.configure(
         callbacks, self.callbacks, self.verbose
     )
-    new_arg_supported = inspect.signature(self._generate).parameters.get(
-        "run_manager"
-    )
+    new_arg_supported = inspect.signature(self._generate).parameters.get("run_manager")
     if langchain.llm_cache is None or disregard_cache:
         # This happens when langchain.cache is None, but self.cache is True
         if self.cache is not None and self.cache:
-            raise ValueError(
-                "Asked to cache, but no cache found at `langchain.cache`."
-            )
+            raise ValueError("Asked to cache, but no cache found at `langchain.cache`.")
         # PATCH
         run_manager = callback_manager.on_llm_start(
             {"name": self.__class__.__name__}, prompts, llm_settings=llm_settings
@@ -90,12 +88,13 @@ def patched_generate(
     if len(missing_prompts) > 0:
         # PATCH
         run_manager = callback_manager.on_llm_start(
-            {"name": self.__class__.__name__}, missing_prompts, llm_settings=llm_settings
+            {"name": self.__class__.__name__},
+            missing_prompts,
+            llm_settings=llm_settings,
         )
         try:
             new_results = (
-                self._generate(missing_prompts, stop=stop,
-                               run_manager=run_manager)
+                self._generate(missing_prompts, stop=stop, run_manager=run_manager)
                 if new_arg_supported
                 else self._generate(missing_prompts, stop=stop)
             )
@@ -109,11 +108,15 @@ def patched_generate(
     else:
         # PATCH
         run_manager = callback_manager.on_llm_start(
-            {"name": self.__class__.__name__}, prompts, verbose=self.verbose, llm_settings=llm_settings,
+            {"name": self.__class__.__name__},
+            prompts,
+            verbose=self.verbose,
+            llm_settings=llm_settings,
         )
         llm_output = {}
         run_manager.on_llm_end(
-            LLMResult(generations=[], llm_output=llm_output), verbose=self.verbose)
+            LLMResult(generations=[], llm_output=llm_output), verbose=self.verbose
+        )
 
     generations = [existing_prompts[i] for i in range(len(prompts))]
     return LLMResult(generations=generations, llm_output=llm_output)
@@ -143,9 +146,7 @@ def patched_chat_generate(
         {"name": self.__class__.__name__}, message_strings, llm_settings=llm_settings
     )
 
-    new_arg_supported = inspect.signature(self._generate).parameters.get(
-        "run_manager"
-    )
+    new_arg_supported = inspect.signature(self._generate).parameters.get("run_manager")
     try:
         results = [
             self._generate(m, stop=stop, run_manager=run_manager)
