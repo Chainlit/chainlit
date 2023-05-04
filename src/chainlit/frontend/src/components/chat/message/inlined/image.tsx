@@ -37,7 +37,12 @@ export default function InlinedImageList({ items }: Props) {
               }
             }}
           >
-            <img src={item.src} alt={item.title} loading="lazy" />
+            <img
+              className="inlined-image"
+              src={item.src}
+              alt={item.title}
+              loading="lazy"
+            />
             <ImageListItemBar
               sx={{
                 background:

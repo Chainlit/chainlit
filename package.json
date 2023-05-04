@@ -11,6 +11,6 @@
     "prepare": "husky install",
     "checkUi": "cd src/chainlit/frontend && npm run lint && npm run format",
     "checkPython": "black src",
-    "installJSDeps": "npm install && cd src/chainlit/frontend && npm install"
+    "installUiDeps": "cd src/chainlit/frontend && npm install"
   }
 }

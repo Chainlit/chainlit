@@ -26,14 +26,11 @@ jobs:
           python-version: "3.8"
       - name: Install latest LangChain
         run: pip3 install langchain
-      - name: Install JS dependencies
-        run: npm run installJSDeps
+      - name: Install test JS dependencies
+        run: npm install
+      - name: Install UI JS dependencies
+        run: npm run installUiDeps
       - name: Lint UI
         run: npm run checkUi
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
-        with:
-          envkey_SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
-          envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: Run tests
         run: npm test
