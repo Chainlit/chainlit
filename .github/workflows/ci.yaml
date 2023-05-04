@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
-      - name: Install latest LangChain
-        run: pip3 install langchain
+      - name: Install Python CI dependencies
+        run: pip3 install -r src/ci-requirements.txt
       - name: Install test JS dependencies
         run: npm install
       - name: Install UI JS dependencies
