@@ -1,9 +1,11 @@
 name: CI
 
 jobs:
-  install-ui:
+  checkout:
     steps:
       - uses: actions/checkout@v3
+  install-ui:
+    steps:
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
@@ -13,6 +15,7 @@ jobs:
       - name: Install UI JS dependencies
         run: npm run installUiDeps
       - name: Lint UI
+        run: npm run lintUi
   setup-python:
     steps:
       - name: Set up Python 3.8
@@ -30,7 +33,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-    needs: [install-ui, setup-python]
+    needs: [checkout, install-ui, setup-python]
     steps:
       - name: Install Python CI dependencies
         run: pip install -r src/ci-requirements.txt
