@@ -20,18 +20,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16.15.0"
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.8"
-      - name: Install Python CI dependencies
-        run: pip3 install -r src/ci-requirements.txt
       - name: Install test JS dependencies
         run: npm install
       - name: Install UI JS dependencies
         run: npm run installUiDeps
       - name: Lint UI
-        run: npm run checkUi
+        run: npm run lintUi
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+        run: pip install -r src/ci-requirements.txt
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:

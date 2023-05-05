@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run checkUi
-npm run checkPython
+npm run lintUi
+npm run formatUi
+npm run formatPython
