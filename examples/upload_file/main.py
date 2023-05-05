@@ -12,7 +12,6 @@ def init():
         )
     # Decode the file
     text = file.content.decode("utf-8")
-    print(len(text))
 
     # Let the user know that the system is ready
     cl.send_message(f"`{file.name}` uploaded, it contains {len(text)} characters!")

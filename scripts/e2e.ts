@@ -3,9 +3,9 @@ dotenv.config();
 import { installChainlit, runChainlit, runCypressSpec } from "./utils";
 
 const examples = [
-  // "action",
-  // "ask_user",
-  // "elements",
+  "action",
+  "ask_user",
+  "elements",
   "upload_file",
   "lc_rename",
   "openai_sql",
