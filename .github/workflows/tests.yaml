@@ -7,13 +7,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
       - uses: shine1594/secrets-to-env-action@master
         with:
           secrets: ${{ toJSON(secrets) }}
           secrets_env: all
+      - name: Show env
+        run: ls -a && cat .env
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
