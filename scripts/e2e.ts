@@ -8,7 +8,6 @@ const examples = [
   "elements",
   "upload_file",
   "lc_rename",
-  "lc_qa",
   "openai_sql",
 ];
 

@@ -18,9 +18,9 @@ jobs:
       - name: Install UI JS dependencies
         run: npm run installUiDeps
       - name: Set up Python 3.8
-              uses: actions/setup-python@v4
-              with:
-                python-version: "3.8"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Build chainlit
