@@ -1,8 +1,6 @@
 name: Tests
 
-on:
-  workflow_call:
-    secrets: inherit
+on: [workflow_call]
 
 jobs:
   ci:

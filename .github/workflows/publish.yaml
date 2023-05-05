@@ -7,6 +7,7 @@ on:
 jobs:
   tests:
     uses: ./.github/workflows/tests.yaml
+    secrets: inherit
   build-n-publish:
     name: Upload release to PyPI
     runs-on: ubuntu-latest

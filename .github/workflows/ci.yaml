@@ -9,6 +9,7 @@ on:
 jobs:
   tests:
     uses: ./.github/workflows/tests.yaml
+    secrets: inherit
   ci:
     runs-on: ubuntu-latest
     name: Run CI
