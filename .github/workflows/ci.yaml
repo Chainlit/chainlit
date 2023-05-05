@@ -1,5 +1,11 @@
 name: CI
 
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
 jobs:
   checkout:
     steps:
@@ -24,11 +30,6 @@ jobs:
           python-version: "3.8"
           cache: "pip"
   ci:
-    on:
-      push:
-        branches: [main, dev]
-      pull_request:
-        branches: [main, dev]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
