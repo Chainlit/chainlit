@@ -1,5 +1,3 @@
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Typography, Link, Stack } from '@mui/material';
@@ -104,25 +102,8 @@ export default memo(function MessageContent({
                 );
               }
             },
-            code({ inline, className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || '');
-              return !inline && match ? (
-                <SyntaxHighlighter
-                  {...props}
-                  children={String(children).replace(/\n$/, '')}
-                  style={a11yDark}
-                  wrapLongLines
-                  language={match[1]}
-                  PreTag="div"
-                />
-              ) : (
-                <Code
-                  inline={inline}
-                  className={className}
-                  children={children}
-                  {...props}
-                />
-              );
+            code({ ...props }) {
+              return <Code {...props} />;
             }
           }}
         >

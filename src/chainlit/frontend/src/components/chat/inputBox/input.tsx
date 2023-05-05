@@ -11,6 +11,15 @@ interface Props {
   onReply: (message: string) => void;
 }
 
+function getLineCount(el: HTMLDivElement) {
+  const textarea = el.querySelector('textarea');
+  if (!textarea) {
+    return 0;
+  }
+  const lines = textarea.value.split('\n');
+  return lines.length;
+}
+
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const hSetOpen = useSetRecoilState(historyOpenedState);
@@ -26,7 +35,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   useEffect(() => {
     if (ref.current && !loading) {
-      ref.current.querySelector('input')?.focus();
+      ref.current.querySelector('textarea')?.focus();
     }
   }, [loading]);
 
@@ -44,11 +53,14 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         submit();
       } else if (e.key === 'ArrowUp') {
-        hSetOpen(true);
+        const lineCount = getLineCount(e.currentTarget as HTMLDivElement);
+        if (lineCount <= 1) {
+          hSetOpen(true);
+        }
       }
     },
     [submit, hSetOpen]
@@ -71,6 +83,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
       ref={ref}
       id="chat-input"
       autoFocus
+      multiline
       variant="standard"
       autoComplete="false"
       placeholder="Type your message here..."
@@ -104,11 +117,15 @@ const Input = ({ onSubmit, onReply }: Props) => {
         border: (theme) => `1px solid ${theme.palette.divider}`,
         boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
 
-        input: {
+        textarea: {
           height: '34px',
+          maxHeight: '30vh',
+          overflowY: 'scroll !important',
+          resize: 'none',
           paddingBottom: '0.75rem',
           paddingTop: '0.75rem',
-          color: 'text.primary'
+          color: 'text.primary',
+          lineHeight: '24px'
         },
         fieldset: {
           borderRadius: 1,

@@ -61,11 +61,7 @@ const MessageContainer = ({
     if (!ref.current || !autoScroll) {
       return;
     }
-    const messages = Array.from(ref.current.querySelectorAll('.message'));
-    const lastChild = messages[messages.length - 1];
-    if (lastChild) {
-      lastChild.scrollIntoView();
-    }
+    ref.current.scrollTop = ref.current.scrollHeight;
   }, [messages, autoScroll]);
 
   useEffect(() => {

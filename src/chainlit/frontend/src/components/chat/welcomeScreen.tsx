@@ -2,8 +2,6 @@ import { Box, Link } from '@mui/material';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import Code from 'components/Code';
 
@@ -38,26 +36,8 @@ const WelcomeScreen = () => {
                   </Link>
                 );
               },
-              code({ inline, className, children, ...props }) {
-                console.log(inline);
-                const match = /language-(\w+)/.exec(className || '');
-                return !inline && match ? (
-                  <SyntaxHighlighter
-                    {...props}
-                    children={String(children).replace(/\n$/, '')}
-                    style={a11yDark}
-                    wrapLongLines
-                    language={match[1]}
-                    PreTag="div"
-                  />
-                ) : (
-                  <Code
-                    inline={inline}
-                    className={className}
-                    children={children}
-                    {...props}
-                  />
-                );
+              code({ ...props }) {
+                return <Code {...props} />;
               }
             }}
           >

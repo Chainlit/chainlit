@@ -131,7 +131,7 @@ const Message = ({
               borderLeft={`1px solid ${getAuthorColor(message.author)}`}
             />
           )}
-          <Stack alignItems="flex-start" flexGrow={1} spacing={1}>
+          <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
             <MessageContent
               actions={actions}
               elements={elements}

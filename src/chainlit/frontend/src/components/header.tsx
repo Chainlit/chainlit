@@ -29,12 +29,12 @@ function ActiveNavItem({ to, label }: INavItem) {
             : theme.palette.primary.main,
         background: (theme) =>
           theme.palette.mode === 'dark'
-            ? theme.palette.background.paperLight
+            ? theme.palette.background.paperVariant
             : theme.palette.primary.light,
         '&:hover': {
           background: (theme) =>
             theme.palette.mode === 'dark'
-              ? theme.palette.background.paperLight
+              ? theme.palette.background.paperVariant
               : theme.palette.primary.light
         }
       }}

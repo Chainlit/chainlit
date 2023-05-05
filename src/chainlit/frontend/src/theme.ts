@@ -33,7 +33,7 @@ const error = {
 
 declare module '@mui/material/styles' {
   interface TypeBackground {
-    paperLight: string;
+    paperVariant: string;
   }
 }
 
@@ -49,7 +49,7 @@ const darkTheme = createTheme({
     error,
     background: {
       default: '#303030',
-      paperLight: '#616161',
+      paperVariant: '#616161',
       paper: '#212121'
     },
     primary: {
@@ -84,7 +84,7 @@ const lightTheme = createTheme({
     error,
     background: {
       default: '#FAFAFA',
-      paperLight: '#EEEEEE',
+      paperVariant: '#EEEEEE',
       paper: '#FFF'
     },
     primary: {

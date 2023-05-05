@@ -18,20 +18,7 @@ interface Props {
   chats?: IChat[];
 }
 
-export default function HistoryButton({ onClick, onOpen, chats }: Props) {
-  const [open, setOpen] = useRecoilState(historyOpenedState);
-  const ref = useRef<any>();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      if (ref.current) {
-        setAnchorEl(ref.current);
-        onOpen();
-      }
-    }
-  }, [open]);
-
+function buildHistory(chats?: IChat[]) {
   const history: Record<
     string,
     {
@@ -66,7 +53,24 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     });
   });
 
-  const menuEls: JSX.Element[] = [
+  return history;
+}
+
+export default function HistoryButton({ onClick, onOpen, chats }: Props) {
+  const [open, setOpen] = useRecoilState(historyOpenedState);
+  const ref = useRef<any>();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      if (ref.current) {
+        setAnchorEl(ref.current);
+        onOpen();
+      }
+    }
+  }, [open]);
+
+  const header = (
     <Stack
       disabled
       key="title"
@@ -83,81 +87,10 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       </Typography>
       <SearchOutlined />
     </Stack>
-  ];
+  );
 
-  Object.keys(history).forEach((date) => {
-    menuEls.push(
-      <div key={date} disabled>
-        <Typography
-          color="text.primary"
-          sx={{
-            p: 1,
-            fontSize: '10px',
-            fontWeight: 700,
-            color: '#9E9E9E'
-          }}
-        >
-          {date}
-        </Typography>
-      </div>
-    );
-    let prev = '';
-    history[date].forEach((h) => {
-      if (prev === h.content) {
-        return;
-      }
-      prev = h.content;
-      menuEls.push(
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setOpen(false);
-            onClick(h.content);
-          }}
-          disableRipple
-          key={h.key}
-          sx={{
-            p: 1,
-            alignItems: 'baseline',
-            borderRadius: '4px'
-          }}
-        >
-          {/* <Typography
-            sx={{
-              fontSize: '12px',
-              fontWeight: 700,
-              flexBasis: '64px'
-            }}
-            color="text.secondary"
-          >
-            {h.hour}
-          </Typography> */}
-          <Typography
-            color="text.primary"
-            sx={{
-              whiteSpace: 'pre-wrap',
-              fontSize: '14px',
-              maxHeight: '50px',
-              display: '-webkit-box',
-              WebkitLineClamp: '2',
-              WebkitBoxOrient: 'vertical',
-              // flexBasis: 'calc(100% - 60px)',
-              flexGrow: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: '24px'
-            }}
-          >
-            {h.content}
-          </Typography>
-        </MenuItem>
-      );
-    });
-  });
-
-  if (menuEls.length === 0) {
-    menuEls.push(
+  const empty =
+    chats?.length === 0 ? (
       <div key="empty" disabled>
         <Typography
           color="text.secondary"
@@ -171,7 +104,87 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
           Such empty...
         </Typography>
       </div>
-    );
+    ) : null;
+
+  const loading = !chats ? (
+    <div key="loading" disabled>
+      <Typography
+        color="text.secondary"
+        sx={{
+          fontSize: '12px',
+          fontWeight: 700,
+          padding: '16px 12px',
+          textTransform: 'uppercase'
+        }}
+      >
+        Loading...
+      </Typography>
+    </div>
+  ) : null;
+
+  const menuEls: (JSX.Element | null)[] = [header, empty, loading];
+
+  if (chats) {
+    const history = buildHistory(chats);
+    Object.keys(history).forEach((date) => {
+      menuEls.push(
+        <div key={date} disabled>
+          <Typography
+            color="text.primary"
+            sx={{
+              p: 1,
+              fontSize: '10px',
+              fontWeight: 700,
+              color: '#9E9E9E'
+            }}
+          >
+            {date}
+          </Typography>
+        </div>
+      );
+      let prev = '';
+      history[date].forEach((h) => {
+        if (prev === h.content) {
+          return;
+        }
+        prev = h.content;
+        menuEls.push(
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setOpen(false);
+              onClick(h.content);
+            }}
+            disableRipple
+            key={h.key}
+            sx={{
+              p: 1,
+              alignItems: 'baseline',
+              borderRadius: '4px'
+            }}
+          >
+            <Typography
+              color="text.primary"
+              sx={{
+                whiteSpace: 'pre-wrap',
+                fontSize: '14px',
+                maxHeight: '50px',
+                display: '-webkit-box',
+                WebkitLineClamp: '2',
+                WebkitBoxOrient: 'vertical',
+                flexGrow: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                lineHeight: '24px'
+              }}
+            >
+              {h.content}
+            </Typography>
+          </MenuItem>
+        );
+      });
+    });
   }
 
   const menu = (
