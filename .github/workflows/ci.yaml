@@ -11,4 +11,8 @@ jobs:
     uses: ./.github/workflows/tests.yaml
   ci:
     runs-on: ubuntu-latest
+    name: Run CI
     needs: [tests]
+    steps:
+      - name: "Done"
+        run: echo "Done"
