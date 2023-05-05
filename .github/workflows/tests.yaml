@@ -1,6 +1,10 @@
 name: Tests
 
-on: [workflow_call]
+on:
+  workflow_call:
+    secrets:
+      OPENAI_API_KEY:
+        required: true
 
 jobs:
   ci:
