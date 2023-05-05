@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Stack, Tooltip } from '@mui/material';
+import { Button, IconButton, Stack, Tooltip } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { Link, useLocation } from 'react-router-dom';
@@ -29,12 +29,12 @@ function ActiveNavItem({ to, label }: INavItem) {
             : theme.palette.primary.main,
         background: (theme) =>
           theme.palette.mode === 'dark'
-            ? theme.palette.divider
+            ? theme.palette.background.paperLight
             : theme.palette.primary.light,
         '&:hover': {
           background: (theme) =>
             theme.palette.mode === 'dark'
-              ? theme.palette.divider
+              ? theme.palette.background.paperLight
               : theme.palette.primary.light
         }
       }}

@@ -2,13 +2,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Typography, Link, Stack, useTheme } from '@mui/material';
+import { Typography, Link, Stack } from '@mui/material';
 import { IElements } from 'state/element';
 import InlinedElements from './inlined';
 import { memo } from 'react';
 import { IActions } from 'state/action';
 import ElementRef from './elementRef';
 import ActionRef from './actionRef';
+import Code from 'components/Code';
 
 interface Props {
   content: string;
@@ -60,7 +61,6 @@ export default memo(function MessageContent({
   actions,
   language
 }: Props) {
-  const theme = useTheme();
   const { preparedContent, inlinedelements } = prepareContent({
     content,
     language,
@@ -116,17 +116,12 @@ export default memo(function MessageContent({
                   PreTag="div"
                 />
               ) : (
-                <code
-                  {...props}
+                <Code
+                  inline={inline}
                   className={className}
-                  style={{
-                    background: theme.palette.divider,
-                    borderRadius: theme.shape.borderRadius / 2,
-                    padding: theme.spacing(0.5)
-                  }}
-                >
-                  {children}
-                </code>
+                  children={children}
+                  {...props}
+                />
               );
             }
           }}

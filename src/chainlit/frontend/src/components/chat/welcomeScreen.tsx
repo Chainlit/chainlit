@@ -1,14 +1,14 @@
-import { Box, Link, useTheme } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
+import Code from 'components/Code';
 
 const WelcomeScreen = () => {
   const pSettings = useRecoilValue(projectSettingsState);
-  const theme = useTheme();
 
   return (
     <Box overflow="auto">
@@ -39,6 +39,7 @@ const WelcomeScreen = () => {
                 );
               },
               code({ inline, className, children, ...props }) {
+                console.log(inline);
                 const match = /language-(\w+)/.exec(className || '');
                 return !inline && match ? (
                   <SyntaxHighlighter
@@ -50,17 +51,12 @@ const WelcomeScreen = () => {
                     PreTag="div"
                   />
                 ) : (
-                  <code
-                    {...props}
+                  <Code
+                    inline={inline}
                     className={className}
-                    style={{
-                      background: theme.palette.divider,
-                      borderRadius: theme.shape.borderRadius / 2,
-                      padding: theme.spacing(0.5)
-                    }}
-                  >
-                    {children}
-                  </code>
+                    children={children}
+                    {...props}
+                  />
                 );
               }
             }}

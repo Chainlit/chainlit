@@ -31,14 +31,11 @@ const error = {
   contrastText: '#fff'
 };
 
-// declare module '@mui/material/styles' {
-//   interface Palette {
-//     paperPaper: string;
-//   }
-//   interface PaletteOptions {
-//     paperPaper: string;
-//   }
-// }
+declare module '@mui/material/styles' {
+  interface TypeBackground {
+    paperLight: string;
+  }
+}
 
 const darkTheme = createTheme({
   typography,
@@ -52,6 +49,7 @@ const darkTheme = createTheme({
     error,
     background: {
       default: '#303030',
+      paperLight: '#616161',
       paper: '#212121'
     },
     primary: {
@@ -86,6 +84,7 @@ const lightTheme = createTheme({
     error,
     background: {
       default: '#FAFAFA',
+      paperLight: '#EEEEEE',
       paper: '#FFF'
     },
     primary: {
