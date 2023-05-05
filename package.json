@@ -12,6 +12,7 @@
     "lintUi": "cd src/chainlit/frontend && npm run lint",
     "formatUi": "cd src/chainlit/frontend && npm run format",
     "formatPython": "black src",
-    "installUiDeps": "cd src/chainlit/frontend && npm install"
+    "installUiDeps": "cd src/chainlit/frontend && npm install",
+    "build": "(cd src/chainlit/frontend && npm run build) && (cd src && poetry build)"
   }
 }
