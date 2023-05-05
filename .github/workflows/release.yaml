@@ -11,13 +11,13 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/chainlit
-    # permissions:
-    #   id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+    permissions:
+      contents: read
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v3
         with:
           ref: main
-          token: ${{ secrets.PAT }}
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
