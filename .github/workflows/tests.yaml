@@ -15,7 +15,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           secrets_env: all
       - name: Show env
-        run: ls -a && cat .env
+        run: cat .env && cat .env.dev && cat .env.stag
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
