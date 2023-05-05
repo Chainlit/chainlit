@@ -11,8 +11,8 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/chainlit
-    permissions:
-      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+    # permissions:
+    #   id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v3
         with:
