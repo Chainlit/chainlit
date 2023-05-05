@@ -7,11 +7,13 @@ on:
     branches: [main, dev]
 
 jobs:
-  checkout:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
-  install-ui:
-    steps:
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
@@ -22,20 +24,11 @@ jobs:
         run: npm run installUiDeps
       - name: Lint UI
         run: npm run lintUi
-  setup-python:
-    steps:
       - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
           cache: "pip"
-  ci:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    needs: [checkout, install-ui, setup-python]
-    steps:
       - name: Install Python CI dependencies
         run: pip install -r src/ci-requirements.txt
       - name: Make envfile
