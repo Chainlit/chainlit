@@ -213,7 +213,7 @@ export default function ConversationTable() {
         width: value.width,
         minWidth: value.minWidth
       }}
-      color="primary.dark"
+      color="primary"
     >
       {key}
     </Typography>

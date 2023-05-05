@@ -1,4 +1,4 @@
-import { Box, Link } from '@mui/material';
+import { Box, Link, useTheme } from '@mui/material';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 
 const WelcomeScreen = () => {
   const pSettings = useRecoilValue(projectSettingsState);
+  const theme = useTheme();
 
   return (
     <Box overflow="auto">
@@ -49,7 +50,15 @@ const WelcomeScreen = () => {
                     PreTag="div"
                   />
                 ) : (
-                  <code {...props} className={className}>
+                  <code
+                    {...props}
+                    className={className}
+                    style={{
+                      background: theme.palette.divider,
+                      borderRadius: theme.shape.borderRadius / 2,
+                      padding: theme.spacing(0.5)
+                    }}
+                  >
                     {children}
                   </code>
                 );

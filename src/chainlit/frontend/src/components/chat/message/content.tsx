@@ -2,7 +2,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Typography, Link, Stack } from '@mui/material';
+import { Typography, Link, Stack, useTheme } from '@mui/material';
 import { IElements } from 'state/element';
 import InlinedElements from './inlined';
 import { memo } from 'react';
@@ -60,6 +60,7 @@ export default memo(function MessageContent({
   actions,
   language
 }: Props) {
+  const theme = useTheme();
   const { preparedContent, inlinedelements } = prepareContent({
     content,
     language,
@@ -115,7 +116,15 @@ export default memo(function MessageContent({
                   PreTag="div"
                 />
               ) : (
-                <code {...props} className={className}>
+                <code
+                  {...props}
+                  className={className}
+                  style={{
+                    background: theme.palette.divider,
+                    borderRadius: theme.shape.borderRadius / 2,
+                    padding: theme.spacing(0.5)
+                  }}
+                >
                   {children}
                 </code>
               );

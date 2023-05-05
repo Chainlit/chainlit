@@ -99,8 +99,7 @@ export default function Header() {
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
           background: (theme) => theme.palette.background.paper,
-          borderBottomColor: (theme) =>
-            theme.palette.mode === 'dark' ? '#424242' : theme.palette.divider
+          borderBottomColor: (theme) => theme.palette.divider
         }}
       >
         <Stack alignItems="center" direction="row">

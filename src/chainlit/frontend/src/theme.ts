@@ -14,6 +14,11 @@ const components = {
         textTransform: 'none'
       }
     }
+  },
+  MuiLink: {
+    defaultProps: {
+      fontWeight: 500
+    }
   }
 };
 
@@ -61,7 +66,7 @@ const darkTheme = createTheme({
       light: '#B87FE7',
       contrastText: '#fff'
     },
-    divider: '#616161',
+    divider: '#424242',
     text: {
       primary: '#EEEEEE',
       secondary: '#BDBDBD'
@@ -80,7 +85,7 @@ const lightTheme = createTheme({
     success,
     error,
     background: {
-      default: '#EEEEEE',
+      default: '#FAFAFA',
       paper: '#FFF'
     },
     primary: {

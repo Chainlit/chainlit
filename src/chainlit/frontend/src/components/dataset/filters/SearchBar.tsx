@@ -11,7 +11,7 @@ import { datasetFiltersState } from 'state/dataset';
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   color: theme.palette.text.primary,
-  borderRadius: '4px',
+  borderRadius: theme.shape.borderRadius,
   border: `${theme.palette.divider} solid 1px`,
   '&:hover': {
     border: `${theme.palette.primary} solid 1px !important`

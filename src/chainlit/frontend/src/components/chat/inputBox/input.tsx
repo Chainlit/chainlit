@@ -101,10 +101,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
       sx={{
         backgroundColor: 'background.paper',
         borderRadius: 1,
-        border: (theme) =>
-          `1px solid ${
-            theme.palette.mode === 'light' ? theme.palette.divider : '#424242'
-          }`,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
 
         input: {
