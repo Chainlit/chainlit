@@ -58,10 +58,15 @@ export default function UserAvatar() {
         open={open}
         onClose={handleClose}
         PaperProps={{
-          elevation: 0,
           sx: {
             overflow: 'visible',
             mt: 1.5,
+            backgroundImage: 'none',
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            boxShadow: (theme) =>
+              theme.palette.mode === 'light'
+                ? '0px 2px 4px 0px #0000000D'
+                : '0px 10px 10px 0px #0000000D',
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
@@ -76,7 +81,7 @@ export default function UserAvatar() {
               right: 14,
               width: 10,
               height: 10,
-              bgcolor: 'background.paper',
+              bgcolor: 'background.default',
               transform: 'translateY(-50%) rotate(45deg)',
               zIndex: 0
             }

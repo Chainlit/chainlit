@@ -8,12 +8,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useClearChat from 'hooks/clearChat';
 import AddIcon from '@mui/icons-material/Add';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 export default function NewChatButton() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const clearChat = useClearChat();
+  const theme = useTheme();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -32,7 +33,7 @@ export default function NewChatButton() {
   return (
     <Box color="text.primary">
       <Button
-        color="inherit"
+        color={theme.palette.mode === 'dark' ? 'inherit' : 'primary'}
         variant="outlined"
         onClick={handleClickOpen}
         startIcon={<AddIcon />}

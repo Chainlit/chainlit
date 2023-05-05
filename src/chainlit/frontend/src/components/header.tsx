@@ -1,8 +1,6 @@
-import { IconButton, Stack, Tooltip } from '@mui/material';
+import { Box, Button, IconButton, Stack, Tooltip } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import { Link, useLocation } from 'react-router-dom';
 import UserAvatar from './chat/userAvatar';
 import { useAuth } from 'hooks/auth';
@@ -11,6 +9,59 @@ import { projectSettingsState } from 'state/project';
 import ThemeButton from 'themeButton';
 import KeyIcon from '@mui/icons-material/Key';
 import NewChatButton from './chat/newChatButton';
+
+interface INavItem {
+  to: string;
+  label: string;
+}
+
+function ActiveNavItem({ to, label }: INavItem) {
+  return (
+    <Button
+      component={Link}
+      to={to}
+      key={to}
+      sx={{
+        textTransform: 'none',
+        color: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'text.primary'
+            : theme.palette.primary.main,
+        background: (theme) =>
+          theme.palette.mode === 'dark'
+            ? theme.palette.divider
+            : theme.palette.primary.light,
+        '&:hover': {
+          background: (theme) =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.divider
+              : theme.palette.primary.light
+        }
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
+function NavItem({ to, label }: INavItem) {
+  return (
+    <Button
+      component={Link}
+      to={to}
+      key={to}
+      sx={{
+        textTransform: 'none',
+        color: 'text.secondary',
+        '&:hover': {
+          background: 'transparent'
+        }
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
 
 function Nav() {
   const { isProjectMember } = useAuth();
@@ -22,18 +73,17 @@ function Nav() {
     tabs.push({ to: '/dataset', label: 'History' });
   }
 
-  const value = tabs.findIndex((t) => location.pathname === t.to);
-
   return (
-    <Tabs
-      value={value}
-      indicatorColor="primary"
-      TabIndicatorProps={{ sx: { display: 'none' } }}
-    >
-      {tabs.map((t, i) => (
-        <Tab component={Link} to={t.to} key={i} value={i} label={t.label} />
-      ))}
-    </Tabs>
+    <Stack direction="row" spacing={1}>
+      {tabs.map((t) => {
+        const active = location.pathname === t.to;
+        return (
+          <div key={t.to}>
+            {active ? <ActiveNavItem {...t} /> : <NavItem {...t} />}
+          </div>
+        );
+      })}
+    </Stack>
   );
 }
 
@@ -48,7 +98,9 @@ export default function Header() {
           minHeight: '60px !important',
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
-          borderBottomColor: (theme) => theme.palette.divider
+          background: (theme) => theme.palette.background.paper,
+          borderBottomColor: (theme) =>
+            theme.palette.mode === 'dark' ? '#424242' : theme.palette.divider
         }}
       >
         <Stack alignItems="center" direction="row">

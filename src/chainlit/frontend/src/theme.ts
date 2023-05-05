@@ -14,15 +14,6 @@ const components = {
         textTransform: 'none'
       }
     }
-  },
-  MuiTab: {
-    defaultProps: {
-      disableRipple: true,
-      sx: {
-        textTransform: 'none',
-        fontSize: '14px'
-      }
-    }
   }
 };
 
@@ -35,21 +26,33 @@ const error = {
   contrastText: '#fff'
 };
 
+// declare module '@mui/material/styles' {
+//   interface Palette {
+//     paperPaper: string;
+//   }
+//   interface PaletteOptions {
+//     paperPaper: string;
+//   }
+// }
+
 const darkTheme = createTheme({
   typography,
   components,
+  shape: {
+    borderRadius: 8
+  },
   palette: {
     mode: 'dark',
     success,
     error,
     background: {
-      default: '#1D1D22',
-      paper: '#23262F'
+      default: '#303030',
+      paper: '#212121'
     },
     primary: {
-      main: '#f34971',
-      // dark: "#2B64D3",
-      // light: "#6BA6F9",
+      main: '#F80061',
+      dark: '#980039',
+      light: '#FFE7EB',
       contrastText: '#fff'
     },
     secondary: {
@@ -58,27 +61,32 @@ const darkTheme = createTheme({
       light: '#B87FE7',
       contrastText: '#fff'
     },
-
+    divider: '#616161',
     text: {
-      primary: '#F4F5F6',
-      secondary: 'rgba(255,255,255,0.6)'
+      primary: '#EEEEEE',
+      secondary: '#BDBDBD'
     }
   }
 });
 
 const lightTheme = createTheme({
   typography,
-  components,
+  components: components,
+  shape: {
+    borderRadius: 8
+  },
   palette: {
     mode: 'light',
     success,
     error,
     background: {
-      default: '#fff',
-      paper: '#ececf1'
+      default: '#EEEEEE',
+      paper: '#FFF'
     },
     primary: {
-      main: '#f34971',
+      main: '#F80061',
+      dark: '#980039',
+      light: '#FFE7EB',
       contrastText: '#fff'
     },
     secondary: {
@@ -87,9 +95,10 @@ const lightTheme = createTheme({
       light: '#B87FE7',
       contrastText: '#fff'
     },
+    divider: '#EEEEEE',
     text: {
-      primary: '#202123',
-      secondary: '#8e8ea0'
+      primary: '#212121',
+      secondary: '#616161'
     }
   }
 });

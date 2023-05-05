@@ -1,8 +1,16 @@
-import HistoryIcon from '@mui/icons-material/History';
-import { IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import { useRecoilState } from 'recoil';
 import { IChat, historyOpenedState } from 'state/chat';
 import { useEffect, useRef, useState } from 'react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
 
 interface Props {
   onClick: (content: string) => void;
@@ -35,10 +43,9 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   chats?.forEach((c) => {
     const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
     };
     const date = new Date(c.createdAt).toLocaleDateString(
       undefined,
@@ -59,26 +66,47 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     });
   });
 
-  const menuEls: JSX.Element[] = [];
+  const menuEls: JSX.Element[] = [
+    <Stack
+      disabled
+      key="title"
+      direction="row"
+      p={1}
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Typography
+        color="text.primary"
+        sx={{ fontSize: '14px', fontWeight: 700 }}
+      >
+        Last messages
+      </Typography>
+      <SearchOutlined />
+    </Stack>
+  ];
 
   Object.keys(history).forEach((date) => {
     menuEls.push(
-      <div key={date} data-disabled>
+      <div key={date} disabled>
         <Typography
           color="text.primary"
           sx={{
-            fontSize: '12px',
+            p: 1,
+            fontSize: '10px',
             fontWeight: 700,
-            padding: '16px 12px',
-            textTransform: 'uppercase'
+            color: '#9E9E9E'
           }}
         >
           {date}
         </Typography>
       </div>
     );
-
+    let prev = '';
     history[date].forEach((h) => {
+      if (prev === h.content) {
+        return;
+      }
+      prev = h.content;
       menuEls.push(
         <MenuItem
           onClick={(e) => {
@@ -89,9 +117,13 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
           }}
           disableRipple
           key={h.key}
-          sx={{ p: 2, alignItems: 'baseline' }}
+          sx={{
+            p: 1,
+            alignItems: 'baseline',
+            borderRadius: '4px'
+          }}
         >
-          <Typography
+          {/* <Typography
             sx={{
               fontSize: '12px',
               fontWeight: 700,
@@ -100,7 +132,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
             color="text.secondary"
           >
             {h.hour}
-          </Typography>
+          </Typography> */}
           <Typography
             color="text.primary"
             sx={{
@@ -110,7 +142,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
               display: '-webkit-box',
               WebkitLineClamp: '2',
               WebkitBoxOrient: 'vertical',
-              flexBasis: 'calc(100% - 60px)',
+              // flexBasis: 'calc(100% - 60px)',
               flexGrow: 0,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -126,7 +158,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   if (menuEls.length === 0) {
     menuEls.push(
-      <div data-disabled>
+      <div key="empty" disabled>
         <Typography
           color="text.secondary"
           sx={{
@@ -150,17 +182,24 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       open={open}
       onClose={() => setOpen(false)}
       PaperProps={{
-        elevation: 0,
         sx: {
+          p: 1,
+          backgroundImage: 'none',
           mt: -2,
+          ml: -1,
           overflow: 'visible',
-          maxHeight: '60vh',
-          width: '250px',
-          overflowY: 'scroll'
+          maxHeight: '314px',
+          width: '334px',
+          overflowY: 'scroll',
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          boxShadow: (theme) =>
+            theme.palette.mode === 'light'
+              ? '0px 2px 4px 0px #0000000D'
+              : '0px 10px 10px 0px #0000000D'
         }
       }}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
     >
       {menuEls}
     </Menu>
@@ -171,7 +210,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       {menu}
       <Tooltip title="Show history">
         <IconButton color="inherit" onClick={() => setOpen(!open)} ref={ref}>
-          <HistoryIcon />
+          <KeyboardDoubleArrowUpIcon />
         </IconButton>
       </Tooltip>
     </div>

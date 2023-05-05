@@ -1,5 +1,5 @@
-import SendIcon from '@mui/icons-material/Send';
-import { IconButton, TextField } from '@mui/material';
+import SendIcon from '@mui/icons-material/Telegram';
+import { IconButton, TextField, useTheme } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -11,17 +11,18 @@ interface Props {
   onReply: (message: string) => void;
 }
 
-const borderWidth = 0;
-const borderColor = 'transparent';
-
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
   const [value, setValue] = useState('');
+  const theme = useTheme();
 
   const disabled = loading || askUser?.spec.type === 'file';
+
+  const borderWidth = 10;
+  const borderColor = theme.palette.divider;
 
   useEffect(() => {
     if (ref.current && !loading) {
@@ -100,9 +101,14 @@ const Input = ({ onSubmit, onReply }: Props) => {
       sx={{
         backgroundColor: 'background.paper',
         borderRadius: 1,
+        border: (theme) =>
+          `1px solid ${
+            theme.palette.mode === 'light' ? theme.palette.divider : '#424242'
+          }`,
+        boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
 
         input: {
-          height: '27px',
+          height: '34px',
           paddingBottom: '0.75rem',
           paddingTop: '0.75rem',
           color: 'text.primary'
