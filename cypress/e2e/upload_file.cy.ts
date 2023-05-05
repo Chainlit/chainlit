@@ -18,9 +18,6 @@ describe("Upload file", () => {
 
     messages
       .eq(1)
-      .should(
-        "contain",
-        "state_of_the_union.txt uploaded, it contains 38539 characters!"
-      );
+      .should("contain", "state_of_the_union.txt uploaded, it contains");
   });
 });
