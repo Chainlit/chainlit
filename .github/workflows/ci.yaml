@@ -31,6 +31,7 @@ jobs:
         with:
           python-version: "3.8"
           cache: "pip"
+      - name: Install Python CI dependencies
         run: pip install -r src/ci-requirements.txt
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
