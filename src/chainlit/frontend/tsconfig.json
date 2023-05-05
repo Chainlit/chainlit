@@ -11,6 +11,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
+    "types": ["node"],
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
