@@ -13,9 +13,11 @@ jobs:
       - uses: shine1594/secrets-to-env-action@master
         with:
           secrets: ${{ toJSON(secrets) }}
-          secrets_env: all
+          secrets_env: production
+          file_name_prod: .env
+          prefix_prod: ""
       - name: Show env
-        run: cat .env && cat .env.dev && cat .env.stag
+        run: cat .env
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
