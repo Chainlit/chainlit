@@ -1,18 +1,14 @@
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { useSetRecoilState } from 'recoil';
+import { Box, Stack } from '@mui/material';
 import { INestedMessage } from 'state/chat';
 import { IElements } from 'state/element';
-import { playgroundState } from 'state/playground';
-import EditIcon from '@mui/icons-material/Edit';
 import { useState } from 'react';
-import FeedbackButtons from 'components/chat/message/feedbackButtons';
 import DetailsButton from 'components/chat/message/detailsButton';
 import Messages from './messages';
 import MessageContent from './content';
-import { getAuthorColor } from 'helpers/color';
 import UploadButton from './uploadButton';
-import MessageTime from './time';
 import { IActions } from 'state/action';
+import Author, { authorBoxWidth } from './author';
+import Buttons from './buttons';
 
 interface Props {
   message: INestedMessage;
@@ -25,8 +21,6 @@ interface Props {
   isLast?: boolean;
 }
 
-const authorBoxWidth = 70;
-
 const Message = ({
   message,
   elements,
@@ -37,44 +31,7 @@ const Message = ({
   isRunning,
   isLast
 }: Props) => {
-  const [hover, setHover] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const setPlayground = useSetRecoilState(playgroundState);
-
-  const editButton = message.prompt && (
-    <IconButton
-      id="playground-button"
-      color="primary"
-      onClick={() => {
-        if (!message.prompt) return;
-        setPlayground({
-          llmSettings: message.llmSettings,
-          prompt: message.prompt,
-          completion: message.content
-        });
-      }}
-    >
-      <EditIcon sx={{ width: '16px', height: '16px' }} />
-    </IconButton>
-  );
-
-  const buttons = (
-    <Stack
-      direction="row"
-      sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        zIndex: 10,
-        transform: 'translateX(100%)'
-      }}
-    >
-      {editButton}
-      {message.id && !message.authorIsUser && (
-        <FeedbackButtons message={message} />
-      )}
-    </Stack>
-  );
 
   return (
     <Box
@@ -83,8 +40,6 @@ const Message = ({
         backgroundColor: 'transparent'
       }}
       className="message"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
     >
       <Box
         sx={{
@@ -96,7 +51,6 @@ const Message = ({
           position: 'relative'
         }}
       >
-        {hover && buttons}
         <Stack
           direction="row"
           ml={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
@@ -106,33 +60,10 @@ const Message = ({
               showBorder ? `1px solid ${theme.palette.divider}` : 'none'
           }}
         >
-          <Box width={authorBoxWidth} pr={2}>
-            <Tooltip title={message.author}>
-              <Typography
-                noWrap
-                sx={{
-                  width: authorBoxWidth,
-                  fontSize: '12.5px',
-                  fontWeight: 500,
-                  letterSpacing: '.08em',
-                  textTransform: 'uppercase',
-                  color: getAuthorColor(message.author)
-                }}
-              >
-                {showAvatar && message.author}
-              </Typography>
-            </Tooltip>
-            <MessageTime timestamp={message.createdAt} />
-          </Box>
-          {!!message.indent && (
-            <Box
-              width="1px"
-              mr={2}
-              borderLeft={`1px solid ${getAuthorColor(message.author)}`}
-            />
-          )}
+          <Author message={message} show={showAvatar} />
           <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
             <MessageContent
+              authorIsUser={message.authorIsUser}
               actions={actions}
               elements={elements}
               content={message.content}
@@ -145,6 +76,7 @@ const Message = ({
               loading={isRunning}
             />
             {!isRunning && isLast && message.waitForAnswer && <UploadButton />}
+            <Buttons message={message} />
           </Stack>
         </Stack>
       </Box>

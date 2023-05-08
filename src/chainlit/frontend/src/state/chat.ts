@@ -1,4 +1,5 @@
 import { atom } from 'recoil';
+import { Socket } from 'socket.io-client';
 
 export interface ILLMSettings {
   model_name: string;
@@ -58,6 +59,17 @@ export interface IAsk {
     max_size_mb?: number;
   };
 }
+
+export interface ISession {
+  socket: Socket;
+  error?: boolean;
+}
+
+export const sessionState = atom<ISession | undefined>({
+  key: 'Session',
+  dangerouslyAllowMutability: true,
+  default: undefined
+});
 
 export const messagesState = atom<IMessage[]>({
   key: 'Messages',

@@ -1,9 +1,14 @@
 import SendIcon from '@mui/icons-material/Telegram';
-import { IconButton, TextField, useTheme } from '@mui/material';
+import { IconButton, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { askUserState, historyOpenedState, loadingState } from 'state/chat';
+import {
+  askUserState,
+  historyOpenedState,
+  loadingState,
+  sessionState
+} from 'state/chat';
 import HistoryButton from 'components/chat/history';
 
 interface Props {
@@ -25,13 +30,14 @@ const Input = ({ onSubmit, onReply }: Props) => {
   const hSetOpen = useSetRecoilState(historyOpenedState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
+  const session = useRecoilValue(sessionState);
   const [value, setValue] = useState('');
-  const theme = useTheme();
 
-  const disabled = loading || askUser?.spec.type === 'file';
+  const disabled = !session?.socket || loading || askUser?.spec.type === 'file';
 
-  const borderWidth = 10;
-  const borderColor = theme.palette.divider;
+  const placeholder = session?.socket
+    ? 'Type your message here...'
+    : 'Connecting to server...';
 
   useEffect(() => {
     if (ref.current && !loading) {
@@ -86,7 +92,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
       multiline
       variant="standard"
       autoComplete="false"
-      placeholder="Type your message here..."
+      placeholder={placeholder}
       disabled={disabled}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
@@ -126,23 +132,6 @@ const Input = ({ onSubmit, onReply }: Props) => {
           paddingTop: '0.75rem',
           color: 'text.primary',
           lineHeight: '24px'
-        },
-        fieldset: {
-          borderRadius: 1,
-          borderWidth,
-          borderColor: borderColor
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderWidth,
-          borderColor: borderColor
-        },
-        '&:focus .MuiOutlinedInput-notchedOutline': {
-          borderWidth,
-          borderColor: borderColor
-        },
-        '&:active .MuiOutlinedInput-notchedOutline': {
-          borderWidth,
-          borderColor: borderColor
         }
       }}
     />

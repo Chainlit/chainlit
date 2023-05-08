@@ -4,7 +4,8 @@ import { IAction } from 'state/action';
 import { callAction } from 'api';
 import { toast } from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
-import { loadingState } from 'state/chat';
+import { loadingState, sessionState } from 'state/chat';
+import { useCallback } from 'react';
 
 interface Props {
   action: IAction;
@@ -12,16 +13,22 @@ interface Props {
 
 export default function ActionRef({ action }: Props) {
   const loading = useRecoilValue(loadingState);
+  const session = useRecoilValue(sessionState);
 
-  const call = async () => {
+  const call = useCallback(async () => {
     try {
-      await callAction(action);
+      const sessionId = session?.socket.id;
+
+      if (!sessionId) {
+        return;
+      }
+      await callAction(sessionId, action);
     } catch (err) {
       if (err instanceof Error) {
         toast.error(err.message);
       }
     }
-  };
+  }, [session]);
 
   const button = (
     <LoadingButton

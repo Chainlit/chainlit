@@ -37,17 +37,17 @@ export const getCompletion = async (
   return completion;
 };
 
-export const postMessage = async (author: string, content: string) => {
-  if (!window.socket) {
-    throw new Error('Socket not initialized');
-  }
-
+export const postMessage = async (
+  sessionId: string,
+  author: string,
+  content: string
+) => {
   const res = await fetch(`${server}/message`, {
     headers: {
       'content-type': 'application/json'
     },
     method: 'POST',
-    body: JSON.stringify({ sessionId: window.socket.id, author, content })
+    body: JSON.stringify({ sessionId, author, content })
   });
 
   if (!res.ok) {
@@ -57,17 +57,13 @@ export const postMessage = async (author: string, content: string) => {
   return res.json();
 };
 
-export const callAction = async (action: IAction) => {
-  if (!window.socket) {
-    throw new Error('Socket not initialized');
-  }
-
+export const callAction = async (sessionId: string, action: IAction) => {
   const res = await fetch(`${server}/action`, {
     headers: {
       'content-type': 'application/json'
     },
     method: 'POST',
-    body: JSON.stringify({ sessionId: window.socket.id, action })
+    body: JSON.stringify({ sessionId, action })
   });
 
   if (!res.ok) {

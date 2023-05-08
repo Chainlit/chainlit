@@ -12,14 +12,7 @@ import {
   SelectionState
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
-import {
-  Box,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme
-} from '@mui/material';
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { OrderedSet } from 'immutable';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
@@ -37,7 +30,6 @@ const styleMap = {
 };
 
 export default function Playground() {
-  const theme = useTheme();
   const playground = useRecoilValue(playgroundState);
   const setPlayground = useSetRecoilState(playgroundState);
   const settings = useRecoilValue(playgroundSettingsState);
@@ -115,7 +107,7 @@ export default function Playground() {
       fullScreen
       PaperProps={{
         style: {
-          backgroundColor: theme.palette.background.default,
+          // backgroundColor: theme.palette.background.default,
           backgroundImage: 'none'
         }
       }}

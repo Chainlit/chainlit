@@ -13,7 +13,7 @@ export default function MessageTime({ timestamp }: Props) {
   };
   const date = new Date(timestamp).toLocaleTimeString(undefined, dateOptions);
   return (
-    <Typography lineHeight={1} color="text.secondary" variant="overline">
+    <Typography mt={'-4px'} color="#9E9E9E" fontSize="11px">
       {date}
     </Typography>
   );

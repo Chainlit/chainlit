@@ -85,7 +85,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     hello_path = os.path.join(dir_path, "hello.py")
     run_chainlit(hello_path)
 

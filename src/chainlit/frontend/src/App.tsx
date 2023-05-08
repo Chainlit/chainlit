@@ -16,7 +16,6 @@ import Home from 'pages/Home';
 import Element from 'pages/Element';
 import Login from 'pages/Login';
 import AuthCallback from 'pages/AuthCallback';
-import { Socket } from 'socket.io-client';
 import Dataset from 'pages/Dataset';
 import Conversation from 'pages/Conversation';
 import CloudProvider from 'components/cloudProvider';
@@ -24,12 +23,6 @@ import Env from 'pages/Env';
 import { useAuth } from 'hooks/auth';
 import { projectSettingsState } from 'state/project';
 import Badge from 'components/badge';
-
-declare global {
-  interface Window {
-    socket: Socket | undefined;
-  }
-}
 
 const router = createBrowserRouter([
   {
@@ -126,7 +119,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme(themeVariant)}>
-      <Badge />
+      {/* <Badge /> */}
       <Box
         display="flex"
         bgcolor="background.default"

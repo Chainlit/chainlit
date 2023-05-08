@@ -1,10 +1,10 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { INestedMessage } from 'state/chat';
-import { CircularProgress } from '@mui/material';
 import GreyButton from 'components/greyButton';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
+import CircularProgress from '@mui/material/CircularProgress';
 
 interface Props {
   message: INestedMessage;
@@ -25,9 +25,10 @@ export default function DetailsButton({
 
   const tool = nested ? message.subMessages![0].author : undefined;
 
-  const hide = (!loading && !nested) || pSettings?.hideCot;
+  const show =
+    nested || (loading && (!message.content || message.authorIsUser));
 
-  if (hide) {
+  if (!show || pSettings?.hideCot) {
     return null;
   }
 
@@ -53,7 +54,7 @@ export default function DetailsButton({
       }}
       color="primary"
       startIcon={
-        loading ? <CircularProgress color="inherit" size={18} /> : undefined
+        loading ? <CircularProgress color="inherit" size={16} /> : undefined
       }
       variant="contained"
       endIcon={

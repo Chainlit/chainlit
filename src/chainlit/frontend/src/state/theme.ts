@@ -2,10 +2,7 @@ import { atom } from 'recoil';
 
 type ThemeVariant = 'dark' | 'light';
 
-const defaultTheme =
-  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+const defaultTheme = 'light';
 
 const preferredTheme = localStorage.getItem(
   'themeVariant'

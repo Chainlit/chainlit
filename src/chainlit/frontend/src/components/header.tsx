@@ -9,6 +9,7 @@ import { projectSettingsState } from 'state/project';
 import ThemeButton from 'themeButton';
 import KeyIcon from '@mui/icons-material/Key';
 import NewChatButton from './chat/newChatButton';
+import RegularButton from './button';
 
 interface INavItem {
   to: string;
@@ -17,30 +18,9 @@ interface INavItem {
 
 function ActiveNavItem({ to, label }: INavItem) {
   return (
-    <Button
-      component={Link}
-      to={to}
-      key={to}
-      sx={{
-        textTransform: 'none',
-        color: (theme) =>
-          theme.palette.mode === 'dark'
-            ? 'text.primary'
-            : theme.palette.primary.main,
-        background: (theme) =>
-          theme.palette.mode === 'dark'
-            ? theme.palette.background.paperVariant
-            : theme.palette.primary.light,
-        '&:hover': {
-          background: (theme) =>
-            theme.palette.mode === 'dark'
-              ? theme.palette.background.paperVariant
-              : theme.palette.primary.light
-        }
-      }}
-    >
+    <RegularButton component={Link} to={to} key={to}>
       {label}
-    </Button>
+    </RegularButton>
   );
 }
 

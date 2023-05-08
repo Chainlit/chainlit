@@ -22,6 +22,10 @@ const components = {
   }
 };
 
+const shape = {
+  borderRadius: 8
+};
+
 const success = {
   main: 'rgba(25, 195, 125, 1)',
   contrastText: '#fff'
@@ -40,9 +44,7 @@ declare module '@mui/material/styles' {
 const darkTheme = createTheme({
   typography,
   components,
-  shape: {
-    borderRadius: 8
-  },
+  shape,
   palette: {
     mode: 'dark',
     success,
@@ -75,9 +77,7 @@ const darkTheme = createTheme({
 const lightTheme = createTheme({
   typography,
   components: components,
-  shape: {
-    borderRadius: 8
-  },
+  shape,
   palette: {
     mode: 'light',
     success,
@@ -110,13 +110,26 @@ const lightTheme = createTheme({
 const theme = (variant: 'dark' | 'light') =>
   variant === 'dark' ? darkTheme : lightTheme;
 
-export const greyButtonTheme = createTheme({
-  components,
+export const darkGreyButtonTheme = createTheme({
   typography,
+  components,
+  shape,
   palette: {
     primary: {
-      main: Grey[300],
-      contrastText: 'black'
+      main: '#616161',
+      contrastText: '#F5F5F5'
+    }
+  }
+});
+
+export const lightGreyButtonTheme = createTheme({
+  typography,
+  components,
+  shape,
+  palette: {
+    primary: {
+      main: '#EEEEEE',
+      contrastText: '#616161'
     }
   }
 });

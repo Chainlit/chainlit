@@ -11,9 +11,10 @@ import Code from 'components/Code';
 
 interface Props {
   content: string;
-  language?: string;
   elements: IElements;
   actions: IActions;
+  language?: string;
+  authorIsUser?: boolean;
 }
 
 function prepareContent({ elements, actions, content, language }: Props) {
@@ -57,7 +58,8 @@ export default memo(function MessageContent({
   content,
   elements,
   actions,
-  language
+  language,
+  authorIsUser
 }: Props) {
   const { preparedContent, inlinedelements } = prepareContent({
     content,
@@ -67,7 +69,6 @@ export default memo(function MessageContent({
   });
 
   if (!preparedContent) return null;
-
   return (
     <Stack width="100%">
       <Typography
@@ -76,7 +77,8 @@ export default memo(function MessageContent({
           minHeight: '20px',
           fontSize: '1rem',
           lineHeight: '1.5rem',
-          fontFamily: 'Inter'
+          fontFamily: 'Inter',
+          fontWeight: authorIsUser ? 500 : 300
         }}
       >
         <ReactMarkdown

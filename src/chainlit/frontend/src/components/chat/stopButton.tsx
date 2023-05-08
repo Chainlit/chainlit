@@ -1,11 +1,14 @@
-import { Box, Button } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Box } from '@mui/material';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { loadingState } from 'state/chat';
+import { loadingState, sessionState } from 'state/chat';
 import { projectSettingsState } from 'state/project';
+import GreyButton from 'components/greyButton';
 
 export default function StopButton() {
   const [loading, setLoading] = useRecoilState(loadingState);
   const pSettings = useRecoilValue(projectSettingsState);
+  const session = useRecoilValue(sessionState);
 
   if (!loading || pSettings?.hideCot) {
     return null;
@@ -13,14 +16,18 @@ export default function StopButton() {
 
   const handleClick = () => {
     setLoading(false);
-    window.socket?.emit('stop');
+    session?.socket.emit('stop');
   };
 
   return (
     <Box margin="auto">
-      <Button color="error" variant="outlined" onClick={handleClick}>
+      <GreyButton
+        startIcon={<CloseIcon />}
+        variant="contained"
+        onClick={handleClick}
+      >
         Stop task
-      </Button>
+      </GreyButton>
     </Box>
   );
 }

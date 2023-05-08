@@ -1,10 +1,13 @@
-import { ThemeProvider } from '@mui/material/styles';
-import { greyButtonTheme } from 'theme';
+import { ThemeProvider, useTheme } from '@mui/material/styles';
+import { lightGreyButtonTheme, darkGreyButtonTheme } from 'theme';
 import Button, { ButtonProps } from '@mui/material/Button';
 
 export default function GreyButton(props: ButtonProps) {
+  const theme = useTheme();
+  const greyTheme =
+    theme.palette.mode === 'dark' ? darkGreyButtonTheme : lightGreyButtonTheme;
   return (
-    <ThemeProvider theme={greyButtonTheme}>
+    <ThemeProvider theme={greyTheme}>
       <Button {...props} />
     </ThemeProvider>
   );

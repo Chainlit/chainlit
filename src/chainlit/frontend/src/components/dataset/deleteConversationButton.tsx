@@ -72,6 +72,11 @@ export default function DeleteConversationButton({
           onClose={handleClose}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          PaperProps={{
+            sx: {
+              backgroundImage: 'none'
+            }
+          }}
         >
           <DialogTitle id="alert-dialog-title">
             {'Delete conversation?'}
@@ -82,10 +87,18 @@ export default function DeleteConversationButton({
               elements.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Disagree</Button>
-            <LoadingButton loading={loading} onClick={handleConfirm} autoFocus>
-              Agree
+          <DialogActions sx={{ color: 'text.secondary', p: 2 }}>
+            <Button variant="outlined" color="inherit" onClick={handleClose}>
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="outlined"
+              color="primary"
+              loading={loading}
+              onClick={handleConfirm}
+              autoFocus
+            >
+              Confirm
             </LoadingButton>
           </DialogActions>
         </Dialog>

@@ -1,5 +1,5 @@
 import CloudProvider from 'components/cloudProvider';
-import { IconButton, Stack } from '@mui/material';
+import { IconButton, Stack, Tooltip } from '@mui/material';
 import { gql, useMutation } from '@apollo/client';
 import { IMessage } from 'state/chat';
 import toast from 'react-hot-toast';
@@ -56,13 +56,23 @@ function _FeedbackButtons({ message }: Props) {
   };
 
   return (
-    <Stack direction="row">
-      <IconButton onClick={() => onClick(feedback === -1 ? 0 : -1)}>
-        <DownIcon sx={{ width: size, height: size }} />
-      </IconButton>
-      <IconButton onClick={() => onClick(feedback === 1 ? 0 : 1)}>
-        <UpIcon sx={{ width: size, height: size }} />
-      </IconButton>
+    <Stack direction="row" spacing={1}>
+      <Tooltip title="Negative feedback">
+        <IconButton
+          onClick={() => onClick(feedback === -1 ? 0 : -1)}
+          size="small"
+        >
+          <DownIcon sx={{ width: size, height: size }} />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Positive feedback">
+        <IconButton
+          onClick={() => onClick(feedback === 1 ? 0 : 1)}
+          size="small"
+        >
+          <UpIcon sx={{ width: size, height: size }} />
+        </IconButton>
+      </Tooltip>
     </Stack>
   );
 }

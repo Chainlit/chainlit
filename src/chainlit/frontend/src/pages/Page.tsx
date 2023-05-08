@@ -38,12 +38,7 @@ const Page = ({ children }: Props) => {
     return null;
   }
 
-  if (isPrivate && role && !isProjectMember) {
-    return <Alert severity="error">You are not part of this project.</Alert>;
-  }
-
-  const renderAnonymousWarning =
-    !isPrivate && isAuthenticated && role === 'ANONYMOUS';
+  const notAllowed = isPrivate && role && !isProjectMember;
 
   return (
     <Box
@@ -54,13 +49,11 @@ const Page = ({ children }: Props) => {
       }}
     >
       <Header />
-      {renderAnonymousWarning && (
-        <Alert severity="info">
-          You are currently logged in as an anonymous user. You will not be able
-          to save any changes.
-        </Alert>
+      {notAllowed ? (
+        <Alert severity="error">You are not part of this project.</Alert>
+      ) : (
+        children
       )}
-      {children}
     </Box>
   );
 };
