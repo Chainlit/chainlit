@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment*/
+
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import {
   IconButton,

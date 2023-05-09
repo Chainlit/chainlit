@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useRecoilValue } from 'recoil';
 import { tokenCountState } from 'state/chat';
 import StopButton from 'components/chat/stopButton';
