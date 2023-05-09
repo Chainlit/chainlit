@@ -36,7 +36,6 @@ export function useColorForName() {
       return 'text.primary';
     }
     const index = Math.abs(hashCode(name)) % colors.length;
-    console.log(name, colors[index]);
     return colors[index];
   };
 }

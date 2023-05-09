@@ -1,6 +1,11 @@
 import Button, { ButtonProps } from '@mui/material/Button';
 
-export default function RegularButton({ children, ...props }: ButtonProps) {
+interface Props extends ButtonProps {
+  component?: any;
+  to?: any;
+}
+
+export default function RegularButton({ children, ...props }: Props) {
   return (
     <span>
       <Button

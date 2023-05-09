@@ -28,7 +28,7 @@ export default function InlinedElements({ inlined }: Props) {
   );
 
   return (
-    <Stack spacing={1}>
+    <Stack gap={1} mt={1}>
       {images.length ? <InlinedImageList items={images} /> : null}
       {Object.keys(texts).length ? <InlinedTextList items={texts} /> : null}
     </Stack>

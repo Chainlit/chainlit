@@ -2,13 +2,13 @@ import { Button, IconButton, Stack, Tooltip } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { Link, useLocation } from 'react-router-dom';
-import UserAvatar from './chat/userAvatar';
+import UserAvatar from './userAvatar';
 import { useAuth } from 'hooks/auth';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
 import ThemeButton from 'themeButton';
 import KeyIcon from '@mui/icons-material/Key';
-import NewChatButton from './chat/newChatButton';
+import NewChatButton from './newChatButton';
 import RegularButton from './button';
 
 interface INavItem {

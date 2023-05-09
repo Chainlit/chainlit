@@ -1,5 +1,4 @@
 import { createTheme } from '@mui/material/styles';
-import Grey from '@mui/material/colors/grey';
 
 const typography = {
   fontFamily: ['Inter', 'sans-serif'].join(',')
@@ -99,7 +98,7 @@ const lightTheme = createTheme({
       light: '#B87FE7',
       contrastText: '#fff'
     },
-    divider: '#EEEEEE',
+    divider: '#F5F5F5',
     text: {
       primary: '#212121',
       secondary: '#616161'
@@ -107,7 +106,7 @@ const lightTheme = createTheme({
   }
 });
 
-const theme = (variant: 'dark' | 'light') =>
+const makeTheme = (variant: 'dark' | 'light') =>
   variant === 'dark' ? darkTheme : lightTheme;
 
 export const darkGreyButtonTheme = createTheme({
@@ -134,4 +133,4 @@ export const lightGreyButtonTheme = createTheme({
   }
 });
 
-export default theme;
+export default makeTheme;

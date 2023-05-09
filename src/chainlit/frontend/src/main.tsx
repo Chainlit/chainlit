@@ -4,11 +4,9 @@ import { RecoilRoot } from 'recoil';
 import App from './App';
 import './index.css';
 import { Auth0Provider } from '@auth0/auth0-react';
-import { Toaster } from 'react-hot-toast';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Toaster />
     <RecoilRoot>
       <Auth0Provider
         domain="https://auth.chainlit.io"

@@ -2,7 +2,7 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Typography, Link, Stack } from '@mui/material';
 import { IElements } from 'state/element';
-import InlinedElements from './inlined';
+import InlinedElements from '../../element/inlined';
 import { memo } from 'react';
 import { IActions } from 'state/action';
 import ElementRef from './elementRef';

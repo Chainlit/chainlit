@@ -78,7 +78,7 @@ function _UploadButton({ askUser }: Props) {
       sx={{
         width: '100%',
         borderRadius: 1,
-        backgroundColor: (theme) => theme.palette.background.paper,
+        backgroundColor: (theme) => theme.palette.divider,
         boxSizing: 'border-box'
       }}
       direction="row"

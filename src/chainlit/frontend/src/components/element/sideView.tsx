@@ -34,7 +34,7 @@ interface DrawerProps extends BoxProps {
 const Drawer = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'open'
 })<DrawerProps>(({ theme, open }) => ({
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.divider,
   display: 'flex',
   flexDirection: 'column',
   borderRadius: 0,
@@ -55,7 +55,9 @@ const SideView = () => {
   return (
     <Drawer open={!!sideViewElement}>
       <Stack direction="row" alignItems="center">
-        <Typography fontSize="18px">{sideViewElement?.name}</Typography>
+        <Typography noWrap fontSize="20px" fontWeight={500}>
+          {sideViewElement?.name}
+        </Typography>
         <IconButton
           edge="end"
           sx={{ ml: 'auto' }}

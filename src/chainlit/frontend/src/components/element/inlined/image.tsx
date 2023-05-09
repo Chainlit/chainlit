@@ -13,13 +13,15 @@ export default function InlinedImageList({ items }: Props) {
   return (
     <ImageList
       sx={{
+        margin: 0,
         width: '100%',
+        maxWidth: '600px',
         height: 200,
         // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
         transform: 'translateZ(0)'
       }}
       rowHeight={200}
-      gap={1}
+      gap={5}
     >
       {items.map((item) => {
         const cols = 1;
@@ -33,7 +35,12 @@ export default function InlinedImageList({ items }: Props) {
             sx={{
               '.MuiImageListItem-img': {
                 height: '100%',
-                width: 'auto'
+                width: 'auto',
+                p: 1,
+                boxSizing: 'border-box',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'light' ? '#EEEEEE' : '#212121',
+                borderRadius: '4px'
               }
             }}
           >
@@ -43,15 +50,7 @@ export default function InlinedImageList({ items }: Props) {
               alt={item.title}
               loading="lazy"
             />
-            <ImageListItemBar
-              sx={{
-                background:
-                  'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-                  'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)'
-              }}
-              title={item.title}
-              position="top"
-            />
+            {/* <ImageListItemBar title={item.title} position="top" /> */}
           </ImageListItem>
         );
       })}

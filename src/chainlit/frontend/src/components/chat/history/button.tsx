@@ -71,6 +71,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
   }, [open]);
 
   const header = (
+    // @ts-ignore
     <Stack
       disabled
       key="title"
@@ -91,6 +92,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   const empty =
     chats?.length === 0 ? (
+      // @ts-ignore
       <div key="empty" disabled>
         <Typography
           color="text.secondary"
@@ -107,6 +109,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     ) : null;
 
   const loading = !chats ? (
+    // @ts-ignore
     <div key="loading" disabled>
       <Typography
         color="text.secondary"
@@ -128,6 +131,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     const history = buildHistory(chats);
     Object.keys(history).forEach((date) => {
       menuEls.push(
+        // @ts-ignore
         <div key={date} disabled>
           <Typography
             color="text.primary"
