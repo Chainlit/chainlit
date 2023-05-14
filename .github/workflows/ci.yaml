@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yaml
+    secrets: inherit
+  ci:
+    runs-on: ubuntu-latest
+    name: Run CI
+    needs: [tests]
+    steps:
+      - name: "Done"
+        run: echo "Done"

@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "cypress": "^12.9.0",
+    "dotenv": "^16.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "husky": "^8.0.0"
+  },
+  "scripts": {
+    "test": "npx ts-node ./cypress/support/e2e.ts",
+    "prepare": "husky install",
+    "lintUi": "cd src/chainlit/frontend && npm run lint",
+    "formatUi": "cd src/chainlit/frontend && npm run format",
+    "formatPython": "black src",
+    "installUiDeps": "cd src/chainlit/frontend && npm install",
+    "buildUi": "(cd src/chainlit/frontend && npm run build)",
+    "build": "(cd src/chainlit/frontend && npm run build) && (cd src && poetry build)"
+  }
+}

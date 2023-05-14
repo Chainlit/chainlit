@@ -1,0 +1,38 @@
+name: Tests
+
+on: [workflow_call]
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shine1594/secrets-to-env-action@master
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          secrets_env: production
+          file_name_prod: .env
+          prefix_prod: ""
+      - name: Use Node.js 16.15.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.15.0"
+          cache: "npm"
+      - name: Install test JS dependencies
+        run: npm install
+      - name: Install UI JS dependencies
+        run: npm run installUiDeps
+      - name: Lint UI
+        run: npm run lintUi
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+      - name: Install Python CI dependencies
+        run: pip install -r src/ci-requirements.txt
+      - name: Run tests
+        run: npm test
