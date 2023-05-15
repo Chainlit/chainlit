@@ -33,13 +33,13 @@ poetry install
 
 ## Contribute to the UI
 
-The source code of the UI is in [src/chainlit/frontend](src/chainlit/frontend).
+The source code of the UI is in [src/chainlit/frontend](/src/chainlit/frontend).
 
-Before anything, go to [src/chainlit/frontend/api/index.ts](src/chainlit/frontend/api/index.ts). Find the definition of `const server` and inverse the comment:
+Before anything, go to [src/chainlit/frontend/api/index.ts](/src/chainlit/frontend/src/api/index.ts). Find the definition of `const server` and inverse the comment:
 
 ```ts
-// export const server = 'http://127.0.0.1:8000';
-export const server = '';
+export const server = 'http://127.0.0.1:8000';
+// export const server = '';
 ```
 
 Don't forget to revert that change before pushing.
@@ -93,7 +93,3 @@ The `-h` parameter (headless) means the UI will not automatically open. Only use
 2. Run `npm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
- 
-
-
-
