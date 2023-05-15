@@ -42,14 +42,16 @@ def run_chainlit(
 
     # Open the browser if in development mode
     def open_browser(headless: bool):
-        if not headless and config.chainlit_env == "development":
+        if not headless:
             # Wait two seconds to allow the server to start
             socketio.sleep(2)
-            webbrowser.open(f"http://127.0.0.1:{PORT}")
+            url = f"http://127.0.0.1:{PORT}"
+            logger.info(f"Your app is available at {url}")
+            webbrowser.open(url)
 
     socketio.start_background_task(open_browser, headless)
     # Start the server
-    socketio.run(app, port=PORT, debug=debug, use_reloader=False)
+    socketio.run(app, host="0.0.0.0", port=PORT, debug=debug, use_reloader=False)
 
 
 # Define the "run" command for Chainlit CLI
