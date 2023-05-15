@@ -132,7 +132,7 @@ export default function Playground() {
         <Stack
           direction="row"
           spacing={2}
-          sx={{ overflowY: 'scroll', flexGrow: 1 }}
+          sx={{ overflowY: 'auto', flexGrow: 1 }}
         >
           <Box
             sx={{

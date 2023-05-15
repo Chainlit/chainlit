@@ -123,7 +123,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
         textarea: {
           height: '34px',
           maxHeight: '30vh',
-          overflowY: 'scroll !important',
+          overflowY: 'auto !important',
           resize: 'none',
           paddingBottom: '0.75rem',
           paddingTop: '0.75rem',

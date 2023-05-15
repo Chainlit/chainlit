@@ -210,7 +210,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
           overflow: 'visible',
           maxHeight: '314px',
           width: '334px',
-          overflowY: 'scroll',
+          overflowY: 'auto',
           border: (theme) => `1px solid ${theme.palette.divider}`,
           boxShadow: (theme) =>
             theme.palette.mode === 'light'
