@@ -121,6 +121,7 @@ export default function Playground() {
           Prompt playground
         </Typography>
         <IconButton
+          edge="end"
           id="close-playground"
           sx={{ ml: 'auto' }}
           onClick={handleClose}
@@ -132,7 +133,7 @@ export default function Playground() {
         <Stack
           direction="row"
           spacing={2}
-          sx={{ overflowY: 'auto', flexGrow: 1 }}
+          sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1 }}
         >
           <Box
             sx={{

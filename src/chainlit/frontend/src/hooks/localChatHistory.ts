@@ -10,7 +10,7 @@ export default function useLocalChatHistory() {
     if (chatHistory) {
       return JSON.parse(chatHistory) as IChat[];
     }
-    return undefined;
+    return [];
   }, []);
 
   const persistChatLocally = useCallback((message: string) => {
