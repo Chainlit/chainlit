@@ -57,10 +57,13 @@ $ chainlit run demo.py -w
 Checkout our plug and play [integration](https://docs.chainlit.io/langchain) with LangChain!
 
 ## 🛣 Roadmap
-- [ ] New UI elements (spreadsheet, carousel...)
-- [ ] Create your own UI elements
+- [ ] New UI elements (spreadsheet, video, carousel...)
+- [ ] Create your own UI elements via component framework
+- [ ] DAG-based chain-of-thought interface
 - [ ] Support more LLMs in the prompt playground
 - [ ] App deployment
+
+Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/ZThrUxbAYw).
 
 ## 💁 Contributing
 
