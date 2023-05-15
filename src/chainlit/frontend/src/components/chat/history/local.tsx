@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
 import HistoryButton from './button';
 import useLocalChatHistory from 'hooks/localChatHistory';
+import { useState } from 'react';
 
 interface Props {
   onClick: (content: string) => void;
@@ -8,9 +8,12 @@ interface Props {
 
 export default function LocalHistoryButton({ onClick }: Props) {
   const { getLocalChatHistory } = useLocalChatHistory();
-  const chats = getLocalChatHistory();
-  const onOpen = useCallback(() => {
-    return getLocalChatHistory();
-  }, []);
-  return <HistoryButton onClick={onClick} onOpen={onOpen} chats={chats} />;
+  const [chats, setChats] = useState(getLocalChatHistory());
+  return (
+    <HistoryButton
+      onClick={onClick}
+      onOpen={() => setChats(getLocalChatHistory())}
+      chats={chats}
+    />
+  );
 }

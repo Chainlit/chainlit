@@ -156,6 +156,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
         prev = h.content;
         menuEls.push(
           <MenuItem
+            className="history-item"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

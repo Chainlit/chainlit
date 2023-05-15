@@ -4,7 +4,6 @@ import { projectSettingsState } from 'state/project';
 import LocalHistoryButton from './local';
 import CloudHistoryButton from './cloud';
 import { memo } from 'react';
-import { CircularProgress } from '@mui/material';
 
 interface Props {
   onClick: (content: string) => void;
