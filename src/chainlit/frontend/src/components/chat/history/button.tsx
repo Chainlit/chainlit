@@ -95,7 +95,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
   const empty =
     chats?.length === 0 ? (
       // @ts-ignore
-      <div key="empty" disabled>
+      <div key="empty" id="history-empty" disabled>
         <Typography
           color="text.secondary"
           sx={{
@@ -112,7 +112,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   const loading = !chats ? (
     // @ts-ignore
-    <div key="loading" disabled>
+    <div key="loading" id="history-loading" disabled>
       <Typography
         color="text.secondary"
         sx={{
@@ -198,7 +198,6 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
     <Menu
       autoFocus
       anchorEl={anchorEl}
-      id="account-menu"
       open={open}
       onClose={() => setOpen(false)}
       PaperProps={{

@@ -9,3 +9,7 @@ export function openHistory() {
   cy.get(`#chat-input`).should("not.be.disabled");
   cy.get(`#chat-input`).type(`{upArrow}`);
 }
+
+export function closeHistory() {
+  cy.get(`body`).click();
+}
