@@ -1,5 +1,4 @@
-import useClearChat from 'hooks/clearChat';
-import { getProjectSettings, server } from 'api';
+import { server } from 'api';
 import { memo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
@@ -13,7 +12,6 @@ import {
 import { userEnvState } from 'state/user';
 import { useAuth } from 'hooks/auth';
 import io from 'socket.io-client';
-import { projectSettingsState } from 'state/project';
 import { IElement, elementState } from 'state/element';
 import { IAction, actionState } from 'state/action';
 
@@ -22,14 +20,11 @@ export default memo(function Socket() {
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const [session, setSession] = useRecoilState(sessionState);
-  const setPSettings = useSetRecoilState(projectSettingsState);
   const setMessages = useSetRecoilState(messagesState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
-  const clearChat = useClearChat();
-
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {
@@ -70,8 +65,7 @@ export default memo(function Socket() {
     });
 
     socket.on('reload', () => {
-      clearChat();
-      getProjectSettings().then((res) => setPSettings(res));
+      window.location.reload();
     });
 
     socket.on('message', (message: IMessage) => {
