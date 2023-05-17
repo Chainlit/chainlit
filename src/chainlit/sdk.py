@@ -46,7 +46,24 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    def send_element(
+    def send_remote_element(
+        self,
+        url: str,
+        name: str,
+        type: ElementType,
+        display: ElementDisplay,
+    ):
+        """Send an element to the UI."""
+        element = {
+            "name": name,
+            "url": url,
+            "type": type,
+            "display": display,
+        }
+        if self.emit and element:
+            self.emit("element", element)
+
+    def send_local_element(
         self,
         ext: str,
         content: bytes,
@@ -81,7 +98,15 @@ class Chainlit:
             _, ext = os.path.splitext(path)
             type = "image"
             image_data = f.read()
-            self.send_element(ext, image_data, name, type, display)
+            self.send_local_element(ext, image_data, name, type, display)
+
+    def send_image(self, url: str, name: str, display: ElementDisplay = "side"):
+        """Send an image to the UI."""
+        if not self.emit:
+            return
+
+        type = "image"
+        self.send_remote_element(url, name, type, display)
 
     def send_text(self, text: str, name: str, display: ElementDisplay = "side"):
         """Send a text element to the UI."""
@@ -90,7 +115,7 @@ class Chainlit:
 
         type = "text"
         ext = ".txt"
-        self.send_element(ext, bytes(text, "utf-8"), name, type, display)
+        self.send_local_element(ext, bytes(text, "utf-8"), name, type, display)
 
     def send_action(self, name: str, trigger: str, description=""):
         """Send an action to the UI."""

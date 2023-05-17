@@ -108,6 +108,21 @@ def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
 
 
 @trace
+def send_image(url: str, name: str, display: ElementDisplay = "side"):
+    """
+    Send an image to the chatbot UI.
+    Args:
+        url (str): The URL of the image.
+        name (str): The name of the image to be displayed in the UI.
+        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
+            Choices are "side" (default) or "inline" or "page".
+    """
+    sdk = get_sdk()
+    if sdk:
+        sdk.send_image(url, name, display)
+
+
+@trace
 def send_message(
     content: str,
     author=config.chatbot_name,

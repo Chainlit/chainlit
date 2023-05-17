@@ -3,6 +3,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 
 interface Props {
   items: {
+    url?: string;
     src: string;
     title: string;
   }[];
@@ -47,6 +48,15 @@ export default function InlinedImageList({ items }: Props) {
               className="inlined-image"
               src={item.src}
               alt={item.title}
+              style={{
+                objectFit: 'contain',
+                cursor: item.url ? 'pointer' : 'default'
+              }}
+              onClick={() => {
+                if (item.url) {
+                  window.open(item.url, '_blank')?.focus();
+                }
+              }}
               loading="lazy"
             />
             {/* <ImageListItemBar title={item.title} position="top" /> */}

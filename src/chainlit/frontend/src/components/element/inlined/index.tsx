@@ -16,6 +16,7 @@ export default function InlinedElements({ inlined }: Props) {
     .filter((key) => inlined[key].type === ElementType.img)
     .map((k) => {
       return {
+        url: inlined[k].url,
         src:
           inlined[k].url ||
           URL.createObjectURL(new Blob([inlined[k].content!])),

@@ -29,12 +29,12 @@ function prepareContent({ elements, actions, content, language }: Props) {
     : undefined;
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedelements: IElements = {};
+  const inlinedElements: IElements = {};
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
       if (elements[match].display === 'inline') {
-        inlinedelements[match] = elements[match];
+        inlinedElements[match] = elements[match];
       }
       // spaces break markdown links. The address in the link is not used anyway
       return `[${match}](${match.replaceAll(' ', '_')})`;
@@ -51,8 +51,7 @@ function prepareContent({ elements, actions, content, language }: Props) {
   if (language) {
     preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
   }
-
-  return { preparedContent, inlinedelements };
+  return { preparedContent, inlinedElements };
 }
 
 export default memo(function MessageContent({
@@ -62,7 +61,7 @@ export default memo(function MessageContent({
   language,
   authorIsUser
 }: Props) {
-  const { preparedContent, inlinedelements } = prepareContent({
+  const { preparedContent, inlinedElements } = prepareContent({
     content,
     language,
     elements,
@@ -113,7 +112,7 @@ export default memo(function MessageContent({
           {preparedContent}
         </ReactMarkdown>
       </Typography>
-      <InlinedElements inlined={inlinedelements} />
+      <InlinedElements inlined={inlinedElements} />
     </Stack>
   );
 });
