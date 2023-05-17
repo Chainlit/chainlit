@@ -1,4 +1,4 @@
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { IAsk, askUserState } from 'state/chat';
 import { useCallback, useState } from 'react';
 import {
@@ -18,7 +18,6 @@ interface Props {
 }
 
 function _UploadButton({ askUser }: Props) {
-  const setAskUser = useSetRecoilState(askUserState);
   const [uploading, setUploading] = useState(false);
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
@@ -43,8 +42,6 @@ function _UploadButton({ askUser }: Props) {
             content: rawData as ArrayBuffer
           };
           askUser?.callback(payload);
-          setUploading(false);
-          setAskUser(undefined);
         };
 
         reader.onerror = function () {
@@ -95,6 +92,7 @@ function _UploadButton({ askUser }: Props) {
         </Typography>
       </Stack>
       <LoadingButton
+        id={uploading ? 'upload-button-loading' : 'upload-button'}
         loading={uploading}
         sx={{ ml: 'auto !important' }}
         variant="contained"

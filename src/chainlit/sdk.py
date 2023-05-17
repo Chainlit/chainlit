@@ -152,6 +152,11 @@ class Chainlit:
         if self.emit:
             self.emit("ask_timeout", {})
 
+    def clear_ask(self):
+        """Clear the prompt from the UI."""
+        if self.emit:
+            self.emit("clear_ask", {})
+
     def send_ask_user(
         self, author: str, content: str, spec: AskSpec, raise_on_timeout=False
     ):
@@ -189,6 +194,7 @@ class Chainlit:
                     # TODO: upload file to S3
                     pass
 
+            self.clear_ask()
             return res
         except TimeoutError as e:
             self.send_ask_timeout(author)

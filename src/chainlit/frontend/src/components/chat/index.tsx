@@ -78,7 +78,6 @@ const Chat = () => {
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);
-      setAskUser(undefined);
     },
     [askUser, user]
   );

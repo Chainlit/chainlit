@@ -105,6 +105,10 @@ export default memo(function Socket() {
       setLoading(false);
     });
 
+    socket.on('clear_ask', () => {
+      setAskUser(undefined);
+    });
+
     socket.on('element', (element: IElement) => {
       setElements((old) => ({
         ...old,
