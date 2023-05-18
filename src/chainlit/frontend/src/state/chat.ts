@@ -20,6 +20,7 @@ export interface IChat {
 
 export interface IMessage {
   id?: number;
+  tempId?: string;
   author: string;
   authorIsUser?: boolean;
   waitForAnswer?: boolean;

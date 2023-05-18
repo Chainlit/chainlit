@@ -36,7 +36,7 @@ export default function ActionRef({ action }: Props) {
       onClick={call}
       disabled={loading}
     >
-      {action.trigger}
+      {action.name}
     </LoadingButton>
   );
   if (action.description) {

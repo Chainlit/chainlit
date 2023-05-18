@@ -20,12 +20,18 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    def upload_element(self, ext: str, content: bytes) -> int:
+    def upload_element(self, content: bytes) -> int:
         pass
 
     @abstractmethod
     def create_element(
-        self, conversation_id: str, type: ElementType, url: str, name: str, display: str
+        self,
+        conversation_id: str,
+        type: ElementType,
+        url: str,
+        name: str,
+        display: str,
+        for_id: Any = None,
     ) -> int:
         pass
 
@@ -95,18 +101,19 @@ class CloudClient(BaseClient):
         return int(res["data"]["createMessage"]["id"])
 
     def create_element(
-        self, type: ElementType, url: str, name: str, display: str
+        self, type: ElementType, url: str, name: str, display: str, for_id: Any = None
     ) -> Dict[str, Any]:
         c_id = self.get_conversation_id()
 
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display) {
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forId: string) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, forId: $forId) {
                 id,
                 type,
                 url,
                 name,
-                display
+                display,
+                forId
             }
         }
         """
@@ -116,12 +123,13 @@ class CloudClient(BaseClient):
             "url": url,
             "name": name,
             "display": display,
+            "forId": for_id,
         }
         res = self.mutation(mutation, variables)
         return res["data"]["createElement"]
 
-    def upload_element(self, ext: str, content: bytes) -> str:
-        id = f"{uuid.uuid4()}{ext}"
+    def upload_element(self, content: bytes) -> str:
+        id = f"{uuid.uuid4()}"
         url = f"{self.url}/api/upload/file"
         body = {"projectId": self.project_id, "fileName": id}
 

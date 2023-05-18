@@ -1,8 +1,8 @@
 from typing import Union
-import os
 import time
+import uuid
 from chainlit.session import Session
-from chainlit.types import ElementDisplay, LLMSettings, ElementType, AskSpec
+from chainlit.types import ElementDisplay, LLMSettings, ElementType, Action, AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
@@ -52,32 +52,40 @@ class Chainlit:
         name: str,
         type: ElementType,
         display: ElementDisplay,
+        for_id: str = None,
     ):
         """Send an element to the UI."""
-        element = {
-            "name": name,
-            "url": url,
-            "type": type,
-            "display": display,
-        }
+        if self.client:
+            # Cloud is enabled, upload the element to S3
+            element = self.client.create_element(
+                name=name, url=url, type=type, display=display, for_id=for_id
+            )
+        else:
+            element = {
+                "name": name,
+                "url": url,
+                "type": type,
+                "display": display,
+                "forId": for_id,
+            }
         if self.emit and element:
             self.emit("element", element)
 
     def send_local_element(
         self,
-        ext: str,
         content: bytes,
         name: str,
         type: ElementType,
         display: ElementDisplay,
+        for_id: str = None,
     ):
         """Send an element to the UI."""
         if self.client:
             # Cloud is enabled, upload the element to S3
-            url = self.client.upload_element(ext=ext, content=content)
+            url = self.client.upload_element(content=content)
             if url:
                 element = self.client.create_element(
-                    name=name, url=url, type=type, display=display
+                    name=name, url=url, type=type, display=display, for_id=for_id
                 )
         else:
             element = {
@@ -85,49 +93,82 @@ class Chainlit:
                 "content": content.decode("utf-8") if type == "text" else content,
                 "type": type,
                 "display": display,
+                "forId": for_id,
             }
         if self.emit and element:
             self.emit("element", element)
 
-    def send_local_image(self, path: str, name: str, display: ElementDisplay = "side"):
+    def send_local_image(
+        self,
+        name: str,
+        path: str = None,
+        content: bytes = None,
+        display: ElementDisplay = "side",
+        for_id: str = None,
+    ):
         """Send a local image to the UI."""
         if not self.emit:
             return
 
-        with open(path, "rb") as f:
-            _, ext = os.path.splitext(path)
-            type = "image"
-            image_data = f.read()
-            self.send_local_element(ext, image_data, name, type, display)
+        type = "image"
 
-    def send_image(self, url: str, name: str, display: ElementDisplay = "side"):
+        if path:
+            with open(path, "rb") as f:
+                image_data = f.read()
+        elif content:
+            image_data = content
+        else:
+            raise ValueError("Must provide either path or content")
+
+        self.send_local_element(
+            content=image_data, name=name, type=type, display=display, for_id=for_id
+        )
+
+    def send_image(
+        self, url: str, name: str, display: ElementDisplay = "side", for_id: str = None
+    ):
         """Send an image to the UI."""
         if not self.emit:
             return
 
         type = "image"
-        self.send_remote_element(url, name, type, display)
+        self.send_remote_element(url, name, type, display, for_id=for_id)
 
-    def send_text(self, text: str, name: str, display: ElementDisplay = "side"):
+    def send_text(
+        self, text: str, name: str, display: ElementDisplay = "side", for_id: str = None
+    ):
         """Send a text element to the UI."""
         if not self.emit:
             return
 
         type = "text"
-        ext = ".txt"
-        self.send_local_element(ext, bytes(text, "utf-8"), name, type, display)
+        self.send_local_element(
+            content=bytes(text, "utf-8"),
+            name=name,
+            type=type,
+            display=display,
+            for_id=for_id,
+        )
 
-    def send_action(self, name: str, trigger: str, description=""):
+    def send_action(self, name: str, value: str, for_id: str, description=""):
         """Send an action to the UI."""
         if not self.emit:
             return
 
         action = {
             "name": name,
-            "trigger": trigger,
+            "value": value,
             "description": description,
+            "forId": for_id,
         }
         self.emit("action", action)
+
+    def remove_action(self, action: Action):
+        """Remove an action from the UI."""
+        if not self.emit:
+            return
+
+        self.emit("remove_action", action)
 
     def send_message(
         self,
@@ -162,6 +203,9 @@ class Chainlit:
         if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
+        else:
+            message_id = uuid.uuid4().hex
+            msg["tempId"] = message_id
 
         msg["createdAt"] = current_milli_time()
 
@@ -169,6 +213,8 @@ class Chainlit:
             self.stream_end(msg)
         else:
             self.emit("message", msg)
+
+        return str(message_id)
 
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the UI."""

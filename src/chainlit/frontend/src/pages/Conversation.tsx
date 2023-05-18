@@ -6,7 +6,7 @@ import { gql, useQuery } from '@apollo/client';
 import { IElements } from 'state/element';
 import SideView from 'components/element/sideView';
 import Playground from 'components/playground';
-import { IActions } from 'state/action';
+import { IAction } from 'state/action';
 
 const ConversationQuery = gql`
   query ($id: ID!) {
@@ -48,10 +48,8 @@ export default function Conversation() {
     return null;
   }
 
-  const elements: IElements = {};
-  data.conversation.elements.forEach((d: any) => (elements[d.name] = d));
-
-  const actions: IActions = {};
+  const elements: IElements = data.conversation.elements;
+  const actions: IAction[] = [];
 
   return (
     <Page>

@@ -6,14 +6,14 @@ import DetailsButton from 'components/chat/message/detailsButton';
 import Messages from './messages';
 import MessageContent from './content';
 import UploadButton from './uploadButton';
-import { IActions } from 'state/action';
+import { IAction } from 'state/action';
 import Author, { authorBoxWidth } from './author';
 import Buttons from './buttons';
 
 interface Props {
   message: INestedMessage;
   elements: IElements;
-  actions: IActions;
+  actions: IAction[];
   indent: number;
   showAvatar?: boolean;
   showBorder?: boolean;
@@ -66,6 +66,7 @@ const Message = ({
               authorIsUser={message.authorIsUser}
               actions={actions}
               elements={elements}
+              id={message.id ? message.id.toString() : message.tempId}
               content={message.content}
               language={message.language}
             />

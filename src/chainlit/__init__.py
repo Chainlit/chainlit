@@ -74,7 +74,9 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
 
 
 @trace
-def send_text(text: str, name: str, display: ElementDisplay = "side"):
+def send_text(
+    text: str, name: str, display: ElementDisplay = "side", for_id: str = None
+):
     """
     Send a text element to the chatbot UI.
     If a project ID is configured, the element will be uploaded to the cloud storage.
@@ -84,31 +86,45 @@ def send_text(text: str, name: str, display: ElementDisplay = "side"):
         name (str): The name of the text element to be displayed in the UI.
         display (ElementDisplay, optional): Determines how the element should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
+        for_id (str, optional): If specified, the text element will only be working for that message ID.
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_text(text, name, display)
+        sdk.send_text(text, name, display, for_id)
 
 
 @trace
-def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
+def send_local_image(
+    name: str,
+    path: str = None,
+    content: bytes = None,
+    display: ElementDisplay = "side",
+    for_id: str = None,
+):
     """
     Send a local image to the chatbot UI.
     If a project ID is configured, the image will be uploaded to the cloud storage.
 
     Args:
-        path (str): The local file path of the image.
         name (str): The name of the image to be displayed in the UI.
+        path (str, optional): The local file path of the image.
+        content (bytes, optional): The content of the image.
         display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
+        for_id (str, optional): If specified, the image element will only be working for that message ID.
+
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_local_image(path, name, display)
+        sdk.send_local_image(
+            name=name, path=path, content=content, display=display, for_id=for_id
+        )
 
 
 @trace
-def send_image(url: str, name: str, display: ElementDisplay = "side"):
+def send_image(
+    url: str, name: str, display: ElementDisplay = "side", for_id: str = None
+):
     """
     Send an image to the chatbot UI.
     Args:
@@ -116,10 +132,11 @@ def send_image(url: str, name: str, display: ElementDisplay = "side"):
         name (str): The name of the image to be displayed in the UI.
         display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
             Choices are "side" (default) or "inline" or "page".
+        for_id (str, optional): If specified, the image element will only be working for that message ID.
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_image(url, name, display)
+        sdk.send_image(url, name, display, for_id)
 
 
 @trace
@@ -144,10 +161,13 @@ def send_message(
         indent (int, optional): If positive, the message will be nested in the UI.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         end_stream (bool, optional): Pass True if this message was streamed.
+
+    Returns:
+        str: The message ID.
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(
+        return sdk.send_message(
             author=author,
             content=content,
             prompt=prompt,
@@ -238,17 +258,30 @@ def ask_for_file(
 
 
 @trace
-def send_action(name: str, trigger: str, description=""):
+def send_action(name: str, value: str, for_id: str, description=""):
     """
     Send an action to the chatbot UI.
     Args:
         name (str): The name of the action to send.
-        trigger (str): The text that should trigger the action when clicked.
+        value (str): The parameter the action will be called with.
+        for_id (str): The ID of the message the action is for.
         description (str, optional): The description of the action. Defaults to "".
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_action(name=name, trigger=trigger, description=description)
+        sdk.send_action(name=name, value=value, description=description, for_id=for_id)
+
+
+@trace
+def remove_action(action: Action):
+    """
+    Send an action to the chatbot UI.
+    Args:
+        action (Action): The action to remove.
+    """
+    sdk = get_sdk()
+    if sdk:
+        sdk.remove_action(action)
 
 
 @trace
@@ -311,7 +344,8 @@ def langchain_factory(func: Callable) -> Callable:
 def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
-    The decorated function takes the raw output of the LangChain object and return a string as the final response.
+    The decorated function takes the raw output of the LangChain object as input.
+    The response will NOT be automatically sent to the UI, you need to call send_message.
 
     Args:
         func (Callable[[Any], str]): The post-processing function to apply after generating a response. Takes the response as parameter.
@@ -348,7 +382,8 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     """
     Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
     Use when your agent run method has custom parameters.
-    This function should return a string as the final response.
+    Takes the LangChain agent and the user input as parameters.
+    The response will NOT be automatically sent to the UI, you need to call send_message.
     Args:
         func (Callable[[Any, str], str]): The function to be called when a new message is received. Takes the agent and user input as parameters and returns the output string.
 
@@ -413,7 +448,10 @@ def on_stop(func: Callable) -> Callable:
 
 def action(name: str) -> Callable:
     """
-    Callback to call when an action is triggered in the UI.
+    Callback to call when an action is clicked in the UI.
+
+    Args:
+        func (Callable[[Action, Any], Any]): The action callback to exexute. First parameter is the action.
     """
 
     def decorator(func: Callable[[Action], Any]):

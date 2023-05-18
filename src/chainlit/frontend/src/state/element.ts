@@ -19,13 +19,14 @@ export interface IElement {
   content?: ValueOf<ElementContentType>;
   name: string;
   display: 'inline' | 'side' | 'page';
+  forId?: string;
 }
 
-export type IElements = Record<string, IElement>;
+export type IElements = IElement[];
 
 export const elementState = atom<IElements>({
   key: 'Elements',
-  default: {}
+  default: []
 });
 
 export const sideViewState = atom<IElement | undefined>({

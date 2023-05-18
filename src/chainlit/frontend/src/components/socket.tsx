@@ -14,6 +14,7 @@ import { useAuth } from 'hooks/auth';
 import io from 'socket.io-client';
 import { IElement, elementState } from 'state/element';
 import { IAction, actionState } from 'state/action';
+import { deepEqual } from 'helpers/object';
 
 export default memo(function Socket() {
   const { accessToken, isAuthenticated, isLoading } = useAuth();
@@ -104,17 +105,19 @@ export default memo(function Socket() {
     });
 
     socket.on('element', (element: IElement) => {
-      setElements((old) => ({
-        ...old,
-        ...{ [element.name]: element }
-      }));
+      setElements((old) => [...old, element]);
     });
 
     socket.on('action', (action: IAction) => {
-      setActions((old) => ({
-        ...old,
-        ...{ [action.name]: action }
-      }));
+      setActions((old) => [...old, action]);
+    });
+
+    socket.on('remove_action', (action: IAction) => {
+      setActions((old) => {
+        const index = old.findIndex((a) => deepEqual(a, action));
+        if (index === -1) return old;
+        return [...old.slice(0, index), ...old.slice(index + 1)];
+      });
     });
 
     socket.on('token_usage', (count: number) => {

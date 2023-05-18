@@ -40,7 +40,7 @@ class AskFileResponse:
 
 class Action(TypedDict):
     name: str
-    trigger: str
+    value: str
     description: str
 
 

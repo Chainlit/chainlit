@@ -243,14 +243,16 @@ def process_message(session: Session, author: str, input_str: str):
             # If a langchain agent is available, run it
             if config.lc_run:
                 # If the developer provided a custom run function, use it
-                res = config.lc_run(langchain_agent, input_str)
+                config.lc_run(langchain_agent, input_str)
+                return
             else:
                 # Otherwise, use the default run function
                 raw_res, output_key = run_langchain_agent(langchain_agent, input_str)
 
                 if config.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
-                    res = config.lc_postprocess(raw_res)
+                    config.lc_postprocess(raw_res)
+                    return
                 elif output_key is not None:
                     # Use the output key if provided
                     res = raw_res[output_key]
