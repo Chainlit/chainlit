@@ -31,26 +31,23 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  const filteredActions = actions.filter((v) => {
-    if (v.forId) {
-      return v.forId === id;
+  const filteredActions = actions.filter((a) => {
+    if (a.forId) {
+      return a.forId === id;
     }
     return true;
   });
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedElements: IElements = [];
-
-  filteredElements.filter((e) => e.display === 'inline');
+  const inlinedElements: IElements = filteredElements.filter(
+    (e) => e.display === 'inline'
+  );
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
       const element = filteredElements.find((e) => e.name === match);
       if (!element) return match;
 
-      if (element.display === 'inline') {
-        inlinedElements.push(element);
-      }
       // spaces break markdown links. The address in the link is not used anyway
       return `[${match}](${match.replaceAll(' ', '_')})`;
     });
@@ -128,7 +125,7 @@ export default memo(function MessageContent({
           {preparedContent}
         </ReactMarkdown>
       </Typography>
-      <InlinedElements inlined={inlinedElements} actions={filteredActions} />
+      <InlinedElements elements={inlinedElements} actions={filteredActions} />
     </Stack>
   );
 });

@@ -6,16 +6,16 @@ import { IAction } from 'state/action';
 import InlinedActionList from './action';
 
 interface Props {
-  inlined: IElements;
+  elements: IElements;
   actions: IAction[];
 }
 
-export default function InlinedElements({ inlined, actions }: Props) {
-  if (!inlined || !Object.keys(inlined).length) {
+export default function InlinedElements({ elements, actions }: Props) {
+  if (!elements.length && !actions.length) {
     return null;
   }
 
-  const images = inlined
+  const images = elements
     .filter((el) => el.type === ElementType.img)
     .map((el) => {
       return {
@@ -25,7 +25,7 @@ export default function InlinedElements({ inlined, actions }: Props) {
       };
     });
 
-  const texts = inlined.filter((el) => el.type === ElementType.txt);
+  const texts = elements.filter((el) => el.type === ElementType.txt);
 
   return (
     <Stack gap={1} mt={1}>

@@ -7,14 +7,31 @@ describe("Action", () => {
     cy.wait(["@settings"]);
   });
 
-  it("should correcly execute the action", () => {
-    cy.get(".message").should("have.length", 1);
-    cy.get("#action-action1").should("exist");
-    cy.get("#action-action1").click();
+  it("should correcly execute actions", () => {
+    cy.get(".message")
+      .should("have.length", 1)
+      .eq(0)
+      .get("#action-test-action")
+      .should("exist")
+      .click();
     cy.wait(["@action"]);
-    const messages = cy.get(".message");
-    messages.should("have.length", 2);
 
-    messages.eq(1).should("contain", "Executed action 1!");
+    cy.get(".message").should("have.length", 2);
+    cy.get(".message").eq(1).should("contain", "Executed test action!");
+
+    cy.get(".message")
+      .eq(0)
+      .get("#action-removable-action")
+      .should("exist")
+      .click();
+    cy.wait(["@action"]);
+
+    cy.get(".message").should("have.length", 3);
+    cy.get(".message").eq(2).should("contain", "Executed removable action!");
+
+    cy.get(".message")
+      .eq(0)
+      .get("#action-removable-action")
+      .should("not.exist");
   });
 });

@@ -13,4 +13,4 @@ def main():
 
 @cl.langchain_postprocess
 def postprocess(output: str):
-    return "In the end it doesn't even matter."
+    cl.send_message("In the end it doesn't even matter.")

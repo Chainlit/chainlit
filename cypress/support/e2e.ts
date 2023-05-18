@@ -3,7 +3,7 @@ dotenv.config();
 import { installChainlit, runTests, runTest } from "./utils";
 
 async function main() {
-  await installChainlit();
+  // await installChainlit();
   const singleTest = process.argv[2];
   if (singleTest) {
     await runTest(singleTest);

@@ -1,10 +1,12 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { actionState } from 'state/action';
 import { messagesState, sessionState, tokenCountState } from 'state/chat';
 import { sideViewState, elementState } from 'state/element';
 
 export default function useClearChat() {
   const setMessages = useSetRecoilState(messagesState);
   const setElements = useSetRecoilState(elementState);
+  const setActions = useSetRecoilState(actionState);
   const setSideView = useSetRecoilState(sideViewState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const session = useRecoilValue(sessionState);
@@ -13,7 +15,8 @@ export default function useClearChat() {
     session?.socket.disconnect();
     session?.socket.connect();
     setMessages([]);
-    setElements({});
+    setElements([]);
+    setActions([]);
     setSideView(undefined);
     setTokenCount(0);
   };

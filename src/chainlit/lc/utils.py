@@ -1,7 +1,6 @@
 from typing import Any
 from chainlit.types import LLMSettings
 from typing import List, Optional
-from langchain.llms.base import BaseLLM
 
 
 def run_langchain_agent(agent: Any, input_str: str):
@@ -19,7 +18,7 @@ def run_langchain_agent(agent: Any, input_str: str):
     return raw_res, output_key
 
 
-def get_llm_settings(llm: BaseLLM, stop: Optional[List[str]] = None):
+def get_llm_settings(llm, stop: Optional[List[str]] = None):
     if llm.__class__.__name__ == "OpenAI":
         return LLMSettings(
             model_name=llm.model_name,
