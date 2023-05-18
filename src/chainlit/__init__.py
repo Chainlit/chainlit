@@ -275,7 +275,7 @@ def send_action(name: str, value: str, for_id: str, description=""):
 @trace
 def remove_action(action: Action):
     """
-    Send an action to the chatbot UI.
+    Removes an action from the chatbot UI.
     Args:
         action (Action): The action to remove.
     """
@@ -451,7 +451,7 @@ def action(name: str) -> Callable:
     Callback to call when an action is clicked in the UI.
 
     Args:
-        func (Callable[[Action, Any], Any]): The action callback to exexute. First parameter is the action.
+        func (Callable[[Action], Any]): The action callback to exexute. First parameter is the action.
     """
 
     def decorator(func: Callable[[Action], Any]):

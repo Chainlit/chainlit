@@ -31,6 +31,7 @@ const ConversationQuery = gql`
         name
         url
         display
+        forId
       }
     }
   }

@@ -106,7 +106,7 @@ class CloudClient(BaseClient):
         c_id = self.get_conversation_id()
 
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forId: string) {
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forId: String) {
             createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, forId: $forId) {
                 id,
                 type,
@@ -126,6 +126,8 @@ class CloudClient(BaseClient):
             "forId": for_id,
         }
         res = self.mutation(mutation, variables)
+        print(self.url)
+        print(res)
         return res["data"]["createElement"]
 
     def upload_element(self, content: bytes) -> str:
