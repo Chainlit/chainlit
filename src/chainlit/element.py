@@ -12,7 +12,7 @@ from chainlit.types import ElementType, ElementDisplay
 class Element(ABC):
     name: str
     type: ElementType
-    display: ElementDisplay
+    display: ElementDisplay = "side"
     forId: str = None
 
     def __post_init__(self) -> None:
@@ -84,7 +84,7 @@ class LocalImage(LocalElement):
     def __init__(
         self,
         name: str,
-        display: ElementDisplay,
+        display: ElementDisplay = "side",
         path: str = None,
         content: bytes = None,
     ):
@@ -102,7 +102,7 @@ class LocalImage(LocalElement):
 
 
 class RemoteImage(RemoteElement):
-    def __init__(self, name: str, display: ElementDisplay, url: str):
+    def __init__(self, name: str, url: str, display: ElementDisplay = "side"):
         self.name = name
         self.display = display
         self.type = "image"
@@ -110,7 +110,7 @@ class RemoteImage(RemoteElement):
 
 
 class Text(LocalElement):
-    def __init__(self, name: str, display: ElementDisplay, text: str):
+    def __init__(self, name: str, text: str, display: ElementDisplay = "side"):
         self.name = name
         self.display = display
         self.type = "text"
