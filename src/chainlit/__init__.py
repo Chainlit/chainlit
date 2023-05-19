@@ -8,21 +8,21 @@ from chainlit.lc import monkey
 monkey.patch()
 
 from chainlit.sdk import get_sdk
-from chainlit.user_session import user_session
 from chainlit.config import config
 from chainlit.types import (
-    ElementDisplay,
     LLMSettings,
     AskSpec,
     AskFileSpec,
     AskFileResponse,
     AskResponse,
-    Action,
 )
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
 from chainlit.server import socketio
+from chainlit.action import Action
+from chainlit.element import LocalImage, RemoteImage, Text
+from chainlit.user_session import user_session
 from typing import Callable, Any, List, Union
 from dotenv import load_dotenv
 import inspect
@@ -74,72 +74,6 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
 
 
 @trace
-def send_text(
-    text: str, name: str, display: ElementDisplay = "side", for_id: str = None
-):
-    """
-    Send a text element to the chatbot UI.
-    If a project ID is configured, the element will be uploaded to the cloud storage.
-
-    Args:
-        text (str): The content of the text element.
-        name (str): The name of the text element to be displayed in the UI.
-        display (ElementDisplay, optional): Determines how the element should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-        for_id (str, optional): If specified, the text element will only be working for that message ID.
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_text(text, name, display, for_id)
-
-
-@trace
-def send_local_image(
-    name: str,
-    path: str = None,
-    content: bytes = None,
-    display: ElementDisplay = "side",
-    for_id: str = None,
-):
-    """
-    Send a local image to the chatbot UI.
-    If a project ID is configured, the image will be uploaded to the cloud storage.
-
-    Args:
-        name (str): The name of the image to be displayed in the UI.
-        path (str, optional): The local file path of the image.
-        content (bytes, optional): The content of the image.
-        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-        for_id (str, optional): If specified, the image element will only be working for that message ID.
-
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_local_image(
-            name=name, path=path, content=content, display=display, for_id=for_id
-        )
-
-
-@trace
-def send_image(
-    url: str, name: str, display: ElementDisplay = "side", for_id: str = None
-):
-    """
-    Send an image to the chatbot UI.
-    Args:
-        url (str): The URL of the image.
-        name (str): The name of the image to be displayed in the UI.
-        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-        for_id (str, optional): If specified, the image element will only be working for that message ID.
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_image(url, name, display, for_id)
-
-
-@trace
 def send_message(
     content: str,
     author=config.chatbot_name,
@@ -148,6 +82,8 @@ def send_message(
     indent=0,
     llm_settings: LLMSettings = None,
     end_stream=False,
+    actions: List[Action] = [],
+    elements: List[Union[LocalImage, RemoteImage, Text]] = [],
 ):
     """
     Send a message to the chatbot UI.
@@ -167,7 +103,7 @@ def send_message(
     """
     sdk = get_sdk()
     if sdk:
-        return sdk.send_message(
+        msg_id = sdk.send_message(
             author=author,
             content=content,
             prompt=prompt,
@@ -176,6 +112,12 @@ def send_message(
             llm_settings=llm_settings,
             end_stream=end_stream,
         )
+
+        for action in actions:
+            action.send(for_id=msg_id)
+
+        for element in elements:
+            element.send(for_id=msg_id)
 
 
 @trace
@@ -258,33 +200,6 @@ def ask_for_file(
 
 
 @trace
-def send_action(name: str, value: str, for_id: str, description=""):
-    """
-    Send an action to the chatbot UI.
-    Args:
-        name (str): The name of the action to send.
-        value (str): The parameter the action will be called with.
-        for_id (str): The ID of the message the action is for.
-        description (str, optional): The description of the action. Defaults to "".
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_action(name=name, value=value, description=description, for_id=for_id)
-
-
-@trace
-def remove_action(action: Action):
-    """
-    Removes an action from the chatbot UI.
-    Args:
-        action (Action): The action to remove.
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.remove_action(action)
-
-
-@trace
 def start_stream(
     author=config.chatbot_name,
     indent: int = 0,
@@ -334,7 +249,6 @@ def langchain_factory(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated factory function.
     """
-    from chainlit.config import config
 
     config.lc_factory = wrap_user_function(func, with_task=True)
     return func
@@ -353,7 +267,6 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     Returns:
         Callable[[Any], str]: The decorated post-processing function.
     """
-    from chainlit.config import config
 
     config.lc_postprocess = wrap_user_function(func)
     return func
@@ -371,7 +284,6 @@ def on_message(func: Callable) -> Callable:
     Returns:
         Callable[[str], Any]: The decorated on_message function.
     """
-    from chainlit.config import config
 
     config.on_message = wrap_user_function(func)
     return func
@@ -390,7 +302,6 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-    from chainlit.config import config
 
     config.lc_run = wrap_user_function(func)
     return func
@@ -406,7 +317,6 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-    from chainlit.config import config
 
     config.lc_rename = wrap_user_function(func)
     return func
@@ -423,7 +333,6 @@ def on_chat_start(func: Callable) -> Callable:
     Returns:
         Callable[], Any]: The decorated hook.
     """
-    from chainlit.config import config
 
     config.on_chat_start = wrap_user_function(func, with_task=True)
     return func
@@ -440,7 +349,6 @@ def on_stop(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated stop hook.
     """
-    from chainlit.config import config
 
     config.on_stop = wrap_user_function(func)
     return func
@@ -455,8 +363,6 @@ def action(name: str) -> Callable:
     """
 
     def decorator(func: Callable[[Action], Any]):
-        from chainlit.config import config
-
         config.action_callbacks[name] = wrap_user_function(func, with_task=True)
         return func
 
@@ -470,3 +376,26 @@ def sleep(duration: int):
         duration (int): The duration in seconds.
     """
     return socketio.sleep(duration)
+
+
+__all__ = [
+    "user_session",
+    "Action",
+    "LocalImage",
+    "RemoteImage",
+    "Text",
+    "send_message",
+    "send_error_message",
+    "ask_for_input",
+    "ask_for_file",
+    "start_stream",
+    "send_token",
+    "langchain_factory",
+    "langchain_postprocess",
+    "langchain_run",
+    "langchain_rename",
+    "on_chat_start",
+    "on_stop",
+    "action",
+    "sleep",
+]

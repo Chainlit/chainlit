@@ -7,13 +7,15 @@ def on_action():
 
 
 @cl.action("removable action")
-def on_action(action):
+def on_action(action: cl.Action):
     cl.send_message("Executed removable action!")
-    cl.remove_action(action)
+    action.remove()
 
 
 @cl.on_chat_start
 def main():
-    id = cl.send_message("Hello, this is a test message!")
-    cl.send_action(name="test action", value="test", for_id=id)
-    cl.send_action(name="removable action", value="test", for_id=id)
+    actions = [
+        cl.Action(name="test action", value="test"),
+        cl.Action(name="removable action", value="test"),
+    ]
+    cl.send_message("Hello, this is a test message!", actions=actions)

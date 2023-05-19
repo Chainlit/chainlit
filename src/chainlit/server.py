@@ -12,7 +12,7 @@ from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
-from chainlit.types import Action
+from chainlit.action import Action
 from chainlit.telemetry import trace
 from chainlit.logger import logger
 
@@ -295,11 +295,11 @@ def message():
 
 def process_action(session: Session, action: Action):
     __chainlit_sdk__ = Chainlit(session)
-    callback = config.action_callbacks.get(action["name"])
+    callback = config.action_callbacks.get(action.name)
     if callback:
         callback(action)
     else:
-        logger.warning("No callback found for action %s", action["name"])
+        logger.warning("No callback found for action %s", action.name)
 
 
 @app.route("/action", methods=["POST"])
@@ -310,7 +310,7 @@ def on_action():
 
     body = request.json
     session_id = body["sessionId"]
-    action = body["action"]
+    action = Action(**body["action"])
 
     session = need_session(session_id)
 

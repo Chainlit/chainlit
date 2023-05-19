@@ -26,13 +26,12 @@ class BaseClient(ABC):
     @abstractmethod
     def create_element(
         self,
-        conversation_id: str,
         type: ElementType,
         url: str,
         name: str,
         display: str,
-        for_id: Any = None,
-    ) -> int:
+        for_id: str = None,
+    ) -> Dict[str, Any]:
         pass
 
 
@@ -101,7 +100,7 @@ class CloudClient(BaseClient):
         return int(res["data"]["createMessage"]["id"])
 
     def create_element(
-        self, type: ElementType, url: str, name: str, display: str, for_id: Any = None
+        self, type: ElementType, url: str, name: str, display: str, for_id: str = None
     ) -> Dict[str, Any]:
         c_id = self.get_conversation_id()
 
@@ -126,8 +125,6 @@ class CloudClient(BaseClient):
             "forId": for_id,
         }
         res = self.mutation(mutation, variables)
-        print(self.url)
-        print(res)
         return res["data"]["createElement"]
 
     def upload_element(self, content: bytes) -> str:
