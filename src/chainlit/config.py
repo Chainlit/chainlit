@@ -1,11 +1,13 @@
 import os
 import sys
-from typing import Optional, Literal, Any, Callable, List, Dict
+from typing import Optional, Literal, Any, Callable, List, Dict, TYPE_CHECKING
 import tomli
-from chainlit.types import Action
 from pydantic.dataclasses import dataclass
 from importlib import machinery
 from chainlit.logger import logger
+
+if TYPE_CHECKING:
+    from chainlit.action import Action
 
 
 # Get the directory the script is running from
@@ -71,7 +73,7 @@ class ChainlitConfig:
     # Path to the local langchain cache database
     lc_cache_path: str
     # Developer defined callbacks for each action. Key is the action name, value is the callback function.
-    action_callbacks: Dict[str, Callable[[Action], Any]]
+    action_callbacks: Dict[str, Callable[["Action"], Any]]
     # Directory where the Chainlit project is located
     root = root
     # Link to your github repo. This will add a github button in the UI's header.

@@ -3,12 +3,12 @@ import { useEffect, useRef } from 'react';
 import { IMessage, INestedMessage } from 'state/chat';
 import { IElements } from 'state/element';
 import Messages from './messages';
-import { IActions } from 'state/action';
+import { IAction } from 'state/action';
 
 interface Props {
   messages: IMessage[];
   elements: IElements;
-  actions: IActions;
+  actions: IAction[];
   autoScroll?: boolean;
   setAutoSroll?: (autoScroll: boolean) => void;
 }

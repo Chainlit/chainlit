@@ -8,21 +8,21 @@ from chainlit.lc import monkey
 monkey.patch()
 
 from chainlit.sdk import get_sdk
-from chainlit.user_session import user_session
 from chainlit.config import config
 from chainlit.types import (
-    ElementDisplay,
     LLMSettings,
     AskSpec,
     AskFileSpec,
     AskFileResponse,
     AskResponse,
-    Action,
 )
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
 from chainlit.server import socketio
+from chainlit.action import Action
+from chainlit.element import LocalImage, RemoteImage, Text
+from chainlit.user_session import user_session
 from typing import Callable, Any, List, Union
 from dotenv import load_dotenv
 import inspect
@@ -74,55 +74,6 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
 
 
 @trace
-def send_text(text: str, name: str, display: ElementDisplay = "side"):
-    """
-    Send a text element to the chatbot UI.
-    If a project ID is configured, the element will be uploaded to the cloud storage.
-
-    Args:
-        text (str): The content of the text element.
-        name (str): The name of the text element to be displayed in the UI.
-        display (ElementDisplay, optional): Determines how the element should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_text(text, name, display)
-
-
-@trace
-def send_local_image(path: str, name: str, display: ElementDisplay = "side"):
-    """
-    Send a local image to the chatbot UI.
-    If a project ID is configured, the image will be uploaded to the cloud storage.
-
-    Args:
-        path (str): The local file path of the image.
-        name (str): The name of the image to be displayed in the UI.
-        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_local_image(path, name, display)
-
-
-@trace
-def send_image(url: str, name: str, display: ElementDisplay = "side"):
-    """
-    Send an image to the chatbot UI.
-    Args:
-        url (str): The URL of the image.
-        name (str): The name of the image to be displayed in the UI.
-        display (ElementDisplay, optional): Determines how the image should be displayed in the UI.
-            Choices are "side" (default) or "inline" or "page".
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_image(url, name, display)
-
-
-@trace
 def send_message(
     content: str,
     author=config.chatbot_name,
@@ -131,6 +82,8 @@ def send_message(
     indent=0,
     llm_settings: LLMSettings = None,
     end_stream=False,
+    actions: List[Action] = [],
+    elements: List[Union[LocalImage, RemoteImage, Text]] = [],
 ):
     """
     Send a message to the chatbot UI.
@@ -144,10 +97,13 @@ def send_message(
         indent (int, optional): If positive, the message will be nested in the UI.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         end_stream (bool, optional): Pass True if this message was streamed.
+
+    Returns:
+        str: The message ID.
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(
+        msg_id = sdk.send_message(
             author=author,
             content=content,
             prompt=prompt,
@@ -156,6 +112,12 @@ def send_message(
             llm_settings=llm_settings,
             end_stream=end_stream,
         )
+
+        for action in actions:
+            action.send(for_id=msg_id)
+
+        for element in elements:
+            element.send(for_id=msg_id)
 
 
 @trace
@@ -238,20 +200,6 @@ def ask_for_file(
 
 
 @trace
-def send_action(name: str, trigger: str, description=""):
-    """
-    Send an action to the chatbot UI.
-    Args:
-        name (str): The name of the action to send.
-        trigger (str): The text that should trigger the action when clicked.
-        description (str, optional): The description of the action. Defaults to "".
-    """
-    sdk = get_sdk()
-    if sdk:
-        sdk.send_action(name=name, trigger=trigger, description=description)
-
-
-@trace
 def start_stream(
     author=config.chatbot_name,
     indent: int = 0,
@@ -301,7 +249,6 @@ def langchain_factory(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated factory function.
     """
-    from chainlit.config import config
 
     config.lc_factory = wrap_user_function(func, with_task=True)
     return func
@@ -311,7 +258,8 @@ def langchain_factory(func: Callable) -> Callable:
 def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
-    The decorated function takes the raw output of the LangChain object and return a string as the final response.
+    The decorated function takes the raw output of the LangChain object as input.
+    The response will NOT be automatically sent to the UI, you need to call send_message.
 
     Args:
         func (Callable[[Any], str]): The post-processing function to apply after generating a response. Takes the response as parameter.
@@ -319,7 +267,6 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     Returns:
         Callable[[Any], str]: The decorated post-processing function.
     """
-    from chainlit.config import config
 
     config.lc_postprocess = wrap_user_function(func)
     return func
@@ -337,7 +284,6 @@ def on_message(func: Callable) -> Callable:
     Returns:
         Callable[[str], Any]: The decorated on_message function.
     """
-    from chainlit.config import config
 
     config.on_message = wrap_user_function(func)
     return func
@@ -348,14 +294,14 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     """
     Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
     Use when your agent run method has custom parameters.
-    This function should return a string as the final response.
+    Takes the LangChain agent and the user input as parameters.
+    The response will NOT be automatically sent to the UI, you need to call send_message.
     Args:
         func (Callable[[Any, str], str]): The function to be called when a new message is received. Takes the agent and user input as parameters and returns the output string.
 
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-    from chainlit.config import config
 
     config.lc_run = wrap_user_function(func)
     return func
@@ -371,7 +317,6 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-    from chainlit.config import config
 
     config.lc_rename = wrap_user_function(func)
     return func
@@ -388,7 +333,6 @@ def on_chat_start(func: Callable) -> Callable:
     Returns:
         Callable[], Any]: The decorated hook.
     """
-    from chainlit.config import config
 
     config.on_chat_start = wrap_user_function(func, with_task=True)
     return func
@@ -405,7 +349,6 @@ def on_stop(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated stop hook.
     """
-    from chainlit.config import config
 
     config.on_stop = wrap_user_function(func)
     return func
@@ -413,12 +356,13 @@ def on_stop(func: Callable) -> Callable:
 
 def action(name: str) -> Callable:
     """
-    Callback to call when an action is triggered in the UI.
+    Callback to call when an action is clicked in the UI.
+
+    Args:
+        func (Callable[[Action], Any]): The action callback to exexute. First parameter is the action.
     """
 
     def decorator(func: Callable[[Action], Any]):
-        from chainlit.config import config
-
         config.action_callbacks[name] = wrap_user_function(func, with_task=True)
         return func
 
@@ -432,3 +376,26 @@ def sleep(duration: int):
         duration (int): The duration in seconds.
     """
     return socketio.sleep(duration)
+
+
+__all__ = [
+    "user_session",
+    "Action",
+    "LocalImage",
+    "RemoteImage",
+    "Text",
+    "send_message",
+    "send_error_message",
+    "ask_for_input",
+    "ask_for_file",
+    "start_stream",
+    "send_token",
+    "langchain_factory",
+    "langchain_postprocess",
+    "langchain_run",
+    "langchain_rename",
+    "on_chat_start",
+    "on_stop",
+    "action",
+    "sleep",
+]

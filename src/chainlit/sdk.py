@@ -1,8 +1,8 @@
 from typing import Union
-import os
 import time
+import uuid
 from chainlit.session import Session
-from chainlit.types import ElementDisplay, LLMSettings, ElementType, AskSpec
+from chainlit.types import LLMSettings, AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
@@ -46,89 +46,6 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    def send_remote_element(
-        self,
-        url: str,
-        name: str,
-        type: ElementType,
-        display: ElementDisplay,
-    ):
-        """Send an element to the UI."""
-        element = {
-            "name": name,
-            "url": url,
-            "type": type,
-            "display": display,
-        }
-        if self.emit and element:
-            self.emit("element", element)
-
-    def send_local_element(
-        self,
-        ext: str,
-        content: bytes,
-        name: str,
-        type: ElementType,
-        display: ElementDisplay,
-    ):
-        """Send an element to the UI."""
-        if self.client:
-            # Cloud is enabled, upload the element to S3
-            url = self.client.upload_element(ext=ext, content=content)
-            if url:
-                element = self.client.create_element(
-                    name=name, url=url, type=type, display=display
-                )
-        else:
-            element = {
-                "name": name,
-                "content": content.decode("utf-8") if type == "text" else content,
-                "type": type,
-                "display": display,
-            }
-        if self.emit and element:
-            self.emit("element", element)
-
-    def send_local_image(self, path: str, name: str, display: ElementDisplay = "side"):
-        """Send a local image to the UI."""
-        if not self.emit:
-            return
-
-        with open(path, "rb") as f:
-            _, ext = os.path.splitext(path)
-            type = "image"
-            image_data = f.read()
-            self.send_local_element(ext, image_data, name, type, display)
-
-    def send_image(self, url: str, name: str, display: ElementDisplay = "side"):
-        """Send an image to the UI."""
-        if not self.emit:
-            return
-
-        type = "image"
-        self.send_remote_element(url, name, type, display)
-
-    def send_text(self, text: str, name: str, display: ElementDisplay = "side"):
-        """Send a text element to the UI."""
-        if not self.emit:
-            return
-
-        type = "text"
-        ext = ".txt"
-        self.send_local_element(ext, bytes(text, "utf-8"), name, type, display)
-
-    def send_action(self, name: str, trigger: str, description=""):
-        """Send an action to the UI."""
-        if not self.emit:
-            return
-
-        action = {
-            "name": name,
-            "trigger": trigger,
-            "description": description,
-        }
-        self.emit("action", action)
-
     def send_message(
         self,
         author: str,
@@ -162,6 +79,9 @@ class Chainlit:
         if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
+        else:
+            message_id = uuid.uuid4().hex
+            msg["tempId"] = message_id
 
         msg["createdAt"] = current_milli_time()
 
@@ -169,6 +89,8 @@ class Chainlit:
             self.stream_end(msg)
         else:
             self.emit("message", msg)
+
+        return str(message_id)
 
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the UI."""
@@ -295,3 +217,10 @@ def get_sdk() -> Union[Chainlit, None]:
             sdk = candidate
             break
     return sdk
+
+
+def get_emit():
+    sdk = get_sdk()
+    if sdk:
+        return sdk.emit
+    return None

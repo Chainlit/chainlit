@@ -12,7 +12,7 @@ from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
-from chainlit.types import Action
+from chainlit.action import Action
 from chainlit.telemetry import trace
 from chainlit.logger import logger
 
@@ -243,14 +243,16 @@ def process_message(session: Session, author: str, input_str: str):
             # If a langchain agent is available, run it
             if config.lc_run:
                 # If the developer provided a custom run function, use it
-                res = config.lc_run(langchain_agent, input_str)
+                config.lc_run(langchain_agent, input_str)
+                return
             else:
                 # Otherwise, use the default run function
                 raw_res, output_key = run_langchain_agent(langchain_agent, input_str)
 
                 if config.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
-                    res = config.lc_postprocess(raw_res)
+                    config.lc_postprocess(raw_res)
+                    return
                 elif output_key is not None:
                     # Use the output key if provided
                     res = raw_res[output_key]
@@ -293,11 +295,11 @@ def message():
 
 def process_action(session: Session, action: Action):
     __chainlit_sdk__ = Chainlit(session)
-    callback = config.action_callbacks.get(action["name"])
+    callback = config.action_callbacks.get(action.name)
     if callback:
         callback(action)
     else:
-        logger.warning("No callback found for action %s", action["name"])
+        logger.warning("No callback found for action %s", action.name)
 
 
 @app.route("/action", methods=["POST"])
@@ -308,7 +310,7 @@ def on_action():
 
     body = request.json
     session_id = body["sessionId"]
-    action = body["action"]
+    action = Action(**body["action"])
 
     session = need_session(session_id)
 

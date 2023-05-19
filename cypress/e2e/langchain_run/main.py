@@ -14,4 +14,4 @@ def main():
 @cl.langchain_run
 def run(agent, input_str):
     res = agent("2+2")
-    return res["text"]
+    cl.send_message(res["text"])

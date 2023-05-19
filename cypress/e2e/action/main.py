@@ -1,13 +1,21 @@
 import chainlit as cl
 
 
-@cl.action("action1")
+@cl.action("test action")
 def on_action():
-    cl.send_message("Executed action 1!")
+    cl.send_message("Executed test action!")
+
+
+@cl.action("removable action")
+def on_action(action: cl.Action):
+    cl.send_message("Executed removable action!")
+    action.remove()
 
 
 @cl.on_chat_start
 def main():
-    cl.send_message("Hello, here is a clickable action!")
-    cl.send_action(name="action1", trigger="clickable action",
-                   description="Click on this to run action1!")
+    actions = [
+        cl.Action(name="test action", value="test"),
+        cl.Action(name="removable action", value="test"),
+    ]
+    cl.send_message("Hello, this is a test message!", actions=actions)

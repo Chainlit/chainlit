@@ -38,12 +38,6 @@ class AskFileResponse:
     content: bytes
 
 
-class Action(TypedDict):
-    name: str
-    trigger: str
-    description: str
-
-
 @dataclass_json
 @dataclass
 class LLMSettings:

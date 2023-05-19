@@ -4,45 +4,50 @@ import { Typography, Link, Stack } from '@mui/material';
 import { IElements } from 'state/element';
 import InlinedElements from '../../element/inlined';
 import { memo } from 'react';
-import { IActions } from 'state/action';
+import { IAction } from 'state/action';
 import ElementRef from './elementRef';
-import ActionRef from './actionRef';
 import Code from 'components/Code';
 
 interface Props {
+  id?: string;
   content?: string;
   elements: IElements;
-  actions: IActions;
+  actions: IAction[];
   language?: string;
   authorIsUser?: boolean;
 }
 
-function prepareContent({ elements, actions, content, language }: Props) {
-  const elementNames = Object.keys(elements);
+function prepareContent({ id, elements, actions, content, language }: Props) {
+  const filteredElements = elements.filter((e) => {
+    if (e.forId) {
+      return e.forId === id;
+    }
+    return true;
+  });
+
+  const elementNames = filteredElements.map((e) => e.name);
+
   const elementRegexp = elementNames.length
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  const actionContents = Object.values(actions).map((a) => a.trigger);
-  const actionRegexp = actionContents.length
-    ? new RegExp(`(${actionContents.join('|')})`, 'g')
-    : undefined;
+  const filteredActions = actions.filter((a) => {
+    if (a.forId) {
+      return a.forId === id;
+    }
+    return true;
+  });
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedElements: IElements = {};
+  const inlinedElements: IElements = filteredElements.filter(
+    (e) => e.display === 'inline'
+  );
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
-      if (elements[match].display === 'inline') {
-        inlinedElements[match] = elements[match];
-      }
-      // spaces break markdown links. The address in the link is not used anyway
-      return `[${match}](${match.replaceAll(' ', '_')})`;
-    });
-  }
+      const element = filteredElements.find((e) => e.name === match);
+      if (!element) return match;
 
-  if (actionRegexp) {
-    preparedContent = preparedContent.replaceAll(actionRegexp, (match) => {
       // spaces break markdown links. The address in the link is not used anyway
       return `[${match}](${match.replaceAll(' ', '_')})`;
     });
@@ -51,17 +56,29 @@ function prepareContent({ elements, actions, content, language }: Props) {
   if (language) {
     preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
   }
-  return { preparedContent, inlinedElements };
+  return {
+    preparedContent,
+    inlinedElements,
+    filteredElements,
+    filteredActions
+  };
 }
 
 export default memo(function MessageContent({
+  id,
   content,
   elements,
   actions,
   language,
   authorIsUser
 }: Props) {
-  const { preparedContent, inlinedElements } = prepareContent({
+  const {
+    preparedContent,
+    inlinedElements,
+    filteredActions,
+    filteredElements
+  } = prepareContent({
+    id,
     content,
     language,
     elements,
@@ -69,6 +86,7 @@ export default memo(function MessageContent({
   });
 
   if (!preparedContent) return null;
+
   return (
     <Stack width="100%">
       <Typography
@@ -87,15 +105,10 @@ export default memo(function MessageContent({
           components={{
             a({ children, ...props }) {
               const name = children[0] as string;
-              const element = elements[name];
-              const action = Object.values(actions).find(
-                (a) => a.trigger === name
-              );
+              const element = filteredElements.find((e) => e.name === name);
 
               if (element) {
                 return <ElementRef element={element} />;
-              } else if (action) {
-                return <ActionRef action={action} />;
               } else {
                 return (
                   <Link {...props} target="_blank">
@@ -112,7 +125,7 @@ export default memo(function MessageContent({
           {preparedContent}
         </ReactMarkdown>
       </Typography>
-      <InlinedElements inlined={inlinedElements} />
+      <InlinedElements elements={inlinedElements} actions={filteredActions} />
     </Stack>
   );
 });

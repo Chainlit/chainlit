@@ -20,7 +20,7 @@ const ElementView = () => {
   const { name } = useParams();
   const elements = useRecoilValue(elementState);
 
-  const element = elements[name!];
+  const element = elements.find((element) => element.name === name);
 
   if (!element) {
     return <Navigate to="/" />;
