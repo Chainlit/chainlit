@@ -21,18 +21,32 @@ export default function DetailsButton({
 }: Props) {
   const pSettings = useRecoilValue(projectSettingsState);
 
-  const nested = !!message.subMessages?.length;
+  const nestedCount = message.subMessages?.length;
+  const nested = !!nestedCount;
 
-  const tool = nested ? message.subMessages![0].author : undefined;
+  const tool = nested
+    ? message.subMessages![nestedCount - 1].author
+    : undefined;
 
-  const show =
-    nested || (loading && (!message.content || message.authorIsUser));
+  const isRunningEmptyStep = loading && !message.content;
+  const isRunningUserMessage = loading && message.authorIsUser;
+
+  const show = nested || isRunningEmptyStep || isRunningUserMessage;
 
   if (!show || pSettings?.hideCot) {
     return null;
   }
 
-  const text = loading ? (tool ? `Using ${tool}` : 'Running') : `Used ${tool}`;
+  // Don't count empty steps
+  const stepCount = nestedCount
+    ? message.subMessages!.filter((m) => !!m.content).length
+    : 0;
+
+  const text = loading
+    ? tool
+      ? `Using ${tool}`
+      : 'Running'
+    : `Took ${stepCount} step${stepCount <= 1 ? '' : 's'}`;
 
   let id = '';
   if (tool) {
