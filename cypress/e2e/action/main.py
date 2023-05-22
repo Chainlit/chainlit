@@ -1,12 +1,12 @@
 import chainlit as cl
 
 
-@cl.action("test action")
+@cl.action_callback("test action")
 def on_action():
     cl.send_message("Executed test action!")
 
 
-@cl.action("removable action")
+@cl.action_callback("removable action")
 def on_action(action: cl.Action):
     cl.send_message("Executed removable action!")
     action.remove()

@@ -354,7 +354,7 @@ def on_stop(func: Callable) -> Callable:
     return func
 
 
-def action(name: str) -> Callable:
+def action_callback(name: str) -> Callable:
     """
     Callback to call when an action is clicked in the UI.
 
