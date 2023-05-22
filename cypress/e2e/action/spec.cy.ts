@@ -7,7 +7,7 @@ describe("Action", () => {
     cy.wait(["@settings"]);
   });
 
-  it("should correcly execute actions", () => {
+  it("should correctly execute actions", () => {
     cy.get(".message")
       .should("have.length", 1)
       .eq(0)

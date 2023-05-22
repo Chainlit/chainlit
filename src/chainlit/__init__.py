@@ -87,7 +87,7 @@ def send_message(
 ):
     """
     Send a message to the chatbot UI.
-    If a project ID is configured, the messages will be uploaded to the cloud storage.
+    If a project ID is configured, the message will be uploaded to the cloud storage.
 
     Args:
         content (str): The content of the message.
@@ -124,16 +124,18 @@ def send_message(
 def send_error_message(content: str, author=config.chatbot_name, indent=0):
     """
     Send an error message to the chatbot UI.
-    If a project ID is configured, the messages will be uploaded to the cloud storage.
+    If a project ID is configured, the message will be uploaded to the cloud storage.
 
     Args:
-        content (str): The content of the error.
+        content (str): The error message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         indent (int, optional): If positive, the message will be nested in the UI.
     """
     sdk = get_sdk()
     if sdk:
-        sdk.send_message(author=author, content=content, is_error=True, indent=indent)
+        return sdk.send_message(
+            author=author, content=content, is_error=True, indent=indent
+        )
 
 
 @trace
@@ -143,7 +145,7 @@ def ask_for_input(
     """
     Ask for the user input before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
-    If a project ID is configured, the messages will be uploaded to the cloud storage.
+    If a project ID is configured, the message will be uploaded to the cloud storage.
 
     Args:
         content (str): The content of the prompt.
@@ -173,7 +175,7 @@ def ask_for_file(
     """
     Ask the user to upload a file before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
-    If a project ID is configured, the messages will be uploaded to the cloud storage.
+    If a project ID is configured, the file will be uploaded to the cloud storage.
 
     Args:
         title (str): Text displayed above the upload button.
