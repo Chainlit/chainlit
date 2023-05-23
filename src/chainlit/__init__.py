@@ -119,6 +119,8 @@ def send_message(
         for element in elements:
             element.send(for_id=msg_id)
 
+        return msg_id
+
 
 @trace
 def send_error_message(content: str, author=config.chatbot_name, indent=0):

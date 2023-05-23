@@ -88,13 +88,14 @@ def project_settings():
         "userEnv": config.user_env,
         "hideCot": config.hide_cot,
         "chainlitMd": get_markdown_str(config.root),
-        "dev": config.chainlit_env == "development",
+        "prod": bool(config.chainlit_prod_url),
         "appTitle": config.chatbot_name,
         "github": config.github,
     }
 
 
 @socketio.on("connect")
+@trace
 def connect():
     """Handle socket connection."""
 
@@ -189,6 +190,7 @@ def disconnect():
 
 
 @socketio.on("stop")
+@trace
 def stop():
     """Handle a stop request from the client."""
 

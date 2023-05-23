@@ -6,7 +6,7 @@ import { projectSettingsState } from 'state/project';
 export default function Badge() {
   const pSettings = useRecoilValue(projectSettingsState);
 
-  if (pSettings?.dev !== undefined && pSettings.dev) return null;
+  if (!pSettings?.prod) return null;
 
   return (
     <Box

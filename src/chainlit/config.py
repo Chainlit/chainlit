@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Optional, Literal, Any, Callable, List, Dict, TYPE_CHECKING
+from typing import Optional, Any, Callable, List, Dict, TYPE_CHECKING
 import tomli
 from pydantic.dataclasses import dataclass
 from importlib import machinery
@@ -46,18 +46,13 @@ hide_cot = false
 #request_limit = "10 per day"
 """
 
-# Set environment and server URL
-chainlit_env = os.environ.get("CHAINLIT_ENV") or "development"
-if chainlit_env == "development":
-    # chainlit_server = "http://localhost:3000"
-    chainlit_server = "https://cloud.chainlit.io"
-else:
-    chainlit_server = "https://cloud.chainlit.io"
+# Set  and server URL
+chainlit_prod_url = os.environ.get("CHAINLIT_PROD_URL")
+chainlit_server = "https://cloud.chainlit.io"
 
 
 @dataclass()
 class ChainlitConfig:
-    chainlit_env: Literal["development", "production"]
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     # Name of the app and chatbot. Used as the default message author.
@@ -76,6 +71,8 @@ class ChainlitConfig:
     action_callbacks: Dict[str, Callable[["Action"], Any]]
     # Directory where the Chainlit project is located
     root = root
+    # The url of the deployed app. Only set if the app is deployed.
+    chainlit_prod_url = chainlit_prod_url
     # Link to your github repo. This will add a github button in the UI's header.
     github: Optional[str] = None
     # Limit the number of requests per user.
@@ -176,7 +173,6 @@ def load_config():
             github=github,
             request_limit=request_limit,
             hide_cot=hide_cot,
-            chainlit_env=chainlit_env,
             chainlit_server=chainlit_server,
             chatbot_name=chatbot_name,
             public=public,

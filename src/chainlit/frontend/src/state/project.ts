@@ -5,7 +5,7 @@ export const projectSettingsState = atom<
       public: boolean;
       chainlitServer: string;
       hideCot: boolean;
-      dev: boolean;
+      prod: boolean;
       appTitle: string;
       projectId?: string;
       userEnv?: string[];
