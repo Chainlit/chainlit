@@ -13,7 +13,7 @@ from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
-from chainlit.telemetry import trace
+from chainlit.telemetry import trace, trace_event
 from chainlit.logger import logger
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -95,10 +95,8 @@ def project_settings():
 
 
 @socketio.on("connect")
-@trace
 def connect():
     """Handle socket connection."""
-
     session_id = request.sid
     client = None
     user_env = {}
@@ -109,6 +107,7 @@ def connect():
             user_env = json.loads(request.headers.get("user-env"))
             for key in config.user_env:
                 if key not in user_env:
+                    trace_event("missing_user_env")
                     raise ConnectionRefusedError(
                         "Missing user environment variable: " + key
                     )
@@ -116,6 +115,7 @@ def connect():
     access_token = request.headers.get("Authorization")
     if not config.public and not access_token:
         # Refuse connection if the app is private and no access token is provided
+        trace_event("no_access_token")
         raise ConnectionRefusedError("No access token provided")
     elif access_token and config.project_id:
         # Create the cloud client
@@ -171,6 +171,8 @@ def connect():
         task = socketio.start_background_task(_on_chat_start, session)
         session["task"] = task
 
+    trace_event("connection_successful")
+
 
 @socketio.on("disconnect")
 def disconnect():
@@ -190,10 +192,9 @@ def disconnect():
 
 
 @socketio.on("stop")
-@trace
 def stop():
     """Handle a stop request from the client."""
-
+    trace_event("stop_task")
     session = sessions.get(request.sid)
     if not session:
         return
