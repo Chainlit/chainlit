@@ -45,15 +45,20 @@ function NavItem({ to, label }: INavItem) {
 
 interface NavProps {
   isPublic?: boolean;
+  hasReadme?: boolean;
 }
 
-function Nav({ isPublic }: NavProps) {
+function Nav({ isPublic, hasReadme }: NavProps) {
   const location = useLocation();
 
   const tabs = [{ to: '/', label: 'Chat' }];
 
   if (isPublic === false) {
     tabs.push({ to: '/dataset', label: 'History' });
+  }
+
+  if (hasReadme) {
+    tabs.push({ to: '/readme', label: 'Readme' });
   }
 
   return (
@@ -86,7 +91,10 @@ export default function Header() {
         }}
       >
         <Stack alignItems="center" direction="row">
-          <Nav isPublic={pSettings?.public} />
+          <Nav
+            isPublic={pSettings?.public}
+            hasReadme={!!pSettings?.chainlitMd}
+          />
         </Stack>
         <Stack
           alignItems="center"

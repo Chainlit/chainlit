@@ -24,7 +24,7 @@ import ErrorBoundary from 'components/errorBoundary';
 const Chat = () => {
   const { user, isAuthenticated } = useAuth();
   const session = useRecoilValue(sessionState);
-  const [askUser, setAskUser] = useRecoilState(askUserState);
+  const askUser = useRecoilValue(askUserState);
   const [messages, setMessages] = useRecoilState(messagesState);
   const elements = useRecoilValue(elementState);
   const actions = useRecoilValue(actionState);

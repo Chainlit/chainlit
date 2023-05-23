@@ -24,11 +24,16 @@ import { useAuth } from 'hooks/auth';
 import { projectSettingsState } from 'state/project';
 import Socket from 'components/socket';
 import { Toaster } from 'react-hot-toast';
+import Readme from 'pages/Readme';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />
+  },
+  {
+    path: '/readme',
+    element: <Readme />
   },
   {
     path: '/env',
