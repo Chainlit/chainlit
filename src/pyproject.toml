@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "0.2.101"
+version = "0.2.102"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "A faster way to build chatbot UIs."
 authors = ["Chainlit"]
@@ -21,7 +21,6 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = "^3.8"
 dataclasses_json = "^0.5.7"
-flask = "^2.2.3"
 flask_socketio = "^5.3.3"
 flask_cors = "^3.0.10"
 flask-limiter = "^3.3.0"
@@ -36,7 +35,8 @@ pydantic = "^1.10.6"
 python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
 auth0-python = "^4.1.1"
-uptrace = "^1.17.0"
+uptrace = "^1.18.0"
+grpcio = "1.54.2"
 typing-inspect = "0.8.0"
 typing_extensions = "4.5.0"
 
