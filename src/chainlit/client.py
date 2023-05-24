@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
 import uuid
@@ -36,7 +36,7 @@ class BaseClient(ABC):
 
 
 class CloudClient(BaseClient):
-    conversation_id: str = None
+    conversation_id: Optional[str] = None
 
     def __init__(self, project_id: str, session_id: str, access_token: str, url: str):
         self.project_id = project_id
@@ -55,6 +55,12 @@ class CloudClient(BaseClient):
         :return: The response data as a dictionary.
         """
         return self.client.execute(query=query, variables=variables)
+
+    def check_for_errors(self, response: Dict[str, Any]):
+        if "errors" in response:
+            logger.error(response["errors"])
+            return True
+        return False
 
     def mutation(self, mutation: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
@@ -76,7 +82,11 @@ class CloudClient(BaseClient):
         """
         variables = {"projectId": self.project_id, "sessionId": session_id}
         res = self.mutation(mutation, variables)
-        # Todo check response
+
+        if self.check_for_errors(res):
+            logger.warning("Could not create conversation.")
+            return None
+
         return int(res["data"]["createConversation"]["id"])
 
     def get_conversation_id(self):
@@ -87,6 +97,11 @@ class CloudClient(BaseClient):
 
     def create_message(self, variables: Dict[str, Any]) -> int:
         c_id = self.get_conversation_id()
+
+        if not c_id:
+            logger.warning("Missing conversation ID, could not persist the message.")
+            return None
+
         variables["conversationId"] = c_id
 
         mutation = """
@@ -97,12 +112,21 @@ class CloudClient(BaseClient):
         }
         """
         res = self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not persist message.")
+            return None
+
         return int(res["data"]["createMessage"]["id"])
 
     def create_element(
         self, type: ElementType, url: str, name: str, display: str, for_id: str = None
     ) -> Dict[str, Any]:
         c_id = self.get_conversation_id()
+
+        if not c_id:
+            logger.warning("Missing conversation ID, could not persist the element.")
+            return None
 
         mutation = """
         mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forId: String) {
@@ -125,6 +149,11 @@ class CloudClient(BaseClient):
             "forId": for_id,
         }
         res = self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not persist element.")
+            return None
+
         return res["data"]["createElement"]
 
     def upload_element(self, content: bytes) -> str:
