@@ -28,10 +28,13 @@ class Element(ABC):
     def send(self, for_id: str = None):
         sdk = get_sdk()
 
+        element = None
+
         # Cloud is enabled, upload the element to S3
         if sdk.client:
             element = self.persist(sdk.client, for_id)
-        else:
+
+        if not element:
             element = self.to_dict()
             if for_id:
                 element["forId"] = for_id

@@ -79,7 +79,8 @@ class Chainlit:
         if self.client:
             message_id = self.client.create_message(msg)
             msg["id"] = message_id
-        else:
+
+        if not "id" in msg:
             message_id = uuid.uuid4().hex
             msg["tempId"] = message_id
 
