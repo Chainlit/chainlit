@@ -1,27 +1,36 @@
-import { Box } from '@mui/material';
-import { IElement } from 'state/element';
+import { IImageElement } from 'state/element';
+import ImageFrame from './frame';
 
 interface Props {
-  element: IElement;
+  element: IImageElement;
 }
 
 export default function ImageElement({ element }: Props) {
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
+  const className = `${element.display}-image`;
   return (
-    <Box
-      sx={{
-        p: 1,
-        boxSizing: 'border-box',
-        bgcolor: (theme) =>
-          theme.palette.mode === 'light' ? '#EEEEEE' : '#212121',
-        borderRadius: '4px'
-      }}
-    >
+    <ImageFrame>
       <img
+        className={className}
         src={src}
-        style={{ objectFit: 'cover', width: '100%' }}
+        onClick={(e) => {
+          if (element.display === 'inline') {
+            const w = window.open('');
+            const target = e.target as HTMLImageElement;
+            w?.document.write(`<img src="${target.src}" />`);
+          }
+        }}
+        style={{
+          objectFit: 'cover',
+          maxWidth: '100%',
+          margin: 'auto',
+          height: 'auto',
+          display: 'block',
+          cursor: element.display === 'inline' ? 'pointer' : 'default'
+        }}
         alt={element.name}
+        loading="lazy"
       />
-    </Box>
+    </ImageFrame>
   );
 }

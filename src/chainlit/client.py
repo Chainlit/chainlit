@@ -3,7 +3,7 @@ from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
 import uuid
 import requests
-from chainlit.types import ElementType
+from chainlit.types import ElementType, ElementSize
 from chainlit.logger import logger
 
 
@@ -30,6 +30,8 @@ class BaseClient(ABC):
         url: str,
         name: str,
         display: str,
+        size: ElementSize = None,
+        language: str = None,
         for_id: str = None,
     ) -> Dict[str, Any]:
         pass
@@ -120,7 +122,14 @@ class CloudClient(BaseClient):
         return int(res["data"]["createMessage"]["id"])
 
     def create_element(
-        self, type: ElementType, url: str, name: str, display: str, for_id: str = None
+        self,
+        type: ElementType,
+        url: str,
+        name: str,
+        display: str,
+        size: ElementSize = None,
+        language: str = None,
+        for_id: str = None,
     ) -> Dict[str, Any]:
         c_id = self.get_conversation_id()
 
@@ -129,13 +138,15 @@ class CloudClient(BaseClient):
             return None
 
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forId: String) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, forId: $forId) {
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $size: String, $language: String, $forId: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forId: $forId) {
                 id,
                 type,
                 url,
                 name,
                 display,
+                size,
+                language,
                 forId
             }
         }
@@ -146,6 +157,8 @@ class CloudClient(BaseClient):
             "url": url,
             "name": name,
             "display": display,
+            "size": size,
+            "language": language,
             "forId": for_id,
         }
         res = self.mutation(mutation, variables)

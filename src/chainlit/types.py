@@ -4,6 +4,7 @@ from dataclasses_json import dataclass_json
 
 ElementType = Literal["image", "text"]
 ElementDisplay = Literal["inline", "side", "page"]
+ElementSize = Literal["small", "medium", "large"]
 
 
 @dataclass_json

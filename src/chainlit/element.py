@@ -4,7 +4,7 @@ from typing import Dict
 from abc import ABC, abstractmethod
 from chainlit.sdk import get_sdk, BaseClient
 from chainlit.telemetry import trace_event
-from chainlit.types import ElementType, ElementDisplay
+from chainlit.types import ElementType, ElementDisplay, ElementSize
 
 
 @dataclass_json
@@ -43,20 +43,23 @@ class Element(ABC):
 
 
 @dataclass
-class LocalElementBase:
-    content: bytes
+class LocalElement(Element):
+    content: bytes = None
 
-
-@dataclass
-class LocalElement(Element, LocalElementBase):
     def persist(self, client: BaseClient, for_id: str = None):
+        if not self.content:
+            raise ValueError("Must provide content")
         url = client.upload_element(content=self.content)
         if url:
+            size = getattr(self, "size", None)
+            language = getattr(self, "language", None)
             element = client.create_element(
                 name=self.name,
                 url=url,
                 type=self.type,
                 display=self.display,
+                size=size,
+                language=language,
                 for_id=for_id,
             )
             return element
@@ -68,53 +71,66 @@ class RemoteElementBase:
 
 
 @dataclass
+class ImageBase:
+    type: ElementType = "image"
+    size: ElementSize = "medium"
+
+
+@dataclass
 class RemoteElement(Element, RemoteElementBase):
     def persist(self, client: BaseClient, for_id: str = None):
+        size = getattr(self, "size", None)
+        language = getattr(self, "language", None)
         element = client.create_element(
             name=self.name,
             url=self.url,
             type=self.type,
             display=self.display,
+            size=size,
+            language=language,
             for_id=for_id,
         )
         return element
 
 
-class LocalImage(LocalElement):
-    def __init__(
-        self,
-        name: str,
-        display: ElementDisplay = "side",
-        path: str = None,
-        content: bytes = None,
-    ):
-        if path:
-            with open(path, "rb") as f:
+@dataclass
+class LocalImage(ImageBase, LocalElement):
+    """Useful to send an image living on the local filesystem to the UI."""
+
+    path: str = None
+
+    def __post_init__(self):
+        if self.path:
+            with open(self.path, "rb") as f:
                 self.content = f.read()
-        elif content:
-            self.content = content
+        elif self.content:
+            self.content = self.content
         else:
             raise ValueError("Must provide either path or content")
 
-        self.name = name
-        self.display = display
-        self.type = "image"
+
+@dataclass
+class RemoteImage(ImageBase, RemoteElement):
+    """Useful to send an image based on an URL to the UI."""
+
+    pass
 
 
-class RemoteImage(RemoteElement):
-    def __init__(self, name: str, url: str, display: ElementDisplay = "side"):
-        self.name = name
-        self.display = display
-        self.type = "image"
-        self.url = url
+@dataclass
+class TextBase:
+    text: str
 
 
-class Text(LocalElement):
-    def __init__(self, name: str, text: str, display: ElementDisplay = "side"):
-        self.name = name
-        self.display = display
-        self.type = "text"
-        self.content = bytes(text, "utf-8")
+@dataclass
+class Text(LocalElement, TextBase):
+    """Useful to send a text (not a message) to the UI."""
+
+    type: ElementType = "text"
+    content = bytes("", "utf-8")
+    language: str = None
+
+    def __post_init__(self):
+        self.content = bytes(self.text, "utf-8")
 
     def before_emit(self, text_element):
         if "content" in text_element and isinstance(text_element["content"], bytes):

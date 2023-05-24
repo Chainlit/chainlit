@@ -9,7 +9,7 @@ describe("Global Elements", () => {
     cy.get(".message").should("have.length", 1);
 
     // Inlined
-    cy.get(".inlined-image").should("have.length", 1);
+    cy.get(".inline-image").should("have.length", 1);
     cy.get(".element-link").eq(0).should("contain", "text1");
     cy.get(".element-link").eq(0).click();
 

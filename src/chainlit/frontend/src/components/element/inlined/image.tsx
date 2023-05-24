@@ -1,65 +1,46 @@
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import { IImageElement } from 'state/element';
+import ImageElement from '../image';
 
 interface Props {
-  items: {
-    url?: string;
-    src: string;
-    title: string;
-  }[];
+  images: IImageElement[];
 }
 
-export default function InlinedImageList({ items }: Props) {
+function sizeToUnit(image: IImageElement) {
+  if (image.size === 'small') {
+    return 1;
+  } else if (image.size === 'medium') {
+    return 2;
+  } else if (image.size === 'large') {
+    return 4;
+  } else {
+    return 2;
+  }
+}
+
+export default function InlinedImageList({ images }: Props) {
   return (
     <ImageList
       sx={{
         margin: 0,
-        width: '100%',
-        maxWidth: '600px',
-        height: 200,
         // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
-        transform: 'translateZ(0)'
+        transform: 'translateZ(0)',
+        width: '100%',
+        maxWidth: 600,
+        maxHeight: 400
       }}
-      rowHeight={200}
-      gap={5}
+      variant="quilted"
+      cols={4}
+      gap={8}
     >
-      {items.map((item) => {
-        const cols = 1;
-        const rows = 1;
+      {images.map((image, i) => {
+        const cols = sizeToUnit(image);
+        const rows = sizeToUnit(image);
 
         return (
-          <ImageListItem
-            key={item.src}
-            cols={cols}
-            rows={rows}
-            sx={{
-              '.MuiImageListItem-img': {
-                height: '100%',
-                width: 'auto',
-                p: 1,
-                boxSizing: 'border-box',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'light' ? '#EEEEEE' : '#212121',
-                borderRadius: '4px'
-              }
-            }}
-          >
-            <img
-              className="inlined-image"
-              src={item.src}
-              alt={item.title}
-              style={{
-                objectFit: 'contain',
-                cursor: item.url ? 'pointer' : 'default'
-              }}
-              onClick={() => {
-                if (item.url) {
-                  window.open(item.url, '_blank')?.focus();
-                }
-              }}
-              loading="lazy"
-            />
-            {/* <ImageListItemBar title={item.title} position="top" /> */}
+          <ImageListItem key={i} cols={cols} rows={rows}>
+            <ImageElement element={image} />
           </ImageListItem>
         );
       })}

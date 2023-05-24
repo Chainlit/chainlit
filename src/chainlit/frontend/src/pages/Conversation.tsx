@@ -31,6 +31,8 @@ const ConversationQuery = gql`
         name
         url
         display
+        language
+        size
         forId
       }
     }

@@ -1,9 +1,11 @@
-import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { IElement } from 'state/element';
+import { ITextElement } from 'state/element';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import remarkGfm from 'remark-gfm';
+import Code from 'components/Code';
 
 interface Props {
-  element: IElement;
+  element: ITextElement;
 }
 
 export default function TextElement({ element }: Props) {
@@ -19,6 +21,7 @@ export default function TextElement({ element }: Props) {
       .then((_text) => {
         setText(_text);
         setFetching(false);
+        setError(false);
       })
       .catch(() => {
         setText('');
@@ -27,7 +30,7 @@ export default function TextElement({ element }: Props) {
       });
   }, [element]);
 
-  const content = fetching
+  let content = fetching
     ? 'Loading...'
     : error
     ? 'Error'
@@ -35,9 +38,23 @@ export default function TextElement({ element }: Props) {
     ? text
     : (element.content as string);
 
+  if (!fetching && !error && element.language) {
+    content = `\`\`\`${element.language}\n${content}\n\`\`\``;
+  }
+
+  console.log(content, element);
+
   return (
-    <Typography whiteSpace="initial" color="text.primary">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      className="markdown-body"
+      components={{
+        code({ ...props }) {
+          return <Code {...props} />;
+        }
+      }}
+    >
       {content}
-    </Typography>
+    </ReactMarkdown>
   );
 }
