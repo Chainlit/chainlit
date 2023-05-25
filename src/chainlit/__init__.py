@@ -97,7 +97,8 @@ def send_message(
         indent (int, optional): If positive, the message will be nested in the UI.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         end_stream (bool, optional): Pass True if this message was streamed.
-
+        actions (List[Action], optional): A list of actions to send with the message.
+        elements (List[Element], optional): A list of elements to send with the message.
     Returns:
         str: The message ID.
     """

@@ -5,6 +5,16 @@ interface Props {
   element: IImageElement;
 }
 
+const handleImageClick = (name: string, src: string) => {
+  const link = document.createElement('a');
+  link.href = src;
+  link.download = name;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 export default function ImageElement({ element }: Props) {
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
   const className = `${element.display}-image`;
@@ -15,9 +25,8 @@ export default function ImageElement({ element }: Props) {
         src={src}
         onClick={(e) => {
           if (element.display === 'inline') {
-            const w = window.open('');
-            const target = e.target as HTMLImageElement;
-            w?.document.write(`<img src="${target.src}" />`);
+            const name = `${element.name}.png`;
+            handleImageClick(name, src);
           }
         }}
         style={{

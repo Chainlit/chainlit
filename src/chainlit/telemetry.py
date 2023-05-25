@@ -6,6 +6,7 @@ from opentelemetry import trace as ot_trace
 from functools import wraps
 from chainlit.config import config
 from chainlit.version import __version__
+import logging
 
 
 # Patch uptrace.py to hash the hostname to avoid leaking it.
@@ -48,6 +49,7 @@ uptrace.configure_opentelemetry(
     service_name="chainlit",
     service_version="1.0.0",
     deployment_environment="production",
+    logging_level=logging.CRITICAL,
 )
 
 tracer = ot_trace.get_tracer("chainlit", __version__)

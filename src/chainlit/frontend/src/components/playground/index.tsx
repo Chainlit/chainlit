@@ -21,6 +21,7 @@ import ModelSettings from './modelSettings';
 import { getCompletion } from 'api';
 import { toast } from 'react-hot-toast';
 import { userEnvState } from 'state/user';
+import HelpIcon from '@mui/icons-material/HelpOutline';
 
 const styleMap = {
   COMPLETION: {
@@ -120,6 +121,14 @@ export default function Playground() {
         <Typography fontSize="18px" fontWeight={700}>
           Prompt playground
         </Typography>
+        <IconButton
+          href="https://docs.chainlit.io/concepts/prompt-playground"
+          target="_blank"
+        >
+          <Tooltip title="Help">
+            <HelpIcon />
+          </Tooltip>
+        </IconButton>
         <IconButton
           edge="end"
           id="close-playground"
