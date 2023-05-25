@@ -3,6 +3,7 @@ import hashlib
 from socket import gethostname
 from opentelemetry.sdk.resources import Attributes, Resource
 from opentelemetry import trace as ot_trace
+from opentelemetry.exporter.otlp.proto.grpc.exporter import logger as exporter_logger
 from functools import wraps
 from chainlit.config import config
 from chainlit.version import __version__
@@ -51,6 +52,8 @@ uptrace.configure_opentelemetry(
     deployment_environment="production",
     logging_level=logging.CRITICAL,
 )
+
+exporter_logger.setLevel(logging.CRITICAL)
 
 tracer = ot_trace.get_tracer("chainlit", __version__)
 
