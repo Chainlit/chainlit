@@ -11,9 +11,6 @@ from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
 from chainlit.logger import logger
 
-# Set the default port for the server
-PORT = 8000
-
 
 # Create the main command group for Chainlit CLI
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
@@ -23,9 +20,12 @@ def cli():
 
 
 # Define the function to run Chainlit with provided options
-def run_chainlit(
-    target: str, watch=False, headless=False, debug=False, args=None, **kwargs
-):
+def run_chainlit(target: str, watch=False, headless=False, debug=False):
+    DEFAULT_HOST = "0.0.0.0"
+    DEFAULT_PORT = 8000
+    host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
+    port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+
     check_file(target)
     # Load the module provided by the user
     config.module_name = target
@@ -43,35 +43,42 @@ def run_chainlit(
     # Open the browser if in development mode
     def open_browser(headless: bool):
         if not headless:
+            if host == DEFAULT_HOST:
+                url = f"http://localhost:{port}"
+            else:
+                url = f"http://{host}:{port}"
             # Wait two seconds to allow the server to start
             socketio.sleep(2)
-            url = f"http://127.0.0.1:{PORT}"
+
             logger.info(f"Your app is available at {url}")
             webbrowser.open(url)
 
     socketio.start_background_task(open_browser, headless)
     # Start the server
-    socketio.run(app, host="0.0.0.0", port=PORT, debug=debug, use_reloader=False)
+    socketio.run(app, host=host, port=port, debug=debug, use_reloader=False)
 
 
 # Define the "run" command for Chainlit CLI
 @cli.command("run")
-@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.option("-w", "--watch", default=False, is_flag=True, envvar="CHAINLIT_WATCH")
-@click.option(
-    "-h", "--headless", default=False, is_flag=True, envvar="CHAINLIT_HEADLESS"
-)
-@click.option("-d", "--debug", default=False, is_flag=True, envvar="CHAINLIT_DEBUG")
-@click.option("-c", "--ci", default=False, is_flag=True, envvar="CHAINLIT_CI")
-@click.argument("args", nargs=-1)
-def chainlit_run(target, watch, headless, debug, ci, args=None, **kwargs):
+@click.argument("target", required=True, envvar="RUN_TARGET")
+@click.option("-w", "--watch", default=False, is_flag=True, envvar="WATCH")
+@click.option("-h", "--headless", default=False, is_flag=True, envvar="HEADLESS")
+@click.option("-d", "--debug", default=False, is_flag=True, envvar="DEBUG")
+@click.option("-c", "--ci", default=False, is_flag=True, envvar="CI")
+@click.option("--host")
+@click.option("--port")
+def chainlit_run(target, watch, headless, debug, ci, host, port):
+    if host:
+        os.environ["CHAINLIT_HOST"] = host
+    if port:
+        os.environ["CHAINLIT_PORT"] = port
     if ci:
         logger.info("Running in CI mode")
         config.enable_telemetry = False
     else:
         trace_event("chainlit run")
 
-    run_chainlit(target, watch, headless, debug, args, **kwargs)
+    run_chainlit(target, watch, headless, debug)
 
 
 @cli.command("deploy")
