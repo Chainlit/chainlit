@@ -13,9 +13,9 @@ class Action:
     value: str
     # The label of the action. This is what the user will see. If not provided the name will be used.
     label: str = ""
-    # The description of the action. This is what the user will see when they hover over the action. If not provided the name will be used.
+    # The description of the action. This is what the user will see when they hover the action.
     description: str = ""
-    # This should not be set manually, only  used internally.
+    # This should not be set manually, only used internally.
     forId: str = None
 
     def __post_init__(self) -> None:
