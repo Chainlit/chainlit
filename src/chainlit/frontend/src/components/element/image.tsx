@@ -8,6 +8,7 @@ interface Props {
 const handleImageClick = (name: string, src: string) => {
   const link = document.createElement('a');
   link.href = src;
+  link.target = '_blank';
   link.download = name;
   link.style.display = 'none';
   document.body.appendChild(link);
