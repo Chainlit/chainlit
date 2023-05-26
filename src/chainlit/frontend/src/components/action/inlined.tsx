@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material';
-import ActionRef from 'components/chat/message/actionRef';
+import ActionRef from 'components/action/ref';
 import { IAction } from 'state/action';
 
 interface Props {

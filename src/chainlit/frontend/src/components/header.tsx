@@ -1,15 +1,21 @@
-import { Box, Button, IconButton, Stack, Tooltip } from '@mui/material';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import { Link, useLocation } from 'react-router-dom';
-import UserAvatar from './userAvatar';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
-import ThemeButton from 'themeButton';
+import {
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  Tooltip,
+  AppBar,
+  Toolbar
+} from '@mui/material';
+import { Link, useLocation } from 'react-router-dom';
+import UserAvatar from 'components/userAvatar';
 import KeyIcon from '@mui/icons-material/Key';
-import NewChatButton from './newChatButton';
-import RegularButton from './button';
-import GithubButton from './githubButton';
+import ThemeButton from 'components/themeButton';
+import NewChatButton from 'components/newChatButton';
+import RegularButton from 'components/button';
+import GithubButton from 'components/githubButton';
 
 interface INavItem {
   to: string;

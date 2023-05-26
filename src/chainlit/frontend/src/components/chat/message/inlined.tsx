@@ -4,11 +4,11 @@ import {
   IImageElement,
   ITextElement
 } from 'state/element';
-import InlinedImageList from './image';
+import InlinedImageList from 'components/element/inlined/image';
 import { Stack } from '@mui/material';
-import InlinedTextList from './text';
+import InlinedTextList from 'components/element/inlined/text';
 import { IAction } from 'state/action';
-import InlinedActionList from './action';
+import InlinedActionList from 'components/action/inlined';
 
 interface Props {
   elements: IElements;

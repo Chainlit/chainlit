@@ -36,8 +36,6 @@ export default function Messages({
         const _isRunning =
           isRunning === undefined ? loading && isLast : isRunning && isLast;
         const showAvatar = m.author !== previousAuthor;
-        // const nextAuthor = filtered[i + 1]?.author;
-        // const showBorder = m.author !== nextAuthor && (!isLast || !!indent);
         const showBorder = false;
         previousAuthor = m.author;
         return (

@@ -17,5 +17,6 @@ def main():
     actions = [
         cl.Action(name="test action", value="test"),
         cl.Action(name="removable action", value="test"),
+        cl.Action(name="label action", value="test", label="Test Label"),
     ]
     cl.send_message("Hello, this is a test message!", actions=actions)

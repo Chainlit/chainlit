@@ -7,7 +7,13 @@ describe("Action", () => {
     cy.wait(["@settings"]);
   });
 
-  it("should correctly execute actions", () => {
+  it("should correctly execute and display actions", () => {
+    cy.get(".message")
+      .eq(0)
+      .get("#action-label-action")
+      .should("exist")
+      .should("contain", "Test Label");
+
     cy.get(".message")
       .should("have.length", 1)
       .eq(0)

@@ -29,12 +29,11 @@ export default function ActionRef({ action }: Props) {
       }
     }
   }, [session]);
-
   const formattedName = action.name.trim().toLowerCase().replaceAll(' ', '-');
   const id = `action-${formattedName}`;
   const button = (
     <LoadingButton id={id} onClick={call} disabled={loading}>
-      {action.name}
+      {action.label || action.name}
     </LoadingButton>
   );
   if (action.description) {

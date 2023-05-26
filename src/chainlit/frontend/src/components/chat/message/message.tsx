@@ -3,10 +3,10 @@ import { INestedMessage } from 'state/chat';
 import { IElements } from 'state/element';
 import { useState } from 'react';
 import DetailsButton from 'components/chat/message/detailsButton';
+import { IAction } from 'state/action';
 import Messages from './messages';
 import MessageContent from './content';
 import UploadButton from './uploadButton';
-import { IAction } from 'state/action';
 import Author, { authorBoxWidth } from './author';
 import Buttons from './buttons';
 

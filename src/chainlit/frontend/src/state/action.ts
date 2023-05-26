@@ -4,6 +4,7 @@ export interface IAction {
   name: string;
   value: string;
   forId: string;
+  label?: string;
   description?: string;
 }
 
