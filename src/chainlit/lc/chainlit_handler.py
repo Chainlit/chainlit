@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 from chainlit.sdk import get_sdk, Chainlit
+from chainlit.message import Message, ErrorMessage
 from chainlit.config import config
 from chainlit.types import LLMSettings
 
@@ -17,8 +18,8 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
     sequence_per_session: Dict[str, List[str]]
     # Keep track of the last prompt for each session
     last_prompt_per_session: Dict[str, Union[str, None]]
-    # Keep track of whether the session is streaming or not
-    stream_per_session: Dict[str, bool]
+    # Keep track of the currently streamed message for the session
+    stream_per_session: Dict[str, Message]
 
     # We want to handler to be called on every message
     always_verbose: bool = True
@@ -31,13 +32,13 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         self.last_prompt_per_session = {}
         self.stream_per_session = {}
 
-    def is_streaming(self) -> bool:
+    def get_streamed_message(self) -> Union[Message, None]:
         sdk = get_sdk()
         if not sdk:
             return
 
         session_id = sdk.session["id"]
-        return self.stream_per_session.get(session_id, False)
+        return self.stream_per_session.get(session_id, None)
 
     def start_stream(self):
         sdk = get_sdk()
@@ -49,16 +50,15 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
 
         if author in IGNORE_LIST:
             return
-
-        sdk.stream_start(author=author, indent=indent, llm_settings=llm_settings)
-        self.stream_per_session[session_id] = True
+        streamed_message = Message(
+            author=author, indent=indent, llm_settings=llm_settings, content=""
+        )
+        self.stream_per_session[session_id] = streamed_message
 
     def send_token(self, token: str):
-        sdk = get_sdk()
-        if not sdk:
-            return
-
-        sdk.send_token(token)
+        streamed_message = self.get_streamed_message()
+        if streamed_message:
+            streamed_message.stream_token(token)
 
     def end_stream(self):
         sdk = get_sdk()
@@ -66,7 +66,7 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
             return
 
         session_id = sdk.session["id"]
-        self.stream_per_session[session_id] = False
+        del self.stream_per_session[session_id]
 
     def add_in_sequence(self, name: str):
         sdk = get_sdk()
@@ -167,19 +167,26 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        is_streaming = self.is_streaming()
-        if is_streaming:
+        if error:
+            ErrorMessage(author=author, content=message).send()
             self.end_stream()
+            return
 
-        sdk.send_message(
-            author=author,
-            content=message,
-            indent=indent,
-            is_error=error,
-            prompt=prompt,
-            llm_settings=llm_settings,
-            end_stream=is_streaming,
-        )
+        streamed_message = self.get_streamed_message()
+
+        if streamed_message:
+            streamed_message.prompt = prompt
+            streamed_message.llm_settings = llm_settings
+            streamed_message.send()
+            self.end_stream()
+        else:
+            Message(
+                author=author,
+                content=message,
+                indent=indent,
+                prompt=prompt,
+                llm_settings=llm_settings,
+            ).send()
 
     # Callbacks for various events
 
@@ -189,14 +196,11 @@ class ChainlitCallbackHandler(BaseCallbackHandler):
         self.add_prompt(prompts[0], kwargs.get("llm_settings"))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        """Do nothing."""
-        if not self.is_streaming():
+        if not self.get_streamed_message():
             self.start_stream()
-
         self.send_token(token)
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        """Do nothing."""
         self.pop_prompt()
         sdk = get_sdk()
         if not sdk:

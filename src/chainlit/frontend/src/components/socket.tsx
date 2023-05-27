@@ -73,6 +73,33 @@ export default memo(function Socket() {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
+    socket.on('update_message', (message: IMessage) => {
+      setMessages((oldMessages) => {
+        const index = oldMessages.findIndex(
+          (m) => m.id === message.id || m.tempId === message.tempId
+        );
+        if (index === -1) return oldMessages;
+        return [
+          ...oldMessages.slice(0, index),
+          message,
+          ...oldMessages.slice(index + 1)
+        ];
+      });
+    });
+
+    socket.on('delete_message', ({ messageId }: any) => {
+      setMessages((oldMessages) => {
+        const index = oldMessages.findIndex(
+          (m) => m.id === messageId || m.tempId === messageId
+        );
+        if (index === -1) return oldMessages;
+        return [
+          ...oldMessages.slice(0, index),
+          ...oldMessages.slice(index + 1)
+        ];
+      });
+    });
+
     socket.on('stream_start', (message: IMessage) => {
       setMessages((oldMessages) => [...oldMessages, message]);
     });

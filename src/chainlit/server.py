@@ -18,6 +18,7 @@ from chainlit.client import CloudClient
 from chainlit.sdk import Chainlit
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
+from chainlit.message import Message, ErrorMessage
 from chainlit.telemetry import trace, trace_event
 from chainlit.logger import logger
 
@@ -215,9 +216,7 @@ def stop():
         if config.on_stop:
             config.on_stop()
 
-        __chainlit_sdk__.send_message(
-            author="System", content="Conversation stopped by the user."
-        )
+        Message(author="System", content="Conversation stopped by the user.").send()
 
 
 def need_session(id: str):
@@ -268,14 +267,14 @@ def process_message(session: Session, author: str, input_str: str):
                     # Otherwise, use the raw response
                     res = raw_res
             # Finally, send the response to the user
-            __chainlit_sdk__.send_message(author=config.chatbot_name, content=res)
+            Message(author=config.chatbot_name, content=res).send()
 
         elif config.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
             config.on_message(input_str)
     except Exception as e:
         logger.exception(e)
-        __chainlit_sdk__.send_message(author="Error", is_error=True, content=str(e))
+        ErrorMessage(author="Error", content=str(e)).send()
     finally:
         __chainlit_sdk__.task_end()
 

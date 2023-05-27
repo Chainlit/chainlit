@@ -19,22 +19,21 @@ settings = {
     "top_p": 1,
     "frequency_penalty": 0,
     "presence_penalty": 0,
-    "stop": ["```"]
+    "stop": ["```"],
 }
+
 
 @cl.on_message
 def main(message: str):
     fromatted_prompt = prompt.format(input=message)
     response = openai.Completion.create(
-        model=model_name,
-        prompt=fromatted_prompt,
-        **settings  
+        model=model_name, prompt=fromatted_prompt, **settings
     )
     content = response["choices"][0]["text"]
 
-    cl.send_message(
+    cl.Message(
         language="sql",
         content=content,
         prompt=fromatted_prompt,
-        llm_settings=cl.LLMSettings(model_name=model_name, **settings)
-    )
+        llm_settings=cl.LLMSettings(model_name=model_name, **settings),
+    ).send()

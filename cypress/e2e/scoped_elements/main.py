@@ -10,11 +10,11 @@ def start():
     ]
 
     # Element should not be inlined or referenced
-    cl.send_message(
+    cl.Message(
         content="Here is image1, a nice image of a cat! As well as text1 and text2!",
-    )
+    ).send()
     # Image should be inlined even if not referenced
-    cl.send_message(
+    cl.Message(
         content="Here a nice image of a cat! As well as text1 and text2!",
         elements=elements,
-    )
+    ).send()

@@ -1,0 +1,27 @@
+[project]
+# Name of the app and chatbot.
+name = "Chatbot"
+
+# If true (default), the app will be available to anonymous users (once deployed).
+# If false, users will need to authenticate and be part of the project to use the app.
+public = true
+
+# The project ID (found on https://cloud.chainlit.io).
+# If provided, all the message data will be stored in the cloud.
+# The project ID is required when public is set to false.
+#id = ""
+
+# Whether to enable telemetry (default: true). No personal data is collected.
+enable_telemetry = true
+
+# List of environment variables to be provided by each user to use the app.
+user_env = []
+
+# Hide the chain of thought details from the user in the UI.
+hide_cot = false
+
+# Link to your github repo. This will add a github button in the UI's header.
+# github = ""
+
+# Limit the number of requests per user.
+#request_limit = "10 per day"

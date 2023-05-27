@@ -1,16 +1,9 @@
-from typing import Union
-import time
-import uuid
+from typing import Union, Dict
 from chainlit.session import Session
-from chainlit.types import LLMSettings, AskSpec
+from chainlit.types import AskSpec
 from chainlit.client import BaseClient
 from socketio.exceptions import TimeoutError
 import inspect
-
-
-def current_milli_time():
-    """Get the current time in milliseconds."""
-    return round(time.time() * 1000)
 
 
 class Chainlit:
@@ -46,52 +39,26 @@ class Chainlit:
         """Get the 'client' property from the session."""
         return self._get_session_property("client")
 
-    def send_message(
-        self,
-        author: str,
-        content: str,
-        prompt: str = None,
-        language: str = None,
-        indent=0,
-        is_error=False,
-        llm_settings: LLMSettings = None,
-        end_stream=False,
-    ):
+    def send_message(self, msg_dict: Dict):
         """Send a message to the UI."""
         if not self.emit:
             return
 
-        if llm_settings is None and prompt is not None:
-            llm_settings = LLMSettings()
+        self.emit("message", msg_dict)
 
-        if llm_settings:
-            llm_settings = llm_settings.to_dict()
+    def update_message(self, msg_dict: Dict):
+        """Update a message in the UI."""
+        if not self.emit:
+            return
 
-        msg = {
-            "author": author,
-            "content": content,
-            "indent": indent,
-            "language": language,
-            "isError": is_error,
-            "prompt": prompt,
-            "llmSettings": llm_settings,
-        }
-        if self.client:
-            message_id = self.client.create_message(msg)
-            msg["id"] = message_id
+        self.emit("update_message", msg_dict)
 
-        if not "id" in msg:
-            message_id = uuid.uuid4().hex
-            msg["tempId"] = message_id
+    def delete_message(self, message_id: Union[str, int]):
+        """Delete a message in the UI."""
+        if not self.emit:
+            return
 
-        msg["createdAt"] = current_milli_time()
-
-        if end_stream:
-            self.stream_end(msg)
-        else:
-            self.emit("message", msg)
-
-        return str(message_id)
+        self.emit("delete_message", {"messageId": message_id})
 
     def send_ask_timeout(self, author: str):
         """Send a prompt timeout message to the UI."""
@@ -105,30 +72,16 @@ class Chainlit:
         if self.emit:
             self.emit("clear_ask", {})
 
-    def send_ask_user(
-        self, author: str, content: str, spec: AskSpec, raise_on_timeout=False
-    ):
+    def send_ask_user(self, msg_dict: Dict, spec: AskSpec, raise_on_timeout=False):
         """Send a prompt to the UI and wait for a response."""
         if not self.ask_user:
             return
-
-        msg = {
-            "author": author,
-            "content": content,
-            "waitForAnswer": True,
-        }
-
-        if self.client:
-            message_id = self.client.create_message(msg)
-            msg["id"] = message_id
-
-        msg["createdAt"] = current_milli_time()
 
         try:
             # End the task temporarily so that the User can answer the prompt
             self.task_end()
             # Send the prompt to the UI
-            res = self.ask_user({"msg": msg, "spec": spec.to_dict()}, spec.timeout)
+            res = self.ask_user({"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout)
             if self.client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
@@ -145,7 +98,7 @@ class Chainlit:
             self.clear_ask()
             return res
         except TimeoutError as e:
-            self.send_ask_timeout(author)
+            self.send_ask_timeout(msg_dict["author"])
             if raise_on_timeout:
                 raise e
         finally:
@@ -169,24 +122,12 @@ class Chainlit:
         if self.emit:
             self.emit("task_end", {})
 
-    def stream_start(
-        self,
-        author: str,
-        indent: int,
-        language: str = None,
-        llm_settings: LLMSettings = None,
-    ):
+    def stream_start(self, msg_dict: Dict):
         """Send a stream start signal to the UI."""
         if self.emit:
             self.emit(
                 "stream_start",
-                {
-                    "author": author,
-                    "indent": indent,
-                    "language": language,
-                    "content": "",
-                    "llmSettings": llm_settings.to_dict() if llm_settings else None,
-                },
+                msg_dict,
             )
 
     def send_token(self, token: str):

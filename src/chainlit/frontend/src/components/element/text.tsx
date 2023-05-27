@@ -42,8 +42,6 @@ export default function TextElement({ element }: Props) {
     content = `\`\`\`${element.language}\n${content}\n\`\`\``;
   }
 
-  console.log(content, element);
-
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}

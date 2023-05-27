@@ -7,23 +7,19 @@ from chainlit.lc import monkey
 
 monkey.patch()
 
-from chainlit.sdk import get_sdk
 from chainlit.config import config
-from chainlit.types import (
-    LLMSettings,
-    AskSpec,
-    AskFileSpec,
-    AskFileResponse,
-    AskResponse,
-)
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
 from chainlit.server import socketio
+from chainlit.sdk import get_sdk
+from chainlit.types import LLMSettings
+from chainlit.message import ErrorMessage
 from chainlit.action import Action
 from chainlit.element import LocalImage, RemoteImage, Text
+from chainlit.message import Message, ErrorMessage, AskUser, AskFile
 from chainlit.user_session import user_session
-from typing import Callable, Any, List, Union
+from typing import Callable, Any
 from dotenv import load_dotenv
 import inspect
 import os
@@ -65,179 +61,12 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         except Exception as e:
             logger.exception(e)
             if sdk:
-                sdk.send_message(author="Error", is_error=True, content=str(e))
+                ErrorMessage(content=str(e), author="Error").send()
         finally:
             if with_task and sdk:
                 sdk.task_end()
 
     return wrapper
-
-
-@trace
-def send_message(
-    content: str,
-    author=config.chatbot_name,
-    prompt: str = None,
-    language: str = None,
-    indent=0,
-    llm_settings: LLMSettings = None,
-    end_stream=False,
-    actions: List[Action] = [],
-    elements: List[Union[LocalImage, RemoteImage, Text]] = [],
-):
-    """
-    Send a message to the chatbot UI.
-    If a project ID is configured, the message will be uploaded to the cloud storage.
-
-    Args:
-        content (str): The content of the message.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
-        language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
-        indent (int, optional): If positive, the message will be nested in the UI.
-        llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
-        end_stream (bool, optional): Pass True if this message was streamed.
-        actions (List[Action], optional): A list of actions to send with the message.
-        elements (List[Element], optional): A list of elements to send with the message.
-    Returns:
-        str: The message ID.
-    """
-    sdk = get_sdk()
-    if sdk:
-        msg_id = sdk.send_message(
-            author=author,
-            content=content,
-            prompt=prompt,
-            language=language,
-            indent=indent,
-            llm_settings=llm_settings,
-            end_stream=end_stream,
-        )
-
-        for action in actions:
-            action.send(for_id=msg_id)
-
-        for element in elements:
-            element.send(for_id=msg_id)
-
-        return msg_id
-
-
-@trace
-def send_error_message(content: str, author=config.chatbot_name, indent=0):
-    """
-    Send an error message to the chatbot UI.
-    If a project ID is configured, the message will be uploaded to the cloud storage.
-
-    Args:
-        content (str): The error message.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        indent (int, optional): If positive, the message will be nested in the UI.
-    """
-    sdk = get_sdk()
-    if sdk:
-        return sdk.send_message(
-            author=author, content=content, is_error=True, indent=indent
-        )
-
-
-@trace
-def ask_for_input(
-    content: str, author=config.chatbot_name, timeout=60, raise_on_timeout=False
-) -> Union[AskResponse, None]:
-    """
-    Ask for the user input before continuing.
-    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
-    If a project ID is configured, the message will be uploaded to the cloud storage.
-
-    Args:
-        content (str): The content of the prompt.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
-        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
-    Returns:
-        AskResponse: The response from the user include "msg" and "author" or None.
-    """
-    sdk = get_sdk()
-    if sdk:
-        spec = AskSpec(type="text", timeout=timeout)
-        return sdk.send_ask_user(
-            author=author, content=content, spec=spec, raise_on_timeout=raise_on_timeout
-        )
-
-
-@trace
-def ask_for_file(
-    title: str,
-    accept: List[str],
-    max_size_mb=2,
-    author=config.chatbot_name,
-    timeout=90,
-    raise_on_timeout=False,
-) -> Union[AskFileResponse, None]:
-    """
-    Ask the user to upload a file before continuing.
-    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
-    If a project ID is configured, the file will be uploaded to the cloud storage.
-
-    Args:
-        title (str): Text displayed above the upload button.
-        accept (List[str]): List of mime type to accept like ["text/csv", "application/pdf"]
-        max_size_mb (int, optional): Maximum file size in MB.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
-        raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
-    Returns:
-        FileContent: The file content or None.
-    """
-    sdk = get_sdk()
-    if sdk:
-        spec = AskFileSpec(
-            type="file", accept=accept, max_size_mb=max_size_mb, timeout=timeout
-        )
-        res = sdk.send_ask_user(
-            author=author, content=title, spec=spec, raise_on_timeout=raise_on_timeout
-        )
-        if res:
-            return AskFileResponse(**res)
-        else:
-            return None
-
-
-@trace
-def start_stream(
-    author=config.chatbot_name,
-    indent: int = 0,
-    language: str = None,
-    llm_settings: LLMSettings = None,
-):
-    """
-    Start a streamed message.
-
-    Args:
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        indent (int, optional): If positive, the message will be nested in the UI.
-        language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
-        llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
-    """
-    sdk = get_sdk()
-    if sdk:
-        return sdk.stream_start(
-            author=author, indent=indent, language=language, llm_settings=llm_settings
-        )
-
-
-@trace
-def send_token(token: str):
-    """
-    Send a token belonging to the currently streamed message.
-
-    Args:
-        token (str): The token to send.
-    """
-    sdk = get_sdk()
-    if sdk:
-        return sdk.send_token(token)
 
 
 @trace
@@ -264,7 +93,7 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
     """
     Useful to post process the response a LangChain object instantiated with @langchain_factory.
     The decorated function takes the raw output of the LangChain object as input.
-    The response will NOT be automatically sent to the UI, you need to call send_message.
+    The response will NOT be automatically sent to the UI, you need to send a Message.
 
     Args:
         func (Callable[[Any], str]): The post-processing function to apply after generating a response. Takes the response as parameter.
@@ -300,7 +129,7 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     Useful to override the default behavior of the LangChain object instantiated with @langchain_factory.
     Use when your agent run method has custom parameters.
     Takes the LangChain agent and the user input as parameters.
-    The response will NOT be automatically sent to the UI, you need to call send_message.
+    The response will NOT be automatically sent to the UI, you need to send a Message.
     Args:
         func (Callable[[Any, str], str]): The function to be called when a new message is received. Takes the agent and user input as parameters and returns the output string.
 
@@ -385,22 +214,21 @@ def sleep(duration: int):
 
 __all__ = [
     "user_session",
+    "LLMSettings",
     "Action",
     "LocalImage",
     "RemoteImage",
     "Text",
-    "send_message",
-    "send_error_message",
-    "ask_for_input",
-    "ask_for_file",
-    "start_stream",
-    "send_token",
+    "Message",
+    "ErrorMessage",
+    "AskUser",
+    "AskFile",
     "langchain_factory",
     "langchain_postprocess",
     "langchain_run",
     "langchain_rename",
     "on_chat_start",
     "on_stop",
-    "action",
+    "action_callback",
     "sleep",
 ]

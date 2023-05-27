@@ -20,6 +20,14 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
+    def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+        pass
+
+    @abstractmethod
+    def delete_message(self, message_id: int) -> bool:
+        pass
+
+    @abstractmethod
     def upload_element(self, content: bytes) -> int:
         pass
 
@@ -116,10 +124,43 @@ class CloudClient(BaseClient):
         res = self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
-            logger.warning("Could not persist message.")
+            logger.warning("Could not create message.")
             return None
 
         return int(res["data"]["createMessage"]["id"])
+
+    def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+        mutation = """
+        mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json) {
+            updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
+                id
+            }
+        }
+        """
+        variables["messageId"] = message_id
+        res = self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not update message.")
+            return False
+
+        return True
+
+    def delete_message(self, message_id: int) -> bool:
+        mutation = """
+        mutation ($messageId: ID!) {
+            deleteMessage(messageId: $messageId) {
+                id
+            }
+        }
+        """
+        res = self.mutation(mutation, {"messageId": message_id})
+
+        if self.check_for_errors(res):
+            logger.warning("Could not delete message.")
+            return False
+
+        return True
 
     def create_element(
         self,
