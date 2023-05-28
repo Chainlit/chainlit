@@ -55,6 +55,9 @@ class MessageBase(ABC):
         prompt: str = None,
         llm_settings: LLMSettings = None,
     ):
+        """
+        Update a message already sent to the UI.
+        """
         trace_event("update_message")
 
         sdk = get_sdk()
@@ -90,6 +93,10 @@ class MessageBase(ABC):
         return True
 
     def remove(self):
+        """
+        Remove a message already sent to the UI.
+        This will not automatically remove potential nested messages and could lead to undesirable side effects in the UI.
+        """
         trace_event("remove_message")
 
         sdk = get_sdk()
