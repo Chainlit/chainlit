@@ -7,7 +7,9 @@ import {
   Stack,
   Tooltip,
   AppBar,
-  Toolbar
+  Toolbar,
+  useTheme,
+  Menu
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import UserAvatar from 'components/userAvatar';
@@ -16,6 +18,9 @@ import ThemeButton from 'components/themeButton';
 import NewChatButton from 'components/newChatButton';
 import RegularButton from 'components/button';
 import GithubButton from 'components/githubButton';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import MenuIcon from '@mui/icons-material/Menu';
+import { useEffect, useRef, useState } from 'react';
 
 interface INavItem {
   to: string;
@@ -56,6 +61,20 @@ interface NavProps {
 
 function Nav({ isPublic, hasReadme }: NavProps) {
   const location = useLocation();
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<any>();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      if (ref.current) {
+        setAnchorEl(ref.current);
+      }
+    }
+  }, [open]);
+
+  const matches = useMediaQuery(theme.breakpoints.down('md'));
 
   const tabs = [{ to: '/', label: 'Chat' }];
 
@@ -67,8 +86,8 @@ function Nav({ isPublic, hasReadme }: NavProps) {
     tabs.push({ to: '/readme', label: 'Readme' });
   }
 
-  return (
-    <Stack direction="row" spacing={1}>
+  const nav = (
+    <Stack direction={matches ? 'column' : 'row'} spacing={1}>
       {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
@@ -79,6 +98,48 @@ function Nav({ isPublic, hasReadme }: NavProps) {
       })}
     </Stack>
   );
+
+  if (matches) {
+    return (
+      <>
+        <IconButton
+          ref={ref}
+          edge="start"
+          aria-label="open nav"
+          onClick={() => setOpen(true)}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          autoFocus
+          anchorEl={anchorEl}
+          open={open}
+          onClose={() => setOpen(false)}
+          PaperProps={{
+            sx: {
+              p: 1,
+              backgroundImage: 'none',
+              mt: -2,
+              ml: -1,
+              overflow: 'visible',
+              overflowY: 'auto',
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+              boxShadow: (theme) =>
+                theme.palette.mode === 'light'
+                  ? '0px 2px 4px 0px #0000000D'
+                  : '0px 10px 10px 0px #0000000D'
+            }
+          }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          {nav}
+        </Menu>
+      </>
+    );
+  } else {
+    return nav;
+  }
 }
 
 export default function Header() {

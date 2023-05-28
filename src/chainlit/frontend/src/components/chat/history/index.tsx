@@ -1,4 +1,3 @@
-import { useAuth } from 'hooks/auth';
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
 import LocalHistoryButton from './local';
