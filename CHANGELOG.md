@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet.
 
+## [0.2.107] - 2023-05-28
+
+### Added
+
+- Rework of the Message, AskUser and AskFile APIs:
+    -`cl.send_message(...)` becomes `cl.Message(...).send()`
+    -`cl.send_ask_user(...)` becomes `cl.AskUser(...).send()`
+    -`cl.send_ask_file(...)` becomes `cl.AskFile(...).send()`
+- `update` and `remove` methods to the `cl.Message` class
+
+### Fixed
+
+- Blank screen for windows users (https://github.com/Chainlit/chainlit/issues/3)
+- Header navigation for mobile (https://github.com/Chainlit/chainlit/issues/12)
+
 ## [0.2.106] - 2023-05-26
 
 ### Added

@@ -60,9 +60,8 @@ class Chainlit:
 
         self.emit("delete_message", {"messageId": message_id})
 
-    def send_ask_timeout(self, author: str):
+    def send_ask_timeout(self):
         """Send a prompt timeout message to the UI."""
-        self.send_message(author=author, content="Time out", is_error=True)
 
         if self.emit:
             self.emit("ask_timeout", {})
@@ -98,7 +97,8 @@ class Chainlit:
             self.clear_ask()
             return res
         except TimeoutError as e:
-            self.send_ask_timeout(msg_dict["author"])
+            self.send_ask_timeout()
+
             if raise_on_timeout:
                 raise e
         finally:
