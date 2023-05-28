@@ -12,10 +12,10 @@ Nothing unreleased yet.
 
 ### Added
 
-- Rework of the Message, AskUser and AskFile APIs:
+- Rework of the Message, AskUserMessage and AskFileMessage APIs:
     -`cl.send_message(...)` becomes `cl.Message(...).send()`
-    -`cl.send_ask_user(...)` becomes `cl.AskUser(...).send()`
-    -`cl.send_ask_file(...)` becomes `cl.AskFile(...).send()`
+    -`cl.send_ask_user(...)` becomes `cl.AskUserMessage(...).send()`
+    -`cl.send_ask_file(...)` becomes `cl.AskFileMessage(...).send()`
 - `update` and `remove` methods to the `cl.Message` class
 
 ### Fixed

@@ -1,6 +1,6 @@
 from typing import Dict, TypedDict, Optional, Callable, Any, Union
 from chainlit.client import BaseClient
-from chainlit.types import AskResponse, AskFileSpec
+from chainlit.types import AskResponse
 
 
 class Session(TypedDict):

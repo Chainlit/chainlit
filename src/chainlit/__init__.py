@@ -17,7 +17,7 @@ from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
 from chainlit.element import LocalImage, RemoteImage, Text
-from chainlit.message import Message, ErrorMessage, AskUser, AskFile
+from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
 from typing import Callable, Any
 from dotenv import load_dotenv
@@ -221,8 +221,8 @@ __all__ = [
     "Text",
     "Message",
     "ErrorMessage",
-    "AskUser",
-    "AskFile",
+    "AskUserMessage",
+    "AskFileMessage",
     "langchain_factory",
     "langchain_postprocess",
     "langchain_run",

@@ -1,4 +1,4 @@
-from typing import List, Union, Dict
+from typing import List, Union
 import uuid
 import time
 from abc import ABC, abstractmethod
@@ -261,7 +261,7 @@ class ErrorMessage(MessageBase):
         return id
 
 
-class AskBase(MessageBase):
+class AskMessageBase(MessageBase):
     def remove(self):
         removed = super().remove()
         if removed:
@@ -273,7 +273,7 @@ class AskBase(MessageBase):
             sdk.clear_ask()
 
 
-class AskUser(AskBase):
+class AskUserMessage(AskMessageBase):
     """
     Ask for the user input before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
@@ -327,7 +327,7 @@ class AskUser(AskBase):
         return sdk.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
 
-class AskFile(AskBase):
+class AskFileMessage(AskMessageBase):
     """
     Ask the user to upload a file before continuing.
     If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.

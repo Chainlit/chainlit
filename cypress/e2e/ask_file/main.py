@@ -7,7 +7,7 @@ def start():
 
     # Wait for the user to upload a file
     while file == None:
-        file = cl.AskFile(
+        file = cl.AskFileMessage(
             content="Please upload a text file to begin!", accept=["text/plain"]
         ).send()
     # Decode the file
