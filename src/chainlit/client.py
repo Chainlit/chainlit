@@ -5,11 +5,16 @@ import uuid
 import requests
 from chainlit.types import ElementType, ElementSize
 from chainlit.logger import logger
+from chainlit.config import config
 
 
 class BaseClient(ABC):
     project_id: str
     session_id: str
+
+    @abstractmethod
+    def is_project_member(self, access_token: str) -> bool:
+        pass
 
     @abstractmethod
     def create_conversation(self, session_id: str) -> int:
@@ -81,6 +86,23 @@ class CloudClient(BaseClient):
         :return: The response data as a dictionary.
         """
         return self.client.execute(query=mutation, variables=variables)
+
+    def is_project_member(self) -> bool:
+        try:
+            headers = {
+                "content-type": "application/json",
+                "Authorization": self.headers["Authorization"],
+            }
+            data = {"projectId": self.project_id}
+            response = requests.post(
+                f"{config.chainlit_server}/api/role", headers=headers, json=data
+            )
+
+            role = response.json().get("role", "ANONYMOUS")
+            return role != "ANONYMOUS"
+        except Exception as e:
+            logger.exception(e)
+            return False
 
     def create_conversation(self, session_id: str) -> int:
         mutation = """

@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { gql, useQuery } from '@apollo/client';
 import { datasetFiltersState } from 'state/dataset';
 import { projectSettingsState } from 'state/project';
+import { roleState } from 'state/user';
 
 const MembersQuery = gql`
   query ($projectId: String!) {
@@ -26,13 +27,14 @@ const MembersQuery = gql`
 `;
 
 export default function AuthorSelect() {
+  const role = useRecoilValue(roleState);
   const [df, setDf] = useRecoilState(datasetFiltersState);
   const pSettings = useRecoilValue(projectSettingsState);
   const { data, loading, error } = useQuery(MembersQuery, {
     variables: { projectId: pSettings?.projectId }
   });
 
-  if (loading || error) {
+  if (loading || error || role === 'USER') {
     return null;
   }
 

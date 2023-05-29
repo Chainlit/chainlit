@@ -131,6 +131,9 @@ def connect():
             access_token=access_token,
             url=config.chainlit_server,
         )
+        is_project_member = client.is_project_member()
+        if not is_project_member:
+            raise ConnectionRefusedError("You are not a member of this project")
 
     # Function to send a message to this particular session
     def _emit(event, data):

@@ -6,7 +6,6 @@ export const useAuth = () => {
   const { isAuthenticated, ...other } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
   const role = useRecoilValue(roleState);
-
   const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
 
   return {
