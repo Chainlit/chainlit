@@ -23,10 +23,12 @@ export const renderElement = (element: IElement) => {
 };
 
 const ElementView = () => {
-  const { name } = useParams();
+  const { id } = useParams();
   const elements = useRecoilValue(elementState);
 
-  const element = elements.find((element) => element.name === name);
+  const element = elements.find(
+    (element) => element.id == id || element.tempId == id
+  );
 
   if (!element) {
     return <Navigate to="/" />;

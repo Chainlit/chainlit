@@ -6,12 +6,20 @@ describe("Global Elements", () => {
   });
 
   it("should be able to display inlined, side and page elements", () => {
-    cy.get(".message").should("have.length", 1);
+    cy.get(".message").should("have.length", 2);
+
+    cy.get(".message").eq(1).find(".inline-image").should("have.length", 0);
+    cy.get(".message").eq(1).find(".element-link").should("have.length", 0);
 
     // Inlined
-    cy.get(".inline-image").should("have.length", 1);
-    cy.get(".element-link").eq(0).should("contain", "text1");
-    cy.get(".element-link").eq(0).click();
+    cy.get(".message").eq(0).find(".inline-image").should("have.length", 1);
+    cy.get(".message").eq(0).find(".element-link").should("have.length", 2);
+    cy.get(".message")
+      .eq(0)
+      .find(".element-link")
+      .eq(0)
+      .should("contain", "text1")
+      .click();
 
     // Side
     const sideViewTitle = cy.get("#side-view-title");
@@ -23,8 +31,12 @@ describe("Global Elements", () => {
     sideViewContent.should("contain", "Here is a side text document");
 
     // Page
-    cy.get(".element-link").eq(1).should("contain", "text2");
-    cy.get(".element-link").eq(1).click();
+    cy.get(".message")
+      .eq(0)
+      .find(".element-link")
+      .eq(1)
+      .should("contain", "text2")
+      .click();
 
     const view = cy.get("#element-view");
     view.should("exist");

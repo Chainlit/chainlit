@@ -10,3 +10,7 @@ def start():
     cl.Message(
         content="Here is image1, a nice image of a cat! As well as text1 and text2!",
     ).send()
+
+    cl.Message(
+        content="Here is a message without element reference!",
+    ).send()

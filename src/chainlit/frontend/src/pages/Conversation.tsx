@@ -28,6 +28,7 @@ const ConversationQuery = gql`
         createdAt
       }
       elements {
+        id
         type
         name
         url

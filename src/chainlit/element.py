@@ -1,6 +1,7 @@
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from typing import Dict
+import uuid
 from abc import ABC, abstractmethod
 from chainlit.sdk import get_sdk, BaseClient
 from chainlit.telemetry import trace_event
@@ -13,6 +14,8 @@ class Element(ABC):
     name: str
     type: ElementType
     display: ElementDisplay = "side"
+    id: int = None
+    tempId: str = None
     forId: str = None
 
     def __post_init__(self) -> None:
@@ -33,8 +36,10 @@ class Element(ABC):
         # Cloud is enabled, upload the element to S3
         if sdk.client:
             element = self.persist(sdk.client, for_id)
+            self.id = element["id"]
 
         if not element:
+            self.tempId = uuid.uuid4().hex
             element = self.to_dict()
             if for_id:
                 element["forId"] = for_id

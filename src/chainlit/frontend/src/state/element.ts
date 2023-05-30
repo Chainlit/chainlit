@@ -13,7 +13,8 @@ type ElementContentType = {
 type ValueOf<T> = T[keyof T];
 
 export interface IElement {
-  id?: string;
+  id?: number;
+  tempId?: string;
   url?: string;
   content?: ValueOf<ElementContentType>;
   type: ElementType;

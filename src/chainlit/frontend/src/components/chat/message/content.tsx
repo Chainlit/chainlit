@@ -18,20 +18,13 @@ interface Props {
 }
 
 function prepareContent({ id, elements, actions, content, language }: Props) {
-  const filteredElements = elements.filter((e) => {
-    if (e.forId) {
-      return e.forId === id;
-    }
-    return true;
-  });
-
-  const elementNames = filteredElements.map((e) => e.name);
+  const elementNames = elements.map((e) => e.name);
 
   const elementRegexp = elementNames.length
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  const filteredActions = actions.filter((a) => {
+  const scopedActions = actions.filter((a) => {
     if (a.forId) {
       return a.forId === id;
     }
@@ -39,17 +32,36 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   });
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedElements: IElements = filteredElements.filter(
-    (e) => e.display === 'inline'
+  const inlinedElements: IElements = elements.filter(
+    (e) => e.forId === id && e.display === 'inline'
   );
+  const refElements: IElements = [];
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
-      const element = filteredElements.find((e) => e.name === match);
-      if (!element) return match;
-
-      // spaces break markdown links. The address in the link is not used anyway
-      return `[${match}](${match.replaceAll(' ', '_')})`;
+      const element = elements.find((e) => e.name === match);
+      const foundElement = !!element;
+      const wrongScope = element?.forId && element.forId !== id;
+      const inlined = element?.display === 'inline';
+      if (!foundElement) {
+        // Element reference does not exist, return plain text
+        return match;
+      }
+      if (wrongScope) {
+        // If element is not global and not scoped to this message, return plain text
+        return match;
+      } else if (inlined) {
+        // If element is inlined, add it to the list and return plain text
+        if (inlinedElements.indexOf(element) === -1) {
+          inlinedElements.push(element);
+        }
+        return match;
+      } else {
+        // Element is a reference, add it to the list and return link
+        refElements.push(element);
+        // spaces break markdown links. The address in the link is not used anyway
+        return `[${match}](${match.replaceAll(' ', '_')})`;
+      }
     });
   }
 
@@ -59,8 +71,8 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   return {
     preparedContent,
     inlinedElements,
-    filteredElements,
-    filteredActions
+    refElements,
+    scopedActions
   };
 }
 
@@ -72,18 +84,14 @@ export default memo(function MessageContent({
   language,
   authorIsUser
 }: Props) {
-  const {
-    preparedContent,
-    inlinedElements,
-    filteredActions,
-    filteredElements
-  } = prepareContent({
-    id,
-    content,
-    language,
-    elements,
-    actions
-  });
+  const { preparedContent, inlinedElements, refElements, scopedActions } =
+    prepareContent({
+      id,
+      content,
+      language,
+      elements,
+      actions
+    });
 
   if (!preparedContent) return null;
 
@@ -105,7 +113,7 @@ export default memo(function MessageContent({
           components={{
             a({ children, ...props }) {
               const name = children[0] as string;
-              const element = filteredElements.find((e) => e.name === name);
+              const element = refElements.find((e) => e.name === name);
 
               if (element) {
                 return <ElementRef element={element} />;
@@ -125,7 +133,7 @@ export default memo(function MessageContent({
           {preparedContent}
         </ReactMarkdown>
       </Typography>
-      <InlinedElements elements={inlinedElements} actions={filteredActions} />
+      <InlinedElements elements={inlinedElements} actions={scopedActions} />
     </Stack>
   );
 });

@@ -52,7 +52,7 @@ const router = createBrowserRouter([
     element: <Dataset />
   },
   {
-    path: '/element/:name',
+    path: '/element/:id',
     element: <Element />
   },
   {

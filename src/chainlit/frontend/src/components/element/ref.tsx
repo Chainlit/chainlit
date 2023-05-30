@@ -14,6 +14,8 @@ export default function ElementRef({ element }: Props) {
     return <span style={{ fontWeight: 700 }}>{element.name}</span>;
   }
 
+  const elementId = element.id || element.tempId;
+
   return (
     <Link
       className="element-link"
@@ -23,7 +25,7 @@ export default function ElementRef({ element }: Props) {
         }
       }}
       component={RRLink}
-      to={element.display === 'page' ? `/element/${element.name}` : '#'}
+      to={element.display === 'page' ? `/element/${elementId}` : '#'}
     >
       {element.name}
     </Link>
