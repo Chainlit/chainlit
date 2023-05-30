@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet.
 
+## [0.2.108] - 2023-05-30
+
+### Fixed
+
+- Enhanced security
+- Global element display
+- Display elements with display `page` based on their ids instead of their names
+
 ## [0.2.107] - 2023-05-28
 
 ### Added
