@@ -1,4 +1,3 @@
-import { postMessage } from 'api';
 import { Alert, Box } from '@mui/material';
 import MessageContainer from './message/container';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -12,7 +11,6 @@ import Playground from 'components/playground';
 import SideView from 'components/element/sideView';
 import InputBox from './inputBox';
 import { useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { projectSettingsState } from 'state/project';
 import { useAuth } from 'hooks/auth';
 import useLocalChatHistory from 'hooks/localChatHistory';
@@ -53,13 +51,7 @@ const Chat = () => {
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);
-      try {
-        await postMessage(sessionId, message.author, msg);
-      } catch (err) {
-        if (err instanceof Error) {
-          toast.error(err.message);
-        }
-      }
+      session?.socket.emit('message', message);
     },
     [user, session, isAuthenticated, pSettings]
   );

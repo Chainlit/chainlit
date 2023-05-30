@@ -7,7 +7,6 @@ import {
 describe("Message History", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
-    cy.intercept("/message").as("message");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
@@ -23,7 +22,6 @@ describe("Message History", () => {
     const timestamp = Date.now().toString();
 
     submitMessage(timestamp);
-    cy.wait(["@message"]);
 
     openHistory();
 

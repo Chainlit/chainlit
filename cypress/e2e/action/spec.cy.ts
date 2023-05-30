@@ -1,8 +1,6 @@
 describe("Action", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
-    cy.intercept("/message").as("message");
-    cy.intercept("/action").as("action");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
@@ -20,7 +18,6 @@ describe("Action", () => {
       .get("#action-test-action")
       .should("exist")
       .click();
-    cy.wait(["@action"]);
 
     cy.get(".message").should("have.length", 2);
     cy.get(".message").eq(1).should("contain", "Executed test action!");
@@ -30,7 +27,6 @@ describe("Action", () => {
       .get("#action-removable-action")
       .should("exist")
       .click();
-    cy.wait(["@action"]);
 
     cy.get(".message").should("have.length", 3);
     cy.get(".message").eq(2).should("contain", "Executed removable action!");

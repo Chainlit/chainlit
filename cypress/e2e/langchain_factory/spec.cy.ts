@@ -3,7 +3,6 @@ import { submitMessage } from "../../support/testUtils";
 describe("LangChain factory", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
-    cy.intercept("/message").as("message");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
@@ -11,7 +10,6 @@ describe("LangChain factory", () => {
   it("should be able to instantiate a LangChain chain and run it", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage("T-shirt");
-    cy.wait(["@message"]);
 
     cy.get("#llmchain-done").should("exist");
     cy.get("#llmchain-done").click();

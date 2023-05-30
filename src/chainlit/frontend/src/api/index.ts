@@ -37,42 +37,6 @@ export const getCompletion = async (
   return completion;
 };
 
-export const postMessage = async (
-  sessionId: string,
-  author: string,
-  content: string
-) => {
-  const res = await fetch(`${server}/message`, {
-    headers: {
-      'content-type': 'application/json'
-    },
-    method: 'POST',
-    body: JSON.stringify({ sessionId, author, content })
-  });
-
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
-
-  return res.json();
-};
-
-export const callAction = async (sessionId: string, action: IAction) => {
-  const res = await fetch(`${server}/action`, {
-    headers: {
-      'content-type': 'application/json'
-    },
-    method: 'POST',
-    body: JSON.stringify({ sessionId, action })
-  });
-
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
-
-  return res.json();
-};
-
 export const getRole = async (
   chainlitServer: string,
   accessToken: string,

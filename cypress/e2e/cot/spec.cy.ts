@@ -15,7 +15,6 @@ function testPlayground(index, shouldContain: string) {
 describe("Chain of Thought", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
-    cy.intercept("/message").as("message");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
@@ -29,8 +28,6 @@ describe("Chain of Thought", () => {
 
     cy.get("#tool-2-loading").should("exist");
     cy.get("#tool-2-loading").click();
-
-    cy.wait(["@message"]);
 
     cy.get("#tool-1-done").should("exist");
     cy.get("#tool-2-done").should("exist");

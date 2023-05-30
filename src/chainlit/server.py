@@ -8,8 +8,6 @@ import json
 from flask_cors import CORS
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, ConnectionRefusedError
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from chainlit.config import config
 from chainlit.lc.utils import run_langchain_agent
 from chainlit.session import Session, sessions
@@ -29,13 +27,6 @@ app = Flask(__name__, static_folder=build_dir)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=[],
-    storage_uri="memory://",
-)
-
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -48,7 +39,6 @@ def serve(path):
 
 
 @app.route("/completion", methods=["POST"])
-@limiter.limit(config.request_limit)
 @trace
 def completion():
     """Handle a completion request from the prompt playground."""
@@ -282,18 +272,15 @@ def process_message(session: Session, author: str, input_str: str):
         __chainlit_sdk__.task_end()
 
 
-@app.route("/message", methods=["POST"])
-@limiter.limit(config.request_limit)
-@trace
-def message():
+@socketio.on("message")
+def on_message(body):
     """Handle a message from the UI."""
 
-    body = request.json
-    session_id = body["sessionId"]
+    session_id = request.sid
+    session = need_session(session_id)
+
     input_str = body["content"].strip()
     author = body["author"]
-
-    session = need_session(session_id)
 
     task = socketio.start_background_task(process_message, session, author, input_str)
     session["task"] = task
@@ -312,21 +299,15 @@ def process_action(session: Session, action: Action):
         logger.warning("No callback found for action %s", action.name)
 
 
-@app.route("/action", methods=["POST"])
-@limiter.limit(config.request_limit)
-@trace
-def on_action():
+@socketio.on("call_action")
+def call_action(action):
     """Handle an action call from the UI."""
-
-    body = request.json
-    session_id = body["sessionId"]
-    action = Action(**body["action"])
-
+    session_id = request.sid
     session = need_session(session_id)
+
+    action = Action(**action)
 
     task = socketio.start_background_task(process_action, session, action)
     session["task"] = task
     task.join()
     session["task"] = None
-
-    return {"success": True}

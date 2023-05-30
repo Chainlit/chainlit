@@ -3,7 +3,6 @@ import { submitMessage } from "../../support/testUtils";
 describe("LangChain run", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
-    cy.intercept("/message").as("message");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
@@ -11,7 +10,6 @@ describe("LangChain run", () => {
   it("should use the run function defined by the developer", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage("Hello");
-    cy.wait(["@message"]);
     cy.get("#llmchain-done").should("exist");
     const messages = cy.get(".message");
     messages.should("have.length", 2);
