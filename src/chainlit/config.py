@@ -20,6 +20,8 @@ config_file = os.path.join(config_dir, "config.toml")
 DEFAULT_CONFIG_STR = """[project]
 # Name of the app and chatbot.
 name = "Chatbot"
+# Description of the app and chatbot. This is used for HTML tags.
+# description = ""
 
 # If true (default), the app will be available to anonymous users (once deployed).
 # If false, users will need to authenticate and be part of the project to use the app.
@@ -57,6 +59,8 @@ class ChainlitConfig:
     chainlit_server: str
     # Name of the app and chatbot. Used as the default message author.
     chatbot_name: str
+    # Description of the app and chatbot. This is used for HTML tags.
+    description: str
     # Whether the app is available to anonymous users or only to team members.
     public: bool
     # Whether to enable telemetry. No personal data is collected.
@@ -155,6 +159,7 @@ def load_config():
             enable_telemetry = True
 
         chatbot_name = project_settings.get("name")
+        description = project_settings.get("description", "")
         project_id = project_settings.get("id")
         public = project_settings.get("public")
         user_env = project_settings.get("user_env")
@@ -175,6 +180,7 @@ def load_config():
             hide_cot=hide_cot,
             chainlit_server=chainlit_server,
             chatbot_name=chatbot_name,
+            description=description,
             public=public,
             enable_telemetry=enable_telemetry,
             user_env=user_env,

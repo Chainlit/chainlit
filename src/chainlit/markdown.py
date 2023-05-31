@@ -33,7 +33,7 @@ def get_markdown_str(root: str):
     """Get the chainlit.md file as a string."""
     chainlit_md_path = os.path.join(root, "chainlit.md")
     if os.path.exists(chainlit_md_path):
-        with open(chainlit_md_path, encoding="utf-8") as f:
+        with open(chainlit_md_path, "r", encoding="utf-8") as f:
             chainlit_md = f.read()
             return chainlit_md
     else:

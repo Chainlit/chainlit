@@ -84,7 +84,6 @@ function App() {
   useEffect(() => {
     if (pSettings === undefined) {
       getProjectSettings().then((res) => {
-        document.title = res.appTitle;
         setPSettings(res);
       });
     }

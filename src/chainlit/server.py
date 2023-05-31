@@ -33,6 +33,34 @@ socketio = SocketIO(
 )
 
 
+def inject_html_tags():
+    PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
+
+    default_url = "https://github.com/Chainlit/chainlit"
+    url = config.github or default_url
+
+    tags = f"""<title>{config.chatbot_name}</title>
+    <meta name="description" content="{config.description}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{config.chatbot_name}">
+    <meta property="og:description" content="{config.description}">
+    <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
+    <meta property="og:url" content="{url}">"""
+
+    orig_index_html_file_path = os.path.join(app.static_folder, "index.html")
+    injected_index_html_file_path = os.path.join(app.static_folder, "_index.html")
+
+    with open(orig_index_html_file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    content = content.replace(PLACEHOLDER, tags)
+
+    with open(injected_index_html_file_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+inject_html_tags()
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
@@ -40,7 +68,7 @@ def serve(path):
     if path != "" and os.path.exists(app.static_folder + "/" + path):
         return send_from_directory(app.static_folder, path)
     else:
-        return send_from_directory(app.static_folder, "index.html")
+        return send_from_directory(app.static_folder, "_index.html")
 
 
 @app.route("/completion", methods=["POST"])
