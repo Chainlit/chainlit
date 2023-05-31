@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet.
 
+## [0.2.109] - 2023-05-31
+
+### Added
+
+- URL preview for social media share
+
+### Fixed
+
+- `max_http_buffer_size` is now set to 100mb, fixing the `max_size_mb` parameter of `AskFileMessage`
+
 ## [0.2.108] - 2023-05-30
 
 ### Fixed
