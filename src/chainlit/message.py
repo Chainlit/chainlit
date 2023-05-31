@@ -336,7 +336,7 @@ class AskFileMessage(AskMessageBase):
     Args:
         content (str): Text displayed above the upload button.
         accept (List[str]): List of mime type to accept like ["text/csv", "application/pdf"]
-        max_size_mb (int, optional): Maximum file size in MB.
+        max_size_mb (int, optional): Maximum file size in MB. Maximum value is 100.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -365,7 +365,7 @@ class AskFileMessage(AskMessageBase):
             "waitForAnswer": True,
         }
 
-    def send(self) -> Union[AskResponse, None]:
+    def send(self) -> Union[AskFileResponse, None]:
         """
         Sends the message to request a file from the user to the UI and waits for the reply.
         """

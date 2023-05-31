@@ -1,4 +1,3 @@
-import { IAction } from 'state/action';
 import { ILLMSettings } from 'state/chat';
 import { Role } from 'state/user';
 

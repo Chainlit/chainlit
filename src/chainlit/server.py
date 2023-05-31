@@ -25,7 +25,12 @@ build_dir = os.path.join(root_dir, "frontend/dist")
 
 app = Flask(__name__, static_folder=build_dir)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="gevent",
+    max_http_buffer_size=1000000 * 100,
+)
 
 
 @app.route("/", defaults={"path": ""})
