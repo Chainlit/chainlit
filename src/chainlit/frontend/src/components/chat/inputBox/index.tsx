@@ -1,6 +1,6 @@
-import { Box, Typography } from '@mui/material';
-import { useRecoilValue } from 'recoil';
-import { tokenCountState } from 'state/chat';
+import { Box } from '@mui/material';
+// import { useRecoilValue } from 'recoil';
+// import { tokenCountState } from 'state/chat';
 import StopButton from 'components/chat/stopButton';
 import Input from './input';
 import WaterMark from './waterMark';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function InputBox({ onSubmit, onReply }: Props) {
-  const tokenCount = useRecoilValue(tokenCountState);
+  // const tokenCount = useRecoilValue(tokenCountState);
 
   return (
     <Box

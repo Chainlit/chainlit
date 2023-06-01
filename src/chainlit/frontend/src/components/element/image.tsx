@@ -24,7 +24,7 @@ export default function ImageElement({ element }: Props) {
       <img
         className={className}
         src={src}
-        onClick={(e) => {
+        onClick={() => {
           if (element.display === 'inline') {
             const name = `${element.name}.png`;
             handleImageClick(name, src);
