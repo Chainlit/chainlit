@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Dict, Union
 import uuid
 import time
 from abc import ABC, abstractmethod
@@ -335,7 +335,7 @@ class AskFileMessage(AskMessageBase):
 
     Args:
         content (str): Text displayed above the upload button.
-        accept (List[str]): List of mime type to accept like ["text/csv", "application/pdf"]
+        accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
         max_size_mb (int, optional): Maximum file size in MB. Maximum value is 100.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
@@ -345,7 +345,7 @@ class AskFileMessage(AskMessageBase):
     def __init__(
         self,
         content: str,
-        accept: List[str],
+        accept: Union[List[str], Dict[str, List[str]]],
         max_size_mb=2,
         author=config.chatbot_name,
         timeout=90,

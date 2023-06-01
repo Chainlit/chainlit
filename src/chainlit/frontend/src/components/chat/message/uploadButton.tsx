@@ -58,9 +58,18 @@ function _UploadButton({ askUser }: Props) {
 
   if (!askUser.spec.accept || !askUser.spec.max_size_mb) return null;
 
-  const dzAccept: Record<string, string[]> = {};
+  let dzAccept: Record<string, string[]> = {};
   const accept = askUser.spec.accept;
-  accept.forEach((a) => (dzAccept[a] = []));
+  if (Array.isArray(accept)) {
+    accept.forEach((a) => {
+      if (typeof a === 'string') {
+        dzAccept[a] = [];
+      }
+    });
+  } else if (typeof accept === 'object') {
+    dzAccept = accept;
+  }
+
   const maxSize = askUser.spec.max_size_mb;
 
   const { getRootProps, getInputProps } = useDropzone({

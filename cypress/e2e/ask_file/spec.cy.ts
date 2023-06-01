@@ -10,19 +10,29 @@ describe("Upload file", () => {
   it("should be able to receive and decode the file", () => {
     cy.get("#upload-button").should("exist");
 
-    cy.fixture("state_of_the_union.txt", "utf-8").as("file");
-    cy.get("input[type=file]").selectFile("@file", { force: true });
+    cy.fixture("state_of_the_union.txt", "utf-8").as("txtFile");
+    cy.get("input[type=file]").selectFile("@txtFile", { force: true });
 
     cy.get("#upload-button-loading").should("exist");
 
     cy.get("#upload-button-loading").should("not.exist");
-    cy.get("#upload-button").should("not.exist");
 
-    const messages = cy.get(".message");
-    messages.should("have.length", 2);
-
-    messages
+    cy.get(".message")
       .eq(1)
-      .should("contain", "state_of_the_union.txt uploaded, it contains");
+      .should(
+        "contain",
+        "Text file state_of_the_union.txt uploaded, it contains"
+      );
+
+    cy.get("#upload-button").should("exist");
+    cy.fixture("hello.py", "utf-8").as("pyFile");
+    cy.get("input[type=file]").selectFile("@pyFile", { force: true });
+
+    cy.get(".message")
+      .should("have.length", 4)
+      .eq(3)
+      .should("contain", "Python file hello.py uploaded, it contains");
+
+    cy.get("#upload-button").should("not.exist");
   });
 });

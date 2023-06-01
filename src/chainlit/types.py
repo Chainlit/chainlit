@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Optional, Literal
+from typing import List, TypedDict, Optional, Literal, Dict, Union
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
@@ -21,7 +21,7 @@ class AskSpec:
 class AskFileSpec(AskSpec):
     """Specification for asking the user for a file."""
 
-    accept: List[str]
+    accept: Union[List[str], Dict[str, List[str]]]
     max_size_mb: int
 
 
