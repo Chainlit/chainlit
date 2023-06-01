@@ -74,10 +74,10 @@ npm run buildUi
 ### Install from local sources
 
 ```sh
-pip install PATH_TO_CHAINLIT_REPO/src
+pip install -e PATH_TO_CHAINLIT_REPO/src
 ```
 
-You need to repeat that step everytime you make a change in the Python codebase
+This installs your project in editable mode, which means you only need to do this once.
 
 ### Start the server
 
