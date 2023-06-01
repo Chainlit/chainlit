@@ -31,6 +31,8 @@ cd src
 poetry install
 ```
 
+Make sure you have the Python code formatter `black` installed as it is used in a pre-commit hook. Run `pip install black` if needed.
+
 ## Contribute to the UI
 
 The source code of the UI is in [src/chainlit/frontend](/src/chainlit/frontend).
