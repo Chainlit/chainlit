@@ -56,7 +56,7 @@ export interface IAsk {
   spec: {
     type: 'text' | 'file';
     timeout: number;
-    accept?: string[];
+    accept?: string[] | Record<string, string[]>;
     max_size_mb?: number;
   };
 }
