@@ -9,6 +9,7 @@ export default defineConfig({
   },
 
   e2e: {
+    video: false,
     supportFile: false,
     defaultCommandTimeout: 10000,
     setupNodeEvents(on, config) {
