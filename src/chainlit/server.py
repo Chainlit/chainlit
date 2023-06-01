@@ -84,8 +84,11 @@ def completion():
 
     api_key = user_env.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
 
-    stop = llm_settings.pop("stop", None)
     model_name = llm_settings.pop("model_name", None)
+    stop = llm_settings.pop("stop", None)
+    # OpenAI doesn't support an empty stop array, clear it
+    if isinstance(stop, list) and len(stop) == 0:
+        stop = None
 
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         response = openai.ChatCompletion.create(
