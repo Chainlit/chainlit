@@ -31,11 +31,13 @@ cd src
 poetry install
 ```
 
-## Contribute to the UI
+Make sure you have the Python code formatter `black` installed as it is used in a pre-commit hook. Run `pip install black` if needed.
+
+## Setup the UI
 
 The source code of the UI is in [src/chainlit/frontend](/src/chainlit/frontend).
 
-Before anything, go to [src/chainlit/frontend/api/index.ts](/src/chainlit/frontend/src/api/index.ts). Find the definition of `const server` and inverse the comment:
+Before anything, go to [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts). Find the definition of `const server` and inverse the comment:
 
 ```ts
 export const server = 'http://127.0.0.1:8000';
@@ -48,44 +50,30 @@ Don't forget to revert that change before pushing.
 
 ```sh
 cd src/chainlit/frontend
+npm run buildUi
 npm run dev -- --port 5174
 ```
 
+The `buildUi` step is currently needed by the server.
+
 If you visit `http://127.0.0.1:5174/`, it should say that it can't connect to the server.
-
-### Start the server
-- If you only wish to contribute to the UI, you can use any Chainlit installation
-- If your contribution impacts both the UI and the Python package, you need to start the server from your [local installation](#contribute-to-the-python-package)
-
-Starting the chainlit server in headless mode (since we manually started the UI)
-```sh
-chainlit run target.py -h
-```
-
-## Contribute to the Python package
-
-- If you only wish to contribute to the Python package, run:
-```sh
-npm run buildUi
-```
-
-- If your contribution impacts both the Python package and the UI, check the section above
+## Setup the server
 
 ### Install from local sources
 
 ```sh
-pip install PATH_TO_CHAINLIT_REPO/src
+pip install -e PATH_TO_CHAINLIT_REPO/src
 ```
 
-You need to repeat that step everytime you make a change in the Python codebase
+This installs your project in editable mode, which means you only need to do this once.
 
 ### Start the server
 
 ```sh
-chainlit run target.py [-h]
+chainlit run target.py -h
 ```
 
-The `-h` parameter (headless) means the UI will not automatically open. Only use this if you are already running the UI yourself.
+The `-h` parameter (headless) means the UI will not automatically open.
 
 ## Run the tests
 
@@ -93,3 +81,38 @@ The `-h` parameter (headless) means the UI will not automatically open. Only use
 2. Run `npm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
+
+## Only contribute to one side of the project
+
+This is the easiest solution if you want to only make a change in the UI or the server.
+
+Start with following the steps from the [Local setup](#local-setup).
+
+### Only contribute to frontend
+
+1. Follow the steps from [Setup the UI](#setup-the-ui).
+2. Change the server configuration in [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts) to match your target chainlit server. 
+
+```js
+export const server = 'https://img-gen.chainlit.app/';
+```
+3. Follow the steps from [Start the UI](#start-the-ui).
+
+### Only contribute to the server
+
+1. Build the UI.
+
+```sh
+cd src/chainlit/frontend
+npm run buildUi
+```
+
+2. Follow the instruction from [Install from local sources](#install-from-local-sources).
+
+3. Run the server without the `-h` flag.
+
+```sh
+chainlit run target.py
+```
+
+4. Any time you've made a change, restart the server from the previous step.
