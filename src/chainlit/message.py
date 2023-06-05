@@ -2,6 +2,8 @@ from typing import List, Dict, Union
 import uuid
 import time
 from abc import ABC, abstractmethod
+import asyncio
+
 from chainlit.telemetry import trace_event
 from chainlit.logger import logger
 from chainlit.sdk import get_sdk, Chainlit
@@ -27,9 +29,12 @@ class MessageBase(ABC):
     temp_id: str = None
     streaming = False
     sdk: Chainlit = None
+    created_at: int = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
+        self.temp_id = uuid.uuid4().hex
+        self.created_at = current_milli_time()
         if not self.sdk:
             self.sdk = get_sdk()
             if not self.sdk:
@@ -46,12 +51,6 @@ class MessageBase(ABC):
             if self.id:
                 msg_dict["id"] = self.id
 
-        if not "id" in msg_dict:
-            self.temp_id = uuid.uuid4().hex
-            msg_dict["tempId"] = self.temp_id
-
-        msg_dict["createdAt"] = current_milli_time()
-
         return msg_dict
 
     async def update(
@@ -67,12 +66,6 @@ class MessageBase(ABC):
         """
         trace_event("update_message")
 
-        sdk = self.sdk or get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot update message")
-            return False
-
         if author:
             self.author = author
         if content:
@@ -86,8 +79,8 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if sdk.client and self.id:
-            sdk.client.update_message(self.id, msg_dict)
+        if self.sdk.client and self.id:
+            self.sdk.client.update_message(self.id, msg_dict)
             msg_dict["id"] = self.id
         elif self.temp_id:
             msg_dict["tempId"] = self.temp_id
@@ -95,7 +88,7 @@ class MessageBase(ABC):
             logger.error("Cannot update a message that has no ID")
             return False
 
-        await sdk.update_message(msg_dict)
+        await self.sdk.update_message(msg_dict)
 
         return True
 
@@ -106,16 +99,11 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        sdk = self.sdk or get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot delete message")
-            return False
-        if sdk.client and self.id:
-            sdk.client.delete_message(self.id)
-            await sdk.delete_message(self.id)
+        if self.sdk.client and self.id:
+            self.sdk.client.delete_message(self.id)
+            await self.sdk.delete_message(self.id)
         elif self.temp_id:
-            await sdk.delete_message(self.temp_id)
+            await self.sdk.delete_message(self.temp_id)
         else:
             logger.error("Cannot delete a message that has no ID")
             return False
@@ -127,9 +115,8 @@ class MessageBase(ABC):
 
         if self.streaming:
             self.streaming = False
-            await self.sdk.stream_end(msg_dict)
-        else:
-            await self.sdk.send_message(msg_dict)
+
+        await self.sdk.send_message(msg_dict)
 
         return self.id or self.temp_id
 
@@ -138,19 +125,14 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to persist the message.
         """
-        sdk = self.sdk or get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot stream token")
-            return
 
         if not self.streaming:
             self.streaming = True
             msg_dict = self.to_dict()
-            await sdk.stream_start(msg_dict)
+            await self.sdk.stream_start(msg_dict)
 
         self.content += token
-        await sdk.send_token(token)
+        await self.sdk.send_token(id=self.id or self.temp_id, token=token)
 
 
 class Message(MessageBase):
@@ -202,6 +184,8 @@ class Message(MessageBase):
 
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "prompt": self.prompt,
@@ -218,11 +202,10 @@ class Message(MessageBase):
         trace_event("send_message")
         id = await super().send()
 
-        for action in self.actions:
-            await action.send(for_id=str(id))
+        action_coros = [action.send(for_id=str(id)) for action in self.actions]
+        element_coros = [element.send(for_id=str(id)) for element in self.elements]
 
-        for element in self.elements:
-            await element.send(for_id=str(id))
+        await asyncio.gather(*action_coros, *element_coros)
 
         return id
 
@@ -255,6 +238,8 @@ class ErrorMessage(MessageBase):
 
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "indent": self.indent,
@@ -274,12 +259,7 @@ class AskMessageBase(MessageBase):
     def remove(self):
         removed = super().remove()
         if removed:
-            sdk = self.sdk or get_sdk()
-
-            if not sdk:
-                return
-
-            sdk.clear_ask()
+            self.sdk.clear_ask()
 
 
 class AskUserMessage(AskMessageBase):
@@ -314,6 +294,8 @@ class AskUserMessage(AskMessageBase):
 
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
@@ -376,6 +358,8 @@ class AskFileMessage(AskMessageBase):
 
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,

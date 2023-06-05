@@ -34,6 +34,11 @@ export interface IMessage {
   llmSettings?: ILLMSettings;
 }
 
+export interface IToken {
+  id: number | string;
+  token: string;
+}
+
 export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
 }

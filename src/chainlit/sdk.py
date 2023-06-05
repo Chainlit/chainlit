@@ -44,7 +44,7 @@ class Chainlit:
         if not self.emit:
             return
 
-        return self.emit("message", msg_dict)
+        return self.emit("new_message", msg_dict)
 
     def update_message(self, msg_dict: Dict):
         """Update a message in the UI."""
@@ -134,15 +134,10 @@ class Chainlit:
                 msg_dict,
             )
 
-    def send_token(self, token: str):
+    def send_token(self, id: Union[str, int], token: str):
         """Send a message token to the UI."""
         if self.emit:
-            return self.emit("stream_token", token)
-
-    def stream_end(self, msg):
-        """Send a stream end signal to the UI."""
-        if self.emit:
-            return self.emit("stream_end", msg)
+            return self.emit("stream_token", {"id": id, "token": token})
 
 
 def get_sdk() -> Union[Chainlit, None]:

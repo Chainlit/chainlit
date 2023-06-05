@@ -3,6 +3,7 @@ import { memo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   IMessage,
+  IToken,
   askUserState,
   loadingState,
   messagesState,
@@ -71,8 +72,21 @@ export default memo(function Socket() {
       window.location.reload();
     });
 
-    socket.on('message', (message: IMessage) => {
-      setMessages((oldMessages) => [...oldMessages, message]);
+    socket.on('new_message', (message: IMessage) => {
+      setMessages((oldMessages) => {
+        const index = oldMessages.findIndex(
+          (m) => m.id === message.id || m.tempId === message.tempId
+        );
+        if (index === -1) {
+          return [...oldMessages, message];
+        } else {
+          return [
+            ...oldMessages.slice(0, index),
+            message,
+            ...oldMessages.slice(index + 1)
+          ];
+        }
+      });
     });
 
     socket.on('update_message', (message: IMessage) => {
@@ -106,16 +120,21 @@ export default memo(function Socket() {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    socket.on('stream_token', (token: string) => {
+    socket.on('stream_token', ({ id, token }: IToken) => {
       setMessages((oldMessages) => {
-        const lastMessage = { ...oldMessages[oldMessages.length - 1] };
-        lastMessage.content += token;
-        return [...oldMessages.slice(0, -1), lastMessage];
+        const index = oldMessages.findIndex(
+          (m) => m.id === id || m.tempId === id
+        );
+        if (index === -1) return oldMessages;
+        const oldMessage = oldMessages[index];
+        const newMessage = { ...oldMessage };
+        newMessage.content += token;
+        return [
+          ...oldMessages.slice(0, index),
+          newMessage,
+          ...oldMessages.slice(index + 1)
+        ];
       });
-    });
-
-    socket.on('stream_end', (message: IMessage) => {
-      setMessages((oldMessages) => [...oldMessages.slice(0, -1), message]);
     });
 
     socket.on('ask', ({ msg, spec }, callback) => {
