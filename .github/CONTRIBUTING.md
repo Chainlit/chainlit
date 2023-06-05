@@ -82,6 +82,11 @@ The `-h` parameter (headless) means the UI will not automatically open.
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
+### Run one test
+
+1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
+2. Run `npm test FOLDER` and change FOLDER with the folder from the previous step (example: `run test scoped_elements`).
+
 ## Only contribute to one side of the project
 
 This is the easiest solution if you want to only make a change in the UI or the server.
