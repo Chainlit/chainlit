@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 from chainlit.sdk import get_sdk, BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
+from base64 import b64encode, b64decode
+from urllib import parse as urlparse
 
 
 @dataclass_json
@@ -144,3 +146,48 @@ class Text(LocalElement, TextBase):
         if "content" in text_element and isinstance(text_element["content"], bytes):
             text_element["content"] = text_element["content"].decode("utf-8")
         return text_element
+
+
+@dataclass
+class Pdf(Element):
+    """Useful to send a pdf (remote or local) to the UI."""
+
+    type: ElementType = "pdf"
+    url: str = None
+    path: str = None
+    content: str = None
+
+    def persist(self, client: BaseClient, for_id: str = None):
+        if not self.content and not self.url:
+            raise ValueError("Must provide content or url")
+
+        # Either upload the content or use the url
+        url = None
+        if self.content:
+            content = b64decode(urlparse.unquote(self.content))
+            url = client.upload_element(content=content)
+        else:
+            url = self.url
+
+        if url:
+            size = getattr(self, "size", None)
+            language = getattr(self, "language", None)
+            element = client.create_element(
+                name=self.name,
+                url=url,
+                type=self.type,
+                display=self.display,
+                size=size,
+                language=language,
+                for_id=for_id,
+            )
+            return element
+
+    def __post_init__(self):
+        if self.path:
+            with open(self.path, "rb") as f:
+                self.content = urlparse.quote(b64encode(f.read()).decode("utf-8"))
+        elif self.content or self.url:
+            pass  # do nothing here
+        else:
+            raise ValueError("Must provide either path, content or url")

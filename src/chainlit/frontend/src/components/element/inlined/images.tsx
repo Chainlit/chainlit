@@ -4,7 +4,7 @@ import { IImageElement } from 'state/element';
 import ImageElement from '../image';
 
 interface Props {
-  images: IImageElement[];
+  items: IImageElement[];
 }
 
 function sizeToUnit(image: IImageElement) {
@@ -19,7 +19,7 @@ function sizeToUnit(image: IImageElement) {
   }
 }
 
-export default function InlinedImageList({ images }: Props) {
+export default function InlinedImageList({ items }: Props) {
   return (
     <ImageList
       sx={{
@@ -34,7 +34,7 @@ export default function InlinedImageList({ images }: Props) {
       cols={4}
       gap={8}
     >
-      {images.map((image, i) => {
+      {items.map((image, i) => {
         const cols = sizeToUnit(image);
         const rows = sizeToUnit(image);
 

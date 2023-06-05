@@ -16,7 +16,7 @@ from chainlit.sdk import get_sdk
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
-from chainlit.element import LocalImage, RemoteImage, Text
+from chainlit.element import LocalImage, RemoteImage, Text, Pdf
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
 from typing import Callable, Any
@@ -216,6 +216,7 @@ __all__ = [
     "user_session",
     "LLMSettings",
     "Action",
+    "Pdf",
     "LocalImage",
     "RemoteImage",
     "Text",

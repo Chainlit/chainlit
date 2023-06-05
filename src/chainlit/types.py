@@ -2,7 +2,7 @@ from typing import List, TypedDict, Optional, Literal, Dict, Union
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
-ElementType = Literal["image", "text"]
+ElementType = Literal["image", "text", "pdf"]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
 
