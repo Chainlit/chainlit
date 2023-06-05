@@ -10,8 +10,10 @@ describe("Scoped Elements", () => {
 
     cy.get(".message").eq(0).find(".inline-image").should("have.length", 0);
     cy.get(".message").eq(0).find(".element-link").should("have.length", 0);
+    cy.get(".message").eq(0).find(".inline-pdf").should("have.length", 0);
 
     cy.get(".message").eq(1).find(".inline-image").should("have.length", 1);
     cy.get(".message").eq(1).find(".element-link").should("have.length", 2);
+    cy.get(".message").eq(1).find(".inline-pdf").should("have.length", 1);
   });
 });
