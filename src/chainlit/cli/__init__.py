@@ -1,15 +1,22 @@
 import click
 import os
 import sys
-import webbrowser
-from chainlit.config import config, init_config, load_module
-from chainlit.watch import watch_directory
+import uvicorn
+import asyncio
+import nest_asyncio
+
+nest_asyncio.apply()
+
+from chainlit.config import config, init_config, load_module, package_root
 from chainlit.markdown import init_markdown
 from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
 from chainlit.logger import logger
+from chainlit.server import app
+
+# from chainlit.watch import watch_directory
 
 
 # Create the main command group for Chainlit CLI
@@ -21,10 +28,12 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str, watch=False, headless=False, debug=False):
-    DEFAULT_HOST = "0.0.0.0"
-    DEFAULT_PORT = 8000
-    host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
-    port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    host = os.environ.get("CHAINLIT_HOST", config.run_settings.DEFAULT_HOST)
+    port = int(os.environ.get("CHAINLIT_PORT", config.run_settings.DEFAULT_PORT))
+
+    config.run_settings.headless = headless
+    config.run_settings.host = host
+    config.run_settings.port = port
 
     check_file(target)
     # Load the module provided by the user
@@ -35,27 +44,19 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
     init_markdown(config.root)
 
     # Enable file watching if the user specified it
-    if watch:
-        watch_directory()
+    # if watch:
+    #     watch_directory()
 
-    from chainlit.server import socketio, app
-
-    # Open the browser if in development mode
-    def open_browser(headless: bool):
-        if not headless:
-            if host == DEFAULT_HOST:
-                url = f"http://localhost:{port}"
-            else:
-                url = f"http://{host}:{port}"
-            # Wait two seconds to allow the server to start
-            socketio.sleep(2)
-
-            logger.info(f"Your app is available at {url}")
-            webbrowser.open(url)
-
-    socketio.start_background_task(open_browser, headless)
     # Start the server
-    socketio.run(app, host=host, port=port, debug=debug, use_reloader=False)
+    async def start():
+        # log_level = "debug" if debug else "info"
+        config = uvicorn.Config(app, host=host, port=port, log_level="info")
+        server = uvicorn.Server(config)
+        await server.serve()
+
+    # Run the asyncio event loop instead of uvloop to enable re entrance
+    asyncio.run(start())
+    # uvicorn.run(app, host=host, port=port)
 
 
 # Define the "run" command for Chainlit CLI
@@ -94,8 +95,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
-    dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    hello_path = os.path.join(dir_path, "hello.py")
+    hello_path = os.path.join(package_root, "hello.py")
     run_chainlit(hello_path)
 
 

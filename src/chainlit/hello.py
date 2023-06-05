@@ -4,9 +4,9 @@ from chainlit import AskUserMessage, Message, on_chat_start
 
 
 @on_chat_start
-def main():
-    res = AskUserMessage(content="What is your name?", timeout=30).send()
+async def main():
+    res = await AskUserMessage(content="What is your name?", timeout=30).send()
     if res:
-        Message(
+        await Message(
             content=f"Your name is: {res['content']}.\nChainlit installation is working!\nYou can now start building your own chainlit apps!",
         ).send()

@@ -20,48 +20,50 @@ class Element(ABC):
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
+        self.sdk = get_sdk()
+        if not self.sdk:
+            raise Exception("Must initialize SDK before creating an element")
 
     @abstractmethod
-    def persist(self, client: BaseClient, for_id: str = None) -> Dict:
+    async def persist(self, client: BaseClient, for_id: str = None) -> Dict:
         pass
 
     def before_emit(self, element: Dict) -> Dict:
         return element
 
-    def send(self, for_id: str = None):
-        sdk = get_sdk()
-
+    async def send(self, for_id: str = None):
         element = None
 
         # Cloud is enabled, upload the element to S3
-        if sdk.client:
-            element = self.persist(sdk.client, for_id)
-            self.id = element["id"]
+        if self.sdk.client:
+            element = await self.persist(self.sdk.client, for_id)
 
-        if not element:
+        if element:
+            self.id = element["id"]
+        elif not element:
             self.tempId = uuid.uuid4().hex
             element = self.to_dict()
             if for_id:
                 element["forId"] = for_id
 
-        if sdk.emit and element:
+        if self.sdk.emit and element:
             trace_event(f"send {self.__class__.__name__}")
             element = self.before_emit(element)
-            sdk.emit("element", element)
+            await self.sdk.emit("element", element)
 
 
 @dataclass
 class LocalElement(Element):
     content: bytes = None
 
-    def persist(self, client: BaseClient, for_id: str = None):
+    async def persist(self, client: BaseClient, for_id: str = None):
         if not self.content:
             raise ValueError("Must provide content")
-        url = client.upload_element(content=self.content)
+        url = await client.upload_element(content=self.content)
         if url:
             size = getattr(self, "size", None)
             language = getattr(self, "language", None)
-            element = client.create_element(
+            element = await client.create_element(
                 name=self.name,
                 url=url,
                 type=self.type,
@@ -86,10 +88,10 @@ class ImageBase:
 
 @dataclass
 class RemoteElement(Element, RemoteElementBase):
-    def persist(self, client: BaseClient, for_id: str = None):
+    async def persist(self, client: BaseClient, for_id: str = None):
         size = getattr(self, "size", None)
         language = getattr(self, "language", None)
-        element = client.create_element(
+        element = await client.create_element(
             name=self.name,
             url=self.url,
             type=self.type,
@@ -108,6 +110,7 @@ class LocalImage(ImageBase, LocalElement):
     path: str = None
 
     def __post_init__(self):
+        super().__post_init__()
         if self.path:
             with open(self.path, "rb") as f:
                 self.content = f.read()
@@ -138,6 +141,7 @@ class Text(LocalElement, TextBase):
     language: str = None
 
     def __post_init__(self):
+        super().__post_init__()
         self.content = bytes(self.text, "utf-8")
 
     def before_emit(self, text_element):

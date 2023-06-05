@@ -1,8 +1,11 @@
 from typing import Dict, Any, Optional
-from python_graphql_client import GraphqlClient
 from abc import ABC, abstractmethod
 import uuid
-import requests
+
+import asyncio
+import httpx
+from python_graphql_client import GraphqlClient
+
 from chainlit.types import ElementType, ElementSize
 from chainlit.logger import logger
 from chainlit.config import config
@@ -13,31 +16,31 @@ class BaseClient(ABC):
     session_id: str
 
     @abstractmethod
-    def is_project_member(self, access_token: str) -> bool:
+    async def is_project_member(self, access_token: str) -> bool:
         pass
 
     @abstractmethod
-    def create_conversation(self, session_id: str) -> int:
+    async def create_conversation(self, session_id: str) -> int:
         pass
 
     @abstractmethod
-    def create_message(self, variables: Dict[str, Any]) -> int:
+    async def create_message(self, variables: Dict[str, Any]) -> int:
         pass
 
     @abstractmethod
-    def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+    async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
         pass
 
     @abstractmethod
-    def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: int) -> bool:
         pass
 
     @abstractmethod
-    def upload_element(self, content: bytes) -> int:
+    async def upload_element(self, content: bytes) -> int:
         pass
 
     @abstractmethod
-    def create_element(
+    async def create_element(
         self,
         type: ElementType,
         url: str,
@@ -49,17 +52,31 @@ class BaseClient(ABC):
     ) -> Dict[str, Any]:
         pass
 
+    def is_response_ok(self, response: httpx.Response):
+        return 200 <= response.status_code < 300
+
+
+conversation_lock = asyncio.Lock()
+
 
 class CloudClient(BaseClient):
     conversation_id: Optional[str] = None
 
-    def __init__(self, project_id: str, session_id: str, access_token: str, url: str):
+    def __init__(self, project_id: str, session_id: str, access_token: str):
         self.project_id = project_id
         self.session_id = session_id
-        self.url = url
-        self.headers = {"Authorization": access_token}
-        graphql_endpoint = f"{url}/api/graphql"
-        self.client = GraphqlClient(endpoint=graphql_endpoint, headers=self.headers)
+        self.headers = {
+            "Authorization": access_token,
+            "content-type": "application/json",
+        }
+        graphql_endpoint = f"{config.chainlit_server}/api/graphql"
+        self.graphql_client = GraphqlClient(
+            endpoint=graphql_endpoint, headers=self.headers
+        )
+
+        self.http_client = httpx.AsyncClient(
+            base_url=config.chainlit_server, headers=self.headers
+        )
 
     def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
@@ -69,7 +86,7 @@ class CloudClient(BaseClient):
         :param variables: A dictionary of variables for the query.
         :return: The response data as a dictionary.
         """
-        return self.client.execute(query=query, variables=variables)
+        return self.graphql_client.execute_async(query=query, variables=variables)
 
     def check_for_errors(self, response: Dict[str, Any]):
         if "errors" in response:
@@ -85,50 +102,46 @@ class CloudClient(BaseClient):
         :param variables: A dictionary of variables for the mutation.
         :return: The response data as a dictionary.
         """
-        return self.client.execute(query=mutation, variables=variables)
+        return self.graphql_client.execute_async(query=mutation, variables=variables)
 
-    def is_project_member(self) -> bool:
-        try:
-            headers = {
-                "content-type": "application/json",
-                "Authorization": self.headers["Authorization"],
-            }
-            data = {"projectId": self.project_id}
-            response = requests.post(
-                f"{config.chainlit_server}/api/role", headers=headers, json=data
-            )
-
-            role = response.json().get("role", "ANONYMOUS")
-            return role != "ANONYMOUS"
-        except Exception as e:
-            logger.exception(e)
+    async def is_project_member(self) -> bool:
+        data = {"projectId": self.project_id}
+        r = await self.http_client.post("/api/role", json=data)
+        if not self.is_response_ok(r):
+            logger.error(f"Failed to get user role. {r.status_code}: {r.text}")
             return False
+        role = r.json().get("role", "ANONYMOUS")
+        return role != "ANONYMOUS"
 
-    def create_conversation(self, session_id: str) -> int:
-        mutation = """
-        mutation ($projectId: String!, $sessionId: String!) {
-            createConversation(projectId: $projectId, sessionId: $sessionId) {
-                id
+    async def create_conversation(self, session_id: str) -> int:
+        # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
+        async with conversation_lock:
+            if self.conversation_id:
+                return self.conversation_id
+
+            mutation = """
+            mutation ($projectId: String!, $sessionId: String!) {
+                createConversation(projectId: $projectId, sessionId: $sessionId) {
+                    id
+                }
             }
-        }
-        """
-        variables = {"projectId": self.project_id, "sessionId": session_id}
-        res = self.mutation(mutation, variables)
+            """
+            variables = {"projectId": self.project_id, "sessionId": session_id}
+            res = await self.mutation(mutation, variables)
 
-        if self.check_for_errors(res):
-            logger.warning("Could not create conversation.")
-            return None
+            if self.check_for_errors(res):
+                logger.warning("Could not create conversation.")
+                return None
 
-        return int(res["data"]["createConversation"]["id"])
+            return int(res["data"]["createConversation"]["id"])
 
-    def get_conversation_id(self):
-        if not self.conversation_id:
-            self.conversation_id = self.create_conversation(self.session_id)
+    async def get_conversation_id(self):
+        self.conversation_id = await self.create_conversation(self.session_id)
 
         return self.conversation_id
 
-    def create_message(self, variables: Dict[str, Any]) -> int:
-        c_id = self.get_conversation_id()
+    async def create_message(self, variables: Dict[str, Any]) -> int:
+        c_id = await self.get_conversation_id()
 
         if not c_id:
             logger.warning("Missing conversation ID, could not persist the message.")
@@ -143,15 +156,14 @@ class CloudClient(BaseClient):
             }
         }
         """
-        res = self.mutation(mutation, variables)
-
+        res = await self.mutation(mutation, variables)
         if self.check_for_errors(res):
             logger.warning("Could not create message.")
             return None
 
         return int(res["data"]["createMessage"]["id"])
 
-    def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+    async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
         mutation = """
         mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json) {
             updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
@@ -160,7 +172,7 @@ class CloudClient(BaseClient):
         }
         """
         variables["messageId"] = message_id
-        res = self.mutation(mutation, variables)
+        res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
             logger.warning("Could not update message.")
@@ -168,7 +180,7 @@ class CloudClient(BaseClient):
 
         return True
 
-    def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: int) -> bool:
         mutation = """
         mutation ($messageId: ID!) {
             deleteMessage(messageId: $messageId) {
@@ -176,7 +188,7 @@ class CloudClient(BaseClient):
             }
         }
         """
-        res = self.mutation(mutation, {"messageId": message_id})
+        res = await self.mutation(mutation, {"messageId": message_id})
 
         if self.check_for_errors(res):
             logger.warning("Could not delete message.")
@@ -184,7 +196,7 @@ class CloudClient(BaseClient):
 
         return True
 
-    def create_element(
+    async def create_element(
         self,
         type: ElementType,
         url: str,
@@ -194,7 +206,7 @@ class CloudClient(BaseClient):
         language: str = None,
         for_id: str = None,
     ) -> Dict[str, Any]:
-        c_id = self.get_conversation_id()
+        c_id = await self.get_conversation_id()
 
         if not c_id:
             logger.warning("Missing conversation ID, could not persist the element.")
@@ -224,7 +236,7 @@ class CloudClient(BaseClient):
             "language": language,
             "forId": for_id,
         }
-        res = self.mutation(mutation, variables)
+        res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
             logger.warning("Could not persist element.")
@@ -232,30 +244,29 @@ class CloudClient(BaseClient):
 
         return res["data"]["createElement"]
 
-    def upload_element(self, content: bytes) -> str:
+    async def upload_element(self, content: bytes) -> str:
         id = f"{uuid.uuid4()}"
-        url = f"{self.url}/api/upload/file"
         body = {"projectId": self.project_id, "fileName": id}
 
-        res = requests.post(url, json=body, headers=self.headers)
+        r = await self.http_client.post("/api/upload/file", json=body)
 
-        if not res.ok:
-            logger.error(f"Failed to upload file: {res.text}")
+        if not self.is_response_ok(r):
+            logger.error(f"Failed to upload file: {r.text}")
             return ""
+        json_res = r.json()
 
-        json_res = res.json()
         upload_details = json_res["post"]
         permanent_url = json_res["permanentUrl"]
-
         files = {"file": content}
 
-        upload_response = requests.post(
-            upload_details["url"], data=upload_details["fields"], files=files
-        )
+        async with httpx.AsyncClient(timeout=20) as client:
+            upload_response = await client.post(
+                url=upload_details["url"], data=upload_details["fields"], files=files
+            )
 
-        if not upload_response.ok:
-            logger.error(f"Failed to upload file: {res.text}")
-            return ""
+            if not self.is_response_ok(upload_response):
+                logger.error(f"Failed to upload file: {r.text}")
+                return ""
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
         return permanent_url

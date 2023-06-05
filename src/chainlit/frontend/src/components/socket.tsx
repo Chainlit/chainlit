@@ -1,4 +1,4 @@
-import { server } from 'api';
+import { wsEndpoint } from 'api';
 import { memo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
@@ -36,7 +36,8 @@ export default memo(function Socket() {
       session.socket.close();
     }
 
-    const socket = io(server, {
+    const socket = io(wsEndpoint, {
+      path: '/ws/socket.io',
       extraHeaders: {
         Authorization: accessToken || '',
         'user-env': JSON.stringify(userEnv)
@@ -49,6 +50,7 @@ export default memo(function Socket() {
 
     socket.on('connect', () => {
       console.log('connected');
+      socket.emit('connection_successful');
       setSession((s) => ({ ...s!, error: false }));
     });
 

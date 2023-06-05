@@ -1,17 +1,17 @@
-import gevent
-from gevent import monkey
+from dotenv import load_dotenv
+from typing import Callable, Any
+import inspect
+import os
+import asyncio
 
-monkey.patch_all()
+from chainlit.lc import check_lc_installation
 
-from chainlit.lc import monkey
-
-monkey.patch()
+LANGCHAIN_INSTALLED = check_lc_installation()
 
 from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
-from chainlit.server import socketio
 from chainlit.sdk import get_sdk
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
@@ -19,10 +19,13 @@ from chainlit.action import Action
 from chainlit.element import LocalImage, RemoteImage, Text
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
-from typing import Callable, Any
-from dotenv import load_dotenv
-import inspect
-import os
+from chainlit.user_session import user_session
+
+if LANGCHAIN_INSTALLED:
+    from chainlit.lc.callbacks import (
+        ChainlitCallbackHandler,
+        AsyncChainlitCallbackHandler,
+    )
 
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
@@ -42,7 +45,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         Callable: The wrapped function.
     """
 
-    def wrapper(*args):
+    async def wrapper(*args):
         sdk = get_sdk()
         # Get the parameter names of the user-defined function
         user_function_params = list(inspect.signature(user_function).parameters.keys())
@@ -53,24 +56,27 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         }
 
         if with_task and sdk:
-            sdk.task_start()
+            await sdk.task_start()
 
         try:
             # Call the user-defined function with the arguments
-            return user_function(**params_values)
+            if inspect.iscoroutinefunction(user_function):
+                return await user_function(**params_values)
+            else:
+                return user_function(**params_values)
         except Exception as e:
             logger.exception(e)
             if sdk:
-                ErrorMessage(content=str(e), author="Error").send()
+                await ErrorMessage(content=str(e), author="Error").send()
         finally:
             if with_task and sdk:
-                sdk.task_end()
+                await sdk.task_end()
 
     return wrapper
 
 
 @trace
-def langchain_factory(func: Callable) -> Callable:
+def langchain_factory(use_async: bool = False) -> Callable:
     """
     Plug and play decorator for the LangChain library.
     The decorated function should instantiate a new LangChain instance (Chain, Agent...).
@@ -78,14 +84,19 @@ def langchain_factory(func: Callable) -> Callable:
     The per user instance is called every time a new message is received.
 
     Args:
-        func (Callable[[], Any]): The factory function to create a new LangChain instance.
+        use_async bool: Whether to call the the agent asynchronously or not. Defaults to False.
 
     Returns:
         Callable[[], Any]: The decorated factory function.
     """
 
-    config.lc_factory = wrap_user_function(func, with_task=True)
-    return func
+    def decorator(func: Callable) -> Callable:
+        config.lc_factory = wrap_user_function(func, with_task=True)
+        return func
+
+    config.lc_agent_is_async = use_async
+
+    return decorator
 
 
 @trace
@@ -136,7 +147,6 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-
     config.lc_run = wrap_user_function(func)
     return func
 
@@ -209,7 +219,7 @@ def sleep(duration: int):
     Args:
         duration (int): The duration in seconds.
     """
-    return socketio.sleep(duration)
+    return asyncio.sleep(duration)
 
 
 __all__ = [
@@ -231,4 +241,6 @@ __all__ = [
     "on_stop",
     "action_callback",
     "sleep",
+    "ChainlitCallbackHandler",
+    "AsyncChainlitCallbackHandler",
 ]

@@ -9,6 +9,7 @@ from chainlit.logger import logger
 if TYPE_CHECKING:
     from chainlit.action import Action
 
+package_root = os.path.dirname(__file__)
 
 # Get the directory the script is running from
 root = os.getcwd()
@@ -54,7 +55,17 @@ chainlit_server = "https://cloud.chainlit.io"
 
 
 @dataclass()
+class RunSettings:
+    host: str = None
+    port: int = None
+    headless: bool = False
+    DEFAULT_HOST = "0.0.0.0"
+    DEFAULT_PORT = 8000
+
+
+@dataclass()
 class ChainlitConfig:
+    run_settings: RunSettings
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     # Name of the app and chatbot. Used as the default message author.
@@ -91,6 +102,7 @@ class ChainlitConfig:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
+    lc_agent_is_async: Optional[bool] = None
     lc_run: Optional[Callable[[Any, str], str]] = None
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
@@ -174,6 +186,7 @@ def load_config():
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
 
         config = ChainlitConfig(
+            run_settings=RunSettings(),
             action_callbacks={},
             github=github,
             request_limit=request_limit,

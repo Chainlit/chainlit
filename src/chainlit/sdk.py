@@ -44,43 +44,47 @@ class Chainlit:
         if not self.emit:
             return
 
-        self.emit("message", msg_dict)
+        return self.emit("message", msg_dict)
 
     def update_message(self, msg_dict: Dict):
         """Update a message in the UI."""
         if not self.emit:
             return
 
-        self.emit("update_message", msg_dict)
+        return self.emit("update_message", msg_dict)
 
     def delete_message(self, message_id: Union[str, int]):
         """Delete a message in the UI."""
         if not self.emit:
             return
 
-        self.emit("delete_message", {"messageId": message_id})
+        return self.emit("delete_message", {"messageId": message_id})
 
     def send_ask_timeout(self):
         """Send a prompt timeout message to the UI."""
 
         if self.emit:
-            self.emit("ask_timeout", {})
+            return self.emit("ask_timeout", {})
 
     def clear_ask(self):
         """Clear the prompt from the UI."""
         if self.emit:
-            self.emit("clear_ask", {})
+            return self.emit("clear_ask", {})
 
-    def send_ask_user(self, msg_dict: Dict, spec: AskSpec, raise_on_timeout=False):
+    async def send_ask_user(
+        self, msg_dict: Dict, spec: AskSpec, raise_on_timeout=False
+    ):
         """Send a prompt to the UI and wait for a response."""
         if not self.ask_user:
             return
 
         try:
             # End the task temporarily so that the User can answer the prompt
-            self.task_end()
+            await self.task_end()
             # Send the prompt to the UI
-            res = self.ask_user({"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout)
+            res = await self.ask_user(
+                {"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout
+            )
             if self.client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
@@ -89,43 +93,43 @@ class Chainlit:
                         "authorIsUser": True,
                         "content": res["content"],
                     }
-                    self.client.create_message(res_msg)
+                    await self.client.create_message(res_msg)
                 elif spec.type == "file":
                     # TODO: upload file to S3
                     pass
 
-            self.clear_ask()
+            await self.clear_ask()
             return res
         except TimeoutError as e:
-            self.send_ask_timeout()
+            await self.send_ask_timeout()
 
             if raise_on_timeout:
                 raise e
         finally:
-            self.task_start()
+            await self.task_start()
 
     def update_token_count(self, count: int):
         """Update the token count for the UI."""
         if not self.emit:
             return
-        self.emit("token_usage", count)
+        return self.emit("token_usage", count)
 
     def task_start(self):
         """
         Send a task start signal to the UI.
         """
         if self.emit:
-            self.emit("task_start", {})
+            return self.emit("task_start", {})
 
     def task_end(self):
         """Send a task end signal to the UI."""
         if self.emit:
-            self.emit("task_end", {})
+            return self.emit("task_end", {})
 
     def stream_start(self, msg_dict: Dict):
         """Send a stream start signal to the UI."""
         if self.emit:
-            self.emit(
+            return self.emit(
                 "stream_start",
                 msg_dict,
             )
@@ -133,12 +137,12 @@ class Chainlit:
     def send_token(self, token: str):
         """Send a message token to the UI."""
         if self.emit:
-            self.emit("stream_token", token)
+            return self.emit("stream_token", token)
 
     def stream_end(self, msg):
         """Send a stream end signal to the UI."""
         if self.emit:
-            self.emit("stream_end", msg)
+            return self.emit("stream_end", msg)
 
 
 def get_sdk() -> Union[Chainlit, None]:
