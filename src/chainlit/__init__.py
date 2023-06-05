@@ -19,7 +19,7 @@ from chainlit.action import Action
 from chainlit.element import LocalImage, RemoteImage, Text
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
-from chainlit.user_session import user_session
+from chainlit.sync import run_sync
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -243,4 +243,5 @@ __all__ = [
     "sleep",
     "ChainlitCallbackHandler",
     "AsyncChainlitCallbackHandler",
+    "run_sync",
 ]

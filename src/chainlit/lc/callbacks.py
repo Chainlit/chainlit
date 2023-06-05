@@ -10,7 +10,7 @@ from chainlit.sdk import get_sdk, Chainlit
 from chainlit.message import Message, ErrorMessage
 from chainlit.config import config
 from chainlit.types import LLMSettings
-from syncer import sync
+from chainlit.sync import run_sync
 
 IGNORE_LIST = ["AgentExecutor"]
 
@@ -155,7 +155,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = sync(config.lc_rename(author))
+            author = run_sync(config.lc_rename(author))
 
         streamed_message = Message(
             author=author,
@@ -169,7 +169,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
     def send_token(self, token: str):
         streamed_message = self.get_streamed_message()
         if streamed_message:
-            sync(streamed_message.stream_token(token))
+            run_sync(streamed_message.stream_token(token))
 
     def add_message(self, message, prompt: str = None, error=False):
         author, indent, llm_settings = self.get_message_params()
@@ -178,10 +178,10 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = sync(config.lc_rename(author))
+            author = run_sync(config.lc_rename(author))
 
         if error:
-            sync(ErrorMessage(author=author, content=message, sdk=self.sdk).send())
+            run_sync(ErrorMessage(author=author, content=message, sdk=self.sdk).send())
             self.end_stream()
             return
 
@@ -190,10 +190,10 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
         if streamed_message:
             streamed_message.prompt = prompt
             streamed_message.llm_settings = llm_settings
-            sync(streamed_message.send())
+            run_sync(streamed_message.send())
             self.end_stream()
         else:
-            sync(
+            run_sync(
                 Message(
                     author=author,
                     content=message,
@@ -235,7 +235,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
-                    sync(self.sdk.update_token_count(token_usage["total_tokens"]))
+                    run_sync(self.sdk.update_token_count(token_usage["total_tokens"]))
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
