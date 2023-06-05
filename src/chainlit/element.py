@@ -178,7 +178,6 @@ class Pdf(Element):
                 type=self.type,
                 display=self.display,
                 size=size,
-                language=language,
                 for_id=for_id,
             )
             return element
