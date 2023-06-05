@@ -16,9 +16,11 @@ export default function InlinedElements({ elements, actions }: Props) {
     return null;
   }
 
-  // Categorize the elements by element type
-  // The TypeScript dance is needed to make sure we can do elementsByType.image
-  // and get an array of IImageElement
+  /**
+   * Categorize the elements by element type
+   * The TypeScript dance is needed to make sure we can do elementsByType.image
+   * and get an array of IImageElement.
+   */
   const elementsByType = elements.reduce(
     (acc, el: AllElements) => {
       if (!acc[el.type]) {
@@ -39,9 +41,7 @@ export default function InlinedElements({ elements, actions }: Props) {
   return (
     <Stack gap={1} mt={1}>
       {elementsByType.image?.length ? (
-        <InlinedImageList
-          items={elementsByType.image.filter((x) => x.type == 'image')}
-        />
+        <InlinedImageList items={elementsByType.image} />
       ) : null}
       {elementsByType.text?.length ? (
         <InlinedTextList items={elementsByType.text} />
