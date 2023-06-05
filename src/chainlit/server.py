@@ -371,19 +371,19 @@ async def process_action(session: Session, action: Action):
     __chainlit_sdk__ = Chainlit(session)
     callback = config.action_callbacks.get(action.name)
     if callback:
-        callback(action)
+        await callback(action)
     else:
         logger.warning("No callback found for action %s", action.name)
 
 
-@socket.on("action")
+@socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
     session = need_session(sid)
 
     action = Action(**action)
 
-    task = asyncio.Task(process_action, session, action)
+    task = asyncio.Task(process_action(session, action))
     session["task"] = task
     await task
     session["task"] = None
