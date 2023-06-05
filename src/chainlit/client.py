@@ -33,7 +33,7 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    def upload_element(self, content: bytes) -> int:
+    def upload_element(self, content: bytes, mime: str) -> int:
         pass
 
     @abstractmethod
@@ -232,7 +232,7 @@ class CloudClient(BaseClient):
 
         return res["data"]["createElement"]
 
-    def upload_element(self, content: bytes) -> str:
+    def upload_element(self, content: bytes, mime: str) -> str:
         id = f"{uuid.uuid4()}"
         url = f"{self.url}/api/upload/file"
         body = {"projectId": self.project_id, "fileName": id}
@@ -247,10 +247,12 @@ class CloudClient(BaseClient):
         upload_details = json_res["post"]
         permanent_url = json_res["permanentUrl"]
 
-        files = {"file": content}
+        files = {"file": (None, content, mime)}
 
         upload_response = requests.post(
-            upload_details["url"], data=upload_details["fields"], files=files
+            upload_details["url"],
+            data=upload_details["fields"],
+            files=files,
         )
 
         if not upload_response.ok:

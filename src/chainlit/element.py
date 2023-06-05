@@ -59,7 +59,7 @@ class LocalElement(Element):
     def persist(self, client: BaseClient, for_id: str = None):
         if not self.content:
             raise ValueError("Must provide content")
-        url = client.upload_element(content=self.content)
+        url = client.upload_element(content=self.content, mime=None)
         if url:
             size = getattr(self, "size", None)
             language = getattr(self, "language", None)
@@ -165,7 +165,7 @@ class Pdf(Element):
         url = None
         if self.content:
             content = b64decode(urlparse.unquote(self.content))
-            url = client.upload_element(content=content)
+            url = client.upload_element(content=content, mime="application/pdf")
         else:
             url = self.url
 
