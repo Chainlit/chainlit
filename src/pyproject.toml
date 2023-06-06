@@ -21,6 +21,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = "^3.8"
 dataclasses_json = "^0.5.7"
+uvicorn = "^0.22.0"
 fastapi = "^0.96.0"
 fastapi-socketio = "^0.0.10"
 httpx = "^0.24.1"
