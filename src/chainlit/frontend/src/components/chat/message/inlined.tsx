@@ -46,10 +46,10 @@ export default function InlinedElements({ elements, actions }: Props) {
       {elementsByType.text?.length ? (
         <InlinedTextList items={elementsByType.text} />
       ) : null}
-      {actions.length ? <InlinedActionList actions={actions} /> : null}
       {elementsByType.pdf?.length ? (
         <InlinedPDFList items={elementsByType.pdf} />
       ) : null}
+      {actions.length ? <InlinedActionList actions={actions} /> : null}
     </Stack>
   );
 }
