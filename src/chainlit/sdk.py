@@ -157,6 +157,7 @@ def get_sdk() -> Union[Chainlit, None]:
         if candidate:
             sdk = candidate
             break
+
     return sdk
 
 

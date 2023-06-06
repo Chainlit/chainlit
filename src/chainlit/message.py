@@ -28,17 +28,15 @@ class MessageBase(ABC):
     id: int = None
     temp_id: str = None
     streaming = False
-    sdk: Chainlit = None
     created_at: int = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.temp_id = uuid.uuid4().hex
         self.created_at = current_milli_time()
+        self.sdk = get_sdk()
         if not self.sdk:
-            self.sdk = get_sdk()
-            if not self.sdk:
-                raise Exception("Must initialize SDK before creating a message")
+            raise RuntimeError("Message should be instantiated in a Chainlit context")
 
     @abstractmethod
     def to_dict(self):

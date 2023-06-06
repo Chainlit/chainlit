@@ -24,14 +24,15 @@ settings = {
 
 
 @cl.on_message
-def main(message: str):
+async def main(message: str):
     fromatted_prompt = prompt.format(input=message)
-    response = openai.Completion.create(
+    response = await openai.Completion.acreate(
         model=model_name, prompt=fromatted_prompt, **settings
     )
+
     content = response["choices"][0]["text"]
 
-    cl.Message(
+    await cl.Message(
         language="sql",
         content=content,
         prompt=fromatted_prompt,

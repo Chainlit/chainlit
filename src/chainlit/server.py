@@ -197,7 +197,7 @@ async def connect(sid, environ):
                 if key not in user_env:
                     trace_event("missing_user_env")
                     logger.error("Missing user environment variable: " + key)
-                return False
+                    return False
         else:
             logger.error("Missing user environment variables")
             return False

@@ -1,6 +1,6 @@
 from typing import Any
 from chainlit.lc.callbacks import ChainlitCallbackHandler, AsyncChainlitCallbackHandler
-from asyncer import asyncify
+from chainlit.sync import asyncify
 
 
 async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):

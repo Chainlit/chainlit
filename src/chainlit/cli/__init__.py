@@ -56,10 +56,11 @@ def run_chainlit(target: str):
     # if watch:
     #     watch_directory()
 
+    log_level = "debug" if config.run_settings.debug else "error"
+
     # Start the server
     async def start():
-        # log_level = "debug" if debug else "info"
-        config = uvicorn.Config(app, host=host, port=port, log_level="info")
+        config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
         server = uvicorn.Server(config)
         await server.serve()
 

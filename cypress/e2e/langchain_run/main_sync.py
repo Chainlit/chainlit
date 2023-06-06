@@ -1,0 +1,20 @@
+from langchain import OpenAI, LLMChain, PromptTemplate
+import chainlit as cl
+from chainlit.sync import asyncify
+
+prompt_template = "{input}?"
+
+
+@cl.langchain_factory(use_async=False)
+async def main():
+    llm = OpenAI(temperature=0)
+    chain = LLMChain(llm=llm, prompt=PromptTemplate.from_template(prompt_template))
+    return chain
+
+
+@cl.langchain_run
+async def run(agent, input_str):
+    res = await asyncify(agent.__call__, cancellable=True)(
+        "2+2", callbacks=[cl.ChainlitCallbackHandler()]
+    )
+    await cl.Message(content=res["text"]).send()

@@ -25,7 +25,7 @@ class Element(ABC):
         trace_event(f"init {self.__class__.__name__}")
         self.sdk = get_sdk()
         if not self.sdk:
-            raise Exception("Must initialize SDK before creating an element")
+            raise RuntimeError("Element should be instantiated in a Chainlit context")
 
     @abstractmethod
     async def persist(self, client: BaseClient, for_id: str = None) -> Dict:

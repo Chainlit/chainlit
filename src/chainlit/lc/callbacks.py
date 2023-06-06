@@ -54,20 +54,12 @@ class BaseChainlitCallbackHandler(BaseCallbackHandler):
     always_verbose: bool = True
 
     def __init__(self) -> None:
-        self._sdk = get_sdk()
+        self.sdk = get_sdk()
         self.prompts = []
         self.llm_settings = None
         self.sequence = []
         self.last_prompt = None
         self.stream = None
-
-    @property
-    def sdk(self):
-        if not hasattr(self, "_sdk"):
-            self._sdk = get_sdk()
-            if not self._sdk:
-                raise RuntimeError("Chainlit SDK not initialized")
-        return self._sdk
 
     def end_stream(self):
         self.stream = None
@@ -113,9 +105,11 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = run_sync(config.lc_rename(author))
+            author = run_sync(config.lc_rename(author, __chainlit_sdk__=self.sdk))
 
         self.pop_prompt()
+
+        __chainlit_sdk__ = self.sdk
 
         streamed_message = Message(
             author=author,
@@ -123,7 +117,6 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             llm_settings=llm_settings,
             prompt=self.consume_last_prompt(),
             content="",
-            sdk=self.sdk,
         )
         self.stream = streamed_message
 
@@ -138,10 +131,12 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = run_sync(config.lc_rename(author))
+            author = run_sync(config.lc_rename(author, __chainlit_sdk__=self.sdk))
+
+        __chainlit_sdk__ = self.sdk
 
         if error:
-            run_sync(ErrorMessage(author=author, content=message, sdk=self.sdk).send())
+            run_sync(ErrorMessage(author=author, content=message).send())
             self.end_stream()
             return
 
@@ -156,7 +151,6 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
                     indent=indent,
                     prompt=prompt,
                     llm_settings=llm_settings,
-                    sdk=self.sdk,
                 ).send()
             )
 
@@ -261,9 +255,11 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.lc_rename:
-            author = await config.lc_rename(author)
+            author = await config.lc_rename(author, __chainlit_sdk__=self.sdk)
 
         self.pop_prompt()
+
+        __chainlit_sdk__ = self.sdk
 
         streamed_message = Message(
             author=author,
@@ -271,7 +267,6 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             prompt=self.consume_last_prompt(),
             llm_settings=llm_settings,
             content="",
-            sdk=self.sdk,
         )
         self.stream = streamed_message
 
@@ -286,10 +281,12 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.lc_rename:
-            author = await config.lc_rename(author)
+            author = await config.lc_rename(author, __chainlit_sdk__=self.sdk)
+
+        __chainlit_sdk__ = self.sdk
 
         if error:
-            await ErrorMessage(author=author, content=message, sdk=self.sdk).send()
+            await ErrorMessage(author=author, content=message).send()
             self.end_stream()
             return
 
@@ -303,7 +300,6 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
                 indent=indent,
                 prompt=prompt,
                 llm_settings=llm_settings,
-                sdk=self.sdk,
             ).send()
 
     # Callbacks for various events
