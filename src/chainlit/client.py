@@ -247,7 +247,10 @@ class CloudClient(BaseClient):
         upload_details = json_res["post"]
         permanent_url = json_res["permanentUrl"]
 
-        files = {"file": (None, content, mime)}
+        if mime:
+            upload_details["fields"]["Content-Type"] = mime
+
+        files = {"file": content}
 
         upload_response = requests.post(
             upload_details["url"],
@@ -256,7 +259,7 @@ class CloudClient(BaseClient):
         )
 
         if not upload_response.ok:
-            logger.error(f"Failed to upload file: {res.text}")
+            logger.error(f"Failed to upload file: {upload_response.text}")
             return ""
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
