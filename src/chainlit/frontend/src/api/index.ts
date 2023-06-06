@@ -3,6 +3,7 @@ import { Role } from 'state/user';
 
 // export const serverUrl = 'new URL(http://127.0.0.1:8000)';
 const serverUrl = new URL(window.origin);
+
 const apiEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
 export const wsEndpoint = `${
   serverUrl.protocol === 'https:' ? 'wss' : 'ws'

@@ -4,15 +4,12 @@ import inspect
 import os
 import asyncio
 
-from chainlit.lc import check_lc_installation
-
-LANGCHAIN_INSTALLED = check_lc_installation()
-
+from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
-from chainlit.sdk import get_sdk
+from chainlit.sdk import Chainlit
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
@@ -45,8 +42,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         Callable: The wrapped function.
     """
 
-    async def wrapper(*args):
-        sdk = get_sdk()
+    async def wrapper(*args, __chainlit_sdk__: Chainlit):
         # Get the parameter names of the user-defined function
         user_function_params = list(inspect.signature(user_function).parameters.keys())
 
@@ -55,8 +51,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        if with_task and sdk:
-            await sdk.task_start()
+        if with_task and __chainlit_sdk__:
+            await __chainlit_sdk__.task_start()
 
         try:
             # Call the user-defined function with the arguments
@@ -66,17 +62,17 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return user_function(**params_values)
         except Exception as e:
             logger.exception(e)
-            if sdk:
+            if __chainlit_sdk__:
                 await ErrorMessage(content=str(e), author="Error").send()
         finally:
-            if with_task and sdk:
-                await sdk.task_end()
+            if with_task and __chainlit_sdk__:
+                await __chainlit_sdk__.task_end()
 
     return wrapper
 
 
 @trace
-def langchain_factory(use_async: bool = False) -> Callable:
+def langchain_factory(use_async: bool) -> Callable:
     """
     Plug and play decorator for the LangChain library.
     The decorated function should instantiate a new LangChain instance (Chain, Agent...).

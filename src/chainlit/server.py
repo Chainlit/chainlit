@@ -19,7 +19,7 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
-from chainlit.config import config
+from chainlit.config import config, DEFAULT_HOST
 from chainlit.lc.agent import run_langchain_agent
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
@@ -93,7 +93,7 @@ async def startup():
     port = config.run_settings.port
 
     if not config.run_settings.headless:
-        if host == config.run_settings.DEFAULT_HOST:
+        if host == DEFAULT_HOST:
             url = f"http://localhost:{port}"
         else:
             url = f"http://{host}:{port}"
@@ -256,12 +256,12 @@ async def connection_successful(sid):
     __chainlit_sdk__ = Chainlit(session)
     if config.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
-        agent = await config.lc_factory()
+        agent = await config.lc_factory(__chainlit_sdk__=__chainlit_sdk__)
         session["agent"] = agent
 
     if config.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
-        await config.on_chat_start()
+        await config.on_chat_start(__chainlit_sdk__=__chainlit_sdk__)
 
 
 @socket.on("disconnect")
@@ -322,7 +322,9 @@ async def process_message(session: Session, author: str, input_str: str):
             # If a langchain agent is available, run it
             if config.lc_run:
                 # If the developer provided a custom run function, use it
-                await config.lc_run(langchain_agent, input_str)
+                await config.lc_run(
+                    langchain_agent, input_str, __chainlit_sdk__=__chainlit_sdk__
+                )
                 return
             else:
                 # Otherwise, use the default run function
@@ -332,7 +334,9 @@ async def process_message(session: Session, author: str, input_str: str):
 
                 if config.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
-                    await config.lc_postprocess(raw_res)
+                    await config.lc_postprocess(
+                        raw_res, __chainlit_sdk__=__chainlit_sdk__
+                    )
                     return
                 elif output_key is not None:
                     # Use the output key if provided
@@ -345,7 +349,7 @@ async def process_message(session: Session, author: str, input_str: str):
 
         elif config.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
-            await config.on_message(input_str)
+            await config.on_message(input_str, __chainlit_sdk__=__chainlit_sdk__)
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(author="Error", content=str(e)).send()
@@ -371,7 +375,7 @@ async def process_action(session: Session, action: Action):
     __chainlit_sdk__ = Chainlit(session)
     callback = config.action_callbacks.get(action.name)
     if callback:
-        await callback(action)
+        await callback(action, __chainlit_sdk__=__chainlit_sdk__)
     else:
         logger.warning("No callback found for action %s", action.name)
 
@@ -381,6 +385,7 @@ async def call_action(sid, action):
     """Handle an action call from the UI."""
     session = need_session(sid)
 
+    __chainlit_sdk__ = Chainlit(session)
     action = Action(**action)
 
     task = asyncio.Task(process_action(session, action))

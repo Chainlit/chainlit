@@ -20,16 +20,15 @@ class Action:
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
+        self.emit = get_emit()
+        if not self.emit:
+            raise Exception("Must initialize SDK before creating an action")
 
     async def send(self, for_id: str):
-        emit = get_emit()
-        if emit:
-            trace_event(f"send {self.__class__.__name__}")
-            self.forId = for_id
-            await emit("action", self.to_dict())
+        trace_event(f"send {self.__class__.__name__}")
+        self.forId = for_id
+        await self.emit("action", self.to_dict())
 
     async def remove(self):
-        emit = get_emit()
-        if emit:
-            trace_event(f"remove {self.__class__.__name__}")
-            await emit("remove_action", self.to_dict())
+        trace_event(f"remove {self.__class__.__name__}")
+        await self.emit("remove_action", self.to_dict())

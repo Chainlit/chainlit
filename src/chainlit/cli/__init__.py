@@ -7,7 +7,14 @@ import nest_asyncio
 
 nest_asyncio.apply()
 
-from chainlit.config import config, init_config, load_module, package_root
+from chainlit.config import (
+    config,
+    init_config,
+    load_module,
+    package_root,
+    DEFAULT_HOST,
+    DEFAULT_PORT,
+)
 from chainlit.markdown import init_markdown
 from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
@@ -15,6 +22,7 @@ from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
 from chainlit.logger import logger
 from chainlit.server import app
+from chainlit.cache import init_lc_cache
 
 # from chainlit.watch import watch_directory
 
@@ -27,11 +35,9 @@ def cli():
 
 
 # Define the function to run Chainlit with provided options
-def run_chainlit(target: str, watch=False, headless=False, debug=False):
-    host = os.environ.get("CHAINLIT_HOST", config.run_settings.DEFAULT_HOST)
-    port = int(os.environ.get("CHAINLIT_PORT", config.run_settings.DEFAULT_PORT))
-
-    config.run_settings.headless = headless
+def run_chainlit(target: str):
+    host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
+    port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
     config.run_settings.host = host
     config.run_settings.port = port
 
@@ -42,6 +48,9 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
+
+    # Initialize the LangChain cache if installed and enabled
+    init_lc_cache()
 
     # Enable file watching if the user specified it
     # if watch:
@@ -66,9 +75,10 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="HEADLESS")
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="DEBUG")
 @click.option("-c", "--ci", default=False, is_flag=True, envvar="CI")
+@click.option("--no-cache", default=False, is_flag=True, envvar="NO_CACHE")
 @click.option("--host")
 @click.option("--port")
-def chainlit_run(target, watch, headless, debug, ci, host, port):
+def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
@@ -79,7 +89,13 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
     else:
         trace_event("chainlit run")
 
-    run_chainlit(target, watch, headless, debug)
+    config.run_settings.headless = headless
+    config.run_settings.debug = debug
+    config.run_settings.no_cache = no_cache
+    config.run_settings.ci = ci
+    config.run_settings.watch = watch
+
+    run_chainlit(target)
 
 
 @cli.command("deploy")

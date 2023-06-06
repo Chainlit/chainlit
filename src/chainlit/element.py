@@ -1,8 +1,11 @@
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from typing import Dict
+from typing import Dict, Union
 import uuid
 from abc import ABC, abstractmethod
+
+import aiofiles
+
 from chainlit.sdk import get_sdk, BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
@@ -28,7 +31,7 @@ class Element(ABC):
     async def persist(self, client: BaseClient, for_id: str = None) -> Dict:
         pass
 
-    def before_emit(self, element: Dict) -> Dict:
+    async def before_emit(self, element: Dict) -> Dict:
         return element
 
     async def send(self, for_id: str = None):
@@ -48,12 +51,13 @@ class Element(ABC):
 
         if self.sdk.emit and element:
             trace_event(f"send {self.__class__.__name__}")
-            element = self.before_emit(element)
+            element = await self.before_emit(element)
             await self.sdk.emit("element", element)
 
 
 @dataclass
 class LocalElement(Element):
+    path: str = None
     content: bytes = None
 
     async def persist(self, client: BaseClient, for_id: str = None):
@@ -73,6 +77,23 @@ class LocalElement(Element):
                 for_id=for_id,
             )
             return element
+
+    async def preprocess_content(self):
+        pass
+
+    async def load(self):
+        if self.path:
+            async with aiofiles.open(self.path, "rb") as f:
+                self.content = await f.read()
+        elif self.content:
+            await self.preprocess_content()
+            return
+        else:
+            raise ValueError("Must provide path or content for LocalElement")
+
+    async def send(self, for_id: str = None):
+        await self.load()
+        await super().send(for_id)
 
 
 @dataclass
@@ -107,15 +128,13 @@ class RemoteElement(Element, RemoteElementBase):
 class LocalImage(ImageBase, LocalElement):
     """Useful to send an image living on the local filesystem to the UI."""
 
-    path: str = None
-
     def __post_init__(self):
         super().__post_init__()
         if self.path:
             with open(self.path, "rb") as f:
                 self.content = f.read()
         elif self.content:
-            self.content = self.content
+            pass
         else:
             raise ValueError("Must provide either path or content")
 
@@ -129,22 +148,20 @@ class RemoteImage(ImageBase, RemoteElement):
 
 @dataclass
 class TextBase:
-    text: str
+    content: Union[str, bytes] = None
+    type: ElementType = "text"
+    language: str = None
 
 
 @dataclass
-class Text(LocalElement, TextBase):
+class Text(TextBase, LocalElement):
     """Useful to send a text (not a message) to the UI."""
 
-    type: ElementType = "text"
-    content = bytes("", "utf-8")
-    language: str = None
+    async def preprocess_content(self):
+        if isinstance(self.content, str):
+            self.content = self.content.encode("utf-8")
 
-    def __post_init__(self):
-        super().__post_init__()
-        self.content = bytes(self.text, "utf-8")
-
-    def before_emit(self, text_element):
+    async def before_emit(self, text_element):
         if "content" in text_element and isinstance(text_element["content"], bytes):
             text_element["content"] = text_element["content"].decode("utf-8")
         return text_element

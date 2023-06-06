@@ -82,11 +82,6 @@ class MessageBase(ABC):
         if self.sdk.client and self.id:
             self.sdk.client.update_message(self.id, msg_dict)
             msg_dict["id"] = self.id
-        elif self.temp_id:
-            msg_dict["tempId"] = self.temp_id
-        else:
-            logger.error("Cannot update a message that has no ID")
-            return False
 
         await self.sdk.update_message(msg_dict)
 
@@ -100,13 +95,9 @@ class MessageBase(ABC):
         trace_event("remove_message")
 
         if self.sdk.client and self.id:
-            self.sdk.client.delete_message(self.id)
-            await self.sdk.delete_message(self.id)
-        elif self.temp_id:
-            await self.sdk.delete_message(self.temp_id)
-        else:
-            logger.error("Cannot delete a message that has no ID")
-            return False
+            await self.sdk.client.delete_message(self.id)
+
+        await self.sdk.delete_message(self.to_dict())
 
         return True
 
@@ -204,8 +195,8 @@ class Message(MessageBase):
 
         action_coros = [action.send(for_id=str(id)) for action in self.actions]
         element_coros = [element.send(for_id=str(id)) for element in self.elements]
-
-        await asyncio.gather(*action_coros, *element_coros)
+        all_coros = action_coros + element_coros
+        await asyncio.gather(*all_coros)
 
         return id
 

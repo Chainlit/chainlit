@@ -54,13 +54,19 @@ chainlit_prod_url = os.environ.get("CHAINLIT_PROD_URL")
 chainlit_server = "https://cloud.chainlit.io"
 
 
+DEFAULT_HOST = "0.0.0.0"
+DEFAULT_PORT = 8000
+
+
 @dataclass()
 class RunSettings:
-    host: str = None
-    port: int = None
+    host: str = DEFAULT_HOST
+    port: int = DEFAULT_PORT
     headless: bool = False
-    DEFAULT_HOST = "0.0.0.0"
-    DEFAULT_PORT = 8000
+    watch: bool = False
+    no_cache: bool = False
+    debug: bool = False
+    ci: bool = False
 
 
 @dataclass()

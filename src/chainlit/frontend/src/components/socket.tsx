@@ -17,6 +17,12 @@ import { IElement, elementState } from 'state/element';
 import { IAction, actionState } from 'state/action';
 import { deepEqual } from 'helpers/object';
 
+const compareMessageIds = (a: IMessage, b: IMessage) => {
+  if (a.id && b.id) return a.id === b.id;
+  if (a.tempId && b.tempId) return a.tempId === b.tempId;
+  return false;
+};
+
 export default memo(function Socket() {
   const { accessToken, isAuthenticated, isLoading } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
@@ -74,8 +80,8 @@ export default memo(function Socket() {
 
     socket.on('new_message', (message: IMessage) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => m.id === message.id || m.tempId === message.tempId
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
         );
         if (index === -1) {
           return [...oldMessages, message];
@@ -91,8 +97,8 @@ export default memo(function Socket() {
 
     socket.on('update_message', (message: IMessage) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => m.id === message.id || m.tempId === message.tempId
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
         );
         if (index === -1) return oldMessages;
         return [
@@ -103,11 +109,12 @@ export default memo(function Socket() {
       });
     });
 
-    socket.on('delete_message', ({ messageId }: any) => {
+    socket.on('delete_message', (message: IMessage) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => m.id === messageId || m.tempId === messageId
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
         );
+
         if (index === -1) return oldMessages;
         return [
           ...oldMessages.slice(0, index),
@@ -123,7 +130,7 @@ export default memo(function Socket() {
     socket.on('stream_token', ({ id, token }: IToken) => {
       setMessages((oldMessages) => {
         const index = oldMessages.findIndex(
-          (m) => m.id === id || m.tempId === id
+          (m) => (m.id && m.id === id) || (m.tempId && m.tempId === id)
         );
         if (index === -1) return oldMessages;
         const oldMessage = oldMessages[index];

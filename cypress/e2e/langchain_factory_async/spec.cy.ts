@@ -1,13 +1,13 @@
 import { submitMessage } from "../../support/testUtils";
 
-describe("LangChain factory", () => {
+describe("LangChain factory async", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
     cy.visit("http://127.0.0.1:8000");
     cy.wait(["@settings"]);
   });
 
-  it("should be able to instantiate a LangChain chain and run it", () => {
+  it("should be able to instantiate a LangChain chain and run it asynchronously", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage("T-shirt");
 

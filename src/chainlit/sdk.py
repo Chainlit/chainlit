@@ -53,12 +53,12 @@ class Chainlit:
 
         return self.emit("update_message", msg_dict)
 
-    def delete_message(self, message_id: Union[str, int]):
+    def delete_message(self, msg_dict):
         """Delete a message in the UI."""
         if not self.emit:
             return
 
-        return self.emit("delete_message", {"messageId": message_id})
+        return self.emit("delete_message", msg_dict)
 
     def send_ask_timeout(self):
         """Send a prompt timeout message to the UI."""
