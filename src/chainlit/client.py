@@ -234,7 +234,10 @@ class CloudClient(BaseClient):
 
     def upload_element(self, content: bytes, mime: str) -> str:
         id = f"{uuid.uuid4()}"
-        url = f"{self.url}/api/upload/file"
+        query = ""
+        if mime:
+            query = f"?v=2"
+        url = f"{self.url}/api/upload/file{query}"
         body = {"projectId": self.project_id, "fileName": id}
 
         res = requests.post(url, json=body, headers=self.headers)
