@@ -1,16 +1,16 @@
 import { ILLMSettings } from 'state/chat';
 import { Role } from 'state/user';
 
-// export const serverUrl = 'new URL(http://127.0.0.1:8000)';
+// export const serverUrl = new URL('http://127.0.0.1:8000');
 const serverUrl = new URL(window.origin);
 
-const apiEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
+const httpEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
 export const wsEndpoint = `${
   serverUrl.protocol === 'https:' ? 'wss' : 'ws'
 }://${serverUrl.host}`;
 
 export const getProjectSettings = async () => {
-  const res = await fetch(`${apiEndpoint}/project/settings`, {
+  const res = await fetch(`${httpEndpoint}/project/settings`, {
     headers: {
       'content-type': 'application/json'
     },
@@ -25,7 +25,7 @@ export const getCompletion = async (
   settings: ILLMSettings,
   userEnv = {}
 ) => {
-  const res = await fetch(`${apiEndpoint}/completion`, {
+  const res = await fetch(`${httpEndpoint}/completion`, {
     headers: {
       'content-type': 'application/json'
     },
