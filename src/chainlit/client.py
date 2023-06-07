@@ -36,7 +36,7 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def upload_element(self, content: bytes) -> int:
+    async def upload_element(self, content: bytes, mime: str) -> int:
         pass
 
     @abstractmethod
@@ -244,11 +244,13 @@ class CloudClient(BaseClient):
 
         return res["data"]["createElement"]
 
-    async def upload_element(self, content: bytes) -> str:
+    async def upload_element(self, content: bytes, mime: str) -> str:
         id = f"{uuid.uuid4()}"
-        body = {"projectId": self.project_id, "fileName": id}
+        body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 
-        r = await self.http_client.post("/api/upload/file", json=body)
+        path = f"/api/upload/file"
+
+        r = await self.http_client.post(path, json=body)
 
         if not self.is_response_ok(r):
             logger.error(f"Failed to upload file: {r.text}")
@@ -265,7 +267,7 @@ class CloudClient(BaseClient):
             )
 
             if not self.is_response_ok(upload_response):
-                logger.error(f"Failed to upload file: {r.text}")
+                logger.error(f"Failed to upload file: {upload_response.text}")
                 return ""
 
         url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'

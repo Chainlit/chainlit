@@ -63,7 +63,7 @@ class LocalElement(Element):
     async def persist(self, client: BaseClient, for_id: str = None):
         if not self.content:
             raise ValueError("Must provide content")
-        url = await client.upload_element(content=self.content)
+        url = await client.upload_element(content=self.content, mime=self.mime)
         if url:
             size = getattr(self, "size", None)
             language = getattr(self, "language", None)
@@ -104,6 +104,7 @@ class RemoteElementBase:
 @dataclass
 class ImageBase:
     type: ElementType = "image"
+    mime: str = "image/png"
     size: ElementSize = "medium"
 
 
@@ -149,6 +150,7 @@ class RemoteImage(ImageBase, RemoteElement):
 @dataclass
 class TextBase:
     content: Union[str, bytes] = None
+    mime: str = "text/plain"
     type: ElementType = "text"
     language: str = None
 
