@@ -9,12 +9,12 @@ from chainlit.logger import logger
 if TYPE_CHECKING:
     from chainlit.action import Action
 
-package_root = os.path.dirname(__file__)
+PACKAGE_ROOT = os.path.dirname(__file__)
 
 # Get the directory the script is running from
-root = os.getcwd()
+APP_ROOT = os.getcwd()
 
-config_dir = os.path.join(root, ".chainlit")
+config_dir = os.path.join(APP_ROOT, ".chainlit")
 config_file = os.path.join(config_dir, "config.toml")
 
 # Default config file created if none exists
@@ -91,7 +91,7 @@ class ChainlitConfig:
     # Developer defined callbacks for each action. Key is the action name, value is the callback function.
     action_callbacks: Dict[str, Callable[["Action"], Any]]
     # Directory where the Chainlit project is located
-    root = root
+    root = APP_ROOT
     # The url of the deployed app. Only set if the app is deployed.
     chainlit_prod_url = chainlit_prod_url
     # Link to your github repo. This will add a github button in the UI's header.

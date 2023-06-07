@@ -20,7 +20,6 @@ from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
 from chainlit.config import config, DEFAULT_HOST
-from chainlit.lc.agent import run_langchain_agent
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
@@ -319,6 +318,8 @@ async def process_message(session: Session, author: str, input_str: str):
 
         langchain_agent = session.get("agent")
         if langchain_agent:
+            from chainlit.lc.agent import run_langchain_agent
+
             # If a langchain agent is available, run it
             if config.lc_run:
                 # If the developer provided a custom run function, use it

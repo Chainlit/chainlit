@@ -11,7 +11,7 @@ from chainlit.config import (
     config,
     init_config,
     load_module,
-    package_root,
+    PACKAGE_ROOT,
     DEFAULT_HOST,
     DEFAULT_PORT,
 )
@@ -112,7 +112,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
-    hello_path = os.path.join(package_root, "hello.py")
+    hello_path = os.path.join(PACKAGE_ROOT, "hello.py")
     run_chainlit(hello_path)
 
 
