@@ -4,16 +4,18 @@ import asyncio
 from syncer import sync
 from asyncer import asyncify as _asyncify
 
-from chainlit.sdk import get_sdk
+from chainlit.emitter import get_emitter
 
 
 def asyncify(function: Callable, cancellable: bool = True):
-    sdk = get_sdk()
-    if not sdk:
-        raise RuntimeError("SDK not found, please call asyncify in a Chainlit context.")
+    emitter = get_emitter()
+    if not emitter:
+        raise RuntimeError(
+            "Emitter not found, please call asyncify in a Chainlit context."
+        )
 
     def wrapper(*args, **kwargs):
-        __chainlit_sdk__ = sdk
+        __chainlit_emitter__ = emitter
         return function(*args, **kwargs)
 
     return _asyncify(wrapper, cancellable=cancellable)

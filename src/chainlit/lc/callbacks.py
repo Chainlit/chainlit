@@ -6,7 +6,7 @@ from langchain.schema import (
     BaseMessage,
     LLMResult,
 )
-from chainlit.sdk import get_sdk, Chainlit
+from chainlit.emitter import get_emitter, ChainlitEmitter
 from chainlit.message import Message, ErrorMessage
 from chainlit.config import config
 from chainlit.types import LLMSettings
@@ -38,7 +38,7 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
 
 
 class BaseChainlitCallbackHandler(BaseCallbackHandler):
-    _sdk: Chainlit
+    emitter: ChainlitEmitter
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
     # Keep track of the LLM settings for the last prompt
@@ -54,7 +54,7 @@ class BaseChainlitCallbackHandler(BaseCallbackHandler):
     always_verbose: bool = True
 
     def __init__(self) -> None:
-        self.sdk = get_sdk()
+        self.emitter = get_emitter()
         self.prompts = []
         self.llm_settings = None
         self.sequence = []
@@ -105,11 +105,13 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = run_sync(config.lc_rename(author, __chainlit_sdk__=self.sdk))
+            author = run_sync(
+                config.lc_rename(author, __chainlit_emitter__=self.emitter)
+            )
 
         self.pop_prompt()
 
-        __chainlit_sdk__ = self.sdk
+        __chainlit_emitter__ = self.emitter
 
         streamed_message = Message(
             author=author,
@@ -131,9 +133,11 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.lc_rename:
-            author = run_sync(config.lc_rename(author, __chainlit_sdk__=self.sdk))
+            author = run_sync(
+                config.lc_rename(author, __chainlit_emitter__=self.emitter)
+            )
 
-        __chainlit_sdk__ = self.sdk
+        __chainlit_emitter__ = self.emitter
 
         if error:
             run_sync(ErrorMessage(author=author, content=message).send())
@@ -185,7 +189,9 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
-                    run_sync(self.sdk.update_token_count(token_usage["total_tokens"]))
+                    run_sync(
+                        self.emitter.update_token_count(token_usage["total_tokens"])
+                    )
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -255,11 +261,11 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.lc_rename:
-            author = await config.lc_rename(author, __chainlit_sdk__=self.sdk)
+            author = await config.lc_rename(author, __chainlit_emitter__=self.emitter)
 
         self.pop_prompt()
 
-        __chainlit_sdk__ = self.sdk
+        __chainlit_emitter__ = self.emitter
 
         streamed_message = Message(
             author=author,
@@ -281,9 +287,9 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.lc_rename:
-            author = await config.lc_rename(author, __chainlit_sdk__=self.sdk)
+            author = await config.lc_rename(author, __chainlit_emitter__=self.emitter)
 
-        __chainlit_sdk__ = self.sdk
+        __chainlit_emitter__ = self.emitter
 
         if error:
             await ErrorMessage(author=author, content=message).send()
@@ -333,7 +339,7 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
-                    await self.sdk.update_token_count(token_usage["total_tokens"])
+                    await self.emitter.update_token_count(token_usage["total_tokens"])
 
     async def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any

@@ -24,7 +24,7 @@ from chainlit.lc.agent import run_langchain_agent
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
-from chainlit.sdk import Chainlit
+from chainlit.emitter import ChainlitEmitter
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
 from chainlit.message import Message, ErrorMessage
@@ -253,15 +253,15 @@ async def connect(sid, environ):
 @socket.on("connection_successful")
 async def connection_successful(sid):
     session = need_session(sid)
-    __chainlit_sdk__ = Chainlit(session)
+    __chainlit_emitter__ = ChainlitEmitter(session)
     if config.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
-        agent = await config.lc_factory(__chainlit_sdk__=__chainlit_sdk__)
+        agent = await config.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
         session["agent"] = agent
 
     if config.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
-        await config.on_chat_start(__chainlit_sdk__=__chainlit_sdk__)
+        await config.on_chat_start(__chainlit_emitter__=__chainlit_emitter__)
 
 
 @socket.on("disconnect")
@@ -292,7 +292,7 @@ async def stop(sid):
         task.cancel()
         session["task"] = None
 
-        __chainlit_sdk__ = Chainlit(session)
+        __chainlit_emitter__ = ChainlitEmitter(session)
 
         if config.on_stop:
             await config.on_stop()
@@ -304,8 +304,8 @@ async def process_message(session: Session, author: str, input_str: str):
     """Process a message from the user."""
 
     try:
-        __chainlit_sdk__ = Chainlit(session)
-        await __chainlit_sdk__.task_start()
+        __chainlit_emitter__ = ChainlitEmitter(session)
+        await __chainlit_emitter__.task_start()
 
         if session["client"]:
             # If cloud is enabled, persist the message
@@ -323,7 +323,9 @@ async def process_message(session: Session, author: str, input_str: str):
             if config.lc_run:
                 # If the developer provided a custom run function, use it
                 await config.lc_run(
-                    langchain_agent, input_str, __chainlit_sdk__=__chainlit_sdk__
+                    langchain_agent,
+                    input_str,
+                    __chainlit_emitter__=__chainlit_emitter__,
                 )
                 return
             else:
@@ -335,7 +337,7 @@ async def process_message(session: Session, author: str, input_str: str):
                 if config.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
                     await config.lc_postprocess(
-                        raw_res, __chainlit_sdk__=__chainlit_sdk__
+                        raw_res, __chainlit_emitter__=__chainlit_emitter__
                     )
                     return
                 elif output_key is not None:
@@ -349,12 +351,14 @@ async def process_message(session: Session, author: str, input_str: str):
 
         elif config.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
-            await config.on_message(input_str, __chainlit_sdk__=__chainlit_sdk__)
+            await config.on_message(
+                input_str, __chainlit_emitter__=__chainlit_emitter__
+            )
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(author="Error", content=str(e)).send()
     finally:
-        await __chainlit_sdk__.task_end()
+        await __chainlit_emitter__.task_end()
 
 
 @socket.on("ui_message")
@@ -372,10 +376,10 @@ async def message(sid, data):
 
 
 async def process_action(session: Session, action: Action):
-    __chainlit_sdk__ = Chainlit(session)
+    __chainlit_emitter__ = ChainlitEmitter(session)
     callback = config.action_callbacks.get(action.name)
     if callback:
-        await callback(action, __chainlit_sdk__=__chainlit_sdk__)
+        await callback(action, __chainlit_emitter__=__chainlit_emitter__)
     else:
         logger.warning("No callback found for action %s", action.name)
 
@@ -385,7 +389,7 @@ async def call_action(sid, action):
     """Handle an action call from the UI."""
     session = need_session(sid)
 
-    __chainlit_sdk__ = Chainlit(session)
+    __chainlit_emitter__ = ChainlitEmitter(session)
     action = Action(**action)
 
     task = asyncio.Task(process_action(session, action))

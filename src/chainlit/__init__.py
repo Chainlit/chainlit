@@ -9,7 +9,7 @@ from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
-from chainlit.sdk import Chainlit
+from chainlit.emitter import ChainlitEmitter
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
@@ -42,7 +42,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         Callable: The wrapped function.
     """
 
-    async def wrapper(*args, __chainlit_sdk__: Chainlit):
+    async def wrapper(*args, __chainlit_emitter__: ChainlitEmitter):
         # Get the parameter names of the user-defined function
         user_function_params = list(inspect.signature(user_function).parameters.keys())
 
@@ -51,8 +51,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        if with_task and __chainlit_sdk__:
-            await __chainlit_sdk__.task_start()
+        if with_task and __chainlit_emitter__:
+            await __chainlit_emitter__.task_start()
 
         try:
             # Call the user-defined function with the arguments
@@ -62,11 +62,11 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return user_function(**params_values)
         except Exception as e:
             logger.exception(e)
-            if __chainlit_sdk__:
+            if __chainlit_emitter__:
                 await ErrorMessage(content=str(e), author="Error").send()
         finally:
-            if with_task and __chainlit_sdk__:
-                await __chainlit_sdk__.task_end()
+            if with_task and __chainlit_emitter__:
+                await __chainlit_emitter__.task_end()
 
     return wrapper
 

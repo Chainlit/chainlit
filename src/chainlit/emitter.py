@@ -6,16 +6,16 @@ from socketio.exceptions import TimeoutError
 import inspect
 
 
-class Chainlit:
+class ChainlitEmitter:
     """
-    Chainlit SDK class. The SDK is not directly exposed to the developer.
-    Instead, the developer interacts with the SDK through the methods exposed in the __init__ file.
+    Chainlit Emitter class. The Emitter is not directly exposed to the developer.
+    Instead, the developer interacts with the Emitter through the methods and classes exposed in the __init__ file.
     """
 
     session: Session
 
     def __init__(self, session: Session) -> None:
-        """Initialize Chainlit with the user session."""
+        """Initialize with the user session."""
         self.session = session
 
     def _get_session_property(self, property_name: str):
@@ -140,29 +140,29 @@ class Chainlit:
             return self.emit("stream_token", {"id": id, "token": token})
 
 
-def get_sdk() -> Union[Chainlit, None]:
+def get_emitter() -> Union[ChainlitEmitter, None]:
     """
-    Get the Chainlit SDK instance from the current call stack.
+    Get the Chainlit Emitter instance from the current call stack.
     This unusual approach is necessary because:
-     - we need to get the right SDK instance with the right websocket connection
-     - to preserve a lean developer experience, we do not pass the SDK instance to every function call
+     - we need to get the right Emitter instance with the right websocket connection
+     - to preserve a lean developer experience, we do not pass the Emitter instance to every function call
 
-    What happens is that we set __chainlit_sdk__ in the local variables when we receive a websocket message.
+    What happens is that we set __chainlit_emitter__ in the local variables when we receive a websocket message.
     Then we can retrieve it from the call stack when we need it, even if the developer's code has no idea about it.
     """
-    attr = "__chainlit_sdk__"
+    attr = "__chainlit_emitter__"
     candidates = [i[0].f_locals.get(attr) for i in inspect.stack()]
-    sdk = None
+    emitter = None
     for candidate in candidates:
         if candidate:
-            sdk = candidate
+            emitter = candidate
             break
 
-    return sdk
+    return emitter
 
 
-def get_emit():
-    sdk = get_sdk()
-    if sdk:
-        return sdk.emit
+def get_emit_fn():
+    emitter = get_emitter()
+    if emitter:
+        return emitter.emit
     return None

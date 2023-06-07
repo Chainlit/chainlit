@@ -1,12 +1,12 @@
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from typing import Dict, Union
-import uuid
 from abc import ABC, abstractmethod
+import uuid
 
 import aiofiles
 
-from chainlit.sdk import get_sdk, BaseClient
+from chainlit.emitter import get_emitter, BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
@@ -23,8 +23,8 @@ class Element(ABC):
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        self.sdk = get_sdk()
-        if not self.sdk:
+        self.emitter = get_emitter()
+        if not self.emitter:
             raise RuntimeError("Element should be instantiated in a Chainlit context")
 
     @abstractmethod
@@ -38,8 +38,8 @@ class Element(ABC):
         element = None
 
         # Cloud is enabled, upload the element to S3
-        if self.sdk.client:
-            element = await self.persist(self.sdk.client, for_id)
+        if self.emitter.client:
+            element = await self.persist(self.emitter.client, for_id)
 
         if element:
             self.id = element["id"]
@@ -49,10 +49,10 @@ class Element(ABC):
             if for_id:
                 element["forId"] = for_id
 
-        if self.sdk.emit and element:
+        if self.emitter.emit and element:
             trace_event(f"send {self.__class__.__name__}")
             element = await self.before_emit(element)
-            await self.sdk.emit("element", element)
+            await self.emitter.emit("element", element)
 
 
 @dataclass

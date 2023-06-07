@@ -1,12 +1,11 @@
 from typing import List, Dict, Union
+from abc import ABC, abstractmethod
 import uuid
 import time
-from abc import ABC, abstractmethod
 import asyncio
 
 from chainlit.telemetry import trace_event
-from chainlit.logger import logger
-from chainlit.sdk import get_sdk, Chainlit
+from chainlit.emitter import get_emitter, ChainlitEmitter
 from chainlit.config import config
 from chainlit.types import (
     LLMSettings,
@@ -34,8 +33,8 @@ class MessageBase(ABC):
         trace_event(f"init {self.__class__.__name__}")
         self.temp_id = uuid.uuid4().hex
         self.created_at = current_milli_time()
-        self.sdk = get_sdk()
-        if not self.sdk:
+        self.emitter = get_emitter()
+        if not self.emitter:
             raise RuntimeError("Message should be instantiated in a Chainlit context")
 
     @abstractmethod
@@ -44,8 +43,8 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-        if self.sdk.client:
-            self.id = await self.sdk.client.create_message(msg_dict)
+        if self.emitter.client:
+            self.id = await self.emitter.client.create_message(msg_dict)
             if self.id:
                 msg_dict["id"] = self.id
 
@@ -77,11 +76,11 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if self.sdk.client and self.id:
-            self.sdk.client.update_message(self.id, msg_dict)
+        if self.emitter.client and self.id:
+            self.emitter.client.update_message(self.id, msg_dict)
             msg_dict["id"] = self.id
 
-        await self.sdk.update_message(msg_dict)
+        await self.emitter.update_message(msg_dict)
 
         return True
 
@@ -92,10 +91,10 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        if self.sdk.client and self.id:
-            await self.sdk.client.delete_message(self.id)
+        if self.emitter.client and self.id:
+            await self.emitter.client.delete_message(self.id)
 
-        await self.sdk.delete_message(self.to_dict())
+        await self.emitter.delete_message(self.to_dict())
 
         return True
 
@@ -105,7 +104,7 @@ class MessageBase(ABC):
         if self.streaming:
             self.streaming = False
 
-        await self.sdk.send_message(msg_dict)
+        await self.emitter.send_message(msg_dict)
 
         return self.id or self.temp_id
 
@@ -118,10 +117,10 @@ class MessageBase(ABC):
         if not self.streaming:
             self.streaming = True
             msg_dict = self.to_dict()
-            await self.sdk.stream_start(msg_dict)
+            await self.emitter.stream_start(msg_dict)
 
         self.content += token
-        await self.sdk.send_token(id=self.id or self.temp_id, token=token)
+        await self.emitter.send_token(id=self.id or self.temp_id, token=token)
 
 
 class Message(MessageBase):
@@ -150,7 +149,6 @@ class Message(MessageBase):
         indent: int = 0,
         actions: List[Action] = [],
         elements: List[Element] = [],
-        sdk: Chainlit = None,
     ):
         self.content = content
         self.author = author
@@ -160,8 +158,6 @@ class Message(MessageBase):
         self.actions = actions
         self.elements = elements
         self.llmSettings = None
-        if sdk:
-            self.sdk = sdk
 
         if llm_settings is None and prompt is not None:
             self.llmSettings = LLMSettings().to_dict()
@@ -215,13 +211,10 @@ class ErrorMessage(MessageBase):
         content: str,
         author: str = config.chatbot_name,
         indent: int = 0,
-        sdk: Chainlit = None,
     ):
         self.content = content
         self.author = author
         self.indent = indent
-        if sdk:
-            self.sdk = sdk
 
         super().__post_init__()
 
@@ -248,7 +241,7 @@ class AskMessageBase(MessageBase):
     def remove(self):
         removed = super().remove()
         if removed:
-            self.sdk.clear_ask()
+            self.emitter.clear_ask()
 
 
 class AskUserMessage(AskMessageBase):
@@ -270,14 +263,11 @@ class AskUserMessage(AskMessageBase):
         author: str = config.chatbot_name,
         timeout: int = 60,
         raise_on_timeout: bool = False,
-        sdk: Chainlit = None,
     ):
         self.content = content
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
-        if sdk:
-            self.sdk = sdk
 
         super().__post_init__()
 
@@ -303,7 +293,7 @@ class AskUserMessage(AskMessageBase):
 
         spec = AskSpec(type="text", timeout=self.timeout)
 
-        res = await self.sdk.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         return res
 
@@ -331,7 +321,6 @@ class AskFileMessage(AskMessageBase):
         author=config.chatbot_name,
         timeout=90,
         raise_on_timeout=False,
-        sdk: Chainlit = None,
     ):
         self.content = content
         self.max_size_mb = max_size_mb
@@ -339,9 +328,6 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
-
-        if sdk:
-            self.sdk = sdk
 
         super().__post_init__()
 
@@ -372,7 +358,7 @@ class AskFileMessage(AskMessageBase):
             timeout=self.timeout,
         )
 
-        res = await self.sdk.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         if res:
             return AskFileResponse(**res)
