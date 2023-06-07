@@ -236,7 +236,7 @@ class CloudClient(BaseClient):
         id = f"{uuid.uuid4()}"
         query = ""
         if mime:
-            query = f"?v=2"
+            query = f"?contentType={mime}"
         url = f"{self.url}/api/upload/file{query}"
         body = {"projectId": self.project_id, "fileName": id}
 
@@ -249,9 +249,6 @@ class CloudClient(BaseClient):
         json_res = res.json()
         upload_details = json_res["post"]
         permanent_url = json_res["permanentUrl"]
-
-        if mime:
-            upload_details["fields"]["Content-Type"] = mime
 
         files = {"file": content}
 
