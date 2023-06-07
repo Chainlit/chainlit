@@ -24,8 +24,6 @@ from chainlit.logger import logger
 from chainlit.server import app
 from chainlit.cache import init_lc_cache
 
-# from chainlit.watch import watch_directory
-
 
 # Create the main command group for Chainlit CLI
 @click.group(context_settings={"auto_envvar_prefix": "CHAINLIT"})
@@ -51,10 +49,6 @@ def run_chainlit(target: str):
 
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
-
-    # Enable file watching if the user specified it
-    # if watch:
-    #     watch_directory()
 
     log_level = "debug" if config.run_settings.debug else "error"
 

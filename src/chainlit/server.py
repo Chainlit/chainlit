@@ -7,6 +7,9 @@ import os
 import json
 import webbrowser
 
+from contextlib import asynccontextmanager
+from watchfiles import awatch
+
 from fastapi import FastAPI
 from fastapi.responses import (
     HTMLResponse,
@@ -19,7 +22,7 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
-from chainlit.config import config, DEFAULT_HOST
+from chainlit.config import config, load_module, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
 from chainlit.client import CloudClient
@@ -31,10 +34,56 @@ from chainlit.telemetry import trace_event
 from chainlit.logger import logger
 from chainlit.types import CompletionRequest
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    host = config.run_settings.host
+    port = config.run_settings.port
+
+    if not config.run_settings.headless:
+        if host == DEFAULT_HOST:
+            url = f"http://localhost:{port}"
+        else:
+            url = f"http://{host}:{port}"
+
+        logger.info(f"Your app is available at {url}")
+        webbrowser.open(url)
+
+    watch_task = None
+    stop_event = asyncio.Event()
+
+    if config.run_settings.watch:
+
+        async def watch_files_for_changes():
+            async for changes in awatch(config.root, stop_event=stop_event):
+                for change_type, file_path in changes:
+                    file_name = os.path.basename(file_path)
+                    file_ext = os.path.splitext(file_name)[1]
+
+                    if file_ext.lower() == ".py" or file_name.lower() == "chainlit.md":
+                        logger.info(f"File {change_type.name}: {file_name}")
+
+                        # Reload the module if the module name is specified in the config
+                        if config.module_name:
+                            load_module(config.module_name)
+
+                        await socket.emit("reload", {})
+
+                        break
+
+        watch_task = asyncio.create_task(watch_files_for_changes())
+
+    yield
+
+    if watch_task:
+        stop_event.set()
+        await watch_task
+
+
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=build_dir), name="static")
 app.add_middleware(
     CORSMiddleware,
@@ -84,21 +133,6 @@ def get_html_template():
 
 
 html_template = get_html_template()
-
-
-@app.on_event("startup")
-async def startup():
-    host = config.run_settings.host
-    port = config.run_settings.port
-
-    if not config.run_settings.headless:
-        if host == DEFAULT_HOST:
-            url = f"http://localhost:{port}"
-        else:
-            url = f"http://{host}:{port}"
-
-        logger.info(f"Your app is available at {url}")
-        webbrowser.open(url)
 
 
 @app.post("/completion")
