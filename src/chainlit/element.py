@@ -155,7 +155,7 @@ class Pdf(Element):
     type: ElementType = "pdf"
     url: str = None
     path: str = None
-    content: str = None
+    content: bytes = None
 
     def persist(self, client: BaseClient, for_id: str = None):
         if not self.content and not self.url:
@@ -164,20 +164,16 @@ class Pdf(Element):
         # Either upload the content or use the url
         url = None
         if self.content:
-            content = b64decode(urlparse.unquote(self.content))
-            url = client.upload_element(content=content, mime="application/pdf")
+            url = client.upload_element(content=self.content, mime="application/pdf")
         else:
             url = self.url
 
         if url:
-            size = getattr(self, "size", None)
-            language = getattr(self, "language", None)
             element = client.create_element(
                 name=self.name,
                 url=url,
                 type=self.type,
                 display=self.display,
-                size=size,
                 for_id=for_id,
             )
             return element
@@ -185,7 +181,7 @@ class Pdf(Element):
     def __post_init__(self):
         if self.path:
             with open(self.path, "rb") as f:
-                self.content = urlparse.quote(b64encode(f.read()).decode("utf-8"))
+                self.content = f.read()
         elif self.content or self.url:
             pass  # do nothing here
         else:

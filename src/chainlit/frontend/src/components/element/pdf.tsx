@@ -9,10 +9,15 @@ export default function PDFElement({ element }: Props) {
     return null;
   }
   const className = `${element.display}-pdf`;
+  const src =
+    element.url ||
+    URL.createObjectURL(
+      new Blob([element.content!], { type: 'application/pdf' })
+    );
   return (
     <iframe
       className={className}
-      src={element.url || `data:application/pdf;base64,${element.content}`}
+      src={src}
       style={{ border: 'none' }}
       width="100%"
       height="100%"

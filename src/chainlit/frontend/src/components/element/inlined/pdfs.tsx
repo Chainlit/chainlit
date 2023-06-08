@@ -12,12 +12,13 @@ export default function InlinedPDFList({ items }: Props) {
       {items.map((pdf, i) => {
         return (
           <div
+            key={i}
             style={{
               maxWidth: '600px',
               height: '400px'
             }}
           >
-            <PDFElement key={pdf.id || i} element={pdf} />
+            <PDFElement element={pdf} />
           </div>
         );
       })}
