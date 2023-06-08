@@ -10,7 +10,16 @@ export default function InlinedPDFList({ items }: Props) {
   return (
     <Stack spacing={1}>
       {items.map((pdf, i) => {
-        return <PDFElement key={pdf.id || i} element={pdf} />;
+        return (
+          <div
+            style={{
+              maxWidth: '600px',
+              height: '400px'
+            }}
+          >
+            <PDFElement key={pdf.id || i} element={pdf} />
+          </div>
+        );
       })}
     </Stack>
   );
