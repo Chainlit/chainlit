@@ -80,7 +80,13 @@ const SideView = () => {
         </IconButton>
       </Stack>
 
-      <Box mt="1.5rem" id="side-view-content">
+      <Box
+        mt="1.5rem"
+        id="side-view-content"
+        sx={{
+          height: '100%'
+        }}
+      >
         {sideViewElement && renderElement(sideViewElement)}
       </Box>
     </Drawer>
