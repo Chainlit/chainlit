@@ -12,6 +12,9 @@ export default defineConfig({
     supportFile: false,
     defaultCommandTimeout: 10000,
     video: false,
+    retries: {
+      runMode: 2,
+    },
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
