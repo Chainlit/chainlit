@@ -3,22 +3,23 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import {
   elementState,
-  ElementType,
   IElement,
   IImageElement,
+  IPdfElement,
   ITextElement
 } from 'state/element';
 import TextElement from './text';
 import ImageElement from './image';
+import PDFElement from './pdf';
 
-export const renderElement = (element: IElement) => {
+export const renderElement = (element: IElement): JSX.Element => {
   switch (element.type) {
-    case ElementType.img:
+    case 'image':
       return <ImageElement element={element as IImageElement} />;
-    case ElementType.txt:
+    case 'text':
       return <TextElement element={element as ITextElement} />;
-    default:
-      return null;
+    case 'pdf':
+      return <PDFElement element={element as IPdfElement} />;
   }
 };
 

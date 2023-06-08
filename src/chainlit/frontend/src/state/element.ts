@@ -1,22 +1,13 @@
 import { atom } from 'recoil';
 
-export enum ElementType {
-  img = 'image',
-  txt = 'text'
-}
+export type ElementType = 'image' | 'text' | 'pdf';
 
-type ElementContentType = {
-  [ElementType.img]: ArrayBuffer;
-  [ElementType.txt]: string;
-};
-
-type ValueOf<T> = T[keyof T];
+export type AllElements = IImageElement | ITextElement | IPdfElement;
 
 export interface IElement {
   id?: number;
   tempId?: string;
   url?: string;
-  content?: ValueOf<ElementContentType>;
   type: ElementType;
   name: string;
   display: 'inline' | 'side' | 'page';
@@ -24,15 +15,20 @@ export interface IElement {
 }
 
 export interface IImageElement extends IElement {
-  type: ElementType.img;
-  content?: ElementContentType[ElementType.img];
+  type: 'image';
+  content?: ArrayBuffer;
   size?: 'small' | 'medium' | 'large';
 }
 
 export interface ITextElement extends IElement {
-  type: ElementType.txt;
-  content?: ElementContentType[ElementType.txt];
+  type: 'text';
+  content?: string;
   language?: string;
+}
+export interface IPdfElement extends IElement {
+  type: 'pdf';
+  content?: string;
+  url?: string;
 }
 
 export type IElements = IElement[];
