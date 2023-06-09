@@ -16,7 +16,7 @@ from chainlit.action import Action
 from chainlit.element import Image, Text, Pdf
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
-from chainlit.sync import run_sync
+from chainlit.sync import run_sync, asyncify
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -240,4 +240,5 @@ __all__ = [
     "ChainlitCallbackHandler",
     "AsyncChainlitCallbackHandler",
     "run_sync",
+    "asyncify",
 ]

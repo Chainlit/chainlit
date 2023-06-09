@@ -20,9 +20,9 @@ from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
+from chainlit.cache import init_lc_cache
 from chainlit.logger import logger
 from chainlit.server import app
-from chainlit.cache import init_lc_cache
 
 
 # Create the main command group for Chainlit CLI
@@ -81,40 +81,10 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     if ci:
         logger.info("Running in CI mode")
         config.enable_telemetry = False
+        no_cache = True
+        from chainlit.cli.mock import mock_openai
 
-        # Set the openai api key to a fake value
-        import os
-
-        os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-
-        # Mock the openai api
-        import responses
-
-        responses.start()
-        jsonReply = {
-            "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
-            "object": "text_completion",
-            "created": 1589478378,
-            "model": "text-davinci-003",
-            "choices": [
-                {
-                    "text": "\n\n```text\n3*3\n```",
-                    "index": 0,
-                    "logprobs": None,
-                    "finish_reason": "length",
-                }
-            ],
-            "usage": {
-                "prompt_tokens": 5,
-                "completion_tokens": 7,
-                "total_tokens": 12,
-            },
-        }
-        responses.add(
-            responses.POST,
-            "https://api.openai.com/v1/completions",
-            json=jsonReply,
-        )
+        mock_openai()
 
     else:
         trace_event("chainlit run")
