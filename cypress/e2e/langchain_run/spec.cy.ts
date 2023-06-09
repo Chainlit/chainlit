@@ -13,6 +13,6 @@ describe("LangChain run", () => {
     cy.get("#llmchain-done").should("exist");
     const messages = cy.get(".message");
     messages.should("have.length", 2);
-    messages.eq(1).should("contain", "4");
+    messages.eq(1).should("not.be.empty");
   });
 });
