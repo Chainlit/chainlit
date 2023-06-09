@@ -75,6 +75,41 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
     if ci:
         logger.info("Running in CI mode")
         config.enable_telemetry = False
+
+        # Set the openai api key to a fake value
+        import os
+
+        os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
+
+        # Mock the openai api
+        import responses
+
+        responses.start()
+        jsonReply = {
+            "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
+            "object": "text_completion",
+            "created": 1589478378,
+            "model": "text-davinci-003",
+            "choices": [
+                {
+                    "text": "\n\n```text\n3*3\n```",
+                    "index": 0,
+                    "logprobs": None,
+                    "finish_reason": "length",
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 5,
+                "completion_tokens": 7,
+                "total_tokens": 12,
+            },
+        }
+        responses.add(
+            responses.POST,
+            "https://api.openai.com/v1/completions",
+            json=jsonReply,
+        )
+
     else:
         trace_event("chainlit run")
 
