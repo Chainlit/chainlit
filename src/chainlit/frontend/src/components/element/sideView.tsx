@@ -2,6 +2,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { IconButton, Box, BoxProps, Typography, Stack } from '@mui/material';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import { renderElement } from 'components/element/view';
+import { useMemo } from 'react';
 import { useRecoilState } from 'recoil';
 import { sideViewState } from 'state/element';
 
@@ -60,6 +61,14 @@ const Drawer = styled(Box, {
 
 const SideView = () => {
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
+
+  const element = useMemo(() => {
+    if (sideViewElement) {
+      return renderElement(sideViewElement);
+    }
+    return null;
+  }, [sideViewElement]);
+
   return (
     <Drawer open={!!sideViewElement}>
       <Stack direction="row" alignItems="center">
@@ -87,7 +96,7 @@ const SideView = () => {
           height: '100%'
         }}
       >
-        {sideViewElement && renderElement(sideViewElement)}
+        {element}
       </Box>
     </Drawer>
   );
