@@ -109,11 +109,6 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
             "https://api.openai.com/v1/completions",
             json=jsonReply,
         )
-        responses.add(
-            responses.POST,
-            "https://api.openai.com/v1/chat/completions",
-            json=jsonReply,
-        )
 
     else:
         trace_event("chainlit run")
