@@ -113,7 +113,6 @@ def completion():
 @app.route("/project/settings", methods=["GET"])
 def project_settings():
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
-    logger.info("returning project settings")
     return {
         "public": config.public,
         "projectId": config.project_id,

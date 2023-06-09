@@ -47,8 +47,6 @@ export async function runChainlit(test: string) {
     const testDir = join(E2E_DIR, test);
     const file = "main.py";
 
-    console.log('spawning chainlit')
-
     // Headless + CI mode
     const child = spawn("chainlit", ["run", file, "-h", "-c"], {
       cwd: testDir,
