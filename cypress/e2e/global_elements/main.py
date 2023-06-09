@@ -6,7 +6,7 @@ import asyncio
 async def start():
     # Send elements to the UI concurrently
     elements = [
-        cl.LocalImage(path="./cat.jpeg", name="image1", display="inline").send(),
+        cl.Image(path="./cat.jpeg", name="image1", display="inline").send(),
         cl.Text(
             content="Here is a side text document", name="text1", display="side"
         ).send(),

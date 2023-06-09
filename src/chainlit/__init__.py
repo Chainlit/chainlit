@@ -13,7 +13,7 @@ from chainlit.emitter import ChainlitEmitter
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
-from chainlit.element import LocalImage, RemoteImage, Text, Pdf
+from chainlit.element import Image, Text, Pdf
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync
@@ -223,8 +223,7 @@ __all__ = [
     "LLMSettings",
     "Action",
     "Pdf",
-    "LocalImage",
-    "RemoteImage",
+    "Image",
     "Text",
     "Message",
     "ErrorMessage",

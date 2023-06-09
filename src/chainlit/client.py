@@ -36,7 +36,7 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def upload_element(self, content: bytes, mime: str) -> int:
+    async def upload_element(self, content: bytes, mime: str) -> str:
         pass
 
     @abstractmethod

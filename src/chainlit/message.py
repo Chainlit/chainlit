@@ -5,7 +5,7 @@ import time
 import asyncio
 
 from chainlit.telemetry import trace_event
-from chainlit.emitter import get_emitter, ChainlitEmitter
+from chainlit.emitter import get_emitter
 from chainlit.config import config
 from chainlit.types import (
     LLMSettings,
@@ -43,7 +43,7 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-        if self.emitter.client:
+        if self.emitter.client and not self.id:
             self.id = await self.emitter.client.create_message(msg_dict)
             if self.id:
                 msg_dict["id"] = self.id
