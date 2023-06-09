@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import uuid
 
 import asyncio
-import httpx
+import aiohttp
 from python_graphql_client import GraphqlClient
 
 from chainlit.types import ElementType, ElementSize
@@ -52,9 +52,6 @@ class BaseClient(ABC):
     ) -> Dict[str, Any]:
         pass
 
-    def is_response_ok(self, response: httpx.Response):
-        return 200 <= response.status_code < 300
-
 
 conversation_lock = asyncio.Lock()
 
@@ -72,10 +69,6 @@ class CloudClient(BaseClient):
         graphql_endpoint = f"{config.chainlit_server}/api/graphql"
         self.graphql_client = GraphqlClient(
             endpoint=graphql_endpoint, headers=self.headers
-        )
-
-        self.http_client = httpx.AsyncClient(
-            base_url=config.chainlit_server, headers=self.headers
         )
 
     def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
@@ -106,12 +99,19 @@ class CloudClient(BaseClient):
 
     async def is_project_member(self) -> bool:
         data = {"projectId": self.project_id}
-        r = await self.http_client.post("/api/role", json=data)
-        if not self.is_response_ok(r):
-            logger.error(f"Failed to get user role. {r.status_code}: {r.text}")
-            return False
-        role = r.json().get("role", "ANONYMOUS")
-        return role != "ANONYMOUS"
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{config.chainlit_server}/api/role",
+                json=data,
+                headers=self.headers,
+            ) as r:
+                if not r.ok:
+                    reason = await r.text()
+                    logger.error(f"Failed to get user role. {r.status}: {reason}")
+                    return False
+                json = await r.json()
+                role = json.get("role", "ANONYMOUS")
+                return role != "ANONYMOUS"
 
     async def create_conversation(self, session_id: str) -> int:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
@@ -250,25 +250,38 @@ class CloudClient(BaseClient):
 
         path = f"/api/upload/file"
 
-        r = await self.http_client.post(path, json=body)
-
-        if not self.is_response_ok(r):
-            logger.error(f"Failed to upload file: {r.text}")
-            return ""
-        json_res = r.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{config.chainlit_server}{path}",
+                json=body,
+                headers=self.headers,
+            ) as r:
+                if not r.ok:
+                    reason = await r.text()
+                    logger.error(f"Failed to upload file: {reason}")
+                    return ""
+                json_res = await r.json()
 
         upload_details = json_res["post"]
         permanent_url = json_res["permanentUrl"]
-        files = {"file": content}
 
-        async with httpx.AsyncClient(timeout=20) as client:
-            upload_response = await client.post(
-                url=upload_details["url"], data=upload_details["fields"], files=files
-            )
+        form_data = aiohttp.FormData()
 
-            if not self.is_response_ok(upload_response):
-                logger.error(f"Failed to upload file: {upload_response.text}")
-                return ""
+        # Add fields to the form_data
+        for field_name, field_value in upload_details["fields"].items():
+            form_data.add_field(field_name, field_value)
 
-        url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
-        return permanent_url
+        # Add file to the form_data
+        form_data.add_field("file", content, content_type="multipart/form-data")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                upload_details["url"],
+                data=form_data,
+            ) as upload_response:
+                if not upload_response.ok:
+                    reason = await upload_response.text()
+                    logger.error(f"Failed to upload file: {reason}")
+                    return ""
+
+                url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
+                return permanent_url
