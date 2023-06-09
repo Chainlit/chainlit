@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased at the moment.
 
+## [0.2.111] - 2023-06-09
+
+### Fixed
+
+- Pdf element reloading issue
+- CI is more stable
+
 ## [0.2.110] - 2023-06-08
 
 ### Added
