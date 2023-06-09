@@ -10,12 +10,6 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - uses: shine1594/secrets-to-env-action@master
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          secrets_env: production
-          file_name_prod: .env
-          prefix_prod: ""
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
