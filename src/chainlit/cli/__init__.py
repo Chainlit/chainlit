@@ -92,7 +92,7 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
             "model": "text-davinci-003",
             "choices": [
                 {
-                    "text": "\n\n```text\nThis is indeed a test\n``` SELECT",
+                    "text": "\n\n```text\n3*3\n```",
                     "index": 0,
                     "logprobs": None,
                     "finish_reason": "length",
