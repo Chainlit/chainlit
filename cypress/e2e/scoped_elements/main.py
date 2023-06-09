@@ -5,6 +5,7 @@ import chainlit as cl
 async def start():
     elements = [
         cl.LocalImage(path="./cat.jpeg", name="image1", display="inline"),
+        cl.Pdf(path="./dummy.pdf", name="pdf1", display="inline"),
         cl.Text(content="Here is a side text document", name="text1", display="side"),
         cl.Text(content="Here is a page text document", name="text2", display="page"),
     ]
