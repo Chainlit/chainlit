@@ -23,6 +23,7 @@ class AskFileSpec(AskSpec):
     """Specification for asking the user for a file."""
 
     accept: Union[List[str], Dict[str, List[str]]]
+    max_files: int
     max_size_mb: int
 
 

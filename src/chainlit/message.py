@@ -307,7 +307,8 @@ class AskFileMessage(AskMessageBase):
     Args:
         content (str): Text displayed above the upload button.
         accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
-        max_size_mb (int, optional): Maximum file size in MB. Maximum value is 100.
+        max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
+        max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -318,12 +319,14 @@ class AskFileMessage(AskMessageBase):
         content: str,
         accept: Union[List[str], Dict[str, List[str]]],
         max_size_mb=2,
+        max_files=1,
         author=config.chatbot_name,
         timeout=90,
         raise_on_timeout=False,
     ):
         self.content = content
         self.max_size_mb = max_size_mb
+        self.max_files = max_files
         self.accept = accept
         self.author = author
         self.timeout = timeout
@@ -340,7 +343,7 @@ class AskFileMessage(AskMessageBase):
             "waitForAnswer": True,
         }
 
-    async def send(self) -> Union[AskFileResponse, None]:
+    async def send(self) -> Union[List[AskFileResponse], None]:
         """
         Sends the message to request a file from the user to the UI and waits for the reply.
         """
@@ -355,12 +358,13 @@ class AskFileMessage(AskMessageBase):
             type="file",
             accept=self.accept,
             max_size_mb=self.max_size_mb,
+            max_files=self.max_files,
             timeout=self.timeout,
         )
 
         res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         if res:
-            return AskFileResponse(**res)
+            return [AskFileResponse(**r) for r in res]
         else:
             return None

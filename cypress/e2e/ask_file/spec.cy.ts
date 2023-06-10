@@ -1,5 +1,3 @@
-const path = require("path");
-
 describe("Upload file", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");

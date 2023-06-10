@@ -57,12 +57,13 @@ export interface IAskFileResponse {
 }
 
 export interface IAsk {
-  callback: (payload: IAskResponse | IAskFileResponse) => void;
+  callback: (payload: IAskResponse | IAskFileResponse[]) => void;
   spec: {
     type: 'text' | 'file';
     timeout: number;
     accept?: string[] | Record<string, string[]>;
     max_size_mb?: number;
+    max_files?: number;
   };
 }
 
