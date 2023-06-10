@@ -2,7 +2,7 @@ try:
     import langchain
 
     if langchain.__version__ < "0.0.189":
-        raise ImportError(
+        raise ValueError(
             "LangChain version is too old, expected >= 0.0.189. Run `pip install langchain --upgrade`"
         )
 
