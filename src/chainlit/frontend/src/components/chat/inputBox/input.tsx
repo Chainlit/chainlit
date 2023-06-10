@@ -32,6 +32,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
   const askUser = useRecoilValue(askUserState);
   const session = useRecoilValue(sessionState);
   const [value, setValue] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
 
   const socketOk = session?.socket && !session?.error;
   const disabled = !socketOk || loading || askUser?.spec.type === 'file';
@@ -54,11 +55,21 @@ const Input = ({ onSubmit, onReply }: Props) => {
     setValue('');
   }, [value, disabled, setValue, askUser, onSubmit]);
 
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        submit();
+        if (!isComposing) {
+          e.preventDefault();
+          submit();
+        }
       } else if (e.key === 'ArrowUp') {
         const lineCount = getLineCount(e.currentTarget as HTMLDivElement);
         if (lineCount <= 1) {
@@ -66,7 +77,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
         }
       }
     },
-    [submit, hSetOpen]
+    [submit, hSetOpen, isComposing]
   );
 
   const onHistoryClick = useCallback((content: string) => {
@@ -93,6 +104,8 @@ const Input = ({ onSubmit, onReply }: Props) => {
       disabled={disabled}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       value={value}
       fullWidth
       InputProps={{
