@@ -114,6 +114,27 @@ class Image(Element):
 
 
 @dataclass
+class Avatar(Element):
+    type: ElementType = "avatar"
+
+    async def send(self):
+        element = None
+
+        if not self.content and not self.url and self.path:
+            await self.load()
+
+        if not self.url and not self.content:
+            raise ValueError("Must provide url or content to send element")
+
+        element = self.to_dict()
+
+        if self.emitter.emit and element:
+            trace_event(f"send {self.__class__.__name__}")
+            element = await self.before_emit(element)
+            await self.emitter.emit("element", element)
+
+
+@dataclass
 class Text(Element):
     """Useful to send a text (not a message) to the UI."""
 
