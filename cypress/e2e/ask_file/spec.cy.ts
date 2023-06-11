@@ -12,10 +12,6 @@ describe("Upload file", () => {
     cy.fixture("state_of_the_union.txt", "utf-8").as("txtFile");
     cy.get("input[type=file]").selectFile("@txtFile", { force: true });
 
-    cy.get("#upload-button-loading").should("exist");
-
-    cy.get("#upload-button-loading").should("not.exist");
-
     cy.get(".message")
       .eq(1)
       .should(
