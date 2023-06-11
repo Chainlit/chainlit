@@ -5,16 +5,13 @@ import {
   Button,
   IconButton,
   Stack,
-  Tooltip,
   AppBar,
   Toolbar,
   useTheme,
   Menu
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
-import UserAvatar from 'components/userAvatar';
-import KeyIcon from '@mui/icons-material/Key';
-import ThemeButton from 'components/themeButton';
+import UserButton from 'components/userButton';
 import NewChatButton from 'components/newChatButton';
 import RegularButton from 'components/button';
 import GithubButton from 'components/githubButton';
@@ -144,7 +141,6 @@ function Nav({ isPublic, hasReadme }: NavProps) {
 
 export default function Header() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const requiredKeys = !!pSettings?.userEnv?.length;
 
   return (
     <AppBar elevation={0} color="transparent" position="static">
@@ -172,16 +168,8 @@ export default function Header() {
         >
           <NewChatButton />
           <Box ml={1} />
-          {requiredKeys && (
-            <Tooltip title="API keys">
-              <IconButton color="inherit" component={Link} to="/env">
-                <KeyIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-          <ThemeButton />
           <GithubButton href={pSettings?.github} />
-          <UserAvatar />
+          <UserButton />
         </Stack>
       </Toolbar>
     </AppBar>

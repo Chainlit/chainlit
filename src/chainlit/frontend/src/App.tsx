@@ -11,7 +11,6 @@ import { accessTokenState, roleState } from 'state/user';
 import { getProjectSettings, getRole } from 'api';
 import makeTheme from 'theme';
 import { ThemeProvider } from '@mui/material';
-import { themeState } from 'state/theme';
 import Home from 'pages/Home';
 import Element from 'pages/Element';
 import Login from 'pages/Login';
@@ -25,6 +24,9 @@ import { projectSettingsState } from 'state/project';
 import Socket from 'components/socket';
 import { Toaster } from 'react-hot-toast';
 import Readme from 'pages/Readme';
+import { settingsState } from 'state/settings';
+import SettingsModal from 'components/settingsModal';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const router = createBrowserRouter([
   {
@@ -70,11 +72,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const themeVariant = useRecoilValue(themeState);
+  const [{ theme: themeVariant }, setSettings] = useRecoilState(settingsState);
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
+  useHotkeys('s', () => setSettings((old) => ({ ...old, open: !old.open })));
   const theme = makeTheme(themeVariant);
 
   useEffect(() => {
@@ -141,6 +144,7 @@ function App() {
       />
       <Box display="flex" height="100vh" width="100vw">
         <Socket />
+        <SettingsModal />
         <RouterProvider router={router} />
       </Box>
     </ThemeProvider>

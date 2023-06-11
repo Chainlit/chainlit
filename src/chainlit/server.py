@@ -221,19 +221,12 @@ async def connect(sid, environ):
     authorization = environ.get("HTTP_AUTHORIZATION")
     cloud_client = None
 
-    # Check user env
-    if config.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.user_env:
-                if key not in user_env:
-                    trace_event("missing_user_env")
-                    logger.error("Missing user environment variable: " + key)
-                    return False
-        else:
-            logger.error("Missing user environment variables")
-            return False
+    # Check decorated functions
+    if not config.lc_factory and not config.on_message and not config.on_chat_start:
+        logger.error(
+            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function"
+        )
+        return False
 
     # Check authorization
     if not config.public and not authorization:
@@ -252,6 +245,21 @@ async def connect(sid, environ):
         if not is_project_member:
             logger.error("You are not a member of this project")
             return False
+
+    # Check user env
+    if config.user_env:
+        # Check if requested user environment variables are provided
+        if user_env:
+            user_env = json.loads(user_env)
+            for key in config.user_env:
+                if key not in user_env:
+                    trace_event("missing_user_env")
+                    logger.error("Missing user environment variable: " + key)
+                    return False
+        else:
+            logger.error("Missing user environment variables")
+            return False
+
     # Create the session
 
     # Function to send a message to this particular session
@@ -271,13 +279,6 @@ async def connect(sid, environ):
     }  # type: Session
 
     sessions[sid] = session
-
-    # Check decorated functions
-    if not config.lc_factory and not config.on_message and not config.on_chat_start:
-        logger.error(
-            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function"
-        )
-        return False
 
     trace_event("connection_successful")
     return True

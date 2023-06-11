@@ -1,7 +1,7 @@
 import { Box, Stack } from '@mui/material';
 import { INestedMessage } from 'state/chat';
 import { IElements } from 'state/element';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DetailsButton from 'components/chat/message/detailsButton';
 import { IAction } from 'state/action';
 import Messages from './messages';
@@ -9,6 +9,8 @@ import MessageContent from './content';
 import UploadButton from './uploadButton';
 import Author, { authorBoxWidth } from './author';
 import Buttons from './buttons';
+import { settingsState } from 'state/settings';
+import { useRecoilValue } from 'recoil';
 
 interface Props {
   message: INestedMessage;
@@ -32,6 +34,11 @@ const Message = ({
   isLast
 }: Props) => {
   const [showDetails, setShowDetails] = useState(false);
+  const appSettings = useRecoilValue(settingsState);
+
+  useEffect(() => {
+    setShowDetails(appSettings.expandAll);
+  }, [appSettings.expandAll]);
 
   return (
     <Box
