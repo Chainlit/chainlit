@@ -79,12 +79,14 @@ class ChainlitEmitter:
             return
 
         try:
-            # End the task temporarily so that the User can answer the prompt
-            await self.task_end()
             # Send the prompt to the UI
             res = await self.ask_user(
                 {"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout
             )
+
+            # End the task temporarily so that the User can answer the prompt
+            await self.task_end()
+
             if self.client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":

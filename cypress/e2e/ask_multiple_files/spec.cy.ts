@@ -15,6 +15,9 @@ describe("Upload multiple files", () => {
       force: true,
     });
 
+    cy.get("#upload-button-loading").should("exist");
+    cy.get("#upload-button-loading").should("not.exist");
+
     cy.get(".message")
       .eq(1)
       .should("contain", "2 files uploaded: state_of_the_union.txt,hello.py");

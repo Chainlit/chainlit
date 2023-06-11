@@ -63,7 +63,7 @@ export async function runChainlit(dir: string, file: string) {
     setTimeout(() => {
       // todo listen for stdout. passing process.env makes stdout silent for some reason.
       resolve(child);
-    }, 3000);
+    }, 6000);
 
     child.stderr?.on("data", (data) => {
       reject(data.toString());

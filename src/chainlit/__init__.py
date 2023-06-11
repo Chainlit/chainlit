@@ -51,7 +51,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        if with_task and __chainlit_emitter__:
+        if with_task:
             await __chainlit_emitter__.task_start()
 
         try:
@@ -62,10 +62,9 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return user_function(**params_values)
         except Exception as e:
             logger.exception(e)
-            if __chainlit_emitter__:
-                await ErrorMessage(content=str(e), author="Error").send()
+            await ErrorMessage(content=str(e), author="Error").send()
         finally:
-            if with_task and __chainlit_emitter__:
+            if with_task:
                 await __chainlit_emitter__.task_end()
 
     return wrapper
