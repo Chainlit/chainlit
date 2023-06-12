@@ -16,6 +16,7 @@ import io from 'socket.io-client';
 import { IElement, elementState } from 'state/element';
 import { IAction, actionState } from 'state/action';
 import { deepEqual } from 'helpers/object';
+import { projectSettingsState } from 'state/project';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;
@@ -24,7 +25,8 @@ const compareMessageIds = (a: IMessage, b: IMessage) => {
 };
 
 export default memo(function Socket() {
-  const { accessToken, isAuthenticated, isLoading } = useAuth();
+  const pSettings = useRecoilValue(projectSettingsState);
+  const { accessToken, isAuthenticated, isLoading: _isLoading } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const [session, setSession] = useRecoilState(sessionState);
@@ -33,6 +35,8 @@ export default memo(function Socket() {
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
+
+  const isLoading = pSettings?.projectId && _isLoading;
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {

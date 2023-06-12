@@ -1,10 +1,10 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { Alert } from '@mui/material';
+import { useAuth } from 'hooks/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthCallback() {
-  const { user, error } = useAuth0();
+  const { user, error } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

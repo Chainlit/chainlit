@@ -8,7 +8,7 @@ import {
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { accessTokenState, roleState } from 'state/user';
-import { getProjectSettings, getRole } from 'api';
+import { getRole } from 'api';
 import makeTheme from 'theme';
 import { ThemeProvider } from '@mui/material';
 import Home from 'pages/Home';
@@ -26,7 +26,7 @@ import { Toaster } from 'react-hot-toast';
 import Readme from 'pages/Readme';
 import { settingsState } from 'state/settings';
 import SettingsModal from 'components/settingsModal';
-import { useHotkeys } from 'react-hotkeys-hook';
+import Hotkeys from 'components/Hotkeys';
 
 const router = createBrowserRouter([
   {
@@ -72,25 +72,16 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const [{ theme: themeVariant }, setSettings] = useRecoilState(settingsState);
-  const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
+  const { theme: themeVariant } = useRecoilValue(settingsState);
+  const pSettings = useRecoilValue(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
-  useHotkeys('s', () => setSettings((old) => ({ ...old, open: !old.open })));
   const theme = makeTheme(themeVariant);
 
   useEffect(() => {
     document.body.style.backgroundColor = theme.palette.background.default;
   }, [theme]);
-
-  useEffect(() => {
-    if (pSettings === undefined) {
-      getProjectSettings().then((res) => {
-        setPSettings(res);
-      });
-    }
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated && accessToken === undefined) {
@@ -144,6 +135,7 @@ function App() {
       />
       <Box display="flex" height="100vh" width="100vw">
         <Socket />
+        <Hotkeys />
         <SettingsModal />
         <RouterProvider router={router} />
       </Box>
