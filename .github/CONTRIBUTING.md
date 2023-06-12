@@ -1,5 +1,28 @@
 # Contribute to Chainlit
+
 To contribute to Chainlit, you first need to setup the project on your local machine.
+
+## Table of Contents
+<!--
+Generated using https://ecotrust-canada.github.io/markdown-toc/.
+I've copy/pasted the whole document there, without the previous two headings.
+-->
+
+- [Local setup](#local-setup)
+  * [Requirements](#requirements)
+  * [Setup the repo](#setup-the-repo)
+  * [Install JS dependencies](#install-js-dependencies)
+  * [Install python dependencies](#install-python-dependencies)
+- [Setup the UI](#setup-the-ui)
+  * [Start the UI](#start-the-ui)
+- [Setup the server](#setup-the-server)
+  * [Install from local sources](#install-from-local-sources)
+  * [Start the server](#start-the-server)
+- [Run the tests](#run-the-tests)
+  * [Run one test](#run-one-test)
+- [Only contribute to one side of the project](#only-contribute-to-one-side-of-the-project)
+  * [Only contribute to the frontend](#only-contribute-to-the-frontend)
+  * [Only contribute to the server](#only-contribute-to-the-server)
 
 ## Local setup
 
@@ -10,11 +33,32 @@ To contribute to Chainlit, you first need to setup the project on your local mac
 3. NodeJS >= `16` ([See how to install](https://nodejs.org/en/download))
 
 
-### Clone the repo
+### Setup the repo
 
+With this setup you can easily code in your fork and fetch updates from the main repository.
+
+1. Go to https://github.com/Chainlit/chainlit/fork to fork the chainlit code into your own repository.
+2. Clone your fork locally
 ```sh
-git clone https://github.com/Chainlit/chainlit.git
-cd chainlit
+$ git clone https://github.com/YOUR_USERNAME/YOUR_FORK.git
+```
+3. Go into your fork and list the current configured remote repository.
+```sh
+$ git remote -v
+> origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
+> origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push) 
+```
+4. Specify the new remote upstream repository that will be synced with the fork.
+```sh
+$ git remote add upstream https://github.com/Chainlit/chainlit.git
+```
+5. Verify the new upstream repository you've specified for your fork.
+```sh
+$ git remote -v
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)
+> upstream  https://github.com/Chainlit/chainlit.git (fetch)
+> upstream  https://github.com/Chainlit/chainlit.git (push)
 ```
 
 ### Install JS dependencies
@@ -24,7 +68,7 @@ npm install
 npm run installUiDeps
 ```
 
-### Install python env
+### Install python dependencies
 
 ```sh
 cd src
@@ -93,7 +137,7 @@ This is the easiest solution if you want to only make a change in the UI or the 
 
 Start with following the steps from the [Local setup](#local-setup).
 
-### Only contribute to frontend
+### Only contribute to the frontend
 
 1. Follow the steps from [Setup the UI](#setup-the-ui).
 2. Change the server configuration in [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts) to match your target chainlit server. 
