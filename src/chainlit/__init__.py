@@ -60,6 +60,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return await user_function(**params_values)
             else:
                 return user_function(**params_values)
+        except InterruptedError:
+            pass
         except Exception as e:
             logger.exception(e)
             await ErrorMessage(content=str(e), author="Error").send()

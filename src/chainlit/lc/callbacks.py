@@ -50,6 +50,8 @@ class BaseChainlitCallbackHandler(BaseCallbackHandler):
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
 
+    raise_error = True
+
     # We want to handler to be called on every message
     always_verbose: bool = True
 
@@ -215,6 +217,8 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
     def on_chain_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
+        if isinstance(error, InterruptedError):
+            return
         self.add_message(str(error), error=True)
         self.pop_sequence()
 
@@ -239,6 +243,8 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Do nothing."""
+        if isinstance(error, InterruptedError):
+            return
         self.add_message(str(error), error=True)
         self.pop_sequence()
 
@@ -363,6 +369,8 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
     async def on_chain_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
+        if isinstance(error, InterruptedError):
+            return
         await self.add_message(str(error), error=True)
         self.pop_sequence()
 
@@ -387,6 +395,8 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Do nothing."""
+        if isinstance(error, InterruptedError):
+            return
         await self.add_message(str(error), error=True)
         self.pop_sequence()
 

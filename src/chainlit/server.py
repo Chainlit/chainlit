@@ -267,10 +267,17 @@ async def connect(sid, environ):
 
     # Function to send a message to this particular session
     def emit_fn(event, data):
+        if sid in sessions:
+            if sessions[sid]["should_stop"]:
+                sessions[sid]["should_stop"] = False
+                raise InterruptedError("Task stopped by user")
         return socket.emit(event, data, to=sid)
 
     # Function to ask the user a question
     def ask_user_fn(data, timeout):
+        if sessions[sid]["should_stop"]:
+            sessions[sid]["should_stop"] = False
+            raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
     session = {
@@ -280,6 +287,7 @@ async def connect(sid, environ):
         "client": cloud_client,
         "user_env": user_env,
         "running_sync": False,
+        "should_stop": False,
     }  # type: Session
 
     sessions[sid] = session
@@ -311,6 +319,22 @@ async def disconnect(sid):
     if sid in user_sessions:
         # Clean up the user session
         user_sessions.pop(sid)
+
+
+@socket.on("stop")
+async def stop(sid):
+    if sid in sessions:
+        trace_event("stop_task")
+        session = sessions[sid]
+
+        __chainlit_emitter__ = ChainlitEmitter(session)
+
+        await Message(author="System", content="Task stopped by the user.").send()
+
+        session["should_stop"] = True
+
+        if config.on_stop:
+            await config.on_stop()
 
 
 async def process_message(session: Session, author: str, input_str: str):
@@ -369,6 +393,8 @@ async def process_message(session: Session, author: str, input_str: str):
             await config.on_message(
                 input_str, __chainlit_emitter__=__chainlit_emitter__
             )
+    except InterruptedError:
+        pass
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(author="Error", content=str(e)).send()
@@ -380,6 +406,7 @@ async def process_message(session: Session, author: str, input_str: str):
 async def message(sid, data):
     """Handle a message sent by the User."""
     session = need_session(sid)
+    session["should_stop"] = False
 
     input_str = data["content"].strip()
     author = data["author"]
