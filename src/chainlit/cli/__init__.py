@@ -68,6 +68,9 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
 @click.option("--host")
 @click.option("--port")
 def chainlit_run(target, watch, headless, debug, ci, host, port):
+
+    import os
+
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
@@ -77,8 +80,6 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
         config.enable_telemetry = False
 
         # Set the openai api key to a fake value
-        import os
-
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
 
         # Mock the openai api
