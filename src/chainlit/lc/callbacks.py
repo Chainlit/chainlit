@@ -201,7 +201,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
+        self.add_in_sequence(serialized["id"][-1])
         # Useful to display details button in the UI
         self.add_message("")
 
@@ -349,7 +349,7 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
+        self.add_in_sequence(serialized["id"][-1])
         # Useful to display details button in the UI
         await self.add_message("")
 
