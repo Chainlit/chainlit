@@ -73,11 +73,14 @@ async def lifespan(app: FastAPI):
 
         watch_task = asyncio.create_task(watch_files_for_changes())
 
-    yield
-
-    if watch_task:
-        stop_event.set()
-        await watch_task
+    try:
+        yield
+    except KeyboardInterrupt:
+        logger.error("KeyboardInterrupt received, stopping the watch task...")
+    finally:
+        if watch_task:
+            stop_event.set()
+            await watch_task
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
