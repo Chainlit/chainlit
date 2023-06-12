@@ -85,6 +85,11 @@ def langchain_factory(use_async: bool) -> Callable:
         Callable[[], Any]: The decorated factory function.
     """
 
+    # Check if the factory is called with the correct parameter
+    if type(use_async) != bool:
+        error_message = "langchain_factory use_async parameter is required"
+        raise ValueError(error_message)
+
     def decorator(func: Callable) -> Callable:
         config.lc_factory = wrap_user_function(func, with_task=True)
         return func
