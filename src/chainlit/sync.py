@@ -7,7 +7,7 @@ from asyncer import asyncify as _asyncify
 from chainlit.emitter import get_emitter
 
 
-def asyncify(function: Callable, cancellable: bool = True):
+def asyncify(function: Callable):
     emitter = get_emitter()
     if not emitter:
         raise RuntimeError(
@@ -15,10 +15,13 @@ def asyncify(function: Callable, cancellable: bool = True):
         )
 
     def wrapper(*args, **kwargs):
+        emitter.session["running_sync"] = True
         __chainlit_emitter__ = emitter
-        return function(*args, **kwargs)
+        res = function(*args, **kwargs)
+        emitter.session["running_sync"] = False
+        return res
 
-    return _asyncify(wrapper, cancellable=cancellable)
+    return _asyncify(wrapper, cancellable=True)
 
 
 def run_sync(co: Any):

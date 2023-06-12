@@ -11,7 +11,7 @@ async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):
                 {input_key: input_str}, callbacks=[AsyncChainlitCallbackHandler()]
             )
         else:
-            raw_res = await asyncify(agent.__call__, cancellable=True)(
+            raw_res = await asyncify(agent.__call__)(
                 {input_key: input_str}, callbacks=[ChainlitCallbackHandler()]
             )
     else:
@@ -20,7 +20,7 @@ async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):
                 input_str, callbacks=[AsyncChainlitCallbackHandler()]
             )
         else:
-            raw_res = await asyncify(agent.__call__, cancellable=True)(
+            raw_res = await asyncify(agent.__call__)(
                 input_str, callbacks=[ChainlitCallbackHandler()]
             )
 

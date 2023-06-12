@@ -120,6 +120,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <Toaster
         toastOptions={{
+          className: 'toast',
           style: {
             fontFamily: 'Inter',
             background: theme.palette.background.paper,

@@ -40,7 +40,7 @@ export default memo(function Socket() {
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {
-    if (authenticating) return;
+    if (authenticating || !pSettings) return;
 
     if (session?.socket) {
       session.socket.removeAllListeners();
@@ -60,7 +60,7 @@ export default memo(function Socket() {
     });
 
     socket.on('connect', () => {
-      console.log('connected');
+      console.log('connected', socket.id);
       socket.emit('connection_successful');
       setSession((s) => ({ ...s!, error: false }));
     });
@@ -182,7 +182,7 @@ export default memo(function Socket() {
     socket.on('token_usage', (count: number) => {
       setTokenCount((old) => old + count);
     });
-  }, [userEnv, authenticating]);
+  }, [userEnv, authenticating, pSettings]);
 
   return null;
 });

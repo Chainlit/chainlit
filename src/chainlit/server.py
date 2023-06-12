@@ -279,6 +279,7 @@ async def connect(sid, environ):
         "ask_user": ask_user_fn,
         "client": cloud_client,
         "user_env": user_env,
+        "running_sync": False,
     }  # type: Session
 
     sessions[sid] = session
@@ -305,36 +306,11 @@ async def connection_successful(sid):
 async def disconnect(sid):
     if sid in sessions:
         # Clean up the session
-        session = sessions.pop(sid)
-        task = session.get("task")
-        if task:
-            # If a background task is running, kill it
-            task.cancel()
+        sessions.pop(sid)
 
     if sid in user_sessions:
         # Clean up the user session
         user_sessions.pop(sid)
-
-
-@socket.on("stop")
-async def stop(sid):
-    trace_event("stop_task")
-    session = sessions.get(sid)
-    if not session:
-        return
-
-    task = session.get("task")
-
-    if task:
-        task.cancel()
-        session["task"] = None
-
-        __chainlit_emitter__ = ChainlitEmitter(session)
-
-        if config.on_stop:
-            await config.on_stop()
-
-        await Message(author="System", content="Task stopped by the user.").send()
 
 
 async def process_message(session: Session, author: str, input_str: str):
@@ -408,10 +384,7 @@ async def message(sid, data):
     input_str = data["content"].strip()
     author = data["author"]
 
-    task = asyncio.Task(process_message(session, author, input_str))
-    session["task"] = task
-    await task
-    session["task"] = None
+    await process_message(session, author, input_str)
 
 
 async def process_action(session: Session, action: Action):
@@ -431,7 +404,4 @@ async def call_action(sid, action):
     __chainlit_emitter__ = ChainlitEmitter(session)
     action = Action(**action)
 
-    task = asyncio.Task(process_action(session, action))
-    session["task"] = task
-    await task
-    session["task"] = None
+    await process_action(session, action)

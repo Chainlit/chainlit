@@ -18,10 +18,13 @@ class ChainlitEmitter:
         """Initialize with the user session."""
         self.session = session
 
-    def _get_session_property(self, property_name: str):
+    def _get_session_property(self, property_name: str, raise_error=True):
         """Helper method to get a property from the session."""
         if not hasattr(self, "session") or property_name not in self.session:
-            return None
+            if raise_error:
+                raise ValueError(f"Session does not have property '{property_name}'")
+            else:
+                return None
         return self.session[property_name]
 
     @property
@@ -37,46 +40,37 @@ class ChainlitEmitter:
     @property
     def client(self) -> Union[BaseClient, None]:
         """Get the 'client' property from the session."""
-        return self._get_session_property("client")
+        return self._get_session_property("client", raise_error=False)
 
     def send_message(self, msg_dict: Dict):
         """Send a message to the UI."""
-        if not self.emit:
-            return
 
         return self.emit("new_message", msg_dict)
 
     def update_message(self, msg_dict: Dict):
         """Update a message in the UI."""
-        if not self.emit:
-            return
 
         return self.emit("update_message", msg_dict)
 
     def delete_message(self, msg_dict):
         """Delete a message in the UI."""
-        if not self.emit:
-            return
 
         return self.emit("delete_message", msg_dict)
 
     def send_ask_timeout(self):
         """Send a prompt timeout message to the UI."""
 
-        if self.emit:
-            return self.emit("ask_timeout", {})
+        return self.emit("ask_timeout", {})
 
     def clear_ask(self):
         """Clear the prompt from the UI."""
-        if self.emit:
-            return self.emit("clear_ask", {})
+
+        return self.emit("clear_ask", {})
 
     async def send_ask_user(
         self, msg_dict: Dict, spec: AskSpec, raise_on_timeout=False
     ):
         """Send a prompt to the UI and wait for a response."""
-        if not self.ask_user:
-            return
 
         try:
             # Send the prompt to the UI
@@ -112,34 +106,29 @@ class ChainlitEmitter:
 
     def update_token_count(self, count: int):
         """Update the token count for the UI."""
-        if not self.emit:
-            return
+
         return self.emit("token_usage", count)
 
     def task_start(self):
         """
         Send a task start signal to the UI.
         """
-        if self.emit:
-            return self.emit("task_start", {})
+        return self.emit("task_start", {})
 
     def task_end(self):
         """Send a task end signal to the UI."""
-        if self.emit:
-            return self.emit("task_end", {})
+        return self.emit("task_end", {})
 
     def stream_start(self, msg_dict: Dict):
         """Send a stream start signal to the UI."""
-        if self.emit:
-            return self.emit(
-                "stream_start",
-                msg_dict,
-            )
+        return self.emit(
+            "stream_start",
+            msg_dict,
+        )
 
     def send_token(self, id: Union[str, int], token: str):
         """Send a message token to the UI."""
-        if self.emit:
-            return self.emit("stream_token", {"id": id, "token": token})
+        return self.emit("stream_token", {"id": id, "token": token})
 
 
 def get_emitter() -> Union[ChainlitEmitter, None]:

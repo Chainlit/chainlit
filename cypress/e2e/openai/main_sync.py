@@ -27,7 +27,7 @@ settings = {
 @cl.on_message
 async def main(message: str):
     fromatted_prompt = prompt.format(input=message)
-    response = await asyncify(openai.Completion.create, cancellable=True)(
+    response = await asyncify(openai.Completion.create)(
         model=model_name, prompt=fromatted_prompt, **settings
     )
 

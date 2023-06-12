@@ -99,6 +99,9 @@ class MessageBase(ABC):
         return True
 
     async def send(self) -> Union[str, int]:
+        if self.content is None:
+            self.content = ""
+
         msg_dict = await self._create()
 
         if self.streaming:
