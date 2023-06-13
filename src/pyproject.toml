@@ -19,7 +19,7 @@ include = [
 chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 dataclasses_json = "^0.5.7"
 uvicorn = "^0.22.0"
 nest-asyncio = "^1.5.6"
