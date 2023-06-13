@@ -8,12 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Moving from sync to async runtime (breaking changes):
+- Moving from sync to async runtime (breaking change):
   - Support async implementation (eg openai, langchain) 
   - Performance improvements
   - Removed patching of different libraries
 - Elements:
-  - Merged LocalImage and RemoteImage to Image
+  - Merged LocalImage and RemoteImage to Image (breaking change)
   - New Avatar element to display avatars in messages
 - AskFileMessage now supports multi file uploads (small breaking change)
 - New settings interface including a new "Expand all" messages setting

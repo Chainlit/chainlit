@@ -9,7 +9,7 @@ def sync_function():
 @cl.on_chat_start
 async def start():
     await cl.Message(content="Message 1").send()
-    await cl.asyncify(sync_function)()
+    await cl.make_async(sync_function)()
     await cl.Message(content="Message 2").send()
 
 

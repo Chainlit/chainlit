@@ -7,7 +7,7 @@ describe("LangChain postprocess", () => {
     cy.wait(["@settings"]);
   });
 
-  it("should be able to postprocess an LangChain output", () => {
+  it("should be able to postprocess a LangChain output", () => {
     cy.get("#welcome-screen").should("exist");
     submitMessage("Hello");
     cy.get("#llmchain-done").should("exist");

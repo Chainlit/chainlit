@@ -4,7 +4,7 @@ import chainlit as cl
 @cl.on_chat_start
 async def start():
     files = await cl.AskFileMessage(
-        content="Please upload a text file to begin!",
+        content="Please upload from one to two python files to begin!",
         max_files=2,
         accept={"text/plain": [".py"]},
     ).send()

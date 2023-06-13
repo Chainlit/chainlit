@@ -1,5 +1,5 @@
 import chainlit as cl
-from chainlit.sync import asyncify, run_sync
+from chainlit.sync import make_async, run_sync
 from chainlit.emitter import get_emitter
 
 
@@ -10,9 +10,9 @@ async def async_function_from_sync():
 
 
 def sync_function():
-    emitter_from_asyncify = get_emitter()
+    emitter_from_make_async = get_emitter()
     emitter_from_async_from_sync = run_sync(async_function_from_sync())
-    return (emitter_from_asyncify, emitter_from_async_from_sync)
+    return (emitter_from_make_async, emitter_from_async_from_sync)
 
 
 async def async_function():
@@ -34,14 +34,14 @@ async def main():
     else:
         await cl.ErrorMessage(content="emitter from async not found").send()
 
-    emitter_from_asyncify, emitter_from_async_from_sync = await asyncify(
+    emitter_from_make_async, emitter_from_async_from_sync = await make_async(
         sync_function
     )()
 
-    if emitter_from_asyncify:
-        await cl.Message(content="emitter from asyncify found!").send()
+    if emitter_from_make_async:
+        await cl.Message(content="emitter from make_async found!").send()
     else:
-        await cl.ErrorMessage(content="emitter from asyncify not found").send()
+        await cl.ErrorMessage(content="emitter from make_async not found").send()
 
     if emitter_from_async_from_sync:
         await cl.Message(content="emitter from async_from_sync found!").send()

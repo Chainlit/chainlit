@@ -2,16 +2,16 @@ from typing import Any, Callable
 
 import asyncio
 from syncer import sync
-from asyncer import asyncify as _asyncify
+from asyncer import asyncify
 
 from chainlit.emitter import get_emitter
 
 
-def asyncify(function: Callable):
+def make_async(function: Callable):
     emitter = get_emitter()
     if not emitter:
         raise RuntimeError(
-            "Emitter not found, please call asyncify in a Chainlit context."
+            "Emitter not found, please call make_async in a Chainlit context."
         )
 
     def wrapper(*args, **kwargs):
@@ -21,7 +21,7 @@ def asyncify(function: Callable):
         emitter.session["running_sync"] = False
         return res
 
-    return _asyncify(wrapper, cancellable=True)
+    return asyncify(wrapper, cancellable=True)
 
 
 def run_sync(co: Any):

@@ -1,7 +1,7 @@
 import openai
 import chainlit as cl
 import os
-from chainlit.sync import asyncify
+from chainlit.sync import make_async
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -27,7 +27,7 @@ settings = {
 @cl.on_message
 async def main(message: str):
     fromatted_prompt = prompt.format(input=message)
-    response = await asyncify(openai.Completion.create)(
+    response = await make_async(openai.Completion.create)(
         model=model_name, prompt=fromatted_prompt, **settings
     )
 
