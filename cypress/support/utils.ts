@@ -1,20 +1,29 @@
 import { execSync, spawn } from "child_process";
 import { join } from "path";
-import { readdirSync } from "fs";
+import { readdirSync, existsSync } from "fs";
 
 const ROOT = process.cwd();
 const E2E_DIR = join(ROOT, "cypress/e2e");
 const CHAINLIT_DIR = join(ROOT, "src");
 const FRONTEND_DIR = join(CHAINLIT_DIR, "chainlit", "frontend");
 
+const candidateFiles = ["main.py", "main_sync.py", "main_async.py"];
+
 export async function runTest(test: string) {
-  let childProcess;
-  try {
-    console.log("Running:", test);
-    childProcess = await runChainlit(test);
-    runSpec(test);
-  } finally {
-    childProcess?.kill();
+  const testDir = join(E2E_DIR, test);
+  const variants = candidateFiles.filter((file) =>
+    existsSync(join(testDir, file))
+  );
+
+  for (const file of variants) {
+    let childProcess;
+    console.log(`Running spec "${test}" with chainlit file "${file}"`);
+    try {
+      childProcess = await runChainlit(testDir, file);
+      runSpec(test);
+    } finally {
+      childProcess?.kill();
+    }
   }
 }
 
@@ -42,14 +51,11 @@ export function runSpec(test: string) {
   return runCommand(`npx cypress run --spec cypress/e2e/${test}/spec.cy.ts`);
 }
 
-export async function runChainlit(test: string) {
+export async function runChainlit(dir: string, file: string) {
   return new Promise((resolve, reject) => {
-    const testDir = join(E2E_DIR, test);
-    const file = "main.py";
-
     // Headless + CI mode
     const child = spawn("chainlit", ["run", file, "-h", "-c"], {
-      cwd: testDir,
+      cwd: dir,
       env: process.env,
       stdio: "inherit",
     });
@@ -57,7 +63,7 @@ export async function runChainlit(test: string) {
     setTimeout(() => {
       // todo listen for stdout. passing process.env makes stdout silent for some reason.
       resolve(child);
-    }, 3000);
+    }, 4000);
 
     child.stderr?.on("data", (data) => {
       reject(data.toString());

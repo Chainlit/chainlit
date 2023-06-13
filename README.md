@@ -37,12 +37,12 @@ import chainlit as cl
 
 
 @cl.on_message  # this function will be called every time a user inputs a message in the UI
-def main(message: str):
+async def main(message: str):
     # this is an intermediate step
-    cl.Message(author="Tool 1", content=f"Response from tool1", indent=1).send()
+    await cl.Message(author="Tool 1", content=f"Response from tool1", indent=1).send()
 
     # send back the final answer
-    cl.Message(content=f"This is the final answer").send()
+    await cl.Message(content=f"This is the final answer").send()
 ```
 
 Now run it!

@@ -1,6 +1,6 @@
 import { submitMessage } from "../../support/testUtils";
 
-describe("OpenAI SQL", () => {
+describe("OpenAI", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
     cy.visit("http://127.0.0.1:8000");

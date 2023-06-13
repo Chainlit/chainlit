@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
 import { projectSettingsState } from 'state/project';
-import { themeState } from 'state/theme';
+import { settingsState } from 'state/settings';
 
 const lightColors = [
   '#066DEB',
@@ -39,7 +39,7 @@ function hashCode(str: string) {
 
 export function useColorForName() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const theme = useRecoilValue(themeState);
+  const { theme } = useRecoilValue(settingsState);
 
   const colors = theme === 'dark' ? darkColors : lightColors;
 

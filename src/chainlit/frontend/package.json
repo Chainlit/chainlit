@@ -26,6 +26,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.0",
+    "react-hotkeys-hook": "^4.4.0",
     "react-markdown": "^8.0.6",
     "react-router-dom": "^6.8.1",
     "react-string-replace": "^1.1.0",

@@ -21,7 +21,7 @@ export default function ActionRef({ action }: Props) {
       if (!sessionId) {
         return;
       }
-      session?.socket.emit('call_action', action);
+      session?.socket.emit('action_call', action);
     } catch (err) {
       if (err instanceof Error) {
         toast.error(err.message);

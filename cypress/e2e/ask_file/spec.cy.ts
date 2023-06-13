@@ -1,5 +1,3 @@
-const path = require("path");
-
 describe("Upload file", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
@@ -15,7 +13,6 @@ describe("Upload file", () => {
     cy.get("input[type=file]").selectFile("@txtFile", { force: true });
 
     cy.get("#upload-button-loading").should("exist");
-
     cy.get("#upload-button-loading").should("not.exist");
 
     cy.get(".message")

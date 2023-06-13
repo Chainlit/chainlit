@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
-import { themeState } from 'state/theme';
 import LogoDark from 'assets/logo_dark.svg';
 import LogoLight from 'assets/logo_light.svg';
+import { settingsState } from 'state/settings';
 
 interface Props {
   width?: number;
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const Logo = ({ width, style }: Props) => {
-  const themeVariant = useRecoilValue(themeState);
-  const src = themeVariant === 'light' ? LogoLight : LogoDark;
+  const { theme } = useRecoilValue(settingsState);
+  const src = theme === 'light' ? LogoLight : LogoDark;
   return <img src={src} style={style} width={width || 40} />;
 };

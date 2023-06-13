@@ -1,5 +1,5 @@
 from typing import Dict
-from chainlit.sdk import get_sdk
+from chainlit.emitter import get_emitter
 
 user_sessions: Dict[str, Dict] = {}
 
@@ -11,33 +11,33 @@ class UserSession:
     """
 
     def get(self, key):
-        sdk = get_sdk()
-        if not sdk:
+        emitter = get_emitter()
+        if not emitter:
             return None
 
-        if sdk.session["id"] not in user_sessions:
+        if emitter.session["id"] not in user_sessions:
             # Create a new user session
-            user_sessions[sdk.session["id"]] = {}
+            user_sessions[emitter.session["id"]] = {}
 
-        user_session = user_sessions[sdk.session["id"]]
+        user_session = user_sessions[emitter.session["id"]]
 
-        # Copy important fields from the SDK session
-        user_session["id"] = sdk.session["id"]
-        user_session["env"] = sdk.session["user_env"]
-        if "agent" in sdk.session:
-            user_session["agent"] = sdk.session["agent"]
+        # Copy important fields from the session
+        user_session["id"] = emitter.session["id"]
+        user_session["env"] = emitter.session["user_env"]
+        if "agent" in emitter.session:
+            user_session["agent"] = emitter.session["agent"]
 
         return user_session.get(key)
 
     def set(self, key, value):
-        sdk = get_sdk()
-        if not sdk:
+        emitter = get_emitter()
+        if not emitter:
             return None
 
-        if sdk.session["id"] not in user_sessions:
-            user_sessions[sdk.session["id"]] = {}
+        if emitter.session["id"] not in user_sessions:
+            user_sessions[emitter.session["id"]] = {}
 
-        user_session = user_sessions[sdk.session["id"]]
+        user_session = user_sessions[emitter.session["id"]]
         user_session[key] = value
 
 

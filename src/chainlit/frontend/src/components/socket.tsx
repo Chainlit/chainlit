@@ -1,8 +1,9 @@
-import { server } from 'api';
+import { wsEndpoint } from 'api';
 import { memo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   IMessage,
+  IToken,
   askUserState,
   loadingState,
   messagesState,
@@ -15,9 +16,17 @@ import io from 'socket.io-client';
 import { IElement, elementState } from 'state/element';
 import { IAction, actionState } from 'state/action';
 import { deepEqual } from 'helpers/object';
+import { projectSettingsState } from 'state/project';
+
+const compareMessageIds = (a: IMessage, b: IMessage) => {
+  if (a.id && b.id) return a.id === b.id;
+  if (a.tempId && b.tempId) return a.tempId === b.tempId;
+  return false;
+};
 
 export default memo(function Socket() {
-  const { accessToken, isAuthenticated, isLoading } = useAuth();
+  const pSettings = useRecoilValue(projectSettingsState);
+  const { accessToken, isAuthenticated, isLoading: _isLoading } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const [session, setSession] = useRecoilState(sessionState);
@@ -26,17 +35,20 @@ export default memo(function Socket() {
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
+
+  const isLoading = pSettings?.projectId && _isLoading;
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {
-    if (authenticating) return;
+    if (authenticating || !pSettings) return;
 
     if (session?.socket) {
       session.socket.removeAllListeners();
       session.socket.close();
     }
 
-    const socket = io(server, {
+    const socket = io(wsEndpoint, {
+      path: '/ws/socket.io',
       extraHeaders: {
         Authorization: accessToken || '',
         'user-env': JSON.stringify(userEnv)
@@ -48,7 +60,8 @@ export default memo(function Socket() {
     });
 
     socket.on('connect', () => {
-      console.log('connected');
+      console.log('connected', socket.id);
+      socket.emit('connection_successful');
       setSession((s) => ({ ...s!, error: false }));
     });
 
@@ -69,14 +82,27 @@ export default memo(function Socket() {
       window.location.reload();
     });
 
-    socket.on('message', (message: IMessage) => {
-      setMessages((oldMessages) => [...oldMessages, message]);
+    socket.on('new_message', (message: IMessage) => {
+      setMessages((oldMessages) => {
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
+        );
+        if (index === -1) {
+          return [...oldMessages, message];
+        } else {
+          return [
+            ...oldMessages.slice(0, index),
+            message,
+            ...oldMessages.slice(index + 1)
+          ];
+        }
+      });
     });
 
     socket.on('update_message', (message: IMessage) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => m.id === message.id || m.tempId === message.tempId
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
         );
         if (index === -1) return oldMessages;
         return [
@@ -87,11 +113,12 @@ export default memo(function Socket() {
       });
     });
 
-    socket.on('delete_message', ({ messageId }: any) => {
+    socket.on('delete_message', (message: IMessage) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => m.id === messageId || m.tempId === messageId
+        const index = oldMessages.findIndex((m) =>
+          compareMessageIds(m, message)
         );
+
         if (index === -1) return oldMessages;
         return [
           ...oldMessages.slice(0, index),
@@ -104,16 +131,21 @@ export default memo(function Socket() {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    socket.on('stream_token', (token: string) => {
+    socket.on('stream_token', ({ id, token }: IToken) => {
       setMessages((oldMessages) => {
-        const lastMessage = { ...oldMessages[oldMessages.length - 1] };
-        lastMessage.content += token;
-        return [...oldMessages.slice(0, -1), lastMessage];
+        const index = oldMessages.findIndex(
+          (m) => (m.id && m.id === id) || (m.tempId && m.tempId === id)
+        );
+        if (index === -1) return oldMessages;
+        const oldMessage = oldMessages[index];
+        const newMessage = { ...oldMessage };
+        newMessage.content += token;
+        return [
+          ...oldMessages.slice(0, index),
+          newMessage,
+          ...oldMessages.slice(index + 1)
+        ];
       });
-    });
-
-    socket.on('stream_end', (message: IMessage) => {
-      setMessages((oldMessages) => [...oldMessages.slice(0, -1), message]);
     });
 
     socket.on('ask', ({ msg, spec }, callback) => {
@@ -150,7 +182,7 @@ export default memo(function Socket() {
     socket.on('token_usage', (count: number) => {
       setTokenCount((old) => old + count);
     });
-  }, [userEnv, authenticating]);
+  }, [userEnv, authenticating, pSettings]);
 
   return null;
 });

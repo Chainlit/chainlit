@@ -9,11 +9,12 @@ from chainlit.logger import logger
 if TYPE_CHECKING:
     from chainlit.action import Action
 
+PACKAGE_ROOT = os.path.dirname(__file__)
 
 # Get the directory the script is running from
-root = os.getcwd()
+APP_ROOT = os.getcwd()
 
-config_dir = os.path.join(root, ".chainlit")
+config_dir = os.path.join(APP_ROOT, ".chainlit")
 config_file = os.path.join(config_dir, "config.toml")
 
 # Default config file created if none exists
@@ -53,8 +54,24 @@ chainlit_prod_url = os.environ.get("CHAINLIT_PROD_URL")
 chainlit_server = "https://cloud.chainlit.io"
 
 
+DEFAULT_HOST = "0.0.0.0"
+DEFAULT_PORT = 8000
+
+
+@dataclass()
+class RunSettings:
+    host: str = DEFAULT_HOST
+    port: int = DEFAULT_PORT
+    headless: bool = False
+    watch: bool = False
+    no_cache: bool = False
+    debug: bool = False
+    ci: bool = False
+
+
 @dataclass()
 class ChainlitConfig:
+    run_settings: RunSettings
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     # Name of the app and chatbot. Used as the default message author.
@@ -74,7 +91,7 @@ class ChainlitConfig:
     # Developer defined callbacks for each action. Key is the action name, value is the callback function.
     action_callbacks: Dict[str, Callable[["Action"], Any]]
     # Directory where the Chainlit project is located
-    root = root
+    root = APP_ROOT
     # The url of the deployed app. Only set if the app is deployed.
     chainlit_prod_url = chainlit_prod_url
     # Link to your github repo. This will add a github button in the UI's header.
@@ -91,6 +108,7 @@ class ChainlitConfig:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
+    lc_agent_is_async: Optional[bool] = None
     lc_run: Optional[Callable[[Any, str], str]] = None
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
@@ -174,6 +192,7 @@ def load_config():
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
 
         config = ChainlitConfig(
+            run_settings=RunSettings(),
             action_callbacks={},
             github=github,
             request_limit=request_limit,

@@ -1,15 +1,28 @@
 import click
 import os
 import sys
-import webbrowser
-from chainlit.config import config, init_config, load_module
-from chainlit.watch import watch_directory
+import uvicorn
+import asyncio
+import nest_asyncio
+
+nest_asyncio.apply()
+
+from chainlit.config import (
+    config,
+    init_config,
+    load_module,
+    PACKAGE_ROOT,
+    DEFAULT_HOST,
+    DEFAULT_PORT,
+)
 from chainlit.markdown import init_markdown
 from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
+from chainlit.cache import init_lc_cache
 from chainlit.logger import logger
+from chainlit.server import app
 
 
 # Create the main command group for Chainlit CLI
@@ -20,11 +33,11 @@ def cli():
 
 
 # Define the function to run Chainlit with provided options
-def run_chainlit(target: str, watch=False, headless=False, debug=False):
-    DEFAULT_HOST = "0.0.0.0"
-    DEFAULT_PORT = 8000
+def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    config.run_settings.host = host
+    config.run_settings.port = port
 
     check_file(target)
     # Load the module provided by the user
@@ -34,28 +47,20 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
 
-    # Enable file watching if the user specified it
-    if watch:
-        watch_directory()
+    # Initialize the LangChain cache if installed and enabled
+    init_lc_cache()
 
-    from chainlit.server import socketio, app
+    log_level = "debug" if config.run_settings.debug else "error"
 
-    # Open the browser if in development mode
-    def open_browser(headless: bool):
-        if not headless:
-            if host == DEFAULT_HOST:
-                url = f"http://localhost:{port}"
-            else:
-                url = f"http://{host}:{port}"
-            # Wait two seconds to allow the server to start
-            socketio.sleep(2)
-
-            logger.info(f"Your app is available at {url}")
-            webbrowser.open(url)
-
-    socketio.start_background_task(open_browser, headless)
     # Start the server
-    socketio.run(app, host=host, port=port, debug=debug, use_reloader=False)
+    async def start():
+        config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
+        server = uvicorn.Server(config)
+        await server.serve()
+
+    # Run the asyncio event loop instead of uvloop to enable re entrance
+    asyncio.run(start())
+    # uvicorn.run(app, host=host, port=port)
 
 
 # Define the "run" command for Chainlit CLI
@@ -65,9 +70,10 @@ def run_chainlit(target: str, watch=False, headless=False, debug=False):
 @click.option("-h", "--headless", default=False, is_flag=True, envvar="HEADLESS")
 @click.option("-d", "--debug", default=False, is_flag=True, envvar="DEBUG")
 @click.option("-c", "--ci", default=False, is_flag=True, envvar="CI")
+@click.option("--no-cache", default=False, is_flag=True, envvar="NO_CACHE")
 @click.option("--host")
 @click.option("--port")
-def chainlit_run(target, watch, headless, debug, ci, host, port):
+def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
@@ -75,45 +81,21 @@ def chainlit_run(target, watch, headless, debug, ci, host, port):
     if ci:
         logger.info("Running in CI mode")
         config.enable_telemetry = False
+        no_cache = True
+        from chainlit.cli.mock import mock_openai
 
-        # Set the openai api key to a fake value
-        import os
-
-        os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-
-        # Mock the openai api
-        import responses
-
-        responses.start()
-        jsonReply = {
-            "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
-            "object": "text_completion",
-            "created": 1589478378,
-            "model": "text-davinci-003",
-            "choices": [
-                {
-                    "text": "\n\n```text\n3*3\n```",
-                    "index": 0,
-                    "logprobs": None,
-                    "finish_reason": "length",
-                }
-            ],
-            "usage": {
-                "prompt_tokens": 5,
-                "completion_tokens": 7,
-                "total_tokens": 12,
-            },
-        }
-        responses.add(
-            responses.POST,
-            "https://api.openai.com/v1/completions",
-            json=jsonReply,
-        )
+        mock_openai()
 
     else:
         trace_event("chainlit run")
 
-    run_chainlit(target, watch, headless, debug)
+    config.run_settings.headless = headless
+    config.run_settings.debug = debug
+    config.run_settings.no_cache = no_cache
+    config.run_settings.ci = ci
+    config.run_settings.watch = watch
+
+    run_chainlit(target)
 
 
 @cli.command("deploy")
@@ -129,8 +111,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
-    dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    hello_path = os.path.join(dir_path, "hello.py")
+    hello_path = os.path.join(PACKAGE_ROOT, "hello.py")
     run_chainlit(hello_path)
 
 
