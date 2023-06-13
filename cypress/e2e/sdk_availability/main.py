@@ -16,6 +16,12 @@ def sync_function():
 
 
 async def async_function():
+    emitter = await another_async_function()
+    return emitter
+
+
+async def another_async_function():
+    await cl.sleep(2)
     emitter = get_emitter()
     return emitter
 
