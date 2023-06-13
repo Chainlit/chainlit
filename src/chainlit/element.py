@@ -9,7 +9,7 @@ from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
 type_to_mime = {
-    "image": "image/png",
+    "image": "binary/octet-stream",
     "text": "text/plain",
     "pdf": "application/pdf",
 }
