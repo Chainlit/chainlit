@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - New Avatar element to display avatars in messages
 - AskFileMessage now supports multi file uploads (small breaking change)
 - New settings interface including a new "Expand all" messages setting
+- The element sidebar is resizable
 
 ### Fixed
 
