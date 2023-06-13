@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing unreleased yet.
+
+## [0.3.0] - 2023-06-13
+
 ### Added
 
 - Moving from sync to async runtime (breaking change):
