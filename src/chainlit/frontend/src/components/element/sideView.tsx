@@ -123,11 +123,11 @@ const SideView = () => {
           mt="1.5rem"
           id="side-view-content"
           sx={{
-            height: '100%'
+            height: '100%',
+            pointerEvents: resizeInProgress ? 'none' : 'auto'
           }}
         >
-          {/* Hide the child component when resizing to speed up rendering */}
-          {!resizeInProgress && element}
+          {element}
         </Box>
       </Drawer>
     </Resizable>
