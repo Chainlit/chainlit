@@ -3,7 +3,6 @@ from dataclasses_json import dataclass_json
 from typing import Dict, Union, Any
 import uuid
 import aiofiles
-from matplotlib.figure import Figure
 from io import BytesIO
 
 from chainlit.emitter import get_emitter, BaseClient
@@ -172,6 +171,8 @@ class Pyplot(Element):
     figure: Any = None
 
     def __post_init__(self) -> None:
+        from matplotlib.figure import Figure
+
         if not isinstance(self.figure, Figure):
             raise TypeError("figure must be a matplotlib.figure.Figure")
 
