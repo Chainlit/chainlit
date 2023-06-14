@@ -38,6 +38,7 @@ python-dotenv = "^1.0.0"
 auth0-python = "^4.1.1"
 uptrace = "^1.18.0"
 watchfiles="^0.19.0"
+matplotlib = "^3.7.1"
 
 [build-system]
 requires = ["poetry-core"]
