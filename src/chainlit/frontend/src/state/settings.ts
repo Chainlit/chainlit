@@ -10,7 +10,15 @@ const preferredTheme = localStorage.getItem(
 
 const theme = preferredTheme ? preferredTheme : defaultTheme;
 
-export const themeState = atom<ThemeVariant>({
-  key: 'Theme',
-  default: theme
+export const settingsState = atom<{
+  open: boolean;
+  expandAll: boolean;
+  theme: ThemeVariant;
+}>({
+  key: 'AppSettings',
+  default: {
+    open: false,
+    expandAll: false,
+    theme
+  }
 });

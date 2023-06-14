@@ -1,6 +1,7 @@
 import openai
 import chainlit as cl
 import os
+from chainlit.sync import make_async
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -24,14 +25,15 @@ settings = {
 
 
 @cl.on_message
-def main(message: str):
+async def main(message: str):
     fromatted_prompt = prompt.format(input=message)
-    response = openai.Completion.create(
+    response = await make_async(openai.Completion.create)(
         model=model_name, prompt=fromatted_prompt, **settings
     )
+
     content = response["choices"][0]["text"]
 
-    cl.Message(
+    await cl.Message(
         language="sql",
         content=content,
         prompt=fromatted_prompt,

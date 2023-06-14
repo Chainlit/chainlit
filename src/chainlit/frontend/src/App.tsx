@@ -8,10 +8,9 @@ import {
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { accessTokenState, roleState } from 'state/user';
-import { getProjectSettings, getRole } from 'api';
+import { getRole } from 'api';
 import makeTheme from 'theme';
 import { ThemeProvider } from '@mui/material';
-import { themeState } from 'state/theme';
 import Home from 'pages/Home';
 import Element from 'pages/Element';
 import Login from 'pages/Login';
@@ -25,6 +24,9 @@ import { projectSettingsState } from 'state/project';
 import Socket from 'components/socket';
 import { Toaster } from 'react-hot-toast';
 import Readme from 'pages/Readme';
+import { settingsState } from 'state/settings';
+import SettingsModal from 'components/settingsModal';
+import Hotkeys from 'components/Hotkeys';
 
 const router = createBrowserRouter([
   {
@@ -70,8 +72,8 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const themeVariant = useRecoilValue(themeState);
-  const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
+  const { theme: themeVariant } = useRecoilValue(settingsState);
+  const pSettings = useRecoilValue(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
@@ -80,14 +82,6 @@ function App() {
   useEffect(() => {
     document.body.style.backgroundColor = theme.palette.background.default;
   }, [theme]);
-
-  useEffect(() => {
-    if (pSettings === undefined) {
-      getProjectSettings().then((res) => {
-        setPSettings(res);
-      });
-    }
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated && accessToken === undefined) {
@@ -126,6 +120,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <Toaster
         toastOptions={{
+          className: 'toast',
           style: {
             fontFamily: 'Inter',
             background: theme.palette.background.paper,
@@ -141,6 +136,8 @@ function App() {
       />
       <Box display="flex" height="100vh" width="100vw">
         <Socket />
+        <Hotkeys />
+        <SettingsModal />
         <RouterProvider router={router} />
       </Box>
     </ThemeProvider>

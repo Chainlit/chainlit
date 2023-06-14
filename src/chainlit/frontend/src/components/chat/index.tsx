@@ -51,7 +51,7 @@ const Chat = () => {
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);
-      session?.socket.emit('message', message);
+      session?.socket.emit('ui_message', message);
     },
     [user, session, isAuthenticated, pSettings]
   );

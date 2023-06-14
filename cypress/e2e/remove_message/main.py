@@ -2,12 +2,12 @@ import chainlit as cl
 
 
 @cl.on_chat_start
-def main():
+async def main():
     msg1 = cl.Message(content="Message 1")
-    msg1.send()
+    await msg1.send()
     msg2 = cl.Message(content="Message 2")
-    msg2.send()
-    cl.sleep(2)
-    msg1.remove()
-    cl.sleep(2)
-    msg2.remove()
+    await msg2.send()
+    await cl.sleep(2)
+    await msg1.remove()
+    await cl.sleep(2)
+    await msg2.remove()

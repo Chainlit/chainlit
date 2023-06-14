@@ -20,6 +20,7 @@ export default function StopButton() {
   return (
     <Box margin="auto">
       <GreyButton
+        id="stop-button"
         startIcon={<CloseIcon />}
         variant="contained"
         onClick={handleClick}

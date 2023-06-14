@@ -6,7 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased at the moment.
+Nothing unreleased yet.
+
+## [0.3.0] - 2023-06-13
+
+### Added
+
+- Moving from sync to async runtime (breaking change):
+  - Support async implementation (eg openai, langchain) 
+  - Performance improvements
+  - Removed patching of different libraries
+- Elements:
+  - Merged LocalImage and RemoteImage to Image (breaking change)
+  - New Avatar element to display avatars in messages
+- AskFileMessage now supports multi file uploads (small breaking change)
+- New settings interface including a new "Expand all" messages setting
+- The element sidebar is resizable
+
+### Fixed
+
+- Secure origin issues when running on HTTP
+- Updated the callback handler to langchain 0.0.198 latest changes
+- Filewatcher issues
+- Blank screen issues
+- Port option in the CLI does not fail anymore because of os import
+
+## [0.2.111] - 2023-06-09
+
+### Fixed
+
+- Pdf element reloading issue
+- CI is more stable
 
 ## [0.2.110] - 2023-06-08
 

@@ -12,7 +12,7 @@ import TextElement from './text';
 import ImageElement from './image';
 import PDFElement from './pdf';
 
-export const renderElement = (element: IElement): JSX.Element => {
+export const renderElement = (element: IElement): JSX.Element | null => {
   switch (element.type) {
     case 'image':
       return <ImageElement element={element as IImageElement} />;
@@ -20,6 +20,8 @@ export const renderElement = (element: IElement): JSX.Element => {
       return <TextElement element={element as ITextElement} />;
     case 'pdf':
       return <PDFElement element={element as IPdfElement} />;
+    default:
+      return null;
   }
 };
 

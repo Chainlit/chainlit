@@ -1,11 +1,11 @@
 from typing import List, Dict, Union
+from abc import ABC, abstractmethod
 import uuid
 import time
-from abc import ABC, abstractmethod
+import asyncio
+
 from chainlit.telemetry import trace_event
-from chainlit.logger import logger
-from chainlit.sdk import get_sdk, Chainlit
-from chainlit.telemetry import trace_event
+from chainlit.emitter import get_emitter
 from chainlit.config import config
 from chainlit.types import (
     LLMSettings,
@@ -27,27 +27,30 @@ class MessageBase(ABC):
     id: int = None
     temp_id: str = None
     streaming = False
+    created_at: int = None
+
+    def __post_init__(self) -> None:
+        trace_event(f"init {self.__class__.__name__}")
+        self.temp_id = uuid.uuid4().hex
+        self.created_at = current_milli_time()
+        self.emitter = get_emitter()
+        if not self.emitter:
+            raise RuntimeError("Message should be instantiated in a Chainlit context")
 
     @abstractmethod
     def to_dict(self):
         pass
 
-    def _create(self, sdk: Chainlit):
+    async def _create(self):
         msg_dict = self.to_dict()
-        if sdk.client:
-            self.id = sdk.client.create_message(msg_dict)
+        if self.emitter.client and not self.id:
+            self.id = await self.emitter.client.create_message(msg_dict)
             if self.id:
                 msg_dict["id"] = self.id
 
-        if not "id" in msg_dict:
-            self.temp_id = uuid.uuid4().hex
-            msg_dict["tempId"] = self.temp_id
-
-        msg_dict["createdAt"] = current_milli_time()
-
         return msg_dict
 
-    def update(
+    async def update(
         self,
         author: str = None,
         content: str = None,
@@ -59,12 +62,6 @@ class MessageBase(ABC):
         Update a message already sent to the UI.
         """
         trace_event("update_message")
-
-        sdk = get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot update message")
-            return False
 
         if author:
             self.author = author
@@ -79,77 +76,54 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if sdk.client and self.id:
-            sdk.client.update_message(self.id, msg_dict)
+        if self.emitter.client and self.id:
+            self.emitter.client.update_message(self.id, msg_dict)
             msg_dict["id"] = self.id
-        elif self.temp_id:
-            msg_dict["tempId"] = self.temp_id
-        else:
-            logger.error("Cannot update a message that has no ID")
-            return False
 
-        sdk.update_message(msg_dict)
+        await self.emitter.update_message(msg_dict)
 
         return True
 
-    def remove(self):
+    async def remove(self):
         """
         Remove a message already sent to the UI.
         This will not automatically remove potential nested messages and could lead to undesirable side effects in the UI.
         """
         trace_event("remove_message")
 
-        sdk = get_sdk()
+        if self.emitter.client and self.id:
+            await self.emitter.client.delete_message(self.id)
 
-        if not sdk:
-            logger.warning("No SDK found, cannot delete message")
-            return False
-        if sdk.client and self.id:
-            sdk.client.delete_message(self.id)
-            sdk.delete_message(self.id)
-        elif self.temp_id:
-            sdk.delete_message(self.temp_id)
-        else:
-            logger.error("Cannot delete a message that has no ID")
-            return False
+        await self.emitter.delete_message(self.to_dict())
 
         return True
 
-    def send(self) -> Union[str, int]:
-        sdk = get_sdk()
+    async def send(self) -> Union[str, int]:
+        if self.content is None:
+            self.content = ""
 
-        if not sdk:
-            logger.warning("No SDK found, cannot send message")
-            return
-
-        msg_dict = self._create(sdk)
+        msg_dict = await self._create()
 
         if self.streaming:
             self.streaming = False
-            sdk.stream_end(msg_dict)
-        else:
-            sdk.send_message(msg_dict)
+
+        await self.emitter.send_message(msg_dict)
 
         return self.id or self.temp_id
 
-    def stream_token(self, token: str):
+    async def stream_token(self, token: str):
         """
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to persist the message.
         """
-        sdk = get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot send message")
-            return
 
         if not self.streaming:
             self.streaming = True
             msg_dict = self.to_dict()
-            sdk.stream_start(msg_dict)
+            await self.emitter.stream_start(msg_dict)
 
         self.content += token
-        sdk.send_token(token)
+        await self.emitter.send_token(id=self.id or self.temp_id, token=token)
 
 
 class Message(MessageBase):
@@ -194,8 +168,12 @@ class Message(MessageBase):
         if llm_settings:
             self.llmSettings = llm_settings.to_dict()
 
+        super().__post_init__()
+
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "prompt": self.prompt,
@@ -204,19 +182,18 @@ class Message(MessageBase):
             "indent": self.indent,
         }
 
-    def send(self):
+    async def send(self):
         """
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
         """
         trace_event("send_message")
-        id = super().send()
+        id = await super().send()
 
-        for action in self.actions:
-            action.send(for_id=str(id))
-
-        for element in self.elements:
-            element.send(for_id=str(id))
+        action_coros = [action.send(for_id=str(id)) for action in self.actions]
+        element_coros = [element.send(for_id=str(id)) for element in self.elements]
+        all_coros = action_coros + element_coros
+        await asyncio.gather(*all_coros)
 
         return id
 
@@ -242,35 +219,32 @@ class ErrorMessage(MessageBase):
         self.author = author
         self.indent = indent
 
+        super().__post_init__()
+
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "indent": self.indent,
             "isError": True,
         }
 
-    def send(self):
+    async def send(self):
         """
         Send the error message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
         """
         trace_event("send_error_message")
-        id = super().send()
-
-        return id
+        return await super().send()
 
 
 class AskMessageBase(MessageBase):
     def remove(self):
         removed = super().remove()
         if removed:
-            sdk = get_sdk()
-
-            if not sdk:
-                return
-
-            sdk.clear_ask()
+            self.emitter.clear_ask()
 
 
 class AskUserMessage(AskMessageBase):
@@ -298,33 +272,33 @@ class AskUserMessage(AskMessageBase):
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
 
+        super().__post_init__()
+
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
         }
 
-    def send(self) -> Union[AskResponse, None]:
+    async def send(self) -> Union[AskResponse, None]:
         """
         Sends the question to ask to the UI and waits for the reply.
         """
         trace_event("send_ask_user")
 
-        sdk = get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot send message")
-            return
-
         if self.streaming:
             self.streaming = False
 
-        msg_dict = self._create(sdk)
+        msg_dict = await self._create()
 
         spec = AskSpec(type="text", timeout=self.timeout)
 
-        return sdk.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+
+        return res
 
 
 class AskFileMessage(AskMessageBase):
@@ -336,7 +310,8 @@ class AskFileMessage(AskMessageBase):
     Args:
         content (str): Text displayed above the upload button.
         accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
-        max_size_mb (int, optional): Maximum file size in MB. Maximum value is 100.
+        max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
+        max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -347,51 +322,52 @@ class AskFileMessage(AskMessageBase):
         content: str,
         accept: Union[List[str], Dict[str, List[str]]],
         max_size_mb=2,
+        max_files=1,
         author=config.chatbot_name,
         timeout=90,
         raise_on_timeout=False,
     ):
         self.content = content
         self.max_size_mb = max_size_mb
+        self.max_files = max_files
         self.accept = accept
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
 
+        super().__post_init__()
+
     def to_dict(self):
         return {
+            "tempId": self.temp_id,
+            "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
         }
 
-    def send(self) -> Union[AskFileResponse, None]:
+    async def send(self) -> Union[List[AskFileResponse], None]:
         """
         Sends the message to request a file from the user to the UI and waits for the reply.
         """
         trace_event("send_ask_file")
 
-        sdk = get_sdk()
-
-        if not sdk:
-            logger.warning("No SDK found, cannot send message")
-            return
-
         if self.streaming:
             self.streaming = False
 
-        msg_dict = self._create(sdk)
+        msg_dict = await self._create()
 
         spec = AskFileSpec(
             type="file",
             accept=self.accept,
             max_size_mb=self.max_size_mb,
+            max_files=self.max_files,
             timeout=self.timeout,
         )
 
-        res = sdk.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         if res:
-            return AskFileResponse(**res)
+            return [AskFileResponse(**r) for r in res]
         else:
             return None

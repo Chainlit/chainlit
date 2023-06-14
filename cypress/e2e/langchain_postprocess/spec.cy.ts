@@ -13,6 +13,11 @@ describe("LangChain postprocess", () => {
     cy.get("#llmchain-done").should("exist");
     const messages = cy.get(".message");
     messages.should("have.length", 2);
-    messages.eq(1).should("contain", "In the end it doesn't even matter.");
+    messages
+      .eq(1)
+      .should(
+        "contain",
+        "Postprocessed output: In the end it doesn't even matter."
+      );
   });
 });

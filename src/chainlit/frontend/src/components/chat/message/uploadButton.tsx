@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import { toast } from 'react-hot-toast';
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import { LoadingButton } from '@mui/lab';
+import { IAskFileResponse } from 'state/chat';
 
 interface Props {
   askUser: IAsk;
@@ -22,36 +23,45 @@ function _UploadButton({ askUser }: Props) {
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
     (acceptedFiles: FileWithPath[], fileRejections: FileRejection[]) => {
-      const file = acceptedFiles[0];
-      const rejection = fileRejections[0];
-
-      if (rejection) {
-        toast.error(rejection.errors[0].message);
+      if (fileRejections.length > 0) {
+        toast.error(fileRejections[0].errors[0].message);
+        return;
       }
-      if (file) {
-        setUploading(true);
-        const reader = new FileReader();
 
-        reader.onload = function (e) {
-          const rawData = e.target?.result;
-          const payload = {
-            path: file.path,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            content: rawData as ArrayBuffer
+      if (!acceptedFiles.length) return;
+
+      setUploading(true);
+
+      const promises = acceptedFiles.map((file) => {
+        return new Promise<IAskFileResponse>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const rawData = e.target?.result;
+            const payload: IAskFileResponse = {
+              path: file.path,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              content: rawData as ArrayBuffer
+            };
+            resolve(payload);
           };
-          askUser?.callback(payload);
-        };
+          reader.onerror = function () {
+            if (!reader.error) return;
+            reject(reader.error.message);
+          };
+          reader.readAsArrayBuffer(file);
+        });
+      });
 
-        reader.onerror = function () {
-          if (!reader.error) return;
-          toast.error(reader.error.message);
+      Promise.all(promises)
+        .then((payloads) => {
+          askUser?.callback(payloads);
+        })
+        .catch((err) => {
+          toast.error(err);
           setUploading(false);
-        };
-
-        reader.readAsArrayBuffer(acceptedFiles[0]);
-      }
+        });
     },
     [askUser]
   );
@@ -74,7 +84,7 @@ function _UploadButton({ askUser }: Props) {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    maxFiles: 1,
+    maxFiles: askUser.spec.max_files || 1,
     accept: dzAccept,
     maxSize: maxSize * 1000000
   });

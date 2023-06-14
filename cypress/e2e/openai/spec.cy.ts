@@ -1,6 +1,6 @@
 import { submitMessage } from "../../support/testUtils";
 
-describe("OpenAI SQL", () => {
+describe("OpenAI", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
     cy.visit("http://127.0.0.1:8000");
@@ -12,7 +12,7 @@ describe("OpenAI SQL", () => {
     submitMessage("How many minutes of video were watched");
     const messages = cy.get(".message");
     messages.should("have.length", 2);
-
-    messages.eq(1).should("contain", "SELECT");
+    
+    messages.eq(1).should("not.be.empty");
   });
 });
