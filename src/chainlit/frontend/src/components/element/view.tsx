@@ -48,11 +48,12 @@ const ElementView = () => {
       mx="auto"
       sx={{
         width: '100%',
-        maxWidth: '60rem'
+        maxWidth: '60rem',
+        color: 'text.primary'
       }}
       id="element-view"
     >
-      <Typography color="text.primary" fontWeight={700} fontSize="25px">
+      <Typography fontWeight={700} fontSize="25px">
         {element.name}
       </Typography>
       {renderElement(element)}
