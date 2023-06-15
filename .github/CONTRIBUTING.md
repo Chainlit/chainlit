@@ -121,8 +121,7 @@ The `-h` parameter (headless) means the UI will not automatically open.
 
 ## Run the tests
 
-1. Create an `.env` file at the root of the repo following the model of `.env.example`
-2. Run `npm test`
+Run `npm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
