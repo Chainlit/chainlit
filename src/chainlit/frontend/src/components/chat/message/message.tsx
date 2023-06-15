@@ -40,6 +40,10 @@ const Message = ({
     setShowDetails(appSettings.expandAll);
   }, [appSettings.expandAll]);
 
+  if (appSettings.hideCot && indent) {
+    return null;
+  }
+
   return (
     <Box
       sx={{
