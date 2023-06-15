@@ -1,3 +1,4 @@
 langchain
 responses==0.23.1
 aioresponses==0.7.4
+matplotlib==3.7.1

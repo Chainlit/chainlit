@@ -1,8 +1,9 @@
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from typing import Dict, Union
+from typing import Dict, Union, Any
 import uuid
 import aiofiles
+from io import BytesIO
 
 from chainlit.emitter import get_emitter, BaseClient
 from chainlit.telemetry import trace_event
@@ -157,3 +158,37 @@ class Pdf(Element):
     """Useful to send a pdf to the UI."""
 
     type: ElementType = "pdf"
+
+
+@dataclass
+class Pyplot(Element):
+    """Useful to send a pyplot to the UI."""
+
+    # We reuse the frontend image element to display the chart
+    type: ElementType = "image"
+    # The type is set to Any because the figure is not serializable
+    # and its actual type is checked in __post_init__.
+    figure: Any = None
+
+    def __post_init__(self) -> None:
+        from matplotlib.figure import Figure
+
+        if not isinstance(self.figure, Figure):
+            raise TypeError("figure must be a matplotlib.figure.Figure")
+
+        options = {
+            "dpi": 200,
+            "bbox_inches": "tight",
+            "backend": "Agg",
+            "format": "png",
+        }
+        image = BytesIO()
+        self.figure.savefig(image, **options)
+        self.content = image.getvalue()
+
+        super().__post_init__()
+
+    async def before_emit(self, element: Dict) -> Dict:
+        # Prevent the figure from being serialized
+        del element["figure"]
+        return element
