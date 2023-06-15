@@ -59,7 +59,7 @@ tracer = ot_trace.get_tracer("chainlit", __version__)
 
 
 def trace_event(event_name):
-    if config.enable_telemetry:
+    if config.project.enable_telemetry:
         with tracer.start_as_current_span(
             event_name, record_exception=False, set_status_on_exception=False
         ):
@@ -70,7 +70,7 @@ def trace(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         event_name = func.__name__
-        if config.enable_telemetry:
+        if config.project.enable_telemetry:
             with tracer.start_as_current_span(
                 event_name, record_exception=False, set_status_on_exception=False
             ):

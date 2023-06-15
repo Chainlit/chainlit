@@ -31,7 +31,7 @@ export default function AuthorSelect() {
   const [df, setDf] = useRecoilState(datasetFiltersState);
   const pSettings = useRecoilValue(projectSettingsState);
   const { data, loading, error } = useQuery(MembersQuery, {
-    variables: { projectId: pSettings?.projectId }
+    variables: { projectId: pSettings?.project?.id }
   });
 
   if (loading || error || role === 'USER') {

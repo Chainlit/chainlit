@@ -36,13 +36,13 @@ def cli():
 def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
-    config.run_settings.host = host
-    config.run_settings.port = port
+    config.run.host = host
+    config.run.port = port
 
     check_file(target)
     # Load the module provided by the user
-    config.module_name = target
-    load_module(config.module_name)
+    config.run.module_name = target
+    load_module(config.run.module_name)
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
@@ -50,7 +50,7 @@ def run_chainlit(target: str):
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
 
-    log_level = "debug" if config.run_settings.debug else "error"
+    log_level = "debug" if config.run.debug else "error"
 
     # Start the server
     async def start():
@@ -80,7 +80,7 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
         os.environ["CHAINLIT_PORT"] = port
     if ci:
         logger.info("Running in CI mode")
-        config.enable_telemetry = False
+        config.project.enable_telemetry = False
         no_cache = True
         from chainlit.cli.mock import mock_openai
 
@@ -89,11 +89,11 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     else:
         trace_event("chainlit run")
 
-    config.run_settings.headless = headless
-    config.run_settings.debug = debug
-    config.run_settings.no_cache = no_cache
-    config.run_settings.ci = ci
-    config.run_settings.watch = watch
+    config.run.headless = headless
+    config.run.debug = debug
+    config.run.no_cache = no_cache
+    config.run.ci = ci
+    config.run.watch = watch
 
     run_chainlit(target)
 

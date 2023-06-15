@@ -43,7 +43,7 @@ def create_tar_gz_archive(archive_path, source_dir):
 
 def upload_tar_gz_archive(access_token: str, archive_path: str):
     url = f"{config.chainlit_server}/api/upload/deployment"
-    body = {"projectId": config.project_id}
+    body = {"projectId": config.project.id}
 
     headers = {"Authorization": access_token}
 
@@ -71,7 +71,7 @@ def upload_tar_gz_archive(access_token: str, archive_path: str):
 
 
 def deploy(target: str):
-    if not config.project_id:
+    if not config.project.id:
         raise Exception(
             "Project id not set in config. A project id is mandatory to deploy a chainlit app."
         )

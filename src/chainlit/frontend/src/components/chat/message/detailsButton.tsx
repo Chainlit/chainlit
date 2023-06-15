@@ -33,7 +33,7 @@ export default function DetailsButton({
 
   const show = nested || isRunningEmptyStep || isRunningUserMessage;
 
-  if (!show || pSettings?.hideCot) {
+  if (!show || pSettings?.ui?.hide_cot) {
     return null;
   }
 

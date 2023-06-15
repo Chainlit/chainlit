@@ -36,7 +36,7 @@ function _CloudHistoryButton({ onClick }: Props) {
   const [_, { data, refetch }] = useLazyQuery(ConversationsQuery, {
     variables: {
       first: 30,
-      projectId: pSettings?.projectId,
+      projectId: pSettings?.project?.id,
       authorEmail: user?.email
     }
   });

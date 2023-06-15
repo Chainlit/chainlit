@@ -11,7 +11,7 @@ interface Props {
 export default memo(function ChatHistory({ onClick }: Props) {
   const pSettings = useRecoilValue(projectSettingsState);
 
-  if (pSettings?.public === false) {
+  if (!pSettings?.project?.public) {
     return <CloudHistoryButton onClick={onClick} />;
   } else {
     return <LocalHistoryButton onClick={onClick} />;

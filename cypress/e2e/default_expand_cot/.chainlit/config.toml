@@ -22,7 +22,7 @@ name = "Chatbot"
 # description = ""
 
 # The default value for the expand messages settings.
-default_expand_messages = false
+default_expand_messages = true
 
 # Hide the chain of thought details from the user in the UI.
 hide_cot = false

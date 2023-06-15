@@ -33,8 +33,8 @@ const Message = ({
   isRunning,
   isLast
 }: Props) => {
-  const [showDetails, setShowDetails] = useState(false);
   const appSettings = useRecoilValue(settingsState);
+  const [showDetails, setShowDetails] = useState(appSettings.expandAll);
 
   useEffect(() => {
     setShowDetails(appSettings.expandAll);

@@ -45,7 +45,7 @@ const Chat = () => {
         createdAt: Date.now()
       };
 
-      if (!isAuthenticated || !pSettings?.projectId) {
+      if (!isAuthenticated || !pSettings?.project?.id) {
         persistChatLocally(msg);
       }
 

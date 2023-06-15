@@ -47,7 +47,7 @@ export function useColorForName() {
     if (isError) {
       return 'error.main';
     }
-    if (name === pSettings?.appTitle) {
+    if (name === pSettings?.ui?.name) {
       return 'primary.main';
     }
     if (isUser) {

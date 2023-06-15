@@ -85,7 +85,7 @@ export default function ConversationTable() {
     {
       variables: {
         first: BATCH_SIZE,
-        projectId: pSettings?.projectId,
+        projectId: pSettings?.project?.id,
         withFeedback: df.feedback,
         authorEmail: df.authorEmail,
         search: df.search
@@ -106,7 +106,7 @@ export default function ConversationTable() {
         variables: {
           first: BATCH_SIZE,
           cursor: pageInfo.endCursor,
-          projectId: pSettings?.projectId,
+          projectId: pSettings?.project?.id,
           withFeedback: df.feedback,
           authorEmail: df.authorEmail,
           search: df.search

@@ -10,7 +10,7 @@ interface Props {
 export default memo(function AuthProvider({ children }: Props) {
   const pSettings = useRecoilValue(projectSettingsState);
 
-  if (pSettings?.projectId) {
+  if (pSettings?.project?.id) {
     return (
       <Auth0Provider
         domain="https://auth.chainlit.io"
