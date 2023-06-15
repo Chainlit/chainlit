@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Pyplot chart element
-- Config option `default_expand_messages` to enable the default expand message settings by default in the UI
+- Config option `default_expand_messages` to enable the default expand message settings by default in the UI (breaking change)
 
 ## [0.3.0] - 2023-06-13
 
