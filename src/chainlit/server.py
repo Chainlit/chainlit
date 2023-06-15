@@ -17,7 +17,6 @@ from fastapi.responses import (
     FileResponse,
     PlainTextResponse,
 )
-from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
@@ -87,7 +86,7 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")
 
 app = FastAPI(lifespan=lifespan)
-app.mount("/static", StaticFiles(directory=build_dir), name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
