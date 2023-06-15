@@ -74,7 +74,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Rework of the Message, AskUserMessage and AskFileMessage APIs: -`cl.send_message(...)` becomes `cl.Message(...).send()` -`cl.send_ask_user(...)` becomes `cl.AskUserMessage(...).send()` -`cl.send_ask_file(...)` becomes `cl.AskFileMessage(...).send()`
+- Rework of the Message, AskUserMessage and AskFileMessage APIs:
+- `cl.send_message(...)` becomes `cl.Message(...).send()`
+- `cl.send_ask_user(...)` becomes `cl.AskUserMessage(...).send()`
+- `cl.send_ask_file(...)` becomes `cl.AskFileMessage(...).send()`
 - `update` and `remove` methods to the `cl.Message` class
 
 ### Fixed
