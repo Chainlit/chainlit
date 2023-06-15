@@ -20,6 +20,9 @@ interface Props {
 function prepareContent({ id, elements, actions, content, language }: Props) {
   const elementNames = elements.map((e) => e.name);
 
+  // Sort by descending length to avoid matching substrings
+  elementNames.sort((a, b) => b.length - a.length);
+
   const elementRegexp = elementNames.length
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
