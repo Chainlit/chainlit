@@ -42,7 +42,11 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
-      const element = elements.find((e) => e.name === match);
+      const element = elements.find((e) => {
+        const nameMatch = e.name === match;
+        const scopeMatch = e.forId ? e.forId === id : true;
+        return nameMatch && scopeMatch;
+      });
       const foundElement = !!element;
       const wrongScope = element?.forId && element.forId !== id;
       const inlined = element?.display === 'inline';

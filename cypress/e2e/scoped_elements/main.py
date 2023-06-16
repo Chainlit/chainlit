@@ -19,3 +19,8 @@ async def start():
         content="Here a nice image of a cat! As well as text1 and text2!",
         elements=elements,
     ).send()
+    # Element references should work even if element names collide
+    await cl.Message(
+        content="Here a nice image of a cat! As well as text1 and text2!",
+        elements=elements,
+    ).send()
