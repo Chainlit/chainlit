@@ -6,10 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing unreleased yet!
+
+## [0.4.0] - 2023-06-16
+
 ### Added
 
 - Pyplot chart element
 - Config option `default_expand_messages` to enable the default expand message settings by default in the UI (breaking change)
+
+### Fixed
+
+- Scoped elements sharing names are now correctly displayed
+- Clickable Element refs are now correctly displayed, even if another ref being a substring of it exists
 
 ## [0.3.0] - 2023-06-13
 
