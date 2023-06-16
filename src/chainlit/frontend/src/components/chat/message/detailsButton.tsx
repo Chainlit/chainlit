@@ -3,8 +3,8 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { INestedMessage } from 'state/chat';
 import GreyButton from 'components/greyButton';
 import { useRecoilValue } from 'recoil';
-import { projectSettingsState } from 'state/project';
 import CircularProgress from '@mui/material/CircularProgress';
+import { settingsState } from 'state/settings';
 
 interface Props {
   message: INestedMessage;
@@ -19,7 +19,7 @@ export default function DetailsButton({
   onClick,
   loading
 }: Props) {
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { hideCot } = useRecoilValue(settingsState);
 
   const nestedCount = message.subMessages?.length;
   const nested = !!nestedCount;
@@ -33,7 +33,7 @@ export default function DetailsButton({
 
   const show = nested || isRunningEmptyStep || isRunningUserMessage;
 
-  if (!show || pSettings?.hideCot) {
+  if (!show || hideCot) {
     return null;
   }
 

@@ -93,10 +93,10 @@ def langchain_factory(use_async: bool) -> Callable:
         raise ValueError(error_message)
 
     def decorator(func: Callable) -> Callable:
-        config.lc_factory = wrap_user_function(func, with_task=True)
+        config.code.lc_factory = wrap_user_function(func, with_task=True)
         return func
 
-    config.lc_agent_is_async = use_async
+    config.code.lc_agent_is_async = use_async
 
     return decorator
 
@@ -115,7 +115,7 @@ def langchain_postprocess(func: Callable[[Any], str]) -> Callable:
         Callable[[Any], str]: The decorated post-processing function.
     """
 
-    config.lc_postprocess = wrap_user_function(func)
+    config.code.lc_postprocess = wrap_user_function(func)
     return func
 
 
@@ -132,7 +132,7 @@ def on_message(func: Callable) -> Callable:
         Callable[[str], Any]: The decorated on_message function.
     """
 
-    config.on_message = wrap_user_function(func)
+    config.code.on_message = wrap_user_function(func)
     return func
 
 
@@ -149,7 +149,7 @@ def langchain_run(func: Callable[[Any, str], str]) -> Callable:
     Returns:
         Callable[[Any, str], Any]: The decorated function.
     """
-    config.lc_run = wrap_user_function(func)
+    config.code.lc_run = wrap_user_function(func)
     return func
 
 
@@ -164,7 +164,7 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
         Callable[[Any, str], Any]: The decorated function.
     """
 
-    config.lc_rename = wrap_user_function(func)
+    config.code.lc_rename = wrap_user_function(func)
     return func
 
 
@@ -180,7 +180,7 @@ def on_chat_start(func: Callable) -> Callable:
         Callable[], Any]: The decorated hook.
     """
 
-    config.on_chat_start = wrap_user_function(func, with_task=True)
+    config.code.on_chat_start = wrap_user_function(func, with_task=True)
     return func
 
 
@@ -196,7 +196,7 @@ def on_stop(func: Callable) -> Callable:
         Callable[[], Any]: The decorated stop hook.
     """
 
-    config.on_stop = wrap_user_function(func)
+    config.code.on_stop = wrap_user_function(func)
     return func
 
 
@@ -209,7 +209,7 @@ def action_callback(name: str) -> Callable:
     """
 
     def decorator(func: Callable[[Action], Any]):
-        config.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        config.code.action_callbacks[name] = wrap_user_function(func, with_task=True)
         return func
 
     return decorator

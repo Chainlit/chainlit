@@ -103,10 +103,10 @@ function App() {
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
 
   useEffect(() => {
-    if (!accessToken || !pSettings?.projectId) {
+    if (!accessToken || !pSettings?.project?.id) {
       return;
     }
-    getRole(pSettings.chainlitServer, accessToken, pSettings.projectId)
+    getRole(pSettings.chainlitServer, accessToken, pSettings.project.id)
       .then(async ({ role }) => {
         setRole(role);
       })

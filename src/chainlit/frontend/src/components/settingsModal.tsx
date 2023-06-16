@@ -12,6 +12,7 @@ import { useRecoilState } from 'recoil';
 import { settingsState } from 'state/settings';
 import ExpandIcon from '@mui/icons-material/Expand';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 
 export default function SettingsModal() {
   const [settings, setSettings] = useRecoilState(settingsState);
@@ -45,6 +46,22 @@ export default function SettingsModal() {
               checked={settings.expandAll}
               inputProps={{
                 'aria-labelledby': 'switch-expand-all'
+              }}
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <EmojiObjectsIcon />
+            </ListItemIcon>
+            <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
+            <Switch
+              edge="end"
+              onChange={() =>
+                setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
+              }
+              checked={settings.hideCot}
+              inputProps={{
+                'aria-labelledby': 'hide-cot'
               }}
             />
           </ListItem>

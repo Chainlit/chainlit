@@ -8,7 +8,7 @@ import Code from 'components/Code';
 const WelcomeScreen = () => {
   const pSettings = useRecoilValue(projectSettingsState);
 
-  if (!pSettings?.chainlitMd) {
+  if (!pSettings?.markdown) {
     return <Box flexGrow={1} />;
   }
 
@@ -29,7 +29,7 @@ const WelcomeScreen = () => {
           flexDirection: 'column'
         }}
       >
-        {pSettings?.chainlitMd ? (
+        {pSettings?.markdown ? (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -45,7 +45,7 @@ const WelcomeScreen = () => {
               }
             }}
           >
-            {pSettings?.chainlitMd}
+            {pSettings?.markdown}
           </ReactMarkdown>
         ) : null}
       </Box>

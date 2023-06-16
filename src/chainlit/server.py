@@ -36,10 +36,10 @@ from chainlit.types import CompletionRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    host = config.run_settings.host
-    port = config.run_settings.port
+    host = config.run.host
+    port = config.run.port
 
-    if not config.run_settings.headless:
+    if not config.run.headless:
         if host == DEFAULT_HOST:
             url = f"http://localhost:{port}"
         else:
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     watch_task = None
     stop_event = asyncio.Event()
 
-    if config.run_settings.watch:
+    if config.run.watch:
 
         async def watch_files_for_changes():
             async for changes in awatch(config.root, stop_event=stop_event):
@@ -63,8 +63,8 @@ async def lifespan(app: FastAPI):
                         logger.info(f"File {change_type.name}: {file_name}")
 
                         # Reload the module if the module name is specified in the config
-                        if config.module_name:
-                            load_module(config.module_name)
+                        if config.run.module_name:
+                            load_module(config.run.module_name)
 
                         await socket.emit("reload", {})
 
@@ -116,13 +116,13 @@ def get_html_template():
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
-    url = config.github or default_url
+    url = config.ui.github or default_url
 
-    tags = f"""<title>{config.chatbot_name}</title>
-    <meta name="description" content="{config.description}">
+    tags = f"""<title>{config.ui.name}</title>
+    <meta name="description" content="{config.ui.description}">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{config.chatbot_name}">
-    <meta property="og:description" content="{config.description}">
+    <meta property="og:title" content="{config.ui.name}">
+    <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
@@ -178,15 +178,11 @@ async def project_settings():
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return JSONResponse(
         content={
-            "public": config.public,
-            "projectId": config.project_id,
             "chainlitServer": config.chainlit_server,
-            "userEnv": config.user_env,
-            "hideCot": config.hide_cot,
-            "chainlitMd": get_markdown_str(config.root),
             "prod": bool(config.chainlit_prod_url),
-            "appTitle": config.chatbot_name,
-            "github": config.github,
+            "ui": config.ui.to_dict(),
+            "project": config.project.to_dict(),
+            "markdown": get_markdown_str(config.root),
         }
     )
 
@@ -224,22 +220,26 @@ async def connect(sid, environ):
     cloud_client = None
 
     # Check decorated functions
-    if not config.lc_factory and not config.on_message and not config.on_chat_start:
+    if (
+        not config.code.lc_factory
+        and not config.code.on_message
+        and not config.code.on_chat_start
+    ):
         logger.error(
             "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function"
         )
         return False
 
     # Check authorization
-    if not config.public and not authorization:
+    if not config.project.public and not authorization:
         # Refuse connection if the app is private and no access token is provided
         trace_event("no_access_token")
         logger.error("No access token provided")
         return False
-    elif authorization and config.project_id:
+    elif authorization and config.project.id:
         # Create the cloud client
         cloud_client = CloudClient(
-            project_id=config.project_id,
+            project_id=config.project.id,
             session_id=sid,
             access_token=authorization,
         )
@@ -249,11 +249,11 @@ async def connect(sid, environ):
             return False
 
     # Check user env
-    if config.user_env:
+    if config.project.user_env:
         # Check if requested user environment variables are provided
         if user_env:
             user_env = json.loads(user_env)
-            for key in config.user_env:
+            for key in config.project.user_env:
                 if key not in user_env:
                     trace_event("missing_user_env")
                     logger.error("Missing user environment variable: " + key)
@@ -299,14 +299,14 @@ async def connect(sid, environ):
 async def connection_successful(sid):
     session = need_session(sid)
     __chainlit_emitter__ = ChainlitEmitter(session)
-    if config.lc_factory:
+    if config.code.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
-        agent = await config.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
+        agent = await config.code.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
         session["agent"] = agent
 
-    if config.on_chat_start:
+    if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
-        await config.on_chat_start(__chainlit_emitter__=__chainlit_emitter__)
+        await config.code.on_chat_start(__chainlit_emitter__=__chainlit_emitter__)
 
 
 @socket.on("disconnect")
@@ -332,8 +332,8 @@ async def stop(sid):
 
         session["should_stop"] = True
 
-        if config.on_stop:
-            await config.on_stop()
+        if config.code.on_stop:
+            await config.code.on_stop()
 
 
 async def process_message(session: Session, author: str, input_str: str):
@@ -358,9 +358,9 @@ async def process_message(session: Session, author: str, input_str: str):
             from chainlit.lc.agent import run_langchain_agent
 
             # If a langchain agent is available, run it
-            if config.lc_run:
+            if config.code.lc_run:
                 # If the developer provided a custom run function, use it
-                await config.lc_run(
+                await config.code.lc_run(
                     langchain_agent,
                     input_str,
                     __chainlit_emitter__=__chainlit_emitter__,
@@ -369,12 +369,12 @@ async def process_message(session: Session, author: str, input_str: str):
             else:
                 # Otherwise, use the default run function
                 raw_res, output_key = await run_langchain_agent(
-                    langchain_agent, input_str, use_async=config.lc_agent_is_async
+                    langchain_agent, input_str, use_async=config.code.lc_agent_is_async
                 )
 
-                if config.lc_postprocess:
+                if config.code.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
-                    await config.lc_postprocess(
+                    await config.code.lc_postprocess(
                         raw_res, __chainlit_emitter__=__chainlit_emitter__
                     )
                     return
@@ -385,11 +385,11 @@ async def process_message(session: Session, author: str, input_str: str):
                     # Otherwise, use the raw response
                     res = raw_res
             # Finally, send the response to the user
-            await Message(author=config.chatbot_name, content=res).send()
+            await Message(author=config.ui.name, content=res).send()
 
-        elif config.on_message:
+        elif config.code.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
-            await config.on_message(
+            await config.code.on_message(
                 input_str, __chainlit_emitter__=__chainlit_emitter__
             )
     except InterruptedError:
@@ -415,7 +415,7 @@ async def message(sid, data):
 
 async def process_action(session: Session, action: Action):
     __chainlit_emitter__ = ChainlitEmitter(session)
-    callback = config.action_callbacks.get(action.name)
+    callback = config.code.action_callbacks.get(action.name)
     if callback:
         await callback(action, __chainlit_emitter__=__chainlit_emitter__)
     else:

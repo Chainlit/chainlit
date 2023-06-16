@@ -94,7 +94,7 @@ class BaseChainlitCallbackHandler(BaseCallbackHandler):
         if self.sequence:
             author = self.sequence[-1]
         else:
-            author = config.chatbot_name
+            author = config.ui.name
 
         return author, indent, llm_settings
 
@@ -106,9 +106,9 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        if config.lc_rename:
+        if config.code.lc_rename:
             author = run_sync(
-                config.lc_rename(author, __chainlit_emitter__=self.emitter)
+                config.code.lc_rename(author, __chainlit_emitter__=self.emitter)
             )
 
         self.pop_prompt()
@@ -134,9 +134,9 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        if config.lc_rename:
+        if config.code.lc_rename:
             author = run_sync(
-                config.lc_rename(author, __chainlit_emitter__=self.emitter)
+                config.code.lc_rename(author, __chainlit_emitter__=self.emitter)
             )
 
         __chainlit_emitter__ = self.emitter
@@ -266,8 +266,10 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
         if author in IGNORE_LIST:
             return
 
-        if config.lc_rename:
-            author = await config.lc_rename(author, __chainlit_emitter__=self.emitter)
+        if config.code.lc_rename:
+            author = await config.code.lc_rename(
+                author, __chainlit_emitter__=self.emitter
+            )
 
         self.pop_prompt()
 
@@ -292,8 +294,10 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
         if author in IGNORE_LIST:
             return
 
-        if config.lc_rename:
-            author = await config.lc_rename(author, __chainlit_emitter__=self.emitter)
+        if config.code.lc_rename:
+            author = await config.code.lc_rename(
+                author, __chainlit_emitter__=self.emitter
+            )
 
         __chainlit_emitter__ = self.emitter
 

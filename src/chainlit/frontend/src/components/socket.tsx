@@ -36,7 +36,7 @@ export default memo(function Socket() {
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
 
-  const isLoading = pSettings?.projectId && _isLoading;
+  const isLoading = pSettings?.project?.id && _isLoading;
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {

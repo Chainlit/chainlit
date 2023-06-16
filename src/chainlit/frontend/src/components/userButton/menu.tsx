@@ -26,7 +26,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   const { user, logout } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const setAppSettings = useSetRecoilState(settingsState);
-  const requiredKeys = !!pSettings?.userEnv?.length;
+  const requiredKeys = !!pSettings?.project?.user_env?.length;
 
   const userNameItem = user && (
     <ListItem key="user-name" sx={{ display: 'flex', flexDirection: 'column' }}>

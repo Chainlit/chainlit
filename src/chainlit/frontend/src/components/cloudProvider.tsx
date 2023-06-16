@@ -12,7 +12,7 @@ export default memo(function CloudProvider({ children }: Props) {
   const pSettings = useRecoilValue(projectSettingsState);
   const { isProjectMember, accessToken } = useAuth();
 
-  if (pSettings?.public === true || isProjectMember === false) return null;
+  if (!!pSettings?.project.public || isProjectMember === false) return null;
 
   if (!accessToken) {
     return null;

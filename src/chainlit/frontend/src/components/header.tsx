@@ -155,8 +155,8 @@ export default function Header() {
       >
         <Stack alignItems="center" direction="row">
           <Nav
-            isPublic={pSettings?.public}
-            hasReadme={!!pSettings?.chainlitMd}
+            isPublic={pSettings?.project?.public}
+            hasReadme={!!pSettings?.markdown}
           />
         </Stack>
         <Stack
@@ -168,7 +168,7 @@ export default function Header() {
         >
           <NewChatButton />
           <Box ml={1} />
-          <GithubButton href={pSettings?.github} />
+          <GithubButton href={pSettings?.ui?.github} />
           <UserButton />
         </Stack>
       </Toolbar>

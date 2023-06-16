@@ -18,7 +18,7 @@ const Page = ({ children }: Props) => {
   const navigate = useNavigate();
   const userEnv = useRecoilValue(userEnvState);
 
-  const isPrivate = pSettings && pSettings.public === false;
+  const isPrivate = pSettings && !pSettings.project?.public;
 
   useEffect(() => {
     if (isPrivate && !isAuthenticated && !isLoading) {
@@ -27,8 +27,8 @@ const Page = ({ children }: Props) => {
   }, [pSettings, isAuthenticated, isLoading]);
 
   useEffect(() => {
-    if (pSettings?.userEnv) {
-      for (const key of pSettings.userEnv) {
+    if (pSettings?.project?.user_env) {
+      for (const key of pSettings.project?.user_env || []) {
         if (!userEnv[key]) navigate('/env');
       }
     }

@@ -145,7 +145,7 @@ class Message(MessageBase):
     def __init__(
         self,
         content: str,
-        author: str = config.chatbot_name,
+        author: str = config.ui.name,
         prompt: str = None,
         llm_settings: LLMSettings = None,
         language: str = None,
@@ -212,7 +212,7 @@ class ErrorMessage(MessageBase):
     def __init__(
         self,
         content: str,
-        author: str = config.chatbot_name,
+        author: str = config.ui.name,
         indent: int = 0,
     ):
         self.content = content
@@ -263,7 +263,7 @@ class AskUserMessage(AskMessageBase):
     def __init__(
         self,
         content: str,
-        author: str = config.chatbot_name,
+        author: str = config.ui.name,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
@@ -323,7 +323,7 @@ class AskFileMessage(AskMessageBase):
         accept: Union[List[str], Dict[str, List[str]]],
         max_size_mb=2,
         max_files=1,
-        author=config.chatbot_name,
+        author=config.ui.name,
         timeout=90,
         raise_on_timeout=False,
     ):
