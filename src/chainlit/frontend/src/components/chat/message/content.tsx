@@ -113,6 +113,7 @@ export default memo(function MessageContent({
           fontFamily: 'Inter',
           fontWeight: authorIsUser ? 500 : 300
         }}
+        component="div"
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
