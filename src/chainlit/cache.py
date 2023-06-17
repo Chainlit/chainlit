@@ -13,7 +13,7 @@ def init_lc_cache():
         import langchain
         from langchain.cache import SQLiteCache
 
-        if config.project.lc_cache_path is None:
+        if config.project.lc_cache_path is not None:
             langchain.llm_cache = SQLiteCache(
                 database_path=config.project.lc_cache_path
             )
