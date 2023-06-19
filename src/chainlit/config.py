@@ -193,7 +193,7 @@ def load_config():
         )
         ui_settings = UISettings(**ui_settings)
 
-        if not project_settings.public and not project_settings.project_id:
+        if not project_settings.public and not project_settings.id:
             raise ValueError("Project ID is required when public is set to false.")
 
         config = ChainlitConfig(
