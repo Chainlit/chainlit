@@ -16,6 +16,8 @@ class Session(TypedDict):
     user_env: Dict[str, str]
     # Optional langchain agent
     agent: Any
+    # Optional llama instance
+    llama_instance: Any
     # If the session is currently running a sync task
     running_sync: bool
     # Whether the current task should be stopped

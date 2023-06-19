@@ -221,12 +221,18 @@ async def connect(sid, environ):
 
     # Check decorated functions
     if (
-        not config.code.lc_factory
+        not config.code.llama_factory
+        and not config.code.lc_factory
         and not config.code.on_message
         and not config.code.on_chat_start
     ):
         logger.error(
-            "Module should at least expose one of @langchain_factory, @on_message or @on_chat_start function"
+            "Module should at least expose one of @langchain_factory, @llama_factory, @on_message or @on_chat_start function"
+        )
+        return False
+    elif config.code.llama_factory and config.code.lc_factory:
+        logger.error(
+            "Module should not expose both @langchain_factory and @llama_factory function"
         )
         return False
 
@@ -304,6 +310,11 @@ async def connection_successful(sid):
         agent = await config.code.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
         session["agent"] = agent
 
+    if config.code.llama_factory:
+        llama_instance = await config.code.llama_factory(
+            __chainlit_emitter__=__chainlit_emitter__
+        )
+        session["llama_instance"] = llama_instance
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start(__chainlit_emitter__=__chainlit_emitter__)
@@ -354,6 +365,8 @@ async def process_message(session: Session, author: str, input_str: str):
             )
 
         langchain_agent = session.get("agent")
+        llama_instance = session.get("llama_instance")
+
         if langchain_agent:
             from chainlit.lc.agent import run_langchain_agent
 
@@ -386,6 +399,11 @@ async def process_message(session: Session, author: str, input_str: str):
                     res = raw_res
             # Finally, send the response to the user
             await Message(author=config.ui.name, content=res).send()
+
+        elif llama_instance:
+            from chainlit.llama_index.run import run_llama
+
+            await run_llama(llama_instance, input_str)
 
         elif config.code.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer

@@ -5,6 +5,7 @@ import os
 import asyncio
 
 from chainlit.lc import LANGCHAIN_INSTALLED
+from chainlit.llama_index import LLAMA_INDEX_INSTALLED
 from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
@@ -20,8 +21,13 @@ from chainlit.sync import run_sync, make_async
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
-        ChainlitCallbackHandler,
-        AsyncChainlitCallbackHandler,
+        LangchainCallbackHandler,
+        AsyncLangchainCallbackHandler,
+    )
+
+if LLAMA_INDEX_INSTALLED:
+    from chainlit.llama_index.callbacks import (
+        LlamaIndexCallbackHandler,
     )
 
 
@@ -169,6 +175,35 @@ def langchain_rename(func: Callable[[str], str]) -> Callable[[str], str]:
 
 
 @trace
+def llama_index_factory(use_async: bool) -> Callable:
+    """
+    Plug and play decorator for the LangChain library.
+    The decorated function should instantiate a new LangChain instance (Chain, Agent...).
+    One instance per user session is created and cached.
+    The per user instance is called every time a new message is received.
+
+    Args:
+        use_async bool: Whether to call the the agent asynchronously or not. Defaults to False.
+
+    Returns:
+        Callable[[], Any]: The decorated factory function.
+    """
+
+    # Check if the factory is called with the correct parameter
+    if type(use_async) != bool:
+        error_message = "llama_index_factory use_async parameter is required"
+        raise ValueError(error_message)
+
+    def decorator(func: Callable) -> Callable:
+        config.code.llama_factory = wrap_user_function(func, with_task=True)
+        return func
+
+    # config.code.lc_agent_is_async = use_async
+
+    return decorator
+
+
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -245,8 +280,9 @@ __all__ = [
     "on_stop",
     "action_callback",
     "sleep",
-    "ChainlitCallbackHandler",
-    "AsyncChainlitCallbackHandler",
+    "LangchainCallbackHandler",
+    "AsyncLangchainCallbackHandler",
+    "LlamaIndexCallbackHandler",
     "run_sync",
     "make_async",
 ]

@@ -14,6 +14,6 @@ async def main():
 @cl.langchain_run
 async def run(agent, input_str):
     res = await cl.make_async(agent)(
-        input_str, callbacks=[cl.ChainlitCallbackHandler()]
+        input_str, callbacks=[cl.LangchainCallbackHandler()]
     )
     await cl.Message(content=res["text"]).send()
