@@ -46,6 +46,9 @@ async def lifespan(app: FastAPI):
             url = f"http://{host}:{port}"
 
         logger.info(f"Your app is available at {url}")
+
+        # Add a delay before opening the browser
+        await asyncio.sleep(1)
         webbrowser.open(url)
 
     watch_task = None
