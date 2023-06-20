@@ -314,8 +314,8 @@ async def connection_successful(sid):
         agent = await config.code.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
         session["agent"] = agent
 
-    if config.code.llama_factory:
-        llama_instance = await config.code.llama_factory(
+    if config.code.llama_index_factory:
+        llama_instance = await config.code.llama_index_factory(
             __chainlit_emitter__=__chainlit_emitter__
         )
         session["llama_instance"] = llama_instance

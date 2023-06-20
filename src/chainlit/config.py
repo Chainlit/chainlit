@@ -102,7 +102,7 @@ class CodeSettings:
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
-    llama_factory: Optional[Callable[[], Any]] = None
+    llama_index_factory: Optional[Callable[[], Any]] = None
 
     def validate(self):
         requires_one_of = [
