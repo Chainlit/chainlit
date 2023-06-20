@@ -109,7 +109,6 @@ class CodeSettings:
         requires_one_of = [
             "lc_factory",
             "llama_index_factory",
-            "langflow_factory",
             "on_message",
             "on_chat_start",
         ]
