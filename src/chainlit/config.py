@@ -4,7 +4,7 @@ import sys
 import tomli
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from importlib import machinery
+from importlib import util
 from chainlit.logger import logger
 from chainlit.version import __version__
 
@@ -103,6 +103,31 @@ class CodeSettings:
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
 
+    def validate(self):
+        requires_one_of = [
+            "lc_factory",
+            "on_message",
+            "on_chat_start",
+        ]
+
+        mutually_exclusive = ["lc_factory"]
+
+        # Check if at least one of the required attributes is set
+        if not any(getattr(self, attr) for attr in requires_one_of):
+            raise ValueError(
+                f"Module should at least expose one of {', '.join(requires_one_of)} function"
+            )
+
+        # Check if any mutually exclusive attributes are set together
+        for i, attr1 in enumerate(mutually_exclusive):
+            for attr2 in mutually_exclusive[i + 1 :]:
+                if getattr(self, attr1) and getattr(self, attr2):
+                    raise ValueError(
+                        f"Module should not expose both {attr1} and {attr2} functions"
+                    )
+
+        return True
+
 
 @dataclass_json
 @dataclass()
@@ -145,18 +170,8 @@ def init_config(log=False):
         logger.info(f"Config file already exists at {config_file}")
 
 
-def reset_module_config():
-    if not config:
-        return
-
-    config.code = CodeSettings(action_callbacks={})
-
-
 def load_module(target: str):
     """Load the specified module."""
-
-    # Reset the config fields that belonged to the previous module
-    reset_module_config()
 
     # Get the target's directory
     target_dir = os.path.dirname(os.path.abspath(target))
@@ -164,16 +179,17 @@ def load_module(target: str):
     # Add the target's directory to the Python path
     sys.path.insert(0, target_dir)
 
-    loader = machinery.SourceFileLoader(target, target)
-    config.code.module = loader.load_module()
+    spec = util.spec_from_file_location(target, target)
+    module = util.module_from_spec(spec)
+    spec.loader.exec_module(module)
 
     # Remove the target's directory from the Python path
     sys.path.pop(0)
 
+    config.code.validate()
 
-def load_config():
-    """Load the configuration from the config file."""
-    init_config()
+
+def load_settings():
     with open(config_file, "rb") as f:
         toml_dict = tomli.load(f)
         # Load project settings
@@ -196,14 +212,38 @@ def load_config():
         if not project_settings.public and not project_settings.id:
             raise ValueError("Project ID is required when public is set to false.")
 
-        config = ChainlitConfig(
-            chainlit_server=chainlit_server,
-            chainlit_prod_url=chainlit_prod_url,
-            ui=ui_settings,
-            run=RunSettings(),
-            project=project_settings,
-            code=CodeSettings(action_callbacks={}),
-        )
+        return {
+            "ui": ui_settings,
+            "project": project_settings,
+            "code": CodeSettings(action_callbacks={}),
+        }
+
+
+def reload_config():
+    """Reload the configuration from the config file."""
+    global config
+    if config is None:
+        return
+
+    settings = load_settings()
+
+    config.code = settings["code"]
+    config.ui = settings["ui"]
+    config.project = settings["project"]
+
+
+def load_config():
+    """Load the configuration from the config file."""
+    init_config()
+
+    settings = load_settings()
+
+    config = ChainlitConfig(
+        chainlit_server=chainlit_server,
+        chainlit_prod_url=chainlit_prod_url,
+        run=RunSettings(),
+        **settings,
+    )
 
     return config
 
