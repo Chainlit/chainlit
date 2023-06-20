@@ -11,6 +11,8 @@ from chainlit.lc import (
     langchain_rename,
 )
 from chainlit.llama_index import LLAMA_INDEX_INSTALLED, llama_index_factory
+from chainlit.langflow import langflow_factory
+
 from chainlit.utils import wrap_user_function
 from chainlit.config import config
 from chainlit.telemetry import trace
@@ -133,6 +135,7 @@ __all__ = [
     "langchain_run",
     "langchain_rename",
     "llama_index_factory",
+    "langflow_factory",
     "on_chat_start",
     "on_stop",
     "action_callback",

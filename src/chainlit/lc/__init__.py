@@ -26,7 +26,7 @@ def langchain_factory(use_async: bool) -> Callable:
     The per user instance is called every time a new message is received.
 
     Args:
-        use_async bool: Whether to call the the agent asynchronously or not. Defaults to False.
+        use_async bool: Whether to call the the agent asynchronously or not.
 
     Returns:
         Callable[[], Any]: The decorated factory function.

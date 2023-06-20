@@ -1,4 +1,4 @@
-from typing import Optional, Any, Callable, List, Dict, TYPE_CHECKING
+from typing import Optional, Any, Callable, List, Dict, Union, TYPE_CHECKING
 import os
 import sys
 import tomli
@@ -103,11 +103,13 @@ class CodeSettings:
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
     llama_index_factory: Optional[Callable[[], Any]] = None
+    langflow_schema: Union[Dict, str] = None
 
     def validate(self):
         requires_one_of = [
             "lc_factory",
             "llama_index_factory",
+            "langflow_factory",
             "on_message",
             "on_chat_start",
         ]
