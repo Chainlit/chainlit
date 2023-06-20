@@ -14,13 +14,12 @@ export default function AppWrapper() {
     if (pSettings === undefined) {
       getProjectSettings().then((res: IProjectSettings) => {
         setPSettings(res);
-        if (res.ui.default_expand_messages) {
-          setAppSettings((prev) => ({
-            ...prev,
-            expandAll: !!res.ui.default_expand_messages,
-            hideCot: !!res.ui.hide_cot
-          }));
-        }
+
+        setAppSettings((prev) => ({
+          ...prev,
+          expandAll: !!res.ui.default_expand_messages,
+          hideCot: !!res.ui.hide_cot
+        }));
       });
     }
   }, []);

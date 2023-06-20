@@ -18,6 +18,7 @@ from chainlit.element import Image, Text, Pdf, Avatar, Pyplot
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync, make_async
+from chainlit.cache import cache
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -285,4 +286,5 @@ __all__ = [
     "LlamaIndexCallbackHandler",
     "run_sync",
     "make_async",
+    "cache",
 ]

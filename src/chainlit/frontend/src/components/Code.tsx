@@ -1,6 +1,6 @@
 import { Box, useTheme } from '@mui/material';
 import { CodeProps } from 'react-markdown/lib/ast-to-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Code({ inline, children, ...props }: CodeProps) {
@@ -25,7 +25,8 @@ export default function Code({ inline, children, ...props }: CodeProps) {
         style={{
           background: theme.palette.divider,
           borderRadius: '4px',
-          padding: '0.2em 0.4em'
+          padding: '0.2em 0.4em',
+          overflowX: 'auto'
         }}
       >
         {children}
@@ -37,7 +38,8 @@ export default function Code({ inline, children, ...props }: CodeProps) {
         sx={{
           background: theme.palette.divider,
           borderRadius: '4px',
-          padding: theme.spacing(1)
+          padding: theme.spacing(1),
+          overflowX: 'auto'
         }}
       >
         <code

@@ -1,3 +1,7 @@
+.markdown-body {
+  overflow-x: auto;
+}
+
 .markdown-body *:first-child {
   margin-top: 0;
 }

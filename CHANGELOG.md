@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.4.1] - 2023-06-20
+
+### Added
+
+- File watcher now reloads the app when the config is updated
+- cl.cache to avoid wasting time reloading expensive resources every time the app reloads
+
+### Fixed
+
+- Bug introduced by 0.4.0 preventing to run private apps
+- Long line content breaking the sidebar with Text elements
+- File watcher preventing to keyboard interrupt the chainlit process
+- Updated socket io to fix a security issue
+- Bug preventing config settings to be the default values for the settings in the UI
+
 ## [0.4.0] - 2023-06-16
 
 ### Added
