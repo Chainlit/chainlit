@@ -1,7 +1,7 @@
 from typing import Any
 from llama_index.response.schema import Response, StreamingResponse
-from llama_index.chat_engine import CondenseQuestionChatEngine, ReActChatEngine
-from llama_index.query_engine.retriever_query_engine import RetrieverQueryEngine
+from llama_index.chat_engine.types import BaseChatEngine
+from llama_index.indices.query.base import BaseQueryEngine
 
 from chainlit.message import Message
 
@@ -12,11 +12,9 @@ async def run_llama(instance: Any, input_str: str):
 
     response_message = Message(content="")
 
-    if isinstance(instance, RetrieverQueryEngine):
+    if isinstance(instance, BaseQueryEngine):
         response = await instance.aquery(input_str)
-    elif isinstance(instance, CondenseQuestionChatEngine):
-        response = await instance.achat(input_str)
-    elif isinstance(instance, ReActChatEngine):
+    elif isinstance(instance, BaseChatEngine):
         response = await instance.achat(input_str)
     else:
         raise NotImplementedError
