@@ -27,6 +27,6 @@ jobs:
           python-version: "3.8"
           cache: "pip"
       - name: Install Python CI dependencies
-        run: pip install -r --ignore-installed src/ci-requirements.txt
+        run: pip install -r src/ci-requirements.txt
       - name: Run tests
         run: npm test
