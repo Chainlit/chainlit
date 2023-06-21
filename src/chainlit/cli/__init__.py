@@ -85,6 +85,7 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     if ci:
         logger.info("Running in CI mode")
         config.project.enable_telemetry = False
+        config.project.database = None
         no_cache = True
         from chainlit.cli.mock import mock_openai
 
