@@ -115,6 +115,8 @@ class LocalClient(BaseClient):
 
         variables["conversationId"] = c_id
 
+        self.before_write(variables)
+
         res = await Element.prisma().create(data=variables)
 
         return res.dict()

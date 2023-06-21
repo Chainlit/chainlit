@@ -56,6 +56,7 @@ class Element:
 
     def to_dict(self) -> Dict:
         return {
+            "tempId": self.tempId,
             "type": self.type,
             "url": self.url,
             "name": self.name,
@@ -72,13 +73,10 @@ class Element:
         if self.path:
             async with aiofiles.open(self.path, "rb") as f:
                 self.content = await f.read()
-                await self.preprocess_content()
-        elif self.content:
-            await self.preprocess_content()
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: BaseClient, for_id: str = None):
+    async def persist(self, client: BaseClient):
         if not self.url and self.content:
             self.url = await client.upload_element(
                 content=self.content, mime=type_to_mime[self.type]
@@ -96,17 +94,21 @@ class Element:
         if not self.content and not self.url and self.path:
             await self.load()
 
+        await self.preprocess_content()
+
         self.for_id = for_id
 
         # We have a client, persist the element
         if self.emitter.client and not self.id:
-            element = await self.persist(self.emitter.client, for_id)
+            element = await self.persist(self.emitter.client)
             self.id = element["id"]
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
 
         element = self.to_dict()
+
+        element["content"] = self.content
 
         if self.emitter.emit and element:
             trace_event(f"send {self.__class__.__name__}")
@@ -193,8 +195,3 @@ class Pyplot(Element):
         self.content = image.getvalue()
 
         super().__post_init__()
-
-    async def before_emit(self, element: Dict) -> Dict:
-        # Prevent the figure from being serialized
-        del element["figure"]
-        return element

@@ -21,8 +21,9 @@ __pycache__
 
 .ipynb_checkpoints
 
-.langchain.db
-database.db
+*.db
+
+fs
 
 .chroma
 

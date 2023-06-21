@@ -102,6 +102,8 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        if config.project.database == "local":
+            await client.disconnect()
         if watch_task:
             try:
                 stop_event.set()
@@ -109,9 +111,6 @@ async def lifespan(app: FastAPI):
                 await watch_task
             except asyncio.exceptions.CancelledError:
                 pass
-
-        if config.project.database == "local":
-            await client.disconnect()
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
