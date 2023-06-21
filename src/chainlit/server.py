@@ -6,6 +6,8 @@ mimetypes.add_type("text/css", ".css")
 import os
 import json
 import webbrowser
+from pathlib import Path
+
 
 from contextlib import asynccontextmanager
 from watchfiles import awatch
@@ -21,10 +23,13 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
+from prisma import Client, register
+
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
-from chainlit.client import CloudClient
+from chainlit.client.cloud import CloudClient
+from chainlit.client.local import LocalClient
 from chainlit.emitter import ChainlitEmitter
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
@@ -50,6 +55,11 @@ async def lifespan(app: FastAPI):
         # Add a delay before opening the browser
         await asyncio.sleep(1)
         webbrowser.open(url)
+
+    if config.project.database == "local":
+        client = Client()
+        register(client)
+        await client.connect()
 
     watch_task = None
     stop_event = asyncio.Event()
@@ -99,6 +109,9 @@ async def lifespan(app: FastAPI):
                 await watch_task
             except asyncio.exceptions.CancelledError:
                 pass
+
+        if config.project.database == "local":
+            await client.disconnect()
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -206,6 +219,15 @@ async def project_settings():
     )
 
 
+@app.get("/files/{filename:path}")
+async def serve_file(filename: str):
+    file_path = Path(config.project.local_fs_path) / filename
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        return {"error": "File not found"}
+
+
 @app.get("/{path:path}")
 async def serve(path: str):
     """Serve the UI."""
@@ -236,7 +258,7 @@ def need_session(id: str):
 async def connect(sid, environ):
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
-    cloud_client = None
+    client = None
 
     # Check authorization
     if not config.project.public and not authorization:
@@ -244,17 +266,19 @@ async def connect(sid, environ):
         trace_event("no_access_token")
         logger.error("Connection refused: No access token provided")
         return False
-    elif authorization and config.project.id:
+    elif authorization and config.project.id and config.project.database == "cloud":
         # Create the cloud client
-        cloud_client = CloudClient(
+        client = CloudClient(
             project_id=config.project.id,
             session_id=sid,
             access_token=authorization,
         )
-        is_project_member = await cloud_client.is_project_member()
+        is_project_member = await client.is_project_member()
         if not is_project_member:
             logger.error("Connection refused: You are not a member of this project")
             return False
+    elif config.project.database == "local":
+        client = LocalClient(session_id=sid)
 
     # Check user env
     if config.project.user_env:
@@ -293,7 +317,7 @@ async def connect(sid, environ):
         "id": sid,
         "emit": emit_fn,
         "ask_user": ask_user_fn,
-        "client": cloud_client,
+        "client": client,
         "user_env": user_env,
         "running_sync": False,
         "should_stop": False,

@@ -10,13 +10,18 @@ from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
 type_to_mime = {
-    "image": "binary/octet-stream",
+    "image": "image/png",
     "text": "text/plain",
     "pdf": "application/pdf",
 }
 
+mime_to_ext = {
+    "image/png": "png",
+    "text/plain": "txt",
+    "application/pdf": "pdf",
+}
 
-@dataclass_json
+
 @dataclass
 class Element:
     # Name of the element, this will be used to reference the element in the UI.
@@ -49,6 +54,17 @@ class Element:
 
         self.tempId = uuid.uuid4().hex
 
+    def to_dict(self) -> Dict:
+        return {
+            "type": self.type,
+            "url": self.url,
+            "name": self.name,
+            "display": self.display,
+            "size": getattr(self, "size", None),
+            "language": getattr(self, "language", None),
+            "forId": getattr(self, "for_id", None),
+        }
+
     async def preprocess_content(self):
         pass
 
@@ -68,17 +84,7 @@ class Element:
                 content=self.content, mime=type_to_mime[self.type]
             )
 
-        size = getattr(self, "size", None)
-        language = getattr(self, "language", None)
-        element = await client.create_element(
-            name=self.name,
-            url=self.url,
-            type=self.type,
-            display=self.display,
-            size=size,
-            language=language,
-            for_id=for_id,
-        )
+        element = await client.create_element(self.to_dict())
         return element
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -90,7 +96,9 @@ class Element:
         if not self.content and not self.url and self.path:
             await self.load()
 
-        # Cloud is enabled, upload the element to S3
+        self.for_id = for_id
+
+        # We have a client, persist the element
         if self.emitter.client and not self.id:
             element = await self.persist(self.emitter.client, for_id)
             self.id = element["id"]
@@ -99,8 +107,6 @@ class Element:
             raise ValueError("Must provide url or content to send element")
 
         element = self.to_dict()
-        if for_id:
-            element["forId"] = for_id
 
         if self.emitter.emit and element:
             trace_event(f"send {self.__class__.__name__}")

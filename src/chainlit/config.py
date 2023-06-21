@@ -1,4 +1,4 @@
-from typing import Optional, Any, Callable, List, Dict, TYPE_CHECKING
+from typing import Optional, Any, Callable, Literal, List, Dict, TYPE_CHECKING
 import os
 import sys
 import tomli
@@ -26,9 +26,13 @@ DEFAULT_CONFIG_STR = f"""[project]
 public = true
 
 # The project ID (found on https://cloud.chainlit.io).
-# If provided, all the message data will be stored in the cloud.
 # The project ID is required when public is set to false.
 #id = ""
+
+# local will create a database in your .chainlit directory.
+# cloud will use the Chainlit cloud database.
+# If you don't want to persist at all, comment out this line.
+database = "local"
 
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
@@ -136,12 +140,18 @@ class ProjectSettings:
     id: Optional[str] = None
     # Whether the app is available to anonymous users or only to team members.
     public: bool = True
+    # Storage type
+    database: Optional[Literal["local", "cloud"]] = None
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: List[str] = None
     # Path to the local langchain cache database
     lc_cache_path: str = None
+    # Path to the local chat db
+    local_db_path: str = None
+    # Path to the local file system
+    local_fs_path: str = None
 
 
 @dataclass()
@@ -203,10 +213,18 @@ def load_settings():
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
+        local_db_path = os.path.join(config_dir, ".chat.db")
+        local_fs_path = os.path.join(config_dir, "fs")
+
+        os.environ["LOCAL_DB_PATH"] = f"file:{local_db_path}"
 
         project_settings = ProjectSettings(
-            lc_cache_path=lc_cache_path, **project_config
+            lc_cache_path=lc_cache_path,
+            local_db_path=local_db_path,
+            local_fs_path=local_fs_path,
+            **project_config,
         )
+
         ui_settings = UISettings(**ui_settings)
 
         if not project_settings.public and not project_settings.id:

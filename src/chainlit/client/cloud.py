@@ -1,56 +1,14 @@
 from typing import Dict, Any, Optional
-from abc import ABC, abstractmethod
 import uuid
 
 import asyncio
 import aiohttp
 from python_graphql_client import GraphqlClient
 
-from chainlit.types import ElementType, ElementSize
+from .base import BaseClient
+
 from chainlit.logger import logger
 from chainlit.config import config
-
-
-class BaseClient(ABC):
-    project_id: str
-    session_id: str
-
-    @abstractmethod
-    async def is_project_member(self, access_token: str) -> bool:
-        pass
-
-    @abstractmethod
-    async def create_conversation(self, session_id: str) -> int:
-        pass
-
-    @abstractmethod
-    async def create_message(self, variables: Dict[str, Any]) -> int:
-        pass
-
-    @abstractmethod
-    async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
-        pass
-
-    @abstractmethod
-    async def delete_message(self, message_id: int) -> bool:
-        pass
-
-    @abstractmethod
-    async def upload_element(self, content: bytes, mime: str) -> str:
-        pass
-
-    @abstractmethod
-    async def create_element(
-        self,
-        type: ElementType,
-        url: str,
-        name: str,
-        display: str,
-        size: ElementSize = None,
-        language: str = None,
-        for_id: str = None,
-    ) -> Dict[str, Any]:
-        pass
 
 
 conversation_lock = asyncio.Lock()
@@ -140,6 +98,9 @@ class CloudClient(BaseClient):
 
         return self.conversation_id
 
+    async def get_message(self):
+        raise NotImplementedError
+
     async def create_message(self, variables: Dict[str, Any]) -> int:
         c_id = await self.get_conversation_id()
 
@@ -196,16 +157,7 @@ class CloudClient(BaseClient):
 
         return True
 
-    async def create_element(
-        self,
-        type: ElementType,
-        url: str,
-        name: str,
-        display: str,
-        size: ElementSize = None,
-        language: str = None,
-        for_id: str = None,
-    ) -> Dict[str, Any]:
+    async def create_element(self, variables):
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -226,16 +178,7 @@ class CloudClient(BaseClient):
             }
         }
         """
-        variables = {
-            "conversationId": c_id,
-            "type": type,
-            "url": url,
-            "name": name,
-            "display": display,
-            "size": size,
-            "language": language,
-            "forId": for_id,
-        }
+        variables["conversationId"] = c_id
         res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):

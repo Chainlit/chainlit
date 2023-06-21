@@ -21,6 +21,7 @@ from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.telemetry import trace_event
 from chainlit.cache import init_lc_cache
+from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
 from chainlit.server import app
 
@@ -49,6 +50,9 @@ def run_chainlit(target: str):
 
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
+
+    # Initialize the local database if configured to use it
+    init_local_db()
 
     log_level = "debug" if config.run.debug else "error"
 
@@ -128,6 +132,14 @@ def chainlit_login(args=None, **kwargs):
 def chainlit_logout(args=None, **kwargs):
     trace_event("chainlit logout")
     logout()
+    sys.exit(0)
+
+
+@cli.command("migrate")
+@click.argument("args", nargs=-1)
+def chainlit_migrate(args=None, **kwargs):
+    trace_event("chainlit migrate")
+    migrate_local_db()
     sys.exit(0)
 
 
