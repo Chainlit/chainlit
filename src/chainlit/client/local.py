@@ -9,8 +9,6 @@ import aiofiles
 
 from .base import BaseClient, MessageDict
 
-from prisma.models import Conversation, Message, Element
-
 from chainlit.logger import logger
 from chainlit.config import config
 from chainlit.element import mime_to_ext
@@ -52,6 +50,8 @@ class LocalClient(BaseClient):
         return True
 
     async def create_conversation(self, session_id):
+        from prisma.models import Conversation
+
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
         async with conversation_lock:
             if self.conversation_id:
@@ -71,6 +71,8 @@ class LocalClient(BaseClient):
         return self.conversation_id
 
     async def create_message(self, variables):
+        from prisma.models import Message
+
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -86,12 +88,16 @@ class LocalClient(BaseClient):
         return res.id
 
     async def get_message(self, message_id):
+        from prisma.models import Message
+
         res = await Message.prisma().find_first(where={"id": message_id})
         res = res.dict()
         self.after_read(res)
         return res
 
     async def update_message(self, message_id, variables):
+        from prisma.models import Message
+
         self.before_write(variables)
 
         await Message.prisma().update(data=variables, where={"id": message_id})
@@ -99,6 +105,8 @@ class LocalClient(BaseClient):
         return True
 
     async def delete_message(self, message_id):
+        from prisma.models import Message
+
         await Message.prisma().delete(where={"id": message_id})
 
         return True
@@ -107,6 +115,8 @@ class LocalClient(BaseClient):
         self,
         variables,
     ):
+        from prisma.models import Element
+
         c_id = await self.get_conversation_id()
 
         if not c_id:

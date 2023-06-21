@@ -1,6 +1,4 @@
 import os
-from prisma.cli.prisma import run
-
 from chainlit.logger import logger
 from chainlit.config import config, PACKAGE_ROOT
 
@@ -8,6 +6,8 @@ SCHEMA_PATH = os.path.join(PACKAGE_ROOT, "db/prisma/schema.prisma")
 
 
 def db_push():
+    from prisma.cli.prisma import run
+
     args = ["db", "push", f"--schema={SCHEMA_PATH}"]
     env = {"LOCAL_DB_PATH": os.environ.get("LOCAL_DB_PATH")}
     run(args, env=env)
