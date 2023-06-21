@@ -23,8 +23,6 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
-from prisma import Client, register
-
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
@@ -57,6 +55,8 @@ async def lifespan(app: FastAPI):
         webbrowser.open(url)
 
     if config.project.database == "local":
+        from prisma import Client, register
+
         client = Client()
         register(client)
         await client.connect()
