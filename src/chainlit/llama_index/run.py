@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Union
 from llama_index.response.schema import Response, StreamingResponse
 from llama_index.chat_engine.types import BaseChatEngine
 from llama_index.indices.query.base import BaseQueryEngine
@@ -6,7 +6,7 @@ from llama_index.indices.query.base import BaseQueryEngine
 from chainlit.message import Message
 
 
-async def run_llama(instance: Any, input_str: str):
+async def run_llama(instance: Union[BaseChatEngine, BaseQueryEngine], input_str: str):
     # Trick to display the loader in the UI until the first token is streamed
     await Message(content="").send()
 
