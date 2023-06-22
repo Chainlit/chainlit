@@ -108,6 +108,7 @@ class Element:
 
         element = self.to_dict()
 
+        element["id"] = self.id
         element["content"] = self.content
 
         if self.emitter.emit and element:
