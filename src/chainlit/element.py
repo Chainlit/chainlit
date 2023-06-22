@@ -55,7 +55,7 @@ class Element:
         self.tempId = uuid.uuid4().hex
 
     def to_dict(self) -> Dict:
-        return {
+        _dict = {
             "tempId": self.tempId,
             "type": self.type,
             "url": self.url,
@@ -65,6 +65,11 @@ class Element:
             "language": getattr(self, "language", None),
             "forId": getattr(self, "for_id", None),
         }
+
+        if self.id:
+            _dict["id"] = self.id
+
+        return _dict
 
     async def preprocess_content(self):
         pass
@@ -108,7 +113,6 @@ class Element:
 
         element = self.to_dict()
 
-        element["id"] = self.id
         element["content"] = self.content
 
         if self.emitter.emit and element:

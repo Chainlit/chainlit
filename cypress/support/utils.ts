@@ -41,9 +41,7 @@ export async function runTest(test: string) {
     for (const file of variants) {
       let childProcess;
 
-      if (localDb) {
-        cleanLocalData(testDir);
-      }
+      cleanLocalData(testDir);
 
       console.log(`Running spec "${test}" with chainlit file "${file}"`);
 

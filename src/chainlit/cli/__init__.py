@@ -126,8 +126,6 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
 
         if db:
             config.project.database = db
-        else:
-            config.project.database = None
 
         config.project.enable_telemetry = False
         no_cache = True

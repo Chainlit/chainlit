@@ -278,6 +278,10 @@ async def connect(sid, environ):
             return False
     elif config.project.database == "local":
         client = LocalClient(session_id=sid)
+    elif config.project.database == "custom":
+        if not config.code.client_factory:
+            raise ValueError("Client factory not provided")
+        client = await config.code.client_factory(sid)
 
     # Check user env
     if config.project.user_env:
@@ -429,7 +433,9 @@ async def process_message(session: Session, author: str, input_str: str):
         pass
     except Exception as e:
         logger.exception(e)
-        await ErrorMessage(author="Error", content=str(e)).send()
+        await ErrorMessage(
+            author="Error", content=str(e) or e.__class__.__name__
+        ).send()
     finally:
         await __chainlit_emitter__.task_end()
 

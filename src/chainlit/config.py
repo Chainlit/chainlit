@@ -10,6 +10,7 @@ from chainlit.version import __version__
 
 if TYPE_CHECKING:
     from chainlit.action import Action
+    from chainlit.client.base import BaseClient
 
 PACKAGE_ROOT = os.path.dirname(__file__)
 
@@ -31,6 +32,7 @@ public = true
 
 # local will create a database in your .chainlit directory.
 # cloud will use the Chainlit cloud database.
+# custom will load your custom client.
 # If you don't want to persist at all, comment out this line.
 database = "local"
 
@@ -106,6 +108,7 @@ class CodeSettings:
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
+    client_factory: Optional[Callable[[str], "BaseClient"]] = None
 
     def validate(self):
         requires_one_of = [
@@ -141,7 +144,7 @@ class ProjectSettings:
     # Whether the app is available to anonymous users or only to team members.
     public: bool = True
     # Storage type
-    database: Optional[Literal["local", "cloud"]] = None
+    database: Optional[Literal["local", "cloud", "custom"]] = None
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
