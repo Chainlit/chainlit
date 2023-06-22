@@ -1,7 +1,7 @@
 def mock_openai():
     import os
     from aioresponses import aioresponses
-    import responses
+    from responses import RequestsMock
 
     # Mock the openai api key
     os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
@@ -1578,16 +1578,18 @@ def mock_openai():
 
     # Mock the sync openai api
 
-    responses.start()
+    request_mock = RequestsMock()
 
-    responses.add(
-        responses.POST,
+    request_mock.start()
+
+    request_mock.add(
+        request_mock.POST,
         "https://api.openai.com/v1/completions",
         json=mocked_completion,
     )
 
-    responses.add(
-        responses.POST,
+    request_mock.add(
+        request_mock.POST,
         "https://api.openai.com/v1/embeddings",
         json=mocked_embedding,
     )
