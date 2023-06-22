@@ -7,10 +7,15 @@ SCHEMA_PATH = os.path.join(PACKAGE_ROOT, "db/prisma/schema.prisma")
 
 def db_push():
     from prisma.cli.prisma import run
+    import prisma
+    from importlib import reload
 
     args = ["db", "push", f"--schema={SCHEMA_PATH}"]
     env = {"LOCAL_DB_PATH": os.environ.get("LOCAL_DB_PATH")}
     run(args, env=env)
+
+    # Without this the client will fail to initialize the first time.
+    reload(prisma)
 
 
 def init_local_db():
