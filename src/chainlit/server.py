@@ -42,14 +42,14 @@ async def lifespan(app: FastAPI):
     host = config.run.host
     port = config.run.port
 
+    if host == DEFAULT_HOST:
+        url = f"http://localhost:{port}"
+    else:
+        url = f"http://{host}:{port}"
+
+    logger.info(f"Your app is available at {url}")
+
     if not config.run.headless:
-        if host == DEFAULT_HOST:
-            url = f"http://localhost:{port}"
-        else:
-            url = f"http://{host}:{port}"
-
-        logger.info(f"Your app is available at {url}")
-
         # Add a delay before opening the browser
         await asyncio.sleep(1)
         webbrowser.open(url)

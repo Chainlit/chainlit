@@ -27,14 +27,14 @@ DEFAULT_CONFIG_STR = f"""[project]
 public = true
 
 # The project ID (found on https://cloud.chainlit.io).
-# The project ID is required when public is set to false.
+# The project ID is required when public is set to false or when using the cloud database.
 #id = ""
 
-# local will create a database in your .chainlit directory.
+# Uncomment if you want to persist the chats.
+# local will create a database in your .chainlit directory (requires node.js installed).
 # cloud will use the Chainlit cloud database.
-# custom will load your custom client.
-# If you don't want to persist at all, comment out this line.
-database = "local"
+# custom will load use your custom client.
+# database = "local"
 
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true

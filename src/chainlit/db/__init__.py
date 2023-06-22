@@ -23,7 +23,6 @@ def init_local_db():
     if use_local_db:
         if not os.path.exists(config.project.local_db_path):
             db_push()
-            logger.info(f"Local db created at: {config.project.local_db_path}")
 
 
 def migrate_local_db():

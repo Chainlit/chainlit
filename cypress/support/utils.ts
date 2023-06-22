@@ -101,17 +101,22 @@ export async function runChainlit(dir: string, file: string, localDb = false) {
 
     const child = spawn("chainlit", options, {
       cwd: dir,
-      env: process.env,
-      stdio: "inherit",
     });
 
-    setTimeout(() => {
-      // todo listen for stdout. passing process.env makes stdout silent for some reason.
-      resolve(child);
-    }, 4000);
+    // child.stdout?.on("data", (data) => {
+    //   const output = data.toString();
+    //   console.log(`stdout: ${data}`);
+
+    //   if (output.includes("Listening on")) {
+    //     resolve(child);
+    //   }
+    // });
 
     child.stderr?.on("data", (data) => {
-      reject(data.toString());
+      if (data.toString().includes("Your app is available at")) {
+        resolve(child);
+      }
+      // reject(data.toString());
     });
 
     child.on("error", (error) => {
