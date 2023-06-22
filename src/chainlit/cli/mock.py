@@ -1578,7 +1578,7 @@ def mock_openai():
 
     # Mock the sync openai api
 
-    request_mock = RequestsMock()
+    request_mock = RequestsMock(passthru_prefixes=("https://openaipublic"))
 
     request_mock.start()
 
