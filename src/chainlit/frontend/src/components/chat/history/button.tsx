@@ -24,7 +24,7 @@ function buildHistory(chats?: IChat[]) {
   const history: Record<
     string,
     {
-      key: number;
+      key: number | string;
       hour: string;
       content: string;
     }[]
@@ -51,7 +51,7 @@ function buildHistory(chats?: IChat[]) {
     history[date].push({
       key: c.createdAt,
       hour: new Date(c.createdAt).toLocaleTimeString(undefined, timeOptions),
-      content: c.messages[0].content
+      content: c.messages[0].content!
     });
   });
 

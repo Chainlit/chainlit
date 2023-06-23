@@ -2,10 +2,11 @@ from typing import Optional
 import uuid
 import json
 import os
-from datetime import datetime
 
 import asyncio
 import aiofiles
+
+from chainlit.client.base import PaginatedResponse, PageInfo
 
 from .base import BaseClient, MessageDict
 
@@ -14,29 +15,16 @@ from chainlit.config import config
 from chainlit.element import mime_to_ext
 
 
-def timestamp_to_datetime(timestamp: int):
-    return (
-        datetime.fromtimestamp(timestamp / 1000).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-        + "Z"
-    )
-
-
 conversation_lock = asyncio.Lock()
 
 
 class LocalClient(BaseClient):
     conversation_id: Optional[str] = None
 
-    def __init__(self, session_id: str):
-        self.session_id = session_id
-
     def before_write(self, variables: MessageDict):
         if "llmSettings" in variables:
             # Sqlite doesn't support json fields, so we need to serialize it.
             variables["llmSettings"] = json.dumps(variables["llmSettings"])
-
-        if "createdAt" in variables:
-            variables["createdAt"] = timestamp_to_datetime(variables["createdAt"])
 
         if "tempId" in variables:
             del variables["tempId"]
@@ -49,7 +37,18 @@ class LocalClient(BaseClient):
     async def is_project_member(self):
         return True
 
-    async def create_conversation(self, session_id):
+    async def get_member_role(self):
+        return "OWNER"
+
+    async def get_project_members(self):
+        return []
+
+    async def get_conversation_id(self):
+        self.conversation_id = await self.create_conversation()
+
+        return self.conversation_id
+
+    async def create_conversation(self):
         from prisma.models import Conversation
 
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
@@ -57,18 +56,82 @@ class LocalClient(BaseClient):
             if self.conversation_id:
                 return self.conversation_id
 
-            res = await Conversation.prisma().create(
-                data={
-                    "sessionId": session_id,
-                }
-            )
+            res = await Conversation.prisma().create(data={})
 
             return res.id
 
-    async def get_conversation_id(self):
-        self.conversation_id = await self.create_conversation(self.session_id)
+    async def delete_conversation(self, conversation_id):
+        from prisma.models import Conversation
 
-        return self.conversation_id
+        await Conversation.prisma().delete(where={"id": conversation_id})
+
+        return True
+
+    async def get_conversation(self, conversation_id: int):
+        from prisma.models import Conversation
+
+        c = await Conversation.prisma().find_unique_or_raise(
+            where={"id": conversation_id}, include={"messages": True, "elements": True}
+        )
+
+        for m in c.messages:
+            if m.llmSettings:
+                m.llmSettings = json.loads(m.llmSettings)
+
+        return json.loads(c.json())
+
+    async def get_conversations(self, pagination, filter):
+        from prisma.models import Conversation
+
+        some_messages = {}
+
+        if filter.feedback is not None:
+            some_messages["humanFeedback"] = filter.feedback
+
+        if filter.search is not None:
+            some_messages["content"] = {"contains": filter.search or None}
+
+        if pagination.cursor:
+            cursor = {"id": pagination.cursor}
+        else:
+            cursor = None
+
+        conversations = await Conversation.prisma().find_many(
+            take=pagination.first,
+            skip=1 if pagination.cursor else None,
+            cursor=cursor,
+            include={
+                "messages": {
+                    "take": 1,
+                    "where": {
+                        "authorIsUser": True,
+                    },
+                    "orderBy": [
+                        {
+                            "createdAt": "asc",
+                        }
+                    ],
+                }
+            },
+            where={"messages": {"some": some_messages}},
+            order={
+                "createdAt": "desc",
+            },
+        )
+
+        has_more = len(conversations) == pagination.first
+
+        if has_more:
+            end_cursor = conversations[-1].id
+        else:
+            end_cursor = None
+
+        conversations = [json.loads(c.json()) for c in conversations]
+
+        return PaginatedResponse(
+            pageInfo=PageInfo(hasNextPage=has_more, endCursor=end_cursor),
+            data=conversations,
+        )
 
     async def create_message(self, variables):
         from prisma.models import Message
@@ -79,12 +142,13 @@ class LocalClient(BaseClient):
             logger.warning("Missing conversation ID, could not persist the message.")
             return None
 
+        variables = variables.copy()
+
         variables["conversationId"] = c_id
 
         self.before_write(variables)
 
         res = await Message.prisma().create(data=variables)
-
         return res.id
 
     async def get_message(self, message_id):
@@ -97,6 +161,8 @@ class LocalClient(BaseClient):
 
     async def update_message(self, message_id, variables):
         from prisma.models import Message
+
+        variables = variables.copy()
 
         self.before_write(variables)
 
@@ -153,3 +219,15 @@ class LocalClient(BaseClient):
 
             url = f"/files/{sub_path}"
             return url
+
+    async def set_human_feedback(self, message_id, feedback):
+        from prisma.models import Message
+
+        await Message.prisma().update(
+            where={"id": message_id},
+            data={
+                "humanFeedback": feedback,
+            },
+        )
+
+        return True

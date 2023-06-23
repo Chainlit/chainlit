@@ -52,11 +52,11 @@ function NavItem({ to, label }: INavItem) {
 }
 
 interface NavProps {
-  isPublic?: boolean;
+  hasDb?: boolean;
   hasReadme?: boolean;
 }
 
-function Nav({ isPublic, hasReadme }: NavProps) {
+function Nav({ hasDb, hasReadme }: NavProps) {
   const location = useLocation();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -75,7 +75,7 @@ function Nav({ isPublic, hasReadme }: NavProps) {
 
   const tabs = [{ to: '/', label: 'Chat' }];
 
-  if (isPublic === false) {
+  if (hasDb) {
     tabs.push({ to: '/dataset', label: 'History' });
   }
 
@@ -155,7 +155,7 @@ export default function Header() {
       >
         <Stack alignItems="center" direction="row">
           <Nav
-            isPublic={pSettings?.project?.public}
+            hasDb={!!pSettings?.project?.database}
             hasReadme={!!pSettings?.markdown}
           />
         </Stack>

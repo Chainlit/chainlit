@@ -12,7 +12,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from watchfiles import awatch
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
@@ -28,13 +28,19 @@ from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
 from chainlit.client.cloud import CloudClient
 from chainlit.client.local import LocalClient
+from chainlit.client.utils import get_client
 from chainlit.emitter import ChainlitEmitter
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
 from chainlit.message import Message, ErrorMessage
 from chainlit.telemetry import trace_event
 from chainlit.logger import logger
-from chainlit.types import CompletionRequest
+from chainlit.types import (
+    CompletionRequest,
+    UpdateFeedbackRequest,
+    GetConversationsRequest,
+    DeleteConversationRequest,
+)
 
 
 @asynccontextmanager
@@ -218,6 +224,62 @@ async def project_settings():
     )
 
 
+@app.put("/message/feedback")
+async def update_feedback(request: Request, update: UpdateFeedbackRequest):
+    """Update the human feedback for a particular message."""
+
+    client = await get_client(request)
+    await client.set_human_feedback(
+        message_id=update.messageId, feedback=update.feedback
+    )
+    return JSONResponse(content={"success": True})
+
+
+@app.get("/project/members")
+async def get_project_members(request: Request):
+    """Get all the members of a project."""
+
+    client = await get_client(request)
+    res = await client.get_project_members()
+    return JSONResponse(content=res)
+
+
+@app.get("/project/role")
+async def get_member_role(request: Request):
+    """Get the role of a member."""
+
+    client = await get_client(request)
+    res = await client.get_member_role()
+    return PlainTextResponse(content=res)
+
+
+@app.post("/project/conversations")
+async def get_project_conversations(request: Request, payload: GetConversationsRequest):
+    """Get the conversations page by page."""
+
+    client = await get_client(request)
+    res = await client.get_conversations(payload.pagination, payload.filter)
+    return JSONResponse(content=res.to_dict())
+
+
+@app.get("/project/conversation/{conversation_id}")
+async def get_conversation(request: Request, conversation_id: str):
+    """Get a specific conversation."""
+
+    client = await get_client(request)
+    res = await client.get_conversation(int(conversation_id))
+    return JSONResponse(content=res)
+
+
+@app.delete("/project/conversation")
+async def delete_conversation(request: Request, payload: DeleteConversationRequest):
+    """Delete a conversation."""
+
+    client = await get_client(request)
+    await client.delete_conversation(conversation_id=payload.conversationId)
+    return JSONResponse(content={"success": True})
+
+
 @app.get("/files/{filename:path}")
 async def serve_file(filename: str):
     file_path = Path(config.project.local_fs_path) / filename
@@ -269,7 +331,6 @@ async def connect(sid, environ):
         # Create the cloud client
         client = CloudClient(
             project_id=config.project.id,
-            session_id=sid,
             access_token=authorization,
         )
         is_project_member = await client.is_project_member()
@@ -277,11 +338,11 @@ async def connect(sid, environ):
             logger.error("Connection refused: You are not a member of this project")
             return False
     elif config.project.database == "local":
-        client = LocalClient(session_id=sid)
+        client = LocalClient()
     elif config.project.database == "custom":
         if not config.code.client_factory:
             raise ValueError("Client factory not provided")
-        client = await config.code.client_factory(sid)
+        client = await config.code.client_factory()
 
     # Check user env
     if config.project.user_env:

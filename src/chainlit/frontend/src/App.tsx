@@ -8,7 +8,6 @@ import {
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { accessTokenState, roleState } from 'state/user';
-import { getRole } from 'api';
 import makeTheme from 'theme';
 import { ThemeProvider } from '@mui/material';
 import Home from 'pages/Home';
@@ -17,16 +16,15 @@ import Login from 'pages/Login';
 import AuthCallback from 'pages/AuthCallback';
 import Dataset from 'pages/Dataset';
 import Conversation from 'pages/Conversation';
-import CloudProvider from 'components/cloudProvider';
 import Env from 'pages/Env';
 import { useAuth } from 'hooks/auth';
-import { projectSettingsState } from 'state/project';
 import Socket from 'components/socket';
 import { Toaster } from 'react-hot-toast';
 import Readme from 'pages/Readme';
 import { settingsState } from 'state/settings';
 import SettingsModal from 'components/settingsModal';
 import Hotkeys from 'components/Hotkeys';
+import { clientState } from 'state/client';
 
 const router = createBrowserRouter([
   {
@@ -43,11 +41,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/conversations/:id',
-    element: (
-      <CloudProvider>
-        <Conversation />
-      </CloudProvider>
-    )
+    element: <Conversation />
   },
   {
     path: '/dataset',
@@ -72,8 +66,8 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const client = useRecoilValue(clientState);
   const { theme: themeVariant } = useRecoilValue(settingsState);
-  const pSettings = useRecoilValue(projectSettingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
@@ -103,18 +97,20 @@ function App() {
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
 
   useEffect(() => {
-    if (!accessToken || !pSettings?.project?.id) {
+    if (!accessToken) {
       return;
     }
-    getRole(pSettings.chainlitServer, accessToken, pSettings.project.id)
-      .then(async ({ role }) => {
+    client.setAccessToken(accessToken);
+    client
+      .getRole()
+      .then(async (role) => {
         setRole(role);
       })
       .catch((err) => {
         console.log(err);
         setRole('ANONYMOUS');
       });
-  }, [accessToken, pSettings]);
+  }, [accessToken]);
 
   return (
     <ThemeProvider theme={theme}>

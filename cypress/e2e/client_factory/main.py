@@ -3,13 +3,28 @@ import chainlit as cl
 
 
 class CustomClient(BaseClient):
-    def __init__(self, session_id: str):
-        self.session_id = session_id
-
     async def is_project_member(self, access_token):
         raise NotImplementedError()
 
-    async def create_conversation(self, session_id):
+    async def get_member_role(self, access_token):
+        raise NotImplementedError()
+
+    async def get_project_members(self):
+        raise NotImplementedError()
+
+    async def create_conversation(self):
+        raise NotImplementedError()
+
+    async def delete_conversation(self, conversation_id):
+        raise NotImplementedError()
+
+    async def get_conversation(self, conversation_id):
+        raise NotImplementedError()
+
+    async def get_conversations(self):
+        raise NotImplementedError()
+
+    async def set_human_feedback(self, message_id, feedback):
         raise NotImplementedError()
 
     async def get_message(self, conversation_id, message_id):
@@ -32,8 +47,8 @@ class CustomClient(BaseClient):
 
 
 @cl.client_factory
-async def client_factory(session_id: str):
-    return CustomClient(session_id)
+async def client_factory():
+    return CustomClient()
 
 
 @cl.on_chat_start

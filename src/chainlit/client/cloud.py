@@ -5,7 +5,7 @@ import asyncio
 import aiohttp
 from python_graphql_client import GraphqlClient
 
-from .base import BaseClient
+from .base import BaseClient, PaginatedResponse, PageInfo
 
 from chainlit.logger import logger
 from chainlit.config import config
@@ -17,9 +17,8 @@ conversation_lock = asyncio.Lock()
 class CloudClient(BaseClient):
     conversation_id: Optional[str] = None
 
-    def __init__(self, project_id: str, session_id: str, access_token: str):
+    def __init__(self, project_id: str, access_token: str):
         self.project_id = project_id
-        self.session_id = session_id
         self.headers = {
             "Authorization": access_token,
             "content-type": "application/json",
@@ -39,9 +38,11 @@ class CloudClient(BaseClient):
         """
         return self.graphql_client.execute_async(query=query, variables=variables)
 
-    def check_for_errors(self, response: Dict[str, Any]):
+    def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
         if "errors" in response:
-            logger.error(response["errors"])
+            if raise_error:
+                raise Exception(response["errors"][0])
+            logger.error(response["errors"][0])
             return True
         return False
 
@@ -55,7 +56,9 @@ class CloudClient(BaseClient):
         """
         return self.graphql_client.execute_async(query=mutation, variables=variables)
 
-    async def is_project_member(self) -> bool:
+    async def get_member_role(
+        self,
+    ):
         data = {"projectId": self.project_id}
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -68,23 +71,56 @@ class CloudClient(BaseClient):
                     logger.error(f"Failed to get user role. {r.status}: {reason}")
                     return False
                 json = await r.json()
-                role = json.get("role", "ANONYMOUS")
-                return role != "ANONYMOUS"
+                return json.get("role", "ANONYMOUS")
 
-    async def create_conversation(self, session_id: str) -> int:
+    async def is_project_member(self) -> bool:
+        role = await self.get_member_role()
+        return role != "ANONYMOUS"
+
+    async def get_project_members(self):
+        query = """query ($projectId: String!) {
+                    projectMembers(projectId: $projectId) {
+                    edges {
+                        cursor
+                        node {
+                        role
+                        user {
+                            email
+                            name
+                        }
+                        }
+                    }
+                    }
+                }"""
+        variables = {"projectId": self.project_id}
+        res = await self.query(query, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        members = []
+
+        for edge in res["data"]["projectMembers"]["edges"]:
+            node = edge["node"]
+            role = node["role"]
+            name = node["user"]["name"]
+            email = node["user"]["email"]
+            members.append({"role": role, "name": name, "email": email})
+
+        return members
+
+    async def create_conversation(self) -> int:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
         async with conversation_lock:
             if self.conversation_id:
                 return self.conversation_id
 
             mutation = """
-            mutation ($projectId: String!, $sessionId: String!) {
+            mutation ($projectId: String!, $sessionId: String) {
                 createConversation(projectId: $projectId, sessionId: $sessionId) {
                     id
                 }
             }
             """
-            variables = {"projectId": self.project_id, "sessionId": session_id}
+            variables = {"projectId": self.project_id}
             res = await self.mutation(mutation, variables)
 
             if self.check_for_errors(res):
@@ -94,9 +130,140 @@ class CloudClient(BaseClient):
             return int(res["data"]["createConversation"]["id"])
 
     async def get_conversation_id(self):
-        self.conversation_id = await self.create_conversation(self.session_id)
+        self.conversation_id = await self.create_conversation()
 
         return self.conversation_id
+
+    async def delete_conversation(self, conversation_id: int):
+        mutation = """mutation ($id: ID!) {
+    deleteConversation(id: $id) {
+      id
+    }
+  }"""
+        variables = {"id": conversation_id}
+        res = await self.mutation(mutation, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        return True
+
+    async def get_conversation(self, conversation_id: int):
+        query = """query ($id: ID!) {
+    conversation(id: $id) {
+      id
+      createdAt
+      messages {
+        id
+        isError
+        indent
+        author
+        content
+        waitForAnswer
+        humanFeedback
+        language
+        prompt
+        llmSettings
+        authorIsUser
+        createdAt
+      }
+      elements {
+        id
+        type
+        name
+        url
+        display
+        language
+        size
+        forId
+      }
+    }
+  }"""
+        variables = {
+            "id": conversation_id,
+        }
+        res = await self.query(query, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        return res["data"]["conversation"]
+
+    async def get_conversations(self, pagination, filter):
+        query = """query (
+        $first: Int
+        $projectId: String!
+        $cursor: String
+        $withFeedback: Int
+        $authorEmail: String
+        $search: String
+    ) {
+        conversations(
+        first: $first
+        cursor: $cursor
+        projectId: $projectId
+        withFeedback: $withFeedback
+        authorEmail: $authorEmail
+        search: $search
+        ) {
+        pageInfo {
+            endCursor
+            hasNextPage
+        }
+        edges {
+            cursor
+            node {
+            id
+            createdAt
+            elementCount
+            messageCount
+            author {
+                name
+                email
+            }
+            messages {
+                content
+            }
+            }
+        }
+        }
+    }"""
+
+        variables = {
+            "projectId": self.project_id,
+            "first": pagination.first,
+            "cursor": pagination.cursor,
+            "withFeedback": filter.feedback,
+            "authorEmail": filter.authorEmail,
+            "search": filter.search,
+        }
+        res = await self.query(query, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        conversations = []
+
+        for edge in res["data"]["conversations"]["edges"]:
+            node = edge["node"]
+            conversations.append(node)
+
+        page_info = res["data"]["conversations"]["pageInfo"]
+
+        return PaginatedResponse(
+            pageInfo=PageInfo(
+                hasNextPage=page_info["hasNextPage"],
+                endCursor=page_info["endCursor"],
+            ),
+            data=conversations,
+        )
+
+    async def set_human_feedback(self, message_id, feedback):
+        mutation = """mutation ($messageId: ID!, $humanFeedback: Int!) {
+                        setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback) {
+                            id
+                            humanFeedback
+                    }
+                }"""
+        variables = {"messageId": message_id, "humanFeedback": feedback}
+        res = await self.mutation(mutation, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        return True
 
     async def get_message(self):
         raise NotImplementedError
@@ -111,7 +278,7 @@ class CloudClient(BaseClient):
         variables["conversationId"] = c_id
 
         mutation = """
-        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: Float) {
+        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
             createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
                 id
             }

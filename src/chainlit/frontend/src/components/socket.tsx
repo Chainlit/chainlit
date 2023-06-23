@@ -26,7 +26,7 @@ const compareMessageIds = (a: IMessage, b: IMessage) => {
 
 export default memo(function Socket() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const { accessToken, isAuthenticated, isLoading: _isLoading } = useAuth();
+  const { accessToken, isAuthenticated, isLoading } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const [session, setSession] = useRecoilState(sessionState);
@@ -36,7 +36,6 @@ export default memo(function Socket() {
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
 
-  const isLoading = pSettings?.project?.id && _isLoading;
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {

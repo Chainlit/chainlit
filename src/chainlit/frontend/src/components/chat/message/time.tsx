@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 
 interface Props {
-  timestamp: number;
+  timestamp: number | string;
 }
 
 export default function MessageTime({ timestamp }: Props) {

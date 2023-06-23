@@ -1,8 +1,8 @@
 from typing import List, Dict, Union
 from abc import ABC, abstractmethod
 import uuid
-import time
 import asyncio
+from datetime import datetime, timezone
 
 from chainlit.telemetry import trace_event
 from chainlit.emitter import get_emitter
@@ -19,11 +19,6 @@ from chainlit.action import Action
 from chainlit.logger import logger
 
 
-def current_milli_time():
-    """Get the current time in milliseconds."""
-    return round(time.time() * 1000)
-
-
 class MessageBase(ABC):
     id: int = None
     temp_id: str = None
@@ -34,7 +29,7 @@ class MessageBase(ABC):
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.temp_id = uuid.uuid4().hex
-        self.created_at = current_milli_time()
+        self.created_at = datetime.now(timezone.utc).isoformat()
         self.emitter = get_emitter()
         if not self.emitter:
             raise RuntimeError("Message should be instantiated in a Chainlit context")

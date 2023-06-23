@@ -7,6 +7,12 @@ export const accessTokenState = atom<string | undefined>({
 
 export type Role = 'USER' | 'ADMIN' | 'OWNER' | 'ANONYMOUS' | undefined;
 
+export interface IMember {
+  name: string;
+  email: string;
+  role: Role;
+}
+
 export const roleState = atom<Role>({
   key: 'Role',
   default: undefined
