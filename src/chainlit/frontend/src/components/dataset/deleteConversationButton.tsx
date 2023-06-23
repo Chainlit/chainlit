@@ -8,7 +8,6 @@ import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import { IconButton } from '@mui/material';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { getErrorMessage } from 'helpers/apollo';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useRecoilValue } from 'recoil';
 import { clientState } from 'state/client';
@@ -38,7 +37,11 @@ export default function DeleteConversationButton({
       loading: 'Deleting conversation...',
       success: 'Conversation deleted!',
       error: (err) => {
-        return <span>{getErrorMessage(err)}</span>;
+        if (err instanceof Error) {
+          return <span>{err.message}</span>;
+        } else {
+          return <span></span>;
+        }
       }
     });
     onDelete();
