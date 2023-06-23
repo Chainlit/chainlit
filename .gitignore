@@ -23,6 +23,7 @@ __pycache__
 
 *.db
 
+
 fs
 
 .chroma
