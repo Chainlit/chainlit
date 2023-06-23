@@ -54,6 +54,7 @@ class Element:
 
     def to_dict(self) -> Dict:
         _dict = {
+            "tempId": self.tempId,
             "type": self.type,
             "url": self.url,
             "name": self.name,
@@ -108,6 +109,7 @@ class Element:
 
         element = self.to_dict()
 
+        element["id"] = self.id
         element["content"] = self.content
 
         if self.emitter.emit and element:
