@@ -6,7 +6,7 @@ import aiofiles
 from io import BytesIO
 
 from chainlit.context import get_emitter
-from chainlit.client import BaseClient
+from chainlit.client.base import BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
