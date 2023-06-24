@@ -93,8 +93,8 @@ Don't forget to revert that change before pushing.
 ### Start the UI
 
 ```sh
-cd src/chainlit/frontend
 npm run buildUi
+cd src/chainlit/frontend
 npm run dev -- --port 5174
 ```
 
