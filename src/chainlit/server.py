@@ -421,7 +421,7 @@ async def message(sid, data):
     await process_message(session, author, input_str)
 
 
-async def process_action(session: Session, action: Action):
+async def process_action(action: Action):
     callback = config.code.action_callbacks.get(action.name)
     if callback:
         await callback(action)
@@ -437,4 +437,4 @@ async def call_action(sid, action):
 
     action = Action(**action)
 
-    await process_action(session, action)
+    await process_action(action)
