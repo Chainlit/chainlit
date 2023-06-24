@@ -296,7 +296,6 @@ async def connect(sid, environ):
         "ask_user": ask_user_fn,
         "client": cloud_client,
         "user_env": user_env,
-        "running_sync": False,
         "should_stop": False,
     }  # type: Session
 

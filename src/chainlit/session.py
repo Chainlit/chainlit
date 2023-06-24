@@ -16,8 +16,6 @@ class Session(TypedDict):
     user_env: Dict[str, str]
     # Optional langchain agent
     agent: Any
-    # If the session is currently running a sync task
-    running_sync: bool
     # Whether the current task should be stopped
     should_stop: bool
     # Optional client to persist messages and files

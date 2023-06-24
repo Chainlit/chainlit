@@ -5,7 +5,7 @@ import time
 import asyncio
 
 from chainlit.telemetry import trace_event
-from chainlit.emitter import get_emitter
+from chainlit.context import get_emitter
 from chainlit.config import config
 from chainlit.types import (
     LLMSettings,
@@ -34,8 +34,6 @@ class MessageBase(ABC):
         self.temp_id = uuid.uuid4().hex
         self.created_at = current_milli_time()
         self.emitter = get_emitter()
-        if not self.emitter:
-            raise RuntimeError("Message should be instantiated in a Chainlit context")
 
     @abstractmethod
     def to_dict(self):

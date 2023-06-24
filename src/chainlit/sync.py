@@ -1,30 +1,18 @@
-from typing import Any, Callable
-
+from typing import Any, TypeVar, ParamSpec, Coroutine
 import asyncio
-from syncer import sync
 from asyncer import asyncify
 
-from chainlit.emitter import get_emitter
-from chainlit.context import loop_var
+from chainlit.context import get_loop
 
 
-def make_async(function: Callable):
-    emitter = get_emitter()
-    if not emitter:
-        raise RuntimeError(
-            "Emitter not found, please call make_async in a Chainlit context."
-        )
+make_async = asyncify
 
-    def wrapper(*args, **kwargs):
-        emitter.session["running_sync"] = True
-        res = function(*args, **kwargs)
-        emitter.session["running_sync"] = False
-        return res
-
-    return asyncify(wrapper, cancellable=True)
+T_Retval = TypeVar("T_Retval")
+T_ParamSpec = ParamSpec("T_ParamSpec")
+T = TypeVar("T")
 
 
-def run_sync(co: Any):
-    loop = loop_var.get()
+def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
+    loop = get_loop()
     result = asyncio.run_coroutine_threadsafe(co, loop=loop)
     return result.result()

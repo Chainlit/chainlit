@@ -1,5 +1,5 @@
 from typing import Dict
-from chainlit.emitter import get_emitter
+from chainlit.context import get_emitter
 
 user_sessions: Dict[str, Dict] = {}
 

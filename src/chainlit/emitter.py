@@ -129,21 +129,3 @@ class ChainlitEmitter:
     def send_token(self, id: Union[str, int], token: str):
         """Send a message token to the UI."""
         return self.emit("stream_token", {"id": id, "token": token})
-
-
-def get_emitter() -> Union[ChainlitEmitter, None]:
-    """
-    Get the Chainlit Emitter instance from the current call stack.
-    This unusual approach is necessary because:
-     - we need to get the right Emitter instance with the right websocket connection
-     - to preserve a lean developer experience, we do not pass the Emitter instance to every function call
-    """
-
-    return emitter_var.get()
-
-
-def get_emit_fn():
-    emitter = get_emitter()
-    if emitter:
-        return emitter.emit
-    return None

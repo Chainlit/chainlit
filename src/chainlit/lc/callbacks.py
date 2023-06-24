@@ -6,7 +6,8 @@ from langchain.schema import (
     BaseMessage,
     LLMResult,
 )
-from chainlit.emitter import get_emitter, ChainlitEmitter
+from chainlit.emitter import ChainlitEmitter
+from chainlit.context import get_emitter
 from chainlit.message import Message, ErrorMessage
 from chainlit.config import config
 from chainlit.types import LLMSettings
