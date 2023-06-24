@@ -2,8 +2,8 @@ from typing import Union, Dict
 from chainlit.session import Session
 from chainlit.types import AskSpec
 from chainlit.client import BaseClient
+from chainlit.context import emitter_var
 from socketio.exceptions import TimeoutError
-import inspect
 
 
 class ChainlitEmitter:
@@ -137,19 +137,9 @@ def get_emitter() -> Union[ChainlitEmitter, None]:
     This unusual approach is necessary because:
      - we need to get the right Emitter instance with the right websocket connection
      - to preserve a lean developer experience, we do not pass the Emitter instance to every function call
-
-    What happens is that we set __chainlit_emitter__ in the local variables when we receive a websocket message.
-    Then we can retrieve it from the call stack when we need it, even if the developer's code has no idea about it.
     """
-    attr = "__chainlit_emitter__"
-    candidates = [i[0].f_locals.get(attr) for i in inspect.stack()]
-    emitter = None
-    for candidate in candidates:
-        if candidate:
-            emitter = candidate
-            break
 
-    return emitter
+    return emitter_var.get()
 
 
 def get_emit_fn():

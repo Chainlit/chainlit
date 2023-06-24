@@ -107,13 +107,9 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.code.lc_rename:
-            author = run_sync(
-                config.code.lc_rename(author, __chainlit_emitter__=self.emitter)
-            )
+            author = run_sync(config.code.lc_rename(author))
 
         self.pop_prompt()
-
-        __chainlit_emitter__ = self.emitter
 
         streamed_message = Message(
             author=author,
@@ -135,11 +131,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
             return
 
         if config.code.lc_rename:
-            author = run_sync(
-                config.code.lc_rename(author, __chainlit_emitter__=self.emitter)
-            )
-
-        __chainlit_emitter__ = self.emitter
+            author = run_sync(config.code.lc_rename(author))
 
         if error:
             run_sync(ErrorMessage(author=author, content=message).send())
@@ -267,13 +259,9 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.code.lc_rename:
-            author = await config.code.lc_rename(
-                author, __chainlit_emitter__=self.emitter
-            )
+            author = await config.code.lc_rename(author)
 
         self.pop_prompt()
-
-        __chainlit_emitter__ = self.emitter
 
         streamed_message = Message(
             author=author,
@@ -295,11 +283,7 @@ class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHan
             return
 
         if config.code.lc_rename:
-            author = await config.code.lc_rename(
-                author, __chainlit_emitter__=self.emitter
-            )
-
-        __chainlit_emitter__ = self.emitter
+            author = await config.code.lc_rename(author)
 
         if error:
             await ErrorMessage(author=author, content=message).send()

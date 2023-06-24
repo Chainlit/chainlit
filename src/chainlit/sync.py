@@ -16,7 +16,6 @@ def make_async(function: Callable):
 
     def wrapper(*args, **kwargs):
         emitter.session["running_sync"] = True
-        __chainlit_emitter__ = emitter
         res = function(*args, **kwargs)
         emitter.session["running_sync"] = False
         return res

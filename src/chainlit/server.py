@@ -21,6 +21,7 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
+from chainlit.context import emitter_var
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
@@ -308,15 +309,15 @@ async def connect(sid, environ):
 @socket.on("connection_successful")
 async def connection_successful(sid):
     session = need_session(sid)
-    __chainlit_emitter__ = ChainlitEmitter(session)
+    emitter_var.set(ChainlitEmitter(session))
     if config.code.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
-        agent = await config.code.lc_factory(__chainlit_emitter__=__chainlit_emitter__)
+        agent = await config.code.lc_factory()
         session["agent"] = agent
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
-        await config.code.on_chat_start(__chainlit_emitter__=__chainlit_emitter__)
+        await config.code.on_chat_start()
 
 
 @socket.on("disconnect")
@@ -336,7 +337,7 @@ async def stop(sid):
         trace_event("stop_task")
         session = sessions[sid]
 
-        __chainlit_emitter__ = ChainlitEmitter(session)
+        emitter_var.set(ChainlitEmitter(session))
 
         await Message(author="System", content="Task stopped by the user.").send()
 
@@ -350,8 +351,10 @@ async def process_message(session: Session, author: str, input_str: str):
     """Process a message from the user."""
 
     try:
-        __chainlit_emitter__ = ChainlitEmitter(session)
-        await __chainlit_emitter__.task_start()
+        emitter = ChainlitEmitter(session)
+        emitter_var.set(emitter)
+
+        await emitter.task_start()
 
         if session["client"]:
             # If cloud is enabled, persist the message
@@ -373,7 +376,6 @@ async def process_message(session: Session, author: str, input_str: str):
                 await config.code.lc_run(
                     langchain_agent,
                     input_str,
-                    __chainlit_emitter__=__chainlit_emitter__,
                 )
                 return
             else:
@@ -384,9 +386,7 @@ async def process_message(session: Session, author: str, input_str: str):
 
                 if config.code.lc_postprocess:
                     # If the developer provided a custom postprocess function, use it
-                    await config.code.lc_postprocess(
-                        raw_res, __chainlit_emitter__=__chainlit_emitter__
-                    )
+                    await config.code.lc_postprocess(raw_res)
                     return
                 elif output_key is not None:
                     # Use the output key if provided
@@ -399,16 +399,14 @@ async def process_message(session: Session, author: str, input_str: str):
 
         elif config.code.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
-            await config.code.on_message(
-                input_str, __chainlit_emitter__=__chainlit_emitter__
-            )
+            await config.code.on_message(input_str)
     except InterruptedError:
         pass
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(author="Error", content=str(e)).send()
     finally:
-        await __chainlit_emitter__.task_end()
+        await emitter.task_end()
 
 
 @socket.on("ui_message")
@@ -424,10 +422,9 @@ async def message(sid, data):
 
 
 async def process_action(session: Session, action: Action):
-    __chainlit_emitter__ = ChainlitEmitter(session)
     callback = config.code.action_callbacks.get(action.name)
     if callback:
-        await callback(action, __chainlit_emitter__=__chainlit_emitter__)
+        await callback(action)
     else:
         logger.warning("No callback found for action %s", action.name)
 
@@ -436,8 +433,8 @@ async def process_action(session: Session, action: Action):
 async def call_action(sid, action):
     """Handle an action call from the UI."""
     session = need_session(sid)
+    emitter_var.set(ChainlitEmitter(session))
 
-    __chainlit_emitter__ = ChainlitEmitter(session)
     action = Action(**action)
 
     await process_action(session, action)
