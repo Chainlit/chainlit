@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+
+## [0.4.101] - 2023-06-24
+
+### Fixed
+
+- Performance improvements and bug fixes on run_sync and asyncify
+
 ## [0.4.1] - 2023-06-20
 
 ### Added
