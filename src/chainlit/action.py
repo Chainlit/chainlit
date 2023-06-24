@@ -1,7 +1,7 @@
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
-from chainlit.emitter import get_emit_fn
+from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event
 
 
@@ -21,9 +21,7 @@ class Action:
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        self.emit = get_emit_fn()
-        if not self.emit:
-            raise RuntimeError("Action should be instantiated in a Chainlit context")
+        self.emit = get_emitter().emit
 
     async def send(self, for_id: str):
         trace_event(f"send {self.__class__.__name__}")

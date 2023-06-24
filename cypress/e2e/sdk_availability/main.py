@@ -1,6 +1,6 @@
 import chainlit as cl
 from chainlit.sync import make_async, run_sync
-from chainlit.emitter import get_emitter
+from chainlit.context import get_emitter
 
 
 async def async_function_from_sync():
