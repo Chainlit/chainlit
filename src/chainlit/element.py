@@ -52,8 +52,6 @@ class Element:
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
-        self.tempId = uuid.uuid4().hex
-
     def to_dict(self) -> Dict:
         _dict = {
             "tempId": self.tempId,
@@ -65,9 +63,6 @@ class Element:
             "language": getattr(self, "language", None),
             "forId": getattr(self, "for_id", None),
         }
-
-        if self.id:
-            _dict["id"] = self.id
 
         return _dict
 
@@ -101,10 +96,11 @@ class Element:
 
         await self.preprocess_content()
 
+        self.tempId = str(uuid.uuid4())
         self.for_id = for_id
 
         # We have a client, persist the element
-        if self.emitter.client and not self.id:
+        if self.emitter.client:
             element = await self.persist(self.emitter.client)
             self.id = element["id"]
 
@@ -113,6 +109,7 @@ class Element:
 
         element = self.to_dict()
 
+        element["id"] = self.id
         element["content"] = self.content
 
         if self.emitter.emit and element:

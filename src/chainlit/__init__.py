@@ -222,9 +222,7 @@ def action_callback(name: str) -> Callable:
 
 
 @trace
-def client_factory(
-    func: Callable[[str], "BaseClient"]
-) -> Callable[[str], "BaseClient"]:
+def client_factory(func: Callable[[], "BaseClient"]) -> Callable[[], "BaseClient"]:
     """
     Callback to call when to initialize the custom client.
 

@@ -2,58 +2,40 @@ import { Box } from '@mui/material';
 import MessageContainer from 'components/chat/message/container';
 import Page from 'pages/Page';
 import { useParams } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
-import { IElements } from 'state/element';
 import SideView from 'components/element/sideView';
 import Playground from 'components/playground';
 import { IAction } from 'state/action';
-
-const ConversationQuery = gql`
-  query ($id: ID!) {
-    conversation(id: $id) {
-      id
-      createdAt
-      messages {
-        id
-        isError
-        indent
-        author
-        content
-        waitForAnswer
-        humanFeedback
-        language
-        prompt
-        llmSettings
-        authorIsUser
-        createdAt
-      }
-      elements {
-        id
-        type
-        name
-        url
-        display
-        language
-        size
-        forId
-      }
-    }
-  }
-`;
+import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { clientState } from 'state/client';
+import { IChat } from 'state/chat';
 
 export default function Conversation() {
   const { id } = useParams();
-  const { data, error } = useQuery(ConversationQuery, {
-    variables: {
-      id: id
-    }
-  });
+  const client = useRecoilValue(clientState);
+  const [error, setError] = useState<string | undefined>();
+  const [conversation, setConversation] = useState<IChat | undefined>();
 
-  if (!data || error) {
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    setError(undefined);
+
+    client
+      .getConversation(parseInt(id, 10))
+      .then((conversation) => setConversation(conversation))
+      .catch((err) => {
+        setError(err.message);
+      });
+  }, [client, id]);
+
+  if (!conversation || error) {
     return null;
   }
 
-  const elements: IElements = data.conversation.elements;
+  const elements = conversation.elements;
   const actions: IAction[] = [];
 
   return (
@@ -75,7 +57,7 @@ export default function Conversation() {
           <MessageContainer
             actions={actions}
             elements={elements}
-            messages={data.conversation.messages}
+            messages={conversation.messages}
           />
         </Box>
         <SideView />

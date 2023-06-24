@@ -15,6 +15,7 @@ export interface IProjectSettings {
     id?: string;
     public?: boolean;
     user_env?: string[];
+    database?: string;
   };
 }
 

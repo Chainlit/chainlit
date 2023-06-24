@@ -1,6 +1,22 @@
-from typing import Dict, Any, TypedDict, Optional, Union
-from abc import ABC, abstractmethod
+from typing import (
+    Dict,
+    Any,
+    List,
+    TypedDict,
+    Optional,
+    Union,
+    Literal,
+    TypeVar,
+    Generic,
+    TYPE_CHECKING,
+)
 
+if TYPE_CHECKING:
+    from chainlit.types import Pagination, ConversationFilter
+
+from abc import ABC, abstractmethod
+from pydantic.dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
 from chainlit.types import ElementType, ElementSize, ElementDisplay
 
@@ -19,6 +35,13 @@ class MessageDict(TypedDict):
     authorIsUser: Optional[bool]
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
+    humanFeedback: Optional[int]
+
+
+class UserDict(TypedDict):
+    name: str
+    email: str
+    role: str
 
 
 class ElementDict(TypedDict):
@@ -32,16 +55,63 @@ class ElementDict(TypedDict):
     forId: Optional[Union[str, int]]
 
 
+class ConversationDict(TypedDict):
+    id: Optional[int]
+    createdAt: Optional[int]
+    elementCount: Optional[int]
+    messageCount: Optional[int]
+    author: Optional[UserDict]
+    messages: List[MessageDict]
+    elements: Optional[List[ElementDict]]
+
+
+@dataclass
+class PageInfo:
+    hasNextPage: bool
+    endCursor: Any
+
+
+T = TypeVar("T")
+
+
+@dataclass_json
+@dataclass
+class PaginatedResponse(Generic[T]):
+    pageInfo: PageInfo
+    data: List[T]
+
+
 class BaseClient(ABC):
     project_id: str
-    session_id: str
 
     @abstractmethod
     async def is_project_member(self, access_token: str) -> bool:
         pass
 
     @abstractmethod
-    async def create_conversation(self, session_id: str) -> int:
+    async def get_member_role(self, access_token: str) -> str:
+        pass
+
+    @abstractmethod
+    async def get_project_members(self) -> List[UserDict]:
+        pass
+
+    @abstractmethod
+    async def create_conversation(self) -> int:
+        pass
+
+    @abstractmethod
+    async def delete_conversation(self, conversation_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    async def get_conversation(self, conversation_id: int) -> ConversationDict:
+        pass
+
+    @abstractmethod
+    async def get_conversations(
+        self, pagination: "Pagination", filter: "ConversationFilter"
+    ) -> PaginatedResponse[ConversationDict]:
         pass
 
     @abstractmethod
@@ -65,5 +135,11 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def create_element(self, variables: ElementDict) -> Dict[str, Any]:
+    async def create_element(self, variables: ElementDict) -> ElementDict:
+        pass
+
+    @abstractmethod
+    async def set_human_feedback(
+        self, message_id: int, feedback: Literal[-1, 0, 1]
+    ) -> bool:
         pass

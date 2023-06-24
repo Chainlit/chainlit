@@ -113,6 +113,7 @@ export async function runChainlit(dir: string, file: string, localDb = false) {
     // });
 
     child.stderr?.on("data", (data) => {
+      console.log(data.toString());
       if (data.toString().includes("Your app is available at")) {
         resolve(child);
       }
