@@ -1,4 +1,11 @@
-from typing import Any, TypeVar, ParamSpec, Coroutine
+import sys
+from typing import Any, TypeVar, Coroutine
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
+
 import asyncio
 from asyncer import asyncify
 
