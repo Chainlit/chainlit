@@ -1,37 +1,25 @@
-from typing import Any, Callable
+import sys
+from typing import Any, TypeVar, Coroutine
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 import asyncio
-from syncer import sync
 from asyncer import asyncify
 
-from chainlit.emitter import get_emitter
+from chainlit.context import get_loop
 
 
-def make_async(function: Callable):
-    emitter = get_emitter()
-    if not emitter:
-        raise RuntimeError(
-            "Emitter not found, please call make_async in a Chainlit context."
-        )
+make_async = asyncify
 
-    def wrapper(*args, **kwargs):
-        emitter.session["running_sync"] = True
-        __chainlit_emitter__ = emitter
-        res = function(*args, **kwargs)
-        emitter.session["running_sync"] = False
-        return res
-
-    return asyncify(wrapper, cancellable=True)
+T_Retval = TypeVar("T_Retval")
+T_ParamSpec = ParamSpec("T_ParamSpec")
+T = TypeVar("T")
 
 
-def run_sync(co: Any):
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError as e:
-        if "There is no current event loop" in str(e):
-            loop = None
-
-    if loop is None or not loop.is_running():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    return sync(co)
+def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
+    loop = get_loop()
+    result = asyncio.run_coroutine_threadsafe(co, loop=loop)
+    return result.result()

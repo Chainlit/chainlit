@@ -21,6 +21,7 @@ from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessa
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync, make_async
 from chainlit.cache import cache
+from chainlit.context import emitter_var
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -46,7 +47,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         Callable: The wrapped function.
     """
 
-    async def wrapper(*args, __chainlit_emitter__: ChainlitEmitter):
+    async def wrapper(*args):
         # Get the parameter names of the user-defined function
         user_function_params = list(inspect.signature(user_function).parameters.keys())
 
@@ -55,8 +56,10 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
+        emitter = emitter_var.get()
+
         if with_task:
-            await __chainlit_emitter__.task_start()
+            await emitter.task_start()
 
         try:
             # Call the user-defined function with the arguments
@@ -73,7 +76,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             ).send()
         finally:
             if with_task:
-                await __chainlit_emitter__.task_end()
+                await emitter.task_end()
 
     return wrapper
 

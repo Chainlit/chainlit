@@ -22,7 +22,6 @@ chainlit = 'chainlit.cli:cli'
 python = "^3.8"
 dataclasses_json = "^0.5.7"
 uvicorn = "^0.22.0"
-nest-asyncio = "^1.5.6"
 fastapi = "^0.96.0"
 fastapi-socketio = "^0.0.10"
 aiohttp = "^3.8.4"
