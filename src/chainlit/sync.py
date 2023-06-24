@@ -5,6 +5,7 @@ from syncer import sync
 from asyncer import asyncify
 
 from chainlit.emitter import get_emitter
+from chainlit.context import loop_var
 
 
 def make_async(function: Callable):
@@ -24,13 +25,6 @@ def make_async(function: Callable):
 
 
 def run_sync(co: Any):
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError as e:
-        if "There is no current event loop" in str(e):
-            loop = None
-
-    if loop is None or not loop.is_running():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    return sync(co)
+    loop = loop_var.get()
+    result = asyncio.run_coroutine_threadsafe(co, loop=loop)
+    return result.result()

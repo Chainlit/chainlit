@@ -21,7 +21,7 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 import asyncio
 
-from chainlit.context import emitter_var
+from chainlit.context import emitter_var, loop_var
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
@@ -310,6 +310,8 @@ async def connect(sid, environ):
 async def connection_successful(sid):
     session = need_session(sid)
     emitter_var.set(ChainlitEmitter(session))
+    loop_var.set(asyncio.get_event_loop())
+
     if config.code.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
         agent = await config.code.lc_factory()
@@ -338,6 +340,7 @@ async def stop(sid):
         session = sessions[sid]
 
         emitter_var.set(ChainlitEmitter(session))
+        loop_var.set(asyncio.get_event_loop())
 
         await Message(author="System", content="Task stopped by the user.").send()
 
@@ -353,6 +356,7 @@ async def process_message(session: Session, author: str, input_str: str):
     try:
         emitter = ChainlitEmitter(session)
         emitter_var.set(emitter)
+        loop_var.set(asyncio.get_event_loop())
 
         await emitter.task_start()
 
@@ -434,6 +438,7 @@ async def call_action(sid, action):
     """Handle an action call from the UI."""
     session = need_session(sid)
     emitter_var.set(ChainlitEmitter(session))
+    loop_var.set(asyncio.get_event_loop())
 
     action = Action(**action)
 
