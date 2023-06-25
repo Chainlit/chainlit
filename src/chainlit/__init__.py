@@ -12,7 +12,6 @@ from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
-from chainlit.emitter import ChainlitEmitter
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
@@ -21,7 +20,7 @@ from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessa
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync, make_async
 from chainlit.cache import cache
-from chainlit.context import emitter_var
+from chainlit.context import get_emitter
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -56,7 +55,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        emitter = emitter_var.get()
+        emitter = get_emitter()
 
         if with_task:
             await emitter.task_start()

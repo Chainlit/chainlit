@@ -39,29 +39,29 @@ class Element:
     # The ID of the element. This is set automatically when the element is sent to the UI if cloud is enabled.
     id: int = None
     # The ID of the element if cloud is disabled.
-    tempId: str = None
+    temp_id: str = None
     # The ID of the message this element is associated with.
-    forIds: List[str] = None
+    for_ids: List[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.emitter = get_emitter()
-        self.forIds = []
-        self.tempId = str(uuid.uuid4())
+        self.for_ids = []
+        self.temp_id = str(uuid.uuid4())
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
     def to_dict(self) -> Dict:
         _dict = {
-            "tempId": self.tempId,
+            "tempId": self.temp_id,
             "type": self.type,
             "url": self.url,
             "name": self.name,
             "display": self.display,
             "size": getattr(self, "size", None),
             "language": getattr(self, "language", None),
-            "forIds": getattr(self, "forIds", None),
+            "forIds": getattr(self, "for_ids", None),
         }
 
         if self.id:
@@ -100,7 +100,7 @@ class Element:
         await self.preprocess_content()
 
         if for_id:
-            self.forIds.append(for_id)
+            self.for_ids.append(for_id)
 
         # We have a client, persist the element
         if self.emitter.client:
@@ -112,15 +112,14 @@ class Element:
 
         element = self.to_dict()
 
-        element["id"] = self.id
         element["content"] = self.content
 
         if self.emitter.emit and element:
-            if len(self.forIds) > 1:
+            if len(self.for_ids) > 1:
                 trace_event(f"update {self.__class__.__name__}")
                 await self.emitter.emit(
                     "update_element",
-                    {"id": self.id or self.tempId, "forIds": self.forIds},
+                    {"id": self.id or self.temp_id, "forIds": self.for_ids},
                 )
             else:
                 trace_event(f"send {self.__class__.__name__}")
