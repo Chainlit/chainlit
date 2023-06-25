@@ -39,7 +39,7 @@ class CustomClient(BaseClient):
     async def update_message(self, message_id, variables):
         raise NotImplementedError()
 
-    async def create_element(self, variables):
+    async def upsert_element(self, variables):
         raise NotImplementedError()
 
     async def upload_element(self, content, mime):

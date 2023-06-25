@@ -12,8 +12,13 @@ type Props = {
 };
 
 const Page = ({ children }: Props) => {
-  const { isProjectMember, isAuthenticated, isLoading, role, accessToken } =
-    useAuth();
+  const {
+    isProjectMember,
+    authenticating,
+    isAuthenticated,
+    accessToken,
+    role
+  } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
   const userEnv = useRecoilValue(userEnvState);
@@ -21,10 +26,10 @@ const Page = ({ children }: Props) => {
   const isPrivate = pSettings && !pSettings.project?.public;
 
   useEffect(() => {
-    if (isPrivate && !isAuthenticated && !isLoading) {
+    if (isPrivate && !isAuthenticated && !authenticating) {
       navigate('/login');
     }
-  }, [pSettings, isAuthenticated, isLoading]);
+  }, [pSettings, isAuthenticated, authenticating]);
 
   useEffect(() => {
     if (pSettings?.project?.user_env) {
@@ -34,7 +39,7 @@ const Page = ({ children }: Props) => {
     }
   }, [pSettings, userEnv]);
 
-  if (isPrivate && !accessToken) {
+  if (!pSettings || (isPrivate && (!accessToken || !role))) {
     return null;
   }
 

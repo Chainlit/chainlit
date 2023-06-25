@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 import uuid
 import json
 import os
@@ -21,15 +21,19 @@ conversation_lock = asyncio.Lock()
 class LocalClient(BaseClient):
     conversation_id: Optional[str] = None
 
-    def before_write(self, variables: MessageDict):
+    def before_write(self, variables: Dict):
         if "llmSettings" in variables:
             # Sqlite doesn't support json fields, so we need to serialize it.
             variables["llmSettings"] = json.dumps(variables["llmSettings"])
 
+        if "forIds" in variables:
+            # Sqlite doesn't support list of primitives, so we need to serialize it.
+            variables["forIds"] = json.dumps(variables["forIds"])
+
         if "tempId" in variables:
             del variables["tempId"]
 
-    def after_read(self, variables: MessageDict):
+    def after_read(self, variables: Dict):
         if "llmSettings" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
             variables["llmSettings"] = json.loads(variables["llmSettings"])
@@ -77,6 +81,10 @@ class LocalClient(BaseClient):
         for m in c.messages:
             if m.llmSettings:
                 m.llmSettings = json.loads(m.llmSettings)
+
+        for e in c.elements:
+            if e.forIds:
+                e.forIds = json.loads(e.forIds)
 
         return json.loads(c.json())
 
@@ -177,7 +185,7 @@ class LocalClient(BaseClient):
 
         return True
 
-    async def create_element(
+    async def upsert_element(
         self,
         variables,
     ):
@@ -193,7 +201,12 @@ class LocalClient(BaseClient):
 
         self.before_write(variables)
 
-        res = await Element.prisma().create(data=variables)
+        if "id" in variables:
+            res = await Element.prisma().update(
+                data=variables, where={"id": variables.get("id")}
+            )
+        else:
+            res = await Element.prisma().create(data=variables)
 
         return res.dict()
 

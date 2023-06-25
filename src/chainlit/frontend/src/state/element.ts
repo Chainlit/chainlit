@@ -10,12 +10,13 @@ export type AllElements =
 
 export interface IElement {
   id?: number;
+  conversationId?: number;
   tempId?: string;
   url?: string;
   type: ElementType;
   name: string;
   display: 'inline' | 'side' | 'page';
-  forId?: string;
+  forIds?: string[];
 }
 
 export interface IImageElement extends IElement {

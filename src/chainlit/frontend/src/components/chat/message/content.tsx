@@ -17,6 +17,21 @@ interface Props {
   authorIsUser?: boolean;
 }
 
+const isForIdMatch = (
+  id: string | number | undefined,
+  forIds: string[] | undefined
+) => {
+  if (!forIds || !forIds.length || !id) {
+    return false;
+  }
+
+  return forIds.includes(id.toString());
+};
+
+const isGlobalMatch = (forIds: string[] | undefined) => {
+  return !forIds || !forIds.length;
+};
+
 function prepareContent({ id, elements, actions, content, language }: Props) {
   const elementNames = elements.map((e) => e.name);
 
@@ -36,7 +51,7 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
 
   let preparedContent = content ? content.trim() : '';
   const inlinedElements: IElements = elements.filter(
-    (e) => e.forId === id && e.display === 'inline'
+    (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
   );
   const refElements: IElements = [];
 
@@ -44,18 +59,15 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
       const element = elements.find((e) => {
         const nameMatch = e.name === match;
-        const scopeMatch = e.forId ? e.forId === id : true;
+        const scopeMatch =
+          isGlobalMatch(e?.forIds) || isForIdMatch(id, e?.forIds);
         return nameMatch && scopeMatch;
       });
       const foundElement = !!element;
-      const wrongScope = element?.forId && element.forId !== id;
+
       const inlined = element?.display === 'inline';
       if (!foundElement) {
         // Element reference does not exist, return plain text
-        return match;
-      }
-      if (wrongScope) {
-        // If element is not global and not scoped to this message, return plain text
         return match;
       } else if (inlined) {
         // If element is inlined, add it to the list and return plain text

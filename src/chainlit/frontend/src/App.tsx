@@ -25,6 +25,7 @@ import { settingsState } from 'state/settings';
 import SettingsModal from 'components/settingsModal';
 import Hotkeys from 'components/Hotkeys';
 import { clientState } from 'state/client';
+import Page from 'pages/Page';
 
 const router = createBrowserRouter([
   {
@@ -41,7 +42,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/conversations/:id',
-    element: <Conversation />
+    element: (
+      <Page>
+        <Conversation />
+      </Page>
+    )
   },
   {
     path: '/dataset',

@@ -13,7 +13,12 @@ describe("Local db", () => {
     cy.get(".message").should("have.length", 4);
 
     cy.get(".inline-image").should("have.length", 3);
-    cy.get(".element-link").should("have.length", 6);
+    cy.get(".element-link").should("have.length", 7);
+
+    cy.get(".message").eq(1).find(".element-link").should("have.length", 2);
+    cy.get(".message").eq(2).find(".element-link").should("have.length", 2);
+    cy.get(".message").eq(3).find(".element-link").should("have.length", 3);
+
     cy.get(".message").eq(1).find(".positive-feedback-off").click();
 
     cy.get(".message")
@@ -28,8 +33,12 @@ describe("Local db", () => {
 
     cy.get(".message").should("have.length", 4);
 
+    cy.get(".message").eq(1).find(".element-link").should("have.length", 2);
+    cy.get(".message").eq(2).find(".element-link").should("have.length", 2);
+    cy.get(".message").eq(3).find(".element-link").should("have.length", 3);
+
     cy.get(".inline-image").should("have.length", 3);
-    cy.get(".element-link").should("have.length", 6);
+    cy.get(".element-link").should("have.length", 7);
 
     cy.get(".message")
       .eq(1)

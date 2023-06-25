@@ -167,13 +167,14 @@ class CloudClient(BaseClient):
       }
       elements {
         id
+        conversationId
         type
         name
         url
         display
         language
         size
-        forId
+        forIds
       }
     }
   }"""
@@ -324,35 +325,48 @@ class CloudClient(BaseClient):
 
         return True
 
-    async def create_element(self, variables):
+    async def upsert_element(self, variables):
         c_id = await self.get_conversation_id()
 
         if not c_id:
             logger.warning("Missing conversation ID, could not persist the element.")
             return None
 
-        mutation = """
-        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $size: String, $language: String, $forId: String) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forId: $forId) {
-                id,
-                type,
-                url,
-                name,
-                display,
-                size,
-                language,
-                forId
+        if "id" in variables:
+            mutation_name = "updateElement"
+            mutation = """
+            mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
+                updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
+                    id,
+                }
             }
-        }
-        """
-        variables["conversationId"] = c_id
-        res = await self.mutation(mutation, variables)
+            """
+            variables["conversationId"] = c_id
+            res = await self.mutation(mutation, variables)
+        else:
+            mutation_name = "createElement"
+            mutation = """
+            mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
+                createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+                    id,
+                    type,
+                    url,
+                    name,
+                    display,
+                    size,
+                    language,
+                    forIds
+                }
+            }
+            """
+            variables["conversationId"] = c_id
+            res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
             logger.warning("Could not persist element.")
             return None
 
-        return res["data"]["createElement"]
+        return res["data"][mutation_name]
 
     async def upload_element(self, content: bytes, mime: str) -> str:
         id = f"{uuid.uuid4()}"

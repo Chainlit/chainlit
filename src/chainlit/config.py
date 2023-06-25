@@ -219,7 +219,9 @@ def load_settings():
         local_db_path = os.path.join(config_dir, ".chat.db")
         local_fs_path = os.path.join(config_dir, "fs")
 
-        os.environ["LOCAL_DB_PATH"] = f"file:{local_db_path}"
+        os.environ[
+            "LOCAL_DB_PATH"
+        ] = f"file:{local_db_path}?socket_timeout=10&connection_limit=1"
 
         project_settings = ProjectSettings(
             lc_cache_path=lc_cache_path,

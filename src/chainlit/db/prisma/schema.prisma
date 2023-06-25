@@ -26,7 +26,7 @@ model Element {
   display        String
   size           String?
   language       String?
-  forId          String?
+  forIds         String?
 }
 
 model Message {

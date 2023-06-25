@@ -1,6 +1,5 @@
 from pydantic.dataclasses import dataclass
-from dataclasses_json import dataclass_json
-from typing import Dict, Union, Any
+from typing import Dict, List, Union, Any
 import uuid
 import aiofiles
 from io import BytesIO
@@ -42,11 +41,13 @@ class Element:
     # The ID of the element if cloud is disabled.
     tempId: str = None
     # The ID of the message this element is associated with.
-    forId: str = None
+    forIds: List[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.emitter = get_emitter()
+        self.forIds = []
+        self.tempId = str(uuid.uuid4())
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
@@ -60,8 +61,11 @@ class Element:
             "display": self.display,
             "size": getattr(self, "size", None),
             "language": getattr(self, "language", None),
-            "forId": getattr(self, "for_id", None),
+            "forIds": getattr(self, "forIds", None),
         }
+
+        if self.id:
+            _dict["id"] = self.id
 
         return _dict
 
@@ -76,12 +80,12 @@ class Element:
             raise ValueError("Must provide path or content to load element")
 
     async def persist(self, client: BaseClient):
-        if not self.url and self.content:
+        if not self.url and self.content and not self.id:
             self.url = await client.upload_element(
                 content=self.content, mime=type_to_mime[self.type]
             )
 
-        element = await client.create_element(self.to_dict())
+        element = await client.upsert_element(self.to_dict())
         return element
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -95,13 +99,13 @@ class Element:
 
         await self.preprocess_content()
 
-        self.tempId = str(uuid.uuid4())
-        self.for_id = for_id
+        if for_id:
+            self.forIds.append(for_id)
 
         # We have a client, persist the element
         if self.emitter.client:
             element = await self.persist(self.emitter.client)
-            self.id = element["id"]
+            self.id = element and element.get("id")
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
@@ -112,9 +116,16 @@ class Element:
         element["content"] = self.content
 
         if self.emitter.emit and element:
-            trace_event(f"send {self.__class__.__name__}")
-            element = await self.before_emit(element)
-            await self.emitter.emit("element", element)
+            if len(self.forIds) > 1:
+                trace_event(f"update {self.__class__.__name__}")
+                await self.emitter.emit(
+                    "update_element",
+                    {"id": self.id or self.tempId, "forIds": self.forIds},
+                )
+            else:
+                trace_event(f"send {self.__class__.__name__}")
+                element = await self.before_emit(element)
+                await self.emitter.emit("element", element)
 
 
 @dataclass

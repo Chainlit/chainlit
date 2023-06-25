@@ -46,13 +46,14 @@ class UserDict(TypedDict):
 
 class ElementDict(TypedDict):
     id: Optional[int]
+    conversationId: Optional[int]
     type: ElementType
     url: str
     name: str
     display: ElementDisplay
     size: ElementSize
     language: str
-    forId: Optional[Union[str, int]]
+    forIds: Optional[List[Union[str, int]]]
 
 
 class ConversationDict(TypedDict):
@@ -135,7 +136,7 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def create_element(self, variables: ElementDict) -> ElementDict:
+    async def upsert_element(self, variables: ElementDict) -> ElementDict:
         pass
 
     @abstractmethod

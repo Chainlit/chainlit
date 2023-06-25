@@ -12,17 +12,16 @@ export const wsEndpoint = `${
 }://${serverUrl.host}`;
 
 export class ChainlitClient {
-  private headers: Headers;
+  public headers: Headers;
 
-  constructor(private accessToken?: string) {
+  constructor(accessToken?: string) {
     this.headers = new Headers({
       'content-type': 'application/json',
-      Authorization: this.accessToken || ''
+      Authorization: accessToken || ''
     });
   }
 
   setAccessToken = (accessToken: string) => {
-    this.accessToken = accessToken;
     this.headers.set('Authorization', accessToken);
   };
 

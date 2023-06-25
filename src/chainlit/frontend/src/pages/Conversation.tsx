@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import MessageContainer from 'components/chat/message/container';
-import Page from 'pages/Page';
 import { useParams } from 'react-router-dom';
 import SideView from 'components/element/sideView';
 import Playground from 'components/playground';
@@ -39,29 +38,27 @@ export default function Conversation() {
   const actions: IAction[] = [];
 
   return (
-    <Page>
-      <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
-        <Playground />
-        <Box
-          flexGrow={1}
-          display="flex"
-          flexDirection="column"
-          overflow="auto"
-          boxSizing="border-box"
-          px={{
-            xs: 2,
-            md: 0
-          }}
-        >
-          <Box my={1} />
-          <MessageContainer
-            actions={actions}
-            elements={elements}
-            messages={conversation.messages}
-          />
-        </Box>
-        <SideView />
+    <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
+      <Playground />
+      <Box
+        flexGrow={1}
+        display="flex"
+        flexDirection="column"
+        overflow="auto"
+        boxSizing="border-box"
+        px={{
+          xs: 2,
+          md: 0
+        }}
+      >
+        <Box my={1} />
+        <MessageContainer
+          actions={actions}
+          elements={elements}
+          messages={conversation.messages}
+        />
       </Box>
-    </Page>
+      <SideView />
+    </Box>
   );
 }

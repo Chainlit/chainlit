@@ -77,7 +77,7 @@ class MessageBase(ABC):
         msg_dict = self.to_dict()
 
         if self.emitter.client and self.id:
-            self.emitter.client.update_message(self.id, msg_dict)
+            await self.emitter.client.update_message(self.id, msg_dict)
 
         await self.emitter.update_message(msg_dict)
 

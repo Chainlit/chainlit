@@ -15,10 +15,13 @@ export const useAuth = () => {
 
   const isLoading = cloudAuthRequired && _isLoading;
 
+  const authenticating = isLoading || (isAuthenticated && !accessToken);
+
   return {
     role,
     accessToken,
     isAuthenticated,
+    authenticating,
     isProjectMember,
     isLoading,
     cloudAuthRequired,
