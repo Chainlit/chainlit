@@ -15,7 +15,7 @@ from chainlit.config import config
 from chainlit.element import mime_to_ext
 
 
-conversation_lock = asyncio.Lock()
+# conversation_lock = asyncio.Lock()
 
 
 class LocalClient(BaseClient):
@@ -55,14 +55,14 @@ class LocalClient(BaseClient):
     async def create_conversation(self):
         from prisma.models import Conversation
 
-        # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
-        async with conversation_lock:
-            if self.conversation_id:
-                return self.conversation_id
+        # # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
+        # async with conversation_lock:
+        if self.conversation_id:
+            return self.conversation_id
 
-            res = await Conversation.prisma().create(data={})
+        res = await Conversation.prisma().create(data={})
 
-            return res.id
+        return res.id
 
     async def delete_conversation(self, conversation_id):
         from prisma.models import Conversation
