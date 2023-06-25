@@ -272,6 +272,15 @@ async def get_conversation(request: Request, conversation_id: str):
     return JSONResponse(content=res)
 
 
+@app.get("/project/conversation/{conversation_id}/element/{element_id}")
+async def get_conversation(request: Request, conversation_id: str, element_id: str):
+    """Get a specific conversation."""
+
+    client = await get_client(request)
+    res = await client.get_element(int(conversation_id), int(element_id))
+    return JSONResponse(content=res)
+
+
 @app.delete("/project/conversation")
 async def delete_conversation(request: Request, payload: DeleteConversationRequest):
     """Delete a conversation."""

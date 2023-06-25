@@ -1,6 +1,7 @@
 import { IPageInfo, IPagination } from 'components/dataset/table';
 import { IChat, ILLMSettings } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
+import { IElement } from 'state/element';
 import { Role, IMember } from 'state/user';
 
 // export const serverUrl = new URL('http://127.0.0.1:8000');
@@ -117,6 +118,25 @@ export class ChainlitClient {
   getConversation = async (conversationId: number): Promise<IChat> => {
     const res = await fetch(
       `${httpEndpoint}/project/conversation/${conversationId}`,
+      {
+        headers: this.headers,
+        method: 'GET'
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(res.statusText);
+    }
+
+    return res.json();
+  };
+
+  getElement = async (
+    conversationId: number | string,
+    elementId: number | string
+  ): Promise<IElement> => {
+    const res = await fetch(
+      `${httpEndpoint}/project/conversation/${conversationId}/element/${elementId}`,
       {
         headers: this.headers,
         method: 'GET'

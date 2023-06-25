@@ -99,32 +99,26 @@ export async function runChainlit(dir: string, file: string, localDb = false) {
       options.push("local");
     }
 
-    const child = spawn("chainlit", options, {
+    const server = spawn("chainlit", options, {
       cwd: dir,
     });
 
-    // child.stdout?.on("data", (data) => {
-    //   const output = data.toString();
-    //   console.log(`stdout: ${data}`);
-
-    //   if (output.includes("Listening on")) {
-    //     resolve(child);
-    //   }
-    // });
-
-    child.stderr?.on("data", (data) => {
-      console.log(data.toString());
+    server.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
       if (data.toString().includes("Your app is available at")) {
-        resolve(child);
+        resolve(server);
       }
-      // reject(data.toString());
     });
 
-    child.on("error", (error) => {
+    server.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    server.on("error", (error) => {
       reject(error.message);
     });
 
-    child.on("exit", function (code) {
+    server.on("exit", function (code) {
       reject("child process exited with code " + code);
     });
   });

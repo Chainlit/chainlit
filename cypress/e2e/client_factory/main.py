@@ -36,6 +36,9 @@ class CustomClient(BaseClient):
     async def delete_message(self, message_id):
         raise NotImplementedError()
 
+    async def get_element(self, conversation_id, element_id):
+        raise NotImplementedError()
+
     async def update_message(self, message_id, variables):
         raise NotImplementedError()
 

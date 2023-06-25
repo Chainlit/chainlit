@@ -210,6 +210,16 @@ class LocalClient(BaseClient):
 
         return res.dict()
 
+    async def get_element(
+        self,
+        conversation_id,
+        element_id,
+    ):
+        from prisma.models import Element
+
+        res = await Element.prisma().find_unique_or_raise(where={"id": element_id})
+        return json.loads(res.json())
+
     async def upload_element(self, content: bytes, mime: str):
         c_id = await self.get_conversation_id()
 

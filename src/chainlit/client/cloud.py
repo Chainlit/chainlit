@@ -325,6 +325,36 @@ class CloudClient(BaseClient):
 
         return True
 
+    async def get_element(self, conversation_id, element_id):
+        query = """query (
+        $conversationId: ID!
+        $id: ID!
+    ) {
+        element(
+        conversationId: $conversationId,
+        id: $id
+        ) {
+        id
+        conversationId
+        type
+        name
+        url
+        display
+        language
+        size
+        forIds
+        }
+    }"""
+
+        variables = {
+            "conversationId": conversation_id,
+            "id": element_id,
+        }
+        res = await self.query(query, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        return res["data"]["element"]
+
     async def upsert_element(self, variables):
         c_id = await self.get_conversation_id()
 

@@ -140,6 +140,10 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
+    async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
+        pass
+
+    @abstractmethod
     async def set_human_feedback(
         self, message_id: int, feedback: Literal[-1, 0, 1]
     ) -> bool:
