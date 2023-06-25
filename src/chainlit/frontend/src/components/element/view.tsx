@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { Navigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import {
   elementState,
