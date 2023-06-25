@@ -354,8 +354,6 @@ async def connect(sid, environ):
             raise ValueError("Client factory not provided")
         client = await config.code.client_factory()
 
-    logger.info("New connection: " + (config.project.database or "None"))
-
     # Check user env
     if config.project.user_env:
         # Check if requested user environment variables are provided

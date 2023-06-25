@@ -11,13 +11,12 @@ from chainlit.logger import logger
 from chainlit.config import config
 
 
-conversation_lock = asyncio.Lock()
-
-
 class CloudClient(BaseClient):
     conversation_id: Optional[str] = None
+    lock: asyncio.Lock
 
     def __init__(self, project_id: str, access_token: str):
+        self.lock = asyncio.Lock()
         self.project_id = project_id
         self.headers = {
             "Authorization": access_token,
@@ -109,7 +108,7 @@ class CloudClient(BaseClient):
 
     async def create_conversation(self) -> int:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
-        async with conversation_lock:
+        async with self.lock:
             if self.conversation_id:
                 return self.conversation_id
 

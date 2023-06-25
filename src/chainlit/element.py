@@ -8,7 +8,6 @@ from chainlit.context import get_emitter
 from chainlit.client.base import BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
-from chainlit.logger import logger
 
 type_to_mime = {
     "image": "image/png",
@@ -82,13 +81,10 @@ class Element:
 
     async def persist(self, client: BaseClient):
         if not self.url and self.content and not self.id:
-            logger.info("persist 1")
             self.url = await client.upload_element(
                 content=self.content, mime=type_to_mime[self.type]
             )
-        logger.info("persist 2")
         element = await client.upsert_element(self.to_dict())
-        logger.info("persist 3")
         return element
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -105,10 +101,8 @@ class Element:
         if for_id:
             self.for_ids.append(for_id)
 
-        logger.info("send!")
         # We have a client, persist the element
         if self.emitter.client:
-            logger.info("persist!")
             element = await self.persist(self.emitter.client)
             self.id = element and element.get("id")
 
