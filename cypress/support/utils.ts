@@ -87,7 +87,9 @@ export function installChainlit() {
 
 export function runSpec(test: string) {
   // const recordOptions = ` --record --key ${process.env.CYPRESS_RECORD_KEY} `;
-  return runCommand(`npx cypress run --spec cypress/e2e/${test}/spec.cy.ts`);
+  return runCommand(
+    `npx cypress run --record false --spec cypress/e2e/${test}/spec.cy.ts`
+  );
 }
 
 export async function runChainlit(dir: string, file: string, localDb = false) {
