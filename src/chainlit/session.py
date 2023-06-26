@@ -1,5 +1,5 @@
 from typing import Dict, TypedDict, Optional, Callable, Any, Union
-from chainlit.client import BaseClient
+from chainlit.client.base import BaseClient
 from chainlit.types import AskResponse
 
 
@@ -18,8 +18,6 @@ class Session(TypedDict):
     agent: Any
     # Optional llama instance
     llama_instance: Any
-    # If the session is currently running a sync task
-    running_sync: bool
     # Whether the current task should be stopped
     should_stop: bool
     # Optional client to persist messages and files

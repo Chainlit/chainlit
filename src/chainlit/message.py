@@ -1,11 +1,11 @@
 from typing import List, Dict, Union
 from abc import ABC, abstractmethod
 import uuid
-import time
 import asyncio
+from datetime import datetime, timezone
 
 from chainlit.telemetry import trace_event
-from chainlit.emitter import get_emitter
+from chainlit.context import get_emitter
 from chainlit.config import config
 from chainlit.types import (
     LLMSettings,
@@ -16,11 +16,7 @@ from chainlit.types import (
 )
 from chainlit.element import Element
 from chainlit.action import Action
-
-
-def current_milli_time():
-    """Get the current time in milliseconds."""
-    return round(time.time() * 1000)
+from chainlit.logger import logger
 
 
 class MessageBase(ABC):
@@ -28,14 +24,13 @@ class MessageBase(ABC):
     temp_id: str = None
     streaming = False
     created_at: int = None
+    fail_on_persist_error: bool = True
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.temp_id = uuid.uuid4().hex
-        self.created_at = current_milli_time()
+        self.created_at = datetime.now(timezone.utc).isoformat()
         self.emitter = get_emitter()
-        if not self.emitter:
-            raise RuntimeError("Message should be instantiated in a Chainlit context")
 
     @abstractmethod
     def to_dict(self):
@@ -44,9 +39,14 @@ class MessageBase(ABC):
     async def _create(self):
         msg_dict = self.to_dict()
         if self.emitter.client and not self.id:
-            self.id = await self.emitter.client.create_message(msg_dict)
-            if self.id:
-                msg_dict["id"] = self.id
+            try:
+                self.id = await self.emitter.client.create_message(msg_dict)
+                if self.id:
+                    msg_dict["id"] = self.id
+            except Exception as e:
+                if self.fail_on_persist_error:
+                    raise e
+                logger.error(f"Failed to persist message: {str(e)}")
 
         return msg_dict
 
@@ -77,8 +77,7 @@ class MessageBase(ABC):
         msg_dict = self.to_dict()
 
         if self.emitter.client and self.id:
-            self.emitter.client.update_message(self.id, msg_dict)
-            msg_dict["id"] = self.id
+            await self.emitter.client.update_message(self.id, msg_dict)
 
         await self.emitter.update_message(msg_dict)
 
@@ -171,7 +170,7 @@ class Message(MessageBase):
         super().__post_init__()
 
     def to_dict(self):
-        return {
+        _dict = {
             "tempId": self.temp_id,
             "createdAt": self.created_at,
             "content": self.content,
@@ -181,6 +180,11 @@ class Message(MessageBase):
             "language": self.language,
             "indent": self.indent,
         }
+
+        if self.id:
+            _dict["id"] = self.id
+
+        return _dict
 
     async def send(self):
         """
@@ -214,10 +218,12 @@ class ErrorMessage(MessageBase):
         content: str,
         author: str = config.ui.name,
         indent: int = 0,
+        fail_on_persist_error: bool = False,
     ):
         self.content = content
         self.author = author
         self.indent = indent
+        self.fail_on_persist_error = fail_on_persist_error
 
         super().__post_init__()
 

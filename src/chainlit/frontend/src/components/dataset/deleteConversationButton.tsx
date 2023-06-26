@@ -7,21 +7,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import { IconButton } from '@mui/material';
 import { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
-import { getErrorMessage } from 'helpers/apollo';
 import LoadingButton from '@mui/lab/LoadingButton';
-
-const DeleteConversationMutation = gql`
-  mutation ($id: ID!) {
-    deleteConversation(id: $id) {
-      id
-    }
-  }
-`;
+import { useRecoilValue } from 'recoil';
+import { clientState } from 'state/client';
 
 interface Props {
-  conversationId: string;
+  conversationId: number;
   onDelete: () => void;
 }
 
@@ -30,9 +22,7 @@ export default function DeleteConversationButton({
   onDelete
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [deleteConversation, { loading }] = useMutation(
-    DeleteConversationMutation
-  );
+  const client = useRecoilValue(clientState);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -43,29 +33,31 @@ export default function DeleteConversationButton({
   };
 
   const handleConfirm = async () => {
-    await toast.promise(
-      deleteConversation({ variables: { id: conversationId } }),
-      {
-        loading: 'Deleting conversation...',
-        success: 'Conversation deleted!',
-        error: (err) => {
-          return <span>{getErrorMessage(err)}</span>;
+    await toast.promise(client.deleteConversation(conversationId), {
+      loading: 'Deleting conversation...',
+      success: 'Conversation deleted!',
+      error: (err) => {
+        if (err instanceof Error) {
+          return <span>{err.message}</span>;
+        } else {
+          return <span></span>;
         }
       }
-    );
+    });
     onDelete();
     handleClose();
   };
 
   return (
     <div>
-      {/* <Tooltip title="Delete conversation">
-        <span> */}
-      <IconButton size="small" color="error" onClick={handleClickOpen}>
+      <IconButton
+        className="delete-conversation-button"
+        size="small"
+        color="error"
+        onClick={handleClickOpen}
+      >
         <DeleteOutline />
       </IconButton>
-      {/* </span>
-      </Tooltip> */}
       {open && (
         <Dialog
           open={open}
@@ -94,7 +86,6 @@ export default function DeleteConversationButton({
             <LoadingButton
               variant="outlined"
               color="primary"
-              loading={loading}
               onClick={handleConfirm}
               autoFocus
             >

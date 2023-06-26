@@ -15,12 +15,16 @@ export default function useLocalChatHistory() {
 
   const persistChatLocally = useCallback((message: string) => {
     const chat: IChat = {
+      id: 0,
       createdAt: new Date().getTime(),
       messages: [
         {
-          content: message
+          content: message,
+          author: '',
+          createdAt: new Date().getTime()
         }
-      ]
+      ],
+      elements: []
     };
 
     const chatHistory = getLocalChatHistory();

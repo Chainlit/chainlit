@@ -43,7 +43,6 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> str:
         """Run when an event starts and return id of event."""
-        __chainlit_emitter__ = self.emitter
 
         run_sync(
             Message(

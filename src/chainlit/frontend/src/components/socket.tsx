@@ -26,7 +26,7 @@ const compareMessageIds = (a: IMessage, b: IMessage) => {
 
 export default memo(function Socket() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const { accessToken, isAuthenticated, isLoading: _isLoading } = useAuth();
+  const { accessToken, authenticating } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const [session, setSession] = useRecoilState(sessionState);
@@ -35,9 +35,6 @@ export default memo(function Socket() {
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
-
-  const isLoading = pSettings?.project?.id && _isLoading;
-  const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   useEffect(() => {
     if (authenticating || !pSettings) return;
@@ -166,6 +163,21 @@ export default memo(function Socket() {
     socket.on('element', (element: IElement) => {
       setElements((old) => [...old, element]);
     });
+
+    socket.on(
+      'update_element',
+      (update: { id: number | string; forIds: string[] }) => {
+        setElements((old) => {
+          const index = old.findIndex(
+            (e) => e.id === update.id || e.tempId === update.id
+          );
+          if (index === -1) return old;
+          const element = old[index];
+          const newElement = { ...element, forIds: update.forIds };
+          return [...old.slice(0, index), newElement, ...old.slice(index + 1)];
+        });
+      }
+    );
 
     socket.on('action', (action: IAction) => {
       setActions((old) => [...old, action]);

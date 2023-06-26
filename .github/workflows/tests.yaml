@@ -29,4 +29,6 @@ jobs:
       - name: Install Python CI dependencies
         run: pip install -r src/ci-requirements.txt
       - name: Run tests
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         run: npm test

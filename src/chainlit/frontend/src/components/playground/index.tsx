@@ -18,10 +18,10 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ModelSettings from './modelSettings';
-import { getCompletion } from 'api';
 import { toast } from 'react-hot-toast';
 import { userEnvState } from 'state/user';
 import HelpIcon from '@mui/icons-material/HelpOutline';
+import { clientState } from 'state/client';
 
 const styleMap = {
   COMPLETION: {
@@ -31,6 +31,7 @@ const styleMap = {
 };
 
 export default function Playground() {
+  const client = useRecoilValue(clientState);
   const playground = useRecoilValue(playgroundState);
   const setPlayground = useSetRecoilState(playgroundState);
   const settings = useRecoilValue(playgroundSettingsState);
@@ -91,7 +92,7 @@ export default function Playground() {
     const prompt = state.getCurrentContent().getPlainText();
     try {
       setLoading(true);
-      const completion = await getCompletion(prompt, settings, userEnv);
+      const completion = await client.getCompletion(prompt, settings, userEnv);
       setState(insertCompletion(state, completion));
     } catch (err) {
       if (err instanceof Error) {

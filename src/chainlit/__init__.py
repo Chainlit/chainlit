@@ -1,7 +1,10 @@
 from dotenv import load_dotenv
-from typing import Callable, Any
+from typing import Callable, Any, TYPE_CHECKING
 import os
 import asyncio
+
+if TYPE_CHECKING:
+    from chainlit.client.base import BaseClient
 
 from chainlit.lc import (
     LANGCHAIN_INSTALLED,
@@ -12,7 +15,6 @@ from chainlit.lc import (
 )
 from chainlit.llama_index import LLAMA_INDEX_INSTALLED, llama_index_factory
 from chainlit.langflow import langflow_factory
-
 from chainlit.utils import wrap_user_function
 from chainlit.config import config
 from chainlit.telemetry import trace
@@ -98,7 +100,7 @@ def action_callback(name: str) -> Callable:
     Callback to call when an action is clicked in the UI.
 
     Args:
-        func (Callable[[Action], Any]): The action callback to exexute. First parameter is the action.
+        func (Callable[[Action], Any]): The action callback to execute. First parameter is the action.
     """
 
     def decorator(func: Callable[[Action], Any]):
@@ -106,6 +108,19 @@ def action_callback(name: str) -> Callable:
         return func
 
     return decorator
+
+
+@trace
+def client_factory(func: Callable[[], "BaseClient"]) -> Callable[[], "BaseClient"]:
+    """
+    Callback to call when to initialize the custom client.
+
+    Args:
+        func (Callable[[str], BaseClient]): The action callback to execute. First parameter is the session id.
+    """
+
+    config.code.client_factory = func
+    return func
 
 
 def sleep(duration: int):
@@ -143,6 +158,7 @@ __all__ = [
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",
     "LlamaIndexCallbackHandler",
+    "client_factory",
     "run_sync",
     "make_async",
     "cache",

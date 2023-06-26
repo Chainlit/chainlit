@@ -4,6 +4,7 @@ from chainlit.lc.callbacks import (
     AsyncLangchainCallbackHandler,
 )
 from chainlit.sync import make_async
+from chainlit.context import emitter_var
 
 
 async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):

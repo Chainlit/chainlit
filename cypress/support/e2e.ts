@@ -4,7 +4,11 @@ import { installChainlit, runTests, runTest } from "./utils";
 
 async function main() {
   const singleTest = process.env.SINGLE_TEST;
-  await installChainlit();
+  const skipBuild = process.env.SKIP_BUILD;
+
+  if (!skipBuild) {
+    await installChainlit();
+  }
 
   if (singleTest) {
     await runTest(singleTest);

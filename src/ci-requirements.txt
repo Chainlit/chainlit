@@ -1,4 +1,4 @@
-langchain
+langchain==0.0.211
 llama_index>=0.6.30
 responses==0.23.1
 aioresponses==0.7.4

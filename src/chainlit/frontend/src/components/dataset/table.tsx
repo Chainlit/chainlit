@@ -1,4 +1,3 @@
-import { gql, useQuery } from '@apollo/client';
 import { useRecoilValue } from 'recoil';
 import { Alert, Box, Stack, Typography } from '@mui/material';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -6,67 +5,24 @@ import { FixedSizeList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import DeleteConversationButton from './deleteConversationButton';
 import OpenConversationButton from './openConversationButton';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { datasetFiltersState } from 'state/dataset';
-import { projectSettingsState } from 'state/project';
+import { clientState } from 'state/client';
+import { IChat } from 'state/chat';
 
-const ConversationsQuery = gql`
-  query (
-    $first: Int
-    $projectId: String!
-    $cursor: String
-    $withFeedback: Int
-    $authorEmail: String
-    $search: String
-  ) {
-    conversations(
-      first: $first
-      cursor: $cursor
-      projectId: $projectId
-      withFeedback: $withFeedback
-      authorEmail: $authorEmail
-      search: $search
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      edges {
-        cursor
-        node {
-          id
-          createdAt
-          elementCount
-          messageCount
-          author {
-            name
-            email
-          }
-          messages {
-            content
-          }
-        }
-      }
-    }
-  }
-`;
+export interface IPageInfo {
+  hasNextPage: boolean;
+  endCursor: any;
+}
 
-const updateQuery = (previousResult: any, { fetchMoreResult }: any) => {
-  if (!fetchMoreResult) {
-    return previousResult;
-  }
+export interface IPagination {
+  first: number;
+  cursor?: string | number;
+}
 
-  const previousEdges = previousResult.conversations.edges;
-  const fetchMoreEdges = fetchMoreResult.conversations.edges;
+const BATCH_SIZE = 30;
 
-  fetchMoreResult.conversations.edges = [...previousEdges, ...fetchMoreEdges];
-
-  return { ...fetchMoreResult };
-};
-
-const BATCH_SIZE = 50;
-
-const serializeDate = (timestamp: number) => {
+const serializeDate = (timestamp: number | string) => {
   const dateOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'numeric',
@@ -79,50 +35,55 @@ const serializeDate = (timestamp: number) => {
 
 export default function ConversationTable() {
   const df = useRecoilValue(datasetFiltersState);
-  const pSettings = useRecoilValue(projectSettingsState);
-  const { data, loading, error, refetch, fetchMore } = useQuery(
-    ConversationsQuery,
-    {
-      variables: {
-        first: BATCH_SIZE,
-        projectId: pSettings?.project?.id,
-        withFeedback: df.feedback,
-        authorEmail: df.authorEmail,
-        search: df.search
+  const [conversations, setConversations] = useState<IChat[]>([]);
+  const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
+  const client = useRecoilValue(clientState);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+
+  const fetchConversations = useCallback(
+    async (cursor?: string | number) => {
+      try {
+        const { pageInfo, data } = await client.getConversations(
+          { first: BATCH_SIZE, cursor },
+          df
+        );
+        setPrevPageInfo(pageInfo);
+        setError(undefined);
+        setConversations((prev) => [...prev, ...data]);
+      } catch (error) {
+        if (error instanceof Error) setError(error.message);
+      } finally {
+        setLoading(false);
       }
-    }
+    },
+    [client, df]
   );
 
-  useEffect(() => {
-    refetch();
-  }, [df]);
+  const refetchConversations = useCallback(async () => {
+    setConversations([]);
+    setLoading(true);
+    setPrevPageInfo(undefined);
+    fetchConversations(undefined);
+  }, [fetchConversations]);
 
-  const pageInfo = data?.conversations.pageInfo;
+  useEffect(() => {
+    refetchConversations();
+  }, [df, client]);
 
   const loadMoreItems = useCallback(() => {
-    if (data && fetchMore && pageInfo.hasNextPage) {
-      fetchMore({
-        updateQuery,
-        variables: {
-          first: BATCH_SIZE,
-          cursor: pageInfo.endCursor,
-          projectId: pSettings?.project?.id,
-          withFeedback: df.feedback,
-          authorEmail: df.authorEmail,
-          search: df.search
-        }
-      });
+    if (prevPageInfo?.hasNextPage) {
+      fetchConversations(prevPageInfo.endCursor);
     }
-  }, [pageInfo, fetchMore, pSettings, df, updateQuery, data]);
+  }, [prevPageInfo]);
 
   if (error) {
-    return <Alert severity="error">{error.message}</Alert>;
+    return <Alert severity="error">{(error as any).message}</Alert>;
   }
   if (loading) {
     return <Typography color="text.primary">Loading...</Typography>;
   }
 
-  const conversations = data.conversations.edges.map((e: any) => e.node);
   const itemCount = conversations.length;
 
   if (itemCount === 0) {
@@ -172,6 +133,7 @@ export default function ConversationTable() {
     const conversation = conversations[index];
     return (
       <Box
+        className="conversation-row"
         style={style}
         sx={{
           display: 'flex',
@@ -180,7 +142,10 @@ export default function ConversationTable() {
         }}
       >
         <RowText text={conversation.id} col={columns['Id']} />
-        <RowText text={conversation.author.email} col={columns['Author']} />
+        <RowText
+          text={conversation.author?.email || 'LocalUser'}
+          col={columns['Author']}
+        />
         <RowText
           text={conversation.messages[0]?.content}
           col={columns['Input']}
@@ -199,7 +164,7 @@ export default function ConversationTable() {
           <OpenConversationButton conversationId={conversation.id} />
           <DeleteConversationButton
             conversationId={conversation.id}
-            onDelete={() => refetch()}
+            onDelete={() => refetchConversations()}
           />
         </Stack>
       </Box>
@@ -208,6 +173,7 @@ export default function ConversationTable() {
 
   const Header = Object.entries(columns).map(([key, value]) => (
     <Typography
+      key={key}
       sx={{
         fontSize: '0.875rem',
         width: value.width,
@@ -235,8 +201,8 @@ export default function ConversationTable() {
         <AutoSizer>
           {({ height, width }) => (
             <InfiniteLoader
-              isItemLoaded={(index) => conversations[index]}
-              itemCount={pageInfo.hasNextPage ? itemCount + 1 : itemCount}
+              isItemLoaded={(index) => !!conversations[index]}
+              itemCount={prevPageInfo?.hasNextPage ? itemCount + 1 : itemCount}
               loadMoreItems={loadMoreItems}
             >
               {({ onItemsRendered, ref }) => (
