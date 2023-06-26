@@ -1,14 +1,12 @@
-from functools import wraps
-from typing import Callable
-
 from fastapi import HTTPException, Request
 
 from chainlit.config import config
+from chainlit.client.base import BaseClient
 from chainlit.client.local import LocalClient
 from chainlit.client.cloud import CloudClient
 
 
-async def get_client(request: Request):
+async def get_client(request: Request) -> BaseClient:
     auth_header = request.headers.get("Authorization")
 
     db = config.project.database

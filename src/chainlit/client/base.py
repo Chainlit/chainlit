@@ -8,17 +8,19 @@ from typing import (
     Literal,
     TypeVar,
     Generic,
-    TYPE_CHECKING,
 )
-
-if TYPE_CHECKING:
-    from chainlit.types import Pagination, ConversationFilter
 
 from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
-from chainlit.types import ElementType, ElementSize, ElementDisplay
+from chainlit.types import (
+    Pagination,
+    ConversationFilter,
+    ElementType,
+    ElementSize,
+    ElementDisplay,
+)
 
 
 class MessageDict(TypedDict):

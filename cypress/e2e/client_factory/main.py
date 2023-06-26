@@ -1,52 +1,67 @@
-from chainlit.client.base import BaseClient
+from typing import List, Literal, Dict
+
 import chainlit as cl
+from chainlit.client.base import (
+    BaseClient,
+    UserDict,
+    ConversationDict,
+    Pagination,
+    ConversationFilter,
+    PaginatedResponse,
+    MessageDict,
+    ElementDict,
+)
 
 
 class CustomClient(BaseClient):
-    async def is_project_member(self, access_token):
-        raise NotImplementedError()
+    async def is_project_member(self, access_token: str) -> bool:
+        raise NotImplementedError
 
-    async def get_member_role(self, access_token):
-        raise NotImplementedError()
+    async def get_member_role(self, access_token: str) -> str:
+        raise NotImplementedError
 
-    async def get_project_members(self):
-        raise NotImplementedError()
+    async def get_project_members(self) -> List[UserDict]:
+        raise NotImplementedError
 
-    async def create_conversation(self):
-        raise NotImplementedError()
+    async def create_conversation(self) -> int:
+        raise NotImplementedError
 
-    async def delete_conversation(self, conversation_id):
-        raise NotImplementedError()
+    async def delete_conversation(self, conversation_id: int) -> bool:
+        raise NotImplementedError
 
-    async def get_conversation(self, conversation_id):
-        raise NotImplementedError()
+    async def get_conversation(self, conversation_id: int) -> ConversationDict:
+        raise NotImplementedError
 
-    async def get_conversations(self):
-        raise NotImplementedError()
+    async def get_conversations(
+        self, pagination: "Pagination", filter: "ConversationFilter"
+    ) -> PaginatedResponse[ConversationDict]:
+        raise NotImplementedError
 
-    async def set_human_feedback(self, message_id, feedback):
-        raise NotImplementedError()
+    async def get_message(self, conversation_id: str, message_id: str) -> Dict:
+        raise NotImplementedError
 
-    async def get_message(self, conversation_id, message_id):
-        raise NotImplementedError()
+    async def create_message(self, variables: MessageDict) -> int:
+        raise NotImplementedError
 
-    async def create_message(self, variables):
-        raise NotImplementedError()
+    async def update_message(self, message_id: int, variables: MessageDict) -> bool:
+        raise NotImplementedError
 
-    async def delete_message(self, message_id):
-        raise NotImplementedError()
+    async def delete_message(self, message_id: int) -> bool:
+        raise NotImplementedError
 
-    async def get_element(self, conversation_id, element_id):
-        raise NotImplementedError()
+    async def upload_element(self, content: bytes, mime: str) -> str:
+        raise NotImplementedError
 
-    async def update_message(self, message_id, variables):
-        raise NotImplementedError()
+    async def upsert_element(self, variables: ElementDict) -> ElementDict:
+        raise NotImplementedError
 
-    async def upsert_element(self, variables):
-        raise NotImplementedError()
+    async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
+        raise NotImplementedError
 
-    async def upload_element(self, content, mime):
-        raise NotImplementedError()
+    async def set_human_feedback(
+        self, message_id: int, feedback: Literal[-1, 0, 1]
+    ) -> bool:
+        raise NotImplementedError
 
 
 @cl.client_factory
