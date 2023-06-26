@@ -18,16 +18,16 @@ const runLocal = [
 ];
 
 function cleanLocalData(testDir: string) {
-  if (existsSync(join(testDir, ".chainlit/fs"))) {
-    execSync("rm -rf .chainlit/fs", {
+  if (existsSync(join(testDir, ".chainlit/chat_files"))) {
+    execSync("rm -rf .chainlit/chat_files", {
       encoding: "utf-8",
       cwd: testDir,
       env: process.env,
       stdio: "inherit",
     });
   }
-  if (existsSync(join(testDir, ".chainlit/.chat.db"))) {
-    unlinkSync(join(testDir, ".chainlit/.chat.db"));
+  if (existsSync(join(testDir, ".chainlit/chat.db"))) {
+    unlinkSync(join(testDir, ".chainlit/chat.db"));
   }
 }
 

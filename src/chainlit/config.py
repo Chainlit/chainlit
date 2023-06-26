@@ -216,8 +216,8 @@ def load_settings():
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
-        local_db_path = os.path.join(config_dir, ".chat.db")
-        local_fs_path = os.path.join(config_dir, "fs")
+        local_db_path = os.path.join(config_dir, "chat.db")
+        local_fs_path = os.path.join(config_dir, "chat_files")
 
         os.environ[
             "LOCAL_DB_PATH"

@@ -24,7 +24,7 @@ __pycache__
 *.db
 
 
-fs
+chat_files
 
 .chroma
 
