@@ -3,8 +3,13 @@ dotenv.config();
 import { installChainlit, runTests, runTest } from "./utils";
 
 async function main() {
-  await installChainlit();
-  const singleTest = process.argv[2];
+  const singleTest = process.env.SINGLE_TEST;
+  const skipBuild = process.env.SKIP_BUILD;
+
+  if (!skipBuild) {
+    await installChainlit();
+  }
+
   if (singleTest) {
     await runTest(singleTest);
   } else {
@@ -15,6 +20,7 @@ async function main() {
 main()
   .then(() => {
     console.log("Done!");
+    process.exit(0);
   })
   .catch((error) => {
     console.error(error);

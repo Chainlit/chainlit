@@ -12,7 +12,6 @@
     "format": "prettier --config .prettierrc 'src/**/*.{ts,tsx}' --write"
   },
   "dependencies": {
-    "@apollo/client": "^3.7.10",
     "@auth0/auth0-react": "^2.0.1",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",

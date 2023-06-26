@@ -1,15 +1,17 @@
 from dotenv import load_dotenv
-from typing import Callable, Any
+from typing import Callable, Any, TYPE_CHECKING
 import inspect
 import os
 import asyncio
+
+if TYPE_CHECKING:
+    from chainlit.client.base import BaseClient
 
 from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.config import config
 from chainlit.telemetry import trace
 from chainlit.version import __version__
 from chainlit.logger import logger
-from chainlit.emitter import ChainlitEmitter
 from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
@@ -18,7 +20,7 @@ from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessa
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync, make_async
 from chainlit.cache import cache
-from chainlit.context import emitter_var
+from chainlit.context import get_emitter
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
@@ -53,7 +55,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        emitter = emitter_var.get()
+        emitter = get_emitter()
 
         if with_task:
             await emitter.task_start()
@@ -68,7 +70,9 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             pass
         except Exception as e:
             logger.exception(e)
-            await ErrorMessage(content=str(e), author="Error").send()
+            await ErrorMessage(
+                content=str(e) or e.__class__.__name__, author="Error"
+            ).send()
         finally:
             if with_task:
                 await emitter.task_end()
@@ -209,7 +213,7 @@ def action_callback(name: str) -> Callable:
     Callback to call when an action is clicked in the UI.
 
     Args:
-        func (Callable[[Action], Any]): The action callback to exexute. First parameter is the action.
+        func (Callable[[Action], Any]): The action callback to execute. First parameter is the action.
     """
 
     def decorator(func: Callable[[Action], Any]):
@@ -217,6 +221,19 @@ def action_callback(name: str) -> Callable:
         return func
 
     return decorator
+
+
+@trace
+def client_factory(func: Callable[[], "BaseClient"]) -> Callable[[], "BaseClient"]:
+    """
+    Callback to call when to initialize the custom client.
+
+    Args:
+        func (Callable[[str], BaseClient]): The action callback to execute. First parameter is the session id.
+    """
+
+    config.code.client_factory = func
+    return func
 
 
 def sleep(duration: int):
@@ -251,6 +268,7 @@ __all__ = [
     "sleep",
     "ChainlitCallbackHandler",
     "AsyncChainlitCallbackHandler",
+    "client_factory",
     "run_sync",
     "make_async",
     "cache",

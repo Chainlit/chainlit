@@ -1,4 +1,4 @@
-from typing import Optional, Any, Callable, List, Dict, TYPE_CHECKING
+from typing import Optional, Any, Callable, Literal, List, Dict, TYPE_CHECKING
 import os
 import sys
 import tomli
@@ -10,6 +10,7 @@ from chainlit.version import __version__
 
 if TYPE_CHECKING:
     from chainlit.action import Action
+    from chainlit.client.base import BaseClient
 
 PACKAGE_ROOT = os.path.dirname(__file__)
 
@@ -26,9 +27,14 @@ DEFAULT_CONFIG_STR = f"""[project]
 public = true
 
 # The project ID (found on https://cloud.chainlit.io).
-# If provided, all the message data will be stored in the cloud.
-# The project ID is required when public is set to false.
+# The project ID is required when public is set to false or when using the cloud database.
 #id = ""
+
+# Uncomment if you want to persist the chats.
+# local will create a database in your .chainlit directory (requires node.js installed).
+# cloud will use the Chainlit cloud database.
+# custom will load use your custom client.
+# database = "local"
 
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
@@ -102,6 +108,7 @@ class CodeSettings:
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
+    client_factory: Optional[Callable[[str], "BaseClient"]] = None
 
     def validate(self):
         requires_one_of = [
@@ -136,12 +143,18 @@ class ProjectSettings:
     id: Optional[str] = None
     # Whether the app is available to anonymous users or only to team members.
     public: bool = True
+    # Storage type
+    database: Optional[Literal["local", "cloud", "custom"]] = None
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: List[str] = None
     # Path to the local langchain cache database
     lc_cache_path: str = None
+    # Path to the local chat db
+    local_db_path: str = None
+    # Path to the local file system
+    local_fs_path: str = None
 
 
 @dataclass()
@@ -203,10 +216,20 @@ def load_settings():
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
+        local_db_path = os.path.join(config_dir, "chat.db")
+        local_fs_path = os.path.join(config_dir, "chat_files")
+
+        os.environ[
+            "LOCAL_DB_PATH"
+        ] = f"file:{local_db_path}?socket_timeout=10&connection_limit=1"
 
         project_settings = ProjectSettings(
-            lc_cache_path=lc_cache_path, **project_config
+            lc_cache_path=lc_cache_path,
+            local_db_path=local_db_path,
+            local_fs_path=local_fs_path,
+            **project_config,
         )
+
         ui_settings = UISettings(**ui_settings)
 
         if not project_settings.public and not project_settings.id:

@@ -1,5 +1,7 @@
 import { atom } from 'recoil';
 import { Socket } from 'socket.io-client';
+import { IMember } from './user';
+import { IElement } from './element';
 
 export interface ILLMSettings {
   model_name: string;
@@ -12,10 +14,11 @@ export interface ILLMSettings {
 }
 
 export interface IChat {
-  createdAt: number;
-  messages: {
-    content: string;
-  }[];
+  id: number;
+  createdAt: number | string;
+  author?: IMember;
+  messages: IMessage[];
+  elements: IElement[];
 }
 
 export interface IMessage {
@@ -25,7 +28,7 @@ export interface IMessage {
   authorIsUser?: boolean;
   waitForAnswer?: boolean;
   content?: string;
-  createdAt: number;
+  createdAt: number | string;
   humanFeedback?: number;
   language?: string;
   indent?: number;

@@ -1,8 +1,7 @@
 from typing import Union, Dict
 from chainlit.session import Session
 from chainlit.types import AskSpec
-from chainlit.client import BaseClient
-from chainlit.context import emitter_var
+from chainlit.client.base import BaseClient
 from socketio.exceptions import TimeoutError
 
 

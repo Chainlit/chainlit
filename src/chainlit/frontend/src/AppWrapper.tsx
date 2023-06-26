@@ -1,5 +1,5 @@
 import App from 'App';
-import { getProjectSettings } from 'api';
+import { ChainlitClient } from 'api';
 import AuthProvider from 'components/authProvider';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
@@ -12,7 +12,7 @@ export default function AppWrapper() {
 
   useEffect(() => {
     if (pSettings === undefined) {
-      getProjectSettings().then((res: IProjectSettings) => {
+      ChainlitClient.getProjectSettings().then((res: IProjectSettings) => {
         setPSettings(res);
 
         setAppSettings((prev) => ({

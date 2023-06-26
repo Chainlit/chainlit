@@ -1,0 +1,48 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("LOCAL_DB_PATH")
+}
+
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  messages  Message[]
+  elements  Element[]
+}
+
+model Element {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  type           String
+  url            String
+  name           String
+  display        String
+  size           String?
+  language       String?
+  forIds         String?
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorIsUser   Boolean      @default(false)
+  isError        Boolean      @default(false)
+  waitForAnswer  Boolean      @default(false)
+  indent         Int          @default(0)
+  author         String
+  content        String
+  humanFeedback  Int          @default(0)
+  language       String?
+  prompt         String?
+  // Sqlite does not support JSON
+  llmSettings    String?
+}

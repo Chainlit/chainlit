@@ -1,23 +1,27 @@
 from pydantic.dataclasses import dataclass
-from dataclasses_json import dataclass_json
-from typing import Dict, Union, Any
+from typing import Dict, List, Union, Any
 import uuid
 import aiofiles
 from io import BytesIO
 
 from chainlit.context import get_emitter
-from chainlit.client import BaseClient
+from chainlit.client.base import BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
 type_to_mime = {
-    "image": "binary/octet-stream",
+    "image": "image/png",
     "text": "text/plain",
     "pdf": "application/pdf",
 }
 
+mime_to_ext = {
+    "image/png": "png",
+    "text/plain": "txt",
+    "application/pdf": "pdf",
+}
 
-@dataclass_json
+
 @dataclass
 class Element:
     # Name of the element, this will be used to reference the element in the UI.
@@ -35,18 +39,35 @@ class Element:
     # The ID of the element. This is set automatically when the element is sent to the UI if cloud is enabled.
     id: int = None
     # The ID of the element if cloud is disabled.
-    tempId: str = None
+    temp_id: str = None
     # The ID of the message this element is associated with.
-    forId: str = None
+    for_ids: List[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.emitter = get_emitter()
+        self.for_ids = []
+        self.temp_id = str(uuid.uuid4())
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
-        self.tempId = uuid.uuid4().hex
+    def to_dict(self) -> Dict:
+        _dict = {
+            "tempId": self.temp_id,
+            "type": self.type,
+            "url": self.url,
+            "name": self.name,
+            "display": self.display,
+            "size": getattr(self, "size", None),
+            "language": getattr(self, "language", None),
+            "forIds": getattr(self, "for_ids", None),
+        }
+
+        if self.id:
+            _dict["id"] = self.id
+
+        return _dict
 
     async def preprocess_content(self):
         pass
@@ -55,29 +76,15 @@ class Element:
         if self.path:
             async with aiofiles.open(self.path, "rb") as f:
                 self.content = await f.read()
-                await self.preprocess_content()
-        elif self.content:
-            await self.preprocess_content()
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: BaseClient, for_id: str = None):
-        if not self.url and self.content:
+    async def persist(self, client: BaseClient):
+        if not self.url and self.content and not self.id:
             self.url = await client.upload_element(
                 content=self.content, mime=type_to_mime[self.type]
             )
-
-        size = getattr(self, "size", None)
-        language = getattr(self, "language", None)
-        element = await client.create_element(
-            name=self.name,
-            url=self.url,
-            type=self.type,
-            display=self.display,
-            size=size,
-            language=language,
-            for_id=for_id,
-        )
+        element = await client.upsert_element(self.to_dict())
         return element
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -89,22 +96,34 @@ class Element:
         if not self.content and not self.url and self.path:
             await self.load()
 
-        # Cloud is enabled, upload the element to S3
-        if self.emitter.client and not self.id:
-            element = await self.persist(self.emitter.client, for_id)
-            self.id = element["id"]
+        await self.preprocess_content()
+
+        if for_id:
+            self.for_ids.append(for_id)
+
+        # We have a client, persist the element
+        if self.emitter.client:
+            element = await self.persist(self.emitter.client)
+            self.id = element and element.get("id")
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
 
         element = self.to_dict()
-        if for_id:
-            element["forId"] = for_id
+
+        element["content"] = self.content
 
         if self.emitter.emit and element:
-            trace_event(f"send {self.__class__.__name__}")
-            element = await self.before_emit(element)
-            await self.emitter.emit("element", element)
+            if len(self.for_ids) > 1:
+                trace_event(f"update {self.__class__.__name__}")
+                await self.emitter.emit(
+                    "update_element",
+                    {"id": self.id or self.temp_id, "forIds": self.for_ids},
+                )
+            else:
+                trace_event(f"send {self.__class__.__name__}")
+                element = await self.before_emit(element)
+                await self.emitter.emit("element", element)
 
 
 @dataclass
@@ -186,8 +205,3 @@ class Pyplot(Element):
         self.content = image.getvalue()
 
         super().__post_init__()
-
-    async def before_emit(self, element: Dict) -> Dict:
-        # Prevent the figure from being serialized
-        del element["figure"]
-        return element

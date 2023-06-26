@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Optional, Literal, Dict, Union
+from typing import List, Any, TypedDict, Optional, Literal, Dict, Union
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
@@ -66,3 +66,28 @@ class CompletionRequest(BaseModel):
     prompt: str
     userEnv: Dict[str, str]
     settings: LLMSettings
+
+
+class UpdateFeedbackRequest(BaseModel):
+    messageId: int
+    feedback: int
+
+
+class DeleteConversationRequest(BaseModel):
+    conversationId: int
+
+
+class Pagination(BaseModel):
+    first: int
+    cursor: Any
+
+
+class ConversationFilter(BaseModel):
+    feedback: Optional[Literal[-1, 0, 1]]
+    authorEmail: Optional[str]
+    search: Optional[str]
+
+
+class GetConversationsRequest(BaseModel):
+    pagination: Pagination
+    filter: ConversationFilter
