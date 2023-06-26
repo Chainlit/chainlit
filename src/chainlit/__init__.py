@@ -16,6 +16,7 @@ from chainlit.types import LLMSettings
 from chainlit.message import ErrorMessage
 from chainlit.action import Action
 from chainlit.element import Image, Text, Pdf, Avatar, Pyplot
+from chainlit.tasklist import Task, TaskList, TaskStatus
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
 from chainlit.sync import run_sync, make_async
@@ -254,6 +255,9 @@ __all__ = [
     "Text",
     "Avatar",
     "Pyplot",
+    "Task",
+    "TaskList",
+    "TaskStatus",
     "Message",
     "ErrorMessage",
     "AskUserMessage",
