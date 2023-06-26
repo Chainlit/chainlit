@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.4.2] - 2023-06-26
+
+### Added
+
+- New data persistence mode `local` and `custom` are available on top of the pre-existing `cloud` one. Learn more [here](https://docs.chainlit.io/data). 
+
 
 ## [0.4.101] - 2023-06-24
 
