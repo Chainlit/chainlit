@@ -30,8 +30,6 @@ async def factory():
         callback_manager=CallbackManager([cl.LlamaIndexCallbackHandler()]),
     )
 
-    query_engine = index.as_query_engine(
-        service_context=service_context,
-    )
+    query_engine = index.as_query_engine(service_context=service_context)
 
     return query_engine

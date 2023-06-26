@@ -4,6 +4,7 @@ from llama_index.chat_engine.types import BaseChatEngine
 from llama_index.indices.query.base import BaseQueryEngine
 
 from chainlit.message import Message
+from chainlit.sync import make_async
 
 
 async def run_llama(instance: Union[BaseChatEngine, BaseQueryEngine], input_str: str):
@@ -13,9 +14,9 @@ async def run_llama(instance: Union[BaseChatEngine, BaseQueryEngine], input_str:
     response_message = Message(content="")
 
     if isinstance(instance, BaseQueryEngine):
-        response = await instance.aquery(input_str)
+        response = await make_async(instance.query)(input_str)
     elif isinstance(instance, BaseChatEngine):
-        response = await instance.achat(input_str)
+        response = await make_async(instance.chat)(input_str)
     else:
         raise NotImplementedError
 
