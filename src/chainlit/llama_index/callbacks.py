@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 
-from chainlit.emitter import ChainlitEmitter, get_emitter
+
 from chainlit.message import Message
 from chainlit.element import Text
 from chainlit.sync import run_sync
@@ -23,8 +23,6 @@ DEFAULT_IGNORE = [
 class LlamaIndexCallbackHandler(BaseCallbackHandler):
     """Base callback handler that can be used to track event starts and ends."""
 
-    emitter: ChainlitEmitter
-
     def __init__(
         self,
         event_starts_to_ignore: List[CBEventType] = DEFAULT_IGNORE,
@@ -33,7 +31,6 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         """Initialize the base callback handler."""
         self.event_starts_to_ignore = tuple(event_starts_to_ignore)
         self.event_ends_to_ignore = tuple(event_ends_to_ignore)
-        self.emitter = get_emitter()
 
     def on_event_start(
         self,
@@ -43,7 +40,6 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> str:
         """Run when an event starts and return id of event."""
-
         run_sync(
             Message(
                 author=event_type,

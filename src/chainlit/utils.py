@@ -41,7 +41,9 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             pass
         except Exception as e:
             logger.exception(e)
-            await ErrorMessage(content=str(e), author="Error").send()
+            await ErrorMessage(
+                content=str(e) or e.__class__.__name__, author="Error"
+            ).send()
         finally:
             if with_task:
                 await emitter.task_end()

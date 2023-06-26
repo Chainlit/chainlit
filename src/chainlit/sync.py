@@ -6,7 +6,9 @@ if sys.version_info >= (3, 10):
 else:
     from typing_extensions import ParamSpec
 
+import threading
 import asyncio
+from syncer import sync
 from asyncer import asyncify
 
 from chainlit.context import get_loop
@@ -20,6 +22,9 @@ T = TypeVar("T")
 
 
 def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
-    loop = get_loop()
-    result = asyncio.run_coroutine_threadsafe(co, loop=loop)
-    return result.result()
+    if threading.current_thread() == threading.main_thread():
+        return sync(co)
+    else:
+        loop = get_loop()
+        result = asyncio.run_coroutine_threadsafe(co, loop=loop)
+        return result.result()
