@@ -10,7 +10,7 @@ try:
 except ImportError:
     LANGFLOW_INSTALLED = False
 
-from typing import Callable, Union, Dict
+from typing import Callable, Union, Dict, Optional
 import aiohttp
 
 from chainlit.telemetry import trace
@@ -19,15 +19,19 @@ from chainlit.lc import langchain_factory
 
 
 @trace
-def langflow_factory(schema: Union[Dict, str], use_async: bool) -> Callable:
+def langflow_factory(
+    use_async: bool, schema: Union[Dict, str], tweaks: Optional[Dict] = None
+) -> Callable:
     """
     Plug and play decorator for the Langflow library.
     One instance per user session is created and cached.
     The per user instance is called every time a new message is received.
 
     Args:
-        schema (Union[Dict, str]): The langflow schema dict or url.
         use_async bool: Whether to call the the agent asynchronously or not.
+        schema (Union[Dict, str]): The langflow schema dict or url.
+        tweaks Optional[Dict]: Optional tweaks to be processed
+
 
     Returns:
         Callable[[], Any]: The decorated factory function.
@@ -61,7 +65,7 @@ def langflow_factory(schema: Union[Dict, str], use_async: bool) -> Callable:
                             raise ValueError(f"Error: {reason}")
                         schema = await r.json()
 
-            flow = load_flow_from_json(schema)
+            flow = load_flow_from_json(input=schema, tweaks=tweaks)
             return func(flow)
 
         langchain_factory(use_async=use_async)(wrapper)
