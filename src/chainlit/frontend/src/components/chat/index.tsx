@@ -18,6 +18,7 @@ import { actionState } from 'state/action';
 import WelcomeScreen from 'components/chat/welcomeScreen';
 import { elementState } from 'state/element';
 import ErrorBoundary from 'components/errorBoundary';
+import TaskList from 'components/tasklist';
 
 const Chat = () => {
   const { user, isAuthenticated } = useAuth();
@@ -77,6 +78,7 @@ const Chat = () => {
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
       <Playground />
+      <TaskList tasklist={elements.findLast((e) => e.type === 'tasklist')} />
       <Box
         display="flex"
         flexDirection="column"

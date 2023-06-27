@@ -1,8 +1,10 @@
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
+from dataclasses_json import dataclass_json
 from typing import Dict, List, Union, Any
 import uuid
 import aiofiles
 from io import BytesIO
+from enum import Enum
 
 from chainlit.context import get_emitter
 from chainlit.client.base import BaseClient
@@ -13,6 +15,7 @@ type_to_mime = {
     "image": "image/png",
     "text": "text/plain",
     "pdf": "application/pdf",
+    "tasklist": "text/plain",
 }
 
 mime_to_ext = {
@@ -205,3 +208,64 @@ class Pyplot(Element):
         self.content = image.getvalue()
 
         super().__post_init__()
+
+    async def before_emit(self, element: Dict) -> Dict:
+        # Prevent the figure from being serialized
+        del element["figure"]
+        return element
+
+
+class TaskStatus(Enum):
+    NOT_STARTED = "not started"
+    RUNNING = "running"
+    DONE = "done"
+
+
+@dataclass
+class Task:
+    title: str = None
+    status: TaskStatus = TaskStatus.NOT_STARTED
+
+    def __init__(
+        self,
+        title: str,
+        description: str = None,
+        status: TaskStatus = TaskStatus.NOT_STARTED,
+    ):
+        self.title = title
+        self.description = description
+        self.status = status
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+
+@dataclass
+class TaskList(Element):
+    type = "tasklist"
+    tasks: List[Task] = Field(default_factory=list, exclude=True)
+    status: str = "Running..."
+
+    def __init__(self):
+        self.tasks = []
+        self.content = "dummy content to pass validation"
+        self.name = "tasklist"
+        self.type = "tasklist"
+        super().__post_init__()
+
+    async def add_task(self, task: Task):
+        self.tasks.append(task)
+
+    async def update(self):
+        await self.send()
+
+    async def before_emit(self, element: Dict) -> Dict:
+        # serialize enum
+        for task in element["tasks"]:
+            task["status"] = task["status"].value
+
+        # Move tasks to content
+        element["content"] = element["tasks"]
+        del element["tasks"]
+
+        return element

@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-export type ElementType = 'image' | 'text' | 'pdf' | 'avatar';
+export type ElementType = 'image' | 'text' | 'pdf' | 'avatar' | 'tasklist';
 
 export type AllElements =
   | IImageElement
