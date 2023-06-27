@@ -13,7 +13,7 @@ async def start():
     ).send()
 
     await cl.Message(
-        content="This message should have an avatar!", author="Tool 1"
+        content="Tool 1! This message should have an avatar!", author="Tool 1"
     ).send()
 
     await cl.Message(

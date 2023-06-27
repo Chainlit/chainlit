@@ -33,7 +33,9 @@ const isGlobalMatch = (forIds: string[] | undefined) => {
 };
 
 function prepareContent({ id, elements, actions, content, language }: Props) {
-  const elementNames = elements.map((e) => e.name);
+  const elementNames = elements
+    .filter((e) => e.type !== 'avatar')
+    .map((e) => e.name);
 
   // Sort by descending length to avoid matching substrings
   elementNames.sort((a, b) => b.length - a.length);
