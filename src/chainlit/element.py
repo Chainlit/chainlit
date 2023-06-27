@@ -216,7 +216,7 @@ class Pyplot(Element):
 
 
 class TaskStatus(Enum):
-    NOT_STARTED = "not started"
+    READY = "ready"
     RUNNING = "running"
     DONE = "done"
 
@@ -224,13 +224,13 @@ class TaskStatus(Enum):
 @dataclass
 class Task:
     title: str = None
-    status: TaskStatus = TaskStatus.NOT_STARTED
+    status: TaskStatus = TaskStatus.READY
 
     def __init__(
         self,
         title: str,
         description: str = None,
-        status: TaskStatus = TaskStatus.NOT_STARTED,
+        status: TaskStatus = TaskStatus.READY,
     ):
         self.title = title
         self.description = description
@@ -244,7 +244,7 @@ class Task:
 class TaskList(Element):
     type = "tasklist"
     tasks: List[Task] = Field(default_factory=list, exclude=True)
-    status: str = "Running..."
+    status: str = "Ready"
 
     def __init__(self):
         self.tasks = []

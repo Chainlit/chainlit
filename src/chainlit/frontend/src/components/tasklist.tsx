@@ -88,70 +88,80 @@ const Task = ({ index, task }) => {
   );
 };
 
-const tasks = [
-  {
-    title: 'Conduct research on the root causes of world hunger',
-    status: 'done'
-  },
-  {
-    title: 'Identify regions and populations most affected by hunger',
-    status: 'done'
-  },
-  {
-    title:
-      'Develop partnerships with local organizations and governments to address...',
-    status: 'done'
-  },
-  {
-    title:
-      'Implement sustainable agriculture practices to increase food production',
-    status: 'running'
-  },
-  {
-    title: 'Provide education and resources on nutrition and food preparation',
-    status: 'not started'
-  },
-  {
-    title: 'Establish food banks and distribution centers in areas of need',
-    status: 'not started'
-  },
-  {
-    title:
-      'Advocate for policy changes to address systemic issues contributing to hunger',
-    status: 'not started'
-  },
-  {
-    title: 'Raise awareness and funds through public campaigns and events',
-    status: 'not started'
-  },
-  {
-    title: 'Raise awareness and funds through public campaigns and events',
-    status: 'not started'
-  },
-  {
-    title: 'Raise awareness and funds through public campaigns and events',
-    status: 'not started'
-  },
-  {
-    title: 'Raise awareness and funds through public campaigns and events',
-    status: 'not started'
-  },
-  {
-    title: 'Raise awareness and funds through public campaigns and events',
-    status: 'not started'
-  }
-];
-
-export default function TaskList({ tasklist }) {
+export default function TaskList({ tasklist, isMobile }) {
   const theme = useTheme();
+
+  if (!tasklist) {
+    return null;
+  }
+
+  if (isMobile) {
+    // Get the first running or ready task, or the latest done task
+    let highlightedTaskIndex = tasklist.content.length - 1;
+    for (let i = 0; i < tasklist.content.length; i++) {
+      if (
+        tasklist.content[i].status === 'running' ||
+        tasklist.content[i].status === 'ready'
+      ) {
+        highlightedTaskIndex = i;
+        break;
+      }
+    }
+    const highlightedTask = tasklist.content?.[highlightedTaskIndex];
+
+    return (
+      <Box
+        component="aside"
+        sx={{
+          color: theme.palette.text.primary,
+          padding: theme.spacing(2),
+          width: '100%',
+          boxSizing: 'border-box',
+          display: {
+            xs: 'flex',
+            md: 'none'
+          }
+        }}
+      >
+        <Box
+          sx={{
+            background: theme.palette.divider,
+            borderRadius: '4px',
+            flexGrow: '1'
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: 'row',
+              padding: theme.spacing(2)
+            }}
+          >
+            <Box sx={{ flexGrow: '1', fontWeight: '600' }}>Task list</Box>
+            <Chip label={tasklist?.status || '?'} sx={{ fontWeight: '500' }} />
+          </Box>
+          {highlightedTask && (
+            <List>
+              <Task index={highlightedTaskIndex + 1} task={highlightedTask} />
+            </List>
+          )}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box
       component="aside"
       sx={{
         color: theme.palette.text.primary,
         padding: theme.spacing(2),
-        display: 'flex',
-        width: '380px'
+        width: '380px',
+        display: {
+          xs: 'none',
+          md: 'flex'
+        }
       }}
     >
       <Box

@@ -75,17 +75,21 @@ const Chat = () => {
     [askUser, user]
   );
 
+  const tasklist = elements.findLast((e) => e.type === 'tasklist');
+
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
       <Playground />
-      <TaskList tasklist={elements.findLast((e) => e.type === 'tasklist')} />
+      <TaskList tasklist={tasklist} isMobile={false} />
       <Box
         display="flex"
         flexDirection="column"
         width="100%"
         boxSizing="border-box"
         px={2}
+        flexGrow={1}
       >
+        <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
         {session?.error && (
           <Alert severity="error">Could not reach the server.</Alert>
