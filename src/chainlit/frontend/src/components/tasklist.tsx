@@ -5,10 +5,21 @@ import {
   ListItem,
   ListItemButton,
   SvgIcon,
+  Theme,
   useTheme
 } from '@mui/material';
 
-const TaskStatusIcon = ({ status }) => (
+interface ITask {
+  title: string;
+  status: 'ready' | 'running' | 'done';
+}
+
+interface ITaskList {
+  status: 'ready' | 'running' | 'done';
+  content: ITask[];
+}
+
+const TaskStatusIcon = ({ status }: {status: ITask["status"]}) => (
   <SvgIcon
     sx={{
       marginTop: '-2px'
@@ -52,16 +63,42 @@ const TaskStatusIcon = ({ status }) => (
   </SvgIcon>
 );
 
-const Task = ({ index, task }) => {
+const Header = ({ status }: {status: ITask["status"]}) => {
+  const theme = useTheme();
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        padding: theme.spacing(2)
+      }}
+    >
+      <Box sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}>🗒️ Task List</Box>
+      <Chip
+        label={status || '?'}
+        sx={{
+          fontWeight: '500',
+          borderRadius: '4px',
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.mode === 'dark' ? '#9E9E9E' : '#757575'
+        }}
+      />
+    </Box>
+  );
+};
+
+const Task = ({ index, task }: { index: number, task: ITask }) => {
   const theme = useTheme();
   return (
     <ListItem disableGutters>
       <ListItemButton
         sx={{
-          color:
-            task.status === 'running'
-              ? theme.palette.primary.contrastText
-              : theme.palette.text.secondary,
+          color: {
+            'ready': theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
+            'running': theme.palette.primary.contrastText,
+            'done': '#9E9E9E'
+          }[task.status] || theme.palette.text.secondary,
           fontWeight: task.status === 'running' ? '700' : '500',
           alignItems: 'flex-start',
           fontSize: '14px',
@@ -70,7 +107,8 @@ const Task = ({ index, task }) => {
       >
         <Box
           sx={{
-            paddingRight: theme.spacing(1)
+            paddingRight: theme.spacing(1),
+            width: '18px',
           }}
         >
           {index}
@@ -88,7 +126,20 @@ const Task = ({ index, task }) => {
   );
 };
 
-export default function TaskList({ tasklist, isMobile }) {
+const taskListContainerStyles = (theme: Theme) => ({
+  background: theme.palette.background.paper,
+  borderRadius: '4px',
+  border: `1px solid ${theme.palette.divider}`,
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  boxShadow:
+    theme.palette.mode === 'dark'
+      ? '0px 4px 20px 0px rgba(0, 0, 0, 0.20)'
+      : '0px 4px 20px 0px rgba(0, 0, 0, 0.05)'
+})
+
+export default function TaskList({ tasklist, isMobile } : { tasklist: ITaskList, isMobile: boolean }) {
   const theme = useTheme();
 
   if (!tasklist) {
@@ -125,22 +176,10 @@ export default function TaskList({ tasklist, isMobile }) {
       >
         <Box
           sx={{
-            background: theme.palette.divider,
-            borderRadius: '4px',
-            flexGrow: '1'
+            ...taskListContainerStyles(theme)
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'row',
-              padding: theme.spacing(2)
-            }}
-          >
-            <Box sx={{ flexGrow: '1', fontWeight: '600' }}>Task list</Box>
-            <Chip label={tasklist?.status || '?'} sx={{ fontWeight: '500' }} />
-          </Box>
+          <Header status={tasklist?.status} />
           {highlightedTask && (
             <List>
               <Task index={highlightedTaskIndex + 1} task={highlightedTask} />
@@ -158,6 +197,7 @@ export default function TaskList({ tasklist, isMobile }) {
         color: theme.palette.text.primary,
         padding: theme.spacing(2),
         width: '380px',
+        flexShrink: '0',
         display: {
           xs: 'none',
           md: 'flex'
@@ -166,25 +206,10 @@ export default function TaskList({ tasklist, isMobile }) {
     >
       <Box
         sx={{
-          background: theme.palette.divider,
-          borderRadius: '4px',
-
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column'
+          ...taskListContainerStyles(theme)
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'row',
-            padding: theme.spacing(2)
-          }}
-        >
-          <Box sx={{ flexGrow: '1', fontWeight: '600' }}>Task list</Box>
-          <Chip label={tasklist?.status || '?'} />
-        </Box>
+        <Header status={tasklist?.status} />
         <Box
           sx={{
             overflowY: 'auto'
