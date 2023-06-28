@@ -8,6 +8,8 @@ import {
   Theme,
   useTheme
 } from '@mui/material';
+import { ITasklistElement } from 'state/element';
+import { useEffect, useState } from 'react';
 
 interface ITask {
   title: string;
@@ -16,7 +18,7 @@ interface ITask {
 
 interface ITaskList {
   status: 'ready' | 'running' | 'done';
-  content: ITask[];
+  tasks: ITask[];
 }
 
 const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
@@ -145,31 +147,39 @@ const taskListContainerStyles = (theme: Theme) => ({
 });
 
 export default function TaskList({
-  tasklist,
+  tasklist: rawTasklist,
   isMobile
 }: {
-  tasklist: ITaskList;
+  tasklist?: ITasklistElement;
   isMobile: boolean;
 }) {
   const theme = useTheme();
+  const [content, setContent] = useState<ITaskList | null>(null);
 
-  if (!tasklist) {
+  useEffect(() => {
+    if (!rawTasklist?.content) return;
+    setContent(JSON.parse(rawTasklist.content));
+  }, [rawTasklist, setContent]);
+
+  if (!content) {
     return null;
   }
 
+  const tasks = content.tasks;
+
   if (isMobile) {
-    // Get the first running or ready task, or the latest done task
-    let highlightedTaskIndex = tasklist.content.length - 1;
-    for (let i = 0; i < tasklist.content.length; i++) {
+    // Get the first running or ready task, or the latest task done
+    let highlightedTaskIndex = tasks.length - 1;
+    for (let i = 0; i < tasks.length; i++) {
       if (
-        tasklist.content[i].status === 'running' ||
-        tasklist.content[i].status === 'ready'
+        tasks[i].status === 'running' ||
+        tasks[i].status === 'ready'
       ) {
         highlightedTaskIndex = i;
         break;
       }
     }
-    const highlightedTask = tasklist.content?.[highlightedTaskIndex];
+    const highlightedTask = tasks?.[highlightedTaskIndex];
 
     return (
       <Box
@@ -190,7 +200,7 @@ export default function TaskList({
             ...taskListContainerStyles(theme)
           }}
         >
-          <Header status={tasklist?.status} />
+          <Header status={content.status} />
           {highlightedTask && (
             <List>
               <Task index={highlightedTaskIndex + 1} task={highlightedTask} />
@@ -220,14 +230,14 @@ export default function TaskList({
           ...taskListContainerStyles(theme)
         }}
       >
-        <Header status={tasklist?.status} />
+        <Header status={content?.status} />
         <Box
           sx={{
             overflowY: 'auto'
           }}
         >
           <List>
-            {tasklist?.content?.map((task, index) => (
+            {tasks?.map((task, index) => (
               <Task key={index} index={index + 1} task={task} />
             ))}
           </List>

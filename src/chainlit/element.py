@@ -5,6 +5,7 @@ import uuid
 import aiofiles
 from io import BytesIO
 from enum import Enum
+import json
 
 from chainlit.context import get_emitter
 from chainlit.client.base import BaseClient
@@ -257,11 +258,14 @@ class TaskList(Element):
     async def update(self):
         await self.send()
 
-    async def before_emit(self, element: Dict) -> Dict:
+    async def preprocess_content(self):
         # serialize enum
-        tasks = [{"title": task.title, "status": task.status.value} for task in self.tasks]
-        
-        # Replace content with tasks
-        element["content"] = tasks
+        tasks = [
+            {"title": task.title, "status": task.status.value} for task in self.tasks
+        ]        
 
-        return element
+        # store stringified json in content so that it's correctly stored in the database
+        self.content = json.dumps({
+            "status": self.status,
+            "tasks": tasks,
+        })
