@@ -16,6 +16,8 @@ class Session(TypedDict):
     user_env: Dict[str, str]
     # Optional langchain agent
     agent: Any
+    # Optional llama instance
+    llama_instance: Any
     # Whether the current task should be stopped
     should_stop: bool
     # Optional client to persist messages and files

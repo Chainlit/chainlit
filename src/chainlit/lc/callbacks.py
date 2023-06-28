@@ -38,7 +38,7 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
         return None
 
 
-class BaseChainlitCallbackHandler(BaseCallbackHandler):
+class BaseLangchainCallbackHandler(BaseCallbackHandler):
     emitter: ChainlitEmitter
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
@@ -100,7 +100,7 @@ class BaseChainlitCallbackHandler(BaseCallbackHandler):
         return author, indent, llm_settings
 
 
-class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
+class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
     def start_stream(self):
         author, indent, llm_settings = self.get_message_params()
 
@@ -252,7 +252,7 @@ class ChainlitCallbackHandler(BaseChainlitCallbackHandler, BaseCallbackHandler):
         pass
 
 
-class AsyncChainlitCallbackHandler(BaseChainlitCallbackHandler, AsyncCallbackHandler):
+class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackHandler):
     async def start_stream(self):
         author, indent, llm_settings = self.get_message_params()
 

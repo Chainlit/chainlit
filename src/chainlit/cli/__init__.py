@@ -2,6 +2,10 @@ import click
 import os
 import sys
 import uvicorn
+import asyncio
+import nest_asyncio
+
+nest_asyncio.apply()
 
 from chainlit.config import (
     config,
@@ -52,7 +56,15 @@ def run_chainlit(target: str):
 
     log_level = "debug" if config.run.debug else "error"
 
-    uvicorn.run(app, host=host, port=port, log_level=log_level)
+    # Start the server
+    async def start():
+        config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
+        server = uvicorn.Server(config)
+        await server.serve()
+
+    # Run the asyncio event loop instead of uvloop to enable re entrance
+    asyncio.run(start())
+    # uvicorn.run(app, host=host, port=port, log_level=log_level)
 
 
 # Define the "run" command for Chainlit CLI

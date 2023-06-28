@@ -1,4 +1,4 @@
-from typing import Optional, Any, Callable, Literal, List, Dict, TYPE_CHECKING
+from typing import Optional, Any, Callable, Union, Literal, List, Dict, TYPE_CHECKING
 import os
 import sys
 import tomli
@@ -108,16 +108,19 @@ class CodeSettings:
     lc_postprocess: Optional[Callable[[Any], str]] = None
     lc_factory: Optional[Callable[[], Any]] = None
     lc_rename: Optional[Callable[[str], str]] = None
+    llama_index_factory: Optional[Callable[[], Any]] = None
+    langflow_schema: Union[Dict, str] = None
     client_factory: Optional[Callable[[str], "BaseClient"]] = None
 
     def validate(self):
         requires_one_of = [
             "lc_factory",
+            "llama_index_factory",
             "on_message",
             "on_chat_start",
         ]
 
-        mutually_exclusive = ["lc_factory"]
+        mutually_exclusive = ["lc_factory", "llama_index_factory"]
 
         # Check if at least one of the required attributes is set
         if not any(getattr(self, attr) for attr in requires_one_of):

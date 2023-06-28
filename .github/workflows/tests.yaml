@@ -21,7 +21,7 @@ jobs:
         run: npm run installUiDeps
       - name: Lint UI
         run: npm run lintUi
-      - name: Set up Python 3.8
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"

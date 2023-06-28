@@ -1,5 +1,8 @@
 from typing import Any
-from chainlit.lc.callbacks import ChainlitCallbackHandler, AsyncChainlitCallbackHandler
+from chainlit.lc.callbacks import (
+    LangchainCallbackHandler,
+    AsyncLangchainCallbackHandler,
+)
 from chainlit.sync import make_async
 from chainlit.context import emitter_var
 
@@ -9,20 +12,20 @@ async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):
         input_key = agent.input_keys[0]
         if use_async:
             raw_res = await agent.acall(
-                {input_key: input_str}, callbacks=[AsyncChainlitCallbackHandler()]
+                {input_key: input_str}, callbacks=[AsyncLangchainCallbackHandler()]
             )
         else:
             raw_res = await make_async(agent.__call__)(
-                {input_key: input_str}, callbacks=[ChainlitCallbackHandler()]
+                {input_key: input_str}, callbacks=[LangchainCallbackHandler()]
             )
     else:
         if use_async:
             raw_res = await agent.acall(
-                input_str, callbacks=[AsyncChainlitCallbackHandler()]
+                input_str, callbacks=[AsyncLangchainCallbackHandler()]
             )
         else:
             raw_res = await make_async(agent.__call__)(
-                input_str, callbacks=[ChainlitCallbackHandler()]
+                input_str, callbacks=[LangchainCallbackHandler()]
             )
 
     if hasattr(agent, "output_keys"):

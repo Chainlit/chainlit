@@ -408,14 +408,18 @@ async def connection_successful(sid):
     emitter_var.set(ChainlitEmitter(session))
     loop_var.set(asyncio.get_event_loop())
 
+    if config.code.on_chat_start:
+        """Call the on_chat_start function provided by the developer."""
+        await config.code.on_chat_start()
+
     if config.code.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
         agent = await config.code.lc_factory()
         session["agent"] = agent
 
-    if config.code.on_chat_start:
-        """Call the on_chat_start function provided by the developer."""
-        await config.code.on_chat_start()
+    if config.code.llama_index_factory:
+        llama_instance = await config.code.llama_index_factory()
+        session["llama_instance"] = llama_instance
 
 
 @socket.on("disconnect")
@@ -467,6 +471,8 @@ async def process_message(session: Session, author: str, input_str: str):
             )
 
         langchain_agent = session.get("agent")
+        llama_instance = session.get("llama_instance")
+
         if langchain_agent:
             from chainlit.lc.agent import run_langchain_agent
 
@@ -496,6 +502,11 @@ async def process_message(session: Session, author: str, input_str: str):
                     res = raw_res
             # Finally, send the response to the user
             await Message(author=config.ui.name, content=res).send()
+
+        elif llama_instance:
+            from chainlit.llama_index.run import run_llama
+
+            await run_llama(llama_instance, input_str)
 
         elif config.code.on_message:
             # If no langchain agent is available, call the on_message function provided by the developer
