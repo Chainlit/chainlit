@@ -262,10 +262,12 @@ class TaskList(Element):
         # serialize enum
         tasks = [
             {"title": task.title, "status": task.status.value} for task in self.tasks
-        ]        
+        ]
 
         # store stringified json in content so that it's correctly stored in the database
-        self.content = json.dumps({
-            "status": self.status,
-            "tasks": tasks,
-        })
+        self.content = json.dumps(
+            {
+                "status": self.status,
+                "tasks": tasks,
+            }
+        )

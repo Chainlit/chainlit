@@ -171,10 +171,7 @@ export default function TaskList({
     // Get the first running or ready task, or the latest task done
     let highlightedTaskIndex = tasks.length - 1;
     for (let i = 0; i < tasks.length; i++) {
-      if (
-        tasks[i].status === 'running' ||
-        tasks[i].status === 'ready'
-      ) {
+      if (tasks[i].status === 'running' || tasks[i].status === 'ready') {
         highlightedTaskIndex = i;
         break;
       }
