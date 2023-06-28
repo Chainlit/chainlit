@@ -247,10 +247,10 @@ class ErrorMessage(MessageBase):
 
 
 class AskMessageBase(MessageBase):
-    def remove(self):
-        removed = super().remove()
+    async def remove(self):
+        removed = await super().remove()
         if removed:
-            self.emitter.clear_ask()
+            await self.emitter.clear_ask()
 
 
 class AskUserMessage(AskMessageBase):
