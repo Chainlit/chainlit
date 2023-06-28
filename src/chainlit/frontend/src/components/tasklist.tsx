@@ -19,7 +19,7 @@ interface ITaskList {
   content: ITask[];
 }
 
-const TaskStatusIcon = ({ status }: {status: ITask["status"]}) => (
+const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
   <SvgIcon
     sx={{
       marginTop: '-2px'
@@ -63,7 +63,7 @@ const TaskStatusIcon = ({ status }: {status: ITask["status"]}) => (
   </SvgIcon>
 );
 
-const Header = ({ status }: {status: ITask["status"]}) => {
+const Header = ({ status }: { status: ITask['status'] }) => {
   const theme = useTheme();
   return (
     <Box
@@ -74,7 +74,11 @@ const Header = ({ status }: {status: ITask["status"]}) => {
         padding: theme.spacing(2)
       }}
     >
-      <Box sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}>🗒️ Task List</Box>
+      <Box
+        sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}
+      >
+        🗒️ Task List
+      </Box>
       <Chip
         label={status || '?'}
         sx={{
@@ -88,17 +92,18 @@ const Header = ({ status }: {status: ITask["status"]}) => {
   );
 };
 
-const Task = ({ index, task }: { index: number, task: ITask }) => {
+const Task = ({ index, task }: { index: number; task: ITask }) => {
   const theme = useTheme();
   return (
     <ListItem disableGutters>
       <ListItemButton
         sx={{
-          color: {
-            'ready': theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
-            'running': theme.palette.primary.contrastText,
-            'done': '#9E9E9E'
-          }[task.status] || theme.palette.text.secondary,
+          color:
+            {
+              ready: theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
+              running: theme.palette.primary.contrastText,
+              done: '#9E9E9E'
+            }[task.status] || theme.palette.text.secondary,
           fontWeight: task.status === 'running' ? '700' : '500',
           alignItems: 'flex-start',
           fontSize: '14px',
@@ -108,7 +113,7 @@ const Task = ({ index, task }: { index: number, task: ITask }) => {
         <Box
           sx={{
             paddingRight: theme.spacing(1),
-            width: '18px',
+            width: '18px'
           }}
         >
           {index}
@@ -137,9 +142,15 @@ const taskListContainerStyles = (theme: Theme) => ({
     theme.palette.mode === 'dark'
       ? '0px 4px 20px 0px rgba(0, 0, 0, 0.20)'
       : '0px 4px 20px 0px rgba(0, 0, 0, 0.05)'
-})
+});
 
-export default function TaskList({ tasklist, isMobile } : { tasklist: ITaskList, isMobile: boolean }) {
+export default function TaskList({
+  tasklist,
+  isMobile
+}: {
+  tasklist: ITaskList;
+  isMobile: boolean;
+}) {
   const theme = useTheme();
 
   if (!tasklist) {
