@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.4.3] - 2023-06-28
+
+### Added
+
+- Llama Index integration. Learn more [here](https://docs.chainlit.io/integrations/llama-index). 
+- Langflow integration. Learn more [here](https://docs.chainlit.io/integrations/langflow).
+
+### Fixed
+
+- AskUserMessage.remove() now works properly
+- Avatar element cannot be referenced in messages anymore
+
 ## [0.4.2] - 2023-06-26
 
 ### Added
