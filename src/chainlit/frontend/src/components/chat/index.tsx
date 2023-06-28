@@ -16,7 +16,7 @@ import { useAuth } from 'hooks/auth';
 import useLocalChatHistory from 'hooks/localChatHistory';
 import { actionState } from 'state/action';
 import WelcomeScreen from 'components/chat/welcomeScreen';
-import { elementState } from 'state/element';
+import { IElement, ITasklistElement, elementState } from 'state/element';
 import ErrorBoundary from 'components/errorBoundary';
 import TaskList from 'components/tasklist';
 
@@ -75,7 +75,9 @@ const Chat = () => {
     [askUser, user]
   );
 
-  const tasklist = elements.findLast((e) => e.type === 'tasklist');
+  const tasklist = elements.findLast((e) => e.type === 'tasklist') as
+    | ITasklistElement
+    | undefined;
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
