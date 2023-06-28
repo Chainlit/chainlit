@@ -1,5 +1,6 @@
 langchain
-llama_index>=0.6.30
+llama_index
+transformers
 responses==0.23.1
 aioresponses==0.7.4
 matplotlib==3.7.1
