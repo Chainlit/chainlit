@@ -229,11 +229,9 @@ class Task:
     def __init__(
         self,
         title: str,
-        description: str = None,
         status: TaskStatus = TaskStatus.READY,
     ):
         self.title = title
-        self.description = description
         self.status = status
 
     def __post_init__(self) -> None:
@@ -261,11 +259,9 @@ class TaskList(Element):
 
     async def before_emit(self, element: Dict) -> Dict:
         # serialize enum
-        for task in element["tasks"]:
-            task["status"] = task["status"].value
-
-        # Move tasks to content
-        element["content"] = element["tasks"]
-        del element["tasks"]
+        tasks = [{"title": task.title, "status": task.status.value} for task in self.tasks]
+        
+        # Replace content with tasks
+        element["content"] = tasks
 
         return element
