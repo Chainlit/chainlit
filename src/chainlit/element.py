@@ -1,8 +1,11 @@
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
+from dataclasses_json import dataclass_json
 from typing import Dict, List, Union, Any
 import uuid
 import aiofiles
 from io import BytesIO
+from enum import Enum
+import json
 
 from chainlit.context import get_emitter
 from chainlit.client.base import BaseClient
@@ -13,6 +16,7 @@ type_to_mime = {
     "image": "image/png",
     "text": "text/plain",
     "pdf": "application/pdf",
+    "tasklist": "text/plain",
 }
 
 mime_to_ext = {
@@ -205,3 +209,61 @@ class Pyplot(Element):
         self.content = image.getvalue()
 
         super().__post_init__()
+
+
+class TaskStatus(Enum):
+    READY = "ready"
+    RUNNING = "running"
+    FAILED = "failed"
+    DONE = "done"
+
+
+@dataclass
+class Task:
+    title: str = None
+    status: TaskStatus = TaskStatus.READY
+
+    def __init__(
+        self,
+        title: str,
+        status: TaskStatus = TaskStatus.READY,
+    ):
+        self.title = title
+        self.status = status
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+
+@dataclass
+class TaskList(Element):
+    type = "tasklist"
+    tasks: List[Task] = Field(default_factory=list, exclude=True)
+    status: str = "Ready"
+
+    def __init__(self):
+        self.tasks = []
+        self.content = "dummy content to pass validation"
+        self.name = "tasklist"
+        self.type = "tasklist"
+        super().__post_init__()
+
+    async def add_task(self, task: Task):
+        self.tasks.append(task)
+
+    async def update(self):
+        await self.send()
+
+    async def preprocess_content(self):
+        # serialize enum
+        tasks = [
+            {"title": task.title, "status": task.status.value} for task in self.tasks
+        ]
+
+        # store stringified json in content so that it's correctly stored in the database
+        self.content = json.dumps(
+            {
+                "status": self.status,
+                "tasks": tasks,
+            }
+        )
