@@ -1,81 +1,8 @@
-import {
-  Box,
-  Chip,
-  List,
-  ListItem,
-  ListItemButton,
-  SvgIcon,
-  Theme,
-  useTheme
-} from '@mui/material';
+import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 import { ITasklistElement } from 'state/element';
 import { useEffect, useState } from 'react';
-
-interface ITask {
-  title: string;
-  status: 'ready' | 'running' | 'done' | 'failed';
-}
-
-interface ITaskList {
-  status: 'ready' | 'running' | 'done';
-  tasks: ITask[];
-}
-
-const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
-  <SvgIcon
-    sx={{
-      marginTop: '-2px'
-    }}
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none">
-      {status === 'done' && (
-        <>
-          <circle cx={12} cy={12} r={9} fill="#20A56D" />
-          <path
-            stroke="#fff"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="m15.333 9.5-4.583 4.583L8.667 12"
-          />
-        </>
-      )}
-      {status === 'running' && (
-        <>
-          <g clipPath="url(#a)">
-            <path
-              stroke="#757575"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 1.833V5.5m0 11v3.667M5.5 11H1.833m18.334 0H16.5m.988 6.489-2.592-2.593m2.592-10.313-2.592 2.593M4.51 17.49l2.593-2.593M4.511 4.583l2.593 2.593"
-            />
-          </g>
-          <defs>
-            <clipPath id="a">
-              <path fill="#fff" d="M0 0h22v22H0z" />
-            </clipPath>
-          </defs>
-        </>
-      )}
-      {status === 'ready' && (
-        <circle cx={12} cy={12} r={8.25} stroke="#616161" strokeWidth={1.5} />
-      )}
-      {status === 'failed' && (
-        <>
-          <circle cx={12} cy={12} r={9} fill="#F51762" />
-          <path
-            stroke="#fff"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="m14.5 9.5-5 5m0-5 5 5"
-          />
-        </>
-      )}
-    </svg>
-  </SvgIcon>
-);
+import { ITask, ITaskList } from './types';
+import { Task } from './Task';
 
 const Header = ({ status }: { status: ITask['status'] }) => {
   const theme = useTheme();
@@ -103,46 +30,6 @@ const Header = ({ status }: { status: ITask['status'] }) => {
         }}
       />
     </Box>
-  );
-};
-
-const Task = ({ index, task }: { index: number; task: ITask }) => {
-  const theme = useTheme();
-  return (
-    <ListItem disableGutters className={`task task-status-${task.status}`}>
-      <ListItemButton
-        sx={{
-          color:
-            {
-              ready: theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
-              running: theme.palette.primary.contrastText,
-              done: '#9E9E9E',
-              failed: '#9E9E9E'
-            }[task.status] || theme.palette.text.secondary,
-          fontWeight: task.status === 'running' ? '700' : '500',
-          alignItems: 'flex-start',
-          fontSize: '14px',
-          lineHeight: 1.36
-        }}
-      >
-        <Box
-          sx={{
-            paddingRight: theme.spacing(1),
-            width: '18px'
-          }}
-        >
-          {index}
-        </Box>
-        <TaskStatusIcon status={task.status} />
-        <Box
-          sx={{
-            paddingLeft: theme.spacing(2)
-          }}
-        >
-          {task.title}
-        </Box>
-      </ListItemButton>
-    </ListItem>
   );
 };
 

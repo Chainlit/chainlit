@@ -16,7 +16,7 @@ import { useAuth } from 'hooks/auth';
 import useLocalChatHistory from 'hooks/localChatHistory';
 import { actionState } from 'state/action';
 import WelcomeScreen from 'components/chat/welcomeScreen';
-import { IElement, ITasklistElement, elementState } from 'state/element';
+import { ITasklistElement, elementState } from 'state/element';
 import ErrorBoundary from 'components/errorBoundary';
 import TaskList from 'components/tasklist';
 
