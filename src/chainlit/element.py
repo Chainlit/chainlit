@@ -210,11 +210,6 @@ class Pyplot(Element):
 
         super().__post_init__()
 
-    async def before_emit(self, element: Dict) -> Dict:
-        # Prevent the figure from being serialized
-        del element["figure"]
-        return element
-
 
 class TaskStatus(Enum):
     READY = "ready"
