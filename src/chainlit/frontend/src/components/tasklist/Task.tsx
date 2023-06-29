@@ -1,6 +1,7 @@
 import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
 import { ITask } from './types';
 import { TaskStatusIcon } from './TaskStatusIcon';
+import { grey } from 'palette';
 
 export const Task = ({ index, task }: { index: number; task: ITask }) => {
   const theme = useTheme();
@@ -10,10 +11,10 @@ export const Task = ({ index, task }: { index: number; task: ITask }) => {
         sx={{
           color:
             {
-              ready: theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
+              ready: theme.palette.mode === 'dark' ? grey[300] : grey[700],
               running: theme.palette.primary.contrastText,
-              done: '#9E9E9E',
-              failed: '#9E9E9E'
+              done: grey[500],
+              failed: grey[500]
             }[task.status] || theme.palette.text.secondary,
           fontWeight: task.status === 'running' ? '700' : '500',
           alignItems: 'flex-start',

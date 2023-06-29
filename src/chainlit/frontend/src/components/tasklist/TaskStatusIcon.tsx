@@ -1,5 +1,6 @@
 import { SvgIcon } from '@mui/material';
 import { ITask } from './types';
+import { green, grey, primary, white } from 'palette';
 
 export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
   <SvgIcon
@@ -10,9 +11,9 @@ export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none">
       {status === 'done' && (
         <>
-          <circle cx={12} cy={12} r={9} fill="#20A56D" />
+          <circle cx={12} cy={12} r={9} fill={green[500]} />
           <path
-            stroke="#fff"
+            stroke={white}
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.5}
@@ -24,7 +25,7 @@ export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
         <>
           <g clipPath="url(#a)">
             <path
-              stroke="#757575"
+              stroke={grey[600]}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
@@ -33,19 +34,19 @@ export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
           </g>
           <defs>
             <clipPath id="a">
-              <path fill="#fff" d="M0 0h22v22H0z" />
+              <path fill={white} d="M0 0h22v22H0z" />
             </clipPath>
           </defs>
         </>
       )}
       {status === 'ready' && (
-        <circle cx={12} cy={12} r={8.25} stroke="#616161" strokeWidth={1.5} />
+        <circle cx={12} cy={12} r={8.25} stroke={grey[700]} strokeWidth={1.5} />
       )}
       {status === 'failed' && (
         <>
-          <circle cx={12} cy={12} r={9} fill="#F51762" />
+          <circle cx={12} cy={12} r={9} fill={primary[500]} />
           <path
-            stroke="#fff"
+            stroke={white}
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.5}

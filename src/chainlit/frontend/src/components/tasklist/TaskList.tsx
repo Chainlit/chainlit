@@ -3,6 +3,7 @@ import { ITasklistElement } from 'state/element';
 import { useEffect, useState } from 'react';
 import { ITaskList } from './types';
 import { Task } from './Task';
+import { grey } from 'palette';
 
 const Header = ({ status }: { status: string }) => {
   const theme = useTheme();
@@ -26,7 +27,7 @@ const Header = ({ status }: { status: string }) => {
           fontWeight: '500',
           borderRadius: '4px',
           backgroundColor: theme.palette.background.default,
-          color: theme.palette.mode === 'dark' ? '#9E9E9E' : '#757575'
+          color: theme.palette.mode === 'dark' ? grey[500] : grey[600]
         }}
       />
     </Box>
