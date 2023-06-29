@@ -109,7 +109,7 @@ const Header = ({ status }: { status: ITask['status'] }) => {
 const Task = ({ index, task }: { index: number; task: ITask }) => {
   const theme = useTheme();
   return (
-    <ListItem disableGutters>
+    <ListItem disableGutters className={`task task-status-${task.status}`}>
       <ListItemButton
         sx={{
           color:
@@ -204,6 +204,7 @@ export default function TaskList({
             md: 'none'
           }
         }}
+        className="tasklist tasklist-mobile"
       >
         <Box
           sx={{
@@ -234,6 +235,7 @@ export default function TaskList({
           md: 'flex'
         }
       }}
+      className="tasklist tasklist-desktop"
     >
       <Box
         sx={{
