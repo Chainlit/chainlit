@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 
 interface ITask {
   title: string;
-  status: 'ready' | 'running' | 'done';
+  status: 'ready' | 'running' | 'done' | 'failed';
 }
 
 interface ITaskList {
@@ -58,8 +58,20 @@ const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => (
           </defs>
         </>
       )}
-      {status !== 'done' && status !== 'running' && (
+      {status === 'ready' && (
         <circle cx={12} cy={12} r={8.25} stroke="#616161" strokeWidth={1.5} />
+      )}
+      {status === 'failed' && (
+        <>
+          <circle cx={12} cy={12} r={9} fill="#F51762" />
+          <path
+            stroke="#fff"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="m14.5 9.5-5 5m0-5 5 5"
+          />
+        </>
       )}
     </svg>
   </SvgIcon>
@@ -104,7 +116,8 @@ const Task = ({ index, task }: { index: number; task: ITask }) => {
             {
               ready: theme.palette.mode === 'dark' ? '#E0E0E0' : '#616161',
               running: theme.palette.primary.contrastText,
-              done: '#9E9E9E'
+              done: '#9E9E9E',
+              failed: '#9E9E9E'
             }[task.status] || theme.palette.text.secondary,
           fontWeight: task.status === 'running' ? '700' : '500',
           alignItems: 'flex-start',
@@ -168,7 +181,7 @@ export default function TaskList({
   const tasks = content.tasks;
 
   if (isMobile) {
-    // Get the first running or ready task, or the latest task done
+    // Get the first running or ready task, or the latest task
     let highlightedTaskIndex = tasks.length - 1;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].status === 'running' || tasks[i].status === 'ready') {

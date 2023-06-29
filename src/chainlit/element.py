@@ -219,6 +219,7 @@ class Pyplot(Element):
 class TaskStatus(Enum):
     READY = "ready"
     RUNNING = "running"
+    FAILED = "failed"
     DONE = "done"
 
 
