@@ -1,4 +1,5 @@
 import Button, { ButtonProps } from '@mui/material/Button';
+import { grey } from 'palette';
 
 interface Props extends ButtonProps {
   component?: any;
@@ -17,12 +18,12 @@ export default function RegularButton({ children, ...props }: Props) {
               : theme.palette.primary.main,
           background: (theme) =>
             theme.palette.mode === 'dark'
-              ? theme.palette.background.paperVariant
+              ? grey[700]
               : theme.palette.primary.light,
           '&:hover': {
             background: (theme) =>
               theme.palette.mode === 'dark'
-                ? theme.palette.background.paperVariant
+                ? grey[700]
                 : theme.palette.primary.light
           }
         }}

@@ -51,7 +51,6 @@ const darkTheme = createTheme({
     error,
     background: {
       default: grey[850],
-      paperVariant: grey[700],
       paper: grey[900]
     },
     primary: {
@@ -84,7 +83,6 @@ const lightTheme = createTheme({
     error,
     background: {
       default: grey[50],
-      paperVariant: grey[200],
       paper: white
     },
     primary: {
