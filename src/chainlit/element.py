@@ -95,9 +95,8 @@ class Element:
         return element
 
     async def remove(self):
-        if self.emitter.client:
-            trace_event(f"remove {self.__class__.__name__}")
-            await self.emitter.emit("remove_element", {"id": self.id or self.temp_id})
+        trace_event(f"remove {self.__class__.__name__}")
+        await self.emitter.emit("remove_element", {"id": self.id or self.temp_id})
 
     async def send(self, for_id: str = None):
         element = None
