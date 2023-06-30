@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import { grey, primary, white } from 'palette';
 
 const typography = {
   fontFamily: ['Inter', 'sans-serif'].join(',')
@@ -27,11 +28,11 @@ const shape = {
 
 const success = {
   main: 'rgba(25, 195, 125, 1)',
-  contrastText: '#fff'
+  contrastText: white
 };
 const error = {
   main: 'rgba(239, 65, 70, 1)',
-  contrastText: '#fff'
+  contrastText: white
 };
 
 declare module '@mui/material/styles' {
@@ -49,26 +50,25 @@ const darkTheme = createTheme({
     success,
     error,
     background: {
-      default: '#303030',
-      paperVariant: '#616161',
-      paper: '#212121'
+      default: grey[850],
+      paper: grey[900]
     },
     primary: {
       main: '#F80061',
-      dark: '#980039',
+      dark: primary[800],
       light: '#FFE7EB',
-      contrastText: '#F5F5F5'
+      contrastText: grey[100]
     },
     secondary: {
       main: '#9757D7',
       dark: '#763FB8',
       light: '#B87FE7',
-      contrastText: '#fff'
+      contrastText: white
     },
-    divider: '#424242',
+    divider: grey[800],
     text: {
-      primary: '#EEEEEE',
-      secondary: '#BDBDBD'
+      primary: grey[200],
+      secondary: grey[400]
     }
   }
 });
@@ -82,26 +82,25 @@ const lightTheme = createTheme({
     success,
     error,
     background: {
-      default: '#FAFAFA',
-      paperVariant: '#EEEEEE',
-      paper: '#FFF'
+      default: grey[50],
+      paper: white
     },
     primary: {
       main: '#F80061',
-      dark: '#980039',
+      dark: primary[800],
       light: '#FFE7EB',
-      contrastText: '#303030'
+      contrastText: grey[850]
     },
     secondary: {
       main: '#9757D7',
       dark: '#763FB8',
       light: '#B87FE7',
-      contrastText: '#fff'
+      contrastText: white
     },
-    divider: '#EEEEEE',
+    divider: grey[200],
     text: {
-      primary: '#212121',
-      secondary: '#616161'
+      primary: grey[900],
+      secondary: grey[700]
     }
   }
 });
@@ -115,8 +114,8 @@ export const darkGreyButtonTheme = createTheme({
   shape,
   palette: {
     primary: {
-      main: '#616161',
-      contrastText: '#F5F5F5'
+      main: grey[700],
+      contrastText: grey[100]
     }
   }
 });
@@ -127,8 +126,8 @@ export const lightGreyButtonTheme = createTheme({
   shape,
   palette: {
     primary: {
-      main: '#EEEEEE',
-      contrastText: '#616161'
+      main: grey[200],
+      contrastText: grey[700]
     }
   }
 });

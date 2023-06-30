@@ -13,6 +13,7 @@ import { useRecoilState } from 'recoil';
 import { IChat, historyOpenedState } from 'state/chat';
 import { useEffect, useRef, useState } from 'react';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import { grey } from 'palette';
 
 interface Props {
   onClick: (content: string) => void;
@@ -141,7 +142,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
               p: 1,
               fontSize: '10px',
               fontWeight: 700,
-              color: '#9E9E9E'
+              color: grey[500]
             }}
           >
             {date}

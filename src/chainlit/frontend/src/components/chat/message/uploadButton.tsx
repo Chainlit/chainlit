@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import { LoadingButton } from '@mui/lab';
 import { IAskFileResponse } from 'state/chat';
+import { grey } from 'palette';
 
 interface Props {
   askUser: IAsk;
@@ -94,7 +95,8 @@ function _UploadButton({ askUser }: Props) {
       sx={{
         width: '100%',
         borderRadius: 1,
-        backgroundColor: (theme) => theme.palette.divider,
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark' ? grey[800] : grey[200],
         boxSizing: 'border-box'
       }}
       direction="row"

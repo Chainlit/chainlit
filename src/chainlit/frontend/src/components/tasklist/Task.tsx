@@ -25,6 +25,7 @@ export const Task = ({ index, task }: { index: number; task: ITask }) => {
         <Box
           sx={{
             paddingRight: theme.spacing(1),
+            flex: '0 0 18px',
             width: '18px'
           }}
         >
