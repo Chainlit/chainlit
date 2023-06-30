@@ -58,8 +58,16 @@ export default function TaskList({
   const [content, setContent] = useState<ITaskList | null>(null);
 
   useEffect(() => {
-    if (!rawTasklist?.content) return;
-    setContent(JSON.parse(rawTasklist.content));
+    try {
+      if (rawTasklist?.content) {
+        setContent(JSON.parse(rawTasklist.content));
+      } else {
+        setContent(null);
+      }
+    } catch (e) {
+      console.error(e);
+      setContent(null);
+    }
   }, [rawTasklist, setContent]);
 
   if (!content) {
