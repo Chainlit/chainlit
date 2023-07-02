@@ -199,6 +199,8 @@ def load_module(target: str):
     module = util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
+    sys.modules[target] = module
+
     # Remove the target's directory from the Python path
     sys.path.pop(0)
 
