@@ -13,8 +13,7 @@ I've copy/pasted the whole document there, without the previous two headings.
   * [Setup the repo](#setup-the-repo)
   * [Install JS dependencies](#install-js-dependencies)
   * [Install python dependencies](#install-python-dependencies)
-- [Setup the UI](#setup-the-ui)
-  * [Start the UI](#start-the-ui)
+- [Start the UI](#start-the-ui)
 - [Setup the server](#setup-the-server)
   * [Install from local sources](#install-from-local-sources)
   * [Start the server](#start-the-server)
@@ -77,20 +76,7 @@ poetry install
 
 Make sure you have the Python code formatter `black` installed as it is used in a pre-commit hook. Run `pip install black` if needed.
 
-## Setup the UI
-
-The source code of the UI is in [src/chainlit/frontend](/src/chainlit/frontend).
-
-Before anything, go to [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts). Find the definition of `const server` and inverse the comment:
-
-```ts
-export const server = 'http://127.0.0.1:8000';
-// export const server = '';
-```
-
-Don't forget to revert that change before pushing.
-
-### Start the UI
+## Start the UI
 
 ```sh
 npm run buildUi
@@ -101,6 +87,7 @@ npm run dev -- --port 5174
 The `buildUi` step is currently needed by the server.
 
 If you visit `http://127.0.0.1:5174/`, it should say that it can't connect to the server.
+
 ## Setup the server
 
 ### Install from local sources
@@ -112,6 +99,8 @@ pip install -e PATH_TO_CHAINLIT_REPO/src
 This installs your project in editable mode, which means you only need to do this once.
 
 ### Start the server
+
+Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
 
 ```sh
 chainlit run target.py -h
@@ -138,26 +127,24 @@ Start with following the steps from the [Local setup](#local-setup).
 
 ### Only contribute to the frontend
 
-1. Follow the steps from [Setup the UI](#setup-the-ui).
-2. Change the server configuration in [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts) to match your target chainlit server. 
+1. Change the server url in [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts) to match your target chainlit server. Below is an example using a public chainlit server. Don't forget to change the configuration back before commiting.
 
 ```js
-export const server = 'https://img-gen.chainlit.app/';
+const devServer = 'https://img-gen.chainlit.app/';
 ```
-3. Follow the steps from [Start the UI](#start-the-ui).
+2. Follow the steps from [Start the UI](#start-the-ui).
 
 ### Only contribute to the server
 
 1. Build the UI.
 
 ```sh
-cd src/chainlit/frontend
 npm run buildUi
 ```
 
 2. Follow the instruction from [Install from local sources](#install-from-local-sources).
 
-3. Run the server without the `-h` flag.
+3. Run the server without the `-h` flag. Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
 
 ```sh
 chainlit run target.py
