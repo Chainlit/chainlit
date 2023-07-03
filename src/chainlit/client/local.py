@@ -2,6 +2,7 @@ from typing import Optional, Dict
 import uuid
 import json
 import os
+import mimetypes
 
 import asyncio
 import aiofiles
@@ -12,7 +13,6 @@ from .base import BaseClient
 
 from chainlit.logger import logger
 from chainlit.config import config
-from chainlit.element import mime_to_ext
 
 
 class LocalClient(BaseClient):
@@ -228,8 +228,8 @@ class LocalClient(BaseClient):
             logger.warning("Missing conversation ID, could not persist the message.")
             return None
 
-        file_ext = mime_to_ext.get(mime, "bin")
-        file_name = f"{uuid.uuid4()}.{file_ext}"
+        file_ext = mimetypes.guess_extension(mime)
+        file_name = f"{uuid.uuid4()}{file_ext}"
 
         sub_path = os.path.join(str(c_id), file_name)
         full_path = os.path.join(config.project.local_fs_path, sub_path)
