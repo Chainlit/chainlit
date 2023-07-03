@@ -4,8 +4,9 @@ import { IDatasetFilters } from 'state/dataset';
 import { IElement } from 'state/element';
 import { Role, IMember } from 'state/user';
 
-// export const serverUrl = new URL('http://127.0.0.1:8000');
-const serverUrl = new URL(window.origin);
+const devServer = 'http://127.0.0.1:8000';
+const url = import.meta.env.DEV ? devServer : window.origin;
+const serverUrl = new URL(url);
 
 const httpEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
 export const wsEndpoint = `${
