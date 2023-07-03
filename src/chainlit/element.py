@@ -94,6 +94,10 @@ class Element:
     async def before_emit(self, element: Dict) -> Dict:
         return element
 
+    async def remove(self):
+        trace_event(f"remove {self.__class__.__name__}")
+        await self.emitter.emit("remove_element", {"id": self.id or self.temp_id})
+
     async def send(self, for_id: str = None):
         element = None
 

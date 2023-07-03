@@ -179,6 +179,12 @@ export default memo(function Socket() {
       }
     );
 
+    socket.on('remove_element', (remove: { id: number | string }) => {
+      setElements((old) => {
+        return old.filter((e) => e.id !== remove.id && e.tempId !== remove.id);
+      });
+    });
+
     socket.on('action', (action: IAction) => {
       setActions((old) => [...old, action]);
     });
