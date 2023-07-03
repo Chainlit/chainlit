@@ -192,6 +192,8 @@ class Pyplot(Element):
 
     # We reuse the frontend image element to display the chart
     type: ElementType = "image"
+    size: ElementSize = "medium"
+
     # The type is set to Any because the figure is not serializable
     # and its actual type is checked in __post_init__.
     figure: Any = None
