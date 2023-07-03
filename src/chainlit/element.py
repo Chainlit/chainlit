@@ -262,3 +262,8 @@ class TaskList(Element):
                 "tasks": tasks,
             }
         )
+
+
+@dataclass
+class Audio(Element):
+    type: ElementType = "audio"
