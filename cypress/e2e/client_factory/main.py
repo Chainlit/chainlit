@@ -1,9 +1,8 @@
-from typing import List, Literal, Dict
+from typing import Literal, Dict
 
 import chainlit as cl
 from chainlit.client.base import (
-    BaseClient,
-    UserDict,
+    BaseDBClient,
     ConversationDict,
     Pagination,
     ConversationFilter,
@@ -13,16 +12,7 @@ from chainlit.client.base import (
 )
 
 
-class CustomClient(BaseClient):
-    async def is_project_member(self, access_token: str) -> bool:
-        raise NotImplementedError
-
-    async def get_member_role(self, access_token: str) -> str:
-        raise NotImplementedError
-
-    async def get_project_members(self) -> List[UserDict]:
-        raise NotImplementedError
-
+class CustomClient(BaseDBClient):
     async def create_conversation(self) -> int:
         raise NotImplementedError
 

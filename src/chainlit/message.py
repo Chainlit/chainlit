@@ -38,9 +38,9 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-        if self.emitter.client and not self.id:
+        if self.emitter.db_client and not self.id:
             try:
-                self.id = await self.emitter.client.create_message(msg_dict)
+                self.id = await self.emitter.db_client.create_message(msg_dict)
                 if self.id:
                     msg_dict["id"] = self.id
             except Exception as e:
@@ -76,8 +76,8 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if self.emitter.client and self.id:
-            await self.emitter.client.update_message(self.id, msg_dict)
+        if self.emitter.db_client and self.id:
+            await self.emitter.db_client.update_message(self.id, msg_dict)
 
         await self.emitter.update_message(msg_dict)
 
@@ -90,8 +90,8 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        if self.emitter.client and self.id:
-            await self.emitter.client.delete_message(self.id)
+        if self.emitter.db_client and self.id:
+            await self.emitter.db_client.delete_message(self.id)
 
         await self.emitter.delete_message(self.to_dict())
 

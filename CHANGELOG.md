@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Task list element
 - Audio element
 - All elements can use the `.remove()` method to remove themselves from the UI
+- Can now use cloud auth with any data persistence mode (like local)
 
 ### Fixed
 

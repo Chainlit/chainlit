@@ -9,7 +9,7 @@ import json
 import filetype
 
 from chainlit.context import get_emitter
-from chainlit.client.base import BaseClient
+from chainlit.client.base import BaseDBClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
@@ -71,7 +71,7 @@ class Element:
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: BaseClient):
+    async def persist(self, client: BaseDBClient):
         if not self.url and self.content and not self.id:
             mime = (
                 "text/plain"
@@ -101,8 +101,8 @@ class Element:
             self.for_ids.append(for_id)
 
         # We have a client, persist the element
-        if self.emitter.client:
-            element = await self.persist(self.emitter.client)
+        if self.emitter.db_client:
+            element = await self.persist(self.emitter.db_client)
             self.id = element and element.get("id")
 
         elif not self.url and not self.content:

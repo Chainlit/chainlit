@@ -4,7 +4,7 @@ import os
 import asyncio
 
 if TYPE_CHECKING:
-    from chainlit.client.base import BaseClient
+    from chainlit.client.base import BaseDBClient
 
 from chainlit.lc import (
     LANGCHAIN_INSTALLED,
@@ -121,12 +121,12 @@ def action_callback(name: str) -> Callable:
 
 
 @trace
-def client_factory(func: Callable[[], "BaseClient"]) -> Callable[[], "BaseClient"]:
+def client_factory(func: Callable[[], "BaseDBClient"]) -> Callable[[], "BaseDBClient"]:
     """
     Callback to call when to initialize the custom client.
 
     Args:
-        func (Callable[[str], BaseClient]): The action callback to execute. First parameter is the session id.
+        func (Callable[[str], BaseDBClient]): The action callback to execute. First parameter is the session id.
     """
 
     config.code.client_factory = func

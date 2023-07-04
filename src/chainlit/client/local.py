@@ -9,13 +9,24 @@ import aiofiles
 
 from chainlit.client.base import PaginatedResponse, PageInfo
 
-from .base import BaseClient
+from .base import BaseAuthClient, BaseDBClient
 
 from chainlit.logger import logger
 from chainlit.config import config
 
 
-class LocalClient(BaseClient):
+class LocalAuthClient(BaseAuthClient):
+    async def is_project_member(self):
+        return True
+
+    async def get_member_role(self):
+        return "OWNER"
+
+    async def get_project_members(self):
+        return []
+
+
+class LocalDBClient(BaseDBClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
 
@@ -38,15 +49,6 @@ class LocalClient(BaseClient):
         if "llmSettings" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
             variables["llmSettings"] = json.loads(variables["llmSettings"])
-
-    async def is_project_member(self):
-        return True
-
-    async def get_member_role(self):
-        return "OWNER"
-
-    async def get_project_members(self):
-        return []
 
     async def get_conversation_id(self):
         self.conversation_id = await self.create_conversation()
