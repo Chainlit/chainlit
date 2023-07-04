@@ -5,18 +5,14 @@ import asyncio
 import aiohttp
 from python_graphql_client import GraphqlClient
 
-from .base import BaseClient, PaginatedResponse, PageInfo
+from .base import BaseDBClient, BaseAuthClient, PaginatedResponse, PageInfo
 
 from chainlit.logger import logger
 from chainlit.config import config
 
 
-class CloudClient(BaseClient):
-    conversation_id: Optional[str] = None
-    lock: asyncio.Lock
-
+class GraphQLClient:
     def __init__(self, project_id: str, access_token: str):
-        self.lock = asyncio.Lock()
         self.project_id = project_id
         self.headers = {
             "Authorization": access_token,
@@ -54,6 +50,11 @@ class CloudClient(BaseClient):
         :return: The response data as a dictionary.
         """
         return self.graphql_client.execute_async(query=mutation, variables=variables)
+
+
+class CloudAuthClient(BaseAuthClient, GraphQLClient):
+    def __init__(self, project_id: str, access_token: str):
+        super().__init__(project_id, access_token)
 
     async def get_member_role(
         self,
@@ -105,6 +106,15 @@ class CloudClient(BaseClient):
             members.append({"role": role, "name": name, "email": email})
 
         return members
+
+
+class CloudDBClient(BaseDBClient, GraphQLClient):
+    conversation_id: Optional[str] = None
+    lock: asyncio.Lock
+
+    def __init__(self, project_id: str, access_token: str):
+        self.lock = asyncio.Lock()
+        super().__init__(project_id, access_token)
 
     async def create_conversation(self) -> int:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.

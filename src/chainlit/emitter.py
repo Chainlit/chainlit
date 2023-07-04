@@ -1,7 +1,7 @@
 from typing import Union, Dict
 from chainlit.session import Session
 from chainlit.types import AskSpec
-from chainlit.client.base import BaseClient
+from chainlit.client.base import BaseDBClient
 from socketio.exceptions import TimeoutError
 
 
@@ -37,9 +37,9 @@ class ChainlitEmitter:
         return self._get_session_property("ask_user")
 
     @property
-    def client(self) -> Union[BaseClient, None]:
+    def db_client(self) -> Union[BaseDBClient, None]:
         """Get the 'client' property from the session."""
-        return self._get_session_property("client", raise_error=False)
+        return self._get_session_property("db_client", raise_error=False)
 
     def send_message(self, msg_dict: Dict):
         """Send a message to the UI."""
@@ -80,7 +80,7 @@ class ChainlitEmitter:
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
 
-            if self.client and res:
+            if self.db_client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
                     res_msg = {
@@ -88,7 +88,7 @@ class ChainlitEmitter:
                         "authorIsUser": True,
                         "content": res["content"],
                     }
-                    await self.client.create_message(res_msg)
+                    await self.db_client.create_message(res_msg)
                 elif spec.type == "file":
                     # TODO: upload file to S3
                     pass

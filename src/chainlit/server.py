@@ -27,9 +27,12 @@ from chainlit.context import emitter_var, loop_var
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.session import Session, sessions
 from chainlit.user_session import user_sessions
-from chainlit.client.cloud import CloudClient
-from chainlit.client.local import LocalClient
-from chainlit.client.utils import get_client
+from chainlit.client.utils import (
+    get_db_client,
+    get_auth_client,
+    get_auth_client_from_request,
+    get_db_client_from_request,
+)
 from chainlit.emitter import ChainlitEmitter
 from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
@@ -229,8 +232,8 @@ async def project_settings():
 async def update_feedback(request: Request, update: UpdateFeedbackRequest):
     """Update the human feedback for a particular message."""
 
-    client = await get_client(request)
-    await client.set_human_feedback(
+    db_client = await get_db_client_from_request(request)
+    await db_client.set_human_feedback(
         message_id=update.messageId, feedback=update.feedback
     )
     return JSONResponse(content={"success": True})
@@ -240,8 +243,8 @@ async def update_feedback(request: Request, update: UpdateFeedbackRequest):
 async def get_project_members(request: Request):
     """Get all the members of a project."""
 
-    client = await get_client(request)
-    res = await client.get_project_members()
+    auth_client = await get_auth_client_from_request(request)
+    res = await auth_client.get_project_members()
     return JSONResponse(content=res)
 
 
@@ -249,8 +252,8 @@ async def get_project_members(request: Request):
 async def get_member_role(request: Request):
     """Get the role of a member."""
 
-    client = await get_client(request)
-    res = await client.get_member_role()
+    auth_client = await get_auth_client_from_request(request)
+    res = await auth_client.get_member_role()
     return PlainTextResponse(content=res)
 
 
@@ -258,8 +261,8 @@ async def get_member_role(request: Request):
 async def get_project_conversations(request: Request, payload: GetConversationsRequest):
     """Get the conversations page by page."""
 
-    client = await get_client(request)
-    res = await client.get_conversations(payload.pagination, payload.filter)
+    db_client = await get_db_client_from_request(request)
+    res = await db_client.get_conversations(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())
 
 
@@ -267,8 +270,8 @@ async def get_project_conversations(request: Request, payload: GetConversationsR
 async def get_conversation(request: Request, conversation_id: str):
     """Get a specific conversation."""
 
-    client = await get_client(request)
-    res = await client.get_conversation(int(conversation_id))
+    db_client = await get_db_client_from_request(request)
+    res = await db_client.get_conversation(int(conversation_id))
     return JSONResponse(content=res)
 
 
@@ -276,8 +279,8 @@ async def get_conversation(request: Request, conversation_id: str):
 async def get_conversation(request: Request, conversation_id: str, element_id: str):
     """Get a specific conversation."""
 
-    client = await get_client(request)
-    res = await client.get_element(int(conversation_id), int(element_id))
+    db_client = await get_db_client_from_request(request)
+    res = await db_client.get_element(int(conversation_id), int(element_id))
     return JSONResponse(content=res)
 
 
@@ -285,8 +288,8 @@ async def get_conversation(request: Request, conversation_id: str, element_id: s
 async def delete_conversation(request: Request, payload: DeleteConversationRequest):
     """Delete a conversation."""
 
-    client = await get_client(request)
-    await client.delete_conversation(conversation_id=payload.conversationId)
+    db_client = await get_db_client_from_request(request)
+    await db_client.delete_conversation(conversation_id=payload.conversationId)
     return JSONResponse(content={"success": True})
 
 
@@ -329,48 +332,28 @@ def need_session(id: str):
 async def connect(sid, environ):
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
-    client = None
 
-    # Check authorization
-    if not config.project.public and not authorization:
-        # Refuse connection if the app is private and no access token is provided
-        trace_event("no_access_token")
-        logger.error("Connection refused: No access token provided")
+    try:
+        auth_client = await get_auth_client(authorization)
+        db_client = await get_db_client(authorization)
+
+        # Check user env
+        if config.project.user_env:
+            # Check if requested user environment variables are provided
+            if user_env:
+                user_env = json.loads(user_env)
+                for key in config.project.user_env:
+                    if key not in user_env:
+                        trace_event("missing_user_env")
+                        raise ConnectionRefusedError(
+                            "Missing user environment variable: " + key
+                        )
+            else:
+                raise ConnectionRefusedError("Missing user environment variables")
+
+    except ConnectionRefusedError as e:
+        logger.error(f"ConnectionRefusedError: {e}")
         return False
-    elif authorization and config.project.id and config.project.database == "cloud":
-        # Create the cloud client
-        client = CloudClient(
-            project_id=config.project.id,
-            access_token=authorization,
-        )
-        is_project_member = await client.is_project_member()
-        if not is_project_member:
-            logger.error("Connection refused: You are not a member of this project")
-            return False
-    elif config.project.database == "local":
-        client = LocalClient()
-    elif config.project.database == "custom":
-        if not config.code.client_factory:
-            raise ValueError("Client factory not provided")
-        client = await config.code.client_factory()
-
-    # Check user env
-    if config.project.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.project.user_env:
-                if key not in user_env:
-                    trace_event("missing_user_env")
-                    logger.error(
-                        "Connection refused: Missing user environment variable: " + key
-                    )
-                    return False
-        else:
-            logger.error("Connection refused: Missing user environment variables")
-            return False
-
-    # Create the session
 
     # Function to send a message to this particular session
     def emit_fn(event, data):
@@ -391,7 +374,8 @@ async def connect(sid, environ):
         "id": sid,
         "emit": emit_fn,
         "ask_user": ask_user_fn,
-        "client": client,
+        "auth_client": auth_client,
+        "db_client": db_client,
         "user_env": user_env,
         "should_stop": False,
     }  # type: Session
@@ -460,9 +444,9 @@ async def process_message(session: Session, author: str, input_str: str):
 
         await emitter.task_start()
 
-        if session["client"]:
+        if session["db_client"]:
             # If cloud is enabled, persist the message
-            await session["client"].create_message(
+            await session["db_client"].create_message(
                 {
                     "author": author,
                     "content": input_str,

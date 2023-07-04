@@ -10,7 +10,7 @@ from chainlit.version import __version__
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.client.base import BaseClient
+    from chainlit.client.base import BaseDBClient
 
 PACKAGE_ROOT = os.path.dirname(__file__)
 
@@ -110,7 +110,7 @@ class CodeSettings:
     lc_rename: Optional[Callable[[str], str]] = None
     llama_index_factory: Optional[Callable[[], Any]] = None
     langflow_schema: Union[Dict, str] = None
-    client_factory: Optional[Callable[[str], "BaseClient"]] = None
+    client_factory: Optional[Callable[[str], "BaseDBClient"]] = None
 
     def validate(self):
         requires_one_of = [

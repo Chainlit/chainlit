@@ -84,9 +84,7 @@ class PaginatedResponse(Generic[T]):
     data: List[T]
 
 
-class BaseClient(ABC):
-    project_id: str
-
+class BaseAuthClient(ABC):
     @abstractmethod
     async def is_project_member(self, access_token: str) -> bool:
         pass
@@ -99,6 +97,8 @@ class BaseClient(ABC):
     async def get_project_members(self) -> List[UserDict]:
         pass
 
+
+class BaseDBClient(ABC):
     @abstractmethod
     async def create_conversation(self) -> int:
         pass
