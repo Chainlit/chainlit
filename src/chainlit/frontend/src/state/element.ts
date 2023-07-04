@@ -46,13 +46,11 @@ export interface ITextElement extends IElement {
 export interface IPdfElement extends IElement {
   type: 'pdf';
   content?: string;
-  url?: string;
 }
 
 export interface IAudioElement extends IElement {
   type: 'audio';
-  content?: string;
-  url?: string;
+  content?: ArrayBuffer;
 }
 
 export interface ITasklistElement extends IElement {
