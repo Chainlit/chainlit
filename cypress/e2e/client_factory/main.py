@@ -62,7 +62,7 @@ class CustomClient(BaseDBClient):
 
 
 @cl.client_factory
-async def client_factory():
+async def client_factory(user_infos):
     return CustomClient()
 
 

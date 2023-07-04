@@ -131,7 +131,7 @@ def client_factory(
         func (Callable[[Optional[UserDict]], BaseDBClient]): The action callback to execute. First parameter is the user infos if cloud auth is enabled.
     """
 
-    config.code.client_factory = func
+    config.code.client_factory = wrap_user_function(func, with_task=False)
     return func
 
 
