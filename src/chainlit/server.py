@@ -38,6 +38,7 @@ from chainlit.markdown import get_markdown_str
 from chainlit.action import Action
 from chainlit.message import Message, ErrorMessage
 from chainlit.telemetry import trace_event
+from chainlit.client.cloud import CloudAuthClient
 from chainlit.logger import logger
 from chainlit.types import (
     CompletionRequest,
@@ -243,8 +244,8 @@ async def update_feedback(request: Request, update: UpdateFeedbackRequest):
 async def get_project_members(request: Request):
     """Get all the members of a project."""
 
-    auth_client = await get_auth_client_from_request(request)
-    res = await auth_client.get_project_members()
+    get_db_client = await get_db_client_from_request(request)
+    res = await get_db_client.get_project_members()
     return JSONResponse(content=res)
 
 
@@ -253,8 +254,8 @@ async def get_member_role(request: Request):
     """Get the role of a member."""
 
     auth_client = await get_auth_client_from_request(request)
-    res = await auth_client.get_member_role()
-    return PlainTextResponse(content=res)
+    role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
+    return PlainTextResponse(content=role)
 
 
 @app.post("/project/conversations")
@@ -335,7 +336,7 @@ async def connect(sid, environ):
 
     try:
         auth_client = await get_auth_client(authorization)
-        db_client = await get_db_client(authorization)
+        db_client = await get_db_client(authorization, auth_client.user_infos)
 
         # Check user env
         if config.project.user_env:
@@ -391,6 +392,11 @@ async def connection_successful(sid):
     session = need_session(sid)
     emitter_var.set(ChainlitEmitter(session))
     loop_var.set(asyncio.get_event_loop())
+
+    if isinstance(
+        session["auth_client"], CloudAuthClient
+    ) and config.project.database in ["local", "custom"]:
+        await session["db_client"].create_user(session["auth_client"].user_infos)
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""

@@ -41,8 +41,9 @@ class MessageDict(TypedDict):
 
 
 class UserDict(TypedDict):
-    name: str
-    email: str
+    id: Optional[int]
+    name: Optional[str]
+    email: Optional[str]
     role: str
 
 
@@ -85,20 +86,29 @@ class PaginatedResponse(Generic[T]):
 
 
 class BaseAuthClient(ABC):
+    user_infos: Optional[UserDict] = None
+    access_token: Optional[str] = None
+
     @abstractmethod
-    async def is_project_member(self, access_token: str) -> bool:
+    async def is_project_member(self) -> bool:
         pass
 
     @abstractmethod
-    async def get_member_role(self, access_token: str) -> str:
+    async def get_user_infos(self) -> UserDict:
+        pass
+
+
+class BaseDBClient(ABC):
+    user_infos: Optional[UserDict] = None
+
+    @abstractmethod
+    async def create_user(self, variables: UserDict) -> bool:
         pass
 
     @abstractmethod
     async def get_project_members(self) -> List[UserDict]:
         pass
 
-
-class BaseDBClient(ABC):
     @abstractmethod
     async def create_conversation(self) -> int:
         pass

@@ -69,13 +69,13 @@ export default function ConversationTable() {
 
   useEffect(() => {
     refetchConversations();
-  }, [df, client]);
+  }, [refetchConversations]);
 
   const loadMoreItems = useCallback(() => {
     if (prevPageInfo?.hasNextPage) {
       fetchConversations(prevPageInfo.endCursor);
     }
-  }, [prevPageInfo]);
+  }, [prevPageInfo, fetchConversations]);
 
   if (error) {
     return <Alert severity="error">{(error as any).message}</Alert>;

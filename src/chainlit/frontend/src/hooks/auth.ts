@@ -11,7 +11,7 @@ export const useAuth = () => {
   const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
 
   const cloudAuthRequired =
-    pSettings?.project.id && pSettings?.project.database === 'cloud';
+    pSettings?.project.id && pSettings?.project.public === false;
 
   const isLoading = cloudAuthRequired && _isLoading;
 

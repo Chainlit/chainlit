@@ -20,16 +20,10 @@ const Page = ({ children }: Props) => {
     role
   } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
-  const navigate = useNavigate();
   const userEnv = useRecoilValue(userEnvState);
+  const navigate = useNavigate();
 
   const isPrivate = pSettings && !pSettings.project?.public;
-
-  useEffect(() => {
-    if (isPrivate && !isAuthenticated && !authenticating) {
-      navigate('/login');
-    }
-  }, [pSettings, isAuthenticated, authenticating]);
 
   useEffect(() => {
     if (pSettings?.project?.user_env) {
@@ -37,7 +31,10 @@ const Page = ({ children }: Props) => {
         if (!userEnv[key]) navigate('/env');
       }
     }
-  }, [pSettings, userEnv]);
+    if (isPrivate && !isAuthenticated && !authenticating) {
+      navigate('/login');
+    }
+  }, [pSettings, isAuthenticated, authenticating, userEnv]);
 
   if (!pSettings || (isPrivate && (!accessToken || !role))) {
     return null;
