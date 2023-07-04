@@ -23,6 +23,7 @@ from chainlit.logger import logger
 from chainlit.types import LLMSettings
 from chainlit.action import Action
 from chainlit.element import (
+    Audio,
     Image,
     Text,
     Pdf,
@@ -145,6 +146,7 @@ __all__ = [
     "user_session",
     "LLMSettings",
     "Action",
+    "Audio",
     "Pdf",
     "Image",
     "Text",

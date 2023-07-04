@@ -1,13 +1,20 @@
 import { atom } from 'recoil';
 
-export type ElementType = 'image' | 'text' | 'pdf' | 'avatar' | 'tasklist';
+export type ElementType =
+  | 'image'
+  | 'text'
+  | 'pdf'
+  | 'avatar'
+  | 'tasklist'
+  | 'audio';
 
 export type AllElements =
   | IImageElement
   | ITextElement
   | IPdfElement
   | IAvatarElement
-  | ITasklistElement;
+  | ITasklistElement
+  | IAudioElement;
 
 export interface IElement {
   id?: number;
@@ -39,7 +46,11 @@ export interface ITextElement extends IElement {
 export interface IPdfElement extends IElement {
   type: 'pdf';
   content?: string;
-  url?: string;
+}
+
+export interface IAudioElement extends IElement {
+  type: 'audio';
+  content?: ArrayBuffer;
 }
 
 export interface ITasklistElement extends IElement {

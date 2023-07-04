@@ -6,24 +6,12 @@ import aiofiles
 from io import BytesIO
 from enum import Enum
 import json
+import filetype
 
 from chainlit.context import get_emitter
 from chainlit.client.base import BaseClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
-
-type_to_mime = {
-    "image": "image/png",
-    "text": "text/plain",
-    "pdf": "application/pdf",
-    "tasklist": "text/plain",
-}
-
-mime_to_ext = {
-    "image/png": "png",
-    "text/plain": "txt",
-    "application/pdf": "pdf",
-}
 
 
 @dataclass
@@ -85,9 +73,12 @@ class Element:
 
     async def persist(self, client: BaseClient):
         if not self.url and self.content and not self.id:
-            self.url = await client.upload_element(
-                content=self.content, mime=type_to_mime[self.type]
+            mime = (
+                "text/plain"
+                if self.type == "text"
+                else filetype.guess_mime(self.content)
             )
+            self.url = await client.upload_element(content=self.content, mime=mime)
         element = await client.upsert_element(self.to_dict())
         return element
 
@@ -273,3 +264,8 @@ class TaskList(Element):
                 "tasks": tasks,
             }
         )
+
+
+@dataclass
+class Audio(Element):
+    type: ElementType = "audio"

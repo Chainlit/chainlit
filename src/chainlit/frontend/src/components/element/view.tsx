@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import {
   elementState,
+  IAudioElement,
   IElement,
   IImageElement,
   IPdfElement,
@@ -14,6 +15,7 @@ import PDFElement from './pdf';
 import { useQuery } from 'hooks/query';
 import { useEffect, useState } from 'react';
 import { clientState } from 'state/client';
+import AudioElement from './audio';
 
 export const renderElement = (element: IElement): JSX.Element | null => {
   switch (element.type) {
@@ -23,6 +25,8 @@ export const renderElement = (element: IElement): JSX.Element | null => {
       return <TextElement element={element as ITextElement} />;
     case 'pdf':
       return <PDFElement element={element as IPdfElement} />;
+    case 'audio':
+      return <AudioElement element={element as IAudioElement} />;
     default:
       return null;
   }
