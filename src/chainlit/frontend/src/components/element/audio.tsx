@@ -14,7 +14,7 @@ export default function AudioElement({ element }: Props) {
   const className = `${element.display}-audio`;
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
   return (
-    <Box>
+    <Box className={className}>
       <Box
         sx={{
           fontSize: '14px',
@@ -25,7 +25,7 @@ export default function AudioElement({ element }: Props) {
       >
         {element.name}
       </Box>
-      <audio controls src={src} className={className}></audio>
+      <audio controls src={src}></audio>
     </Box>
   );
 }
