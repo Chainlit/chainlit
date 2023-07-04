@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import AudioElement from 'components/element/audio';
 import { IAudioElement } from 'state/element';
 
@@ -11,9 +11,9 @@ export default function InlinedAudioList({ items }: Props) {
     <Stack spacing={1}>
       {items.map((audio, i) => {
         return (
-          <div key={i}>
+          <Box key={i} pt={0.5}>
             <AudioElement element={audio} />
-          </div>
+          </Box>
         );
       })}
     </Stack>
