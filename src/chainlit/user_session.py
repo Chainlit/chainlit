@@ -24,6 +24,7 @@ class UserSession:
         # Copy important fields from the session
         user_session["id"] = emitter.session["id"]
         user_session["env"] = emitter.session["user_env"]
+        user_session["user_infos"] = emitter.session["auth_client"].user_infos
         if "agent" in emitter.session:
             user_session["agent"] = emitter.session["agent"]
 

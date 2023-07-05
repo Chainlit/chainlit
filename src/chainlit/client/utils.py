@@ -1,7 +1,7 @@
 from fastapi import Request
 
 from chainlit.config import config
-from chainlit.client.base import BaseDBClient, BaseAuthClient
+from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
 from chainlit.client.local import LocalAuthClient, LocalDBClient
 from chainlit.client.cloud import CloudAuthClient, CloudDBClient
 from chainlit.telemetry import trace_event
@@ -30,7 +30,9 @@ async def get_auth_client(authorization: str) -> BaseAuthClient:
     return LocalAuthClient()
 
 
-async def get_db_client(authorization: str) -> BaseDBClient:
+async def get_db_client(
+    authorization: str = None, user_infos: UserDict = None
+) -> BaseDBClient:
     # Create the database client
     if config.project.database == "cloud":
         if not config.project.id:
@@ -41,12 +43,12 @@ async def get_db_client(authorization: str) -> BaseDBClient:
             access_token=authorization,
         )
     elif config.project.database == "local":
-        return LocalDBClient()
+        return LocalDBClient(user_infos=user_infos)
     elif config.project.database == "custom":
         if not config.code.client_factory:
             raise ValueError("Client factory not provided")
 
-        custom_db_client = await config.code.client_factory()
+        custom_db_client = await config.code.client_factory(user_infos)
         return custom_db_client
 
 
@@ -66,7 +68,10 @@ async def get_db_client_from_request(
 ) -> BaseDBClient:
     authorization = request.headers.get("Authorization")
 
+    # Get the auth client
+    auth_client = await get_auth_client(authorization)
+
     # Get the db client
-    db_client = await get_db_client(authorization)
+    db_client = await get_db_client(authorization, auth_client.user_infos)
 
     return db_client

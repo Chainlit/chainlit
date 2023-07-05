@@ -31,5 +31,7 @@ def migrate_local_db():
         if os.path.exists(config.project.local_db_path):
             db_push()
             logger.info(f"Local db migrated")
+        else:
+            logger.info(f"Local db does not exist, skipping migration")
     else:
-        logger.info(f"Local db does not exist, skipping migration")
+        logger.info(f"Database setting must be set to 'local' to migrate local db")

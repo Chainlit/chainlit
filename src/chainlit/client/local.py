@@ -9,7 +9,7 @@ import aiofiles
 
 from chainlit.client.base import PaginatedResponse, PageInfo
 
-from .base import BaseAuthClient, BaseDBClient
+from .base import BaseAuthClient, BaseDBClient, UserDict
 
 from chainlit.logger import logger
 from chainlit.config import config
@@ -19,19 +19,17 @@ class LocalAuthClient(BaseAuthClient):
     async def is_project_member(self):
         return True
 
-    async def get_member_role(self):
-        return "OWNER"
-
-    async def get_project_members(self):
-        return []
+    async def get_user_infos(self):
+        return {"name": "Local User", "role": "OWNER"}
 
 
 class LocalDBClient(BaseDBClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
 
-    def __init__(self):
+    def __init__(self, user_infos: Optional[UserDict] = None):
         self.lock = asyncio.Lock()
+        self.user_infos = user_infos
 
     def before_write(self, variables: Dict):
         if "llmSettings" in variables:
@@ -55,6 +53,22 @@ class LocalDBClient(BaseDBClient):
 
         return self.conversation_id
 
+    async def create_user(self, variables: UserDict):
+        from prisma.models import User
+
+        user = await User.prisma().find_unique(where={"id": variables["id"]})
+        if not user:
+            user = await User.prisma().create(data=variables)
+            return True
+        return False
+
+    async def get_project_members(self):
+        from prisma.models import User
+
+        users = await User.prisma().find_many()
+
+        return [json.loads(u.json()) for u in users]
+
     async def create_conversation(self):
         from prisma.models import Conversation
 
@@ -63,7 +77,11 @@ class LocalDBClient(BaseDBClient):
             if self.conversation_id:
                 return self.conversation_id
 
-            res = await Conversation.prisma().create(data={})
+            data = {}
+            if self.user_infos:
+                data["authorId"] = self.user_infos["id"]
+
+            res = await Conversation.prisma().create(data=data)
 
             return res.id
 
@@ -94,6 +112,14 @@ class LocalDBClient(BaseDBClient):
     async def get_conversations(self, pagination, filter):
         from prisma.models import Conversation
 
+        email_where = {}
+
+        if self.user_infos:
+            if self.user_infos["role"] == "USER":
+                email_where = {"email": self.user_infos["email"]}
+            elif filter.authorEmail:
+                email_where = {"email": filter.authorEmail}
+
         some_messages = {}
 
         if filter.feedback is not None:
@@ -112,6 +138,7 @@ class LocalDBClient(BaseDBClient):
             skip=1 if pagination.cursor else None,
             cursor=cursor,
             include={
+                "author": True,
                 "messages": {
                     "take": 1,
                     "where": {
@@ -122,9 +149,9 @@ class LocalDBClient(BaseDBClient):
                             "createdAt": "asc",
                         }
                     ],
-                }
+                },
             },
-            where={"messages": {"some": some_messages}},
+            where={"messages": {"some": some_messages}, "author": email_where},
             order={
                 "createdAt": "desc",
             },

@@ -5,7 +5,9 @@ import asyncio
 import aiohttp
 from python_graphql_client import GraphqlClient
 
-from .base import BaseDBClient, BaseAuthClient, PaginatedResponse, PageInfo
+from chainlit.client.base import UserDict
+
+from .base import BaseDBClient, BaseAuthClient, PaginatedResponse, PageInfo, UserDict
 
 from chainlit.logger import logger
 from chainlit.config import config
@@ -56,26 +58,44 @@ class CloudAuthClient(BaseAuthClient, GraphQLClient):
     def __init__(self, project_id: str, access_token: str):
         super().__init__(project_id, access_token)
 
-    async def get_member_role(
+    async def get_user_infos(
         self,
-    ):
+    ) -> UserDict:
         data = {"projectId": self.project_id}
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{config.chainlit_server}/api/role",
+                f"{config.chainlit_server}/api/me",
                 json=data,
                 headers=self.headers,
             ) as r:
                 if not r.ok:
                     reason = await r.text()
-                    logger.error(f"Failed to get user role. {r.status}: {reason}")
-                    return False
+                    raise ValueError(f"Failed to get user infos. {r.status}: {reason}")
+
                 json = await r.json()
-                return json.get("role", "ANONYMOUS")
+                self.user_infos = json
+                return self.user_infos
 
     async def is_project_member(self) -> bool:
-        role = await self.get_member_role()
-        return role != "ANONYMOUS"
+        try:
+            user = await self.get_user_infos()
+            return user["role"] != "ANONYMOUS"
+        except ValueError as e:
+            logger.error(e)
+            return False
+
+
+class CloudDBClient(BaseDBClient, GraphQLClient):
+    conversation_id: Optional[str] = None
+    lock: asyncio.Lock
+
+    def __init__(self, project_id: str, access_token: str):
+        self.lock = asyncio.Lock()
+        super().__init__(project_id, access_token)
+
+    async def create_user(self, variables: UserDict) -> bool:
+        raise NotImplementedError
 
     async def get_project_members(self):
         query = """query ($projectId: String!) {
@@ -106,15 +126,6 @@ class CloudAuthClient(BaseAuthClient, GraphQLClient):
             members.append({"role": role, "name": name, "email": email})
 
         return members
-
-
-class CloudDBClient(BaseDBClient, GraphQLClient):
-    conversation_id: Optional[str] = None
-    lock: asyncio.Lock
-
-    def __init__(self, project_id: str, access_token: str):
-        self.lock = asyncio.Lock()
-        super().__init__(project_id, access_token)
 
     async def create_conversation(self) -> int:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.

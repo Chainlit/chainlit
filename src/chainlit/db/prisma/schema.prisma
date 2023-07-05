@@ -8,11 +8,23 @@ generator client {
   recursive_type_depth = 5
 }
 
+model User {
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  email         String?         @unique
+  name          String?
+  role          String          @default("USER")
+  conversations Conversation[]
+}
+
 model Conversation {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
   messages  Message[]
   elements  Element[]
+  authorId    Int?
+  author    User? @relation(fields: [authorId], references: [id])
+
 }
 
 model Element {

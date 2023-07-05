@@ -9,9 +9,7 @@ const url = import.meta.env.DEV ? devServer : window.origin;
 const serverUrl = new URL(url);
 
 const httpEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
-export const wsEndpoint = `${
-  serverUrl.protocol === 'https:' ? 'wss' : 'ws'
-}://${serverUrl.host}`;
+export const wsEndpoint = httpEndpoint;
 
 export class ChainlitClient {
   public headers: Headers;

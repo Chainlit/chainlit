@@ -26,9 +26,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             param_name: arg for param_name, arg in zip(user_function_params, args)
         }
 
-        emitter = get_emitter()
-
         if with_task:
+            emitter = get_emitter()
             await emitter.task_start()
 
         try:
@@ -46,6 +45,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             ).send()
         finally:
             if with_task:
+                emitter = get_emitter()
                 await emitter.task_end()
 
     return wrapper
