@@ -110,10 +110,10 @@ class MessageBase(ABC):
 
         return self.id or self.temp_id
 
-    async def stream_token(self, token: str):
+    async def stream_token(self, token: str, is_sequence=False):
         """
         Sends a token to the UI. This is useful for streaming messages.
-        Once all tokens have been streamed, call .send() to persist the message.
+        Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
 
         if not self.streaming:
@@ -121,8 +121,14 @@ class MessageBase(ABC):
             msg_dict = self.to_dict()
             await self.emitter.stream_start(msg_dict)
 
-        self.content += token
-        await self.emitter.send_token(id=self.id or self.temp_id, token=token)
+        if is_sequence:
+            self.content = token
+        else:
+            self.content += token
+
+        await self.emitter.send_token(
+            id=self.id or self.temp_id, token=token, is_sequence=is_sequence
+        )
 
 
 class Message(MessageBase):

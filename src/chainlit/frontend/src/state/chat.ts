@@ -40,6 +40,7 @@ export interface IMessage {
 export interface IToken {
   id: number | string;
   token: string;
+  isSequence: boolean;
 }
 
 export interface INestedMessage extends IMessage {
