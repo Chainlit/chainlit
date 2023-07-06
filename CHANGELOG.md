@@ -6,15 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing released yet!
+
+## [0.5.1] - 2023-07-06
+
 ### Added
 
 - Task list element
 - Audio element
 - All elements can use the `.remove()` method to remove themselves from the UI
 - Can now use cloud auth with any data persistence mode (like local)
+- Microsoft auth
 
 ### Fixed
-
+- Files in app dir are now properly served (typical use case is displaying an image in the readme)
 - Add missing attribute `size` to Pyplot element
 
 ## [0.5.0] - 2023-06-28
