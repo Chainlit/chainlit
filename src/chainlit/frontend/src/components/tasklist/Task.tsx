@@ -2,12 +2,16 @@ import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
 import { ITask } from './types';
 import { TaskStatusIcon } from './TaskStatusIcon';
 import { grey } from 'palette';
+import { useSetRecoilState } from 'recoil';
+import { highlightMessage } from 'state/chat';
 
 export const Task = ({ index, task }: { index: number; task: ITask }) => {
+  const setHighlightedMessage = useSetRecoilState(highlightMessage);
   const theme = useTheme();
   return (
     <ListItem disableGutters className={`task task-status-${task.status}`}>
       <ListItemButton
+        disableRipple={!task.forId}
         sx={{
           color:
             {
@@ -19,7 +23,21 @@ export const Task = ({ index, task }: { index: number; task: ITask }) => {
           fontWeight: task.status === 'running' ? '700' : '500',
           alignItems: 'flex-start',
           fontSize: '14px',
-          lineHeight: 1.36
+          lineHeight: 1.36,
+          cursor: task.forId ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (task.forId) {
+            setHighlightedMessage(task.forId);
+            const element = document.getElementById(`message-${task.forId}`);
+            if (element) {
+              element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'start'
+              });
+            }
+          }
         }}
       >
         <Box

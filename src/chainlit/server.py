@@ -123,6 +123,9 @@ async def lifespan(app: FastAPI):
             except asyncio.exceptions.CancelledError:
                 pass
 
+        # Force exit the process to avoid potential AnyIO threads still running
+        os._exit(0)
+
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 build_dir = os.path.join(root_dir, "frontend/dist")

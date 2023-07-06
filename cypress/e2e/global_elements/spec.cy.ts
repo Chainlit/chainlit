@@ -14,11 +14,11 @@ describe("Global Elements", () => {
     // Inlined
     cy.get(".message").eq(0).find(".inline-image").should("have.length", 1);
     cy.get(".message").eq(0).find(".element-link").should("have.length", 2);
-    cy.get(".message")
+    cy.get(".message").eq(0).find(".element-link")
       .eq(0)
-      .find(".element-link")
+      .should("contain", "text1");
+    cy.get(".message").eq(0).find(".element-link")
       .eq(0)
-      .should("contain", "text1")
       .click();
 
     // Side
