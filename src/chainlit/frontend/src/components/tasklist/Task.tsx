@@ -28,7 +28,6 @@ export const Task = ({ index, task }: { index: number; task: ITask }) => {
         }}
         onClick={() => {
           if (task.forId) {
-            console.log('set', task.forId);
             setHighlightedMessage(task.forId);
             const element = document.getElementById(`message-${task.forId}`);
             if (element) {
