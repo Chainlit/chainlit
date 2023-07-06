@@ -13,6 +13,11 @@ from chainlit.client.base import BaseDBClient
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementType, ElementDisplay, ElementSize
 
+mime_types = {
+    "text": "text/plain",
+    "tasklist": "application/json",
+}
+
 
 @dataclass
 class Element:
@@ -73,9 +78,10 @@ class Element:
 
     async def persist(self, client: BaseDBClient):
         if not self.url and self.content and not self.id:
+            # Only guess the mime type when the content is binary
             mime = (
-                "text/plain"
-                if self.type == "text"
+                mime_types[self.type]
+                if self.type in mime_types
                 else filetype.guess_mime(self.content)
             )
             self.url = await client.upload_element(content=self.content, mime=mime)
@@ -219,14 +225,17 @@ class TaskStatus(Enum):
 class Task:
     title: str = None
     status: TaskStatus = TaskStatus.READY
+    forId: str = None
 
     def __init__(
         self,
         title: str,
         status: TaskStatus = TaskStatus.READY,
+        forId: str = None,
     ):
         self.title = title
         self.status = status
+        self.forId = forId
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -254,7 +263,8 @@ class TaskList(Element):
     async def preprocess_content(self):
         # serialize enum
         tasks = [
-            {"title": task.title, "status": task.status.value} for task in self.tasks
+            {"title": task.title, "status": task.status.value, "forId": task.forId}
+            for task in self.tasks
         ]
 
         # store stringified json in content so that it's correctly stored in the database
