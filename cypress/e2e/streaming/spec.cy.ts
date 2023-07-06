@@ -1,3 +1,11 @@
+function testStreamedMessage(index: number) {
+  const tokenList = ["the", "quick", "brown", "fox"];
+  for (const token of tokenList) {
+    cy.get(".message").eq(index).should("contain", token);
+  }
+  cy.get(".message").eq(index).should("contain", tokenList.join(" "));
+}
+
 describe("Streaming", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
@@ -6,15 +14,14 @@ describe("Streaming", () => {
   });
 
   it("should be able to stream a message", () => {
-    const tokenList = ["the", "quick", "brown", "fox"];
     cy.get(".message").should("have.length", 1);
 
-    for (const token of tokenList) {
-      cy.get(".message").eq(0).should("contain", token);
-    }
-    cy.get(".message").eq(0).should("contain", tokenList.join(""));
+    testStreamedMessage(0);
 
-    cy.wait(2000);
     cy.get(".message").should("have.length", 1);
+
+    testStreamedMessage(1);
+
+    cy.get(".message").should("have.length", 2);
   });
 });

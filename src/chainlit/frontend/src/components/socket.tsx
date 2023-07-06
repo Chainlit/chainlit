@@ -128,7 +128,7 @@ export default memo(function Socket() {
       setMessages((oldMessages) => [...oldMessages, message]);
     });
 
-    socket.on('stream_token', ({ id, token }: IToken) => {
+    socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
       setMessages((oldMessages) => {
         const index = oldMessages.findIndex(
           (m) => (m.id && m.id === id) || (m.tempId && m.tempId === id)
@@ -136,7 +136,11 @@ export default memo(function Socket() {
         if (index === -1) return oldMessages;
         const oldMessage = oldMessages[index];
         const newMessage = { ...oldMessage };
-        newMessage.content += token;
+        if (isSequence) {
+          newMessage.content = token;
+        } else {
+          newMessage.content += token;
+        }
         return [
           ...oldMessages.slice(0, index),
           newMessage,
