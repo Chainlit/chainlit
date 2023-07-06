@@ -2,14 +2,10 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Typography, Link, Stack, Box } from '@mui/material';
 import { IElements } from 'state/element';
-import { memo } from 'react';
 import { IAction } from 'state/action';
 import ElementRef from 'components/element/ref';
 import Code from 'components/Code';
 import InlinedElements from './inlined';
-import { useRecoilValue } from 'recoil';
-import { highlightMessage } from 'state/chat';
-import { keyframes } from '@emotion/react';
 
 interface Props {
   id?: string;
@@ -100,20 +96,7 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   };
 }
 
-// Uses yellow[500] with 50% opacity
-const flash = keyframes`
-  from {
-    background-color: transparent;
-  }
-  25% {
-    background-color: rgba(255, 173, 51, 0.5);
-  }
-  to {
-    background-color: transparent;
-  }
-`;
-
-function MessageContent({
+export default function MessageContent({
   id,
   content,
   elements,
@@ -173,46 +156,5 @@ function MessageContent({
       </Typography>
       <InlinedElements elements={inlinedElements} actions={scopedActions} />
     </Stack>
-  );
-}
-
-export default function Message({
-  id,
-  content,
-  elements,
-  actions,
-  language,
-  authorIsUser
-}: Props) {
-  const highlightedMessage = useRecoilValue(highlightMessage);
-
-  // The content of a message is memoized to avoid re-rendering Markdown
-  const Content = memo(() => (
-    <MessageContent
-      id={id}
-      content={content}
-      elements={elements}
-      actions={actions}
-      language={language}
-      authorIsUser={authorIsUser}
-    />
-  ));
-
-  if (!Content) {
-    return null;
-  }
-
-  // Change the key of the message to force re-rendering when it is highlighted
-  return (
-    <Box
-      id={`message-${id}`}
-      key={`${id}-${highlightedMessage == id}`}
-      sx={{
-        animation:
-          highlightedMessage == id ? `3s ease-in-out 0.1s ${flash}` : 'none'
-      }}
-    >
-      <Content />
-    </Box>
   );
 }

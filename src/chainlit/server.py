@@ -308,12 +308,17 @@ async def serve_file(filename: str):
 
 @app.get("/{path:path}")
 async def serve(path: str):
-    """Serve the UI."""
-    path_to_file = os.path.join(build_dir, path)
-    if path != "" and os.path.exists(path_to_file):
-        return FileResponse(path_to_file)
-    else:
-        return HTMLResponse(content=html_template, status_code=200)
+    """Serve the UI and app files."""
+    if path:
+        app_file_path = os.path.join(config.root, path)
+        ui_file_path = os.path.join(build_dir, path)
+        file_paths = [app_file_path, ui_file_path]
+
+        for file_path in file_paths:
+            if os.path.isfile(file_path):
+                return FileResponse(file_path)
+
+    return HTMLResponse(content=html_template, status_code=200)
 
 
 """
