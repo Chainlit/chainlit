@@ -374,9 +374,10 @@ async def connect(sid, environ):
 
     # Function to ask the user a question
     def ask_user_fn(data, timeout):
-        if sessions[sid]["should_stop"]:
-            sessions[sid]["should_stop"] = False
-            raise InterruptedError("Task stopped by user")
+        if sid in sessions:
+            if sessions[sid]["should_stop"]:
+                sessions[sid]["should_stop"] = False
+                raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
     session = {
