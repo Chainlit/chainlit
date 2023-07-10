@@ -6,6 +6,7 @@ import { IAction } from 'state/action';
 import InlinedActionList from 'components/action/inlined';
 import InlinedPDFList from 'components/element/inlined/pdfs';
 import InlinedAudioList from 'components/element/inlined/audios';
+import InlinedVideoList from 'components/element/inlined/videos';
 
 interface Props {
   elements: IElements;
@@ -52,6 +53,9 @@ export default function InlinedElements({ elements, actions }: Props) {
       ) : null}
       {elementsByType.audio?.length ? (
         <InlinedAudioList items={elementsByType.audio} />
+      ) : null}
+      {elementsByType.video?.length ? (
+        <InlinedVideoList items={elementsByType.video} />
       ) : null}
       {actions.length ? <InlinedActionList actions={actions} /> : null}
     </Stack>

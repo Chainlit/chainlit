@@ -32,6 +32,7 @@ from chainlit.element import (
     TaskList,
     Task,
     TaskStatus,
+    Video,
 )
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
@@ -157,6 +158,7 @@ __all__ = [
     "Task",
     "TaskList",
     "TaskStatus",
+    "Video",
     "Message",
     "ErrorMessage",
     "AskUserMessage",
