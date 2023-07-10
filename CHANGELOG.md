@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.2] - 2023-07-10
+
 ### Added
 
 - Add the video element
@@ -13,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fix the inline element flashing when scrolling the page, due to un-needed re-rendering
+- Fix the orange flash effect on messages
 
 ## [0.5.1] - 2023-07-06
 
