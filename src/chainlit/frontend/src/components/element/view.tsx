@@ -7,7 +7,8 @@ import {
   IElement,
   IImageElement,
   IPdfElement,
-  ITextElement
+  ITextElement,
+  IVideoElement
 } from 'state/element';
 import TextElement from './text';
 import ImageElement from './image';
@@ -16,6 +17,7 @@ import { useQuery } from 'hooks/query';
 import { useEffect, useState } from 'react';
 import { clientState } from 'state/client';
 import AudioElement from './audio';
+import VideoElement from './video';
 
 export const renderElement = (element: IElement): JSX.Element | null => {
   switch (element.type) {
@@ -27,6 +29,8 @@ export const renderElement = (element: IElement): JSX.Element | null => {
       return <PDFElement element={element as IPdfElement} />;
     case 'audio':
       return <AudioElement element={element as IAudioElement} />;
+    case 'video':
+      return <VideoElement element={element as IVideoElement} />;
     default:
       return null;
   }

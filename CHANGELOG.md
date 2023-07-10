@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing released yet!
+### Added
+
+- Add the video element
+
+### Fixed
+
+- Fix the inline element flashing when scrolling the page, due to un-needed re-rendering
 
 ## [0.5.1] - 2023-07-06
 

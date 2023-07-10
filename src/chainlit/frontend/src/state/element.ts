@@ -6,7 +6,8 @@ export type ElementType =
   | 'pdf'
   | 'avatar'
   | 'tasklist'
-  | 'audio';
+  | 'audio'
+  | 'video';
 
 export type AllElements =
   | IImageElement
@@ -14,7 +15,10 @@ export type AllElements =
   | IPdfElement
   | IAvatarElement
   | ITasklistElement
-  | IAudioElement;
+  | IAudioElement
+  | IVideoElement;
+
+export type IElementSize = 'small' | 'medium' | 'large';
 
 export interface IElement {
   id?: number;
@@ -30,7 +34,7 @@ export interface IElement {
 export interface IImageElement extends IElement {
   type: 'image';
   content?: ArrayBuffer;
-  size?: 'small' | 'medium' | 'large';
+  size?: IElementSize;
 }
 
 export interface IAvatarElement extends IElement {
@@ -51,6 +55,12 @@ export interface IPdfElement extends IElement {
 export interface IAudioElement extends IElement {
   type: 'audio';
   content?: ArrayBuffer;
+}
+
+export interface IVideoElement extends IElement {
+  type: 'video';
+  content?: ArrayBuffer;
+  size?: IElementSize;
 }
 
 export interface ITasklistElement extends IElement {

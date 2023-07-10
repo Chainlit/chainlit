@@ -279,3 +279,9 @@ class TaskList(Element):
 @dataclass
 class Audio(Element):
     type: ElementType = "audio"
+
+
+@dataclass
+class Video(Element):
+    type: ElementType = "video"
+    size: ElementSize = "medium"
