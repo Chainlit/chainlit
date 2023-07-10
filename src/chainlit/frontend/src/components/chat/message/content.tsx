@@ -6,6 +6,7 @@ import { IAction } from 'state/action';
 import ElementRef from 'components/element/ref';
 import Code from 'components/Code';
 import InlinedElements from './inlined';
+import { memo } from 'react';
 
 interface Props {
   id?: string;
@@ -96,7 +97,7 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   };
 }
 
-export default function MessageContent({
+export default memo(function MessageContent({
   id,
   content,
   elements,
@@ -157,4 +158,4 @@ export default function MessageContent({
       <InlinedElements elements={inlinedElements} actions={scopedActions} />
     </Stack>
   );
-}
+});
