@@ -114,7 +114,7 @@ Once you create a pull request, the tests will automatically run. It is a good p
 ### Run one test
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `npm test FOLDER` and change FOLDER with the folder from the previous step (example: `run test scoped_elements`).
+2. Run `SINGLE_TEST=FOLDER npm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).
 
 ## Only contribute to one side of the project
 
