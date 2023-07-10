@@ -481,7 +481,11 @@ async def process_message(session: Session, author: str, input_str: str):
                 return
             else:
                 # Otherwise, use the default run function
-                raw_res, output_key = await run_langchain_agent(
+                (
+                    raw_res,
+                    output_key,
+                    has_streamed_final_answer,
+                ) = await run_langchain_agent(
                     langchain_agent, input_str, use_async=config.code.lc_agent_is_async
                 )
 
@@ -495,8 +499,10 @@ async def process_message(session: Session, author: str, input_str: str):
                 else:
                     # Otherwise, use the raw response
                     res = raw_res
+
             # Finally, send the response to the user
-            await Message(author=config.ui.name, content=res).send()
+            if not has_streamed_final_answer:
+                await Message(author=config.ui.name, content=res).send()
 
         elif llama_instance:
             from chainlit.llama_index.run import run_llama

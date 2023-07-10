@@ -1,5 +1,8 @@
 from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
+from langchain.callbacks.streaming_aiter_final_only import (
+    AsyncFinalIteratorCallbackHandler as BaseAsyncFinalIteratorCallbackHandler,
+)
 from langchain.schema import (
     AgentAction,
     AgentFinish,
@@ -398,3 +401,43 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> None:
         """Run on agent end."""
         pass
+
+
+class AsyncLangchainFinalIteratorCallbackHandler(
+    BaseAsyncFinalIteratorCallbackHandler, AsyncLangchainCallbackHandler
+):
+    def __init__(self, *args, **kwargs):
+        BaseAsyncFinalIteratorCallbackHandler.__init__(self, *args, **kwargs)
+        AsyncLangchainCallbackHandler.__init__(self)
+
+        self.final_stream = Message(author=config.ui.name, content="")
+        self.has_streamed_final_answer = False
+
+    async def on_llm_start(
+        self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
+    ) -> None:
+        await BaseAsyncFinalIteratorCallbackHandler.on_llm_start(
+            self, serialized, prompts, **kwargs
+        )
+        await AsyncLangchainCallbackHandler.on_llm_start(
+            self, serialized, prompts, **kwargs
+        )
+
+    async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        if self.answer_reached and self.final_stream:
+            self.has_streamed_final_answer = True
+            await self.final_stream.stream_token(token)
+
+        await BaseAsyncFinalIteratorCallbackHandler.on_llm_new_token(
+            self, token, **kwargs
+        )
+        await AsyncLangchainCallbackHandler.on_llm_new_token(self, token, **kwargs)
+
+    async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
+        await BaseAsyncFinalIteratorCallbackHandler.on_llm_end(self, response, **kwargs)
+        await AsyncLangchainCallbackHandler.on_llm_end(self, response, **kwargs)
+
+
+AsyncLangchainFinalIteratorCallbackHandler.__init__.__doc__ = (
+    BaseAsyncFinalIteratorCallbackHandler.__init__.__doc__
+)
