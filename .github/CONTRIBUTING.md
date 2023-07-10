@@ -19,9 +19,6 @@ I've copy/pasted the whole document there, without the previous two headings.
   * [Start the server](#start-the-server)
 - [Run the tests](#run-the-tests)
   * [Run one test](#run-one-test)
-- [Only contribute to one side of the project](#only-contribute-to-one-side-of-the-project)
-  * [Only contribute to the frontend](#only-contribute-to-the-frontend)
-  * [Only contribute to the server](#only-contribute-to-the-server)
 
 ## Local setup
 
@@ -118,36 +115,3 @@ Once you create a pull request, the tests will automatically run. It is a good p
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
 2. Run `npm test FOLDER` and change FOLDER with the folder from the previous step (example: `run test scoped_elements`).
-
-## Only contribute to one side of the project
-
-This is the easiest solution if you want to only make a change in the UI or the server.
-
-Start with following the steps from the [Local setup](#local-setup).
-
-### Only contribute to the frontend
-
-1. Change the server url in [src/chainlit/frontend/src/api/index.ts](/src/chainlit/frontend/src/api/index.ts) to match your target chainlit server. Below is an example using a public chainlit server. Don't forget to change the configuration back before commiting.
-
-```js
-const devServer = 'https://img-gen.chainlit.app/';
-```
-2. Follow the steps from [Start the UI](#start-the-ui).
-
-### Only contribute to the server
-
-1. Build the UI.
-
-```sh
-npm run buildUi
-```
-
-2. Follow the instruction from [Install from local sources](#install-from-local-sources).
-
-3. Run the server without the `-h` flag. Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
-
-```sh
-chainlit run target.py
-```
-
-4. Any time you've made a change, restart the server from the previous step.
