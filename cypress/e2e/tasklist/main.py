@@ -18,8 +18,9 @@ fake_tasks = [
     "Wrapping up and preparing for the next tasks",
     "Doing a system backup",
     "Updating the security protocols",
-    "Preparing for shutdown"
+    "Preparing for shutdown",
 ]
+
 
 @cl.on_chat_start
 async def main():
@@ -33,17 +34,10 @@ async def main():
     task_list.tasks[0].status = cl.TaskStatus.RUNNING
     await task_list.send()
 
-
     for i in range(9):
         task_list.tasks[i].status = cl.TaskStatus.DONE
-        task_list.tasks[i+1].status = cl.TaskStatus.RUNNING
+        task_list.tasks[i + 1].status = cl.TaskStatus.RUNNING
         await task_list.send()
 
     task_list.tasks[9].status = cl.TaskStatus.FAILED
     await task_list.send()
-    
-
-
-
-
-
