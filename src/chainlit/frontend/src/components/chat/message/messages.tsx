@@ -1,8 +1,10 @@
-import { INestedMessage, loadingState } from 'state/chat';
-import Message from './message';
-import { IElements } from 'state/element';
 import { useRecoilValue } from 'recoil';
+
 import { IAction } from 'state/action';
+import { INestedMessage, loadingState } from 'state/chat';
+import { IElements } from 'state/element';
+
+import Message from './message';
 
 interface Props {
   messages: INestedMessage[];

@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
+import { grey } from 'palette';
+import { useEffect, useRef, useState } from 'react';
+import { useRecoilState } from 'recoil';
 
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import {
   IconButton,
   Menu,
@@ -9,11 +13,8 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
-import { useRecoilState } from 'recoil';
+
 import { IChat, historyOpenedState } from 'state/chat';
-import { useEffect, useRef, useState } from 'react';
-import SearchOutlined from '@mui/icons-material/SearchOutlined';
-import { grey } from 'palette';
 
 interface Props {
   onClick: (content: string) => void;

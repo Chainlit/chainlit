@@ -1,7 +1,8 @@
 import { atom } from 'recoil';
 import { Socket } from 'socket.io-client';
-import { IMember } from './user';
+
 import { IElement } from './element';
+import { IMember } from './user';
 
 export interface ILLMSettings {
   model_name: string;

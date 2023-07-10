@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ITextElement } from 'state/element';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
+
 import Code from 'components/Code';
+
+import { ITextElement } from 'state/element';
 
 interface Props {
   element: ITextElement;

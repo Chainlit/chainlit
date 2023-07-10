@@ -1,4 +1,5 @@
 import { Stack, Typography } from '@mui/material';
+
 import { Logo } from 'components/logo';
 
 export default function WaterMark() {

@@ -1,4 +1,5 @@
 import { IImageElement } from 'state/element';
+
 import ImageFrame from './frame';
 
 interface Props {

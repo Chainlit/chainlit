@@ -1,5 +1,7 @@
 import VideoElement from 'components/element/video';
+
 import { IVideoElement } from 'state/element';
+
 import { ListWithSize } from './utils';
 
 interface Props {

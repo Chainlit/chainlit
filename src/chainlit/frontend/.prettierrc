@@ -2,5 +2,18 @@
   "semi": true,
   "trailingComma": "none",
   "singleQuote": true,
-  "printWidth": 80
+  "printWidth": 80,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "pages/(.*)$",
+    "@mui/(.*)$",
+    "components/(.*)$",
+    "assets/(.*)$",
+    "hooks/(.*)$",
+    "state/(.*)$",
+    "^./*.*.css",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

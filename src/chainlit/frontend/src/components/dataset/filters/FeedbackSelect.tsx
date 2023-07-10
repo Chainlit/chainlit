@@ -1,9 +1,11 @@
+import { useRecoilState } from 'recoil';
+
 import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { useRecoilState } from 'recoil';
+
 import { datasetFiltersState } from 'state/dataset';
 
 export default function FeedbackSelect() {

@@ -1,18 +1,21 @@
-import {
-  Menu,
-  MenuItem,
-  Divider,
-  ListItemIcon,
-  Typography,
-  ListItem,
-  ListItemText
-} from '@mui/material';
+import { Link } from 'react-router-dom';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+
+import KeyIcon from '@mui/icons-material/Key';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
-import KeyIcon from '@mui/icons-material/Key';
-import { Link } from 'react-router-dom';
+import {
+  Divider,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Typography
+} from '@mui/material';
+
 import { useAuth } from 'hooks/auth';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 

@@ -1,5 +1,6 @@
-import { createTheme } from '@mui/material/styles';
 import { grey, primary, white } from 'palette';
+
+import { createTheme } from '@mui/material/styles';
 
 const typography = {
   fontFamily: ['Inter', 'sans-serif'].join(',')

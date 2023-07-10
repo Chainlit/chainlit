@@ -1,5 +1,5 @@
-import Button, { ButtonProps } from '@mui/material/Button';
 import { useTheme } from '@mui/material';
+import Button, { ButtonProps } from '@mui/material/Button';
 
 export default function AccentButton({ children, ...props }: ButtonProps) {
   const theme = useTheme();

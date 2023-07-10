@@ -1,4 +1,5 @@
 import { Avatar, Box, useTheme } from '@mui/material';
+
 import { useAuth } from 'hooks/auth';
 
 export default function UserAvatar() {

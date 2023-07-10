@@ -1,24 +1,29 @@
-import { Alert, Box } from '@mui/material';
-import MessageContainer from './message/container';
+import { useCallback, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
+
+import { Alert, Box } from '@mui/material';
+
+import WelcomeScreen from 'components/chat/welcomeScreen';
+import SideView from 'components/element/sideView';
+import ErrorBoundary from 'components/errorBoundary';
+import Playground from 'components/playground';
+import TaskList from 'components/tasklist';
+
+import { useAuth } from 'hooks/auth';
+import useLocalChatHistory from 'hooks/localChatHistory';
+
+import { actionState } from 'state/action';
 import {
   IMessage,
   askUserState,
   messagesState,
   sessionState
 } from 'state/chat';
-import Playground from 'components/playground';
-import SideView from 'components/element/sideView';
-import InputBox from './inputBox';
-import { useCallback, useState } from 'react';
-import { projectSettingsState } from 'state/project';
-import { useAuth } from 'hooks/auth';
-import useLocalChatHistory from 'hooks/localChatHistory';
-import { actionState } from 'state/action';
-import WelcomeScreen from 'components/chat/welcomeScreen';
 import { ITasklistElement, elementState } from 'state/element';
-import ErrorBoundary from 'components/errorBoundary';
-import TaskList from 'components/tasklist';
+import { projectSettingsState } from 'state/project';
+
+import InputBox from './inputBox';
+import MessageContainer from './message/container';
 
 const Chat = () => {
   const { user, isAuthenticated } = useAuth();

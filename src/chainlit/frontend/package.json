@@ -46,6 +46,7 @@
     "@babel/preset-typescript": "^7.22.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/draft-js": "^0.11.10",
     "@types/jest": "^29.5.2",
     "@types/lodash": "^4.14.192",

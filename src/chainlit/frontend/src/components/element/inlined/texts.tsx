@@ -1,5 +1,7 @@
 import { Alert, AlertTitle, Stack } from '@mui/material';
+
 import TextElement from 'components/element/text';
+
 import { ITextElement } from 'state/element';
 
 interface Props {
