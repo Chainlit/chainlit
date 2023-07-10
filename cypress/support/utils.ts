@@ -82,7 +82,7 @@ function runCommand(command: string, cwd = ROOT) {
 
 export function installChainlit() {
   runCommand("npm run build", FRONTEND_DIR);
-  runCommand("pip3 install -e ./src");
+  runCommand(`poetry install -C ${CHAINLIT_DIR} --with tests`);
 }
 
 export function runSpec(test: string) {
@@ -96,14 +96,14 @@ export function runSpec(test: string) {
 export async function runChainlit(dir: string, file: string, localDb = false) {
   return new Promise((resolve, reject) => {
     // Headless + CI mode
-    const options = ["run", file, "-h", "-c"];
+    const options = ["run", "-C", CHAINLIT_DIR, "chainlit", "run", file, "-h", "-c"];
 
     if (localDb) {
       options.push("--db");
       options.push("local");
     }
 
-    const server = spawn("chainlit", options, {
+    const server = spawn("poetry", options, {
       cwd: dir,
     });
 
