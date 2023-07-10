@@ -90,23 +90,20 @@ If you visit `http://127.0.0.1:5174/`, it should say that it can't connect to th
 
 ## Setup the server
 
-### Install from local sources
-
-```sh
-pip install -e PATH_TO_CHAINLIT_REPO/src
-```
-
-This installs your project in editable mode, which means you only need to do this once.
-
 ### Start the server
 
-Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
+Start by running `src/chainlit/hello.py` as an example.
 
 ```sh
-chainlit run target.py -h
+cd src
+poetry run chainlit run chainlit/hello.py -h
 ```
 
 The `-h` parameter (headless) means the UI will not automatically open.
+
+You should now be able to use the UI you launched previously on `http://127.0.0.1:5174/`.
+
+If you've made it this far, you can now replace `chainlit/hello.py` by your own target. 😎
 
 ## Run the tests
 
@@ -147,7 +144,7 @@ npm run buildUi
 3. Run the server without the `-h` flag. Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
 
 ```sh
-chainlit run target.py
+poetry run chainlit run target.py
 ```
 
 4. Any time you've made a change, restart the server from the previous step.

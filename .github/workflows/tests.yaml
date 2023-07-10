@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: "3.8"
           cache: "pip"
-      - name: Install Python CI dependencies
-        run: pip install -r src/ci-requirements.txt
+      - name: Install Poetry
+        run: pip install poetry
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
