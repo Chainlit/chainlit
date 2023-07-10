@@ -11,6 +11,7 @@ import makeTheme from 'theme';
 import AuthCallback from 'pages/AuthCallback';
 import Conversation from 'pages/Conversation';
 import Dataset from 'pages/Dataset';
+import Design from 'pages/Design';
 import Element from 'pages/Element';
 import Env from 'pages/Env';
 import Home from 'pages/Home';
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />
+  },
+  {
+    path: '/design',
+    element: <Design />
   },
   {
     path: '/api/auth/callback',
