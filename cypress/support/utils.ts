@@ -1,3 +1,4 @@
+import * as kill from "tree-kill";
 import { execSync, spawn } from "child_process";
 import { join } from "path";
 import { readdirSync, existsSync, unlinkSync } from "fs";
@@ -53,7 +54,9 @@ export async function runTest(test: string) {
         childProcess = await runChainlit(testDir, file, localDb);
         runSpec(test);
       } finally {
-        childProcess?.kill();
+        if (childProcess) {
+          kill(childProcess.pid);
+        }
       }
     }
   };

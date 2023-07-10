@@ -144,7 +144,7 @@ npm run buildUi
 3. Run the server without the `-h` flag. Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
 
 ```sh
-chainlit run target.py
+poetry run chainlit run target.py
 ```
 
 4. Any time you've made a change, restart the server from the previous step.
