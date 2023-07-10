@@ -1,11 +1,15 @@
-import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, Box, BoxProps, Typography, Stack } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { renderElement } from 'components/element/view';
 import { forwardRef, useMemo, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { sideViewState } from 'state/element';
 import { Resizable } from 'react-resizable';
+import { useRecoilState } from 'recoil';
+
+import CloseIcon from '@mui/icons-material/Close';
+import { Box, BoxProps, IconButton, Stack, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+import { renderElement } from 'components/element/view';
+
+import { sideViewState } from 'state/element';
+
 import 'react-resizable/css/styles.css';
 
 interface DrawerProps extends BoxProps {

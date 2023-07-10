@@ -1,6 +1,8 @@
 import { useRecoilValue } from 'recoil';
+
 import LogoDark from 'assets/logo_dark.svg';
 import LogoLight from 'assets/logo_light.svg';
+
 import { settingsState } from 'state/settings';
 
 interface Props {

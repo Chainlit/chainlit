@@ -1,8 +1,10 @@
 import App from 'App';
 import { ChainlitClient } from 'api';
-import AuthProvider from 'components/authProvider';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
+
+import AuthProvider from 'components/authProvider';
+
 import { IProjectSettings, projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 

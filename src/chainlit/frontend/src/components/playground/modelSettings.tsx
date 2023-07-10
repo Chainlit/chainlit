@@ -1,14 +1,17 @@
-import { Stack, Box, ListSubheader } from '@mui/material';
-import { ILLMSettings } from 'state/chat';
+import { useFormik } from 'formik';
+import { MuiChipsInput } from 'mui-chips-input';
+import { useEffect } from 'react';
+import { useRecoilState } from 'recoil';
+import * as yup from 'yup';
+
+import { Box, ListSubheader, Stack } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import * as yup from 'yup';
-import { useFormik } from 'formik';
+
 import Slider from 'components/slider';
-import { MuiChipsInput } from 'mui-chips-input';
-import { useRecoilState } from 'recoil';
-import { useEffect } from 'react';
+
+import { ILLMSettings } from 'state/chat';
 import { playgroundSettingsState } from 'state/playground';
 
 const models = {

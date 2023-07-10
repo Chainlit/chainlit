@@ -1,10 +1,14 @@
-import { Box, Tooltip, Typography } from '@mui/material';
-import MessageTime from './time';
 import { useColorForName } from 'helpers/color';
-import { IMessage } from 'state/chat';
 import { useRecoilValue } from 'recoil';
-import { IAvatarElement, elementState } from 'state/element';
+
+import { Box, Tooltip, Typography } from '@mui/material';
+
 import AvatarElement from 'components/element/avatar';
+
+import { IMessage } from 'state/chat';
+import { IAvatarElement, elementState } from 'state/element';
+
+import MessageTime from './time';
 
 interface Props {
   message: IMessage;

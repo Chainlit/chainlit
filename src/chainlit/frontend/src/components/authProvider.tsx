@@ -1,6 +1,7 @@
 import { Auth0Provider } from '@auth0/auth0-react';
 import { memo } from 'react';
 import { useRecoilValue } from 'recoil';
+
 import { projectSettingsState } from 'state/project';
 
 interface Props {

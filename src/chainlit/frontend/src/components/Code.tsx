@@ -1,8 +1,9 @@
-import { Box, useTheme } from '@mui/material';
 import { grey } from 'palette';
 import { CodeProps } from 'react-markdown/lib/ast-to-react';
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+import { Box, useTheme } from '@mui/material';
 
 export default function Code({ inline, children, ...props }: CodeProps) {
   const theme = useTheme();

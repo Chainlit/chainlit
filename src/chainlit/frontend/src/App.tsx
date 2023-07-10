@@ -1,31 +1,37 @@
-import { Box } from '@mui/material';
-import './App.css';
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider
-} from 'react-router-dom';
 import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { accessTokenState, roleState } from 'state/user';
-import makeTheme from 'theme';
-import { ThemeProvider } from '@mui/material';
-import Home from 'pages/Home';
-import Element from 'pages/Element';
-import Login from 'pages/Login';
-import AuthCallback from 'pages/AuthCallback';
-import Dataset from 'pages/Dataset';
-import Conversation from 'pages/Conversation';
-import Env from 'pages/Env';
-import { useAuth } from 'hooks/auth';
-import Socket from 'components/socket';
 import { Toaster } from 'react-hot-toast';
-import Readme from 'pages/Readme';
-import { settingsState } from 'state/settings';
-import SettingsModal from 'components/settingsModal';
-import Hotkeys from 'components/Hotkeys';
-import { clientState } from 'state/client';
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter
+} from 'react-router-dom';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import makeTheme from 'theme';
+
+import AuthCallback from 'pages/AuthCallback';
+import Conversation from 'pages/Conversation';
+import Dataset from 'pages/Dataset';
+import Element from 'pages/Element';
+import Env from 'pages/Env';
+import Home from 'pages/Home';
+import Login from 'pages/Login';
 import Page from 'pages/Page';
+import Readme from 'pages/Readme';
+
+import { Box } from '@mui/material';
+import { ThemeProvider } from '@mui/material';
+
+import Hotkeys from 'components/Hotkeys';
+import SettingsModal from 'components/settingsModal';
+import Socket from 'components/socket';
+
+import { useAuth } from 'hooks/auth';
+
+import { clientState } from 'state/client';
+import { settingsState } from 'state/settings';
+import { accessTokenState, roleState } from 'state/user';
+
+import './App.css';
 
 const router = createBrowserRouter([
   {

@@ -1,4 +1,5 @@
 import { atom } from 'recoil';
+
 import { ILLMSettings } from './chat';
 
 export interface IPlaygroundState {

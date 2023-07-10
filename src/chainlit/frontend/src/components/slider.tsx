@@ -1,7 +1,8 @@
+import { white } from 'palette';
+
 import { InputLabel, Stack } from '@mui/material';
 import Slider, { SliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
-import { white } from 'palette';
 
 const StyledSlider = styled(Slider)({
   width: 'calc(100% - 7px)',

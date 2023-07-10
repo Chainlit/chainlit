@@ -1,5 +1,6 @@
-import LocalHistoryButton from './local';
 import { memo } from 'react';
+
+import LocalHistoryButton from './local';
 
 interface Props {
   onClick: (content: string) => void;

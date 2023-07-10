@@ -1,9 +1,12 @@
-import { Box, Chip, List, Theme, useTheme } from '@mui/material';
-import { ITasklistElement } from 'state/element';
-import { useEffect, useState } from 'react';
-import { ITaskList } from './types';
-import { Task } from './Task';
 import { grey } from 'palette';
+import { useEffect, useState } from 'react';
+
+import { Box, Chip, List, Theme, useTheme } from '@mui/material';
+
+import { ITasklistElement } from 'state/element';
+
+import { Task } from './Task';
+import { ITaskList } from './types';
 
 const Header = ({ status }: { status: string }) => {
   const theme = useTheme();

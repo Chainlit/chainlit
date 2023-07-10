@@ -1,5 +1,6 @@
-import { Typography } from '@mui/material';
 import { grey } from 'palette';
+
+import { Typography } from '@mui/material';
 
 interface Props {
   timestamp: number | string;

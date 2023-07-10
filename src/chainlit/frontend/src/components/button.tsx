@@ -1,5 +1,6 @@
-import Button, { ButtonProps } from '@mui/material/Button';
 import { grey } from 'palette';
+
+import Button, { ButtonProps } from '@mui/material/Button';
 
 interface Props extends ButtonProps {
   component?: any;

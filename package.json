@@ -6,6 +6,7 @@
     "eslint": "^8.40.0",
     "husky": "^8.0.0",
     "prettier": "^2.8.8",
+    "tree-kill": "^1.2.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },
@@ -14,7 +15,7 @@
     "prepare": "husky install",
     "lintUi": "cd src/chainlit/frontend && npm run lint",
     "formatUi": "cd src/chainlit/frontend && npm run format",
-    "formatPython": "black src",
+    "formatPython": "black `git ls-files | grep '.py$'`",
     "installUiDeps": "cd src/chainlit/frontend && npm install",
     "buildUi": "(cd src/chainlit/frontend && npm run build)",
     "build": "(cd src/chainlit/frontend && npm run build) && (cd src && poetry build)"

@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import AddIcon from '@mui/icons-material/Add';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import AddIcon from '@mui/icons-material/Add';
-import { Box } from '@mui/material';
-import useClearChat from 'hooks/clearChat';
+
 import AccentButton from 'components/accentButton';
 import RegularButton from 'components/button';
+
+import useClearChat from 'hooks/clearChat';
 
 export default function NewChatButton() {
   const navigate = useNavigate();

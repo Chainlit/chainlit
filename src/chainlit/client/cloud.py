@@ -155,11 +155,13 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         return self.conversation_id
 
     async def delete_conversation(self, conversation_id: int):
-        mutation = """mutation ($id: ID!) {
-    deleteConversation(id: $id) {
-      id
-    }
-  }"""
+        mutation = """
+        mutation ($id: ID!) {
+            deleteConversation(id: $id) {
+                id
+            }
+        }
+        """
         variables = {"id": conversation_id}
         res = await self.mutation(mutation, variables)
         self.check_for_errors(res, raise_error=True)
@@ -167,37 +169,39 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         return True
 
     async def get_conversation(self, conversation_id: int):
-        query = """query ($id: ID!) {
-    conversation(id: $id) {
-      id
-      createdAt
-      messages {
-        id
-        isError
-        indent
-        author
-        content
-        waitForAnswer
-        humanFeedback
-        language
-        prompt
-        llmSettings
-        authorIsUser
-        createdAt
-      }
-      elements {
-        id
-        conversationId
-        type
-        name
-        url
-        display
-        language
-        size
-        forIds
-      }
-    }
-  }"""
+        query = """
+        query ($id: ID!) {
+            conversation(id: $id) {
+                id
+                createdAt
+                messages {
+                    id
+                    isError
+                    indent
+                    author
+                    content
+                    waitForAnswer
+                    humanFeedback
+                    language
+                    prompt
+                    llmSettings
+                    authorIsUser
+                    createdAt
+                }
+                elements {
+                    id
+                    conversationId
+                    type
+                    name
+                    url
+                    display
+                    language
+                    size
+                    forIds
+                }
+            }
+        }
+        """
         variables = {
             "id": conversation_id,
         }

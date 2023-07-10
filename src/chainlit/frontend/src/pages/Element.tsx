@@ -1,5 +1,6 @@
-import ElementView from 'components/element/view';
 import Page from 'pages/Page';
+
+import ElementView from 'components/element/view';
 
 export default function Element() {
   return (

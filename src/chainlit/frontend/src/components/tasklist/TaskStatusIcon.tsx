@@ -1,6 +1,8 @@
-import { CircularProgress, SvgIcon, Box } from '@mui/material';
-import { ITask } from './types';
 import { green, grey, primary, white } from 'palette';
+
+import { Box, CircularProgress, SvgIcon } from '@mui/material';
+
+import { ITask } from './types';
 
 export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => {
   if (status === 'running') {

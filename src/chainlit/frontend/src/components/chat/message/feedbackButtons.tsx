@@ -1,13 +1,15 @@
-import { IconButton, Stack, Tooltip } from '@mui/material';
-import { IMessage, messagesState } from 'state/chat';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useRecoilValue } from 'recoil';
+
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
-import { useRecoilValue } from 'recoil';
+import { IconButton, Stack, Tooltip } from '@mui/material';
+
+import { IMessage, messagesState } from 'state/chat';
 import { clientState } from 'state/client';
-import { useState } from 'react';
 
 const size = '16px';
 

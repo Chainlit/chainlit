@@ -1,8 +1,9 @@
 import { IPageInfo, IPagination } from 'components/dataset/table';
+
 import { IChat, ILLMSettings } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
 import { IElement } from 'state/element';
-import { Role, IMember } from 'state/user';
+import { IMember, Role } from 'state/user';
 
 const devServer = 'http://127.0.0.1:8000';
 const url = import.meta.env.DEV ? devServer : window.origin;

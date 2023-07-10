@@ -87,23 +87,20 @@ If you visit `http://127.0.0.1:5174/`, it should say that it can't connect to th
 
 ## Setup the server
 
-### Install from local sources
-
-```sh
-pip install -e PATH_TO_CHAINLIT_REPO/src
-```
-
-This installs your project in editable mode, which means you only need to do this once.
-
 ### Start the server
 
-Replace `target.py` with the file you want to run. You can use `src/chainlit/hello.py` as an example.
+Start by running `src/chainlit/hello.py` as an example.
 
 ```sh
-chainlit run target.py -h
+cd src
+poetry run chainlit run chainlit/hello.py -h
 ```
 
 The `-h` parameter (headless) means the UI will not automatically open.
+
+You should now be able to use the UI you launched previously on `http://127.0.0.1:5174/`.
+
+If you've made it this far, you can now replace `chainlit/hello.py` by your own target. 😎
 
 ## Run the tests
 
@@ -114,4 +111,4 @@ Once you create a pull request, the tests will automatically run. It is a good p
 ### Run one test
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `npm test FOLDER` and change FOLDER with the folder from the previous step (example: `run test scoped_elements`).
+2. Run `SINGLE_TEST=FOLDER npm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).

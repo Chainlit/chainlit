@@ -1,9 +1,12 @@
-import { Box } from '@mui/material';
 import { useEffect, useRef } from 'react';
+
+import { Box } from '@mui/material';
+
+import { IAction } from 'state/action';
 import { IMessage, INestedMessage } from 'state/chat';
 import { IElements } from 'state/element';
+
 import Messages from './messages';
-import { IAction } from 'state/action';
 
 interface Props {
   messages: IMessage[];
