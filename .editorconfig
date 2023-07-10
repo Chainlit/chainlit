@@ -1,0 +1,15 @@
+root = true
+
+[*]
+end_of_line = lf
+
+[*.{py,ts,tsx}]
+indent_style = space
+insert_final_newline = true
+
+[*.py]
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{ts,tsx}]
+indent_size = 2
