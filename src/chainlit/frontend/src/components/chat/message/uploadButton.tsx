@@ -1,19 +1,21 @@
-import { useRecoilValue } from 'recoil';
-import { IAsk, askUserState } from 'state/chat';
+import { grey } from 'palette';
 import { useCallback, useState } from 'react';
 import {
-  useDropzone,
   DropzoneOptions,
   FileRejection,
-  FileWithPath
+  FileWithPath,
+  useDropzone
 } from 'react-dropzone';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import { toast } from 'react-hot-toast';
+import { useRecoilValue } from 'recoil';
+
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import { LoadingButton } from '@mui/lab';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+import { IAsk, askUserState } from 'state/chat';
 import { IAskFileResponse } from 'state/chat';
-import { grey } from 'palette';
 
 interface Props {
   askUser: IAsk;

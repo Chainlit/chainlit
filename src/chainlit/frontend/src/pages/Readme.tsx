@@ -1,6 +1,8 @@
-import { Box } from '@mui/material';
-import WelcomeScreen from 'components/chat/welcomeScreen';
 import Page from 'pages/Page';
+
+import { Box } from '@mui/material';
+
+import WelcomeScreen from 'components/chat/welcomeScreen';
 
 export default function Readme() {
   return (

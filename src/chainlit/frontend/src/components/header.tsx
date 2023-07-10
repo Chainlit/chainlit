@@ -1,23 +1,26 @@
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { projectSettingsState } from 'state/project';
+
+import MenuIcon from '@mui/icons-material/Menu';
 import {
+  AppBar,
   Box,
   Button,
   IconButton,
+  Menu,
   Stack,
-  AppBar,
   Toolbar,
-  useTheme,
-  Menu
+  useTheme
 } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
-import UserButton from 'components/userButton';
-import NewChatButton from 'components/newChatButton';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 import RegularButton from 'components/button';
 import GithubButton from 'components/githubButton';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import MenuIcon from '@mui/icons-material/Menu';
-import { useEffect, useRef, useState } from 'react';
+import NewChatButton from 'components/newChatButton';
+import UserButton from 'components/userButton';
+
+import { projectSettingsState } from 'state/project';
 
 interface INavItem {
   to: string;

@@ -1,11 +1,13 @@
-import { useRef } from 'react';
-import { styled } from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
 import { debounce } from 'lodash';
+import { useRef } from 'react';
+import { useRecoilState } from 'recoil';
+
+import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { useRecoilState } from 'recoil';
+import InputBase from '@mui/material/InputBase';
+import { styled } from '@mui/material/styles';
+
 import { datasetFiltersState } from 'state/dataset';
 
 const Search = styled('div')(({ theme }) => ({

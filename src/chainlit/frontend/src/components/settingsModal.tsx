@@ -1,3 +1,8 @@
+import { useRecoilState } from 'recoil';
+
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
+import ExpandIcon from '@mui/icons-material/Expand';
 import {
   Dialog,
   DialogContent,
@@ -8,11 +13,8 @@ import {
   ListSubheader,
   Switch
 } from '@mui/material';
-import { useRecoilState } from 'recoil';
+
 import { settingsState } from 'state/settings';
-import ExpandIcon from '@mui/icons-material/Expand';
-import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
-import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 
 export default function SettingsModal() {
   const [settings, setSettings] = useRecoilState(settingsState);

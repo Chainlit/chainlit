@@ -1,6 +1,8 @@
-import HistoryButton from './button';
-import useLocalChatHistory from 'hooks/localChatHistory';
 import { useState } from 'react';
+
+import useLocalChatHistory from 'hooks/localChatHistory';
+
+import HistoryButton from './button';
 
 interface Props {
   onClick: (content: string) => void;

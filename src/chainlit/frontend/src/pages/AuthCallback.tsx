@@ -1,7 +1,9 @@
-import { Alert } from '@mui/material';
-import { useAuth } from 'hooks/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { Alert } from '@mui/material';
+
+import { useAuth } from 'hooks/auth';
 
 export default function AuthCallback() {
   const { user, error } = useAuth();

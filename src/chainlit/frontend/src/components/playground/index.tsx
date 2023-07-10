@@ -1,27 +1,31 @@
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { playgroundSettingsState, playgroundState } from 'state/playground';
-import { useEffect, useState } from 'react';
 import {
+  ContentState,
   Editor,
   EditorState,
-  ContentState,
   Modifier,
   SelectionState
 } from 'draft-js';
-import 'draft-js/dist/Draft.css';
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { OrderedSet } from 'immutable';
-import LoadingButton from '@mui/lab/LoadingButton';
-import CloseIcon from '@mui/icons-material/Close';
-import RestoreIcon from '@mui/icons-material/Restore';
-import ModelSettings from './modelSettings';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { userEnvState } from 'state/user';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+
+import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
+import RestoreIcon from '@mui/icons-material/Restore';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+
 import { clientState } from 'state/client';
+import { playgroundSettingsState, playgroundState } from 'state/playground';
+import { userEnvState } from 'state/user';
+
+import 'draft-js/dist/Draft.css';
+
+import ModelSettings from './modelSettings';
 
 const styleMap = {
   COMPLETION: {

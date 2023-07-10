@@ -1,9 +1,12 @@
-import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
-import { ITask } from './types';
-import { TaskStatusIcon } from './TaskStatusIcon';
 import { grey } from 'palette';
 import { useSetRecoilState } from 'recoil';
+
+import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
+
 import { highlightMessage } from 'state/chat';
+
+import { TaskStatusIcon } from './TaskStatusIcon';
+import { ITask } from './types';
 
 export const Task = ({ index, task }: { index: number; task: ITask }) => {
   const setHighlightedMessage = useSetRecoilState(highlightMessage);

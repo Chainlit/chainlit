@@ -1,17 +1,21 @@
-import { Box, Stack } from '@mui/material';
 import { keyframes } from '@emotion/react';
+import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+
+import { Box, Stack } from '@mui/material';
+
+import DetailsButton from 'components/chat/message/detailsButton';
+
+import { IAction } from 'state/action';
 import { INestedMessage, highlightMessage } from 'state/chat';
 import { IElements } from 'state/element';
-import { useEffect, useState } from 'react';
-import DetailsButton from 'components/chat/message/detailsButton';
-import { IAction } from 'state/action';
-import Messages from './messages';
-import MessageContent from './content';
-import UploadButton from './uploadButton';
+import { settingsState } from 'state/settings';
+
 import Author, { authorBoxWidth } from './author';
 import Buttons from './buttons';
-import { settingsState } from 'state/settings';
-import { useRecoilValue } from 'recoil';
+import MessageContent from './content';
+import Messages from './messages';
+import UploadButton from './uploadButton';
 
 interface Props {
   message: INestedMessage;

@@ -1,7 +1,9 @@
-import { IElement, sideViewState } from 'state/element';
 import { Link as RRLink } from 'react-router-dom';
-import { Link } from '@mui/material';
 import { useSetRecoilState } from 'recoil';
+
+import { Link } from '@mui/material';
+
+import { IElement, sideViewState } from 'state/element';
 
 interface Props {
   element: IElement;

@@ -1,5 +1,6 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSetRecoilState } from 'recoil';
+
 import { settingsState } from 'state/settings';
 
 export default function Hotkeys() {

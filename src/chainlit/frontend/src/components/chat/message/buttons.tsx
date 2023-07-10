@@ -1,9 +1,12 @@
-import { IMessage } from 'state/chat';
-import EditIcon from '@mui/icons-material/EditOutlined';
-import FeedbackButtons from 'components/chat/message/feedbackButtons';
 import { useSetRecoilState } from 'recoil';
-import { playgroundState } from 'state/playground';
+
+import EditIcon from '@mui/icons-material/EditOutlined';
 import { IconButton, Stack, Tooltip } from '@mui/material';
+
+import FeedbackButtons from 'components/chat/message/feedbackButtons';
+
+import { IMessage } from 'state/chat';
+import { playgroundState } from 'state/playground';
 
 interface Props {
   message: IMessage;

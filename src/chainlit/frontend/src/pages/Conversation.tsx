@@ -1,13 +1,16 @@
-import { Box } from '@mui/material';
-import MessageContainer from 'components/chat/message/container';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+
+import { Box } from '@mui/material';
+
+import MessageContainer from 'components/chat/message/container';
 import SideView from 'components/element/sideView';
 import Playground from 'components/playground';
+
 import { IAction } from 'state/action';
-import { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { clientState } from 'state/client';
 import { IChat } from 'state/chat';
+import { clientState } from 'state/client';
 
 export default function Conversation() {
   const { id } = useParams();

@@ -1,15 +1,18 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+
 import SendIcon from '@mui/icons-material/Telegram';
 import { IconButton, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+
+import HistoryButton from 'components/chat/history';
+
 import {
   askUserState,
   historyOpenedState,
   loadingState,
   sessionState
 } from 'state/chat';
-import HistoryButton from 'components/chat/history';
 
 interface Props {
   onSubmit: (message: string) => void;

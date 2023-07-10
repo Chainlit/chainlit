@@ -1,9 +1,12 @@
-import { Box, Link } from '@mui/material';
-import { useRecoilValue } from 'recoil';
-import { projectSettingsState } from 'state/project';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import { useRecoilValue } from 'recoil';
 import remarkGfm from 'remark-gfm';
+
+import { Box, Link } from '@mui/material';
+
 import Code from 'components/Code';
+
+import { projectSettingsState } from 'state/project';
 
 const WelcomeScreen = () => {
   const pSettings = useRecoilValue(projectSettingsState);

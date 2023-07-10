@@ -1,3 +1,9 @@
+import { useFormik } from 'formik';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import * as yup from 'yup';
+
 import {
   Alert,
   Box,
@@ -6,14 +12,11 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+
 import TopBar from 'components/header';
-import { useFormik } from 'formik';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
-import * as yup from 'yup';
 
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);

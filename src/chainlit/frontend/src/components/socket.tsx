@@ -1,6 +1,12 @@
 import { wsEndpoint } from 'api';
+import { deepEqual } from 'helpers/object';
 import { memo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import io from 'socket.io-client';
+
+import { useAuth } from 'hooks/auth';
+
+import { IAction, actionState } from 'state/action';
 import {
   IMessage,
   IToken,
@@ -10,13 +16,9 @@ import {
   sessionState,
   tokenCountState
 } from 'state/chat';
-import { userEnvState } from 'state/user';
-import { useAuth } from 'hooks/auth';
-import io from 'socket.io-client';
 import { IElement, elementState } from 'state/element';
-import { IAction, actionState } from 'state/action';
-import { deepEqual } from 'helpers/object';
 import { projectSettingsState } from 'state/project';
+import { userEnvState } from 'state/user';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;

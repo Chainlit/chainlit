@@ -1,9 +1,11 @@
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import MessageContent from './content';
-import { ITextElement } from 'state/element';
 import { RecoilRoot } from 'recoil';
+
+import { ITextElement } from 'state/element';
+
+import MessageContent from './content';
 
 it('renders the message content', () => {
   const { getByText } = render(

@@ -1,7 +1,10 @@
-import { Button, Box, Tooltip } from '@mui/material';
-import { Logo } from './logo';
 import { useRecoilValue } from 'recoil';
+
+import { Box, Button, Tooltip } from '@mui/material';
+
 import { projectSettingsState } from 'state/project';
+
+import { Logo } from './logo';
 
 export default function Badge() {
   const pSettings = useRecoilValue(projectSettingsState);

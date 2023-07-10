@@ -1,9 +1,12 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { INestedMessage } from 'state/chat';
-import GreyButton from 'components/greyButton';
 import { useRecoilValue } from 'recoil';
+
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
+
+import GreyButton from 'components/greyButton';
+
+import { INestedMessage } from 'state/chat';
 import { settingsState } from 'state/settings';
 
 interface Props {

@@ -1,7 +1,9 @@
-import { IconButton } from '@mui/material';
 import { useState } from 'react';
-import UserMenu from './menu';
+
+import { IconButton } from '@mui/material';
+
 import UserAvatar from './avatar';
+import UserMenu from './menu';
 
 export default function UserButton() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
