@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
 from langchain.callbacks.streaming_aiter_final_only import (
-    AsyncFinalIteratorCallbackHandler as BaseAsyncFinalIteratorCallbackHandler,
+    DEFAULT_ANSWER_PREFIX_TOKENS,
+    AsyncFinalIteratorCallbackHandler,
 )
 from langchain.schema import (
     AgentAction,
@@ -53,19 +54,58 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # Should we stream the final answer?
+    stream_final_answer: bool = False
+    # Token sequence that prefixes the answer
+    answer_prefix_tokens: List[str]
+    # Ignore white spaces and new lines when comparing answer_prefix_tokens to last tokens? (to determine if answer has been reached)
+    strip_tokens: bool
+    # Should answer prefix itself also be streamed?
+    stream_prefix: bool
 
     raise_error = True
 
     # We want to handler to be called on every message
     always_verbose: bool = True
 
-    def __init__(self) -> None:
+    # Expose Langchain final answer streaming methods
+    append_to_last_tokens = AsyncFinalIteratorCallbackHandler.append_to_last_tokens
+    check_if_answer_reached = AsyncFinalIteratorCallbackHandler.check_if_answer_reached
+
+    def __init__(
+        self,
+        *,
+        answer_prefix_tokens: Optional[List[str]] = None,
+        strip_tokens: bool = True,
+        stream_prefix: bool = False,
+    ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
         self.llm_settings = None
         self.sequence = []
         self.last_prompt = None
         self.stream = None
+
+        # Langchain final answer streaming logic
+        if answer_prefix_tokens is None:
+            self.answer_prefix_tokens = DEFAULT_ANSWER_PREFIX_TOKENS
+        else:
+            self.answer_prefix_tokens = answer_prefix_tokens
+        if strip_tokens:
+            self.answer_prefix_tokens_stripped = [
+                token.strip() for token in self.answer_prefix_tokens
+            ]
+        else:
+            self.answer_prefix_tokens_stripped = self.answer_prefix_tokens
+        self.last_tokens = [""] * len(self.answer_prefix_tokens)
+        self.last_tokens_stripped = [""] * len(self.answer_prefix_tokens)
+        self.strip_tokens = strip_tokens
+        self.stream_prefix = stream_prefix
+        self.answer_reached = False
+
+        # Our own final answer streaming logic
+        self.final_stream = None
+        self.has_streamed_final_answer = False
 
     def end_stream(self):
         self.stream = None
@@ -124,9 +164,11 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         )
         self.stream = streamed_message
 
-    def send_token(self, token: str):
-        if self.stream:
-            run_sync(self.stream.stream_token(token))
+    def send_token(self, token: str, final: bool = False):
+        stream = self.final_stream if final else self.stream
+        if stream:
+            run_sync(stream.stream_token(token))
+            self.has_streamed_final_answer = final
 
     def add_message(self, message, prompt: str = None, error=False):
         author, indent, llm_settings = self.get_message_params()
@@ -177,9 +219,19 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         self.add_prompt(prompt, llm_settings)
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        self.append_to_last_tokens(token)
+
         if not self.stream:
             self.start_stream()
         self.send_token(token)
+
+        if self.answer_reached:
+            if not self.final_stream:
+                self.final_stream = Message(author=config.ui.name, content="")
+            self.send_token(token, final=True)
+
+        if self.check_if_answer_reached():
+            self.answer_reached = True
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
@@ -276,9 +328,11 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         )
         self.stream = streamed_message
 
-    async def send_token(self, token: str):
-        if self.stream:
-            await self.stream.stream_token(token)
+    async def send_token(self, token: str, final: bool = False):
+        stream = self.final_stream if final else self.stream
+        if stream:
+            await stream.stream_token(token)
+            self.has_streamed_final_answer = final
 
     async def add_message(self, message, prompt: str = None, error=False):
         author, indent, llm_settings = self.get_message_params()
@@ -327,9 +381,19 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         self.add_prompt(prompt, llm_settings)
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        self.append_to_last_tokens(token)
+
         if not self.stream:
             await self.start_stream()
         await self.send_token(token)
+
+        if self.answer_reached:
+            if not self.final_stream:
+                self.final_stream = Message(author=config.ui.name, content="")
+            await self.send_token(token, final=True)
+
+        if self.check_if_answer_reached():
+            self.answer_reached = True
 
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
@@ -401,43 +465,3 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_agent_finish(self, finish: AgentFinish, **kwargs: Any) -> None:
         """Run on agent end."""
         pass
-
-
-class AsyncLangchainFinalIteratorCallbackHandler(
-    BaseAsyncFinalIteratorCallbackHandler, AsyncLangchainCallbackHandler
-):
-    def __init__(self, *args, **kwargs):
-        BaseAsyncFinalIteratorCallbackHandler.__init__(self, *args, **kwargs)
-        AsyncLangchainCallbackHandler.__init__(self)
-
-        self.final_stream = Message(author=config.ui.name, content="")
-        self.has_streamed_final_answer = False
-
-    async def on_llm_start(
-        self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
-    ) -> None:
-        await BaseAsyncFinalIteratorCallbackHandler.on_llm_start(
-            self, serialized, prompts, **kwargs
-        )
-        await AsyncLangchainCallbackHandler.on_llm_start(
-            self, serialized, prompts, **kwargs
-        )
-
-    async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        if self.answer_reached and self.final_stream:
-            self.has_streamed_final_answer = True
-            await self.final_stream.stream_token(token)
-
-        await BaseAsyncFinalIteratorCallbackHandler.on_llm_new_token(
-            self, token, **kwargs
-        )
-        await AsyncLangchainCallbackHandler.on_llm_new_token(self, token, **kwargs)
-
-    async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        await BaseAsyncFinalIteratorCallbackHandler.on_llm_end(self, response, **kwargs)
-        await AsyncLangchainCallbackHandler.on_llm_end(self, response, **kwargs)
-
-
-AsyncLangchainFinalIteratorCallbackHandler.__init__.__doc__ = (
-    BaseAsyncFinalIteratorCallbackHandler.__init__.__doc__
-)
