@@ -1,9 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
-from langchain.callbacks.streaming_aiter_final_only import (
-    DEFAULT_ANSWER_PREFIX_TOKENS,
-    AsyncFinalIteratorCallbackHandler,
-)
 from langchain.schema import (
     AgentAction,
     AgentFinish,
@@ -18,6 +14,7 @@ from chainlit.types import LLMSettings
 from chainlit.sync import run_sync
 
 IGNORE_LIST = ["AgentExecutor"]
+DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
 
 def get_llm_settings(invocation_params: Union[Dict, None]):
@@ -68,10 +65,6 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     # We want to handler to be called on every message
     always_verbose: bool = True
 
-    # Expose Langchain final answer streaming methods
-    append_to_last_tokens = AsyncFinalIteratorCallbackHandler.append_to_last_tokens
-    check_if_answer_reached = AsyncFinalIteratorCallbackHandler.check_if_answer_reached
-
     def __init__(
         self,
         *,
@@ -108,6 +101,19 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.stream_final_answer = stream_final_answer
         self.final_stream = None
         self.has_streamed_final_answer = False
+
+    def append_to_last_tokens(self, token: str) -> None:
+        self.last_tokens.append(token)
+        self.last_tokens_stripped.append(token.strip())
+        if len(self.last_tokens) > len(self.answer_prefix_tokens):
+            self.last_tokens.pop(0)
+            self.last_tokens_stripped.pop(0)
+
+    def check_if_answer_reached(self) -> bool:
+        if self.strip_tokens:
+            return self.last_tokens_stripped == self.answer_prefix_tokens_stripped
+        else:
+            return self.last_tokens == self.answer_prefix_tokens
 
     def end_stream(self):
         self.stream = None
