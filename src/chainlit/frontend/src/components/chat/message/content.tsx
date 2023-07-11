@@ -8,14 +8,14 @@ import Code from 'components/Code';
 import ElementRef from 'components/element/ref';
 
 import { IAction } from 'state/action';
-import { IElements } from 'state/element';
+import { IDisplayElement } from 'state/element';
 
 import InlinedElements from './inlined';
 
 interface Props {
   id?: string;
   content?: string;
-  elements: IElements;
+  elements: IDisplayElement[];
   actions: IAction[];
   language?: string;
   authorIsUser?: boolean;
@@ -37,9 +37,7 @@ const isGlobalMatch = (forIds: string[] | undefined) => {
 };
 
 function prepareContent({ id, elements, actions, content, language }: Props) {
-  const elementNames = elements
-    .filter((e) => e.type !== 'avatar')
-    .map((e) => e.name);
+  const elementNames = elements.map((e) => e.name);
 
   // Sort by descending length to avoid matching substrings
   elementNames.sort((a, b) => b.length - a.length);
@@ -56,10 +54,10 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   });
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedElements: IElements = elements.filter(
+  const inlinedElements = elements.filter(
     (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
   );
-  const refElements: IElements = [];
+  const refElements: IDisplayElement[] = [];
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {

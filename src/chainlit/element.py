@@ -27,7 +27,9 @@ class Element:
     type: ElementType
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
     display: ElementDisplay = "side"
-    # The URL of the element if already hosted somehwere else.
+    # Controls the initial drawer width of the element when the display is set to "side"
+    drawer_width: int = 400
+    # The URL of the element if already hosted somewhere else.
     url: str = None
     # The local path of the element.
     path: str = None
@@ -39,6 +41,8 @@ class Element:
     temp_id: str = None
     # The ID of the message this element is associated with.
     for_ids: List[str] = None
+    # Can the element be persisted
+    persistable: bool = True
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -56,6 +60,7 @@ class Element:
             "url": self.url,
             "name": self.name,
             "display": self.display,
+            "drawerWidth": self.drawer_width,
             "size": getattr(self, "size", None),
             "language": getattr(self, "language", None),
             "forIds": getattr(self, "for_ids", None),
@@ -107,7 +112,7 @@ class Element:
             self.for_ids.append(for_id)
 
         # We have a client, persist the element
-        if self.emitter.db_client:
+        if self.emitter.db_client and self.persistable:
             element = await self.persist(self.emitter.db_client)
             self.id = element and element.get("id")
 
@@ -290,3 +295,239 @@ class Video(Element):
 @dataclass
 class File(Element):
     type: ElementType = "file"
+
+
+@dataclass
+class ContainerElement:
+    def to_dict(self) -> dict[str, Any]:
+        pass
+
+
+@dataclass
+class InputWidget(ContainerElement):
+    key: str or int = None
+    label: str = None
+
+    def __post_init__(self) -> None:
+        if not self.key:
+            raise ValueError("Must provide key to load InputWidget")
+
+        self.emitter = get_emitter()
+        self.emitter.set_setting(self.key, self.initial_value)
+
+
+@dataclass
+class Container(Element):
+    """Useful to create a container where you can display multiple other elements."""
+
+    type: ElementType = "container"
+    content: List[ContainerElement] = Field(default_factory=list, exclude=True)
+
+    def __init__(
+        self,
+        name: str,
+        content: List[ContainerElement],
+        display: ElementDisplay = "side",
+    ) -> None:
+        self.persistable = False
+        self.name = name
+        self.display = display
+        self.content = content
+        super().__post_init__()
+
+    async def preprocess_content(self):
+        # store stringified json in content so that it's correctly stored in the database
+        self.content = [
+            container_element.to_dict() for container_element in self.content
+        ]
+
+
+@dataclass
+class Checkbox(InputWidget):
+    """Useful to create a checkbox input in the settings element."""
+
+    type: ElementType = "checkbox"
+    initial: bool = False
+
+    def __init__(self, key: str or int, label: str, initial: bool = False) -> None:
+        self.key = key
+        self.label = label
+        self.initial = initial
+        self.initial_value = initial
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial": self.initial,
+        }
+
+
+@dataclass
+class Radio(InputWidget):
+    """Useful to create a radio input in the settings element."""
+
+    type: ElementType = "radio"
+    options: List[str] = Field(default_factory=list, exclude=True)
+    initial_index: int = 0
+
+    def __init__(
+        self, key: str or int, label: str, options: List[str], initial_index: int = 0
+    ) -> None:
+        self.key = key
+        self.label = label
+        self.options = options
+        self.initial_index = initial_index
+        self.initial_value = options[initial_index]
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial_index": self.initial_index,
+            "options": self.options,
+        }
+
+
+@dataclass
+class SelectBox(InputWidget):
+    """Useful to create a selectbox input in the settings element."""
+
+    type: ElementType = "selectbox"
+    options: List[str] = Field(default_factory=list, exclude=True)
+    initial_index: int = 0
+
+    def __init__(
+        self, key: str or int, label: str, options: List[str], initial_index: int = 0
+    ) -> None:
+        self.key = key
+        self.label = label
+        self.options = options
+        self.initial_index = initial_index
+        self.initial_value = options[initial_index]
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial_index": self.initial_index,
+            "options": self.options,
+        }
+
+
+@dataclass
+class Slider(InputWidget):
+    """Useful to create a slider input in the settings element."""
+
+    type: ElementType = "slider"
+    initial: Union[int, float] = 1
+    min: float = 0
+    max: float = 10
+    step: float = 1
+
+    def __init__(
+        self,
+        key: str or int,
+        label: str,
+        initial: float = None,
+        min: float = 0,
+        max: float = 10,
+        step: float = 1,
+    ) -> None:
+        self.key = key
+        self.label = label
+        self.initial = initial
+        self.min = min
+        self.max = max
+        self.step = step
+        self.initial_value = initial
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial": self.initial,
+            "min": self.min,
+            "max": self.max,
+            "step": self.step,
+        }
+
+
+@dataclass
+class TextInput(InputWidget):
+    """Useful to create a text input in the settings element."""
+
+    type: ElementType = "textinput"
+    initial: str = None
+    placeholder: str = None
+    max_chars: int = None
+
+    def __init__(
+        self,
+        key: str or int,
+        label: str,
+        initial: str = None,
+        placeholder: str = None,
+        max_chars: int = None,
+    ) -> None:
+        self.key = key
+        self.label = label
+        self.initial = initial
+        self.placeholder = placeholder
+        self.max_chars = max_chars
+        self.initial_value = initial
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial": self.initial,
+            "placeholder": self.placeholder,
+            "max_chars": self.max_chars,
+        }
+
+
+@dataclass
+class NumberInput(InputWidget):
+    """Useful to create a number input in the settings element."""
+
+    type: ElementType = "numberinput"
+    initial: float = None
+    placeholder: str = None
+    decimal: bool = False
+
+    def __init__(
+        self,
+        key: str or int,
+        label: str,
+        initial: float = None,
+        placeholder: str = None,
+        decimal: bool = False,
+    ) -> None:
+        self.key = key
+        self.label = label
+        self.initial = initial
+        self.placeholder = placeholder
+        self.decimal = decimal
+        self.initial_value = initial
+        super().__post_init__()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "key": self.key,
+            "label": self.label,
+            "initial": self.initial,
+            "placeholder": self.placeholder,
+            "decimal": self.decimal,
+        }

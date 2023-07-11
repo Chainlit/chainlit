@@ -4,13 +4,13 @@ import { Box } from '@mui/material';
 
 import { IAction } from 'state/action';
 import { IMessage, INestedMessage } from 'state/chat';
-import { IElements } from 'state/element';
+import { IDisplayElement } from 'state/element';
 
 import Messages from './messages';
 
 interface Props {
   messages: IMessage[];
-  elements: IElements;
+  elements: IDisplayElement[];
   actions: IAction[];
   autoScroll?: boolean;
   setAutoSroll?: (autoScroll: boolean) => void;

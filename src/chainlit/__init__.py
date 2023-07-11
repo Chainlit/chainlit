@@ -34,6 +34,13 @@ from chainlit.element import (
     TaskStatus,
     Text,
     Video,
+    Checkbox,
+    Radio,
+    Slider,
+    SelectBox,
+    TextInput,
+    NumberInput,
+    Container,
 )
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
 from chainlit.user_session import user_session
@@ -160,6 +167,14 @@ __all__ = [
     "TaskList",
     "TaskStatus",
     "Video",
+    "File",
+    "Container",
+    "Checkbox",
+    "Radio",
+    "Slider",
+    "SelectBox",
+    "TextInput",
+    "NumberInput",
     "Message",
     "ErrorMessage",
     "AskUserMessage",

@@ -3,10 +3,10 @@ import { useSetRecoilState } from 'recoil';
 
 import { Link } from '@mui/material';
 
-import { IElement, sideViewState } from 'state/element';
+import { IDisplayElement, sideViewState } from 'state/element';
 
 interface Props {
-  element: IElement;
+  element: IDisplayElement;
 }
 
 export default function ElementRef({ element }: Props) {

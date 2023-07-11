@@ -2,7 +2,7 @@ import { IPageInfo, IPagination } from 'components/dataset/table';
 
 import { IChat, ILLMSettings } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
-import { IElement } from 'state/element';
+import { IDisplayElement } from 'state/element';
 import { IMember, Role } from 'state/user';
 
 const devServer = 'http://127.0.0.1:8000';
@@ -134,7 +134,7 @@ export class ChainlitClient {
   getElement = async (
     conversationId: number | string,
     elementId: number | string
-  ): Promise<IElement> => {
+  ): Promise<IDisplayElement> => {
     const res = await fetch(
       `${httpEndpoint}/project/conversation/${conversationId}/element/${elementId}`,
       {

@@ -8,7 +8,7 @@ import DetailsButton from 'components/chat/message/detailsButton';
 
 import { IAction } from 'state/action';
 import { INestedMessage, highlightMessage } from 'state/chat';
-import { IElements } from 'state/element';
+import { IDisplayElement } from 'state/element';
 import { settingsState } from 'state/settings';
 
 import Author, { authorBoxWidth } from './author';
@@ -19,7 +19,7 @@ import UploadButton from './uploadButton';
 
 interface Props {
   message: INestedMessage;
-  elements: IElements;
+  elements: IDisplayElement[];
   actions: IAction[];
   indent: number;
   showAvatar?: boolean;

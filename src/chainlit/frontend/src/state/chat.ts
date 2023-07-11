@@ -1,7 +1,7 @@
-import { atom } from 'recoil';
+import { SerializableParam, atom, atomFamily } from 'recoil';
 import { Socket } from 'socket.io-client';
 
-import { IElement } from './element';
+import { IDisplayElement } from './element';
 import { IMember } from './user';
 
 export interface ILLMSettings {
@@ -19,7 +19,7 @@ export interface IChat {
   createdAt: number | string;
   author?: IMember;
   messages: IMessage[];
-  elements: IElement[];
+  elements: IDisplayElement[];
 }
 
 export interface IMessage {
@@ -114,4 +114,9 @@ export const highlightMessage = atom<
 >({
   key: 'HighlightMessage',
   default: null
+});
+
+export const sessionSettingsFamilyState = atomFamily<any, SerializableParam>({
+  key: 'SessionSettings',
+  default: undefined
 });

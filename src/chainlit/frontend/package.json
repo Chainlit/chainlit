@@ -9,7 +9,7 @@
     "test": "jest",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx",
-    "format": "prettier --config .prettierrc 'src/**/*.{ts,tsx}' --write"
+    "format": "prettier --config .prettierrc src/**/*.{ts,tsx} --write"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.0.1",

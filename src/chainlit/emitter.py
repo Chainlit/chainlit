@@ -130,3 +130,9 @@ class ChainlitEmitter:
         return self.emit(
             "stream_token", {"id": id, "token": token, "isSequence": is_sequence}
         )
+
+    def set_setting(self, key: str or int, value: any):
+        if "settings" not in self.session:
+            self.session["settings"] = {}
+
+        self.session["settings"][key] = value

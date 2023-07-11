@@ -36,6 +36,7 @@ model Element {
   url            String
   name           String
   display        String
+  drawerWidth    Int
   size           String?
   language       String?
   forIds         String?

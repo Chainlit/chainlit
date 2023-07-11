@@ -7,38 +7,32 @@ import { Box, Typography } from '@mui/material';
 import { useQuery } from 'hooks/query';
 
 import { clientState } from 'state/client';
-import {
-  IAudioElement,
-  IElement,
-  IFileElement,
-  IImageElement,
-  IPdfElement,
-  ITextElement,
-  IVideoElement,
-  elementState
-} from 'state/element';
+import { IDisplayElement, elementState } from 'state/element';
 
 import AudioElement from './audio';
+import Container from './container';
 import FileElement from './file';
 import ImageElement from './image';
 import PDFElement from './pdf';
 import TextElement from './text';
 import VideoElement from './video';
 
-export const renderElement = (element: IElement): JSX.Element | null => {
+export const renderElement = (element: IDisplayElement): JSX.Element | null => {
   switch (element.type) {
     case 'file':
-      return <FileElement element={element as IFileElement} />;
+      return <FileElement element={element} />;
     case 'image':
-      return <ImageElement element={element as IImageElement} />;
+      return <ImageElement element={element} />;
     case 'text':
-      return <TextElement element={element as ITextElement} />;
+      return <TextElement element={element} />;
     case 'pdf':
-      return <PDFElement element={element as IPdfElement} />;
+      return <PDFElement element={element} />;
     case 'audio':
-      return <AudioElement element={element as IAudioElement} />;
+      return <AudioElement element={element} />;
     case 'video':
-      return <VideoElement element={element as IVideoElement} />;
+      return <VideoElement element={element} />;
+    case 'container':
+      return <Container element={element} />;
     default:
       return null;
   }
@@ -49,7 +43,7 @@ const ElementView = () => {
   const query = useQuery();
   const elements = useRecoilValue(elementState);
   const client = useRecoilValue(clientState);
-  const [element, setElement] = useState<IElement | null>(null);
+  const [element, setElement] = useState<IDisplayElement | null>(null);
   const [error, setError] = useState<string | undefined>();
 
   const conversationId = query.get('conversation');
