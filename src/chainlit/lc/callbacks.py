@@ -14,6 +14,7 @@ from chainlit.types import LLMSettings
 from chainlit.sync import run_sync
 
 IGNORE_LIST = ["AgentExecutor"]
+DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
 
 def get_llm_settings(invocation_params: Union[Dict, None]):
@@ -50,19 +51,69 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # Should we stream the final answer?
+    stream_final_answer: bool = False
+    # Token sequence that prefixes the answer
+    answer_prefix_tokens: List[str]
+    # Ignore white spaces and new lines when comparing answer_prefix_tokens to last tokens? (to determine if answer has been reached)
+    strip_tokens: bool
+    # Should answer prefix itself also be streamed?
+    stream_prefix: bool
 
     raise_error = True
 
     # We want to handler to be called on every message
     always_verbose: bool = True
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        answer_prefix_tokens: Optional[List[str]] = None,
+        strip_tokens: bool = True,
+        stream_prefix: bool = False,
+        stream_final_answer: bool = False,
+    ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
         self.llm_settings = None
         self.sequence = []
         self.last_prompt = None
         self.stream = None
+
+        # Langchain final answer streaming logic
+        if answer_prefix_tokens is None:
+            self.answer_prefix_tokens = DEFAULT_ANSWER_PREFIX_TOKENS
+        else:
+            self.answer_prefix_tokens = answer_prefix_tokens
+        if strip_tokens:
+            self.answer_prefix_tokens_stripped = [
+                token.strip() for token in self.answer_prefix_tokens
+            ]
+        else:
+            self.answer_prefix_tokens_stripped = self.answer_prefix_tokens
+        self.last_tokens = [""] * len(self.answer_prefix_tokens)
+        self.last_tokens_stripped = [""] * len(self.answer_prefix_tokens)
+        self.strip_tokens = strip_tokens
+        self.stream_prefix = stream_prefix
+        self.answer_reached = False
+
+        # Our own final answer streaming logic
+        self.stream_final_answer = stream_final_answer
+        self.final_stream = None
+        self.has_streamed_final_answer = False
+
+    def append_to_last_tokens(self, token: str) -> None:
+        self.last_tokens.append(token)
+        self.last_tokens_stripped.append(token.strip())
+        if len(self.last_tokens) > len(self.answer_prefix_tokens):
+            self.last_tokens.pop(0)
+            self.last_tokens_stripped.pop(0)
+
+    def check_if_answer_reached(self) -> bool:
+        if self.strip_tokens:
+            return self.last_tokens_stripped == self.answer_prefix_tokens_stripped
+        else:
+            return self.last_tokens == self.answer_prefix_tokens
 
     def end_stream(self):
         self.stream = None
@@ -121,9 +172,11 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         )
         self.stream = streamed_message
 
-    def send_token(self, token: str):
-        if self.stream:
-            run_sync(self.stream.stream_token(token))
+    def send_token(self, token: str, final: bool = False):
+        stream = self.final_stream if final else self.stream
+        if stream:
+            run_sync(stream.stream_token(token))
+            self.has_streamed_final_answer = final
 
     def add_message(self, message, prompt: str = None, error=False):
         author, indent, llm_settings = self.get_message_params()
@@ -178,6 +231,18 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             self.start_stream()
         self.send_token(token)
 
+        if not self.stream_final_answer:
+            return
+
+        self.append_to_last_tokens(token)
+
+        if self.answer_reached:
+            if not self.final_stream:
+                self.final_stream = Message(author=config.ui.name, content="")
+            self.send_token(token, final=True)
+        else:
+            self.answer_reached = self.check_if_answer_reached()
+
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
         if response.llm_output is not None:
@@ -187,6 +252,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
                     run_sync(
                         self.emitter.update_token_count(token_usage["total_tokens"])
                     )
+        if self.final_stream:
+            run_sync(self.final_stream.send())
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -273,9 +340,11 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         )
         self.stream = streamed_message
 
-    async def send_token(self, token: str):
-        if self.stream:
-            await self.stream.stream_token(token)
+    async def send_token(self, token: str, final: bool = False):
+        stream = self.final_stream if final else self.stream
+        if stream:
+            await stream.stream_token(token)
+            self.has_streamed_final_answer = final
 
     async def add_message(self, message, prompt: str = None, error=False):
         author, indent, llm_settings = self.get_message_params()
@@ -328,6 +397,18 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             await self.start_stream()
         await self.send_token(token)
 
+        if not self.stream_final_answer:
+            return
+
+        self.append_to_last_tokens(token)
+
+        if self.answer_reached:
+            if not self.final_stream:
+                self.final_stream = Message(author=config.ui.name, content="")
+            await self.send_token(token, final=True)
+        else:
+            self.answer_reached = self.check_if_answer_reached()
+
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
         if response.llm_output is not None:
@@ -335,6 +416,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
                     await self.emitter.update_token_count(token_usage["total_tokens"])
+        if self.final_stream:
+            await self.final_stream.send()
 
     async def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
