@@ -229,9 +229,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             if not self.final_stream:
                 self.final_stream = Message(author=config.ui.name, content="")
             self.send_token(token, final=True)
-
-        if self.check_if_answer_reached():
-            self.answer_reached = True
+        else:
+            self.answer_reached = self.check_if_answer_reached()
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
@@ -391,9 +390,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             if not self.final_stream:
                 self.final_stream = Message(author=config.ui.name, content="")
             await self.send_token(token, final=True)
-
-        if self.check_if_answer_reached():
-            self.answer_reached = True
+        else:
+            self.answer_reached = self.check_if_answer_reached()
 
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.pop_prompt()
