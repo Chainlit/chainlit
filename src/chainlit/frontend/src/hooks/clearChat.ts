@@ -14,6 +14,7 @@ export default function useClearChat() {
 
   return () => {
     session?.socket.disconnect();
+    if (session) session.socket.auth = {};
     session?.socket.connect();
     setMessages([]);
     setElements([]);
