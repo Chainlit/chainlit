@@ -416,13 +416,16 @@ async def connection_successful(sid):
 
 @socket.on("disconnect")
 async def disconnect(sid):
-    await asyncio.sleep(45)  # 45s default timeout
-    if session := Session.get(sid):
-        # Clean up the user session
-        if session.id in user_sessions:
-            user_sessions.pop(session.id)
-        # Clean up the session
-        session.delete()
+    async def disconnect_on_timeout(sid):
+        await asyncio.sleep(config.project.session_timeout)
+        if session := Session.get(sid):
+            # Clean up the user session
+            if session.id in user_sessions:
+                user_sessions.pop(session.id)
+            # Clean up the session
+            session.delete()
+
+    asyncio.ensure_future(disconnect_on_timeout(sid))
 
 
 @socket.on("stop")
