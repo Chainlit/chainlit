@@ -2,6 +2,7 @@ import { Stack } from '@mui/material';
 
 import InlinedActionList from 'components/action/inlined';
 import InlinedAudioList from 'components/element/inlined/audios';
+import InlinedFileList from 'components/element/inlined/files';
 import InlinedImageList from 'components/element/inlined/images';
 import InlinedPDFList from 'components/element/inlined/pdfs';
 import InlinedTextList from 'components/element/inlined/texts';
@@ -58,6 +59,9 @@ export default function InlinedElements({ elements, actions }: Props) {
       ) : null}
       {elementsByType.video?.length ? (
         <InlinedVideoList items={elementsByType.video} />
+      ) : null}
+      {elementsByType.file?.length ? (
+        <InlinedFileList items={elementsByType.file} />
       ) : null}
       {actions.length ? <InlinedActionList actions={actions} /> : null}
     </Stack>

@@ -7,7 +7,8 @@ export type ElementType =
   | 'avatar'
   | 'tasklist'
   | 'audio'
-  | 'video';
+  | 'video'
+  | 'file';
 
 export type AllElements =
   | IImageElement
@@ -16,7 +17,8 @@ export type AllElements =
   | IAvatarElement
   | ITasklistElement
   | IAudioElement
-  | IVideoElement;
+  | IVideoElement
+  | IFileElement;
 
 export type IElementSize = 'small' | 'medium' | 'large';
 
@@ -61,6 +63,11 @@ export interface IVideoElement extends IElement {
   type: 'video';
   content?: ArrayBuffer;
   size?: IElementSize;
+}
+
+export interface IFileElement extends IElement {
+  type: 'file';
+  content?: ArrayBuffer;
 }
 
 export interface ITasklistElement extends IElement {

@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { Box, Link, Stack, Typography } from '@mui/material';
+import { Link, Stack, Typography } from '@mui/material';
 
 import Code from 'components/Code';
 import ElementRef from 'components/element/ref';
