@@ -10,6 +10,7 @@ import { clientState } from 'state/client';
 import {
   IAudioElement,
   IElement,
+  IFileElement,
   IImageElement,
   IPdfElement,
   ITextElement,
@@ -18,6 +19,7 @@ import {
 } from 'state/element';
 
 import AudioElement from './audio';
+import FileElement from './file';
 import ImageElement from './image';
 import PDFElement from './pdf';
 import TextElement from './text';
@@ -25,6 +27,8 @@ import VideoElement from './video';
 
 export const renderElement = (element: IElement): JSX.Element | null => {
   switch (element.type) {
+    case 'file':
+      return <FileElement element={element as IFileElement} />;
     case 'image':
       return <ImageElement element={element as IImageElement} />;
     case 'text':

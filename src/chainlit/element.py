@@ -285,3 +285,8 @@ class Audio(Element):
 class Video(Element):
     type: ElementType = "video"
     size: ElementSize = "medium"
+
+
+@dataclass
+class File(Element):
+    type: ElementType = "file"

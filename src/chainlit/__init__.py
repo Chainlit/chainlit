@@ -24,14 +24,15 @@ from chainlit.types import LLMSettings
 from chainlit.action import Action
 from chainlit.element import (
     Audio,
-    Image,
-    Text,
-    Pdf,
     Avatar,
+    File,
+    Image,
+    Pdf,
     Pyplot,
-    TaskList,
     Task,
+    TaskList,
     TaskStatus,
+    Text,
     Video,
 )
 from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
