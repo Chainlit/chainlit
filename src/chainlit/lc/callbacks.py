@@ -78,6 +78,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         answer_prefix_tokens: Optional[List[str]] = None,
         strip_tokens: bool = True,
         stream_prefix: bool = False,
+        stream_final_answer: bool = False,
     ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
@@ -104,6 +105,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.answer_reached = False
 
         # Our own final answer streaming logic
+        self.stream_final_answer = stream_final_answer
         self.final_stream = None
         self.has_streamed_final_answer = False
 
@@ -219,11 +221,14 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         self.add_prompt(prompt, llm_settings)
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        self.append_to_last_tokens(token)
-
         if not self.stream:
             self.start_stream()
         self.send_token(token)
+
+        if not self.stream_final_answer:
+            return
+
+        self.append_to_last_tokens(token)
 
         if self.answer_reached:
             if not self.final_stream:
@@ -380,11 +385,14 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         self.add_prompt(prompt, llm_settings)
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        self.append_to_last_tokens(token)
-
         if not self.stream:
             await self.start_stream()
         await self.send_token(token)
+
+        if not self.stream_final_answer:
+            return
+
+        self.append_to_last_tokens(token)
 
         if self.answer_reached:
             if not self.final_stream:

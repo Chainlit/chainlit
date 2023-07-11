@@ -15,10 +15,10 @@ async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):
         inputs = input_str
 
     if use_async:
-        callback_handler = AsyncLangchainCallbackHandler()
+        callback_handler = AsyncLangchainCallbackHandler(stream_final_answer=True)
         raw_res = await agent.acall(inputs, callbacks=[callback_handler])
     else:
-        callback_handler = LangchainCallbackHandler()
+        callback_handler = LangchainCallbackHandler(stream_final_answer=True)
         raw_res = await make_async(agent.__call__)(inputs, callbacks=[callback_handler])
 
     if hasattr(agent, "output_keys"):
