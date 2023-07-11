@@ -25,7 +25,14 @@ import asyncio
 
 from chainlit.context import emitter_var, loop_var
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
-from chainlit.session import Session, sessions
+from chainlit.session import (
+    Session,
+    get_session,
+    new_session,
+    restore_session,
+    delete_session,
+    get_session_by_id
+)
 from chainlit.user_session import user_sessions
 from chainlit.client.utils import (
     get_db_client,
@@ -325,17 +332,22 @@ async def serve(path: str):
 # -------------------------------------------------------------------------------
 
 
-def need_session(id: str):
-    """Return the session with the given id."""
+def need_session(key: str):
+    """Return the session with the given key."""
 
-    session = sessions.get(id)
+    session = get_session(key)
     if not session:
         raise ValueError("Session not found")
     return session
 
 
 @socket.on("connect")
-async def connect(sid, environ):
+async def connect(sid, environ, auth):
+    session_id = auth and auth.get('sessionId')
+    if session := get_session_by_id(session_id):
+        restore_session(session, new_key=sid)
+        trace_event("session_restored")
+        return
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
 
@@ -363,21 +375,21 @@ async def connect(sid, environ):
 
     # Function to send a message to this particular session
     def emit_fn(event, data):
-        if sid in sessions:
-            if sessions[sid]["should_stop"]:
-                sessions[sid]["should_stop"] = False
+        if session := get_session(sid):
+            if session["should_stop"]:
+                session["should_stop"] = False
                 raise InterruptedError("Task stopped by user")
         return socket.emit(event, data, to=sid)
 
     # Function to ask the user a question
     def ask_user_fn(data, timeout):
-        if sessions[sid]["should_stop"]:
-            sessions[sid]["should_stop"] = False
-            raise InterruptedError("Task stopped by user")
+        if session := get_session(sid):
+            if session["should_stop"]:
+                session["should_stop"] = False
+                raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
-    session = {
-        "id": sid,
+    session_data = {
         "emit": emit_fn,
         "ask_user": ask_user_fn,
         "auth_client": auth_client,
@@ -386,7 +398,8 @@ async def connect(sid, environ):
         "should_stop": False,
     }  # type: Session
 
-    sessions[sid] = session
+    session = new_session(sid, session_data)
+    await socket.emit("session", data={"sessionId": session["id"]}, to=sid)
 
     trace_event("connection_successful")
     return True
@@ -419,20 +432,19 @@ async def connection_successful(sid):
 
 @socket.on("disconnect")
 async def disconnect(sid):
-    if sid in sessions:
+    await asyncio.sleep(45)  # 45s default timeout
+    if session := get_session(sid):
         # Clean up the session
-        sessions.pop(sid)
-
-    if sid in user_sessions:
-        # Clean up the user session
-        user_sessions.pop(sid)
+        delete_session(sid)
+        if session["id"] in user_sessions:
+            # Clean up the user session
+            user_sessions.pop(session["id"])
 
 
 @socket.on("stop")
 async def stop(sid):
-    if sid in sessions:
+    if session := get_session(sid):
         trace_event("stop_task")
-        session = sessions[sid]
 
         emitter_var.set(ChainlitEmitter(session))
         loop_var.set(asyncio.get_event_loop())
