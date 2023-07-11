@@ -252,6 +252,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
                     run_sync(
                         self.emitter.update_token_count(token_usage["total_tokens"])
                     )
+        if self.final_stream:
+            run_sync(self.final_stream.send())
 
     def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
@@ -414,6 +416,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
                     await self.emitter.update_token_count(token_usage["total_tokens"])
+        if self.final_stream:
+            await self.final_stream.send()
 
     async def on_llm_error(
         self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
