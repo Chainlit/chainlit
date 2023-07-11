@@ -547,3 +547,21 @@ async def call_action(sid, action):
     action = Action(**action)
 
     await process_action(action)
+
+
+@socket.on("settings_change")
+async def change_settings(sid, setting):
+    """Handle an action call from the UI."""
+    session = need_session(sid)
+
+    print(setting)
+
+    key = setting["key"]
+    value = setting["value"]
+
+    if "settings" not in session:
+        session["settings"] = {}
+
+    session["settings"][key] = value
+
+    print(session["settings"])

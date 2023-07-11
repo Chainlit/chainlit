@@ -1,4 +1,4 @@
-import { forwardRef, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { Resizable } from 'react-resizable';
 import { useRecoilState } from 'recoil';
 
@@ -7,6 +7,8 @@ import { Box, BoxProps, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { renderElement } from 'components/element/view';
+
+import { useWidthCalc } from 'hooks/window';
 
 import { sideViewState } from 'state/element';
 
@@ -79,10 +81,25 @@ const SideView = () => {
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
   const [resizeInProgress, setResizeInProgress] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState<number>(400);
+  const windowWidth = useWidthCalc();
 
   const handleResize = (event: any, data: { size: { width: number } }) => {
     setDrawerWidth(data.size.width);
   };
+
+  const minWidth = 100;
+  const maxWidth = useMemo(() => {
+    const halfScreenWidth = Math.floor(windowWidth / 2);
+    return halfScreenWidth > minWidth ? halfScreenWidth : minWidth;
+  }, [windowWidth]);
+
+  // Set initial drawerWidth of element when given
+  useEffect(() => {
+    if (!sideViewElement?.drawerWidth) return;
+    setDrawerWidth(
+      Math.min(Math.max(sideViewElement.drawerWidth, minWidth), maxWidth)
+    );
+  }, [windowWidth, sideViewElement]);
 
   const element = useMemo(() => {
     if (sideViewElement) {
@@ -101,8 +118,8 @@ const SideView = () => {
       resizeHandles={['w']}
       handle={<Handle />}
       axis="x"
-      minConstraints={[100, 0]} // Minimum width of 100px and no limit on height.
-      maxConstraints={[1000, 0]} // Maximum width of 1000px and no limit on height.
+      minConstraints={[minWidth, 0]} // Minimum width of 100px and no limit on height.
+      maxConstraints={[maxWidth, 0]} // Maximum width of windowWidth / 2 and no limit on height.
     >
       <Drawer open={!!sideViewElement} width={drawerWidth}>
         <Stack direction="row" alignItems="center">

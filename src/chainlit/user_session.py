@@ -27,6 +27,8 @@ class UserSession:
         user_session["user_infos"] = emitter.session["auth_client"].user_infos
         if "agent" in emitter.session:
             user_session["agent"] = emitter.session["agent"]
+        if "settings" in emitter.session:
+            user_session["settings"] = emitter.session["settings"]
 
         return user_session.get(key)
 

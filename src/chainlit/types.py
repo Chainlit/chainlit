@@ -4,7 +4,21 @@ from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"
+    "image",
+    "avatar",
+    "text",
+    "pdf",
+    "tasklist",
+    "audio",
+    "video",
+    "file",
+    "settings",
+    "checkbox",
+    "radio",
+    "slider",
+    "selectbox",
+    "textinput",
+    "numberinput",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]

@@ -9,10 +9,10 @@ import InlinedTextList from 'components/element/inlined/texts';
 import InlinedVideoList from 'components/element/inlined/videos';
 
 import { IAction } from 'state/action';
-import { AllElements, ElementType, IElements } from 'state/element';
+import { ElementTypes, IDisplayElement } from 'state/element';
 
 interface Props {
-  elements: IElements;
+  elements: IDisplayElement[];
   actions: IAction[];
 }
 
@@ -27,19 +27,19 @@ export default function InlinedElements({ elements, actions }: Props) {
    * and get an array of IImageElement.
    */
   const elementsByType = elements.reduce(
-    (acc, el: AllElements) => {
+    (acc, el: IDisplayElement) => {
       if (!acc[el.type]) {
         acc[el.type] = [];
       }
       const array = acc[el.type] as Extract<
-        AllElements,
+        IDisplayElement,
         { type: typeof el.type }
       >[];
       array.push(el);
       return acc;
     },
     {} as {
-      [K in ElementType]: Extract<AllElements, { type: K }>[];
+      [K in ElementTypes]: Extract<IDisplayElement, { type: K }>[];
     }
   );
 
