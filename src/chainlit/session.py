@@ -44,6 +44,7 @@ class Session:
         self.auth_client = auth_client
         self.db_client = db_client
         self.should_stop = False
+        self.restored = False
         self.id = token_urlsafe()
 
         sessions_id[self.id] = self
@@ -54,6 +55,7 @@ class Session:
         sessions_sid.pop(self.socket_id, None)
         sessions_sid[new_socket_id] = self
         self.socket_id = new_socket_id
+        self.restored = True
 
     def delete(self):
         """Delete the session."""

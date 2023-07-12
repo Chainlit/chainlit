@@ -19,38 +19,38 @@ from chainlit.logger import logger
 from chainlit.server import socket
 
 
-@socket.on("connect")
-async def connect(sid, environ, auth):
+def restore_existing_session(sid, auth, emit_fn, ask_user_fn):
+    """Restore a session from the sessionId provided by the client."""
+
     session_id = auth and auth.get("sessionId")
     if session := Session.get_by_id(session_id):
         session.restore(new_socket_id=sid)
+        session.emit = emit_fn
+        session.ask_user = ask_user_fn
         trace_event("session_restored")
-        return
-    user_env = environ.get("HTTP_USER_ENV")
-    authorization = environ.get("HTTP_AUTHORIZATION")
+        return True
+    return False
 
-    try:
-        auth_client = await get_auth_client(authorization)
-        db_client = await get_db_client(authorization, auth_client.user_infos)
 
-        # Check user env
-        if config.project.user_env:
-            # Check if requested user environment variables are provided
-            if user_env:
-                user_env = json.loads(user_env)
-                for key in config.project.user_env:
-                    if key not in user_env:
-                        trace_event("missing_user_env")
-                        raise ConnectionRefusedError(
-                            "Missing user environment variable: " + key
-                        )
-            else:
-                raise ConnectionRefusedError("Missing user environment variables")
+def load_user_env(user_env):
+    # Check user env
+    if config.project.user_env:
+        # Check if requested user environment variables are provided
+        if user_env:
+            user_env = json.loads(user_env)
+            for key in config.project.user_env:
+                if key not in user_env:
+                    trace_event("missing_user_env")
+                    raise ConnectionRefusedError(
+                        "Missing user environment variable: " + key
+                    )
+        else:
+            raise ConnectionRefusedError("Missing user environment variables")
+    return user_env
 
-    except ConnectionRefusedError as e:
-        logger.error(f"ConnectionRefusedError: {e}")
-        return False
 
+@socket.on("connect")
+async def connect(sid, environ, auth):
     # Function to send a message to this particular session
     def emit_fn(event, data):
         if session := Session.get(sid):
@@ -66,6 +66,20 @@ async def connect(sid, environ, auth):
                 session.should_stop = False
                 raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
+
+    if restore_existing_session(sid, auth, emit_fn, ask_user_fn):
+        return
+
+    user_env = environ.get("HTTP_USER_ENV")
+    authorization = environ.get("HTTP_AUTHORIZATION")
+
+    try:
+        auth_client = await get_auth_client(authorization)
+        db_client = await get_db_client(authorization, auth_client.user_infos)
+        user_env = load_user_env(user_env)
+    except ConnectionRefusedError as e:
+        logger.error(f"ConnectionRefusedError: {e}")
+        return False
 
     session = Session(
         socket_id=sid,
@@ -85,6 +99,9 @@ async def connect(sid, environ, auth):
 @socket.on("connection_successful")
 async def connection_successful(sid):
     session = Session.require(sid)
+    if session.restored:
+        return
+
     emitter_var.set(ChainlitEmitter(session))
     loop_var.set(asyncio.get_event_loop())
 
