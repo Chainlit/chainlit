@@ -20,6 +20,15 @@ const components = {
     defaultProps: {
       fontWeight: 500
     }
+  },
+  MuiFormHelperText: {
+    defaultProps: {
+      sx: {
+        m: 0,
+        fontWeight: 400,
+        color: grey[500]
+      }
+    }
   }
 };
 
