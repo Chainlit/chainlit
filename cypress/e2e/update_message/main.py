@@ -6,4 +6,5 @@ async def main():
     msg = cl.Message(content="Hello!")
     await msg.send()
     await cl.sleep(2)
-    await msg.update(content="Hello again!")
+    msg.content = "Hello again!"
+    await msg.update()
