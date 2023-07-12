@@ -25,7 +25,7 @@ import asyncio
 
 from chainlit.context import emitter_var, loop_var
 from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
-from chainlit.session import Session, sessions
+from chainlit.session import Session
 from chainlit.user_session import user_sessions
 from chainlit.client.utils import (
     get_db_client,
@@ -325,17 +325,13 @@ async def serve(path: str):
 # -------------------------------------------------------------------------------
 
 
-def need_session(id: str):
-    """Return the session with the given id."""
-
-    session = sessions.get(id)
-    if not session:
-        raise ValueError("Session not found")
-    return session
-
-
 @socket.on("connect")
-async def connect(sid, environ):
+async def connect(sid, environ, auth):
+    session_id = auth and auth.get("sessionId")
+    if session := Session.get_by_id(session_id):
+        session.restore(new_key=sid)
+        trace_event("session_restored")
+        return
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
 
@@ -363,30 +359,30 @@ async def connect(sid, environ):
 
     # Function to send a message to this particular session
     def emit_fn(event, data):
-        if sid in sessions:
-            if sessions[sid]["should_stop"]:
-                sessions[sid]["should_stop"] = False
+        if session := Session.get(sid):
+            if session.should_stop:
+                session.should_stop = False
                 raise InterruptedError("Task stopped by user")
         return socket.emit(event, data, to=sid)
 
     # Function to ask the user a question
     def ask_user_fn(data, timeout):
-        if sessions[sid]["should_stop"]:
-            sessions[sid]["should_stop"] = False
-            raise InterruptedError("Task stopped by user")
+        if session := Session.get(sid):
+            if session.should_stop:
+                session.should_stop = False
+                raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
-    session = {
-        "id": sid,
-        "emit": emit_fn,
-        "ask_user": ask_user_fn,
-        "auth_client": auth_client,
-        "db_client": db_client,
-        "user_env": user_env,
-        "should_stop": False,
-    }  # type: Session
+    session = Session(
+        socket_id=sid,
+        emit=emit_fn,
+        ask_user=ask_user_fn,
+        auth_client=auth_client,
+        db_client=db_client,
+        user_env=user_env,
+    )
 
-    sessions[sid] = session
+    await socket.emit("session", data={"sessionId": session.id}, to=sid)
 
     trace_event("connection_successful")
     return True
@@ -394,14 +390,15 @@ async def connect(sid, environ):
 
 @socket.on("connection_successful")
 async def connection_successful(sid):
-    session = need_session(sid)
+    session = Session.require(sid)
     emitter_var.set(ChainlitEmitter(session))
     loop_var.set(asyncio.get_event_loop())
 
-    if isinstance(
-        session["auth_client"], CloudAuthClient
-    ) and config.project.database in ["local", "custom"]:
-        await session["db_client"].create_user(session["auth_client"].user_infos)
+    if isinstance(session.auth_client, CloudAuthClient) and config.project.database in [
+        "local",
+        "custom",
+    ]:
+        await session.db_client.create_user(session.auth_client.user_infos)
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
@@ -410,36 +407,38 @@ async def connection_successful(sid):
     if config.code.lc_factory:
         """Instantiate the langchain agent and store it in the session."""
         agent = await config.code.lc_factory()
-        session["agent"] = agent
+        session.agent = agent
 
     if config.code.llama_index_factory:
         llama_instance = await config.code.llama_index_factory()
-        session["llama_instance"] = llama_instance
+        session.llama_instance = llama_instance
 
 
 @socket.on("disconnect")
 async def disconnect(sid):
-    if sid in sessions:
-        # Clean up the session
-        sessions.pop(sid)
+    async def disconnect_on_timeout(sid):
+        await asyncio.sleep(config.project.session_timeout)
+        if session := Session.get(sid):
+            # Clean up the user session
+            if session.id in user_sessions:
+                user_sessions.pop(session.id)
+            # Clean up the session
+            session.delete()
 
-    if sid in user_sessions:
-        # Clean up the user session
-        user_sessions.pop(sid)
+    asyncio.ensure_future(disconnect_on_timeout(sid))
 
 
 @socket.on("stop")
 async def stop(sid):
-    if sid in sessions:
+    if session := Session.get(sid):
         trace_event("stop_task")
-        session = sessions[sid]
 
         emitter_var.set(ChainlitEmitter(session))
         loop_var.set(asyncio.get_event_loop())
 
         await Message(author="System", content="Task stopped by the user.").send()
 
-        session["should_stop"] = True
+        session.should_stop = True
 
         if config.code.on_stop:
             await config.code.on_stop()
@@ -455,9 +454,9 @@ async def process_message(session: Session, author: str, input_str: str):
 
         await emitter.task_start()
 
-        if session["db_client"]:
+        if session.db_client:
             # If cloud is enabled, persist the message
-            await session["db_client"].create_message(
+            await session.db_client.create_message(
                 {
                     "author": author,
                     "content": input_str,
@@ -465,8 +464,8 @@ async def process_message(session: Session, author: str, input_str: str):
                 }
             )
 
-        langchain_agent = session.get("agent")
-        llama_instance = session.get("llama_instance")
+        langchain_agent = session.agent
+        llama_instance = session.llama_instance
 
         if langchain_agent:
             from chainlit.lc.agent import run_langchain_agent
@@ -520,8 +519,8 @@ async def process_message(session: Session, author: str, input_str: str):
 @socket.on("ui_message")
 async def message(sid, data):
     """Handle a message sent by the User."""
-    session = need_session(sid)
-    session["should_stop"] = False
+    session = Session.require(sid)
+    session.should_stop = False
 
     input_str = data["content"].strip()
     author = data["author"]
@@ -540,7 +539,7 @@ async def process_action(action: Action):
 @socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
-    session = need_session(sid)
+    session = Session.require(sid)
     emitter_var.set(ChainlitEmitter(session))
     loop_var.set(asyncio.get_event_loop())
 
