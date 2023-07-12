@@ -200,8 +200,8 @@ class Message(MessageBase):
         trace_event("send_message")
         id = await super().send()
 
-        action_coros = [action.send(for_id=str(id)) for action in self.actions]
-        await asyncio.gather(*action_coros)
+        for action in self.actions:
+            await action.send(for_id=str(id))
 
         for element in self.elements:
             await element.send(for_id=str(id))
