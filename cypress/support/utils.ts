@@ -50,15 +50,22 @@ export async function runTest(test: string) {
         console.log("Running with local db");
       }
 
-      try {
-        childProcess = await runChainlit(testDir, file, localDb);
-        runSpec(test);
-      } finally {
-        if (childProcess) {
-          kill(childProcess.pid);
-          childProcess.kill("SIGINT");
+      return new Promise(async (resolve, reject) => {
+        try {
+          childProcess = await runChainlit(testDir, file, localDb);
+          runSpec(test);
+        } finally {
+          kill(childProcess.pid, "SIGKILL", function (err) {
+            if (err) {
+              console.log("Error while trying to kill process");
+              reject(err);
+            } else {
+              console.log("Process killed successfully");
+              resolve(true);
+            }
+          });
         }
-      }
+      });
     }
   };
 
