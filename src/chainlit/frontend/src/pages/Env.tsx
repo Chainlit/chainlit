@@ -4,16 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import * as yup from 'yup';
 
-import {
-  Alert,
-  Box,
-  Button,
-  InputLabel,
-  TextField,
-  Typography
-} from '@mui/material';
+import { Alert, Box, Button, Typography } from '@mui/material';
 
 import TopBar from 'components/header';
+import TextInput from 'components/textInput';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
@@ -51,18 +45,19 @@ export default function Env() {
   }
 
   const renderInput = (key: string) => {
+    const hasError = !!formik.errors[key];
+
     return (
-      <Box key={key} my={2}>
-        <InputLabel>{key}</InputLabel>
-        <TextField
-          fullWidth
-          className={key}
-          variant="outlined"
-          value={formik.values[key]}
-          error={!!formik.errors[key]}
-          onChange={(e) => formik.setFieldValue(key, e.target.value)}
-        />
-      </Box>
+      <TextInput
+        id={key}
+        className={key}
+        label={key}
+        value={formik.values[key]}
+        size="medium"
+        hasError={hasError}
+        description={hasError ? formik.errors[key] : ''}
+        onChange={(e) => formik.setFieldValue(key, e.target.value)}
+      />
     );
   };
 
@@ -101,7 +96,13 @@ export default function Env() {
         </Alert>
         <form onSubmit={formik.handleSubmit}>
           {requiredKeys.map((key) => renderInput(key))}
-          <Button id="submit-env" fullWidth type="submit" variant="contained">
+          <Button
+            id="submit-env"
+            fullWidth
+            type="submit"
+            variant="contained"
+            sx={{ mt: 1 }}
+          >
             Save
           </Button>
         </form>
