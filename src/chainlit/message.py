@@ -204,10 +204,10 @@ class Message(MessageBase):
 
         actions_to_update = [action for action in self.actions if action.forId is None]
 
-        action_coros = [action.send(for_id=str(id)) for action in actions_to_update]
-        await asyncio.gather(*action_coros)
-
         elements_to_update = [el for el in self.elements if id not in el.for_ids]
+
+        for action in actions_to_update:
+            await action.send(for_id=str(id))
 
         for element in elements_to_update:
             await element.send(for_id=str(id))

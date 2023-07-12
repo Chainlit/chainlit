@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
@@ -17,7 +19,7 @@ class Action:
     # The description of the action. This is what the user will see when they hover the action.
     description: str = ""
     # This should not be set manually, only used internally.
-    forId: str = None
+    forId: Optional[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
