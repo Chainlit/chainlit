@@ -56,6 +56,7 @@ export async function runTest(test: string) {
       } finally {
         if (childProcess) {
           kill(childProcess.pid);
+          childProcess.kill("SIGINT");
         }
       }
     }
@@ -99,7 +100,16 @@ export function runSpec(test: string) {
 export async function runChainlit(dir: string, file: string, localDb = false) {
   return new Promise((resolve, reject) => {
     // Headless + CI mode
-    const options = ["run", "-C", CHAINLIT_DIR, "chainlit", "run", file, "-h", "-c"];
+    const options = [
+      "run",
+      "-C",
+      CHAINLIT_DIR,
+      "chainlit",
+      "run",
+      file,
+      "-h",
+      "-c",
+    ];
 
     if (localDb) {
       options.push("--db");
