@@ -23,7 +23,7 @@ from chainlit.telemetry import trace_event
 from chainlit.cache import init_lc_cache
 from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
-from chainlit.server import app
+from chainlit.server import app, max_message_size
 
 
 # Create the main command group for Chainlit CLI
@@ -58,7 +58,13 @@ def run_chainlit(target: str):
 
     # Start the server
     async def start():
-        config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
+        config = uvicorn.Config(
+            app,
+            host=host,
+            port=port,
+            log_level=log_level,
+            ws_max_size=max_message_size,
+        )
         server = uvicorn.Server(config)
         await server.serve()
 
