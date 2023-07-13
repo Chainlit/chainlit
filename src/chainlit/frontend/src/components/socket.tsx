@@ -59,9 +59,13 @@ export default memo(function Socket() {
     });
 
     socket.on('connect', () => {
-      console.log('connected', socket.id);
       socket.emit('connection_successful');
       setSession((s) => ({ ...s!, error: false }));
+    });
+
+    socket.on('session', ({ sessionId }) => {
+      // Attach the session id to the next reconnection attempts
+      socket.auth = { sessionId };
     });
 
     socket.on('connect_error', (err) => {
