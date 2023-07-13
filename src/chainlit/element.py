@@ -103,7 +103,7 @@ class Element:
 
         await self.preprocess_content()
 
-        if for_id:
+        if for_id and for_id not in self.for_ids:
             self.for_ids.append(for_id)
 
         # We have a client, persist the element

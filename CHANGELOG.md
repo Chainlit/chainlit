@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Add the file element
 
+### Fixed
+
+- Persist session between websocket reconnection
+
 ## [0.5.2] - 2023-07-10
 
 ### Added

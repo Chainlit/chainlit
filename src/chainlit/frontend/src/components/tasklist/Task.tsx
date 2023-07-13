@@ -19,7 +19,7 @@ export const Task = ({ index, task }: { index: number; task: ITask }) => {
           color:
             {
               ready: theme.palette.mode === 'dark' ? grey[300] : grey[700],
-              running: theme.palette.primary.contrastText,
+              running: theme.palette.mode === 'dark' ? grey[100] : grey[850],
               done: grey[500],
               failed: grey[500]
             }[task.status] || theme.palette.text.secondary,
