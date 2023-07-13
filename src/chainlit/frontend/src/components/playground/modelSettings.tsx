@@ -5,8 +5,8 @@ import { useRecoilState } from 'recoil';
 import * as yup from 'yup';
 
 import { Box, Stack } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
 
+import InputLabel from 'components/inputLabel';
 import SelectCategoryInput from 'components/selectCategoryInput';
 import Slider from 'components/slider';
 
@@ -77,8 +77,9 @@ const ModelSettings = () => {
 
   const stopSequences = (
     <Box>
-      <InputLabel>Stop sequences</InputLabel>
+      <InputLabel label="Stop sequences" />
       <MuiChipsInput
+        sx={{ mt: 1 }}
         size="small"
         placeholder=""
         value={
