@@ -10,7 +10,7 @@ from chainlit.context import emitter_var
 async def run_langchain_agent(agent: Any, input_str: str, use_async: bool):
     if hasattr(agent, "input_keys"):
         input_key = agent.input_keys[0]
-        inputs = {input_key, input_str}
+        inputs = {input_key: input_str}
     else:
         inputs = input_str
 
