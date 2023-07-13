@@ -1,6 +1,6 @@
 from secrets import token_urlsafe
 from typing import Dict, Optional, Callable, Any, Union
-from chainlit.client.base import BaseAuthClient, BaseDBClient
+from chainlit.client.base import BaseAuthClient, BaseDBClient, MessageDict
 from chainlit.types import AskResponse
 
 
@@ -34,6 +34,8 @@ class Session:
         agent: Any = None,
         # Optional llama instance
         llama_instance: Any = None,
+        # Last message sent
+        last_message: MessageDict = None,
     ):
         self.socket_id = socket_id
         self.ask_user = ask_user
@@ -43,6 +45,7 @@ class Session:
         self.llama_instance = llama_instance
         self.auth_client = auth_client
         self.db_client = db_client
+        self.last_message = last_message
         self.should_stop = False
         self.restored = False
         self.id = token_urlsafe()

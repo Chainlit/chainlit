@@ -162,6 +162,8 @@ async def process_message(session: Session, message: MessageDict):
             # If cloud is enabled, persist the message
             await session.db_client.create_message(message)
 
+        session.last_message = message
+
         if config.code.on_message:
             await config.code.on_message(input_str)
     except InterruptedError:
