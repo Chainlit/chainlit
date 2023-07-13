@@ -61,6 +61,9 @@ class Element:
             "forIds": getattr(self, "for_ids", None),
         }
 
+        if self.content:
+            _dict["content"] = self.content
+
         if self.id:
             _dict["id"] = self.id
 
@@ -115,8 +118,6 @@ class Element:
             raise ValueError("Must provide url or content to send element")
 
         element = self.to_dict()
-
-        element["content"] = self.content
 
         if self.emitter.emit and element:
             if len(self.for_ids) > 1:
