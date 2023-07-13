@@ -10,7 +10,7 @@ export const useAuth = () => {
   const accessToken = useRecoilValue(accessTokenState);
   const role = useRecoilValue(roleState);
 
-  // If not project id is set, the auth0 provider is not used and loading is always true
+  // If project id isn't set, the auth0 provider is not used and _isLoading is always true
   const isLoading = _isLoading && pSettings?.project?.id;
 
   const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
