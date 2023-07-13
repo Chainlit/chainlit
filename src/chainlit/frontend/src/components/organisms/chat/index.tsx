@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
@@ -45,10 +46,11 @@ const Chat = () => {
       }
 
       const message: IMessage = {
+        tempId: uuidv4(),
         author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now()
+        createdAt: new Date().toISOString()
       };
 
       if (!isAuthenticated || !pSettings?.project?.id) {
