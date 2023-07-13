@@ -9,13 +9,14 @@ export const useAuth = () => {
   const { isAuthenticated, isLoading: _isLoading, ...other } = useAuth0();
   const accessToken = useRecoilValue(accessTokenState);
   const role = useRecoilValue(roleState);
+
+  // If not project id is set, the auth0 provider is not used and loading is always true
+  const isLoading = _isLoading && pSettings?.project?.id;
+
   const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
 
   const cloudAuthRequired =
     pSettings?.project.id && pSettings?.project.public === false;
-
-  const isLoading = cloudAuthRequired && _isLoading;
-
   const authenticating = isLoading || (isAuthenticated && !accessToken);
 
   return {
