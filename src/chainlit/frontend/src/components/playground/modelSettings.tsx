@@ -4,11 +4,10 @@ import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import * as yup from 'yup';
 
-import { Box, ListSubheader, Stack } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+import { Box, Stack } from '@mui/material';
 
+import InputLabel from 'components/inputLabel';
+import SelectCategoryInput from 'components/selectCategoryInput';
 import Slider from 'components/slider';
 
 import { ILLMSettings } from 'state/chat';
@@ -49,26 +48,19 @@ const ModelSettings = () => {
   }, [formik.values]);
 
   const modelSelect = (
-    <Box>
-      <InputLabel>Model</InputLabel>
-      <Select
-        fullWidth
-        size="small"
-        name="model_name"
-        value={formik.values.model_name}
-        onChange={formik.handleChange}
-      >
-        {Object.entries(models).map(([category, models]) => {
-          const header = <ListSubheader>{category}</ListSubheader>;
-          const items = models.map((m, i) => (
-            <MenuItem key={i} value={m}>
-              {m}
-            </MenuItem>
-          ));
-          return [header, ...items];
-        })}
-      </Select>
-    </Box>
+    <SelectCategoryInput
+      label="Model"
+      size="small"
+      name="model_name"
+      value={formik.values.model_name}
+      onChange={formik.handleChange}
+      id={'model_name'}
+      items={Object.entries(models).map(([category, models]) => {
+        const header = category;
+        const items = models.map((item) => ({ value: item, label: item }));
+        return { header, items };
+      })}
+    />
   );
 
   const temperature = (
@@ -85,8 +77,9 @@ const ModelSettings = () => {
 
   const stopSequences = (
     <Box>
-      <InputLabel>Stop sequences</InputLabel>
+      <InputLabel label="Stop sequences" />
       <MuiChipsInput
+        sx={{ mt: 1 }}
         size="small"
         placeholder=""
         value={
