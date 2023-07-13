@@ -116,9 +116,11 @@ class Element:
 
         element = self.to_dict()
 
+        # Adding this out of to_dict since the dict will be persisted in the DB
         element["content"] = self.content
 
         if self.emitter.emit and element:
+            # Element was already sent
             if len(self.for_ids) > 1:
                 trace_event(f"update {self.__class__.__name__}")
                 await self.emitter.emit(
@@ -151,6 +153,9 @@ class Avatar(Element):
             raise ValueError("Must provide url or content to send element")
 
         element = self.to_dict()
+
+        # Adding this out of to_dict since the dict will be persisted in the DB
+        element["content"] = self.content
 
         if self.emitter.emit and element:
             trace_event(f"send {self.__class__.__name__}")
