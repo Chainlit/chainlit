@@ -131,13 +131,13 @@ app.add_middleware(
 )
 
 # Define max HTTP data size to 100 MB
-max_http_data_size = 100 * 1024 * 1024
+max_message_size = 100 * 1024 * 1024
 
 socket = SocketManager(
     app,
     cors_allowed_origins=[],
     async_mode="asgi",
-    max_http_buffer_size=max_http_data_size,
+    max_http_buffer_size=max_message_size,
 )
 
 
