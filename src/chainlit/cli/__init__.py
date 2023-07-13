@@ -23,7 +23,7 @@ from chainlit.telemetry import trace_event
 from chainlit.cache import init_lc_cache
 from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
-from chainlit.server import app, max_message_size
+from chainlit.server import app, max_message_size, register_wildcard_route_handler
 
 
 # Create the main command group for Chainlit CLI
@@ -44,6 +44,8 @@ def run_chainlit(target: str):
     # Load the module provided by the user
     config.run.module_name = target
     load_module(config.run.module_name)
+
+    register_wildcard_route_handler()
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
