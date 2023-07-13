@@ -129,7 +129,8 @@ class Message(MessageBase):
         prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
-        indent (int, optional): If positive, the message will be nested in the UI.
+        parent_id (Union[str, int], optional): If provided, the message will be nested inside the parent in the UI.
+        indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[Element], optional): A list of elements to send with the message.
     """
@@ -141,6 +142,7 @@ class Message(MessageBase):
         prompt: str = None,
         llm_settings: LLMSettings = None,
         language: str = None,
+        parent_id: Union[str, int] = None,
         indent: int = 0,
         actions: List[Action] = [],
         elements: List[Element] = [],
@@ -149,6 +151,7 @@ class Message(MessageBase):
         self.author = author
         self.prompt = prompt
         self.language = language
+        self.parent_id = parent_id
         self.indent = indent
         self.actions = actions
         self.elements = elements
@@ -171,6 +174,7 @@ class Message(MessageBase):
             "prompt": self.prompt,
             "llmSettings": self.llmSettings,
             "language": self.language,
+            "parentId": self.parent_id,
             "indent": self.indent,
         }
 
