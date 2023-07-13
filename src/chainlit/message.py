@@ -52,27 +52,11 @@ class MessageBase(ABC):
 
     async def update(
         self,
-        author: str = None,
-        content: str = None,
-        language: str = None,
-        prompt: str = None,
-        llm_settings: LLMSettings = None,
     ):
         """
         Update a message already sent to the UI.
         """
         trace_event("update_message")
-
-        if author:
-            self.author = author
-        if content:
-            self.content = content
-        if language:
-            self.language = language
-        if prompt:
-            self.prompt = prompt
-        if llm_settings:
-            self.llmSettings = llm_settings
 
         msg_dict = self.to_dict()
 
@@ -207,6 +191,28 @@ class Message(MessageBase):
             await element.send(for_id=str(id))
 
         return id
+
+    async def update(self):
+        """
+        Send the message to the UI and persist it in the cloud if a project ID is configured.
+        Return the ID of the message.
+        """
+        trace_event("send_message")
+        await super().update()
+
+        id = self.id or self.temp_id
+
+        actions_to_update = [action for action in self.actions if action.forId is None]
+
+        elements_to_update = [el for el in self.elements if id not in el.for_ids]
+
+        for action in actions_to_update:
+            await action.send(for_id=str(id))
+
+        for element in elements_to_update:
+            await element.send(for_id=str(id))
+
+        return True
 
 
 class ErrorMessage(MessageBase):
