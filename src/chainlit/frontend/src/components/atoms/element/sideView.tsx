@@ -1,6 +1,7 @@
 import { forwardRef, useMemo, useState } from 'react';
 import { Resizable } from 'react-resizable';
 import { useRecoilState } from 'recoil';
+import { useWindowSize } from 'usehooks-ts';
 
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, BoxProps, IconButton, Stack, Typography } from '@mui/material';
@@ -80,6 +81,8 @@ const SideView = () => {
   const [resizeInProgress, setResizeInProgress] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState<number>(400);
 
+  const { width } = useWindowSize();
+
   const handleResize = (event: any, data: { size: { width: number } }) => {
     setDrawerWidth(data.size.width);
   };
@@ -102,7 +105,7 @@ const SideView = () => {
       handle={<Handle />}
       axis="x"
       minConstraints={[100, 0]} // Minimum width of 100px and no limit on height.
-      maxConstraints={[1000, 0]} // Maximum width of 1000px and no limit on height.
+      maxConstraints={[width / 2, 0]} // Maximum width of 1000px and no limit on height.
     >
       <Drawer open={!!sideViewElement} width={drawerWidth}>
         <Stack direction="row" alignItems="center">
