@@ -130,7 +130,7 @@ const ModelSettings = () => {
   );
 
   return (
-    <Stack spacing={2} sx={{ width: '250px' }}>
+    <Stack spacing={2} sx={{ maxWidth: '250px' }}>
       {modelSelect}
       {temperature}
       {stopSequences}
