@@ -1,4 +1,4 @@
-import { IPageInfo, IPagination } from 'components/dataset/table';
+import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
 import { IChat, ILLMSettings } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
