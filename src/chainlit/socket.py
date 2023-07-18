@@ -1,6 +1,7 @@
 import json
-
 import asyncio
+from http.cookies import SimpleCookie
+
 
 from chainlit.context import emitter_var, loop_var
 from chainlit.config import config
@@ -49,6 +50,17 @@ def load_user_env(user_env):
     return user_env
 
 
+def load_chainlit_headers(http_cookie):
+    cookie = SimpleCookie(http_cookie)
+    cookie_string = cookie.get("chainlit-headers").value
+    if cookie_string:
+        chainlit_headers = json.loads(cookie_string)
+    else:
+        chainlit_headers = {}
+
+    return chainlit_headers
+
+
 @socket.on("connect")
 async def connect(sid, environ, auth):
     # Function to send a message to this particular session
@@ -72,11 +84,13 @@ async def connect(sid, environ, auth):
 
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
-    headers = json.loads(environ.get("HTTP_HEADERS"))
+    chainlit_headers = load_chainlit_headers(environ.get("HTTP_COOKIE"))
 
     try:
-        auth_client = await get_auth_client(authorization, headers)
-        db_client = await get_db_client(authorization, headers, auth_client.user_infos)
+        auth_client = await get_auth_client(authorization, chainlit_headers)
+        db_client = await get_db_client(
+            authorization, chainlit_headers, auth_client.user_infos
+        )
         user_env = load_user_env(user_env)
     except ConnectionRefusedError as e:
         logger.error(f"ConnectionRefusedError: {e}")
@@ -89,7 +103,7 @@ async def connect(sid, environ, auth):
         auth_client=auth_client,
         db_client=db_client,
         user_env=user_env,
-        headers=headers,
+        headers=chainlit_headers,
     )
 
     await socket.emit("session", data={"sessionId": session.id}, to=sid)

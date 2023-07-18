@@ -50,8 +50,7 @@ export default memo(function Socket() {
       path: '/ws/socket.io',
       extraHeaders: {
         Authorization: accessToken || '',
-        'user-env': JSON.stringify(userEnv),
-        headers: JSON.stringify((window as any)._headers)
+        'user-env': JSON.stringify(userEnv)
       }
     });
 

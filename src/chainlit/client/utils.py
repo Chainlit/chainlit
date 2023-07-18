@@ -1,4 +1,5 @@
 from typing import Dict
+import json
 from fastapi import Request
 
 from chainlit.config import config
@@ -6,6 +7,16 @@ from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
 from chainlit.client.local import LocalAuthClient, LocalDBClient
 from chainlit.client.cloud import CloudAuthClient, CloudDBClient
 from chainlit.telemetry import trace_event
+
+
+def load_chainlit_cookie(request: Request):
+    cookie_string = request.cookies.get("chainlit-headers")
+    if cookie_string:
+        chainlit_headers = json.loads(cookie_string)
+    else:
+        chainlit_headers = {}
+
+    return chainlit_headers
 
 
 async def get_auth_client(
@@ -65,8 +76,10 @@ async def get_auth_client_from_request(
 ) -> BaseAuthClient:
     authorization = request.headers.get("Authorization")
 
+    chainlit_headers = load_chainlit_cookie(request)
+
     # Get the auth client
-    auth_client = await get_auth_client(authorization, request.headers)
+    auth_client = await get_auth_client(authorization, chainlit_headers)
 
     return auth_client
 
@@ -75,13 +88,14 @@ async def get_db_client_from_request(
     request: Request,
 ) -> BaseDBClient:
     authorization = request.headers.get("Authorization")
+    chainlit_headers = load_chainlit_cookie(request)
 
     # Get the auth client
-    auth_client = await get_auth_client(authorization, request.headers)
+    auth_client = await get_auth_client(authorization, chainlit_headers)
 
     # Get the db client
     db_client = await get_db_client(
-        authorization, request.headers, auth_client.user_infos
+        authorization, chainlit_headers, auth_client.user_infos
     )
 
     return db_client

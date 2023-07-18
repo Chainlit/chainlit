@@ -5,6 +5,7 @@ mimetypes.add_type("text/css", ".css")
 
 import os
 import webbrowser
+import json
 from pathlib import Path
 
 
@@ -146,7 +147,7 @@ socket = SocketManager(
 # -------------------------------------------------------------------------------
 
 
-def get_html_template(headers: dict):
+def get_html_template():
     TAGS_PLACEHOLDER = "<!-- TAGS INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
 
@@ -161,9 +162,7 @@ def get_html_template(headers: dict):
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
-    js = f"""<script>
-    window._headers = {headers};
-    </script>"""
+    js = f"""<script></script>"""
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
@@ -311,9 +310,15 @@ def register_wildcard_route_handler():
                 if os.path.isfile(file_path):
                     return FileResponse(file_path)
 
-        html_template = get_html_template(dict(request.headers))
+        html_template = get_html_template()
 
-        return HTMLResponse(content=html_template, status_code=200)
+        response = HTMLResponse(content=html_template, status_code=200)
+
+        response.set_cookie(
+            key="chainlit-headers",
+            value=json.dumps(dict(request.headers)),
+        )
+        return response
 
 
 import chainlit.socket  # noqa
