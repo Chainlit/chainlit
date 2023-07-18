@@ -156,6 +156,7 @@ __all__ = [
     "Text",
     "Avatar",
     "Pyplot",
+    "File",
     "Task",
     "TaskList",
     "TaskStatus",
