@@ -8,7 +8,7 @@ import {
 } from 'draft-js';
 import { useEffect, useState } from 'react';
 
-import EditorWrapper from 'components/playground/editor/editorWrapper';
+import EditorWrapper from 'components/organisms/playground/editor/editorWrapper';
 
 import { IPrompt } from 'state/chat';
 
