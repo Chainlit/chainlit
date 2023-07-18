@@ -122,6 +122,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
         self.pop_prompt()
         message.prompt = self.consume_last_prompt()
+        message.parent_id = self.get_last_message().parent_id
 
         self.stream = message
 
@@ -164,9 +165,16 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
         return ErrorMessage(str(error), author=self.get_author())
 
-    def create_message(self, content: str = "", prompt: str = None, author: str = None):
-        last_message = self.get_last_message()
-        parent_id = last_message.id or last_message.temp_id
+    def create_message(
+        self,
+        content: str = "",
+        prompt: str = None,
+        author: str = None,
+        parent_id: Union[str, int] = None,
+    ):
+        if parent_id is None:
+            last_message = self.get_last_message()
+            parent_id = last_message.id or last_message.temp_id
 
         return Message(
             content,
@@ -262,7 +270,10 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            message = self.create_message(outputs[output_key], prompt)
+            parent_id = self.get_last_message().parent_id
+            message = self.create_message(
+                outputs[output_key], prompt, parent_id=parent_id
+            )
             self.add_message(message)
         self.pop_sequence()
 
@@ -281,7 +292,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        message = self.create_message(output, prompt)
+        parent_id = self.get_last_message().parent_id
+        message = self.create_message(output, prompt, parent_id=parent_id)
         self.add_message(message)
         self.pop_sequence()
 
@@ -379,7 +391,10 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            message = self.create_message(outputs[output_key], prompt)
+            parent_id = self.get_last_message().parent_id
+            message = self.create_message(
+                outputs[output_key], prompt, parent_id=parent_id
+            )
             await self.add_message(message)
         self.pop_sequence()
 
@@ -398,7 +413,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        message = self.create_message(output, prompt)
+        parent_id = self.get_last_message().parent_id
+        message = self.create_message(output, prompt, parent_id=parent_id)
         await self.add_message(message)
         self.pop_sequence()
 
