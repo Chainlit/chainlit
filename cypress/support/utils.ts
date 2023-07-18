@@ -50,7 +50,7 @@ export async function runTest(test: string) {
         console.log("Running with local db");
       }
 
-      const promise = new Promise(async (resolve, reject) => {
+      await new Promise(async (resolve, reject) => {
         try {
           childProcess = await runChainlit(testDir, file, localDb);
           runSpec(test);
@@ -68,8 +68,6 @@ export async function runTest(test: string) {
           });
         }
       });
-
-      await promise;
     }
   };
 

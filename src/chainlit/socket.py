@@ -98,30 +98,22 @@ async def connect(sid, environ, auth):
 
 @socket.on("connection_successful")
 async def connection_successful(sid):
-    try:
-        session = Session.require(sid)
-        if session.restored:
-            return
+    session = Session.require(sid)
+    if session.restored:
+        return
 
-        emitter_var.set(ChainlitEmitter(session))
-        loop_var.set(asyncio.get_event_loop())
+    emitter_var.set(ChainlitEmitter(session))
+    loop_var.set(asyncio.get_event_loop())
 
-        if isinstance(
-            session.auth_client, CloudAuthClient
-        ) and config.project.database in [
-            "local",
-            "custom",
-        ]:
-            await session.db_client.create_user(session.auth_client.user_infos)
+    if isinstance(session.auth_client, CloudAuthClient) and config.project.database in [
+        "local",
+        "custom",
+    ]:
+        await session.db_client.create_user(session.auth_client.user_infos)
 
-        if config.code.on_chat_start:
-            """Call the on_chat_start function provided by the developer."""
-            await config.code.on_chat_start()
-    except Exception as e:
-        logger.exception(e)
-        await ErrorMessage(
-            author="Error", content=str(e) or e.__class__.__name__
-        ).send()
+    if config.code.on_chat_start:
+        """Call the on_chat_start function provided by the developer."""
+        await config.code.on_chat_start()
 
 
 @socket.on("disconnect")
