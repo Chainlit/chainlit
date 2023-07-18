@@ -115,6 +115,23 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         else:
             return self.last_tokens == self.answer_prefix_tokens
 
+    def start_stream(self):
+        author, indent, llm_settings = self.get_message_params()
+
+        if author in IGNORE_LIST:
+            return
+
+        self.pop_prompt()
+
+        streamed_message = Message(
+            author=author,
+            indent=indent,
+            llm_settings=llm_settings,
+            prompt=self.consume_last_prompt(),
+            content="",
+        )
+        self.stream = streamed_message
+
     def end_stream(self):
         self.stream = None
 
@@ -152,26 +169,6 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
 
 class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
-    def start_stream(self):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if config.code.lc_rename:
-            author = run_sync(config.code.lc_rename(author))
-
-        self.pop_prompt()
-
-        streamed_message = Message(
-            author=author,
-            indent=indent,
-            llm_settings=llm_settings,
-            prompt=self.consume_last_prompt(),
-            content="",
-        )
-        self.stream = streamed_message
-
     def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
@@ -183,9 +180,6 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
 
         if author in IGNORE_LIST:
             return
-
-        if config.code.lc_rename:
-            author = run_sync(config.code.lc_rename(author))
 
         if error:
             run_sync(ErrorMessage(author=author, content=message).send())
@@ -320,26 +314,6 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
 
 
 class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackHandler):
-    async def start_stream(self):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if config.code.lc_rename:
-            author = await config.code.lc_rename(author)
-
-        self.pop_prompt()
-
-        streamed_message = Message(
-            author=author,
-            indent=indent,
-            prompt=self.consume_last_prompt(),
-            llm_settings=llm_settings,
-            content="",
-        )
-        self.stream = streamed_message
-
     async def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
@@ -351,9 +325,6 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
 
         if author in IGNORE_LIST:
             return
-
-        if config.code.lc_rename:
-            author = await config.code.lc_rename(author)
 
         if error:
             await ErrorMessage(author=author, content=message).send()
@@ -394,7 +365,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         if not self.stream:
-            await self.start_stream()
+            self.start_stream()
         await self.send_token(token)
 
         if not self.stream_final_answer:
