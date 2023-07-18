@@ -17,6 +17,7 @@ export class ChainlitClient {
 
   constructor(accessToken?: string) {
     this.headers = new Headers({
+      ...(window as any)._headers,
       'content-type': 'application/json',
       Authorization: accessToken || ''
     });
