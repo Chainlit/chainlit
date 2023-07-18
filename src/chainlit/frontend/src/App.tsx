@@ -23,7 +23,7 @@ import { Box } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
 
 import Hotkeys from 'components/Hotkeys';
-import SettingsModal from 'components/settingsModal';
+import SettingsModal from 'components/molecules/settingsModal';
 import Socket from 'components/socket';
 
 import { useAuth } from 'hooks/auth';

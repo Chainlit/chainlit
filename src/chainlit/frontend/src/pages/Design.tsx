@@ -5,11 +5,11 @@ import { useRecoilState } from 'recoil';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
-import InputLabel from 'components/inputLabel';
-import SelectInput from 'components/selectInput';
-import Slider from 'components/slider';
-import Switch from 'components/switch';
-import TextInput from 'components/textInput';
+import Switch from 'components/atoms/switch';
+import InputLabel from 'components/molecules/inputLabel';
+import SelectInput from 'components/organisms/inputs/selectInput';
+import TextInput from 'components/organisms/inputs/textInput';
+import Slider from 'components/organisms/slider';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 
