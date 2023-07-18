@@ -116,21 +116,14 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             return self.last_tokens == self.answer_prefix_tokens
 
     def start_stream(self):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
+        message = self.create_message()
+        if message.author in IGNORE_LIST:
             return
 
         self.pop_prompt()
+        message.prompt = self.consume_last_prompt()
 
-        streamed_message = Message(
-            author=author,
-            indent=indent,
-            llm_settings=llm_settings,
-            prompt=self.consume_last_prompt(),
-            content="",
-        )
-        self.stream = streamed_message
+        self.stream = message
 
     def end_stream(self):
         self.stream = None
@@ -155,50 +148,54 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.last_prompt = None
         return last_prompt
 
-    def get_message_params(self):
-        llm_settings = self.llm_settings
+    def get_author(self):
+        if self.sequence:
+            return self.sequence[-1]
+        return config.ui.name
 
+    def create_error(self, error: Exception):
+        if isinstance(error, InterruptedError):
+            return None
+
+        return ErrorMessage(str(error), author=self.get_author())
+
+    def create_message(self, content: str = "", prompt: str = None):
         indent = len(self.sequence) if self.sequence else 0
 
-        if self.sequence:
-            author = self.sequence[-1]
-        else:
-            author = config.ui.name
-
-        return author, indent, llm_settings
+        return Message(
+            content,
+            author=self.get_author(),
+            indent=indent,
+            prompt=prompt,
+            llm_settings=self.llm_settings,
+        )
 
 
 class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
+    def on_error(self, error, **_):
+        if error := self.create_error(error):
+            run_sync(error.send())
+            self.pop_sequence()
+
+    on_tool_error = on_error
+    on_llm_error = on_error
+    on_chain_error = on_error
+
     def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
             run_sync(stream.stream_token(token))
             self.has_streamed_final_answer = final
 
-    def add_message(self, message, prompt: str = None, error=False):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            run_sync(ErrorMessage(author=author, content=message).send())
-            self.end_stream()
-            return
-
+    def add_message(self, content: str = "", prompt: str = None):
         if self.stream:
             run_sync(self.stream.send())
             self.end_stream()
-        else:
-            run_sync(
-                Message(
-                    author=author,
-                    content=message,
-                    indent=indent,
-                    prompt=prompt,
-                    llm_settings=llm_settings,
-                ).send()
-            )
+            return
+
+        message = self.create_message(content, prompt=prompt)
+        if message.author not in IGNORE_LIST:
+            run_sync(message.send())
 
     # Callbacks for various events
 
@@ -249,17 +246,12 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         if self.final_stream:
             run_sync(self.final_stream.send())
 
-    def on_llm_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        pass
-
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["id"][-1])
         # Useful to display details button in the UI
-        self.add_message("")
+        self.add_message()
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
@@ -268,19 +260,11 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             self.add_message(outputs[output_key], prompt)
         self.pop_sequence()
 
-    def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        self.add_message(str(error), error=True)
-        self.pop_sequence()
-
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["name"])
-        self.add_message("")
+        self.add_message()
 
     def on_tool_end(
         self,
@@ -291,15 +275,6 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
     ) -> None:
         prompt = self.consume_last_prompt()
         self.add_message(output, prompt)
-        self.pop_sequence()
-
-    def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        self.add_message(str(error), error=True)
         self.pop_sequence()
 
     def on_text(self, text: str, **kwargs: Any) -> None:
@@ -314,34 +289,30 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
 
 
 class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackHandler):
+    async def on_error(self, error, **_):
+        if error := self.create_error(error):
+            await error.send()
+            self.pop_sequence()
+
+    on_tool_error = on_error
+    on_llm_error = on_error
+    on_chain_error = on_error
+
     async def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
             await stream.stream_token(token)
             self.has_streamed_final_answer = final
 
-    async def add_message(self, message, prompt: str = None, error=False):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            await ErrorMessage(author=author, content=message).send()
-            self.end_stream()
-            return
-
+    async def add_message(self, content: str = "", prompt: str = None):
         if self.stream:
             await self.stream.send()
             self.end_stream()
-        else:
-            await Message(
-                author=author,
-                content=message,
-                indent=indent,
-                prompt=prompt,
-                llm_settings=llm_settings,
-            ).send()
+            return
+
+        message = self.create_message(content, prompt=prompt)
+        if message.author not in IGNORE_LIST:
+            await message.send()
 
     # Callbacks for various events
 
@@ -390,17 +361,12 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         if self.final_stream:
             await self.final_stream.send()
 
-    async def on_llm_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        pass
-
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["id"][-1])
         # Useful to display details button in the UI
-        await self.add_message("")
+        await self.add_message()
 
     async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
@@ -409,19 +375,11 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             await self.add_message(outputs[output_key], prompt)
         self.pop_sequence()
 
-    async def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
-        self.pop_sequence()
-
     async def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
         self.add_in_sequence(serialized["name"])
-        await self.add_message("")
+        await self.add_message()
 
     async def on_tool_end(
         self,
@@ -432,15 +390,6 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     ) -> None:
         prompt = self.consume_last_prompt()
         await self.add_message(output, prompt)
-        self.pop_sequence()
-
-    async def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
         self.pop_sequence()
 
     async def on_text(self, text: str, **kwargs: Any) -> None:
