@@ -106,13 +106,6 @@ class CodeSettings:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
-    lc_agent_is_async: Optional[bool] = None
-    lc_run: Optional[Callable[[Any, str], str]] = None
-    lc_postprocess: Optional[Callable[[Any], str]] = None
-    lc_factory: Optional[Callable[[], Any]] = None
-    lc_rename: Optional[Callable[[str], str]] = None
-    llama_index_factory: Optional[Callable[[], Any]] = None
-    langflow_schema: Union[Dict, str] = None
     auth_client_factory: Optional[Callable[[Dict[str, str]], "BaseAuthClient"]] = None
     db_client_factory: Optional[Callable[[Dict[str, str], Dict], "BaseDBClient"]] = None
     author_rename: Optional[Callable[[str], str]] = None
