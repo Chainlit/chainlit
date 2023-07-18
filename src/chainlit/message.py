@@ -85,6 +85,9 @@ class MessageBase(ABC):
         if self.content is None:
             self.content = ""
 
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
         msg_dict = await self._create()
 
         if self.streaming:

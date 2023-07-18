@@ -50,10 +50,12 @@ export async function runTest(test: string) {
         console.log("Running with local db");
       }
 
-      return new Promise(async (resolve, reject) => {
+      await new Promise(async (resolve, reject) => {
         try {
           childProcess = await runChainlit(testDir, file, localDb);
           runSpec(test);
+        } catch (err) {
+          console.error(err);
         } finally {
           kill(childProcess.pid, "SIGKILL", function (err) {
             if (err) {
