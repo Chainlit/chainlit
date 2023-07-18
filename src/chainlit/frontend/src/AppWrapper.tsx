@@ -3,7 +3,7 @@ import { ChainlitClient } from 'api';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
-import AuthProvider from 'components/authProvider';
+import AuthProvider from 'components/atoms/authProvider';
 
 import { IProjectSettings, projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';

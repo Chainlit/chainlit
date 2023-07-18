@@ -1,5 +1,4 @@
 from pydantic.dataclasses import dataclass, Field
-from dataclasses_json import dataclass_json
 from typing import Dict, List, Union, Any
 import uuid
 import aiofiles

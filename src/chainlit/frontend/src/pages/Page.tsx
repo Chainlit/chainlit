@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 
 import { Alert, Box } from '@mui/material';
 
-import Header from 'components/header';
+import Header from 'components/organisms/header';
 
 import { useAuth } from 'hooks/auth';
 

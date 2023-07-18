@@ -115,30 +115,19 @@ class CodeSettings:
     langflow_schema: Union[Dict, str] = None
     auth_client_factory: Optional[Callable[[Dict[str, str]], "BaseAuthClient"]] = None
     db_client_factory: Optional[Callable[[Dict[str, str], Dict], "BaseDBClient"]] = None
+    author_rename: Optional[Callable[[str], str]] = None
 
     def validate(self):
         requires_one_of = [
-            "lc_factory",
-            "llama_index_factory",
             "on_message",
             "on_chat_start",
         ]
-
-        mutually_exclusive = ["lc_factory", "llama_index_factory"]
 
         # Check if at least one of the required attributes is set
         if not any(getattr(self, attr) for attr in requires_one_of):
             raise ValueError(
                 f"Module should at least expose one of {', '.join(requires_one_of)} function"
             )
-
-        # Check if any mutually exclusive attributes are set together
-        for i, attr1 in enumerate(mutually_exclusive):
-            for attr2 in mutually_exclusive[i + 1 :]:
-                if getattr(self, attr1) and getattr(self, attr2):
-                    raise ValueError(
-                        f"Module should not expose both {attr1} and {attr2} functions"
-                    )
 
         return True
 
