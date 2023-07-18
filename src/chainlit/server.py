@@ -239,8 +239,8 @@ async def update_feedback(request: Request, update: UpdateFeedbackRequest):
 async def get_project_members(request: Request):
     """Get all the members of a project."""
 
-    get_db_client = await get_db_client_from_request(request)
-    res = await get_db_client.get_project_members()
+    db_client = await get_db_client_from_request(request)
+    res = await db_client.get_project_members()
     return JSONResponse(content=res)
 
 

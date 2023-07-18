@@ -1,3 +1,4 @@
+from typing import Dict
 from fastapi import Request
 
 from chainlit.config import config
@@ -7,9 +8,14 @@ from chainlit.client.cloud import CloudAuthClient, CloudDBClient
 from chainlit.telemetry import trace_event
 
 
-async def get_auth_client(authorization: str) -> BaseAuthClient:
+async def get_auth_client(
+    authorization: str, headers: Dict[str, str] = {}
+) -> BaseAuthClient:
+    auth_client: BaseAuthClient = None
+    if config.code.auth_client_factory:
+        auth_client = await config.code.auth_client_factory(headers)
     # Check authorization
-    if not config.project.public and not authorization:
+    elif not config.project.public and not authorization:
         # Refuse connection if the app is private and no access token is provided
         trace_event("no_access_token")
         raise ConnectionRefusedError("No access token provided")
@@ -19,6 +25,8 @@ async def get_auth_client(authorization: str) -> BaseAuthClient:
             project_id=config.project.id,
             access_token=authorization,
         )
+
+    if auth_client:
         # Check if the user is a member of the project
         is_project_member = await auth_client.is_project_member()
         if not is_project_member:
@@ -31,7 +39,7 @@ async def get_auth_client(authorization: str) -> BaseAuthClient:
 
 
 async def get_db_client(
-    authorization: str = None, user_infos: UserDict = None
+    authorization: str = None, headers: Dict[str, str] = {}, user_infos: UserDict = None
 ) -> BaseDBClient:
     # Create the database client
     if config.project.database == "cloud":
@@ -45,10 +53,10 @@ async def get_db_client(
     elif config.project.database == "local":
         return LocalDBClient(user_infos=user_infos)
     elif config.project.database == "custom":
-        if not config.code.client_factory:
-            raise ValueError("Client factory not provided")
+        if not config.code.db_client_factory:
+            raise ValueError("Db client factory not provided")
 
-        custom_db_client = await config.code.client_factory(user_infos)
+        custom_db_client = await config.code.db_client_factory(headers, user_infos)
         return custom_db_client
 
 
@@ -58,7 +66,7 @@ async def get_auth_client_from_request(
     authorization = request.headers.get("Authorization")
 
     # Get the auth client
-    auth_client = await get_auth_client(authorization)
+    auth_client = await get_auth_client(authorization, request.headers)
 
     return auth_client
 
@@ -69,9 +77,11 @@ async def get_db_client_from_request(
     authorization = request.headers.get("Authorization")
 
     # Get the auth client
-    auth_client = await get_auth_client(authorization)
+    auth_client = await get_auth_client(authorization, request.headers)
 
     # Get the db client
-    db_client = await get_db_client(authorization, auth_client.user_infos)
+    db_client = await get_db_client(
+        authorization, request.headers, auth_client.user_infos
+    )
 
     return db_client

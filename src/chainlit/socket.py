@@ -72,11 +72,11 @@ async def connect(sid, environ, auth):
 
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
-    headers = environ.get("HTTP_HEADERS")
+    headers = json.loads(environ.get("HTTP_HEADERS"))
 
     try:
-        auth_client = await get_auth_client(authorization)
-        db_client = await get_db_client(authorization, auth_client.user_infos)
+        auth_client = await get_auth_client(authorization, headers)
+        db_client = await get_db_client(authorization, headers, auth_client.user_infos)
         user_env = load_user_env(user_env)
     except ConnectionRefusedError as e:
         logger.error(f"ConnectionRefusedError: {e}")
@@ -89,7 +89,7 @@ async def connect(sid, environ, auth):
         auth_client=auth_client,
         db_client=db_client,
         user_env=user_env,
-        headers=json.loads(headers),
+        headers=headers,
     )
 
     await socket.emit("session", data={"sessionId": session.id}, to=sid)
