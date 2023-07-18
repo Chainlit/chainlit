@@ -128,8 +128,8 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def end_stream(self):
         self.stream = None
 
-    def add_in_sequence(self, name: str):
-        self.sequence.append(name)
+    def add_in_sequence(self, message: Message):
+        self.sequence.append(message)
 
     def pop_sequence(self):
         if self.sequence:
@@ -150,7 +150,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
     def get_author(self):
         if self.sequence:
-            return self.sequence[-1]
+            return self.sequence[-1].author
         return config.ui.name
 
     def create_error(self, error: Exception):
@@ -159,14 +159,19 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
         return ErrorMessage(str(error), author=self.get_author())
 
-    def create_message(self, content: str = "", prompt: str = None):
-        indent = len(self.sequence) if self.sequence else 0
+    def create_message(self, content: str = "", prompt: str = None, author: str = None):
+        if self.sequence:
+            last_message = self.sequence[-1]
+            parent_id = last_message.id or last_message.temp_id
+        else:
+            last_message = self.emitter.session.last_message
+            parent_id = last_message.get("id") or last_message.get("tempId")
 
         return Message(
             content,
-            author=self.get_author(),
-            indent=indent,
+            author=author or self.get_author(),
             prompt=prompt,
+            parent_id=parent_id,
             llm_settings=self.llm_settings,
         )
 
@@ -187,13 +192,12 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             run_sync(stream.stream_token(token))
             self.has_streamed_final_answer = final
 
-    def add_message(self, content: str = "", prompt: str = None):
+    def add_message(self, message: Message):
         if self.stream:
             run_sync(self.stream.send())
             self.end_stream()
             return
 
-        message = self.create_message(content, prompt=prompt)
         if message.author not in IGNORE_LIST:
             run_sync(message.send())
 
@@ -249,22 +253,24 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        self.add_message()
+        message = self.create_message(author=serialized["id"][-1])
+        self.add_in_sequence(message)
+        self.add_message(message)
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            self.add_message(outputs[output_key], prompt)
+            message = self.create_message(outputs[output_key], prompt)
+            self.add_message(message)
         self.pop_sequence()
 
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
-        self.add_message()
+        message = self.create_message(author=serialized["name"])
+        self.add_in_sequence(message)
+        self.add_message(message)
 
     def on_tool_end(
         self,
@@ -274,7 +280,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        self.add_message(output, prompt)
+        message = self.create_message(output, prompt)
+        self.add_message(message)
         self.pop_sequence()
 
     def on_text(self, text: str, **kwargs: Any) -> None:
@@ -304,13 +311,12 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             await stream.stream_token(token)
             self.has_streamed_final_answer = final
 
-    async def add_message(self, content: str = "", prompt: str = None):
+    async def add_message(self, message: Message):
         if self.stream:
             await self.stream.send()
             self.end_stream()
             return
 
-        message = self.create_message(content, prompt=prompt)
         if message.author not in IGNORE_LIST:
             await message.send()
 
@@ -364,22 +370,24 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        await self.add_message()
+        message = self.create_message(author=serialized["id"][-1])
+        self.add_in_sequence(message)
+        await self.add_message(message)
 
     async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            await self.add_message(outputs[output_key], prompt)
+            message = self.create_message(outputs[output_key], prompt)
+            await self.add_message(message)
         self.pop_sequence()
 
     async def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
-        await self.add_message()
+        message = self.create_message(author=serialized["name"])
+        self.add_in_sequence(message)
+        await self.add_message(message)
 
     async def on_tool_end(
         self,
@@ -389,7 +397,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        await self.add_message(output, prompt)
+        message = self.create_message(output, prompt)
+        await self.add_message(message)
         self.pop_sequence()
 
     async def on_text(self, text: str, **kwargs: Any) -> None:
