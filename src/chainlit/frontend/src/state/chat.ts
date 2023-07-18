@@ -14,6 +14,15 @@ export interface ILLMSettings {
   presence_penalty: number;
 }
 
+export interface IPrompt {
+  id?: string;
+  template?: string;
+  inputs?: Record<string, string>;
+  formatted?: string;
+  completion?: string;
+  llm_settings?: ILLMSettings;
+}
+
 export interface IChat {
   id: number;
   createdAt: number | string;
@@ -34,8 +43,7 @@ export interface IMessage {
   language?: string;
   indent?: number;
   isError?: boolean;
-  prompt?: string;
-  llmSettings?: ILLMSettings;
+  prompt?: IPrompt;
 }
 
 export interface IToken {

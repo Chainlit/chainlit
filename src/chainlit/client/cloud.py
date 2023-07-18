@@ -184,7 +184,6 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                     humanFeedback
                     language
                     prompt
-                    llmSettings
                     authorIsUser
                     createdAt
                 }
@@ -303,8 +302,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         variables["conversationId"] = c_id
 
         mutation = """
-        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
-            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
+        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
+            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
                 id
             }
         }
@@ -318,8 +317,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
     async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
         mutation = """
-        mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json) {
-            updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
+        mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: Json) {
+            updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt) {
                 id
             }
         }

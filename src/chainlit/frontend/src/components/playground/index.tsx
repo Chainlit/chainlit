@@ -1,103 +1,54 @@
-import {
-  ContentState,
-  Editor,
-  EditorState,
-  Modifier,
-  SelectionState
-} from 'draft-js';
-import { OrderedSet } from 'immutable';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { clientState } from 'state/client';
-import { playgroundSettingsState, playgroundState } from 'state/playground';
+import { playgroundState } from 'state/playground';
 import { userEnvState } from 'state/user';
 
-import 'draft-js/dist/Draft.css';
-
+import Completion from './editor/completion';
+import FormattedPrompt from './editor/formatted';
+import TemplatePrompt from './editor/template';
 import ModelSettings from './modelSettings';
-
-const styleMap = {
-  COMPLETION: {
-    backgroundColor: '#d2f4d3',
-    color: 'black'
-  }
-};
 
 export default function Playground() {
   const client = useRecoilValue(clientState);
-  const playground = useRecoilValue(playgroundState);
-  const setPlayground = useSetRecoilState(playgroundState);
-  const settings = useRecoilValue(playgroundSettingsState);
+  const [origPrompt, setOrigPrompt] = useRecoilState(playgroundState);
+
   const userEnv = useRecoilValue(userEnvState);
-  const setPlaygroundSettings = useSetRecoilState(playgroundSettingsState);
-  const [state, setState] = useState(EditorState.createEmpty());
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (playground?.prompt) {
-      const _state = EditorState.createWithContent(
-        ContentState.createFromText(playground.prompt)
-      );
-      setState(insertCompletion(_state, playground.completion));
-    }
-    if (playground?.llmSettings) {
-      setPlaygroundSettings({ ...playground.llmSettings });
-    }
-  }, [playground]);
-
   const restore = () => {
-    if (playground) {
-      setPlayground({ ...playground });
+    if (origPrompt) {
+      setOrigPrompt({ ...origPrompt });
     }
-  };
-
-  const insertCompletion = (state: EditorState, completion: string) => {
-    const contentState = state.getCurrentContent();
-
-    const blockMap = contentState.getBlockMap();
-    const key = blockMap.last().getKey();
-    const length = blockMap.last().getLength();
-    const selection = new SelectionState({
-      anchorKey: key,
-      anchorOffset: length,
-      focusKey: key,
-      focusOffset: length
-    });
-
-    const ncs = Modifier.insertText(
-      contentState,
-      selection,
-      '\n' + completion,
-      OrderedSet.of('COMPLETION')
-    );
-    const es = EditorState.push(state, ncs, 'insert-characters');
-    return EditorState.forceSelection(es, ncs.getSelectionAfter());
   };
 
   const handleClose = () => {
-    setPlayground(undefined);
+    setOrigPrompt(undefined);
   };
 
   const submit = async () => {
-    if (!settings) {
+    if (!origPrompt?.llm_settings || !origPrompt?.formatted) {
       return;
     }
-    const prompt = state.getCurrentContent().getPlainText();
     try {
       setLoading(true);
-      const completion = await client.getCompletion(prompt, settings, userEnv);
-      setState(insertCompletion(state, completion));
+      const completion = await client.getCompletion(
+        origPrompt.formatted,
+        origPrompt.llm_settings,
+        userEnv
+      );
+      setOrigPrompt((old) => ({ ...old, completion }));
     } catch (err) {
       if (err instanceof Error) {
         toast.error(err.message);
@@ -107,9 +58,13 @@ export default function Playground() {
     }
   };
 
+  if (!origPrompt) {
+    return null;
+  }
+
   return (
     <Dialog
-      open={!!playground}
+      open={!!origPrompt}
       fullScreen
       PaperProps={{
         style: {
@@ -149,26 +104,9 @@ export default function Playground() {
           spacing={2}
           sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1 }}
         >
-          <Box
-            sx={{
-              fontFamily: 'Inter',
-              fontSize: '16px',
-              lineHeight: '24px',
-              padding: '0.75rem',
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              borderRadius: '0.375rem',
-              overflowY: 'auto',
-              width: '100%',
-              flexGrow: 1,
-              caretColor: (theme) => theme.palette.text.primary
-            }}
-          >
-            <Editor
-              customStyleMap={styleMap}
-              editorState={state}
-              onChange={setState}
-            />
-          </Box>
+          <TemplatePrompt prompt={origPrompt} />
+          <FormattedPrompt prompt={origPrompt} />
+          <Completion completion={origPrompt.completion} />
           <ModelSettings />
         </Stack>
         <Stack direction="row" alignItems="center" mt={1} spacing={2}>

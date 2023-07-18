@@ -24,11 +24,7 @@ export default function Buttons({ message }: Props) {
         className="playground-button"
         onClick={() => {
           if (!message.prompt) return;
-          setPlayground({
-            llmSettings: message.llmSettings,
-            prompt: message.prompt,
-            completion: message.content!
-          });
+          setPlayground(message.prompt);
         }}
       >
         <EditIcon sx={{ width: '16px', height: '16px' }} />

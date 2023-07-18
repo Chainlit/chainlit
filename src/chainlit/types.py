@@ -64,6 +64,17 @@ class LLMSettings:
         }
 
 
+@dataclass_json
+@dataclass
+class Prompt:
+    id: Optional[str] = None
+    template: Optional[str] = None
+    inputs: Optional[Dict[str, str]] = None
+    formatted: Optional[str] = None
+    completion: Optional[str] = None
+    llm_settings: Optional[LLMSettings] = None
+
+
 class CompletionRequest(BaseModel):
     prompt: str
     userEnv: Dict[str, str]

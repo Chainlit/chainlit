@@ -11,7 +11,7 @@ import SelectCategoryInput from 'components/selectCategoryInput';
 import Slider from 'components/slider';
 
 import { ILLMSettings } from 'state/chat';
-import { playgroundSettingsState } from 'state/playground';
+import { playgroundState } from 'state/playground';
 
 const models = {
   GPT4: ['gpt-4'],
@@ -20,7 +20,7 @@ const models = {
 };
 
 const ModelSettings = () => {
-  const [settings, setSettings] = useRecoilState(playgroundSettingsState);
+  const [prompt, setPrompt] = useRecoilState(playgroundState);
 
   const schema = yup.object({
     model_name: yup.string(),
@@ -30,6 +30,8 @@ const ModelSettings = () => {
     frequency_penalty: yup.number().min(0).max(1),
     presence_penalty: yup.number().min(0).max(1)
   });
+
+  const settings = prompt?.llm_settings;
 
   const formik = useFormik({
     initialValues: settings || ({} as ILLMSettings),
@@ -44,7 +46,7 @@ const ModelSettings = () => {
   }, [settings]);
 
   useEffect(() => {
-    setSettings(formik.values);
+    setPrompt((old) => ({ ...old, llm_settings: formik.values }));
   }, [formik.values]);
 
   const modelSelect = (
