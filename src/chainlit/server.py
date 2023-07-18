@@ -317,6 +317,7 @@ def register_wildcard_route_handler():
         response.set_cookie(
             key="chainlit-headers",
             value=json.dumps(dict(request.headers)),
+            httponly=True,
         )
         return response
 
