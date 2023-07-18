@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timezone
 
 from chainlit.telemetry import trace_event
+from chainlit.client.base import MessageDict
 from chainlit.context import get_emitter
 from chainlit.config import config
 from chainlit.types import (
@@ -164,6 +165,27 @@ class Message(MessageBase):
             self.llmSettings = llm_settings.to_dict()
 
         super().__post_init__()
+
+    @classmethod
+    def from_dict(self, _dict: MessageDict):
+        message = Message(
+            content=_dict["content"],
+            author=_dict.get("author"),
+            prompt=_dict.get("prompt"),
+            llm_settings=_dict.get("llmSettings"),
+            language=_dict.get("language"),
+            parent_id=_dict.get("parentId"),
+            indent=_dict.get("indent"),
+        )
+
+        if temp_id := _dict.get("tempId"):
+            message.temp_id = temp_id
+        if _id := _dict.get("id"):
+            message.id = _id
+        if created_at := _dict.get("createdAt"):
+            message.created_at = created_at
+
+        return message
 
     def to_dict(self):
         _dict = {

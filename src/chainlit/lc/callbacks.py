@@ -153,6 +153,11 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             return self.sequence[-1].author
         return config.ui.name
 
+    def get_last_message(self):
+        if self.sequence:
+            return self.sequence[-1]
+        return self.emitter.session.last_message
+
     def create_error(self, error: Exception):
         if isinstance(error, InterruptedError):
             return None
@@ -160,12 +165,8 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         return ErrorMessage(str(error), author=self.get_author())
 
     def create_message(self, content: str = "", prompt: str = None, author: str = None):
-        if self.sequence:
-            last_message = self.sequence[-1]
-            parent_id = last_message.id or last_message.temp_id
-        else:
-            last_message = self.emitter.session.last_message
-            parent_id = last_message.get("id") or last_message.get("tempId")
+        last_message = self.get_last_message()
+        parent_id = last_message.id or last_message.temp_id
 
         return Message(
             content,
