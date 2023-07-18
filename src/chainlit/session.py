@@ -30,6 +30,8 @@ class Session:
         db_client: Optional[BaseDBClient],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
+        # Headers received during the initial request
+        headers: Dict[str, str],
         # Optional langchain agent
         agent: Any = None,
         # Optional llama instance
@@ -39,6 +41,7 @@ class Session:
         self.ask_user = ask_user
         self.emit = emit
         self.user_env = user_env
+        self.headers = headers
         self.agent = agent
         self.llama_instance = llama_instance
         self.auth_client = auth_client

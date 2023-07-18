@@ -146,8 +146,9 @@ socket = SocketManager(
 # -------------------------------------------------------------------------------
 
 
-def get_html_template():
-    PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
+def get_html_template(headers: dict):
+    TAGS_PLACEHOLDER = "<!-- TAGS INJECTION PLACEHOLDER -->"
+    JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
     url = config.ui.github or default_url
@@ -160,15 +161,17 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
+    js = f"""<script>
+    window._headers = {headers};
+    </script>"""
+
     index_html_file_path = os.path.join(build_dir, "index.html")
 
     with open(index_html_file_path, "r", encoding="utf-8") as f:
         content = f.read()
-        content = content.replace(PLACEHOLDER, tags)
+        content = content.replace(TAGS_PLACEHOLDER, tags)
+        content = content.replace(JS_PLACEHOLDER, js)
         return content
-
-
-html_template = get_html_template()
 
 
 @app.post("/completion")
@@ -297,7 +300,7 @@ async def serve_file(filename: str):
 
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
-    async def serve(path: str):
+    async def serve(request: Request, path: str):
         """Serve the UI and app files."""
         if path:
             app_file_path = os.path.join(config.root, path)
@@ -307,6 +310,8 @@ def register_wildcard_route_handler():
             for file_path in file_paths:
                 if os.path.isfile(file_path):
                     return FileResponse(file_path)
+
+        html_template = get_html_template(dict(request.headers))
 
         return HTMLResponse(content=html_template, status_code=200)
 

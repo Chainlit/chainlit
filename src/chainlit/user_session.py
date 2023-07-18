@@ -1,7 +1,19 @@
-from typing import Dict
+from typing import Dict, Optional, TypedDict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from chainlit.client.base import UserDict
+
 from chainlit.context import get_emitter
 
-user_sessions: Dict[str, Dict] = {}
+
+class UserSessionDict(TypedDict):
+    id: str
+    env: Dict[str, str]
+    user_infos: Optional["UserDict"]
+    headers: Dict[str, str]
+
+
+user_sessions: Dict[str, UserSessionDict] = {}
 
 
 class UserSession:
@@ -10,10 +22,10 @@ class UserSession:
     Useful for the developer to store user specific data between calls.
     """
 
-    def get(self, key):
+    def get(self, key, default=None):
         emitter = get_emitter()
         if not emitter:
-            return None
+            return default
 
         if emitter.session.id not in user_sessions:
             # Create a new user session
@@ -25,10 +37,11 @@ class UserSession:
         user_session["id"] = emitter.session.id
         user_session["env"] = emitter.session.user_env
         user_session["user_infos"] = emitter.session.auth_client.user_infos
+        user_session["headers"] = emitter.session.headers
         if emitter.session.agent:
             user_session["agent"] = emitter.session.agent
 
-        return user_session.get(key)
+        return user_session.get(key, default)
 
     def set(self, key, value):
         emitter = get_emitter()
