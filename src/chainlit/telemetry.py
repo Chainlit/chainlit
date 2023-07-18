@@ -66,7 +66,7 @@ class ChainlitTelemetry:
         uptrace.configure_opentelemetry(
             dsn="https://YPa4AbDF853uCW6UWN2oYg@api.uptrace.dev/1778",
             service_name="chainlit",
-            service_version="1.0.0",
+            service_version="1.1.0",
             deployment_environment="production",
             logging_level=logging.CRITICAL,
         )
