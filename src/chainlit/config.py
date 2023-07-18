@@ -106,38 +106,20 @@ class CodeSettings:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
-    lc_agent_is_async: Optional[bool] = None
-    lc_run: Optional[Callable[[Any, str], str]] = None
-    lc_postprocess: Optional[Callable[[Any], str]] = None
-    lc_factory: Optional[Callable[[], Any]] = None
-    lc_rename: Optional[Callable[[str], str]] = None
-    llama_index_factory: Optional[Callable[[], Any]] = None
-    langflow_schema: Union[Dict, str] = None
+    author_rename: Optional[Callable[[str], str]] = None
     client_factory: Optional[Callable[[str], "BaseDBClient"]] = None
 
     def validate(self):
         requires_one_of = [
-            "lc_factory",
-            "llama_index_factory",
             "on_message",
             "on_chat_start",
         ]
-
-        mutually_exclusive = ["lc_factory", "llama_index_factory"]
 
         # Check if at least one of the required attributes is set
         if not any(getattr(self, attr) for attr in requires_one_of):
             raise ValueError(
                 f"Module should at least expose one of {', '.join(requires_one_of)} function"
             )
-
-        # Check if any mutually exclusive attributes are set together
-        for i, attr1 in enumerate(mutually_exclusive):
-            for attr2 in mutually_exclusive[i + 1 :]:
-                if getattr(self, attr1) and getattr(self, attr2):
-                    raise ValueError(
-                        f"Module should not expose both {attr1} and {attr2} functions"
-                    )
 
         return True
 

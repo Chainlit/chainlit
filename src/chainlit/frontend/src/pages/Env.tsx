@@ -6,8 +6,8 @@ import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';
 
-import TopBar from 'components/header';
-import TextInput from 'components/textInput';
+import TopBar from 'components/organisms/header';
+import TextInput from 'components/organisms/inputs/textInput';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';

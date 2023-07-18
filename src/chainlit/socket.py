@@ -115,15 +115,6 @@ async def connection_successful(sid):
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start()
 
-    if config.code.lc_factory:
-        """Instantiate the langchain agent and store it in the session."""
-        agent = await config.code.lc_factory()
-        session.agent = agent
-
-    if config.code.llama_index_factory:
-        llama_instance = await config.code.llama_index_factory()
-        session.llama_instance = llama_instance
-
 
 @socket.on("disconnect")
 async def disconnect(sid):
@@ -175,52 +166,7 @@ async def process_message(session: Session, author: str, input_str: str):
                 }
             )
 
-        langchain_agent = session.agent
-        llama_instance = session.llama_instance
-
-        if langchain_agent:
-            from chainlit.lc.agent import run_langchain_agent
-
-            # If a langchain agent is available, run it
-            if config.code.lc_run:
-                # If the developer provided a custom run function, use it
-                await config.code.lc_run(
-                    langchain_agent,
-                    input_str,
-                )
-                return
-            else:
-                # Otherwise, use the default run function
-                (
-                    raw_res,
-                    output_key,
-                    has_streamed_final_answer,
-                ) = await run_langchain_agent(
-                    langchain_agent, input_str, use_async=config.code.lc_agent_is_async
-                )
-
-                if config.code.lc_postprocess:
-                    # If the developer provided a custom postprocess function, use it
-                    await config.code.lc_postprocess(raw_res)
-                    return
-                elif output_key is not None:
-                    # Use the output key if provided
-                    res = raw_res[output_key]
-                else:
-                    # Otherwise, use the raw response
-                    res = raw_res
-
-            # Finally, send the response to the user
-            if not has_streamed_final_answer:
-                await Message(author=config.ui.name, content=res).send()
-
-        elif llama_instance:
-            from chainlit.llama_index.run import run_llama
-
-            await run_llama(llama_instance, input_str)
-
-        elif config.code.on_message:
-            # If no langchain agent is available, call the on_message function provided by the developer
+        if config.code.on_message:
             await config.code.on_message(input_str)
     except InterruptedError:
         pass
