@@ -58,7 +58,7 @@ export async function runTest(test: string) {
           kill(childProcess.pid, "SIGKILL", function (err) {
             if (err) {
               console.log("Error while trying to kill process");
-              reject(err);
+              resolve(true);
             } else {
               console.log("Process killed successfully");
               resolve(true);
