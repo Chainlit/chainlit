@@ -178,12 +178,9 @@ async def process_message(session: Session, message: MessageDict):
         await emitter.task_start()
 
         if session.db_client:
-            message["id"] = await session.db_client.create_message(message)
+            await session.db_client.create_message(message)
 
         session.root_message = Message.from_dict(message)
-
-        if session.root_message.id:
-            await session.root_message.update()
 
         if config.code.on_message:
             await config.code.on_message(input_str, session.root_message.id)

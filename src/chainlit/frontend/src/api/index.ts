@@ -70,7 +70,7 @@ export class ChainlitClient {
     return role as Role;
   };
 
-  setHumanFeedback = async (messageId: number, feedback: number) => {
+  setHumanFeedback = async (messageId: string, feedback: number) => {
     const res = await fetch(`${httpEndpoint}/message/feedback`, {
       headers: this.headers,
       method: 'PUT',
@@ -115,7 +115,7 @@ export class ChainlitClient {
     return res.json();
   };
 
-  getConversation = async (conversationId: number): Promise<IChat> => {
+  getConversation = async (conversationId: string): Promise<IChat> => {
     const res = await fetch(
       `${httpEndpoint}/project/conversation/${conversationId}`,
       {

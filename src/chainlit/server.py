@@ -265,7 +265,7 @@ async def get_conversation(request: Request, conversation_id: str):
     """Get a specific conversation."""
 
     db_client = await get_db_client_from_request(request)
-    res = await db_client.get_conversation(int(conversation_id))
+    res = await db_client.get_conversation(conversation_id)
     return JSONResponse(content=res)
 
 
@@ -274,7 +274,7 @@ async def get_conversation(request: Request, conversation_id: str, element_id: s
     """Get a specific conversation."""
 
     db_client = await get_db_client_from_request(request)
-    res = await db_client.get_element(int(conversation_id), int(element_id))
+    res = await db_client.get_element(conversation_id, element_id)
     return JSONResponse(content=res)
 
 

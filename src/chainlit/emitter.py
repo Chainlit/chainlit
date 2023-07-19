@@ -83,12 +83,7 @@ class ChainlitEmitter:
             if self.db_client and res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
-                    res_msg = {
-                        "author": res["author"],
-                        "authorIsUser": True,
-                        "content": res["content"],
-                    }
-                    await self.db_client.create_message(res_msg)
+                    await self.db_client.create_message(res)
                 elif spec.type == "file":
                     # TODO: upload file to S3
                     pass

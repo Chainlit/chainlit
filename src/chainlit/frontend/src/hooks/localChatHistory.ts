@@ -1,39 +1,37 @@
 import { useCallback } from 'react';
 
-import { IChat } from 'state/chat';
-
 const KEY = 'chatHistory';
 const MAX_SIZE = 50;
 
+export type MessageHistory = {
+  messages: { content: string; createdAt: number }[];
+};
+
 export default function useLocalChatHistory() {
   const getLocalChatHistory = useCallback(() => {
-    const chatHistory = localStorage.getItem(KEY);
-    if (chatHistory) {
-      return JSON.parse(chatHistory) as IChat[];
+    const messageHistory = localStorage.getItem(KEY);
+    if (messageHistory) {
+      return JSON.parse(messageHistory) as MessageHistory[];
     }
     return [];
   }, []);
 
   const persistChatLocally = useCallback((message: string) => {
-    const chat: IChat = {
-      id: 0,
-      createdAt: new Date().getTime(),
+    const messageHistory: MessageHistory = {
       messages: [
         {
           content: message,
-          author: '',
           createdAt: new Date().getTime()
         }
-      ],
-      elements: []
+      ]
     };
 
     const chatHistory = getLocalChatHistory();
 
     if (!chatHistory) {
-      localStorage.setItem(KEY, JSON.stringify([chat]));
+      localStorage.setItem(KEY, JSON.stringify([messageHistory]));
     } else {
-      let curr = [chat, ...chatHistory];
+      let curr = [messageHistory, ...chatHistory];
       if (curr.length > MAX_SIZE) {
         curr = curr.slice(0, MAX_SIZE);
       }

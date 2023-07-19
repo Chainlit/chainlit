@@ -27,30 +27,30 @@ class Element:
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
     display: ElementDisplay = "side"
     # The URL of the element if already hosted somehwere else.
+
     url: str = None
     # The local path of the element.
     path: str = None
     # The byte content of the element.
     content: bytes = None
-    # The ID of the element. This is set automatically when the element is sent to the UI if cloud is enabled.
-    id: int = None
-    # The ID of the element if cloud is disabled.
-    temp_id: str = None
+    # The ID of the element. This is set automatically when the element is sent to the UI.
+    id: str = None
     # The ID of the message this element is associated with.
     for_ids: List[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.emitter = get_emitter()
+        self.persisted = False
         self.for_ids = []
-        self.temp_id = str(uuid.uuid4())
+        if not self.id:
+            self.id = str(uuid.uuid4())
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
     def to_dict(self) -> Dict:
         _dict = {
-            "tempId": self.temp_id,
             "type": self.type,
             "url": self.url,
             "name": self.name,
@@ -76,7 +76,7 @@ class Element:
             raise ValueError("Must provide path or content to load element")
 
     async def persist(self, client: BaseDBClient):
-        if not self.url and self.content and not self.id:
+        if not self.url and self.content and not self.persisted:
             # Only guess the mime type when the content is binary
             mime = (
                 mime_types[self.type]
@@ -84,7 +84,12 @@ class Element:
                 else filetype.guess_mime(self.content)
             )
             self.url = await client.upload_element(content=self.content, mime=mime)
-        element = await client.upsert_element(self.to_dict())
+
+        if not self.persisted:
+            element = await client.create_element(self.to_dict())
+            self.persisted = True
+        else:
+            element = await client.update_element(self.to_dict())
         return element
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -92,7 +97,7 @@ class Element:
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
-        await self.emitter.emit("remove_element", {"id": self.id or self.temp_id})
+        await self.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str = None):
         element = None
@@ -124,7 +129,7 @@ class Element:
                 trace_event(f"update {self.__class__.__name__}")
                 await self.emitter.emit(
                     "update_element",
-                    {"id": self.id or self.temp_id, "forIds": self.for_ids},
+                    {"id": self.id, "forIds": self.for_ids},
                 )
             else:
                 trace_event(f"send {self.__class__.__name__}")

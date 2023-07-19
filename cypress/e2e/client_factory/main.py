@@ -49,7 +49,10 @@ class CustomClient(BaseDBClient):
     async def upload_element(self, content: bytes, mime: str) -> str:
         raise NotImplementedError
 
-    async def upsert_element(self, variables: ElementDict) -> ElementDict:
+    async def create_element(self, variables: ElementDict) -> ElementDict:
+        raise NotImplementedError
+
+    async def update_element(self, variables: ElementDict) -> ElementDict:
         raise NotImplementedError
 
     async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:

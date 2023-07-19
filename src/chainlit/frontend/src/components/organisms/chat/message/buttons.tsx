@@ -1,10 +1,11 @@
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import EditIcon from '@mui/icons-material/EditOutlined';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
 import { IMessage } from 'state/chat';
 import { playgroundState } from 'state/playground';
+import { projectSettingsState } from 'state/project';
 
 import FeedbackButtons from './feedbackButtons';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function Buttons({ message }: Props) {
+  const projectSettings = useRecoilValue(projectSettingsState);
   const setPlayground = useSetRecoilState(playgroundState);
 
   const showEditButton = !!message.prompt && !!message.content;
@@ -37,7 +39,7 @@ export default function Buttons({ message }: Props) {
   );
 
   const showFeedbackButtons =
-    !!message.id &&
+    !!projectSettings?.project?.database &&
     !message.authorIsUser &&
     !message.waitForAnswer &&
     !!message.content;

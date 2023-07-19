@@ -47,7 +47,7 @@ const Chat = () => {
       }
 
       const message: IMessage = {
-        tempId: uuidv4(),
+        id: uuidv4(),
         author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
@@ -69,13 +69,14 @@ const Chat = () => {
     async (msg: string) => {
       if (!askUser) return;
       const message = {
+        id: uuidv4(),
         author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now()
+        createdAt: new Date().toISOString()
       };
 
-      askUser.callback({ author: message.author, content: message.content });
+      askUser.callback(message);
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);

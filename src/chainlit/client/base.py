@@ -25,8 +25,7 @@ from chainlit.types import (
 
 class MessageDict(TypedDict):
     conversationId: Optional[str]
-    id: Optional[int]
-    tempId: Optional[str]
+    id: str
     createdAt: Optional[int]
     content: str
     author: str
@@ -48,8 +47,8 @@ class UserDict(TypedDict):
 
 
 class ElementDict(TypedDict):
-    id: Optional[int]
-    conversationId: Optional[int]
+    id: Optional[str]
+    conversationId: Optional[str]
     type: ElementType
     url: str
     name: str
@@ -60,7 +59,7 @@ class ElementDict(TypedDict):
 
 
 class ConversationDict(TypedDict):
-    id: Optional[int]
+    id: Optional[str]
     createdAt: Optional[int]
     elementCount: Optional[int]
     messageCount: Optional[int]
@@ -110,15 +109,15 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_conversation(self) -> int:
+    async def create_conversation(self) -> str:
         pass
 
     @abstractmethod
-    async def delete_conversation(self, conversation_id: int) -> bool:
+    async def delete_conversation(self, conversation_id: str) -> bool:
         pass
 
     @abstractmethod
-    async def get_conversation(self, conversation_id: int) -> ConversationDict:
+    async def get_conversation(self, conversation_id: str) -> ConversationDict:
         pass
 
     @abstractmethod
@@ -132,15 +131,15 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_message(self, variables: MessageDict) -> int:
+    async def create_message(self, variables: MessageDict) -> str:
         pass
 
     @abstractmethod
-    async def update_message(self, message_id: int, variables: MessageDict) -> bool:
+    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
         pass
 
     @abstractmethod
-    async def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: str) -> bool:
         pass
 
     @abstractmethod
@@ -148,11 +147,15 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def upsert_element(self, variables: ElementDict) -> ElementDict:
+    async def create_element(self, variables: ElementDict) -> ElementDict:
         pass
 
     @abstractmethod
-    async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
+    async def update_element(self, variables: ElementDict) -> ElementDict:
+        pass
+
+    @abstractmethod
+    async def get_element(self, conversation_id: str, element_id: str) -> ElementDict:
         pass
 
     @abstractmethod

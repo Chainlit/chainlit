@@ -10,12 +10,12 @@ interface Props {
 
 export default function LocalHistoryButton({ onClick }: Props) {
   const { getLocalChatHistory } = useLocalChatHistory();
-  const [chats, setChats] = useState(getLocalChatHistory());
+  const [history, setChatHistory] = useState(getLocalChatHistory());
   return (
     <HistoryButton
       onClick={onClick}
-      onOpen={() => setChats(getLocalChatHistory())}
-      chats={chats}
+      onOpen={() => setChatHistory(getLocalChatHistory())}
+      historyMessages={history}
     />
   );
 }
