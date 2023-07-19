@@ -63,11 +63,6 @@ export default memo(function Socket() {
       setSession((s) => ({ ...s!, error: false }));
     });
 
-    socket.on('session', ({ sessionId }) => {
-      // Attach the session id to the next reconnection attempts
-      socket.auth = { sessionId };
-    });
-
     socket.on('connect_error', (err) => {
       console.error('failed to connect', err);
       setSession((s) => ({ ...s!, error: true }));

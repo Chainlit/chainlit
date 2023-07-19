@@ -6,6 +6,7 @@ mimetypes.add_type("text/css", ".css")
 import os
 import webbrowser
 from pathlib import Path
+import uuid
 
 
 from contextlib import asynccontextmanager
@@ -308,7 +309,12 @@ def register_wildcard_route_handler():
                 if os.path.isfile(file_path):
                     return FileResponse(file_path)
 
-        return HTMLResponse(content=html_template, status_code=200)
+        response = HTMLResponse(content=html_template, status_code=200)
+        response.set_cookie(
+            key="chainlit-session", value=str(uuid.uuid4()), httponly=True
+        )
+
+        return response
 
 
 import chainlit.socket  # noqa
