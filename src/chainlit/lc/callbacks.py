@@ -116,15 +116,17 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             return self.last_tokens == self.answer_prefix_tokens
 
     def start_stream(self):
-        message = self.create_message()
-        if message.author in IGNORE_LIST:
+        author = self.get_author()
+        if author in IGNORE_LIST:
             return
 
         self.pop_prompt()
-        message.prompt = self.consume_last_prompt()
-        message.parent_id = self.get_last_message().parent_id
+        prompt = self.consume_last_prompt()
+        parent_id = self.get_last_message().parent_id
 
-        self.stream = message
+        self.stream = self.create_message(
+            prompt=prompt, author=author, parent_id=parent_id
+        )
 
     def end_stream(self):
         self.stream = None
