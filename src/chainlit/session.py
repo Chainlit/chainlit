@@ -1,4 +1,3 @@
-from secrets import token_urlsafe
 from typing import Dict, Optional, Callable, Any, Union
 from chainlit.client.base import BaseAuthClient, BaseDBClient
 from chainlit.types import AskResponse
@@ -18,6 +17,8 @@ class Session:
 
     def __init__(
         self,
+        # Id from the session cookie
+        id: str,
         # Associated socket id
         socket_id: str,
         # Function to emit a message to the user
@@ -45,7 +46,7 @@ class Session:
         self.db_client = db_client
         self.should_stop = False
         self.restored = False
-        self.id = token_urlsafe()
+        self.id = id
 
         sessions_id[self.id] = self
         sessions_sid[socket_id] = self

@@ -6,6 +6,7 @@ import { Alert, Box } from '@mui/material';
 import SideView from 'components/atoms/element/sideView';
 import ErrorBoundary from 'components/atoms/errorBoundary';
 import TaskList from 'components/molecules/tasklist';
+import Socket from 'components/socket';
 
 import { useAuth } from 'hooks/auth';
 import useLocalChatHistory from 'hooks/localChatHistory';
@@ -86,6 +87,7 @@ const Chat = () => {
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
+      <Socket />
       <Playground />
       <TaskList tasklist={tasklist} isMobile={false} />
       <SideView>
