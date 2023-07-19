@@ -7,6 +7,7 @@ from chainlit.context import emitter_var, loop_var
 from chainlit.config import config
 from chainlit.session import Session
 from chainlit.user_session import user_sessions
+from chainlit.client.base import MessageDict
 from chainlit.client.utils import (
     get_db_client,
     get_auth_client,
@@ -159,8 +160,9 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: Session, author: str, input_str: str):
+async def process_message(session: Session, message: MessageDict):
     """Process a message from the user."""
+    input_str = message["content"].strip()
 
     try:
         emitter = ChainlitEmitter(session)
@@ -171,13 +173,9 @@ async def process_message(session: Session, author: str, input_str: str):
 
         if session.db_client:
             # If cloud is enabled, persist the message
-            await session.db_client.create_message(
-                {
-                    "author": author,
-                    "content": input_str,
-                    "authorIsUser": True,
-                }
-            )
+            await session.db_client.create_message(message)
+
+        session.root_message = Message.from_dict(message)
 
         if config.code.on_message:
             await config.code.on_message(input_str)
@@ -193,15 +191,12 @@ async def process_message(session: Session, author: str, input_str: str):
 
 
 @socket.on("ui_message")
-async def message(sid, data):
+async def message(sid, message):
     """Handle a message sent by the User."""
     session = Session.require(sid)
     session.should_stop = False
 
-    input_str = data["content"].strip()
-    author = data["author"]
-
-    await process_message(session, author, input_str)
+    await process_message(session, message)
 
 
 async def process_action(action: Action):

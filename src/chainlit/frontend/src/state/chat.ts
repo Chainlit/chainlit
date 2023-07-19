@@ -33,6 +33,7 @@ export interface IMessage {
   humanFeedback?: number;
   language?: string;
   indent?: number;
+  parentId?: number | string;
   isError?: boolean;
   prompt?: string;
   llmSettings?: ILLMSettings;

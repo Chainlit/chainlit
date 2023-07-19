@@ -16,7 +16,41 @@ interface Props {
   setAutoSroll?: (autoScroll: boolean) => void;
 }
 
+// Nest messages based on parent id
 function nestMessages(messages: IMessage[]): INestedMessage[] {
+  const nestedMessages: INestedMessage[] = [];
+  const lookup = new Map<string | number, INestedMessage>();
+
+  for (const message of messages) {
+    const nestedMessage: INestedMessage = { ...message };
+    if (message.id) lookup.set(message.id, nestedMessage);
+    if (message.tempId) lookup.set(message.tempId, nestedMessage);
+  }
+
+  for (const message of messages) {
+    const id = message.id || message.tempId;
+    if (!id) {
+      nestedMessages.push({ ...message });
+      continue;
+    }
+
+    const nestedMessage = lookup.get(id);
+    if (!nestedMessage) continue;
+
+    if (message.parentId) {
+      const parent = lookup.get(message.parentId);
+      if (!parent) continue;
+      if (!parent.subMessages) parent.subMessages = [];
+      parent.subMessages.push(nestedMessage);
+    } else {
+      nestedMessages.push(nestedMessage);
+    }
+  }
+  return legacyNestMessages(nestedMessages);
+}
+
+// Nest messages based on deprecated indent parameter
+function legacyNestMessages(messages: INestedMessage[]): INestedMessage[] {
   const nestedMessages: INestedMessage[] = [];
   const parentStack: INestedMessage[] = [];
 

@@ -54,6 +54,7 @@ model Message {
   content        String
   humanFeedback  Int          @default(0)
   language       String?
+  parentId       Int?
   prompt         String?
   // Sqlite does not support JSON
   llmSettings    String?
