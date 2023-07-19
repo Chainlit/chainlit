@@ -51,6 +51,8 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # Message at the root of the chat we should attach child messages to
+    root_message: Message
     # Should we stream the final answer?
     stream_final_answer: bool = False
     # Token sequence that prefixes the answer
@@ -72,6 +74,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         strip_tokens: bool = True,
         stream_prefix: bool = False,
         stream_final_answer: bool = False,
+        root_message: Message = None,
     ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
@@ -79,6 +82,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.sequence = []
         self.last_prompt = None
         self.stream = None
+        self.root_message = root_message or self.emitter.session.root_message
 
         # Langchain final answer streaming logic
         if answer_prefix_tokens is None:
@@ -159,7 +163,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def get_last_message(self):
         if self.sequence:
             return self.sequence[-1]
-        return self.emitter.session.root_message
+        return self.root_message
 
     def create_error(self, error: Exception):
         if isinstance(error, InterruptedError):
