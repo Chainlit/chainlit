@@ -22,7 +22,7 @@ it('renders the message content', () => {
 });
 
 it('highlights multiple sources correctly (no substring matching)', () => {
-  const { getByText } = render(
+  const { getByRole } = render(
     <RecoilRoot>
       <BrowserRouter>
         <MessageContent
@@ -54,7 +54,44 @@ it('highlights multiple sources correctly (no substring matching)', () => {
       </BrowserRouter>
     </RecoilRoot>
   );
-  expect(getByText('source_1')).toBeInTheDocument();
-  expect(getByText('source_12')).toBeInTheDocument();
-  expect(getByText('source_121')).toBeInTheDocument();
+  expect(getByRole('link', { name: 'source_1' })).toBeInTheDocument();
+  expect(getByRole('link', { name: 'source_12' })).toBeInTheDocument();
+  expect(getByRole('link', { name: 'source_121' })).toBeInTheDocument();
+});
+
+it('highlights sources containing regex characters correctly', () => {
+  const { getByRole } = render(
+    <RecoilRoot>
+      <BrowserRouter>
+        <MessageContent
+          authorIsUser={false}
+          actions={[]}
+          elements={[
+            {
+              name: 'Document[1]',
+              display: 'side',
+              type: 'text',
+              content: 'hi'
+            } as ITextElement,
+            {
+              name: 'source(12)',
+              display: 'side',
+              type: 'text',
+              content: 'hi'
+            } as ITextElement,
+            {
+              name: 'page{12}',
+              display: 'side',
+              type: 'text',
+              content: 'hi'
+            } as ITextElement
+          ]}
+          content={`Hello world: Document[1], source(12), page{12}`}
+        />
+      </BrowserRouter>
+    </RecoilRoot>
+  );
+  expect(getByRole('link', { name: 'Document[1]' })).toBeInTheDocument();
+  expect(getByRole('link', { name: 'source(12)' })).toBeInTheDocument();
+  expect(getByRole('link', { name: 'page{12}' })).toBeInTheDocument();
 });
