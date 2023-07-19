@@ -180,34 +180,34 @@ const MainDrawer = styled(Box, {
   })
 }));
 
-const Drawer = styled(MDrawer)<DrawerProps>(
-  ({ theme, open, width, isSmallScreen }) => ({
+const Drawer = styled(MDrawer, {
+  shouldForwardProp: (prop) => prop !== 'isSmallScreen'
+})<DrawerProps>(({ theme, open, width, isSmallScreen }) => ({
+  width,
+  flexShrink: 0,
+  '& .MuiDrawer-paper': {
+    position: 'inherit',
     width,
-    flexShrink: 0,
-    '& .MuiDrawer-paper': {
-      position: 'inherit',
-      width,
-      maxWidth: isSmallScreen ? '80%' : '100%',
-      backgroundColor:
-        theme.palette.mode === 'dark'
-          ? theme.palette.grey[800]
-          : theme.palette.grey[100],
-      borderLeft: `1px solid ${
-        theme.palette.mode === 'dark'
-          ? theme.palette.grey[800]
-          : theme.palette.grey[200]
-      }`,
-      display: open ? 'flex' : 'none',
-      flexDirection: 'column',
-      borderRadius: 0,
-      color: theme.palette.text.primary,
-      whiteSpace: 'nowrap',
-      boxSizing: 'border-box',
-      padding: '1.5rem',
-      paddingTop: '.5rem',
-      overflowX: 'hidden'
-    }
-  })
-);
+    maxWidth: isSmallScreen ? '80%' : '100%',
+    backgroundColor:
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey[800]
+        : theme.palette.grey[100],
+    borderLeft: `1px solid ${
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey[800]
+        : theme.palette.grey[200]
+    }`,
+    display: open ? 'flex' : 'none',
+    flexDirection: 'column',
+    borderRadius: 0,
+    color: theme.palette.text.primary,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+    padding: '1.5rem',
+    paddingTop: '.5rem',
+    overflowX: 'hidden'
+  }
+}));
 
 export default SideView;
