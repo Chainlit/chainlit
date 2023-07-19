@@ -2,10 +2,8 @@ import chainlit as cl
 
 
 @cl.on_message
-async def main():
-    root_message = cl.user_session.get("root_message")  # type: cl.Message
-
-    tool1_msg = cl.Message(content="", author="Tool 1", parent_id=root_message.id)
+async def main(message: str, message_id: str):
+    tool1_msg = cl.Message(content="", author="Tool 1", parent_id=message_id)
     await tool1_msg.send()
 
     await cl.sleep(1)
@@ -27,7 +25,7 @@ async def main():
     await tool2_msg.update()
 
     await cl.Message(
-        content="Response from tool 2", author="Tool 1", parent_id=root_message.id
+        content="Response from tool 2", author="Tool 1", parent_id=message_id
     ).send()
 
     await cl.Message(

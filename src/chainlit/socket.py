@@ -183,7 +183,7 @@ async def process_message(session: Session, message: MessageDict):
         session.root_message = Message.from_dict(message)
 
         if config.code.on_message:
-            await config.code.on_message(input_str)
+            await config.code.on_message(input_str, session.root_message.id)
     except InterruptedError:
         pass
     except Exception as e:
