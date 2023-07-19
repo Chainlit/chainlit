@@ -22,8 +22,6 @@ async def load_flow(schema: Union[Dict, str], tweaks: Optional[Dict] = None):
 
     trace_event("load_langflow")
 
-    schema = config.code.langflow_schema
-
     if type(schema) == str:
         async with aiohttp.ClientSession() as session:
             async with session.get(
