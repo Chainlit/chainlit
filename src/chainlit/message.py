@@ -213,6 +213,9 @@ class Message(MessageBase):
         trace_event("send_message")
         id = await super().send()
 
+        if not self.parent_id:
+            self.emitter.session.root_message = self
+
         for action in self.actions:
             await action.send(for_id=str(id))
 

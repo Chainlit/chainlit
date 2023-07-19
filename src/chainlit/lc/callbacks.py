@@ -159,7 +159,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def get_last_message(self):
         if self.sequence:
             return self.sequence[-1]
-        return self.emitter.session.last_message
+        return self.emitter.session.root_message
 
     def create_error(self, error: Exception):
         if isinstance(error, InterruptedError):
