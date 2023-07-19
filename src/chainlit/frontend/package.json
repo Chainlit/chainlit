@@ -42,6 +42,7 @@
     "yup": "^1.0.2"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.2",
     "@babel/preset-env": "^7.22.5",
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.22.5",
