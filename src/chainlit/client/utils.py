@@ -1,3 +1,4 @@
+from chainlit.client.postgres.postgres import PostgresClient
 from fastapi import Request
 
 from chainlit.config import config
@@ -50,6 +51,15 @@ async def get_db_client(
 
         custom_db_client = await config.code.client_factory(user_infos)
         return custom_db_client
+    elif config.project.database == "postgres":
+        local_client = PostgresClient(
+            project_id=config.project.id, user_infos=user_infos
+        )
+
+        # Init the project and user tables if needed
+        await local_client.init()
+
+        return local_client
 
 
 async def get_auth_client_from_request(
@@ -71,7 +81,9 @@ async def get_db_client_from_request(
     # Get the auth client
     auth_client = await get_auth_client(authorization)
 
+    user_infos = await auth_client.get_user_infos()
+
     # Get the db client
-    db_client = await get_db_client(authorization, auth_client.user_infos)
+    db_client = await get_db_client(authorization, user_infos)
 
     return db_client

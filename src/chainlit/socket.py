@@ -75,7 +75,8 @@ async def connect(sid, environ, auth):
 
     try:
         auth_client = await get_auth_client(authorization)
-        db_client = await get_db_client(authorization, auth_client.user_infos)
+        user_infos = await auth_client.get_user_infos()
+        db_client = await get_db_client(authorization, user_infos)
         user_env = load_user_env(user_env)
     except ConnectionRefusedError as e:
         logger.error(f"ConnectionRefusedError: {e}")
@@ -108,6 +109,7 @@ async def connection_successful(sid):
     if isinstance(session.auth_client, CloudAuthClient) and config.project.database in [
         "local",
         "custom",
+        "postgres",
     ]:
         await session.db_client.create_user(session.auth_client.user_infos)
 

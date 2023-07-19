@@ -132,7 +132,7 @@ class ProjectSettings:
     # Whether the app is available to anonymous users or only to team members.
     public: bool = True
     # Storage type
-    database: Optional[Literal["local", "cloud", "custom"]] = None
+    database: Optional[Literal["local", "cloud", "custom", "postgres"]] = None
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.

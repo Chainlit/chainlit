@@ -20,7 +20,7 @@ class LocalAuthClient(BaseAuthClient):
         return True
 
     async def get_user_infos(self):
-        return {"name": "Local User", "role": "OWNER"}
+        return {"id": -1, "name": "Local User", "role": "OWNER"}
 
 
 class LocalDBClient(BaseDBClient):

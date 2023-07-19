@@ -119,7 +119,7 @@ def run_chainlit(target: str):
 )
 @click.option(
     "--db",
-    type=click.Choice(["cloud", "local"]),
+    type=click.Choice(["cloud", "local", "postgres"]),
     help="Useful to control database mode when running CI.",
 )
 @click.option("--host", help="Specify a different host to run the server on")

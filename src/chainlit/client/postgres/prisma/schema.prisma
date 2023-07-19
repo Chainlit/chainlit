@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_DATABASE_URL")
+}
+
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+  output = "./app"
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  email         String?         @unique
+  name          String?
+  role          Role            @default(USER)
+  projects      Project[]
+  Conversation  Conversation[]
+  UserToProject UserToProject[]
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model Project {
+  id            String          @id
+  createdAt     DateTime        @default(now())
+  name          String
+  authorId      Int
+  domains       Domain[]
+  conversations Conversation[]
+  users         UserToProject[]
+  author        User            @relation(fields: [authorId], references: [id])
+}
+
+model UserToProject {
+  id        Int     @id @default(autoincrement())
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+  role      Role
+  projectId String
+  userId    Int
+}
+
+model Domain {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  host      String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  sessionId String?    @unique
+  messages  Message[]
+  elements  Element[]
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+
+model Element {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  type           String
+  url            String
+  name           String
+  display        String
+  size           String?
+  language       String?
+  forId          String?
+  forIds         String[]
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorIsUser   Boolean      @default(false)
+  isError        Boolean      @default(false)
+  waitForAnswer  Boolean      @default(false)
+  indent         Int          @default(0)
+  author         String
+  content        String
+  humanFeedback  Int          @default(0)
+  language       String?
+  prompt         String?
+  llmSettings    Json?
+}

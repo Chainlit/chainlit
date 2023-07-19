@@ -62,6 +62,13 @@ async def lifespan(app: FastAPI):
         register(client)
         await client.connect()
 
+    if config.project.database == "postgres":
+        from chainlit.client.postgres.prisma.app import Client, register
+
+        client = Client()
+        register(client)
+        await client.connect()
+
     watch_task = None
     stop_event = asyncio.Event()
 
@@ -103,7 +110,7 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        if config.project.database == "local":
+        if config.project.database == "local" or config.project.database == "postgres":
             await client.disconnect()
         if watch_task:
             try:
@@ -289,6 +296,7 @@ async def delete_conversation(request: Request, payload: DeleteConversationReque
 @app.get("/files/{filename:path}")
 async def serve_file(filename: str):
     file_path = Path(config.project.local_fs_path) / filename
+    print(f"/files/{filename}", file_path, file_path.is_file())
     if file_path.is_file():
         return FileResponse(file_path)
     else:
@@ -308,7 +316,13 @@ def register_wildcard_route_handler():
                 if os.path.isfile(file_path):
                     return FileResponse(file_path)
 
-        return HTMLResponse(content=html_template, status_code=200)
+        response = HTMLResponse(content=html_template, status_code=200)
+        response.set_cookie(
+            key="chainlit-fun-test",
+            value="hey jude",
+            httponly=True,
+        )
+        return response
 
 
 import chainlit.socket  # noqa
