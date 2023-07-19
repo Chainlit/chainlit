@@ -97,7 +97,13 @@ const Message = ({
           }}
         >
           <Author message={message} show={showAvatar} />
-          <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
+          <Stack
+            alignItems="flex-start"
+            width={0}
+            flexGrow={1}
+            spacing={1}
+            minWidth={200}
+          >
             <MessageContent
               authorIsUser={message.authorIsUser}
               actions={actions}
