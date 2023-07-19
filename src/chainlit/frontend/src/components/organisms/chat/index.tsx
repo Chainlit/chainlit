@@ -88,14 +88,7 @@ const Chat = () => {
     <Box display="flex" width="100%" height="0" flexGrow={1}>
       <Playground />
       <TaskList tasklist={tasklist} isMobile={false} />
-      <Box
-        display="flex"
-        flexDirection="column"
-        width="100%"
-        boxSizing="border-box"
-        px={2}
-        flexGrow={1}
-      >
+      <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
         {session?.error && (
@@ -114,8 +107,7 @@ const Chat = () => {
         )}
         {!messages.length && <WelcomeScreen />}
         <InputBox onReply={onReply} onSubmit={onSubmit} />
-      </Box>
-      <SideView />
+      </SideView>
     </Box>
   );
 };
