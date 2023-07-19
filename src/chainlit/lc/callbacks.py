@@ -180,7 +180,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     ):
         if parent_id is None:
             last_message = self.get_last_message()
-            parent_id = last_message.id or last_message.temp_id
+            parent_id = last_message.id
 
         return Message(
             content,

@@ -23,8 +23,7 @@ export interface IChat {
 }
 
 export interface IMessage {
-  id?: number;
-  tempId?: string;
+  id: string;
   author: string;
   authorIsUser?: boolean;
   waitForAnswer?: boolean;
@@ -33,7 +32,7 @@ export interface IMessage {
   humanFeedback?: number;
   language?: string;
   indent?: number;
-  parentId?: number | string;
+  parentId?: string;
   isError?: boolean;
   prompt?: string;
   llmSettings?: ILLMSettings;
@@ -110,9 +109,7 @@ export const askUserState = atom<IAsk | undefined>({
   default: undefined
 });
 
-export const highlightMessage = atom<
-  IMessage['id'] | IMessage['tempId'] | null
->({
+export const highlightMessage = atom<IMessage['id'] | null>({
   key: 'HighlightMessage',
   default: null
 });

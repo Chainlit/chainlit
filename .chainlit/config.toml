@@ -4,17 +4,23 @@
 public = true
 
 # The project ID (found on https://cloud.chainlit.io).
-# If provided, all the message data will be stored in the cloud.
-# The project ID is required when public is set to false.
+# The project ID is required when public is set to false or when using the cloud database.
 #id = ""
 
-database = "local"
+# Uncomment if you want to persist the chats.
+# local will create a database in your .chainlit directory (requires node.js installed).
+# cloud will use the Chainlit cloud database.
+# custom will load use your custom client.
+# database = "local"
 
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 
 # List of environment variables to be provided by each user to use the app.
 user_env = []
+
+# Duration (in seconds) during which the session is saved when the connection is lost
+session_timeout = 3600
 
 [UI]
 # Name of the app and chatbot.
@@ -33,4 +39,4 @@ hide_cot = false
 # github = ""
 
 [meta]
-generated_by = "0.3.1"
+generated_by = "0.5.2"

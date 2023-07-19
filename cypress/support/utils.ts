@@ -54,8 +54,6 @@ export async function runTest(test: string) {
         try {
           childProcess = await runChainlit(testDir, file, localDb);
           runSpec(test);
-        } catch (err) {
-          console.error(err);
         } finally {
           kill(childProcess.pid, "SIGKILL", function (err) {
             if (err) {

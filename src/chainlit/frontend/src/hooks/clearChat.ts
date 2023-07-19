@@ -13,8 +13,8 @@ export default function useClearChat() {
   const session = useRecoilValue(sessionState);
 
   return () => {
+    session?.socket.emit('clear_session');
     session?.socket.disconnect();
-    if (session) session.socket.auth = {};
     session?.socket.connect();
     setMessages([]);
     setElements([]);
