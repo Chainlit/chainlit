@@ -10,17 +10,20 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.9
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
           node-version: "16.15.0"
-          cache: "npm"
+          cache: "pnpm"
       - name: Install test JS dependencies
-        run: npm install
+        run: pnpm install --no-frozen-lockfile
       - name: Install UI JS dependencies
-        run: npm run installUiDeps
+        run: pnpm run installUiDeps
       - name: Lint UI
-        run: npm run lintUi
+        run: pnpm run lintUi
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -31,4 +34,4 @@ jobs:
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        run: npm test
+        run: pnpm test
