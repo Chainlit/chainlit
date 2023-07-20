@@ -38,6 +38,10 @@ export interface IMessage {
   llmSettings?: ILLMSettings;
 }
 
+export interface IMessageUpdate extends IMessage {
+  newId?: string;
+}
+
 export interface IToken {
   id: number | string;
   token: string;

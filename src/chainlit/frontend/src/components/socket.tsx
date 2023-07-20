@@ -9,6 +9,7 @@ import { useAuth } from 'hooks/auth';
 import { IAction, actionState } from 'state/action';
 import {
   IMessage,
+  IMessageUpdate,
   IToken,
   askUserState,
   loadingState,
@@ -96,12 +97,17 @@ export default memo(function Socket() {
       });
     });
 
-    socket.on('update_message', (message: IMessage) => {
+    socket.on('update_message', (message: IMessageUpdate) => {
       setMessages((oldMessages) => {
         const index = oldMessages.findIndex((m) =>
           compareMessageIds(m, message)
         );
         if (index === -1) return oldMessages;
+        if (message.newId) {
+          message.id = message.newId;
+          delete message.newId;
+        }
+
         return [
           ...oldMessages.slice(0, index),
           message,

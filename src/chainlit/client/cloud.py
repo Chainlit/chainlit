@@ -325,6 +325,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             }
         }
         """
+        variables = variables.copy()
         variables["messageId"] = message_id
         res = await self.mutation(mutation, variables)
 
@@ -424,6 +425,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             }
         }
         """
+
+        variables = variables.copy()
         variables["conversationId"] = c_id
         res = await self.mutation(mutation, variables)
 
