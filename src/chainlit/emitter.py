@@ -76,7 +76,7 @@ class ChainlitEmitter:
             ui_message_update = message.copy()
             persisted_id = await self.db_client.create_message(message)
             if persisted_id:
-                message["id"]: persisted_id
+                message["id"] = persisted_id
                 ui_message_update["newId"] = message["id"]
                 await self.update_message(ui_message_update)
 
