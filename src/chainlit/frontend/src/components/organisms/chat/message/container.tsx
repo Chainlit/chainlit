@@ -19,33 +19,39 @@ interface Props {
 // Nest messages based on parent id
 function nestMessages(messages: IMessage[]): INestedMessage[] {
   const nestedMessages: INestedMessage[] = [];
-  const lookup = new Map<string | number, INestedMessage>();
+  const lookup: Record<string, INestedMessage> = {};
 
-  for (const message of messages) {
-    const nestedMessage: INestedMessage = { ...message };
-    if (message.id) lookup.set(message.id, nestedMessage);
-    if (message.tempId) lookup.set(message.tempId, nestedMessage);
+  function addToParent(
+    parentId: string | undefined,
+    child: INestedMessage
+  ): void {
+    if (parentId) {
+      const parent = lookup[parentId];
+      if (!parent) return;
+      if (!parent.subMessages) parent.subMessages = [];
+      parent.subMessages.push(child);
+    } else {
+      nestedMessages.push(child);
+    }
   }
 
   for (const message of messages) {
-    const id = message.id || message.tempId;
-    if (!id) {
+    const nestedMessage: INestedMessage = { ...message };
+    if (message.id) lookup[message.id] = nestedMessage;
+  }
+
+  for (const message of messages) {
+    if (!message.id) {
       nestedMessages.push({ ...message });
       continue;
     }
 
-    const nestedMessage = lookup.get(id);
+    const nestedMessage = lookup[message.id];
     if (!nestedMessage) continue;
 
-    if (message.parentId) {
-      const parent = lookup.get(message.parentId);
-      if (!parent) continue;
-      if (!parent.subMessages) parent.subMessages = [];
-      parent.subMessages.push(nestedMessage);
-    } else {
-      nestedMessages.push(nestedMessage);
-    }
+    addToParent(message.parentId, nestedMessage);
   }
+
   return legacyNestMessages(nestedMessages);
 }
 

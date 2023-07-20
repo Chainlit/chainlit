@@ -40,9 +40,6 @@ class LocalDBClient(BaseDBClient):
             # Sqlite doesn't support list of primitives, so we need to serialize it.
             variables["forIds"] = json.dumps(variables["forIds"])
 
-        if "tempId" in variables:
-            del variables["tempId"]
-
     def after_read(self, variables: Dict):
         if "llmSettings" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
@@ -92,7 +89,7 @@ class LocalDBClient(BaseDBClient):
 
         return True
 
-    async def get_conversation(self, conversation_id: int):
+    async def get_conversation(self, conversation_id: str):
         from prisma.models import Conversation
 
         c = await Conversation.prisma().find_unique_or_raise(
@@ -215,7 +212,7 @@ class LocalDBClient(BaseDBClient):
 
         return True
 
-    async def upsert_element(
+    async def create_element(
         self,
         variables,
     ):
@@ -231,12 +228,29 @@ class LocalDBClient(BaseDBClient):
 
         self.before_write(variables)
 
-        if "id" in variables:
-            res = await Element.prisma().update(
-                data=variables, where={"id": variables.get("id")}
-            )
-        else:
-            res = await Element.prisma().create(data=variables)
+        res = await Element.prisma().create(data=variables)
+
+        return res.dict()
+
+    async def update_element(
+        self,
+        variables,
+    ):
+        from prisma.models import Element
+
+        c_id = await self.get_conversation_id()
+
+        if not c_id:
+            logger.warning("Missing conversation ID, could not persist the element.")
+            return None
+
+        variables["conversationId"] = c_id
+
+        self.before_write(variables)
+
+        res = await Element.prisma().update(
+            data=variables, where={"id": variables.get("id")}
+        )
 
         return res.dict()
 

@@ -127,7 +127,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return members
 
-    async def create_conversation(self) -> int:
+    async def create_conversation(self) -> str:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
         async with self.lock:
             if self.conversation_id:
@@ -147,14 +147,14 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 logger.warning("Could not create conversation.")
                 return None
 
-            return int(res["data"]["createConversation"]["id"])
+            return res["data"]["createConversation"]["id"]
 
     async def get_conversation_id(self):
         self.conversation_id = await self.create_conversation()
 
         return self.conversation_id
 
-    async def delete_conversation(self, conversation_id: int):
+    async def delete_conversation(self, conversation_id: str):
         mutation = """
         mutation ($id: ID!) {
             deleteConversation(id: $id) {
@@ -168,7 +168,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return True
 
-    async def get_conversation(self, conversation_id: int):
+    async def get_conversation(self, conversation_id: str):
         query = """
         query ($id: ID!) {
             conversation(id: $id) {
@@ -177,6 +177,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 messages {
                     id
                     isError
+                    parentId
                     indent
                     author
                     content
@@ -293,7 +294,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     async def get_message(self):
         raise NotImplementedError
 
-    async def create_message(self, variables: Dict[str, Any]) -> int:
+    async def create_message(self, variables: Dict[str, Any]) -> str:
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -303,8 +304,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         variables["conversationId"] = c_id
 
         mutation = """
-        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
-            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
+        mutation ($id: ID, $conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $parentId: String, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
+            createMessage(id: $id, conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, parentId: $parentId, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
                 id
             }
         }
@@ -314,16 +315,17 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             logger.warning("Could not create message.")
             return None
 
-        return int(res["data"]["createMessage"]["id"])
+        return res["data"]["createMessage"]["id"]
 
-    async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+    async def update_message(self, message_id: str, variables: Dict[str, Any]) -> bool:
         mutation = """
-        mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json) {
-            updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
+        mutation ($messageId: ID!, $author: String!, $content: String!, $parentId: String, $language: String, $prompt: String, $llmSettings: Json) {
+            updateMessage(messageId: $messageId, author: $author, content: $content, parentId: $parentId, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
                 id
             }
         }
         """
+        variables = variables.copy()
         variables["messageId"] = message_id
         res = await self.mutation(mutation, variables)
 
@@ -333,7 +335,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return True
 
-    async def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: str) -> bool:
         mutation = """
         mutation ($messageId: ID!) {
             deleteMessage(messageId: $messageId) {
@@ -379,51 +381,63 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["element"]
 
-    async def upsert_element(self, variables):
+    async def create_element(self, variables):
         c_id = await self.get_conversation_id()
 
         if not c_id:
             logger.warning("Missing conversation ID, could not persist the element.")
             return None
 
-        if "id" in variables:
-            mutation_name = "updateElement"
-            mutation = """
-            mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
-                updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
-                    id,
-                }
+        mutation = """
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+                id,
+                type,
+                url,
+                name,
+                display,
+                size,
+                language,
+                forIds
             }
-            """
-            variables["conversationId"] = c_id
-            res = await self.mutation(mutation, variables)
-        else:
-            mutation_name = "createElement"
-            mutation = """
-            mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
-                createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
-                    id,
-                    type,
-                    url,
-                    name,
-                    display,
-                    size,
-                    language,
-                    forIds
-                }
-            }
-            """
-            variables["conversationId"] = c_id
-            res = await self.mutation(mutation, variables)
+        }
+        """
+        variables["conversationId"] = c_id
+        res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
-            logger.warning("Could not persist element.")
+            logger.warning("Could not create element.")
             return None
 
-        return res["data"][mutation_name]
+        return res["data"]["createElement"]
+
+    async def update_element(self, variables):
+        c_id = await self.get_conversation_id()
+
+        if not c_id:
+            logger.warning("Missing conversation ID, could not persist the element.")
+            return None
+
+        mutation = """
+        mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
+            updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
+                id,
+            }
+        }
+        """
+
+        variables = variables.copy()
+        variables["conversationId"] = c_id
+        res = await self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not update element.")
+            return None
+
+        return res["data"]["updateElement"]
 
     async def upload_element(self, content: bytes, mime: str) -> str:
-        id = f"{uuid.uuid4()}"
+        id = str(uuid.uuid4())
         body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 
         path = f"/api/upload/file"

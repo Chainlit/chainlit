@@ -161,8 +161,9 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         return config.ui.name
 
     def get_last_message(self):
-        if self.sequence:
-            return self.sequence[-1]
+        for message in reversed(self.sequence):
+            if message.author not in IGNORE_LIST:
+                return message
         return self.root_message
 
     def create_error(self, error: Exception):
@@ -180,7 +181,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     ):
         if parent_id is None:
             last_message = self.get_last_message()
-            parent_id = last_message.id or last_message.temp_id
+            parent_id = last_message.id
 
         return Message(
             content,
@@ -208,12 +209,14 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             self.has_streamed_final_answer = final
 
     def add_message(self, message: Message):
+        if message.author in IGNORE_LIST:
+            return
+
         if self.stream:
             run_sync(self.stream.send())
             self.end_stream()
-            return
 
-        if message.author not in IGNORE_LIST:
+        else:
             run_sync(message.send())
 
     # Callbacks for various events
@@ -331,12 +334,14 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             self.has_streamed_final_answer = final
 
     async def add_message(self, message: Message):
+        if message.author in IGNORE_LIST:
+            return
+
         if self.stream:
             await self.stream.send()
             self.end_stream()
-            return
 
-        if message.author not in IGNORE_LIST:
+        else:
             await message.send()
 
     # Callbacks for various events

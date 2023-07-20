@@ -60,7 +60,7 @@ def on_message(func: Callable) -> Callable:
     The decorated function is called every time a new message is received.
 
     Args:
-        func (Callable[[str], Any]): The function to be called when a new message is received. Takes the input message.
+        func (Callable[[str, str], Any]): The function to be called when a new message is received. Takes the input message and the message id.
 
     Returns:
         Callable[[str], Any]: The decorated on_message function.

@@ -26,7 +26,7 @@ export default function Conversation() {
     setError(undefined);
 
     client
-      .getConversation(parseInt(id, 10))
+      .getConversation(id)
       .then((conversation) => setConversation(conversation))
       .catch((err) => {
         setError(err.message);

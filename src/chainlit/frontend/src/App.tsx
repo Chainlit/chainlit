@@ -24,6 +24,7 @@ import { ThemeProvider } from '@mui/material';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
+import Socket from 'components/socket';
 
 import { useAuth } from 'hooks/auth';
 
@@ -146,6 +147,7 @@ function App() {
         }}
       />
       <Box display="flex" height="100vh" width="100vw">
+        <Socket />
         <Hotkeys />
         <SettingsModal />
         <RouterProvider router={router} />
