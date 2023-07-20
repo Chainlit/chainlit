@@ -159,6 +159,7 @@ socket = SocketManager(
 
 def get_html_template():
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
+    JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
     url = config.ui.github or default_url
@@ -171,15 +172,18 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
+    js = None
+    if config.ui.theme:
+        js = f"""<script>window.theme = {config.ui.theme.to_dict()}</script>"""
+
     index_html_file_path = os.path.join(build_dir, "index.html")
 
     with open(index_html_file_path, "r", encoding="utf-8") as f:
         content = f.read()
         content = content.replace(PLACEHOLDER, tags)
+        if js:
+            content = content.replace(JS_PLACEHOLDER, js)
         return content
-
-
-html_template = get_html_template()
 
 
 @app.post("/completion")
@@ -315,6 +319,7 @@ async def get_favicon():
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
     async def serve(path: str):
+        html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
         response.set_cookie(

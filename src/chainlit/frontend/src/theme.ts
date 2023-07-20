@@ -2,6 +2,27 @@ import { grey, primary, white } from 'palette';
 
 import { createTheme } from '@mui/material/styles';
 
+type Primary = {
+  dark?: string;
+  light?: string;
+  main?: string;
+};
+
+type Theme = {
+  primary?: Primary;
+  background?: string;
+  paper?: string;
+};
+
+declare global {
+  interface Window {
+    theme?: {
+      light?: Theme;
+      dark?: Theme;
+    };
+  }
+}
+
 const typography = {
   fontFamily: ['Inter', 'sans-serif'].join(',')
 };
@@ -60,13 +81,13 @@ const darkTheme = createTheme({
     success,
     error,
     background: {
-      default: grey[850],
-      paper: grey[900]
+      default: window?.theme?.dark?.background || grey[850],
+      paper: window?.theme?.dark?.paper || grey[900]
     },
     primary: {
-      main: '#F80061',
-      dark: primary[800],
-      light: '#FFE7EB',
+      main: window?.theme?.dark?.primary?.main || '#F80061',
+      dark: window?.theme?.dark?.primary?.dark || primary[800],
+      light: window?.theme?.dark?.primary?.light || '#FFE7EB',
       contrastText: white
     },
     secondary: {
@@ -92,13 +113,13 @@ const lightTheme = createTheme({
     success,
     error,
     background: {
-      default: grey[50],
-      paper: white
+      default: window?.theme?.light?.background || grey[50],
+      paper: window?.theme?.light?.paper || white
     },
     primary: {
-      main: '#F80061',
-      dark: primary[800],
-      light: '#FFE7EB',
+      main: window?.theme?.light?.primary?.main || '#F80061',
+      dark: window?.theme?.light?.primary?.dark || primary[800],
+      light: window?.theme?.light?.primary?.light || '#FFE7EB',
       contrastText: white
     },
     secondary: {
