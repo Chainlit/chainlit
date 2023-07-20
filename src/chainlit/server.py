@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from watchfiles import awatch
 
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
@@ -119,9 +120,13 @@ async def lifespan(app: FastAPI):
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
-build_dir = os.path.join(root_dir, "frontend/dist")
+ui_dir = "frontend/dist"
+build_dir = os.path.join(root_dir, ui_dir)
 
 app = FastAPI(lifespan=lifespan)
+
+app.mount("/public", StaticFiles(directory="public"), name="public")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -130,6 +135,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Define max HTTP data size to 100 MB
 max_message_size = 100 * 1024 * 1024
@@ -301,14 +307,14 @@ def register_wildcard_route_handler():
     async def serve(path: str):
         """Serve the UI and public files."""
         if path:
-            public_file_path = os.path.join(config.root, "public", path)
-            ui_file_path = os.path.join(build_dir, path)
+            ui_file_path = Path(build_dir) / path
 
-            file_paths = [public_file_path, ui_file_path]
-
-            for file_path in file_paths:
-                if os.path.isfile(file_path):
-                    return FileResponse(file_path)
+            # Check if the file is within the intended directory
+            if (
+                ui_file_path.is_file()
+                and ui_file_path.resolve().parent in ui_file_path.resolve().parents
+            ):
+                return FileResponse(str(ui_file_path))
 
         response = HTMLResponse(content=html_template, status_code=200)
         response.set_cookie(
