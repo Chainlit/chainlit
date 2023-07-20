@@ -299,11 +299,12 @@ async def serve_file(filename: str):
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
     async def serve(path: str):
-        """Serve the UI and app files."""
+        """Serve the UI and public files."""
         if path:
-            app_file_path = os.path.join(config.root, path)
+            public_file_path = os.path.join(config.root, "public", path)
             ui_file_path = os.path.join(build_dir, path)
-            file_paths = [app_file_path, ui_file_path]
+
+            file_paths = [public_file_path, ui_file_path]
 
             for file_path in file_paths:
                 if os.path.isfile(file_path):
