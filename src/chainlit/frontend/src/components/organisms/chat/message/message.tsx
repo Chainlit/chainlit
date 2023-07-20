@@ -89,7 +89,7 @@ const Message = ({
             borderBottom: (theme) =>
               showBorder ? `1px solid ${theme.palette.divider}` : 'none',
             animation:
-              highlightedMessage === message.id
+              message.id && highlightedMessage === message.id
                 ? `3s ease-in-out 0.1s ${flash}`
                 : 'none'
           }}
