@@ -311,7 +311,7 @@ def register_wildcard_route_handler():
             # Check if the file is within the intended directory
             if (
                 ui_file_path.is_file()
-                and ui_file_path.resolve().parent in ui_file_path.resolve().parents
+                and Path(build_dir).resolve() in ui_file_path.resolve().parents
             ):
                 return FileResponse(str(ui_file_path))
 
