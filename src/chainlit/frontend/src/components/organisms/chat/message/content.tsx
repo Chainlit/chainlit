@@ -36,10 +36,15 @@ const isGlobalMatch = (forIds: string[] | undefined) => {
   return !forIds || !forIds.length;
 };
 
+function escapeRegExp(string: string) {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function prepareContent({ id, elements, actions, content, language }: Props) {
   const elementNames = elements
     .filter((e) => e.type !== 'avatar')
-    .map((e) => e.name);
+    .map((e) => escapeRegExp(e.name));
 
   // Sort by descending length to avoid matching substrings
   elementNames.sort((a, b) => b.length - a.length);
