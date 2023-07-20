@@ -61,6 +61,27 @@ hide_cot = false
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
 
+# Override default MUI light theme. (Check theme.ts)
+[UI.theme.light]
+    #background = "#FAFAFA"
+    #paper = "#FFFFFF"
+
+    [UI.theme.light.primary]
+        #main = "#F80061"
+        #dark = "#980039"
+        #light = "#FFE7EB"
+
+# Override default MUI dark theme. (Check theme.ts)
+[UI.theme.dark]
+    #background = "#FAFAFA"
+    #paper = "#FFFFFF"
+
+    [UI.theme.dark.primary]
+        #main = "#F80061"
+        #dark = "#980039"
+        #light = "#FFE7EB"
+
+
 [meta]
 generated_by = "{__version__}"
 """
@@ -88,12 +109,36 @@ class RunSettings:
 
 @dataclass_json
 @dataclass()
+class PaletteOptions:
+    main: Optional[str] = ""
+    light: Optional[str] = ""
+    dark: Optional[str] = ""
+
+
+@dataclass_json
+@dataclass()
+class Palette:
+    primary: PaletteOptions = None
+    background: Optional[str] = ""
+    paper: Optional[str] = ""
+
+
+@dataclass_json
+@dataclass()
+class Theme:
+    light: Palette = None
+    dark: Palette = None
+
+
+@dataclass_json
+@dataclass()
 class UISettings:
     name: str
     description: str = ""
     hide_cot: bool = False
     default_expand_messages: bool = False
     github: str = None
+    theme: Theme = None
 
 
 @dataclass()
