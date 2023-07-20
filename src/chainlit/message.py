@@ -23,7 +23,7 @@ class MessageBase(ABC):
     id: str = None
     streaming = False
     created_at: int = None
-    fail_on_persist_error: bool = True
+    fail_on_persist_error: bool = False
     persisted = False
 
     def __post_init__(self) -> None:
@@ -42,9 +42,11 @@ class MessageBase(ABC):
         msg_dict = self.to_dict()
         if self.emitter.db_client and not self.persisted:
             try:
-                self.id = await self.emitter.db_client.create_message(msg_dict)
-                msg_dict["id"] = self.id
-                self.persisted = True
+                persisted_id = await self.emitter.db_client.create_message(msg_dict)
+                if persisted_id:
+                    msg_dict["id"] = persisted_id
+                    self.id = persisted_id
+                    self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
