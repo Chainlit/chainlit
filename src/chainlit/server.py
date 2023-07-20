@@ -124,7 +124,7 @@ build_dir = os.path.join(root_dir, "frontend/dist")
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/public", StaticFiles(directory="public"), name="public")
+app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
 
 
 app.add_middleware(
