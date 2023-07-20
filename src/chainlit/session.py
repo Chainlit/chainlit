@@ -1,5 +1,9 @@
-from typing import Dict, Optional, Callable, Any, Union
-from chainlit.client.base import BaseAuthClient, BaseDBClient, MessageDict
+from typing import Dict, Optional, Callable, Any, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from chainlit.message import Message
+
+from chainlit.client.base import BaseAuthClient, BaseDBClient
 from chainlit.types import AskResponse
 
 
@@ -36,7 +40,7 @@ class Session:
         # Optional llama instance
         llama_instance: Any = None,
         # Last message at the root of the chat
-        root_message: MessageDict = None,
+        root_message: "Message" = None,
     ):
         self.socket_id = socket_id
         self.ask_user = ask_user
