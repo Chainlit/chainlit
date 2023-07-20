@@ -6,13 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing unreleased yet!
+
+## [0.6.0] - 2023-07-20
+
+### Breaking changes
+
+- Factories, run and post process decorators are removed.
+- langchain_rename becomes author_rename and works globally
+- Message.update signature changed
+
+Migration guide available [here](https://docs.chainlit.io/guides/migration/0.6.0).
+
 ### Added
 
-- Add the file element
+- Langchain final answer streaming
+- Redesign of chainlit input elements
+- Possibility to add custom endpoints to the fast api server
+- New File Element
+- Copy button in code blocks
 
 ### Fixed
 
 - Persist session between websocket reconnection
+- The UI is now more mobile friendly
+- Avatar element Path parameter
+- Increased web socket message max size to 100 mb
+- Duplicated conversations  in the history tab
 
 ## [0.5.2] - 2023-07-10
 
