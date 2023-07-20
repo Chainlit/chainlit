@@ -71,4 +71,6 @@ async def client_factory(user_infos):
 
 @cl.on_chat_start
 async def on_chat_start():
-    await cl.Message("Hello").send()
+    msg = cl.Message(content="Hello")
+    msg.fail_on_persist_error = True
+    await msg.send()
