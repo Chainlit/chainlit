@@ -146,8 +146,8 @@ class Message(MessageBase):
         language: str = None,
         parent_id: str = None,
         indent: int = 0,
-        actions: List[Action] = [],
-        elements: List[Element] = [],
+        actions: List[Action] = None,
+        elements: List[Element] = None,
     ):
         self.content = content
         self.author = author
@@ -155,8 +155,8 @@ class Message(MessageBase):
         self.language = language
         self.parent_id = parent_id
         self.indent = indent
-        self.actions = actions
-        self.elements = elements
+        self.actions = actions if actions is not None else []
+        self.elements = elements if elements is not None else []
         self.llm_settings = None
 
         if llm_settings is None and prompt is not None:
