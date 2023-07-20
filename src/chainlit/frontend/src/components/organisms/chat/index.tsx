@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
@@ -45,15 +46,14 @@ const Chat = () => {
       }
 
       const message: IMessage = {
+        id: uuidv4(),
         author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now()
+        createdAt: new Date().toISOString()
       };
 
-      if (!isAuthenticated || !pSettings?.project?.id) {
-        persistChatLocally(msg);
-      }
+      persistChatLocally(msg);
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);
@@ -66,13 +66,14 @@ const Chat = () => {
     async (msg: string) => {
       if (!askUser) return;
       const message = {
+        id: uuidv4(),
         author: user?.name || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: Date.now()
+        createdAt: new Date().toISOString()
       };
 
-      askUser.callback({ author: message.author, content: message.content });
+      askUser.callback(message);
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);
@@ -88,14 +89,7 @@ const Chat = () => {
     <Box display="flex" width="100%" height="0" flexGrow={1}>
       <Playground />
       <TaskList tasklist={tasklist} isMobile={false} />
-      <Box
-        display="flex"
-        flexDirection="column"
-        width="100%"
-        boxSizing="border-box"
-        px={2}
-        flexGrow={1}
-      >
+      <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
         {session?.error && (
@@ -114,8 +108,7 @@ const Chat = () => {
         )}
         {!messages.length && <WelcomeScreen />}
         <InputBox onReply={onReply} onSubmit={onSubmit} />
-      </Box>
-      <SideView />
+      </SideView>
     </Box>
   );
 };

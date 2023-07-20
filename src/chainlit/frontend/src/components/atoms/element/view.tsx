@@ -60,9 +60,7 @@ const ElementView = () => {
     }
 
     if (!conversationId) {
-      const element = elements.find(
-        (element) => element.id == Number(id) || element.tempId == id
-      );
+      const element = elements.find((element) => element.id === id);
       if (element) {
         setElement(element);
       }

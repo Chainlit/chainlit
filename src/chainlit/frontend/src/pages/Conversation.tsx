@@ -26,7 +26,7 @@ export default function Conversation() {
     setError(undefined);
 
     client
-      .getConversation(parseInt(id, 10))
+      .getConversation(id)
       .then((conversation) => setConversation(conversation))
       .catch((err) => {
         setError(err.message);
@@ -43,25 +43,15 @@ export default function Conversation() {
   return (
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
       <Playground />
-      <Box
-        flexGrow={1}
-        display="flex"
-        flexDirection="column"
-        overflow="auto"
-        boxSizing="border-box"
-        px={{
-          xs: 2,
-          md: 0
-        }}
-      >
+
+      <SideView>
         <Box my={1} />
         <MessageContainer
           actions={actions}
           elements={elements}
           messages={conversation.messages}
         />
-      </Box>
-      <SideView />
+      </SideView>
     </Box>
   );
 }

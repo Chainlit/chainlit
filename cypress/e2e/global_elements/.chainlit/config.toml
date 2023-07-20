@@ -8,6 +8,8 @@ public = true
 # The project ID is required when public is set to false.
 #id = ""
 
+database = "local"
+
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 

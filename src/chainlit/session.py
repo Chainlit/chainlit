@@ -1,5 +1,8 @@
-from secrets import token_urlsafe
-from typing import Dict, Optional, Callable, Any, Union
+from typing import Dict, Optional, Callable, Any, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from chainlit.message import Message
+
 from chainlit.client.base import BaseAuthClient, BaseDBClient
 from chainlit.types import AskResponse
 
@@ -18,6 +21,8 @@ class Session:
 
     def __init__(
         self,
+        # Id from the session cookie
+        id: str,
         # Associated socket id
         socket_id: str,
         # Function to emit a message to the user
@@ -34,6 +39,8 @@ class Session:
         agent: Any = None,
         # Optional llama instance
         llama_instance: Any = None,
+        # Last message at the root of the chat
+        root_message: "Message" = None,
     ):
         self.socket_id = socket_id
         self.ask_user = ask_user
@@ -43,9 +50,10 @@ class Session:
         self.llama_instance = llama_instance
         self.auth_client = auth_client
         self.db_client = db_client
+        self.root_message = root_message
         self.should_stop = False
         self.restored = False
-        self.id = token_urlsafe()
+        self.id = id
 
         sessions_id[self.id] = self
         sessions_sid[socket_id] = self

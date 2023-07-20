@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { useToggle } from 'usehooks-ts';
 
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
+import SettingsIcon from '@mui/icons-material/Settings';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Drawer,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -26,6 +36,7 @@ export default function Playground() {
 
   const userEnv = useRecoilValue(userEnvState);
   const [loading, setLoading] = useState(false);
+  const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
   const restore = () => {
     if (origPrompt) {
@@ -89,14 +100,19 @@ export default function Playground() {
             <HelpIcon />
           </Tooltip>
         </IconButton>
-        <IconButton
-          edge="end"
-          id="close-playground"
-          sx={{ ml: 'auto' }}
-          onClick={handleClose}
-        >
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ ml: 'auto' }}>
+          <IconButton
+            aria-label="open drawer"
+            edge="end"
+            onClick={toggleDrawer}
+            sx={{ mr: '4px' }}
+          >
+            <SettingsIcon />
+          </IconButton>
+          <IconButton edge="end" id="close-playground" onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
         <Stack
@@ -107,7 +123,32 @@ export default function Playground() {
           <TemplatePrompt prompt={origPrompt} />
           <FormattedPrompt prompt={origPrompt} />
           <Completion completion={origPrompt.completion} />
-          <ModelSettings />
+          <Drawer
+            sx={{
+              '& .MuiDrawer-paper': {
+                alignItems: 'center',
+                width: '300px'
+              }
+            }}
+            variant="persistent"
+            anchor="right"
+            open={isDrawerOpen}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: '100%',
+                paddingRight: '30px',
+                paddingTop: '10px'
+              }}
+            >
+              <IconButton onClick={toggleDrawer}>
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+            <ModelSettings />
+          </Drawer>
         </Stack>
         <Stack direction="row" alignItems="center" mt={1} spacing={2}>
           <LoadingButton

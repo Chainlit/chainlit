@@ -9,6 +9,8 @@ async def start():
 
     cb = cl.LlamaIndexCallbackHandler()
 
+    cb.start_trace()
+
     cb.on_event_start(CBEventType.RETRIEVE, payload={})
 
     cb.on_event_end(

@@ -49,7 +49,10 @@ class CustomClient(BaseDBClient):
     async def upload_element(self, content: bytes, mime: str) -> str:
         raise NotImplementedError
 
-    async def upsert_element(self, variables: ElementDict) -> ElementDict:
+    async def create_element(self, variables: ElementDict) -> ElementDict:
+        raise NotImplementedError
+
+    async def update_element(self, variables: ElementDict) -> ElementDict:
         raise NotImplementedError
 
     async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
@@ -68,4 +71,6 @@ async def client_factory(user_infos):
 
 @cl.on_chat_start
 async def on_chat_start():
-    await cl.Message("Hello").send()
+    msg = cl.Message(content="Hello")
+    msg.fail_on_persist_error = True
+    await msg.send()

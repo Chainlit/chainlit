@@ -23,9 +23,8 @@ export type AllElements =
 export type IElementSize = 'small' | 'medium' | 'large';
 
 export interface IElement {
-  id?: number;
-  conversationId?: number;
-  tempId?: string;
+  id: string;
+  conversationId?: string;
   url?: string;
   type: ElementType;
   name: string;

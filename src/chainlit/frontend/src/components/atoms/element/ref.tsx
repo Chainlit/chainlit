@@ -15,9 +15,7 @@ export default function ElementRef({ element }: Props) {
     return <span style={{ fontWeight: 700 }}>{element.name}</span>;
   }
 
-  const elementId = element.id || element.tempId;
-
-  let path = `/element/${elementId}`;
+  let path = `/element/${element.id}`;
   if (element.conversationId) {
     path += `?conversation=${element.conversationId}`;
   }

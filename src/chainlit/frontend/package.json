@@ -44,9 +44,11 @@
     "recoil": "^0.7.6",
     "remark-gfm": "^3.0.1",
     "socket.io-client": "^4.6.2",
+    "usehooks-ts": "^2.9.1",
     "yup": "^1.0.2"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.2",
     "@babel/preset-env": "^7.22.5",
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.22.5",

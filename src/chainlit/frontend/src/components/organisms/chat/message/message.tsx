@@ -62,8 +62,6 @@ const Message = ({
     return null;
   }
 
-  const messageId = message.id ? message.id.toString() : message.tempId;
-
   return (
     <Box
       sx={{
@@ -83,7 +81,7 @@ const Message = ({
         }}
       >
         <Stack
-          id={`message-${messageId}`}
+          id={`message-${message.id}`}
           direction="row"
           ml={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
           sx={{
@@ -91,18 +89,24 @@ const Message = ({
             borderBottom: (theme) =>
               showBorder ? `1px solid ${theme.palette.divider}` : 'none',
             animation:
-              highlightedMessage === messageId
+              message.id && highlightedMessage === message.id
                 ? `3s ease-in-out 0.1s ${flash}`
                 : 'none'
           }}
         >
           <Author message={message} show={showAvatar} />
-          <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
+          <Stack
+            alignItems="flex-start"
+            width={0}
+            flexGrow={1}
+            spacing={1}
+            minWidth={200}
+          >
             <MessageContent
               authorIsUser={message.authorIsUser}
               actions={actions}
               elements={elements}
-              id={messageId}
+              id={message.id}
               content={message.content}
               language={message.language}
             />

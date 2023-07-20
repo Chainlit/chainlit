@@ -82,12 +82,12 @@ class CompletionRequest(BaseModel):
 
 
 class UpdateFeedbackRequest(BaseModel):
-    messageId: int
+    messageId: str
     feedback: int
 
 
 class DeleteConversationRequest(BaseModel):
-    conversationId: int
+    conversationId: str
 
 
 class Pagination(BaseModel):
