@@ -24,6 +24,7 @@ export default function Code({ inline, children, ...props }: CodeProps) {
           {...props}
           children={String(children).replace(/\n$/, '')}
           style={dracula}
+          customStyle={{ paddingRight: '2.5em' }}
           wrapLongLines
           language={match[1]}
           PreTag="div"
@@ -50,6 +51,7 @@ export default function Code({ inline, children, ...props }: CodeProps) {
             background: isDarkMode ? grey[800] : grey[200],
             borderRadius: '4px',
             padding: (theme) => theme.spacing(1),
+            paddingRight: '2.5em',
             overflowX: 'auto'
           }}
         >
@@ -68,34 +70,36 @@ export default function Code({ inline, children, ...props }: CodeProps) {
 
   return (
     <code style={{ position: 'relative' }}>
-      <Tooltip
-        open={showTooltip}
-        title={'Copied to clipboard!'}
-        onClose={toggleTooltip}
-      >
-        <IconButton
-          sx={{
-            color: showSyntaxHighlighter || isDarkMode ? grey[200] : grey[800],
-            position: 'absolute',
-            right: 4,
-            top: 4,
-            zIndex: 1
-          }}
-          onClick={() => {
-            copy(children[0] as string)
-              .then(() => {
-                toggleTooltip();
-                console.log('Successfully copied: ', value);
-              })
-              .catch((err) =>
-                console.log('An error occurred while copying: ', err)
-              );
-          }}
+      {!inline ? (
+        <Tooltip
+          open={showTooltip}
+          title={'Copied to clipboard!'}
+          onClose={toggleTooltip}
         >
-          <CopyAll />
-        </IconButton>
-      </Tooltip>
-
+          <IconButton
+            sx={{
+              color:
+                showSyntaxHighlighter || isDarkMode ? grey[200] : grey[800],
+              position: 'absolute',
+              right: 4,
+              top: 4,
+              zIndex: 1
+            }}
+            onClick={() => {
+              copy(children[0] as string)
+                .then(() => {
+                  toggleTooltip();
+                  console.log('Successfully copied: ', value);
+                })
+                .catch((err) =>
+                  console.log('An error occurred while copying: ', err)
+                );
+            }}
+          >
+            <CopyAll />
+          </IconButton>
+        </Tooltip>
+      ) : null}
       {renderCode()}
     </code>
   );
