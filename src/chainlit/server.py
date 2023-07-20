@@ -120,8 +120,7 @@ async def lifespan(app: FastAPI):
 
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
-ui_dir = "frontend/dist"
-build_dir = os.path.join(root_dir, ui_dir)
+build_dir = os.path.join(root_dir, "frontend/dist")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -305,7 +304,7 @@ async def serve_file(filename: str):
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
     async def serve(path: str):
-        """Serve the UI and public files."""
+        """Serve the UI files."""
         if path:
             ui_file_path = Path(build_dir) / path
 
