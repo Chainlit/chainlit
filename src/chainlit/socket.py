@@ -53,7 +53,7 @@ def load_session_id(http_cookie):
     cookie = SimpleCookie(http_cookie)
     session_cookie = cookie.get("chainlit-session")
     if session_cookie is None:
-        raise ConnectionRefusedError("Session not found")
+        return None
 
     return session_cookie.value
 
@@ -76,11 +76,7 @@ async def connect(sid, environ, auth):
                 raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
-    try:
-        session_id = load_session_id(environ.get("HTTP_COOKIE"))
-    except ConnectionRefusedError as e:
-        logger.error(f"ConnectionRefusedError: {e}")
-        return False
+    session_id = load_session_id(environ.get("HTTP_COOKIE")) or sid
 
     if restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
         return True
@@ -130,6 +126,16 @@ async def connection_successful(sid):
         await config.code.on_chat_start()
 
 
+@socket.on("clear_session")
+async def clean_session(sid):
+    if session := Session.get(sid):
+        # Clean up the user session
+        if session.id in user_sessions:
+            user_sessions.pop(session.id)
+        # Clean up the session
+        session.delete()
+
+
 @socket.on("disconnect")
 async def disconnect(sid):
     async def disconnect_on_timeout(sid):
@@ -172,13 +178,12 @@ async def process_message(session: Session, message: MessageDict):
         await emitter.task_start()
 
         if session.db_client:
-            # If cloud is enabled, persist the message
             await session.db_client.create_message(message)
 
         session.root_message = Message.from_dict(message)
 
         if config.code.on_message:
-            await config.code.on_message(input_str)
+            await config.code.on_message(input_str, session.root_message.id)
     except InterruptedError:
         pass
     except Exception as e:
