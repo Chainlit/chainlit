@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { Link } from '@mui/material';
+
 import { ITextElement } from 'state/element';
 
 import Code from '../Code';
@@ -49,9 +51,12 @@ export default function TextElement({ element }: Props) {
       remarkPlugins={[remarkGfm]}
       className="markdown-body"
       components={{
-        code({ ...props }) {
-          return <Code {...props} />;
-        }
+        a: ({ children, ...props }) => (
+          <Link {...props} target="_blank">
+            {children}
+          </Link>
+        ),
+        code: ({ ...props }) => <Code {...props} />
       }}
     >
       {content}

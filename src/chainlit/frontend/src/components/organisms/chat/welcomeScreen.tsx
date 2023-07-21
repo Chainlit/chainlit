@@ -36,16 +36,12 @@ const WelcomeScreen = () => {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              a({ children, ...props }) {
-                return (
-                  <Link {...props} target="_blank">
-                    {children}
-                  </Link>
-                );
-              },
-              code({ ...props }) {
-                return <Code {...props} />;
-              }
+              a: ({ children, ...props }) => (
+                <Link {...props} target="_blank">
+                  {children}
+                </Link>
+              ),
+              code: ({ ...props }) => <Code {...props} />
             }}
           >
             {pSettings?.markdown}
