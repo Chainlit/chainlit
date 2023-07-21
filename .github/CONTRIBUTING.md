@@ -64,7 +64,6 @@ $ git remote -v
 
 ```sh
 pnpm install
-pnpm run installUiDeps
 ```
 
 ### Install python dependencies

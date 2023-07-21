@@ -17,7 +17,6 @@
     "lintUi": "cd src/chainlit/frontend && pnpm run lint",
     "formatUi": "cd src/chainlit/frontend && pnpm run format",
     "formatPython": "black `git ls-files | grep '.py$'`",
-    "installUiDeps": "cd src/chainlit/frontend && pnpm install",
     "buildUi": "(cd src/chainlit/frontend && pnpm run build)",
     "build": "(cd src/chainlit/frontend && pnpm run build) && (cd src && poetry build)"
   }

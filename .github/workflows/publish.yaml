@@ -30,8 +30,6 @@ jobs:
         with:
           node-version: "16.15.0"
           cache: "pnpm"
-      - name: Install UI JS dependencies
-        run: pnpm run installUiDeps
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

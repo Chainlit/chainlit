@@ -18,17 +18,16 @@ jobs:
         with:
           node-version: "16.15.0"
           cache: "pnpm"
-      - name: Install test JS dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Install UI JS dependencies
-        run: pnpm run installUiDeps
-      - name: Lint UI
-        run: pnpm run lintUi
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
           cache: "pip"
+      - name: Install test JS dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Lint UI
+        run: pnpm run lintUi
+
       - name: Install Poetry
         run: pip install poetry
       - name: Run tests
