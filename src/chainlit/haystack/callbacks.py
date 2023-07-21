@@ -35,7 +35,6 @@ class HaystackCallbackHandler:
         # Prepare agent step message for streaming
         self.agent_name = kwargs.get('name', 'Agent')
         self.agent_message = cl.Message(author=self.agent_name, parent_id=self.get_root_message_id(), content="")
-        print("\n:::agent message:::", self.agent_message.id)
 
     def on_agent_step(self, agent_step: AgentStep, **kwargs: Any) -> None:
         # Send previous (streamed) agent step message
@@ -44,7 +43,6 @@ class HaystackCallbackHandler:
         # Create next agent step message for streaming
         self.previous_agent_message = self.agent_message
         self.agent_message = cl.Message(author=self.agent_name, parent_id=self.get_root_message_id(), content="")
-        print("\n:::agent message:::", self.agent_message.id)
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any):
         # Send previous (streamed) agent step message
@@ -59,7 +57,6 @@ class HaystackCallbackHandler:
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any):
         # Tool started, create message
         self.tool_message = cl.Message(author=tool.name, parent_id=self.previous_agent_message.id, content="")
-        print("\n:::tool used agent message:::", self.agent_message.id)
 
     def on_tool_finish(
         self, tool_result: str, tool_name: Optional[str] = None, tool_input: Optional[str] = None, **kwargs: Any
