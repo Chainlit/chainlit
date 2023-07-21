@@ -2,13 +2,12 @@ from dotenv import load_dotenv
 from typing import Callable, Any, Optional, TYPE_CHECKING
 import os
 import asyncio
+from chainlit.haystack import HAYSTACK_INSTALLED
 
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, UserDict
 
-from chainlit.lc import (
-    LANGCHAIN_INSTALLED,
-)
+from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.llama_index import LLAMA_INDEX_INSTALLED
 from chainlit.utils import wrap_user_function
 from chainlit.config import config
@@ -46,6 +45,10 @@ if LLAMA_INDEX_INSTALLED:
         LlamaIndexCallbackHandler,
     )
 
+if HAYSTACK_INSTALLED:
+    from chainlit.haystack.callbacks import (
+        HaystackCallbackHandler,
+    )
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
@@ -183,6 +186,7 @@ __all__ = [
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",
     "LlamaIndexCallbackHandler",
+    "HaystackCallbackHandler"
     "client_factory",
     "run_sync",
     "make_async",
