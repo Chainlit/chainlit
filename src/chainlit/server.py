@@ -125,6 +125,11 @@ build_dir = os.path.join(root_dir, "frontend/dist")
 app = FastAPI(lifespan=lifespan)
 
 app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
+app.mount(
+    "/assets",
+    StaticFiles(packages=[("chainlit", os.path.join(build_dir, "assets"))]),
+    name="assets",
+)
 
 
 app.add_middleware(
@@ -301,20 +306,16 @@ async def serve_file(filename: str):
         return {"error": "File not found"}
 
 
+@app.get("/favicon.svg")
+async def get_favicon():
+    favicon_path = os.path.join(build_dir, "favicon.svg")
+    return FileResponse(favicon_path, media_type="image/svg+xml")
+
+
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
     async def serve(path: str):
         """Serve the UI files."""
-        if path:
-            ui_file_path = Path(build_dir) / path
-
-            # Check if the file is within the intended directory
-            if (
-                ui_file_path.is_file()
-                and Path(build_dir).resolve() in ui_file_path.resolve().parents
-            ):
-                return FileResponse(str(ui_file_path))
-
         response = HTMLResponse(content=html_template, status_code=200)
         response.set_cookie(
             key="chainlit-session", value=str(uuid.uuid4()), httponly=True
