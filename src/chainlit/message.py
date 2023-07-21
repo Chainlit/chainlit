@@ -164,7 +164,6 @@ class Message(MessageBase):
             content=_dict["content"],
             author=_dict.get("author"),
             prompt=_dict.get("prompt"),
-            llm_settings=_dict.get("llmSettings"),
             language=_dict.get("language"),
             parent_id=_dict.get("parentId"),
             indent=_dict.get("indent", 0),
@@ -250,6 +249,7 @@ class ErrorMessage(MessageBase):
         self,
         content: str,
         author: str = config.ui.name,
+        prompt: Prompt = None,
         indent: int = 0,
         fail_on_persist_error: bool = False,
     ):

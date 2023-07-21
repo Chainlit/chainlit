@@ -122,7 +122,6 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        self.pop_prompt()
         parent_id = self.get_last_message().parent_id
 
         self.stream = self.create_message(
@@ -139,33 +138,11 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if self.sequence:
             return self.sequence.pop()
 
-<<<<<<< HEAD
-    def get_message_params(self):
-        indent = len(self.sequence) if self.sequence else 0
-
-=======
-    def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
-        self.prompts.append(prompt)
-        self.llm_settings = llm_settings
-
-    def pop_prompt(self):
-        if self.prompts:
-            self.last_prompt = self.prompts.pop()
-
-    def consume_last_prompt(self):
-        last_prompt = self.last_prompt
-        self.last_prompt = None
-        return last_prompt
-
     def get_author(self):
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
         if self.sequence:
             return self.sequence[-1].author
         return config.ui.name
 
-<<<<<<< HEAD
-        return author, indent
-=======
     def get_last_message(self):
         for message in reversed(self.sequence):
             if message.author not in IGNORE_LIST:
@@ -176,12 +153,14 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if isinstance(error, InterruptedError):
             return None
 
-        return ErrorMessage(str(error), author=self.get_author())
+        return ErrorMessage(
+            content=str(error), author=self.get_author(), prompt=self.current_prompt
+        )
 
     def create_message(
         self,
         content: str = "",
-        prompt: str = None,
+        prompt: Prompt = None,
         author: str = None,
         parent_id: Union[str, int] = None,
     ):
@@ -194,9 +173,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             author=author or self.get_author(),
             prompt=prompt,
             parent_id=parent_id,
-            llm_settings=self.llm_settings,
         )
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
 
 
 class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
@@ -215,20 +192,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             run_sync(stream.stream_token(token))
             self.has_streamed_final_answer = final
 
-<<<<<<< HEAD
-    def add_message(self, message, error=False):
-        author, indent = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            run_sync(ErrorMessage(author=author, content=message).send())
-            self.end_stream()
-=======
     def add_message(self, message: Message):
         if message.author in IGNORE_LIST:
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
             return
 
         if self.stream:
@@ -236,18 +201,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             self.end_stream()
 
         else:
-<<<<<<< HEAD
-            run_sync(
-                Message(
-                    author=author,
-                    content=message,
-                    indent=indent,
-                    prompt=self.current_prompt,
-                ).send()
-            )
-=======
             run_sync(message.send())
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
 
     # Callbacks for various events
 
@@ -315,46 +269,29 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-<<<<<<< HEAD
         inputs = {k: str(v) for (k, v) in inputs.items()}
         prompt_params = serialized.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
         self.current_prompt = Prompt(
             template=prompt_params.get("template"),
             inptus=inputs,
         )
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        self.add_message("")
-=======
-        message = self.create_message(author=serialized["id"][-1])
+        message = self.create_message(
+            author=serialized["id"][-1], prompt=self.current_prompt
+        )
         self.add_in_sequence(message)
         self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
-<<<<<<< HEAD
-            self.add_message(outputs[output_key])
-        self.pop_sequence()
-        self.current_prompt = None
-
-    def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        self.current_prompt = None
-        self.add_message(str(error), error=True)
-=======
-            prompt = self.consume_last_prompt()
             parent_id = self.get_last_message().parent_id
             message = self.create_message(
-                outputs[output_key], prompt, parent_id=parent_id
+                outputs[output_key], self.current_prompt, parent_id=parent_id
             )
             self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
+
         self.pop_sequence()
+        self.current_prompt = None
 
     def on_tool_start(
         self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
@@ -370,23 +307,9 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-<<<<<<< HEAD
-        self.add_message(output)
-        self.pop_sequence()
-
-    def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        self.add_message(str(error), error=True)
-=======
-        prompt = self.consume_last_prompt()
         parent_id = self.get_last_message().parent_id
-        message = self.create_message(output, prompt, parent_id=parent_id)
+        message = self.create_message(output, None, parent_id=parent_id)
         self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
         self.pop_sequence()
 
     def on_text(self, text: str, **kwargs: Any) -> None:
@@ -416,20 +339,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             await stream.stream_token(token)
             self.has_streamed_final_answer = final
 
-<<<<<<< HEAD
-    async def add_message(self, message, error=False):
-        author, indent = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            await ErrorMessage(author=author, content=message).send()
-            self.end_stream()
-=======
     async def add_message(self, message: Message):
         if message.author in IGNORE_LIST:
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
             return
 
         if self.stream:
@@ -437,16 +348,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             self.end_stream()
 
         else:
-<<<<<<< HEAD
-            await Message(
-                author=author,
-                content=message,
-                indent=indent,
-                prompt=self.current_prompt,
-            ).send()
-=======
             await message.send()
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
 
     # Callbacks for various events
 
@@ -514,44 +416,26 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-<<<<<<< HEAD
         inputs = {k: str(v) for (k, v) in inputs.items()}
         prompt_params = serialized.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
         self.current_prompt = Prompt(
             template=prompt_params.get("template"),
             inputs=inputs,
         )
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        await self.add_message("")
-=======
-        message = self.create_message(author=serialized["id"][-1])
+        message = self.create_message(
+            author=serialized["id"][-1], prompt=self.current_prompt
+        )
         self.add_in_sequence(message)
         await self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
 
     async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
-<<<<<<< HEAD
-            await self.add_message(outputs[output_key])
-        self.pop_sequence()
-        self.current_prompt = None
-
-    async def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
-=======
-            prompt = self.consume_last_prompt()
             parent_id = self.get_last_message().parent_id
             message = self.create_message(
-                outputs[output_key], prompt, parent_id=parent_id
+                outputs[output_key], prompt=self.current_prompt, parent_id=parent_id
             )
             await self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
         self.pop_sequence()
         self.current_prompt = None
 
@@ -569,23 +453,9 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-<<<<<<< HEAD
-        await self.add_message(output)
-        self.pop_sequence()
-
-    async def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
-=======
-        prompt = self.consume_last_prompt()
         parent_id = self.get_last_message().parent_id
-        message = self.create_message(output, prompt, parent_id=parent_id)
+        message = self.create_message(output, parent_id=parent_id)
         await self.add_message(message)
->>>>>>> 4ac6a1138f726b4e9c580c730194c62b6af0d484
         self.pop_sequence()
 
     async def on_text(self, text: str, **kwargs: Any) -> None:
