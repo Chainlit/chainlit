@@ -322,10 +322,6 @@ def register_wildcard_route_handler():
         html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
-        response.set_cookie(
-            key="chainlit-session", value=str(uuid.uuid4()), httponly=True
-        )
-
         return response
 
 

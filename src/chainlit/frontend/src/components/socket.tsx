@@ -19,7 +19,7 @@ import {
 } from 'state/chat';
 import { IElement, elementState } from 'state/element';
 import { projectSettingsState } from 'state/project';
-import { userEnvState } from 'state/user';
+import { sessionIdState, userEnvState } from 'state/user';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;
@@ -31,6 +31,7 @@ export default memo(function Socket() {
   const { accessToken, authenticating } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
+  const sessionId = useRecoilValue(sessionIdState);
   const [session, setSession] = useRecoilState(sessionState);
   const setMessages = useSetRecoilState(messagesState);
   const setTokenCount = useSetRecoilState(tokenCountState);
@@ -50,6 +51,7 @@ export default memo(function Socket() {
       path: '/ws/socket.io',
       extraHeaders: {
         Authorization: accessToken || '',
+        'X-Chainlit-Session-Id': sessionId,
         'user-env': JSON.stringify(userEnv)
       }
     });

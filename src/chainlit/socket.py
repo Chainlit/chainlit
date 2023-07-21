@@ -1,6 +1,4 @@
 import json
-from http.cookies import SimpleCookie
-
 import asyncio
 
 from chainlit.context import emitter_var, loop_var
@@ -49,15 +47,6 @@ def load_user_env(user_env):
     return user_env
 
 
-def load_session_id(http_cookie):
-    cookie = SimpleCookie(http_cookie)
-    session_cookie = cookie.get("chainlit-session")
-    if session_cookie is None:
-        return None
-
-    return session_cookie.value
-
-
 @socket.on("connect")
 async def connect(sid, environ, auth):
     # Function to send a message to this particular session
@@ -76,8 +65,7 @@ async def connect(sid, environ, auth):
                 raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
-    session_id = load_session_id(environ.get("HTTP_COOKIE")) or sid
-
+    session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
     if restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
         return True
 

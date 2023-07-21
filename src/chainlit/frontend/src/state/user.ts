@@ -1,8 +1,14 @@
 import { atom } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
 
 export const accessTokenState = atom<string | undefined>({
   key: 'AccessToken',
   default: undefined
+});
+
+export const sessionIdState = atom<string>({
+  key: 'SessionId',
+  default: uuidv4()
 });
 
 export type Role = 'USER' | 'ADMIN' | 'OWNER' | 'ANONYMOUS' | undefined;
