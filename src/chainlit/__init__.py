@@ -186,7 +186,7 @@ __all__ = [
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",
     "LlamaIndexCallbackHandler",
-    "HaystackCallbackHandler"
+    "HaystackCallbackHandler",
     "client_factory",
     "run_sync",
     "make_async",

@@ -23,7 +23,7 @@ class HaystackCallbackHandler:
         agent.tm.callback_manager.on_tool_error += self.on_tool_error
 
     def get_root_message_id(self):
-        self.emitter = self.emitter if hasattr(self, 'emitter') else get_emitter()
+        self.emitter = self.emitter if hasattr(self, "emitter") else get_emitter()
 
         if not self.emitter.session.root_message:
             root_message = cl.Message(author=config.ui.name, content="")
@@ -33,8 +33,10 @@ class HaystackCallbackHandler:
 
     def on_agent_start(self, **kwargs: Any) -> None:
         # Prepare agent step message for streaming
-        self.agent_name = kwargs.get('name', 'Agent')
-        self.agent_message = cl.Message(author=self.agent_name, parent_id=self.get_root_message_id(), content="")
+        self.agent_name = kwargs.get("name", "Agent")
+        self.agent_message = cl.Message(
+            author=self.agent_name, parent_id=self.get_root_message_id(), content=""
+        )
 
     def on_agent_step(self, agent_step: AgentStep, **kwargs: Any) -> None:
         # Send previous (streamed) agent step message
@@ -42,7 +44,9 @@ class HaystackCallbackHandler:
 
         # Create next agent step message for streaming
         self.previous_agent_message = self.agent_message
-        self.agent_message = cl.Message(author=self.agent_name, parent_id=self.get_root_message_id(), content="")
+        self.agent_message = cl.Message(
+            author=self.agent_name, parent_id=self.get_root_message_id(), content=""
+        )
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any):
         # Send previous (streamed) agent step message
@@ -56,10 +60,16 @@ class HaystackCallbackHandler:
 
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any):
         # Tool started, create message
-        self.tool_message = cl.Message(author=tool.name, parent_id=self.previous_agent_message.id, content="")
+        self.tool_message = cl.Message(
+            author=tool.name, parent_id=self.previous_agent_message.id, content=""
+        )
 
     def on_tool_finish(
-        self, tool_result: str, tool_name: Optional[str] = None, tool_input: Optional[str] = None, **kwargs: Any
+        self,
+        tool_result: str,
+        tool_name: Optional[str] = None,
+        tool_input: Optional[str] = None,
+        **kwargs: Any
     ) -> None:
         # Tool finished, send message with tool_result
         self.tool_message.content = tool_result
