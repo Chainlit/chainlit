@@ -12,7 +12,7 @@ async def start():
     fake_prompt_node = PromptNode(model_name_or_path="gpt-3.5-turbo", api_key="fakekey")
 
     agent = Agent(fake_prompt_node)
-    cb = cl.HaystackCallbackHandler(agent)
+    cb = cl.HaystackAgentCallbackHandler(agent)
 
     cb.on_agent_start(name="agent")
 
