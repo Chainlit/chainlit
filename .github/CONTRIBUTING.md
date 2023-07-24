@@ -19,8 +19,6 @@ I've copy/pasted the whole document there, without the previous two headings.
 - [Run the tests](#run-the-tests)
   - [Run one test](#run-one-test)
 
-> **Note**
-> If you are on windows, some npm commands like npm run formatPython won't work. You can fix this by changing the npm script-shell to bash: npm config set script-shell `C:\\Program Files\\git\\bin\\bash.exe` (default x64 install location)
 
 ## Local setup
 
@@ -29,6 +27,10 @@ I've copy/pasted the whole document there, without the previous two headings.
 1. Python >= `3.8`
 2. Poetry ([See how to install](https://python-poetry.org/docs/#installation))
 3. NodeJS >= `16` ([See how to install](https://nodejs.org/en/download))
+4. Pnpm ([See how to install](https://pnpm.io/installation))
+
+> **Note**
+> If you are on windows, some pnpm commands like `pnpm run formatPython` won't work. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
 
 ### Setup the repo
 
