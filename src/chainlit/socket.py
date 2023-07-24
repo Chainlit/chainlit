@@ -151,21 +151,19 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: Session, message: MessageDict):
+async def process_message(session: Session, message_dict: MessageDict):
     """Process a message from the user."""
-    input_str = message["content"].strip()
-
     try:
         emitter = ChainlitEmitter(session)
         emitter_var.set(emitter)
         loop_var.set(asyncio.get_event_loop())
 
         await emitter.task_start()
+        await emitter.process_user_message(message_dict)
 
-        await emitter.process_user_message(message)
-
+        message = Message.from_dict(message_dict)
         if config.code.on_message:
-            await config.code.on_message(input_str, session.root_message.id)
+            await config.code.on_message(message.content.strip(), message.id)
     except InterruptedError:
         pass
     except Exception as e:
