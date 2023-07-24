@@ -101,7 +101,7 @@ If you've made it this far, you can now replace `chainlit/hello.py` by your own 
 
 ## Start the UI from source
 
-First, you will have to start the server (see the previous section). Since we are starting the UI from source, you can start the server with the `-h` (headless) option.
+First, you will have to start the server either [from source](#start-the-chainlit-server-from-source) or with `chainlit run... `. Since we are starting the UI from source, you can start the server with the `-h` (headless) option.
 
 Then, start the UI.
 
@@ -111,8 +111,6 @@ npm run dev -- --port 5174
 ```
 
 If you visit `http://127.0.0.1:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
-
-You should now be able to access the UI on `http://127.0.0.1:5174/`.
 
 ## Run the tests
 
