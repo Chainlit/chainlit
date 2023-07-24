@@ -21,6 +21,7 @@ from chainlit.types import (
 
 class MessageBase(ABC):
     id: str
+    author: str
     streaming = False
     created_at: Optional[int] = None
     fail_on_persist_error: bool = False
@@ -172,7 +173,7 @@ class Message(MessageBase):
     def from_dict(self, _dict: MessageDict):
         message = Message(
             content=_dict["content"],
-            author=_dict.get("author"),
+            author=_dict.get("author", config.ui.name),
             prompt=_dict.get("prompt"),
             llm_settings=_dict.get("llmSettings"),
             language=_dict.get("language"),
