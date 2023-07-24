@@ -179,7 +179,7 @@ class Message(MessageBase):
             llm_settings=_dict.get("llmSettings"),
             language=_dict.get("language"),
             parent_id=_dict.get("parentId"),
-            indent=_dict.get("indent", 0),
+            indent=_dict.get("indent") or 0,
         )
 
         if _id := _dict.get("id"):
