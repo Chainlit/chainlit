@@ -22,6 +22,7 @@ from chainlit.types import (
 class MessageBase(ABC):
     id: str
     author: str
+    content: str = ""
     streaming = False
     created_at: Union[int, str, None] = None
     fail_on_persist_error: bool = False
