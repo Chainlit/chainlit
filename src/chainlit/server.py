@@ -12,7 +12,7 @@ import uuid
 from contextlib import asynccontextmanager
 from watchfiles import awatch
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import (
     HTMLResponse,
@@ -303,11 +303,17 @@ async def delete_conversation(request: Request, payload: DeleteConversationReque
 
 @app.get("/files/{filename:path}")
 async def serve_file(filename: str):
-    file_path = Path(config.project.local_fs_path) / filename
+    base_path = Path(config.project.local_fs_path).resolve()
+    file_path = (base_path / filename).resolve()
+
+    # Check if the base path is a parent of the file path
+    if base_path not in file_path.parents:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
     if file_path.is_file():
         return FileResponse(file_path)
     else:
-        return {"error": "File not found"}
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.get("/favicon.svg")
