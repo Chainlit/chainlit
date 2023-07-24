@@ -32,6 +32,7 @@ class MessageDict(TypedDict):
     prompt: Optional[str]
     llmSettings: Dict
     language: Optional[str]
+    parentId: Optional[str]
     indent: Optional[int]
     authorIsUser: Optional[bool]
     waitForAnswer: Optional[bool]
