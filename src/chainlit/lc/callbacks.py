@@ -178,7 +178,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         content: str = "",
         prompt: Optional[str] = None,
         author: Optional[str] = None,
-        parent_id: Optional[Union[str, int]] = None,
+        parent_id: Optional[str] = None,
     ):
         if parent_id is None:
             last_message = self.get_last_message()

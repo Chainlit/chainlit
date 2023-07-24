@@ -20,7 +20,7 @@ from chainlit.types import (
 
 
 class MessageBase(ABC):
-    id: str = None
+    id: str
     streaming = False
     created_at: int = None
     fail_on_persist_error: bool = False
@@ -28,7 +28,7 @@ class MessageBase(ABC):
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        if not self.id:
+        if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
         if not self.created_at:
             self.created_at = datetime.now(timezone.utc).isoformat()
@@ -117,6 +117,7 @@ class MessageBase(ABC):
         else:
             self.content += token
 
+        assert self.id
         await self.emitter.send_token(id=self.id, token=token, is_sequence=is_sequence)
 
 

@@ -140,7 +140,7 @@ class ChainlitEmitter:
             msg_dict,
         )
 
-    def send_token(self, id: Union[str, int], token: str, is_sequence=False):
+    def send_token(self, id: str, token: str, is_sequence=False):
         """Send a message token to the UI."""
         return self.emit(
             "stream_token", {"id": id, "token": token, "isSequence": is_sequence}

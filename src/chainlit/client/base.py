@@ -55,7 +55,7 @@ class ElementDict(TypedDict):
     display: ElementDisplay
     size: ElementSize
     language: str
-    forIds: Optional[List[Union[str, int]]]
+    forIds: Optional[List[str]]
 
 
 class ConversationDict(TypedDict):
@@ -160,6 +160,6 @@ class BaseDBClient(ABC):
 
     @abstractmethod
     async def set_human_feedback(
-        self, message_id: int, feedback: Literal[-1, 0, 1]
+        self, message_id: str, feedback: Literal[-1, 0, 1]
     ) -> bool:
         pass

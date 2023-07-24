@@ -59,7 +59,7 @@ class CustomClient(BaseDBClient):
         raise NotImplementedError
 
     async def set_human_feedback(
-        self, message_id: int, feedback: Literal[-1, 0, 1]
+        self, message_id: str, feedback: Literal[-1, 0, 1]
     ) -> bool:
         raise NotImplementedError
 
