@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
@@ -141,13 +141,13 @@ class Message(MessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        prompt: str = None,
-        llm_settings: LLMSettings = None,
-        language: str = None,
-        parent_id: str = None,
+        prompt: Optional[str] = None,
+        llm_settings: Optional[LLMSettings] = None,
+        language: Optional[str] = None,
+        parent_id: Optional[str] = None,
         indent: int = 0,
-        actions: List[Action] = None,
-        elements: List[Element] = None,
+        actions: Optional[List[Action]] = None,
+        elements: Optional[List[Element]] = None,
     ):
         self.content = content
         self.author = author

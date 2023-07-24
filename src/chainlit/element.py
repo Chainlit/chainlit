@@ -2,7 +2,7 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import aiofiles
 import filetype
@@ -100,7 +100,7 @@ class Element:
         trace_event(f"remove {self.__class__.__name__}")
         await self.emitter.emit("remove_element", {"id": self.id})
 
-    async def send(self, for_id: str = None):
+    async def send(self, for_id: Optional[str] = None):
         element = None
 
         if not self.content and not self.url and self.path:
@@ -241,7 +241,7 @@ class Task:
         self,
         title: str,
         status: TaskStatus = TaskStatus.READY,
-        forId: str = None,
+        forId: Optional[str] = None,
     ):
         self.title = title
         self.status = status

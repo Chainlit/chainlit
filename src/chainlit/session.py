@@ -36,11 +36,11 @@ class Session:
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
         # Optional langchain agent
-        agent: Any = None,
+        agent: Optional[Any] = None,
         # Optional llama instance
-        llama_instance: Any = None,
+        llama_instance: Optional[Any] = None,
         # Last message at the root of the chat
-        root_message: "Message" = None,
+        root_message: Optional["Message"] = None,
     ):
         self.socket_id = socket_id
         self.ask_user = ask_user

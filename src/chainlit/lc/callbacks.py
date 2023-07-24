@@ -71,7 +71,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         strip_tokens: bool = True,
         stream_prefix: bool = False,
         stream_final_answer: bool = False,
-        root_message: Message = None,
+        root_message: Optional[Message] = None,
     ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
@@ -143,7 +143,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if self.sequence:
             return self.sequence.pop()
 
-    def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
+    def add_prompt(self, prompt: str, llm_settings: Optional[LLMSettings] = None):
         self.prompts.append(prompt)
         self.llm_settings = llm_settings
 
@@ -176,9 +176,9 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def create_message(
         self,
         content: str = "",
-        prompt: str = None,
-        author: str = None,
-        parent_id: Union[str, int] = None,
+        prompt: Optional[str] = None,
+        author: Optional[str] = None,
+        parent_id: Optional[Union[str, int]] = None,
     ):
         if parent_id is None:
             last_message = self.get_last_message()

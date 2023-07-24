@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import Request
 
 from chainlit.client.base import BaseAuthClient, BaseDBClient, UserDict
@@ -31,7 +33,7 @@ async def get_auth_client(authorization: str) -> BaseAuthClient:
 
 
 async def get_db_client(
-    authorization: str = None, user_infos: UserDict = None
+    authorization: Optional[str] = None, user_infos: Optional[UserDict] = None
 ) -> BaseDBClient:
     # Create the database client
     if config.project.database == "cloud":
