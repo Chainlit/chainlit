@@ -19,6 +19,9 @@ I've copy/pasted the whole document there, without the previous two headings.
 - [Run the tests](#run-the-tests)
   - [Run one test](#run-one-test)
 
+> **Note**
+> If you are on windows, some npm commands like npm run formatPython won't work. You can fix this by changing the npm script-shell to bash: npm config set script-shell `C:\\Program Files\\git\\bin\\bash.exe` (default x64 install location)
+
 ## Local setup
 
 ### Requirements
@@ -65,8 +68,7 @@ $ git remote -v
 ### Install JS dependencies
 
 ```sh
-npm install
-npm run installUiDeps
+pnpm install
 ```
 
 ### Install python dependencies
