@@ -15,10 +15,9 @@ export const wsEndpoint = httpEndpoint;
 export class ChainlitClient {
   public headers: Headers;
 
-  constructor(accessToken?: string) {
+  constructor() {
     this.headers = new Headers({
-      'content-type': 'application/json',
-      Authorization: accessToken || ''
+      'content-type': 'application/json'
     });
   }
 
@@ -37,60 +36,52 @@ export class ChainlitClient {
     return res.json();
   };
 
-  getCompletion = async (
-    prompt: string,
-    settings: ILLMSettings,
-    userEnv = {}
-  ) => {
-    const res = await fetch(`${httpEndpoint}/completion`, {
-      headers: this.headers,
-      method: 'POST',
-      body: JSON.stringify({ prompt, settings, userEnv })
+  fetch = async (resource: string, options: object) => {
+    const res = await fetch(`${httpEndpoint}${resource}`, {
+      ...options,
+      headers: this.headers
     });
 
     if (!res.ok) {
       throw new Error(res.statusText);
     }
+    return res;
+  };
+
+  getCompletion = async (
+    prompt: string,
+    settings: ILLMSettings,
+    userEnv = {}
+  ) => {
+    const res = await this.fetch(`/completion`, {
+      method: 'POST',
+      body: JSON.stringify({ prompt, settings, userEnv })
+    });
 
     const completion = await res.text();
     return completion;
   };
 
   getRole = async () => {
-    const res = await fetch(`${httpEndpoint}/project/role`, {
-      headers: this.headers,
+    const res = await this.fetch(`/project/role`, {
       method: 'GET'
     });
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
 
     const role = await res.text();
     return role as Role;
   };
 
   setHumanFeedback = async (messageId: string, feedback: number) => {
-    const res = await fetch(`${httpEndpoint}/message/feedback`, {
-      headers: this.headers,
+    await this.fetch(`/message/feedback`, {
       method: 'PUT',
       body: JSON.stringify({ messageId, feedback })
     });
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
   };
 
   getProjectMembers = async (): Promise<IMember[]> => {
-    const res = await fetch(`${httpEndpoint}/project/members`, {
-      headers: this.headers,
+    const res = await this.fetch(`/project/members`, {
       method: 'GET'
     });
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
 
     return res.json();
   };
@@ -102,31 +93,18 @@ export class ChainlitClient {
     pageInfo: IPageInfo;
     data: IChat[];
   }> => {
-    const res = await fetch(`${httpEndpoint}/project/conversations`, {
-      headers: this.headers,
+    const res = await this.fetch(`/project/conversations`, {
       method: 'POST',
       body: JSON.stringify({ pagination, filter })
     });
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
 
     return res.json();
   };
 
   getConversation = async (conversationId: string): Promise<IChat> => {
-    const res = await fetch(
-      `${httpEndpoint}/project/conversation/${conversationId}`,
-      {
-        headers: this.headers,
-        method: 'GET'
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
+    const res = await this.fetch(`/project/conversation/${conversationId}`, {
+      method: 'GET'
+    });
 
     return res.json();
   };
@@ -135,31 +113,21 @@ export class ChainlitClient {
     conversationId: number | string,
     elementId: number | string
   ): Promise<IElement> => {
-    const res = await fetch(
-      `${httpEndpoint}/project/conversation/${conversationId}/element/${elementId}`,
+    const res = await this.fetch(
+      `/project/conversation/${conversationId}/element/${elementId}`,
       {
-        headers: this.headers,
         method: 'GET'
       }
     );
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
 
     return res.json();
   };
 
   deleteConversation = async (conversationId: number) => {
-    const res = await fetch(`${httpEndpoint}/project/conversation`, {
-      headers: this.headers,
+    const res = await this.fetch(`/project/conversation`, {
       method: 'DELETE',
       body: JSON.stringify({ conversationId })
     });
-
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
 
     return res.json();
   };
