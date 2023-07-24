@@ -176,7 +176,6 @@ class Message(MessageBase):
             content=_dict["content"],
             author=_dict.get("author", config.ui.name),
             prompt=_dict.get("prompt"),
-            llm_settings=_dict.get("llmSettings"),
             language=_dict.get("language"),
             parent_id=_dict.get("parentId"),
             indent=_dict.get("indent") or 0,
@@ -186,6 +185,8 @@ class Message(MessageBase):
             message.id = _id
         if created_at := _dict.get("createdAt"):
             message.created_at = created_at
+        if llm_settings := _dict.get("llmSettings"):
+            message.llm_settings = llm_settings
 
         return message
 
