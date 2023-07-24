@@ -1,5 +1,6 @@
-import chainlit as cl
 import asyncio
+
+import chainlit as cl
 
 
 @cl.on_chat_start

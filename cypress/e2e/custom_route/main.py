@@ -1,8 +1,7 @@
+from fastapi.responses import HTMLResponse
+
 import chainlit as cl
 from chainlit.server import app
-from fastapi.responses import (
-    HTMLResponse,
-)
 
 
 @app.get("/hello")

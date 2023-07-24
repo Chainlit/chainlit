@@ -2,8 +2,8 @@ import os
 import threading
 
 from chainlit.config import config
-from chainlit.logger import logger
 from chainlit.lc import LANGCHAIN_INSTALLED
+from chainlit.logger import logger
 
 
 def init_lc_cache():

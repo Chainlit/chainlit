@@ -3,40 +3,38 @@ import mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
+import asyncio
 import os
-import webbrowser
-from pathlib import Path
 import uuid
-
-
+import webbrowser
 from contextlib import asynccontextmanager
-from watchfiles import awatch
+from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import (
+    FileResponse,
     HTMLResponse,
     JSONResponse,
-    FileResponse,
     PlainTextResponse,
 )
+from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
-import asyncio
+from watchfiles import awatch
 
-from chainlit.config import config, load_module, reload_config, DEFAULT_HOST
 from chainlit.client.utils import (
     get_auth_client_from_request,
     get_db_client_from_request,
 )
+from chainlit.config import DEFAULT_HOST, config, load_module, reload_config
+from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.telemetry import trace_event
-from chainlit.logger import logger
 from chainlit.types import (
     CompletionRequest,
-    UpdateFeedbackRequest,
-    GetConversationsRequest,
     DeleteConversationRequest,
+    GetConversationsRequest,
+    UpdateFeedbackRequest,
 )
 
 

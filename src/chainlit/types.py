@@ -1,7 +1,8 @@
-from typing import List, Any, TypedDict, Optional, Literal, Dict, Union
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+
+from dataclasses_json import dataclass_json
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
-from dataclasses_json import dataclass_json
 
 ElementType = Literal[
     "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"

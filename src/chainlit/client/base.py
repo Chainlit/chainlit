@@ -1,25 +1,25 @@
+from abc import ABC, abstractmethod
 from typing import (
-    Dict,
     Any,
-    List,
-    TypedDict,
-    Optional,
-    Union,
-    Literal,
-    TypeVar,
+    Dict,
     Generic,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
 )
 
-from abc import ABC, abstractmethod
-from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
+from pydantic.dataclasses import dataclass
 
 from chainlit.types import (
-    Pagination,
     ConversationFilter,
-    ElementType,
-    ElementSize,
     ElementDisplay,
+    ElementSize,
+    ElementType,
+    Pagination,
 )
 
 

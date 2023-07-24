@@ -1,10 +1,12 @@
-from typing import Optional, Any, Callable, Union, Literal, List, Dict, TYPE_CHECKING
 import os
 import sys
-import tomli
-from pydantic.dataclasses import dataclass
-from dataclasses_json import dataclass_json
 from importlib import util
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+
+import tomli
+from dataclasses_json import dataclass_json
+from pydantic.dataclasses import dataclass
+
 from chainlit.logger import logger
 from chainlit.version import __version__
 

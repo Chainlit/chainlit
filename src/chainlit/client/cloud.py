@@ -1,16 +1,15 @@
-from typing import Dict, Any, Optional
-import uuid
-
 import asyncio
+import uuid
+from typing import Any, Dict, Optional
+
 import aiohttp
 from python_graphql_client import GraphqlClient
 
 from chainlit.client.base import UserDict
-
-from .base import BaseDBClient, BaseAuthClient, PaginatedResponse, PageInfo, UserDict
-
-from chainlit.logger import logger
 from chainlit.config import config
+from chainlit.logger import logger
+
+from .base import BaseAuthClient, BaseDBClient, PageInfo, PaginatedResponse, UserDict
 
 
 class GraphQLClient:

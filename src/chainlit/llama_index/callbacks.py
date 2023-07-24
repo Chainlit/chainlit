@@ -1,14 +1,12 @@
 from typing import Any, Dict, List, Optional
 
-
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 
 from chainlit.context import get_emitter
-from chainlit.message import Message
 from chainlit.element import Text
+from chainlit.message import Message
 from chainlit.sync import run_sync
-
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,

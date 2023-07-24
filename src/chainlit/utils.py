@@ -1,5 +1,5 @@
-from typing import Callable
 import inspect
+from typing import Callable
 
 from chainlit.context import get_emitter
 from chainlit.logger import logger

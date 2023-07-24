@@ -1,5 +1,6 @@
-import chainlit as cl
 import time
+
+import chainlit as cl
 
 
 def sync_function():

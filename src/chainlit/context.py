@@ -1,6 +1,6 @@
 import contextvars
-from typing import TYPE_CHECKING
 from asyncio import AbstractEventLoop
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from chainlit.emitter import ChainlitEmitter

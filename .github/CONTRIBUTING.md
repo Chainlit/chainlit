@@ -78,7 +78,7 @@ cd src
 poetry install
 ```
 
-Make sure you have the Python code formatter `black` installed as it is used in a pre-commit hook. Run `pip install black` if needed.
+Make sure you have the Python code formatters `black` and `isort` installed as they are used in a pre-commit hook. Run `pip install black isort` if needed.
 
 ## Start the Chainlit server from source
 

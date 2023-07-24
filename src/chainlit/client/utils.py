@@ -1,9 +1,9 @@
 from fastapi import Request
 
-from chainlit.config import config
-from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
-from chainlit.client.local import LocalAuthClient, LocalDBClient
+from chainlit.client.base import BaseAuthClient, BaseDBClient, UserDict
 from chainlit.client.cloud import CloudAuthClient, CloudDBClient
+from chainlit.client.local import LocalAuthClient, LocalDBClient
+from chainlit.config import config
 from chainlit.telemetry import trace_event
 
 
