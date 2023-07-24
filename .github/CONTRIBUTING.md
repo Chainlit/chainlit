@@ -85,7 +85,7 @@ Make sure you have the Python code formatter `black` installed as it is used in 
 You need to build the UI once before starting the server.
 
 ```sh
-npm run buildUi
+pnpm run buildUi
 ```
 
 Start by running `src/chainlit/hello.py` as an example.
@@ -107,20 +107,20 @@ Then, start the UI.
 
 ```sh
 cd src/chainlit/frontend
-npm run dev -- --port 5174
+pnpm run dev --port 5174
 ```
 
 If you visit `http://127.0.0.1:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
 
 ## Run the tests
 
-Run `npm test`
+Run `pnpm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
 ### Run one test
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `SINGLE_TEST=FOLDER npm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).
+2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).
 
 You can optionally skip the build phase when running a test by adding `SKIP_BUILD=true`.
