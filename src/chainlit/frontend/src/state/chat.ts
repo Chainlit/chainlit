@@ -1,7 +1,7 @@
 import { atom } from 'recoil';
 import { Socket } from 'socket.io-client';
 
-import { IElement } from './element';
+import { IMessageElement } from './element';
 import { IMember } from './user';
 
 export interface ILLMSettings {
@@ -19,7 +19,7 @@ export interface IChat {
   createdAt: number | string;
   author?: IMember;
   messages: IMessage[];
-  elements: IElement[];
+  elements: IMessageElement[];
 }
 
 export interface IMessage {

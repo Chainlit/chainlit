@@ -7,16 +7,7 @@ import { Box, Typography } from '@mui/material';
 import { useQuery } from 'hooks/query';
 
 import { clientState } from 'state/client';
-import {
-  IAudioElement,
-  IElement,
-  IFileElement,
-  IImageElement,
-  IPdfElement,
-  ITextElement,
-  IVideoElement,
-  elementState
-} from 'state/element';
+import { IMessageElement, elementState } from 'state/element';
 
 import AudioElement from './audio';
 import FileElement from './file';
@@ -25,22 +16,20 @@ import PDFElement from './pdf';
 import TextElement from './text';
 import VideoElement from './video';
 
-export const renderElement = (element: IElement): JSX.Element | null => {
+export const renderElement = (element: IMessageElement): JSX.Element | null => {
   switch (element.type) {
     case 'file':
-      return <FileElement element={element as IFileElement} />;
+      return <FileElement element={element} />;
     case 'image':
-      return <ImageElement element={element as IImageElement} />;
+      return <ImageElement element={element} />;
     case 'text':
-      return <TextElement element={element as ITextElement} />;
+      return <TextElement element={element} />;
     case 'pdf':
-      return <PDFElement element={element as IPdfElement} />;
+      return <PDFElement element={element} />;
     case 'audio':
-      return <AudioElement element={element as IAudioElement} />;
+      return <AudioElement element={element} />;
     case 'video':
-      return <VideoElement element={element as IVideoElement} />;
-    default:
-      return null;
+      return <VideoElement element={element} />;
   }
 };
 
@@ -49,7 +38,7 @@ const ElementView = () => {
   const query = useQuery();
   const elements = useRecoilValue(elementState);
   const client = useRecoilValue(clientState);
-  const [element, setElement] = useState<IElement | null>(null);
+  const [element, setElement] = useState<IMessageElement | null>(null);
   const [error, setError] = useState<string | undefined>();
 
   const conversationId = query.get('conversation');

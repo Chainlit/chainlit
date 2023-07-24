@@ -1,16 +1,6 @@
 import { atom } from 'recoil';
 
-export type ElementType =
-  | 'image'
-  | 'text'
-  | 'pdf'
-  | 'avatar'
-  | 'tasklist'
-  | 'audio'
-  | 'video'
-  | 'file';
-
-export type AllElements =
+export type IElement =
   | IImageElement
   | ITextElement
   | IPdfElement
@@ -20,68 +10,83 @@ export type AllElements =
   | IVideoElement
   | IFileElement;
 
+export type IMessageElement =
+  | IImageElement
+  | ITextElement
+  | IPdfElement
+  | IAudioElement
+  | IVideoElement
+  | IFileElement;
+
+export type ElementType = IElement['type'];
 export type IElementSize = 'small' | 'medium' | 'large';
 
-export interface IElement {
+interface TElement<T> {
   id: string;
+  type: T;
   conversationId?: string;
-  url?: string;
-  type: ElementType;
-  name: string;
-  display: 'inline' | 'side' | 'page';
   forIds?: string[];
+  url?: string;
 }
 
-export interface IImageElement extends IElement {
-  type: 'image';
+interface TMessageElement<T> extends TElement<T> {
+  name: string;
+  display: 'inline' | 'side' | 'page';
+}
+
+export interface IImageElement extends TMessageElement<'image'> {
   content?: ArrayBuffer;
   size?: IElementSize;
 }
 
-export interface IAvatarElement extends IElement {
-  type: 'avatar';
+export interface IAvatarElement extends TElement<'avatar'> {
+  name: string;
   content?: ArrayBuffer;
 }
 
-export interface ITextElement extends IElement {
-  type: 'text';
+export interface ITextElement extends TMessageElement<'text'> {
   content?: string;
   language?: string;
 }
-export interface IPdfElement extends IElement {
-  type: 'pdf';
+
+export interface IPdfElement extends TMessageElement<'pdf'> {
   content?: string;
 }
 
-export interface IAudioElement extends IElement {
-  type: 'audio';
+export interface IAudioElement extends TMessageElement<'audio'> {
   content?: ArrayBuffer;
 }
 
-export interface IVideoElement extends IElement {
-  type: 'video';
+export interface IVideoElement extends TMessageElement<'video'> {
   content?: ArrayBuffer;
   size?: IElementSize;
 }
 
-export interface IFileElement extends IElement {
+export interface IFileElement extends TMessageElement<'file'> {
   type: 'file';
   content?: ArrayBuffer;
 }
 
-export interface ITasklistElement extends IElement {
-  type: 'tasklist';
+export interface ITasklistElement extends TElement<'tasklist'> {
   content?: string;
 }
 
-export type IElements = IElement[];
-
-export const elementState = atom<IElements>({
-  key: 'Elements',
+export const elementState = atom<IMessageElement[]>({
+  key: 'DisplayElements',
   default: []
 });
 
-export const sideViewState = atom<IElement | undefined>({
+export const avatarState = atom<IAvatarElement[]>({
+  key: 'AvatarElements',
+  default: []
+});
+
+export const tasklistState = atom<ITasklistElement[]>({
+  key: 'TasklistElements',
+  default: []
+});
+
+export const sideViewState = atom<IMessageElement | undefined>({
   key: 'SideView',
   default: undefined
 });

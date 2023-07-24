@@ -18,7 +18,7 @@ import {
   messagesState,
   sessionState
 } from 'state/chat';
-import { ITasklistElement, elementState } from 'state/element';
+import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
 import Playground from '../playground';
@@ -32,6 +32,7 @@ const Chat = () => {
   const askUser = useRecoilValue(askUserState);
   const [messages, setMessages] = useRecoilState(messagesState);
   const elements = useRecoilValue(elementState);
+  const tasklistElements = useRecoilValue(tasklistState);
   const actions = useRecoilValue(actionState);
   const pSettings = useRecoilValue(projectSettingsState);
   const { persistChatLocally } = useLocalChatHistory();
@@ -81,9 +82,7 @@ const Chat = () => {
     [askUser, user]
   );
 
-  const tasklist = elements.findLast((e) => e.type === 'tasklist') as
-    | ITasklistElement
-    | undefined;
+  const tasklist = tasklistElements.at(-1);
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>

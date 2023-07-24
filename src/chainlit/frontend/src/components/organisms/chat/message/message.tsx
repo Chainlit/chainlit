@@ -6,7 +6,7 @@ import { Box, Stack } from '@mui/material';
 
 import { IAction } from 'state/action';
 import { INestedMessage, highlightMessage } from 'state/chat';
-import { IElements } from 'state/element';
+import { IMessageElement } from 'state/element';
 import { settingsState } from 'state/settings';
 
 import Author, { authorBoxWidth } from './author';
@@ -18,7 +18,7 @@ import UploadButton from './uploadButton';
 
 interface Props {
   message: INestedMessage;
-  elements: IElements;
+  elements: IMessageElement[];
   actions: IAction[];
   indent: number;
   showAvatar?: boolean;

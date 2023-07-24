@@ -9,10 +9,10 @@ import InlinedTextList from 'components/atoms/element/inlined/texts';
 import InlinedVideoList from 'components/atoms/element/inlined/videos';
 
 import { IAction } from 'state/action';
-import { AllElements, ElementType, IElements } from 'state/element';
+import { ElementType, IMessageElement } from 'state/element';
 
 interface Props {
-  elements: IElements;
+  elements: IMessageElement[];
   actions: IAction[];
 }
 
@@ -27,19 +27,19 @@ export default function InlinedElements({ elements, actions }: Props) {
    * and get an array of IImageElement.
    */
   const elementsByType = elements.reduce(
-    (acc, el: AllElements) => {
+    (acc, el: IMessageElement) => {
       if (!acc[el.type]) {
         acc[el.type] = [];
       }
       const array = acc[el.type] as Extract<
-        AllElements,
+        IMessageElement,
         { type: typeof el.type }
       >[];
       array.push(el);
       return acc;
     },
     {} as {
-      [K in ElementType]: Extract<AllElements, { type: K }>[];
+      [K in ElementType]: Extract<IMessageElement, { type: K }>[];
     }
   );
 
