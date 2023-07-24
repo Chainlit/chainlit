@@ -185,6 +185,7 @@ const Drawer = styled(MDrawer, {
 })<DrawerProps>(({ theme, open, width, isSmallScreen }) => ({
   width,
   flexShrink: 0,
+  display: open ? 'flex' : 'none',
   '& .MuiDrawer-paper': {
     position: 'inherit',
     width,
@@ -198,7 +199,6 @@ const Drawer = styled(MDrawer, {
         ? theme.palette.grey[800]
         : theme.palette.grey[200]
     }`,
-    display: open ? 'flex' : 'none',
     flexDirection: 'column',
     borderRadius: 0,
     color: theme.palette.text.primary,
