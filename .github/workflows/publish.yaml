@@ -38,6 +38,8 @@ jobs:
         uses: snok/install-poetry@v1
       - name: Copy readme to src
         run: cp README.md src/
+      - name: Install JS dependencies
+        run: pnpm install --no-frozen-lockfile
       - name: Build chainlit
         run: pnpm run build
       - name: Publish package distributions to PyPI
