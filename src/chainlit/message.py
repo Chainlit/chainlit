@@ -87,7 +87,7 @@ class MessageBase(ABC):
 
         return True
 
-    async def send(self) -> str:
+    async def send(self):
         if self.content is None:
             self.content = ""
 
@@ -206,7 +206,7 @@ class Message(MessageBase):
 
         return _dict
 
-    async def send(self):
+    async def send(self) -> str:
         """
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
