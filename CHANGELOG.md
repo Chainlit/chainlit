@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.6.1] - 2023-07-24
+
+### Added
+
+- Security improvements
+- Haystack callback handler
+- Theme customizability
+
+### Fixed
+
+- Allow multiple browser tabs to connect to one Chainlit app
+- Sidebar blocking the send button on mobile
+
 ## [0.6.0] - 2023-07-20
 
 ### Breaking changes
