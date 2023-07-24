@@ -1,15 +1,14 @@
 from typing import Optional
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 
 from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event
 
 
-@dataclass_json
 @dataclass
-class Action:
+class Action(DataClassJsonMixin):
     # Name of the action, this should be used in the action_callback
     name: str
     # The value associated with the action. This is useful to differentiate between multiple actions with the same name.

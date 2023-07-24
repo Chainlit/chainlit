@@ -11,7 +11,7 @@ from typing import (
     Union,
 )
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 
 from chainlit.types import (
@@ -77,9 +77,8 @@ class PageInfo:
 T = TypeVar("T")
 
 
-@dataclass_json
 @dataclass
-class PaginatedResponse(Generic[T]):
+class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     pageInfo: PageInfo
     data: List[T]
 

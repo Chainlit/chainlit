@@ -4,7 +4,7 @@ from importlib import util
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 
 from chainlit.logger import logger
@@ -109,32 +109,28 @@ class RunSettings:
     ci: bool = False
 
 
-@dataclass_json
 @dataclass()
-class PaletteOptions:
+class PaletteOptions(DataClassJsonMixin):
     main: Optional[str] = ""
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
 
-@dataclass_json
 @dataclass()
-class Palette:
+class Palette(DataClassJsonMixin):
     primary: PaletteOptions = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
 
 
-@dataclass_json
 @dataclass()
-class Theme:
+class Theme(DataClassJsonMixin):
     light: Palette = None
     dark: Palette = None
 
 
-@dataclass_json
 @dataclass()
-class UISettings:
+class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     hide_cot: bool = False
@@ -171,9 +167,8 @@ class CodeSettings:
         return True
 
 
-@dataclass_json
 @dataclass()
-class ProjectSettings:
+class ProjectSettings(DataClassJsonMixin):
     # Enables Cloud features if provided
     id: Optional[str] = None
     # Whether the app is available to anonymous users or only to team members.
