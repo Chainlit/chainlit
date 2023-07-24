@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
         webbrowser.open(url)
 
     if config.project.database == "local":
-        from prisma import Client, register
+        from prisma import Client, register  # type: ignore[attr-defined]
 
         client = Client()
         register(client)
