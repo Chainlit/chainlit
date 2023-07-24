@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Callable, Any, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message

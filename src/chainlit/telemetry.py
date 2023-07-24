@@ -4,13 +4,15 @@ if TYPE_CHECKING:
     from opentelemetry.sdk.resources import Attributes, Resource
     from opentelemetry.trace import Tracer
 
-import uptrace
 import hashlib
-from socket import gethostname
+import logging
 from functools import wraps
+from socket import gethostname
+
+import uptrace
+
 from chainlit.config import config
 from chainlit.version import __version__
-import logging
 
 
 class ChainlitTelemetry:

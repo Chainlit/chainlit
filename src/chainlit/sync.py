@@ -1,18 +1,18 @@
 import sys
-from typing import Any, TypeVar, Coroutine
+from typing import Any, Coroutine, TypeVar
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
 else:
     from typing_extensions import ParamSpec
 
-import threading
 import asyncio
-from syncer import sync
+import threading
+
 from asyncer import asyncify
+from syncer import sync
 
 from chainlit.context import get_loop
-
 
 make_async = asyncify
 

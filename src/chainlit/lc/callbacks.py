@@ -1,17 +1,14 @@
 from typing import Any, Dict, List, Optional, Union
-from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
-from langchain.schema import (
-    AgentAction,
-    AgentFinish,
-    BaseMessage,
-    LLMResult,
-)
-from chainlit.emitter import ChainlitEmitter
-from chainlit.context import get_emitter
-from chainlit.message import Message, ErrorMessage
+
+from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
+from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
+
 from chainlit.config import config
-from chainlit.types import LLMSettings
+from chainlit.context import get_emitter
+from chainlit.emitter import ChainlitEmitter
+from chainlit.message import ErrorMessage, Message
 from chainlit.sync import run_sync
+from chainlit.types import LLMSettings
 
 IGNORE_LIST = ["AgentExecutor"]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]

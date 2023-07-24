@@ -1,18 +1,17 @@
-from typing import Optional, Dict
-import uuid
-import json
-import os
-import mimetypes
-
 import asyncio
+import json
+import mimetypes
+import os
+import uuid
+from typing import Dict, Optional
+
 import aiofiles
 
-from chainlit.client.base import PaginatedResponse, PageInfo
+from chainlit.client.base import PageInfo, PaginatedResponse
+from chainlit.config import config
+from chainlit.logger import logger
 
 from .base import BaseAuthClient, BaseDBClient, UserDict
-
-from chainlit.logger import logger
-from chainlit.config import config
 
 
 class LocalAuthClient(BaseAuthClient):

@@ -1,6 +1,8 @@
-import openai
-import chainlit as cl
 import os
+
+import openai
+
+import chainlit as cl
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 

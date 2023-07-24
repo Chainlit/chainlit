@@ -1,7 +1,7 @@
 from typing import Optional
 
-from pydantic.dataclasses import dataclass
 from dataclasses_json import dataclass_json
+from pydantic.dataclasses import dataclass
 
 from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event

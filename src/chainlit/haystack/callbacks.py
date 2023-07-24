@@ -1,12 +1,12 @@
-from typing import Any, Optional, TypeVar, Generic
+from typing import Any, Generic, Optional, TypeVar
+
+from haystack.agents import Agent, Tool
+from haystack.agents.agent_step import AgentStep
 
 import chainlit as cl
 from chainlit.config import config
 from chainlit.context import get_emitter
 from chainlit.emitter import ChainlitEmitter
-
-from haystack.agents.agent_step import AgentStep
-from haystack.agents import Agent, Tool
 
 T = TypeVar("T")
 

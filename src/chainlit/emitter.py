@@ -1,10 +1,12 @@
 import uuid
-from typing import Union, Dict
+from typing import Dict, Union
+
+from socketio.exceptions import TimeoutError
+
+from chainlit.client.base import BaseDBClient
 from chainlit.message import Message
 from chainlit.session import Session
 from chainlit.types import AskSpec
-from chainlit.client.base import BaseDBClient
-from socketio.exceptions import TimeoutError
 
 
 class ChainlitEmitter:

@@ -1,11 +1,13 @@
+import fnmatch
 import os
 import tarfile
-import fnmatch
 import tempfile
+
 import requests
+
+from chainlit.cli.auth import get_access_token
 from chainlit.cli.utils import check_file
 from chainlit.config import config
-from chainlit.cli.auth import get_access_token
 
 
 def get_gitignore_patterns():

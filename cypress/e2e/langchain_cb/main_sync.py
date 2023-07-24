@@ -1,5 +1,6 @@
+from langchain.schema import Generation, LLMResult, SystemMessage
+
 import chainlit as cl
-from langchain.schema import SystemMessage, LLMResult, Generation
 
 
 @cl.on_chat_start

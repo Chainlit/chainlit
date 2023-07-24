@@ -1,16 +1,17 @@
-from pydantic.dataclasses import dataclass, Field
-from typing import Dict, List, Union, Any
-import uuid
-import aiofiles
-from io import BytesIO
-from enum import Enum
 import json
-import filetype
+import uuid
+from enum import Enum
+from io import BytesIO
+from typing import Any, Dict, List, Union
 
-from chainlit.context import get_emitter
+import aiofiles
+import filetype
+from pydantic.dataclasses import Field, dataclass
+
 from chainlit.client.base import BaseDBClient
+from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event
-from chainlit.types import ElementType, ElementDisplay, ElementSize
+from chainlit.types import ElementDisplay, ElementSize, ElementType
 
 mime_types = {
     "text": "text/plain",

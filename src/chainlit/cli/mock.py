@@ -1,5 +1,6 @@
 def mock_openai():
     import os
+
     from aioresponses import aioresponses
     from responses import RequestsMock
 
