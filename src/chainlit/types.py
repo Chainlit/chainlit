@@ -73,7 +73,7 @@ class CompletionRequest(BaseModel):
 
 class UpdateFeedbackRequest(BaseModel):
     messageId: str
-    feedback: int
+    feedback: Literal[-1, 0, 1]
 
 
 class DeleteConversationRequest(BaseModel):
