@@ -53,6 +53,32 @@ aioresponses = "0.7.4"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
 
+[tool.poetry.group.mypy]
+optional = true
+
+[tool.poetry.group.mypy.dependencies]
+mypy = "^1.4.1"
+types-requests = "^2.31.0.2"
+types-aiofiles = "^23.1.0.5"
+
+[tool.mypy]
+python_version = "3.8"
+
+[[tool.mypy.overrides]]
+module = [
+    "fastapi_socketio",
+    "filetype",
+    "haystack.*",
+    "langflow",
+    "matplotlib.*",  # remove when 3.8.0 is out, it should export types
+    "nest_asyncio",
+    "python_graphql_client",
+    "socketio.*",
+    "uptrace",
+    "syncer",
+]
+ignore_missing_imports = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
