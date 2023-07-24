@@ -1,4 +1,4 @@
-import { atom } from 'recoil';
+import { DefaultValue, atom, selector } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 export const accessTokenState = atom<string | undefined>({
@@ -6,9 +6,16 @@ export const accessTokenState = atom<string | undefined>({
   default: undefined
 });
 
-export const sessionIdState = atom<string>({
+const sessionIdAtom = atom<string>({
   key: 'SessionId',
   default: uuidv4()
+});
+
+export const sessionIdState = selector({
+  key: 'SessionIdSelector',
+  get: ({ get }) => get(sessionIdAtom),
+  set: ({ set }, newValue) =>
+    set(sessionIdAtom, newValue instanceof DefaultValue ? uuidv4() : newValue)
 });
 
 export type Role = 'USER' | 'ADMIN' | 'OWNER' | 'ANONYMOUS' | undefined;
