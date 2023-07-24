@@ -1,7 +1,7 @@
-import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
+import { expect, it } from 'vitest';
 
 import { ITextElement } from 'state/element';
 

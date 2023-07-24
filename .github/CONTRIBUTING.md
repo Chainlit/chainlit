@@ -63,8 +63,7 @@ $ git remote -v
 ### Install JS dependencies
 
 ```sh
-npm install
-npm run installUiDeps
+pnpm install
 ```
 
 ### Install python dependencies
@@ -79,9 +78,9 @@ Make sure you have the Python code formatter `black` installed as it is used in 
 ## Start the UI
 
 ```sh
-npm run buildUi
+pnpm run buildUi
 cd src/chainlit/frontend
-npm run dev -- --port 5174
+pnpm run dev -- --port 5174
 ```
 
 The `buildUi` step is currently needed by the server.
@@ -107,14 +106,14 @@ If you've made it this far, you can now replace `chainlit/hello.py` by your own 
 
 ## Run the tests
 
-Run `npm test`
+Run `pnpm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
 ### Run one test
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `SINGLE_TEST=FOLDER npm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).
+2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements run test`).
 
 ## Only contribute to one side of the project
 
@@ -136,7 +135,7 @@ const devServer = 'https://img-gen.chainlit.app/';
 1. Build the UI.
 
 ```sh
-npm run buildUi
+pnpm run buildUi
 ```
 
 2. Follow the instruction from [Install from local sources](#install-from-local-sources).

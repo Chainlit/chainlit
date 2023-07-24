@@ -92,7 +92,7 @@ function runCommand(command: string, cwd = ROOT) {
 }
 
 export function installChainlit() {
-  runCommand("npm run build", FRONTEND_DIR);
+  runCommand("pnpm run build", FRONTEND_DIR);
   runCommand(`poetry install -C ${CHAINLIT_DIR} --with tests`);
 }
 
