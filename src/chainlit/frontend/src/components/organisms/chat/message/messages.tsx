@@ -2,13 +2,13 @@ import { useRecoilValue } from 'recoil';
 
 import { IAction } from 'state/action';
 import { INestedMessage, loadingState } from 'state/chat';
-import { IElements } from 'state/element';
+import { IMessageElement } from 'state/element';
 
 import Message from './message';
 
 interface Props {
   messages: INestedMessage[];
-  elements: IElements;
+  elements: IMessageElement[];
   actions: IAction[];
   indent: number;
   isRunning?: boolean;

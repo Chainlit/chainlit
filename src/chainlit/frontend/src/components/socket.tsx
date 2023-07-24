@@ -17,7 +17,12 @@ import {
   sessionState,
   tokenCountState
 } from 'state/chat';
-import { IElement, elementState } from 'state/element';
+import {
+  IElement,
+  avatarState,
+  elementState,
+  tasklistState
+} from 'state/element';
 import { projectSettingsState } from 'state/project';
 import { sessionIdState, userEnvState } from 'state/user';
 
@@ -37,6 +42,8 @@ export default memo(function Socket() {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
+  const setAvatars = useSetRecoilState(avatarState);
+  const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
 
   useEffect(() => {
@@ -172,7 +179,13 @@ export default memo(function Socket() {
     });
 
     socket.on('element', (element: IElement) => {
-      setElements((old) => [...old, element]);
+      if (element.type === 'avatar') {
+        setAvatars((old) => [...old, element]);
+      } else if (element.type === 'tasklist') {
+        setTasklists((old) => [...old, element]);
+      } else {
+        setElements((old) => [...old, element]);
+      }
     });
 
     socket.on('update_element', (update: { id: string; forIds: string[] }) => {
