@@ -41,7 +41,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
     # Keep track of the LLM settings for the last prompt
-    llm_settings: LLMSettings
+    llm_settings: Optional[LLMSettings]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
     sequence: List[Message]
     # Keep track of the last prompt for each session

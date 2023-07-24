@@ -22,7 +22,7 @@ from chainlit.types import (
 class MessageBase(ABC):
     id: str
     streaming = False
-    created_at: int = None
+    created_at: Optional[int] = None
     fail_on_persist_error: bool = False
     persisted = False
 

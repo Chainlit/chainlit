@@ -28,16 +28,15 @@ class Element:
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
     display: ElementDisplay = "side"
     # The URL of the element if already hosted somehwere else.
-
-    url: str = None
+    url: Optional[str] = None
     # The local path of the element.
-    path: str = None
+    path: Optional[str] = None
     # The byte content of the element.
-    content: bytes = None
+    content: Optional[bytes] = None
     # The ID of the element. This is set automatically when the element is sent to the UI.
-    id: str = None
+    id: Optional[str] = None
     # The ID of the message this element is associated with.
-    for_ids: List[str] = None
+    for_ids: Optional[List[str]] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -172,9 +171,9 @@ class Avatar(Element):
 class Text(Element):
     """Useful to send a text (not a message) to the UI."""
 
-    content: Union[str, bytes] = None
+    content: Union[str, bytes]
     type: ElementType = "text"
-    language: str = None
+    language: Optional[str] = None
 
     async def preprocess_content(self):
         if isinstance(self.content, str):
@@ -233,9 +232,9 @@ class TaskStatus(Enum):
 
 @dataclass
 class Task:
-    title: str = None
+    title: str
     status: TaskStatus = TaskStatus.READY
-    forId: str = None
+    forId: Optional[str] = None
 
     def __init__(
         self,

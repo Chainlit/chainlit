@@ -118,15 +118,15 @@ class PaletteOptions(DataClassJsonMixin):
 
 @dataclass()
 class Palette(DataClassJsonMixin):
-    primary: PaletteOptions = None
+    primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
 
 
 @dataclass()
 class Theme(DataClassJsonMixin):
-    light: Palette = None
-    dark: Palette = None
+    light: Optional[Palette] = None
+    dark: Optional[Palette] = None
 
 
 @dataclass()
@@ -135,8 +135,8 @@ class UISettings(DataClassJsonMixin):
     description: str = ""
     hide_cot: bool = False
     default_expand_messages: bool = False
-    github: str = None
-    theme: Theme = None
+    github: Optional[str] = None
+    theme: Optional[Theme] = None
 
 
 @dataclass()
@@ -178,13 +178,13 @@ class ProjectSettings(DataClassJsonMixin):
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
-    user_env: List[str] = None
+    user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
-    lc_cache_path: str = None
+    lc_cache_path: Optional[str] = None
     # Path to the local chat db
-    local_db_path: str = None
+    local_db_path: Optional[str] = None
     # Path to the local file system
-    local_fs_path: str = None
+    local_fs_path: Optional[str] = None
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
 
