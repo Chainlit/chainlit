@@ -23,7 +23,7 @@ class MessageBase(ABC):
     id: str
     author: str
     streaming = False
-    created_at: Optional[int] = None
+    created_at: Union[int, str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
 
