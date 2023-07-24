@@ -79,6 +79,7 @@ export default memo(function Socket() {
     });
 
     socket.on('reload', () => {
+      socket.emit('clear_session');
       window.location.reload();
     });
 
