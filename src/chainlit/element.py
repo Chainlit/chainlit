@@ -8,7 +8,7 @@ import aiofiles
 import filetype
 from pydantic.dataclasses import Field, dataclass
 
-from chainlit.client.base import BaseDBClient
+from chainlit.client.base import BaseDBClient, ElementDict
 from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementDisplay, ElementSize, ElementType
@@ -50,19 +50,20 @@ class Element:
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
-    def to_dict(self) -> Dict:
-        _dict = {
-            "type": self.type,
-            "url": self.url,
-            "name": self.name,
-            "display": self.display,
-            "size": getattr(self, "size", None),
-            "language": getattr(self, "language", None),
-            "forIds": getattr(self, "for_ids", None),
-        }
-
-        if self.id:
-            _dict["id"] = self.id
+    def to_dict(self) -> ElementDict:
+        _dict = ElementDict(
+            {
+                "id": self.id,
+                "type": self.type,
+                "url": self.url,
+                "name": self.name,
+                "display": self.display,
+                "size": getattr(self, "size", None),
+                "language": getattr(self, "language", None),
+                "forIds": getattr(self, "for_ids", None),
+                "conversationId": None,
+            }
+        )
 
         return _dict
 
@@ -76,7 +77,7 @@ class Element:
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: BaseDBClient):
+    async def persist(self, client: BaseDBClient) -> ElementDict:
         if not self.url and self.content and not self.persisted:
             # Only guess the mime type when the content is binary
             mime = (
@@ -87,11 +88,11 @@ class Element:
             self.url = await client.upload_element(content=self.content, mime=mime)
 
         if not self.persisted:
-            element = await client.create_element(self.to_dict())
+            element_dict = await client.create_element(self.to_dict())
             self.persisted = True
         else:
-            element = await client.update_element(self.to_dict())
-        return element
+            element_dict = await client.update_element(self.to_dict())
+        return element_dict
 
     async def before_emit(self, element: Dict) -> Dict:
         return element
@@ -113,16 +114,16 @@ class Element:
 
         # We have a client, persist the element
         if self.emitter.db_client:
-            element = await self.persist(self.emitter.db_client)
-            self.id = element and element.get("id")
+            element_dict = await self.persist(self.emitter.db_client)
+            self.id = element_dict and element_dict.get("id")
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
 
-        element = self.to_dict()
+        element_dict = self.to_dict()
 
         # Adding this out of to_dict since the dict will be persisted in the DB
-        element["content"] = self.content
+        element_dict["content"] = self.content
 
         if self.emitter.emit and element:
             # Element was already sent
@@ -134,8 +135,8 @@ class Element:
                 )
             else:
                 trace_event(f"send {self.__class__.__name__}")
-                element = await self.before_emit(element)
-                await self.emitter.emit("element", element)
+                element_dict = await self.before_emit(element_dict)
+                await self.emitter.emit("element", element_dict)
 
 
 @dataclass
