@@ -48,14 +48,14 @@ class UserDict(TypedDict):
 
 
 class ElementDict(TypedDict):
-    id: Optional[str]
+    id: str
     conversationId: Optional[str]
     type: ElementType
     url: str
     name: str
     display: ElementDisplay
-    size: ElementSize
-    language: str
+    size: Optional[ElementSize]
+    language: Optional[str]
     forIds: Optional[List[str]]
 
 

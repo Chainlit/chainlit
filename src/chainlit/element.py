@@ -25,6 +25,8 @@ class Element:
     type: ClassVar[ElementType]
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
     display: ClassVar[ElementDisplay] = "side"
+    # Controls element size
+    size: ClassVar[Optional[ElementSize]]
 
     # Name of the element, this will be used to reference the element in the UI.
     name: str
@@ -38,6 +40,8 @@ class Element:
     id: Optional[str] = None
     # The ID of the message this element is associated with.
     for_ids: Optional[List[str]] = None
+    # The language, if relevant
+    language: Optional[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -113,7 +117,7 @@ class Element:
         # We have a client, persist the element
         if self.emitter.db_client:
             element_dict = await self.persist(self.emitter.db_client)
-            self.id = element_dict and element_dict.get("id")
+            self.id = element_dict["id"]
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
