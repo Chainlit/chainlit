@@ -1,4 +1,4 @@
-import { atom } from 'recoil';
+import { atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 
 import { IElement } from './element';
@@ -81,6 +81,42 @@ export interface ISession {
   error?: boolean;
 }
 
+interface TInputWidget<T> {
+  type: T;
+  key: string;
+  label: string;
+  initial?: unknown;
+  tooltip?: string;
+  description?: string;
+}
+
+export type IInputWidget =
+  | ISwitchWidget
+  | ISliderWidget
+  | ISelectInputWidget
+  | ITextInputWidget;
+
+export interface ISwitchWidget extends TInputWidget<'switch'> {
+  initial: boolean;
+}
+
+export interface ISliderWidget extends TInputWidget<'slider'> {
+  initial: number;
+  min: number;
+  max: number;
+  step: number;
+}
+
+export interface ISelectInputWidget extends TInputWidget<'selectinput'> {
+  initial?: string;
+  options: { label: string; value: string }[];
+}
+
+export interface ITextInputWidget extends TInputWidget<'textinput'> {
+  initial?: string;
+  placeholder?: string;
+}
+
 export const sessionState = atom<ISession | undefined>({
   key: 'Session',
   dangerouslyAllowMutability: true,
@@ -116,4 +152,33 @@ export const askUserState = atom<IAsk | undefined>({
 export const highlightMessage = atom<IMessage['id'] | null>({
   key: 'HighlightMessage',
   default: null
+});
+
+export const chatSettingsState = atom<{
+  open: boolean;
+  widgets: IInputWidget[];
+}>({
+  key: 'ChatSettings',
+  default: {
+    open: false,
+    widgets: []
+  }
+});
+
+export const chatSettingsDefaultValueSelector = selector({
+  key: 'ChatSettingsValue/Default',
+  get: ({ get }) => {
+    const chatSettings = get(chatSettingsState);
+    return chatSettings.widgets.reduce(
+      (form: Record<IInputWidget['key'], any>, widget) => (
+        (form[widget.key] = widget.initial), form
+      ),
+      {}
+    );
+  }
+});
+
+export const chatSettingsValueState = atom({
+  key: 'ChatSettingsValue',
+  default: chatSettingsDefaultValueSelector
 });

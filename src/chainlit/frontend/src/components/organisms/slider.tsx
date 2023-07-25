@@ -1,6 +1,6 @@
 import { grey } from 'palette';
 
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import Slider, { SliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
@@ -53,19 +53,21 @@ const StyledSlider = styled(Slider)(({ theme }) => {
 
 interface Props extends SliderProps {
   label: string;
+  tooltip?: string;
 }
 
-const _Slider = ({ label, ...sliderProps }: Props) => {
+const _Slider = ({ label, tooltip, ...sliderProps }: Props) => {
   return (
-    <Stack mr={1}>
+    <Box>
       <Stack direction="row" justifyContent="space-between">
         <InputLabel
           label={label}
+          tooltip={tooltip}
           notificationsCount={sliderProps.value?.toString()}
         />
       </Stack>
       <StyledSlider {...sliderProps} />
-    </Stack>
+    </Box>
   );
 };
 

@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 from dotenv import load_dotenv
 
@@ -24,6 +24,7 @@ from chainlit.element import (
     Video,
 )
 from chainlit.haystack import HAYSTACK_INSTALLED
+from chainlit.input_widget import ChatSettings, SelectInput, Slider, Switch, TextInput
 from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.llama_index import LLAMA_INDEX_INSTALLED
 from chainlit.logger import logger
@@ -132,6 +133,23 @@ def action_callback(name: str) -> Callable:
     return decorator
 
 
+def on_settings_update(
+    func: Callable[[Dict[str, Any]], Any]
+) -> Callable[[Dict[str, Any]], Any]:
+    """
+    Hook to react to the user changing any settings.
+
+    Args:
+        func (Callable[], Any]): The hook to execute after settings were changed.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
 @trace
 def client_factory(
     func: Callable[[Optional["UserDict"]], "BaseDBClient"]
@@ -171,6 +189,11 @@ __all__ = [
     "TaskList",
     "TaskStatus",
     "Video",
+    "ChatSettings",
+    "Switch",
+    "Slider",
+    "SelectInput",
+    "TextInput",
     "Message",
     "ErrorMessage",
     "AskUserMessage",
@@ -179,6 +202,7 @@ __all__ = [
     "on_stop",
     "action_callback",
     "author_rename",
+    "on_settings_update",
     "sleep",
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",

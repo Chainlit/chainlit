@@ -1,17 +1,25 @@
 import { wsEndpoint } from 'api';
 import { deepEqual } from 'helpers/object';
 import { memo, useEffect } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+  useSetRecoilState
+} from 'recoil';
 import io from 'socket.io-client';
 
 import { useAuth } from 'hooks/auth';
 
 import { IAction, actionState } from 'state/action';
 import {
+  IInputWidget,
   IMessage,
   IMessageUpdate,
   IToken,
   askUserState,
+  chatSettingsState,
+  chatSettingsValueState,
   loadingState,
   messagesState,
   sessionState,
@@ -38,6 +46,8 @@ export default memo(function Socket() {
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setActions = useSetRecoilState(actionState);
+  const setChatSettings = useSetRecoilState(chatSettingsState);
+  const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
 
   useEffect(() => {
     if (authenticating || !pSettings) return;
@@ -169,6 +179,11 @@ export default memo(function Socket() {
 
     socket.on('clear_ask', () => {
       setAskUser(undefined);
+    });
+
+    socket.on('chat_settings', (widgets: IInputWidget[]) => {
+      setChatSettings((old) => ({ ...old, widgets }));
+      resetChatSettingsValue();
     });
 
     socket.on('element', (element: IElement) => {

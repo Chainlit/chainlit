@@ -111,9 +111,6 @@ export default function SelectInput({
         }
         sx={{
           backgroundColor: isDarkMode ? grey[900] : '',
-          color: isDarkMode ? grey[300] : grey[600],
-          fontSize: '14px',
-          fontWeight: 400,
           my: 0.5,
           boxShadow:
             '0px 10px 10px 0px rgba(0, 0, 0, 0.05), 0px 2px 4px 0px rgba(0, 0, 0, 0.05)'
