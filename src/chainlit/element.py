@@ -23,10 +23,6 @@ mime_types = {
 class Element:
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
-    # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
-    display: ClassVar[ElementDisplay] = "side"
-    # Controls element size
-    size: ClassVar[Optional[ElementSize]]
 
     # The ID of the element. This is set automatically when the element is sent to the UI.
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -38,6 +34,10 @@ class Element:
     path: Optional[str] = None
     # The byte content of the element.
     content: Optional[bytes] = None
+    # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
+    display: ElementDisplay = Field(default="side")
+    # Controls element size
+    size: Optional[ElementSize] = None
     # The ID of the message this element is associated with.
     for_ids: List[str] = Field(default_factory=list)
     # The language, if relevant
@@ -143,7 +143,8 @@ ElementBased = TypeVar("ElementBased", bound=Element)
 @dataclass
 class Image(Element):
     type: ClassVar[ElementType] = "image"
-    size: ClassVar[ElementSize] = "medium"
+
+    size: ElementSize = "medium"
 
 
 @dataclass
@@ -198,8 +199,8 @@ class Pyplot(Element):
 
     # We reuse the frontend image element to display the chart
     type: ClassVar[ElementType] = "image"
-    size: ClassVar[ElementSize] = "medium"
 
+    size: ElementSize = "medium"
     # The type is set to Any because the figure is not serializable
     # and its actual type is checked in __post_init__.
     figure: Any = None
@@ -290,7 +291,8 @@ class Audio(Element):
 @dataclass
 class Video(Element):
     type: ClassVar[ElementType] = "video"
-    size: ClassVar[ElementSize] = "medium"
+
+    size: ElementSize = "medium"
 
 
 @dataclass
