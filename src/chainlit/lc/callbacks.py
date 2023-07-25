@@ -79,9 +79,12 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.sequence = []
         self.last_prompt = None
         self.stream = None
-        self.root_message = root_message or self.emitter.session.root_message
 
-        if not self.root_message:
+        if root_message:
+            self.root_message = root_message
+        elif root_message := self.emitter.session.root_message:
+            self.root_message = root_message
+        else:
             self.root_message = Message(author=config.ui.name, content="")
             run_sync(self.root_message.send())
 
