@@ -1,3 +1,4 @@
+import json
 import mimetypes
 
 mimetypes.add_type("application/javascript", ".js")
@@ -172,7 +173,7 @@ def get_html_template():
 
     js = None
     if config.ui.theme:
-        js = f"""<script>window.theme = {config.ui.theme.to_dict()}</script>"""
+        js = f"""<script>window.theme = {json.dumps(config.ui.theme.to_dict())}</script>"""
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
