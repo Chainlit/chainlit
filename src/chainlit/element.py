@@ -2,7 +2,7 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union, cast
 
 import aiofiles
 import filetype
@@ -122,10 +122,10 @@ class Element:
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
 
-        element_dict = self.to_dict()
+        emit_dict = cast(Dict, self.to_dict())
 
         # Adding this out of to_dict since the dict will be persisted in the DB
-        element_dict["content"] = self.content
+        emit_dict["content"] = self.content
 
         if self.emitter.emit:
             # Element was already sent
@@ -137,8 +137,8 @@ class Element:
                 )
             else:
                 trace_event(f"send {self.__class__.__name__}")
-                element_dict = await self.before_emit(element_dict)
-                await self.emitter.emit("element", element_dict)
+                emit_dict = await self.before_emit(emit_dict)
+                await self.emitter.emit("element", emit_dict)
 
 
 @dataclass
