@@ -174,12 +174,8 @@ class Text(Element):
 
     type: ClassVar[ElementType] = "text"
 
-    content: Union[str, bytes]
+    content: bytes
     language: Optional[str] = None
-
-    async def preprocess_content(self):
-        if isinstance(self.content, str):
-            self.content = self.content.encode("utf-8")
 
     async def before_emit(self, text_element):
         if "content" in text_element and isinstance(text_element["content"], bytes):
