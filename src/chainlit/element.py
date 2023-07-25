@@ -2,7 +2,7 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, Dict, List, Optional, Union, cast
+from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 
 import aiofiles
 import filetype
@@ -135,6 +135,9 @@ class Element:
                 trace_event(f"send {self.__class__.__name__}")
                 emit_dict = await self.before_emit(emit_dict)
                 await self.emitter.emit("element", emit_dict)
+
+
+ElementBased = TypeVar("ElementBased", bound=Element)
 
 
 @dataclass

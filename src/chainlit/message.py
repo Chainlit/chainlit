@@ -7,7 +7,7 @@ from chainlit.action import Action
 from chainlit.client.base import MessageDict
 from chainlit.config import config
 from chainlit.context import get_emitter
-from chainlit.element import Element
+from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import (
@@ -137,7 +137,7 @@ class Message(MessageBase):
         parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
         indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
         actions (List[Action], optional): A list of actions to send with the message.
-        elements (List[Element], optional): A list of elements to send with the message.
+        elements (List[ElementBased], optional): A list of elements to send with the message.
     """
 
     def __init__(
@@ -150,7 +150,7 @@ class Message(MessageBase):
         parent_id: Optional[str] = None,
         indent: int = 0,
         actions: Optional[List[Action]] = None,
-        elements: Optional[List[Element]] = None,
+        elements: Optional[List[ElementBased]] = None,
     ):
         self.content = content
         self.author = author
