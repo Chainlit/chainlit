@@ -2,7 +2,7 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 
 import aiofiles
 import filetype
@@ -21,12 +21,13 @@ mime_types = {
 
 @dataclass
 class Element:
+    # The type of the element. This will be used to determine how to display the element in the UI.
+    type: ClassVar[ElementType]
+    # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
+    display: ClassVar[ElementDisplay] = "side"
+
     # Name of the element, this will be used to reference the element in the UI.
     name: str
-    # The type of the element. This will be used to determine how to display the element in the UI.
-    type: ElementType
-    # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
-    display: ElementDisplay = "side"
     # The URL of the element if already hosted somehwere else.
     url: Optional[str] = None
     # The local path of the element.
@@ -139,13 +140,13 @@ class Element:
 
 @dataclass
 class Image(Element):
-    type: ElementType = "image"
-    size: ElementSize = "medium"
+    type: ClassVar[ElementType] = "image"
+    size: ClassVar[ElementSize] = "medium"
 
 
 @dataclass
 class Avatar(Element):
-    type: ElementType = "avatar"
+    type: ClassVar[ElementType] = "avatar"
 
     async def send(self):
         element = None
@@ -171,8 +172,9 @@ class Avatar(Element):
 class Text(Element):
     """Useful to send a text (not a message) to the UI."""
 
+    type: ClassVar[ElementType] = "text"
+
     content: Union[str, bytes]
-    type: ElementType = "text"
     language: Optional[str] = None
 
     async def preprocess_content(self):
@@ -189,7 +191,7 @@ class Text(Element):
 class Pdf(Element):
     """Useful to send a pdf to the UI."""
 
-    type: ElementType = "pdf"
+    type: ClassVar[ElementType] = "pdf"
 
 
 @dataclass
@@ -197,8 +199,8 @@ class Pyplot(Element):
     """Useful to send a pyplot to the UI."""
 
     # We reuse the frontend image element to display the chart
-    type: ElementType = "image"
-    size: ElementSize = "medium"
+    type: ClassVar[ElementType] = "image"
+    size: ClassVar[ElementSize] = "medium"
 
     # The type is set to Any because the figure is not serializable
     # and its actual type is checked in __post_init__.
@@ -252,7 +254,7 @@ class Task:
 
 @dataclass
 class TaskList(Element):
-    type = "tasklist"
+    type: ClassVar[ElementType] = "tasklist"
     tasks: List[Task] = Field(default_factory=list, exclude=True)
     status: str = "Ready"
 
@@ -287,15 +289,15 @@ class TaskList(Element):
 
 @dataclass
 class Audio(Element):
-    type: ElementType = "audio"
+    type: ClassVar[ElementType] = "audio"
 
 
 @dataclass
 class Video(Element):
-    type: ElementType = "video"
-    size: ElementSize = "medium"
+    type: ClassVar[ElementType] = "video"
+    size: ClassVar[ElementSize] = "medium"
 
 
 @dataclass
 class File(Element):
-    type: ElementType = "file"
+    type: ClassVar[ElementType] = "file"
