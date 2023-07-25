@@ -48,6 +48,8 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # The stream we can use to stream the final answer from a chain
+    final_stream: Union[Message, None]
     # Message at the root of the chat we should attach child messages to
     root_message: Message
     # Should we stream the final answer?
