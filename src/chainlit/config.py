@@ -150,6 +150,7 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
+    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     client_factory: Optional[Callable[[str], "BaseDBClient"]] = None
 
     def validate(self):

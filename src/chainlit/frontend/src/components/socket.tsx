@@ -1,7 +1,12 @@
 import { wsEndpoint } from 'api';
 import { deepEqual } from 'helpers/object';
 import { memo, useEffect } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+  useSetRecoilState
+} from 'recoil';
 import io from 'socket.io-client';
 
 import { useAuth } from 'hooks/auth';
@@ -12,6 +17,8 @@ import {
   IMessageUpdate,
   IToken,
   askUserState,
+  chatSettingsState,
+  chatSettingsValueState,
   loadingState,
   messagesState,
   sessionState,
@@ -25,6 +32,8 @@ import {
 } from 'state/element';
 import { projectSettingsState } from 'state/project';
 import { sessionIdState, userEnvState } from 'state/user';
+
+import { TFormInput } from './organisms/FormInput';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;
@@ -45,6 +54,8 @@ export default memo(function Socket() {
   const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
+  const setChatSettings = useSetRecoilState(chatSettingsState);
+  const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
 
   useEffect(() => {
     if (authenticating || !pSettings) return;
@@ -176,6 +187,11 @@ export default memo(function Socket() {
 
     socket.on('clear_ask', () => {
       setAskUser(undefined);
+    });
+
+    socket.on('chat_settings', (inputs: TFormInput[]) => {
+      setChatSettings((old) => ({ ...old, inputs }));
+      resetChatSettingsValue();
     });
 
     socket.on('element', (element: IElement) => {

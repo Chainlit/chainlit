@@ -4,6 +4,7 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
+InputWidgetType = Literal["switch", "slider", "selectinput", "textinput"]
 ElementType = Literal[
     "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"
 ]

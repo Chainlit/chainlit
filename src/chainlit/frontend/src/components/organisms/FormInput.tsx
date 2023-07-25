@@ -2,38 +2,34 @@ import Switch, { SwitchProps } from 'components/atoms/switch';
 
 import { IInput } from 'types/Input';
 
-import SelectInput, {
-  SelectInputProps,
-  SelectItem
-} from './inputs/selectInput';
+import SelectInput, { SelectInputProps } from './inputs/selectInput';
 import TagsInput, { TagsInputProps } from './inputs/tagsInput';
 import TextInput, { TextInputProps } from './inputs/textInput';
 import Slider, { SliderProps } from './slider';
 
-interface IFormInput<T, I> extends IInput {
+export type FormInitial =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | undefined;
+
+export interface IFormInput<T> extends IInput {
   type: T;
-  initial: I;
 }
 
 export type TFormInput =
-  | (SwitchProps & IFormInput<'switch', boolean>)
-  | (SliderProps & IFormInput<'slider', number>)
-  | (SelectInputProps & IFormInput<'select', string>)
-  | (TextInputProps & IFormInput<'textinput', string>)
-  | (TagsInputProps & IFormInput<'tags', string[]>);
+  | (SwitchProps & IFormInput<'switch'>)
+  | (SliderProps & IFormInput<'slider'>)
+  | (SelectInputProps & IFormInput<'select'>)
+  | (TextInputProps & IFormInput<'textinput'>)
+  | (TagsInputProps & IFormInput<'tags'>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element.type) {
     case 'select':
-      return (
-        <SelectInput
-          {...element}
-          items={element.items?.map((option: SelectItem) => ({
-            label: option.label,
-            value: option.value
-          }))}
-        />
-      );
+      return <SelectInput {...element} />;
     case 'slider':
       return <Slider {...element} />;
     case 'tags':

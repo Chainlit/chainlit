@@ -1,5 +1,7 @@
-import { atom } from 'recoil';
+import { atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
+
+import { FormInitial, TFormInput } from 'components/organisms/FormInput';
 
 import { IMessageElement } from './element';
 import { IMember } from './user';
@@ -116,4 +118,34 @@ export const askUserState = atom<IAsk | undefined>({
 export const highlightMessage = atom<IMessage['id'] | null>({
   key: 'HighlightMessage',
   default: null
+});
+
+export const chatSettingsState = atom<{
+  open: boolean;
+  inputs: TFormInput[];
+}>({
+  key: 'ChatSettings',
+  default: {
+    open: false,
+    inputs: []
+  }
+});
+
+export const chatSettingsDefaultValueSelector = selector({
+  key: 'ChatSettingsValue/Default',
+  get: ({ get }) => {
+    const chatSettings = get(chatSettingsState);
+    return chatSettings.inputs.reduce(
+      (
+        form: { [key: string]: any },
+        input: TFormInput & { initial?: FormInitial }
+      ) => ((form[input.id] = input.initial), form),
+      {}
+    );
+  }
+});
+
+export const chatSettingsValueState = atom({
+  key: 'ChatSettingsValue',
+  default: chatSettingsDefaultValueSelector
 });
