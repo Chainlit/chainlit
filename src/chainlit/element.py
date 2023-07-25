@@ -102,8 +102,6 @@ class Element:
         await self.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: Optional[str] = None):
-        element = None
-
         if not self.content and not self.url and self.path:
             await self.load()
 
@@ -125,7 +123,7 @@ class Element:
         # Adding this out of to_dict since the dict will be persisted in the DB
         element_dict["content"] = self.content
 
-        if self.emitter.emit and element:
+        if self.emitter.emit:
             # Element was already sent
             if len(self.for_ids) > 1:
                 trace_event(f"update {self.__class__.__name__}")
@@ -244,9 +242,6 @@ class Task:
         self.title = title
         self.status = status
         self.forId = forId
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
 
 
 @dataclass
