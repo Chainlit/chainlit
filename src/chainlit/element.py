@@ -28,18 +28,18 @@ class Element:
     # Controls element size
     size: ClassVar[Optional[ElementSize]]
 
+    # The ID of the element. This is set automatically when the element is sent to the UI.
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     # Name of the element, this will be used to reference the element in the UI.
-    name: str
+    name: Optional[str] = None
     # The URL of the element if already hosted somehwere else.
     url: Optional[str] = None
     # The local path of the element.
     path: Optional[str] = None
     # The byte content of the element.
     content: Optional[bytes] = None
-    # The ID of the element. This is set automatically when the element is sent to the UI.
-    id: Optional[str] = None
     # The ID of the message this element is associated with.
-    for_ids: Optional[List[str]] = None
+    for_ids: List[str] = Field(default_factory=list)
     # The language, if relevant
     language: Optional[str] = None
 
@@ -47,9 +47,6 @@ class Element:
         trace_event(f"init {self.__class__.__name__}")
         self.emitter = get_emitter()
         self.persisted = False
-        self.for_ids = []
-        if not self.id:
-            self.id = str(uuid.uuid4())
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
@@ -59,8 +56,8 @@ class Element:
             {
                 "id": self.id,
                 "type": self.type,
-                "url": self.url,
-                "name": self.name,
+                "url": self.url or "",
+                "name": self.name or "",
                 "display": self.display,
                 "size": getattr(self, "size", None),
                 "language": getattr(self, "language", None),
@@ -68,7 +65,6 @@ class Element:
                 "conversationId": None,
             }
         )
-
         return _dict
 
     async def preprocess_content(self):
@@ -177,7 +173,7 @@ class Text(Element):
 
     type: ClassVar[ElementType] = "text"
 
-    content: bytes
+    content: bytes = b""
     language: Optional[str] = None
 
     async def before_emit(self, text_element):
