@@ -58,6 +58,8 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         """Run when an event ends."""
+        if payload is None:
+            return
 
         parent_id = self.root_message.id if self.root_message else None
 
