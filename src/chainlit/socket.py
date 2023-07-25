@@ -1,5 +1,6 @@
 import asyncio
 import json
+from typing import Any, Dict
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
@@ -204,3 +205,17 @@ async def call_action(sid, action):
     action = Action(**action)
 
     await process_action(action)
+
+
+@socket.on("chat_settings_change")
+async def change_settings(sid, settings: Dict[str, Any]):
+    """Handle change settings submit from the UI."""
+    session = Session.require(sid)
+    emitter_var.set(ChainlitEmitter(session))
+    loop_var.set(asyncio.get_event_loop())
+
+    for key, value in settings.items():
+        session.chat_settings[key] = value
+
+    if config.code.on_settings_update:
+        await config.code.on_settings_update(settings)

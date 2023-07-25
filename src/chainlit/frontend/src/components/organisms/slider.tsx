@@ -26,7 +26,7 @@ const _Slider = ({
       tooltip={tooltip}
       notificationsCount={sliderProps.value?.toString()}
     >
-      <StyledSlider {...sliderProps} />
+      <StyledSlider {...sliderProps} id={id} name={id} />
     </InputStateHandler>
   );
 };

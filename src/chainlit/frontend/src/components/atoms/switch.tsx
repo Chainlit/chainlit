@@ -8,7 +8,7 @@ import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 import { IInput } from 'types/Input';
 
 export type SwitchProps = {
-  checked?: boolean;
+  checked: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   onChange: (
     event?: React.ChangeEvent<HTMLInputElement>,
@@ -38,6 +38,7 @@ export default function Switch(props: SwitchProps): JSX.Element {
       tooltip={tooltip}
     >
       <StyledSwitch
+        name={id}
         disabled={disabled}
         edge="end"
         onChange={onChange}

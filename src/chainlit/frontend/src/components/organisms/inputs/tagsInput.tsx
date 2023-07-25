@@ -28,7 +28,7 @@ export default function TagsInput({
       label={label}
       tooltip={tooltip}
     >
-      <MuiChipsInput {...rest} size={size} />
+      <MuiChipsInput {...rest} size={size} name={id} id={id} />
     </InputStateHandler>
   );
 }

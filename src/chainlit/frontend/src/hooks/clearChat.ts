@@ -1,7 +1,13 @@
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 
 import { actionState } from 'state/action';
-import { messagesState, sessionState, tokenCountState } from 'state/chat';
+import {
+  chatSettingsState,
+  chatSettingsValueState,
+  messagesState,
+  sessionState,
+  tokenCountState
+} from 'state/chat';
 import {
   avatarState,
   elementState,
@@ -18,6 +24,8 @@ export default function useClearChat() {
   const setActions = useSetRecoilState(actionState);
   const setSideView = useSetRecoilState(sideViewState);
   const setTokenCount = useSetRecoilState(tokenCountState);
+  const resetChatSettings = useResetRecoilState(chatSettingsState);
+  const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
   const resetSessionId = useResetRecoilState(sessionIdState);
   const session = useRecoilValue(sessionState);
 
@@ -33,5 +41,7 @@ export default function useClearChat() {
     setActions([]);
     setSideView(undefined);
     setTokenCount(0);
+    resetChatSettings();
+    resetChatSettingsValue();
   };
 }

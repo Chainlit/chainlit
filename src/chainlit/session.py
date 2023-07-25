@@ -54,6 +54,7 @@ class Session:
         self.should_stop = False
         self.restored = False
         self.id = id
+        self.chat_settings: Dict[str, Any] = {}
 
         sessions_id[self.id] = self
         sessions_sid[socket_id] = self
