@@ -1,4 +1,4 @@
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, List, Optional, TypeVar
 
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
@@ -13,7 +13,7 @@ T = TypeVar("T")
 
 class Stack(Generic[T]):
     def __init__(self) -> None:
-        self.items: list[T] = []
+        self.items: List[T] = []
 
     def __len__(self):
         return len(self.items)
@@ -27,10 +27,14 @@ class Stack(Generic[T]):
     def peek(self) -> T:
         return self.items[-1]
 
+    def clear(self) -> None:
+        self.items.clear()
+
 
 class HaystackAgentCallbackHandler:
     stack: Stack[cl.Message]
     emitter: ChainlitEmitter
+    latest_agent_message: Optional[cl.Message]
 
     def __init__(self, agent: Agent):
         agent.callback_manager.on_agent_start += self.on_agent_start
@@ -82,7 +86,7 @@ class HaystackAgentCallbackHandler:
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
         self.latest_agent_message = None
-        self.stack = None
+        self.stack.clear()
 
     def on_new_token(self, token, **kwargs: Any) -> None:
         # Stream agent step tokens
@@ -90,9 +94,8 @@ class HaystackAgentCallbackHandler:
 
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any) -> None:
         # Tool started, create message
-        tool_message = cl.Message(
-            author=tool.name, parent_id=self.latest_agent_message.id, content=""
-        )
+        parent_id = self.latest_agent_message.id if self.latest_agent_message else None
+        tool_message = cl.Message(author=tool.name, parent_id=parent_id, content="")
         self.stack.push(tool_message)
 
     def on_tool_finish(

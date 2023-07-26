@@ -3,7 +3,7 @@ import json
 import mimetypes
 import os
 import uuid
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 import aiofiles
 
@@ -51,10 +51,14 @@ class LocalDBClient(BaseDBClient):
 
     async def create_user(self, variables: UserDict):
         from prisma.models import User
+        from prisma.types import UserCreateInput
 
         user = await User.prisma().find_unique(where={"id": variables["id"]})
         if not user:
-            user = await User.prisma().create(data=variables)
+            # replace with unpacking when Mypy 1.5.0 is out:
+            # data = UserCreateInput(**variables)
+            data = cast(UserCreateInput, variables)
+            user = await User.prisma().create(data=data)
             return True
         return False
 
@@ -95,11 +99,11 @@ class LocalDBClient(BaseDBClient):
             where={"id": conversation_id}, include={"messages": True, "elements": True}
         )
 
-        for m in c.messages:
+        for m in c.messages or []:
             if m.llmSettings:
                 m.llmSettings = json.loads(m.llmSettings)
 
-        for e in c.elements:
+        for e in c.elements or []:
             if e.forIds:
                 e.forIds = json.loads(e.forIds)
 

@@ -22,7 +22,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
     """Base callback handler that can be used to track event starts and ends."""
 
     # Message at the root of the chat we should attach child messages to
-    root_message: Message = None
+    root_message: Optional[Message] = None
 
     def __init__(
         self,
@@ -58,6 +58,8 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         """Run when an event ends."""
+        if payload is None:
+            return
 
         parent_id = self.root_message.id if self.root_message else None
 

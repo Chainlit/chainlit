@@ -41,13 +41,15 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
     # Keep track of the LLM settings for the last prompt
-    llm_settings: LLMSettings
+    llm_settings: Optional[LLMSettings]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
     sequence: List[Message]
     # Keep track of the last prompt for each session
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # The stream we can use to stream the final answer from a chain
+    final_stream: Union[Message, None]
     # Message at the root of the chat we should attach child messages to
     root_message: Message
     # Should we stream the final answer?
@@ -71,7 +73,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         strip_tokens: bool = True,
         stream_prefix: bool = False,
         stream_final_answer: bool = False,
-        root_message: Message = None,
+        root_message: Optional[Message] = None,
     ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
@@ -79,9 +81,12 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.sequence = []
         self.last_prompt = None
         self.stream = None
-        self.root_message = root_message or self.emitter.session.root_message
 
-        if not self.root_message:
+        if root_message:
+            self.root_message = root_message
+        elif root_message := self.emitter.session.root_message:
+            self.root_message = root_message
+        else:
             self.root_message = Message(author=config.ui.name, content="")
             run_sync(self.root_message.send())
 
@@ -143,7 +148,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if self.sequence:
             return self.sequence.pop()
 
-    def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
+    def add_prompt(self, prompt: str, llm_settings: Optional[LLMSettings] = None):
         self.prompts.append(prompt)
         self.llm_settings = llm_settings
 
@@ -176,9 +181,9 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def create_message(
         self,
         content: str = "",
-        prompt: str = None,
-        author: str = None,
-        parent_id: Union[str, int] = None,
+        prompt: Optional[str] = None,
+        author: Optional[str] = None,
+        parent_id: Optional[str] = None,
     ):
         if parent_id is None:
             last_message = self.get_last_message()
@@ -288,7 +293,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         self.pop_sequence()
 
     def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
         message = self.create_message(author=serialized["name"])
         self.add_in_sequence(message)
@@ -411,7 +416,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         self.pop_sequence()
 
     async def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
         message = self.create_message(author=serialized["name"])
         self.add_in_sequence(message)

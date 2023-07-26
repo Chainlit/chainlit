@@ -4,7 +4,7 @@ from importlib import util
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 
 from chainlit.logger import logger
@@ -109,38 +109,34 @@ class RunSettings:
     ci: bool = False
 
 
-@dataclass_json
 @dataclass()
-class PaletteOptions:
+class PaletteOptions(DataClassJsonMixin):
     main: Optional[str] = ""
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
 
-@dataclass_json
 @dataclass()
-class Palette:
-    primary: PaletteOptions = None
+class Palette(DataClassJsonMixin):
+    primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
 
 
-@dataclass_json
 @dataclass()
-class Theme:
-    light: Palette = None
-    dark: Palette = None
+class Theme(DataClassJsonMixin):
+    light: Optional[Palette] = None
+    dark: Optional[Palette] = None
 
 
-@dataclass_json
 @dataclass()
-class UISettings:
+class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     hide_cot: bool = False
     default_expand_messages: bool = False
-    github: str = None
-    theme: Theme = None
+    github: Optional[str] = None
+    theme: Optional[Theme] = None
 
 
 @dataclass()
@@ -171,9 +167,8 @@ class CodeSettings:
         return True
 
 
-@dataclass_json
 @dataclass()
-class ProjectSettings:
+class ProjectSettings(DataClassJsonMixin):
     # Enables Cloud features if provided
     id: Optional[str] = None
     # Whether the app is available to anonymous users or only to team members.
@@ -183,13 +178,13 @@ class ProjectSettings:
     # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
-    user_env: List[str] = None
+    user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
-    lc_cache_path: str = None
+    lc_cache_path: Optional[str] = None
     # Path to the local chat db
-    local_db_path: str = None
+    local_db_path: Optional[str] = None
     # Path to the local file system
-    local_fs_path: str = None
+    local_fs_path: Optional[str] = None
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
 
@@ -230,7 +225,13 @@ def load_module(target: str):
     sys.path.insert(0, target_dir)
 
     spec = util.spec_from_file_location(target, target)
+    if not spec or not spec.loader:
+        return
+
     module = util.module_from_spec(spec)
+    if not module:
+        return
+
     spec.loader.exec_module(module)
 
     sys.modules[target] = module

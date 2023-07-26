@@ -3,4 +3,5 @@
 
 pnpm run lintUi
 pnpm run formatUi
+pnpm run lintPython
 pnpm run formatPython

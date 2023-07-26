@@ -1,13 +1,13 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
 from chainlit.config import config
 from chainlit.context import get_emitter
-from chainlit.element import Element
+from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import (
@@ -20,15 +20,17 @@ from chainlit.types import (
 
 
 class MessageBase(ABC):
-    id: str = None
+    id: str
+    author: str
+    content: str = ""
     streaming = False
-    created_at: int = None
+    created_at: Union[int, str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        if not self.id:
+        if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
         if not self.created_at:
             self.created_at = datetime.now(timezone.utc).isoformat()
@@ -85,7 +87,7 @@ class MessageBase(ABC):
 
         return True
 
-    async def send(self) -> str:
+    async def send(self):
         if self.content is None:
             self.content = ""
 
@@ -117,6 +119,7 @@ class MessageBase(ABC):
         else:
             self.content += token
 
+        assert self.id
         await self.emitter.send_token(id=self.id, token=token, is_sequence=is_sequence)
 
 
@@ -134,20 +137,20 @@ class Message(MessageBase):
         parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
         indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
         actions (List[Action], optional): A list of actions to send with the message.
-        elements (List[Element], optional): A list of elements to send with the message.
+        elements (List[ElementBased], optional): A list of elements to send with the message.
     """
 
     def __init__(
         self,
         content: str,
         author: str = config.ui.name,
-        prompt: str = None,
-        llm_settings: LLMSettings = None,
-        language: str = None,
-        parent_id: str = None,
+        prompt: Optional[str] = None,
+        llm_settings: Optional[LLMSettings] = None,
+        language: Optional[str] = None,
+        parent_id: Optional[str] = None,
         indent: int = 0,
-        actions: List[Action] = None,
-        elements: List[Element] = None,
+        actions: Optional[List[Action]] = None,
+        elements: Optional[List[ElementBased]] = None,
     ):
         self.content = content
         self.author = author
@@ -171,18 +174,19 @@ class Message(MessageBase):
     def from_dict(self, _dict: MessageDict):
         message = Message(
             content=_dict["content"],
-            author=_dict.get("author"),
+            author=_dict.get("author", config.ui.name),
             prompt=_dict.get("prompt"),
-            llm_settings=_dict.get("llmSettings"),
             language=_dict.get("language"),
             parent_id=_dict.get("parentId"),
-            indent=_dict.get("indent", 0),
+            indent=_dict.get("indent") or 0,
         )
 
         if _id := _dict.get("id"):
             message.id = _id
         if created_at := _dict.get("createdAt"):
             message.created_at = created_at
+        if llm_settings := _dict.get("llmSettings"):
+            message.llm_settings = llm_settings
 
         return message
 
@@ -203,7 +207,7 @@ class Message(MessageBase):
 
         return _dict
 
-    async def send(self):
+    async def send(self) -> str:
         """
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.

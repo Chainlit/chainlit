@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
         webbrowser.open(url)
 
     if config.project.database == "local":
-        from prisma import Client, register
+        from prisma import Client, register  # type: ignore[attr-defined]
 
         client = Client()
         register(client)
@@ -283,8 +283,10 @@ async def get_conversation(request: Request, conversation_id: str):
 
 
 @app.get("/project/conversation/{conversation_id}/element/{element_id}")
-async def get_conversation(request: Request, conversation_id: str, element_id: str):
-    """Get a specific conversation."""
+async def get_conversation_element(
+    request: Request, conversation_id: str, element_id: str
+):
+    """Get a specific conversation element."""
 
     db_client = await get_db_client_from_request(request)
     res = await db_client.get_element(conversation_id, element_id)

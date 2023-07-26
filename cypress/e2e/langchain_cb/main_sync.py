@@ -20,7 +20,7 @@ async def main():
         )
     )
 
-    cb.on_tool_start(serialized={"name": "TestTool1"}, inputs={})
+    cb.on_tool_start(serialized={"name": "TestTool1"}, input_str="")
     cb.on_tool_end(output="This is the response of tool1")
 
     cb.on_chain_end(outputs={"res": "This is the response of TestChain1"})
