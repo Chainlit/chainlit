@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, cast
 import aiohttp
 from python_graphql_client import GraphqlClient
 
-from chainlit.client.base import UserDict
+from chainlit.client.base import MessageDict, UserDict
 from chainlit.config import config
 from chainlit.logger import logger
 
@@ -300,7 +300,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     async def get_message(self):
         raise NotImplementedError
 
-    async def create_message(self, variables: Dict[str, Any]) -> Optional[str]:
+    async def create_message(self, variables: MessageDict) -> Optional[str]:
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -323,7 +323,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["createMessage"]["id"]
 
-    async def update_message(self, message_id: str, variables: Dict[str, Any]) -> bool:
+    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
         mutation = """
         mutation ($messageId: ID!, $author: String!, $content: String!, $parentId: String, $language: String, $prompt: String, $llmSettings: Json) {
             updateMessage(messageId: $messageId, author: $author, content: $content, parentId: $parentId, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
