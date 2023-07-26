@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Mapping, Optional, cast
 
 import aiohttp
 from python_graphql_client import GraphqlClient
@@ -44,7 +44,7 @@ class GraphQLClient:
         return False
 
     async def mutation(
-        self, mutation: str, variables: Dict[str, Any] = {}
+        self, mutation: str, variables: Mapping[str, Any] = {}
     ) -> Dict[str, Any]:
         """
         Execute a GraphQL mutation.
