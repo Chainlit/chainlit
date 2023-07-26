@@ -95,11 +95,11 @@ class LocalDBClient(BaseDBClient):
             where={"id": conversation_id}, include={"messages": True, "elements": True}
         )
 
-        for m in c.messages:
+        for m in c.messages or []:
             if m.llmSettings:
                 m.llmSettings = json.loads(m.llmSettings)
 
-        for e in c.elements:
+        for e in c.elements or []:
             if e.forIds:
                 e.forIds = json.loads(e.forIds)
 

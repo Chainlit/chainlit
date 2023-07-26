@@ -225,7 +225,13 @@ def load_module(target: str):
     sys.path.insert(0, target_dir)
 
     spec = util.spec_from_file_location(target, target)
+    if not spec or not spec.loader:
+        return
+
     module = util.module_from_spec(spec)
+    if not module:
+        return
+
     spec.loader.exec_module(module)
 
     sys.modules[target] = module
