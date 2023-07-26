@@ -135,7 +135,7 @@ def action_callback(name: str) -> Callable:
 @trace
 def client_factory(
     func: Callable[[Optional["UserDict"]], "BaseDBClient"]
-) -> Callable[[], "BaseDBClient"]:
+) -> Callable[[Optional["UserDict"]], "BaseDBClient"]:
     """
     Callback to call when to initialize the custom client.
 

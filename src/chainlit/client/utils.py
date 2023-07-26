@@ -53,6 +53,8 @@ async def get_db_client(
         custom_db_client = await config.code.client_factory(user_infos)
         return custom_db_client
 
+    raise ValueError("Unknown database type")
+
 
 async def get_auth_client_from_request(
     request: Request,

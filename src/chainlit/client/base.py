@@ -109,7 +109,7 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_conversation(self) -> str:
+    async def create_conversation(self) -> Optional[str]:
         pass
 
     @abstractmethod
@@ -131,7 +131,7 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_message(self, variables: MessageDict) -> str:
+    async def create_message(self, variables: MessageDict) -> Optional[str]:
         pass
 
     @abstractmethod

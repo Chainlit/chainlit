@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import aiohttp
 from python_graphql_client import GraphqlClient
@@ -78,7 +78,9 @@ class CloudAuthClient(BaseAuthClient, GraphQLClient):
 
                 json = await r.json()
                 self.user_infos = json
-                return self.user_infos
+                # replace with unpacking when Mypy 1.5.0 is out:
+                # return UserDict(**self.user_infos)
+                return cast(UserDict, self.user_infos)
 
     async def is_project_member(self) -> bool:
         try:
@@ -130,7 +132,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return members
 
-    async def create_conversation(self) -> str:
+    async def create_conversation(self) -> Optional[str]:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
         async with self.lock:
             if self.conversation_id:
@@ -297,7 +299,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     async def get_message(self):
         raise NotImplementedError
 
-    async def create_message(self, variables: Dict[str, Any]) -> str:
+    async def create_message(self, variables: Dict[str, Any]) -> Optional[str]:
         c_id = await self.get_conversation_id()
 
         if not c_id:
