@@ -9,7 +9,7 @@ from chainlit.config import config
 from chainlit.telemetry import trace_event
 
 
-async def get_auth_client(authorization: str) -> BaseAuthClient:
+async def get_auth_client(authorization: Optional[str]) -> BaseAuthClient:
     # Check authorization
     if not config.project.public and not authorization:
         # Refuse connection if the app is private and no access token is provided

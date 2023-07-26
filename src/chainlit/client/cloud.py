@@ -13,12 +13,13 @@ from .base import BaseAuthClient, BaseDBClient, PageInfo, PaginatedResponse, Use
 
 
 class GraphQLClient:
-    def __init__(self, project_id: str, access_token: str):
+    def __init__(self, project_id: str, access_token: Optional[str]):
         self.project_id = project_id
-        self.headers = {
-            "Authorization": access_token,
-            "content-type": "application/json",
-        }
+
+        self.headers = {"content-type": "application/json"}
+        if access_token:
+            self.headers["Authorization"] = access_token
+
         graphql_endpoint = f"{config.chainlit_server}/api/graphql"
         self.graphql_client = GraphqlClient(
             endpoint=graphql_endpoint, headers=self.headers
@@ -95,7 +96,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
 
-    def __init__(self, project_id: str, access_token: str):
+    def __init__(self, project_id: str, access_token: Optional[str]):
         self.lock = asyncio.Lock()
         super().__init__(project_id, access_token)
 
