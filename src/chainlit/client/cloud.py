@@ -24,7 +24,7 @@ class GraphQLClient:
             endpoint=graphql_endpoint, headers=self.headers
         )
 
-    def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
         Execute a GraphQL query.
 
@@ -32,7 +32,7 @@ class GraphQLClient:
         :param variables: A dictionary of variables for the query.
         :return: The response data as a dictionary.
         """
-        return self.graphql_client.execute_async(query=query, variables=variables)
+        return await self.graphql_client.execute_async(query=query, variables=variables)
 
     def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
         if "errors" in response:
@@ -42,7 +42,9 @@ class GraphQLClient:
             return True
         return False
 
-    def mutation(self, mutation: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def mutation(
+        self, mutation: str, variables: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """
         Execute a GraphQL mutation.
 
@@ -50,7 +52,9 @@ class GraphQLClient:
         :param variables: A dictionary of variables for the mutation.
         :return: The response data as a dictionary.
         """
-        return self.graphql_client.execute_async(query=mutation, variables=variables)
+        return await self.graphql_client.execute_async(
+            query=mutation, variables=variables
+        )
 
 
 class CloudAuthClient(BaseAuthClient, GraphQLClient):
