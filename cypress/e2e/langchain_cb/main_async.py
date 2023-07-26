@@ -20,7 +20,7 @@ async def main():
         )
     )
 
-    await acb.on_tool_start(serialized={"name": "TestTool1"}, inputs={})
+    await acb.on_tool_start(serialized={"name": "TestTool1"}, input_str="")
     await acb.on_tool_end(output="This is the response of tool1")
 
     await acb.on_chain_end(outputs={"res": "This is the response of TestChain1"})

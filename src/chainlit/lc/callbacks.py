@@ -293,7 +293,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         self.pop_sequence()
 
     def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
         message = self.create_message(author=serialized["name"])
         self.add_in_sequence(message)
@@ -416,7 +416,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         self.pop_sequence()
 
     async def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
         message = self.create_message(author=serialized["name"])
         self.add_in_sequence(message)
