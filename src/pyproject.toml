@@ -72,6 +72,7 @@ module = [
     "langflow",
     "matplotlib.*",  # remove when 3.8.0 is out, it should export types
     "nest_asyncio",
+    "prisma.*",
     "python_graphql_client",
     "socketio.*",
     "uptrace",
