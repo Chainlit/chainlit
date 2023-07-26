@@ -1,4 +1,4 @@
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, List, Optional, TypeVar
 
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
@@ -13,7 +13,7 @@ T = TypeVar("T")
 
 class Stack(Generic[T]):
     def __init__(self) -> None:
-        self.items: list[T] = []
+        self.items: List[T] = []
 
     def __len__(self):
         return len(self.items)
