@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Union
+from typing import Dict, Union, cast
 
 from socketio.exceptions import TimeoutError
 
@@ -75,7 +75,7 @@ class ChainlitEmitter:
 
         if self.db_client:
             # We have to update the UI with the actual DB ID
-            ui_message_update = message_dict.copy()
+            ui_message_update = cast(Dict, message_dict.copy())
             persisted_id = await self.db_client.create_message(message_dict)
             if persisted_id:
                 message_dict["id"] = persisted_id
