@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
-import SettingsIcon from '@mui/icons-material/Settings';
 import SendIcon from '@mui/icons-material/Telegram';
+import TuneIcon from '@mui/icons-material/Tune';
 import { IconButton, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -100,7 +100,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
           color="inherit"
           onClick={() => setChatSettings((old) => ({ ...old, open: true }))}
         >
-          <SettingsIcon />
+          <TuneIcon />
         </IconButton>
       )}
       <HistoryButton onClick={onHistoryClick} />

@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogTitle,
   FormHelperText
 } from '@mui/material';
 
@@ -137,7 +138,8 @@ export default function ChatSettingsModal() {
         }
       }}
     >
-      <DialogContent sx={{ scrollbarGutter: 'stable' }}>
+      <DialogTitle id="alert-dialog-title">{'Settings panel'}</DialogTitle>
+      <DialogContent>
         <Box
           sx={{
             display: 'flex',
@@ -151,8 +153,11 @@ export default function ChatSettingsModal() {
         </Box>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
+        <AccentButton onClick={handleReset} color="primary" variant="outlined">
+          Reset
+        </AccentButton>
+        <div style={{ flex: '1 0 0' }} />
         <RegularButton onClick={handleClose}>Cancel</RegularButton>
-        <RegularButton onClick={handleReset}>Reset</RegularButton>
         <AccentButton
           id="confirm"
           variant="outlined"
