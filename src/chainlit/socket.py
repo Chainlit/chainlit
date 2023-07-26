@@ -66,12 +66,14 @@ async def connect(sid, environ, auth):
     if restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
         return True
 
+    db_client = None
     user_env = environ.get("HTTP_USER_ENV")
     authorization = environ.get("HTTP_AUTHORIZATION")
 
     try:
         auth_client = await get_auth_client(authorization)
-        db_client = await get_db_client(authorization, auth_client.user_infos)
+        if config.project.database:
+            db_client = await get_db_client(authorization, auth_client.user_infos)
         user_env = load_user_env(user_env)
     except ConnectionRefusedError as e:
         logger.error(f"ConnectionRefusedError: {e}")
