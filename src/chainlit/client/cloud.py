@@ -331,9 +331,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             }
         }
         """
-        variables = variables.copy()
-        variables["messageId"] = message_id
-        res = await self.mutation(mutation, variables)
+        res = await self.mutation(mutation, dict(message_id=message_id, **variables))
 
         if self.check_for_errors(res):
             logger.warning("Could not update message.")
