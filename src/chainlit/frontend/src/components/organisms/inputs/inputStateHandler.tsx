@@ -9,16 +9,32 @@ type InputStateHandlerProps = {
   id: string;
   label?: string;
   tooltip?: string;
+  notificationsCount?: number | string;
 };
 
 export default function InputStateHandler(
   props: InputStateHandlerProps
 ): JSX.Element {
-  const { children, description, hasError, id, label, tooltip } = props;
+  const {
+    children,
+    description,
+    hasError,
+    id,
+    label,
+    notificationsCount,
+    tooltip
+  } = props;
 
   return (
     <Box width="100%">
-      {label ? <InputLabel id={id} label={label} tooltip={tooltip} /> : null}
+      {label ? (
+        <InputLabel
+          id={id}
+          label={label}
+          tooltip={tooltip}
+          notificationsCount={notificationsCount}
+        />
+      ) : null}
       <FormControl error={hasError} fullWidth>
         {children}
         {description ? <FormHelperText>{description}</FormHelperText> : null}
