@@ -3,15 +3,9 @@ import { grey } from 'palette';
 import Slider, { SliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
-import InputStateHandler from './inputs/inputStateHandler';
+import { IInput } from 'types/Input';
 
-interface Props extends SliderProps {
-  description?: string;
-  label: string;
-  tooltip?: string;
-  hasError?: boolean;
-  id: string;
-}
+import InputStateHandler from './inputs/inputStateHandler';
 
 const _Slider = ({
   description,
@@ -20,7 +14,7 @@ const _Slider = ({
   label,
   tooltip,
   ...sliderProps
-}: Props) => {
+}: IInput & SliderProps) => {
   return (
     <InputStateHandler
       description={description}

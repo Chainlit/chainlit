@@ -5,20 +5,16 @@ import { styled } from '@mui/material/styles';
 
 import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 
+import { IInput } from 'types/Input';
+
 type SwitchProps = {
   checked?: boolean;
-  description?: string;
-  disabled?: boolean;
-  hasError?: boolean;
-  id: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-  label?: string;
-  tooltip?: string;
   onChange: (
     event?: React.ChangeEvent<HTMLInputElement>,
     checked?: boolean
   ) => void;
-};
+} & IInput;
 
 export default function Switch(props: SwitchProps): JSX.Element {
   const {

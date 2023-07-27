@@ -2,15 +2,11 @@ import { Box, FormControl, FormHelperText } from '@mui/material';
 
 import InputLabel from 'components/molecules/inputLabel';
 
-type InputStateHandlerProps = {
+import { IInput } from 'types/Input';
+
+export type InputStateHandlerProps = {
   children: React.ReactNode;
-  description?: string;
-  hasError?: boolean;
-  id: string;
-  label?: string;
-  tooltip?: string;
-  notificationsCount?: number | string;
-};
+} & IInput;
 
 export default function InputStateHandler(
   props: InputStateHandlerProps
