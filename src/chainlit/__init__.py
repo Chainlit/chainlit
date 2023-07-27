@@ -7,8 +7,10 @@ from dotenv import load_dotenv
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, UserDict
 
+import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
+from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -24,7 +26,6 @@ from chainlit.element import (
     Video,
 )
 from chainlit.haystack import HAYSTACK_INSTALLED
-from chainlit.input_widget import ChatSettings, SelectInput, Slider, Switch, TextInput
 from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.llama_index import LLAMA_INDEX_INSTALLED
 from chainlit.logger import logger
@@ -190,10 +191,7 @@ __all__ = [
     "TaskStatus",
     "Video",
     "ChatSettings",
-    "Switch",
-    "Slider",
-    "SelectInput",
-    "TextInput",
+    "input_widget",
     "Message",
     "ErrorMessage",
     "AskUserMessage",

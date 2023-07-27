@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic.dataclasses import Field, dataclass
 
-from chainlit.context import get_emitter
 from chainlit.types import InputWidgetType
 
 
@@ -29,36 +28,8 @@ class InputWidget(ABC):
 
 
 @dataclass
-class ChatSettings:
-    """Useful to create chat settings that the user can change."""
-
-    widgets: List[InputWidget] = Field(default_factory=list, exclude=True)
-
-    def __init__(
-        self,
-        widgets: List[InputWidget],
-    ) -> None:
-        self.widgets = widgets
-        self.emitter = get_emitter()
-
-    def settings(self):
-        return dict(
-            [(input_widget.key, input_widget.initial) for input_widget in self.widgets]
-        )
-
-    async def send(self):
-        settings = self.settings()
-        self.emitter.set_chat_settings(settings)
-
-        widgets_content = [input_widget.to_dict() for input_widget in self.widgets]
-        await self.emitter.emit("chat_settings", widgets_content)
-
-        return settings
-
-
-@dataclass
 class Switch(InputWidget):
-    """Useful to create a switch input in the settings element."""
+    """Useful to create a switch input."""
 
     type: InputWidgetType = "switch"
     initial: bool = False
@@ -89,7 +60,7 @@ class Switch(InputWidget):
 
 @dataclass
 class Slider(InputWidget):
-    """Useful to create a slider input in the settings element."""
+    """Useful to create a slider input."""
 
     type: InputWidgetType = "slider"
     initial: float = 0
@@ -131,8 +102,8 @@ class Slider(InputWidget):
 
 
 @dataclass
-class SelectInput(InputWidget):
-    """Useful to create a select input in the settings element."""
+class Select(InputWidget):
+    """Useful to create a select input."""
 
     type: InputWidgetType = "select"
     initial: Optional[str] = None
@@ -162,7 +133,7 @@ class SelectInput(InputWidget):
 
         if values is None and initial_index is not None:
             raise ValueError(
-                "Initial_index can only be used in combination with values to create a SelectInput"
+                "Initial_index can only be used in combination with values to create a Select"
             )
 
         self.id = id
@@ -193,7 +164,7 @@ class SelectInput(InputWidget):
 
 @dataclass
 class TextInput(InputWidget):
-    """Useful to create a text input in the settings element."""
+    """Useful to create a text input."""
 
     type: InputWidgetType = "textinput"
     initial: Optional[str] = None
@@ -221,6 +192,39 @@ class TextInput(InputWidget):
             "label": self.label,
             "initial": self.initial,
             "placeholder": self.placeholder,
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }
+
+
+@dataclass
+class Tags(InputWidget):
+    """Useful to create an input for an array of strings."""
+
+    type: InputWidgetType = "tags"
+    initial: List[str] = Field(default_factory=lambda: list)
+    values: List[str] = Field(default_factory=lambda: list)
+
+    def __init__(
+        self,
+        id: str,
+        label: str,
+        initial: Optional[List[str]] = None,
+        tooltip: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> None:
+        self.id = id
+        self.label = label
+        if initial is not None:
+            self.initial = initial
+        super().__post_init__(tooltip, description)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
         }
