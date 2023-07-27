@@ -96,7 +96,7 @@ export default function ChatSettingsModal() {
             <FormHelperText>{element.description}</FormHelperText>
           </Box>
         );
-      case 'selectinput':
+      case 'select':
         return (
           <SelectInput
             key={element.key}

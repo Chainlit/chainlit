@@ -107,7 +107,7 @@ export interface ISliderWidget extends TInputWidget<'slider'> {
   step: number;
 }
 
-export interface ISelectInputWidget extends TInputWidget<'selectinput'> {
+export interface ISelectInputWidget extends TInputWidget<'select'> {
   initial?: string;
   options: { label: string; value: string }[];
 }
