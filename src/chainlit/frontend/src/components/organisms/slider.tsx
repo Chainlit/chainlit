@@ -1,10 +1,39 @@
 import { grey } from 'palette';
 
-import { Stack } from '@mui/material';
 import Slider, { SliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
-import InputLabel from 'components/molecules/inputLabel';
+import InputStateHandler from './inputs/inputStateHandler';
+
+interface Props extends SliderProps {
+  description?: string;
+  label: string;
+  tooltip?: string;
+  hasError?: boolean;
+  id: string;
+}
+
+const _Slider = ({
+  description,
+  hasError,
+  id,
+  label,
+  tooltip,
+  ...sliderProps
+}: Props) => {
+  return (
+    <InputStateHandler
+      description={description}
+      hasError={hasError}
+      id={id}
+      label={label}
+      tooltip={tooltip}
+      notificationsCount={sliderProps.value?.toString()}
+    >
+      <StyledSlider {...sliderProps} />
+    </InputStateHandler>
+  );
+};
 
 const StyledSlider = styled(Slider)(({ theme }) => {
   const isLightMode = theme.palette.mode === 'light';
@@ -50,23 +79,5 @@ const StyledSlider = styled(Slider)(({ theme }) => {
     }
   };
 });
-
-interface Props extends SliderProps {
-  label: string;
-}
-
-const _Slider = ({ label, ...sliderProps }: Props) => {
-  return (
-    <Stack mr={1}>
-      <Stack direction="row" justifyContent="space-between">
-        <InputLabel
-          label={label}
-          notificationsCount={sliderProps.value?.toString()}
-        />
-      </Stack>
-      <StyledSlider {...sliderProps} />
-    </Stack>
-  );
-};
 
 export default _Slider;
