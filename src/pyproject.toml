@@ -52,6 +52,7 @@ responses = "0.23.1"
 aioresponses = "0.7.4"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
+pytest = "^7.4.0"
 
 [tool.poetry.group.mypy]
 optional = true
