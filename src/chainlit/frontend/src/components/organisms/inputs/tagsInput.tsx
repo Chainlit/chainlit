@@ -4,7 +4,7 @@ import { IInput } from 'types/Input';
 
 import InputStateHandler from './inputStateHandler';
 
-type TagsInput = {
+export type TagsInputProps = {
   placeholder?: string;
   value?: string[];
   onChange?: (value: MuiChipsInputChip[]) => void;
@@ -19,7 +19,7 @@ export default function TagsInput({
   size = 'small',
   tooltip,
   ...rest
-}: TagsInput): JSX.Element {
+}: TagsInputProps): JSX.Element {
   return (
     <InputStateHandler
       description={description}

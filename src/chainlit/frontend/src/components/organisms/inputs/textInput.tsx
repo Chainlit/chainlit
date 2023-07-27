@@ -4,8 +4,9 @@ import { IInput } from 'types/Input';
 
 import InputStateHandler from './inputStateHandler';
 
-type TextInputProps = {
+export type TextInputProps = {
   value?: string;
+  placeholder?: string;
 } & IInput &
   Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
 

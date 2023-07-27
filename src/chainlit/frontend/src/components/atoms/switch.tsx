@@ -7,7 +7,7 @@ import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 
 import { IInput } from 'types/Input';
 
-type SwitchProps = {
+export type SwitchProps = {
   checked?: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   onChange: (
