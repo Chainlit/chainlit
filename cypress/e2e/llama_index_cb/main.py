@@ -1,5 +1,6 @@
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.schema import NodeWithScore, TextNode
+
 import chainlit as cl
 
 
@@ -8,6 +9,8 @@ async def start():
     await cl.Message(content="LlamaIndexCb").send()
 
     cb = cl.LlamaIndexCallbackHandler()
+
+    cb.start_trace()
 
     cb.on_event_start(CBEventType.RETRIEVE, payload={})
 

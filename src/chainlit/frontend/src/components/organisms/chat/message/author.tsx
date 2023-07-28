@@ -6,7 +6,7 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import AvatarElement from 'components/atoms/element/avatar';
 
 import { IMessage } from 'state/chat';
-import { IAvatarElement, elementState } from 'state/element';
+import { avatarState } from 'state/element';
 
 import MessageTime from './time';
 
@@ -19,15 +19,11 @@ export const authorBoxWidth = 70;
 
 export default function Author({ message, show }: Props) {
   const getColorForName = useColorForName();
-  const elements = useRecoilValue(elementState);
-  const avatars = elements.filter((e) => e.type === 'avatar');
+  const avatars = useRecoilValue(avatarState);
   const avatarEl = avatars.find((e) => e.name === message.author);
 
   const avatar = show && avatarEl && (
-    <AvatarElement
-      element={avatarEl as IAvatarElement}
-      author={message.author}
-    />
+    <AvatarElement element={avatarEl} author={message.author} />
   );
 
   const name = show && (

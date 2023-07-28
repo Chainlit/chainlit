@@ -10,19 +10,18 @@ try:
 except ImportError:
     LANGFLOW_INSTALLED = False
 
-from typing import Union, Dict, Optional
+from typing import Dict, Optional, Union
+
 import aiohttp
 
-from chainlit.telemetry import trace_event
 from chainlit.config import config
+from chainlit.telemetry import trace_event
 
 
 async def load_flow(schema: Union[Dict, str], tweaks: Optional[Dict] = None):
     from langflow import load_flow_from_json
 
     trace_event("load_langflow")
-
-    schema = config.code.langflow_schema
 
     if type(schema) == str:
         async with aiohttp.ClientSession() as session:

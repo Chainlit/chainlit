@@ -14,15 +14,17 @@ import {
   Typography
 } from '@mui/material';
 
-import { IChat, historyOpenedState } from 'state/chat';
+import { MessageHistory } from 'hooks/localChatHistory';
+
+import { historyOpenedState } from 'state/chat';
 
 interface Props {
   onClick: (content: string) => void;
   onOpen: () => void;
-  chats?: IChat[];
+  historyMessages?: MessageHistory[];
 }
 
-function buildHistory(chats?: IChat[]) {
+function buildHistory(historyMessages?: MessageHistory[]) {
   const history: Record<
     string,
     {
@@ -32,16 +34,14 @@ function buildHistory(chats?: IChat[]) {
     }[]
   > = {};
 
-  chats?.forEach((c) => {
+  historyMessages?.forEach((hm) => {
+    const { createdAt, content } = hm.messages[0];
     const dateOptions: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'numeric',
       year: 'numeric'
     };
-    const date = new Date(c.createdAt).toLocaleDateString(
-      undefined,
-      dateOptions
-    );
+    const date = new Date(createdAt).toLocaleDateString(undefined, dateOptions);
     if (!history[date]) {
       history[date] = [];
     }
@@ -51,16 +51,20 @@ function buildHistory(chats?: IChat[]) {
       minute: 'numeric'
     };
     history[date].push({
-      key: c.createdAt,
-      hour: new Date(c.createdAt).toLocaleTimeString(undefined, timeOptions),
-      content: c.messages[0].content!
+      key: createdAt,
+      hour: new Date(createdAt).toLocaleTimeString(undefined, timeOptions),
+      content: content
     });
   });
 
   return history;
 }
 
-export default function HistoryButton({ onClick, onOpen, chats }: Props) {
+export default function HistoryButton({
+  onClick,
+  onOpen,
+  historyMessages
+}: Props) {
   const [open, setOpen] = useRecoilState(historyOpenedState);
   const ref = useRef<any>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -95,7 +99,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
   );
 
   const empty =
-    chats?.length === 0 ? (
+    historyMessages?.length === 0 ? (
       // @ts-ignore
       <div key="empty" id="history-empty" disabled>
         <Typography
@@ -112,7 +116,7 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
       </div>
     ) : null;
 
-  const loading = !chats ? (
+  const loading = !historyMessages ? (
     // @ts-ignore
     <div key="loading" id="history-loading" disabled>
       <Typography
@@ -131,8 +135,8 @@ export default function HistoryButton({ onClick, onOpen, chats }: Props) {
 
   const menuEls: (JSX.Element | null)[] = [header, empty, loading];
 
-  if (chats) {
-    const history = buildHistory(chats);
+  if (historyMessages) {
+    const history = buildHistory(historyMessages);
     Object.keys(history).forEach((date) => {
       menuEls.push(
         // @ts-ignore

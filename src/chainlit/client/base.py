@@ -1,38 +1,39 @@
+from abc import ABC, abstractmethod
 from typing import (
-    Dict,
     Any,
-    List,
-    TypedDict,
-    Optional,
-    Union,
-    Literal,
-    TypeVar,
+    Dict,
     Generic,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
 )
 
-from abc import ABC, abstractmethod
+from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
-from dataclasses_json import dataclass_json
+from starlette.datastructures import Headers
 
 from chainlit.types import (
-    Pagination,
     ConversationFilter,
-    ElementType,
-    ElementSize,
     ElementDisplay,
+    ElementSize,
+    ElementType,
+    Pagination,
 )
 
 
 class MessageDict(TypedDict):
     conversationId: Optional[str]
-    id: Optional[int]
-    tempId: Optional[str]
+    id: str
     createdAt: Optional[int]
     content: str
     author: str
     prompt: Optional[str]
     llmSettings: Dict
     language: Optional[str]
+    parentId: Optional[str]
     indent: Optional[int]
     authorIsUser: Optional[bool]
     waitForAnswer: Optional[bool]
@@ -41,26 +42,26 @@ class MessageDict(TypedDict):
 
 
 class UserDict(TypedDict):
-    id: Optional[int]
+    id: int
     name: Optional[str]
     email: Optional[str]
     role: str
 
 
 class ElementDict(TypedDict):
-    id: Optional[int]
-    conversationId: Optional[int]
+    id: str
+    conversationId: Optional[str]
     type: ElementType
     url: str
     name: str
     display: ElementDisplay
-    size: ElementSize
-    language: str
-    forIds: Optional[List[Union[str, int]]]
+    size: Optional[ElementSize]
+    language: Optional[str]
+    forIds: Optional[List[str]]
 
 
 class ConversationDict(TypedDict):
-    id: Optional[int]
+    id: Optional[str]
     createdAt: Optional[int]
     elementCount: Optional[int]
     messageCount: Optional[int]
@@ -78,16 +79,16 @@ class PageInfo:
 T = TypeVar("T")
 
 
-@dataclass_json
 @dataclass
-class PaginatedResponse(Generic[T]):
+class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     pageInfo: PageInfo
     data: List[T]
 
 
 class BaseAuthClient(ABC):
     user_infos: Optional[UserDict] = None
-    access_token: Optional[str] = None
+    handshake_headers: Optional[Dict[str, str]] = None
+    request_headers: Optional[Headers] = None
 
     @abstractmethod
     async def is_project_member(self) -> bool:
@@ -110,15 +111,15 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_conversation(self) -> int:
+    async def create_conversation(self) -> Optional[str]:
         pass
 
     @abstractmethod
-    async def delete_conversation(self, conversation_id: int) -> bool:
+    async def delete_conversation(self, conversation_id: str) -> bool:
         pass
 
     @abstractmethod
-    async def get_conversation(self, conversation_id: int) -> ConversationDict:
+    async def get_conversation(self, conversation_id: str) -> ConversationDict:
         pass
 
     @abstractmethod
@@ -132,15 +133,15 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def create_message(self, variables: MessageDict) -> int:
+    async def create_message(self, variables: MessageDict) -> Optional[str]:
         pass
 
     @abstractmethod
-    async def update_message(self, message_id: int, variables: MessageDict) -> bool:
+    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
         pass
 
     @abstractmethod
-    async def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: str) -> bool:
         pass
 
     @abstractmethod
@@ -148,15 +149,19 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def upsert_element(self, variables: ElementDict) -> ElementDict:
+    async def create_element(self, variables: ElementDict) -> ElementDict:
         pass
 
     @abstractmethod
-    async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
+    async def update_element(self, variables: ElementDict) -> ElementDict:
+        pass
+
+    @abstractmethod
+    async def get_element(self, conversation_id: str, element_id: str) -> ElementDict:
         pass
 
     @abstractmethod
     async def set_human_feedback(
-        self, message_id: int, feedback: Literal[-1, 0, 1]
+        self, message_id: str, feedback: Literal[-1, 0, 1]
     ) -> bool:
         pass

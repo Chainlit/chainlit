@@ -1,29 +1,30 @@
-import click
+import asyncio
 import os
 import sys
-import uvicorn
-import asyncio
+
+import click
 import nest_asyncio
+import uvicorn
 
 nest_asyncio.apply()
 
-from chainlit.config import (
-    config,
-    init_config,
-    load_module,
-    PACKAGE_ROOT,
-    DEFAULT_HOST,
-    DEFAULT_PORT,
-)
-from chainlit.markdown import init_markdown
+from chainlit.cache import init_lc_cache
 from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
-from chainlit.telemetry import trace_event
-from chainlit.cache import init_lc_cache
+from chainlit.config import (
+    DEFAULT_HOST,
+    DEFAULT_PORT,
+    PACKAGE_ROOT,
+    config,
+    init_config,
+    load_module,
+)
 from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
+from chainlit.markdown import init_markdown
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
+from chainlit.telemetry import trace_event
 
 
 # Create the main command group for Chainlit CLI

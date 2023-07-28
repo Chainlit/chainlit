@@ -1,6 +1,6 @@
-import contextvars
-from typing import TYPE_CHECKING
 from asyncio import AbstractEventLoop
+from contextvars import ContextVar
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from chainlit.emitter import ChainlitEmitter
@@ -11,8 +11,8 @@ class ChainlitContextException(Exception):
         super().__init__(msg, *args, **kwargs)
 
 
-emitter_var = contextvars.ContextVar("emitter")
-loop_var = contextvars.ContextVar("loop")
+emitter_var: ContextVar["ChainlitEmitter"] = ContextVar("emitter")
+loop_var: ContextVar[AbstractEventLoop] = ContextVar("loop")
 
 
 def get_emitter() -> "ChainlitEmitter":

@@ -4,19 +4,59 @@ import { Box } from '@mui/material';
 
 import { IAction } from 'state/action';
 import { IMessage, INestedMessage } from 'state/chat';
-import { IElements } from 'state/element';
+import { IMessageElement } from 'state/element';
 
 import Messages from './messages';
 
 interface Props {
   messages: IMessage[];
-  elements: IElements;
+  elements: IMessageElement[];
   actions: IAction[];
   autoScroll?: boolean;
   setAutoSroll?: (autoScroll: boolean) => void;
 }
 
+// Nest messages based on parent id
 function nestMessages(messages: IMessage[]): INestedMessage[] {
+  const nestedMessages: INestedMessage[] = [];
+  const lookup: Record<string, INestedMessage> = {};
+
+  function addToParent(
+    parentId: string | undefined,
+    child: INestedMessage
+  ): void {
+    if (parentId) {
+      const parent = lookup[parentId];
+      if (!parent) return;
+      if (!parent.subMessages) parent.subMessages = [];
+      parent.subMessages.push(child);
+    } else {
+      nestedMessages.push(child);
+    }
+  }
+
+  for (const message of messages) {
+    const nestedMessage: INestedMessage = { ...message };
+    if (message.id) lookup[message.id] = nestedMessage;
+  }
+
+  for (const message of messages) {
+    if (!message.id) {
+      nestedMessages.push({ ...message });
+      continue;
+    }
+
+    const nestedMessage = lookup[message.id];
+    if (!nestedMessage) continue;
+
+    addToParent(message.parentId, nestedMessage);
+  }
+
+  return legacyNestMessages(nestedMessages);
+}
+
+// Nest messages based on deprecated indent parameter
+function legacyNestMessages(messages: INestedMessage[]): INestedMessage[] {
   const nestedMessages: INestedMessage[] = [];
   const parentStack: INestedMessage[] = [];
 

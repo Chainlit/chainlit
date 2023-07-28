@@ -1,14 +1,12 @@
 from typing import Any, Dict, List, Optional
 
-
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 
-
-from chainlit.message import Message
+from chainlit.context import get_emitter
 from chainlit.element import Text
+from chainlit.message import Message
 from chainlit.sync import run_sync
-
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,
@@ -22,6 +20,9 @@ DEFAULT_IGNORE = [
 
 class LlamaIndexCallbackHandler(BaseCallbackHandler):
     """Base callback handler that can be used to track event starts and ends."""
+
+    # Message at the root of the chat we should attach child messages to
+    root_message: Optional[Message] = None
 
     def __init__(
         self,
@@ -57,6 +58,10 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         """Run when an event ends."""
+        if payload is None:
+            return
+
+        parent_id = self.root_message.id if self.root_message else None
 
         if event_type == CBEventType.RETRIEVE:
             sources = payload.get(EventPayload.NODES)
@@ -72,7 +77,10 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
 
                 run_sync(
                     Message(
-                        content=content, author=event_type, elements=elements, indent=1
+                        content=content,
+                        author=event_type,
+                        elements=elements,
+                        parent_id=parent_id,
                     ).send()
                 )
 
@@ -81,14 +89,15 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 Message(
                     content=payload.get(EventPayload.RESPONSE, ""),
                     author=event_type,
-                    indent=1,
+                    parent_id=parent_id,
                     prompt=payload.get(EventPayload.PROMPT),
                 ).send()
             )
 
     def start_trace(self, trace_id: Optional[str] = None) -> None:
         """Run when an overall trace is launched."""
-        pass
+        emitter = get_emitter()
+        self.root_message = emitter.session.root_message
 
     def end_trace(
         self,
@@ -96,4 +105,5 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         trace_map: Optional[Dict[str, List[str]]] = None,
     ) -> None:
         """Run when an overall trace is exited."""
-        pass
+
+        self.root_message = None

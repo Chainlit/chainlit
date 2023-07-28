@@ -9,6 +9,7 @@ import { useAuth } from 'hooks/auth';
 import { IAction, actionState } from 'state/action';
 import {
   IMessage,
+  IMessageUpdate,
   IToken,
   askUserState,
   loadingState,
@@ -16,13 +17,17 @@ import {
   sessionState,
   tokenCountState
 } from 'state/chat';
-import { IElement, elementState } from 'state/element';
+import {
+  IElement,
+  avatarState,
+  elementState,
+  tasklistState
+} from 'state/element';
 import { projectSettingsState } from 'state/project';
-import { userEnvState } from 'state/user';
+import { sessionIdState, userEnvState } from 'state/user';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;
-  if (a.tempId && b.tempId) return a.tempId === b.tempId;
   return false;
 };
 
@@ -31,11 +36,14 @@ export default memo(function Socket() {
   const { accessToken, authenticating } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
+  const sessionId = useRecoilValue(sessionIdState);
   const [session, setSession] = useRecoilState(sessionState);
   const setMessages = useSetRecoilState(messagesState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
+  const setAvatars = useSetRecoilState(avatarState);
+  const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
 
   useEffect(() => {
@@ -50,6 +58,7 @@ export default memo(function Socket() {
       path: '/ws/socket.io',
       extraHeaders: {
         Authorization: accessToken || '',
+        'X-Chainlit-Session-Id': sessionId,
         'user-env': JSON.stringify(userEnv)
       }
     });
@@ -61,11 +70,6 @@ export default memo(function Socket() {
     socket.on('connect', () => {
       socket.emit('connection_successful');
       setSession((s) => ({ ...s!, error: false }));
-    });
-
-    socket.on('session', ({ sessionId }) => {
-      // Attach the session id to the next reconnection attempts
-      socket.auth = { sessionId };
     });
 
     socket.on('connect_error', (err) => {
@@ -82,6 +86,7 @@ export default memo(function Socket() {
     });
 
     socket.on('reload', () => {
+      socket.emit('clear_session');
       window.location.reload();
     });
 
@@ -102,12 +107,17 @@ export default memo(function Socket() {
       });
     });
 
-    socket.on('update_message', (message: IMessage) => {
+    socket.on('update_message', (message: IMessageUpdate) => {
       setMessages((oldMessages) => {
         const index = oldMessages.findIndex((m) =>
           compareMessageIds(m, message)
         );
         if (index === -1) return oldMessages;
+        if (message.newId) {
+          message.id = message.newId;
+          delete message.newId;
+        }
+
         return [
           ...oldMessages.slice(0, index),
           message,
@@ -136,9 +146,7 @@ export default memo(function Socket() {
 
     socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
       setMessages((oldMessages) => {
-        const index = oldMessages.findIndex(
-          (m) => (m.id && m.id === id) || (m.tempId && m.tempId === id)
-        );
+        const index = oldMessages.findIndex((m) => m.id === id);
         if (index === -1) return oldMessages;
         const oldMessage = oldMessages[index];
         const newMessage = { ...oldMessage };
@@ -171,27 +179,28 @@ export default memo(function Socket() {
     });
 
     socket.on('element', (element: IElement) => {
-      setElements((old) => [...old, element]);
+      if (element.type === 'avatar') {
+        setAvatars((old) => [...old, element]);
+      } else if (element.type === 'tasklist') {
+        setTasklists((old) => [...old, element]);
+      } else {
+        setElements((old) => [...old, element]);
+      }
     });
 
-    socket.on(
-      'update_element',
-      (update: { id: number | string; forIds: string[] }) => {
-        setElements((old) => {
-          const index = old.findIndex(
-            (e) => e.id === update.id || e.tempId === update.id
-          );
-          if (index === -1) return old;
-          const element = old[index];
-          const newElement = { ...element, forIds: update.forIds };
-          return [...old.slice(0, index), newElement, ...old.slice(index + 1)];
-        });
-      }
-    );
-
-    socket.on('remove_element', (remove: { id: number | string }) => {
+    socket.on('update_element', (update: { id: string; forIds: string[] }) => {
       setElements((old) => {
-        return old.filter((e) => e.id !== remove.id && e.tempId !== remove.id);
+        const index = old.findIndex((e) => e.id === update.id);
+        if (index === -1) return old;
+        const element = old[index];
+        const newElement = { ...element, forIds: update.forIds };
+        return [...old.slice(0, index), newElement, ...old.slice(index + 1)];
+      });
+    });
+
+    socket.on('remove_element', (remove: { id: string }) => {
+      setElements((old) => {
+        return old.filter((e) => e.id !== remove.id);
       });
     });
 

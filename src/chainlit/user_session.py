@@ -2,6 +2,7 @@ from typing import Dict, Optional, TypedDict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from chainlit.client.base import UserDict
+    from chainlit.message import Message
 
 from chainlit.context import get_emitter
 
@@ -11,6 +12,7 @@ class UserSessionDict(TypedDict):
     env: Dict[str, str]
     user_infos: Optional["UserDict"]
     headers: Dict[str, str]
+    root_message: Optional["Message"]
 
 
 user_sessions: Dict[str, UserSessionDict] = {}
@@ -38,8 +40,9 @@ class UserSession:
         user_session["env"] = emitter.session.user_env
         user_session["user_infos"] = emitter.session.auth_client.user_infos
         user_session["headers"] = emitter.session.headers
-        if emitter.session.agent:
-            user_session["agent"] = emitter.session.agent
+
+        if emitter.session.root_message:
+            user_session["root_message"] = emitter.session.root_message
 
         return user_session.get(key, default)
 

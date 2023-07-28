@@ -1,22 +1,17 @@
-from dotenv import load_dotenv
-from typing import Callable, Dict, Any, Optional, TYPE_CHECKING
-import os
 import asyncio
+import os
+from typing import TYPE_CHECKING, Dict, Any, Callable, Optional
+
+from starlette.datastructures import Headers
+
+from dotenv import load_dotenv
 
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
 
-from chainlit.lc import (
-    LANGCHAIN_INSTALLED,
-)
-from chainlit.llama_index import LLAMA_INDEX_INSTALLED
-from chainlit.utils import wrap_user_function
-from chainlit.config import config
-from chainlit.telemetry import trace
-from chainlit.version import __version__
-from chainlit.logger import logger
-from chainlit.types import LLMSettings
 from chainlit.action import Action
+from chainlit.cache import cache
+from chainlit.config import config
 from chainlit.element import (
     Audio,
     Avatar,
@@ -30,22 +25,29 @@ from chainlit.element import (
     Text,
     Video,
 )
-from chainlit.message import Message, ErrorMessage, AskUserMessage, AskFileMessage
+from chainlit.haystack import HAYSTACK_INSTALLED
+from chainlit.lc import LANGCHAIN_INSTALLED
+from chainlit.llama_index import LLAMA_INDEX_INSTALLED
+from chainlit.logger import logger
+from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
+from chainlit.sync import make_async, run_sync
+from chainlit.telemetry import trace
+from chainlit.types import LLMSettings
 from chainlit.user_session import user_session
-from chainlit.sync import run_sync, make_async
-from chainlit.cache import cache
+from chainlit.utils import wrap_user_function
+from chainlit.version import __version__
 
 if LANGCHAIN_INSTALLED:
     from chainlit.lc.callbacks import (
-        LangchainCallbackHandler,
         AsyncLangchainCallbackHandler,
+        LangchainCallbackHandler,
     )
 
 if LLAMA_INDEX_INSTALLED:
-    from chainlit.llama_index.callbacks import (
-        LlamaIndexCallbackHandler,
-    )
+    from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
 
+if HAYSTACK_INSTALLED:
+    from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
@@ -60,7 +62,7 @@ def on_message(func: Callable) -> Callable:
     The decorated function is called every time a new message is received.
 
     Args:
-        func (Callable[[str], Any]): The function to be called when a new message is received. Takes the input message.
+        func (Callable[[str, str], Any]): The function to be called when a new message is received. Takes the input message and the message id.
 
     Returns:
         Callable[[str], Any]: The decorated on_message function.
@@ -134,8 +136,8 @@ def action_callback(name: str) -> Callable:
 
 @trace
 def auth_client_factory(
-    func: Callable[[Dict[str, str]], "BaseAuthClient"]
-) -> Callable[[], "BaseDBClient"]:
+    func: Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
+) -> Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]:
     """
     Callback to call when to initialize the custom client.
 
@@ -149,8 +151,8 @@ def auth_client_factory(
 
 @trace
 def db_client_factory(
-    func: Callable[[Dict[str, str], Optional["UserDict"]], "BaseDBClient"]
-) -> Callable[[], "BaseDBClient"]:
+    func: Callable[[Optional["UserDict"]], "BaseDBClient"]
+) -> Callable[[Optional["UserDict"]], "BaseDBClient"]:
     """
     Callback to call when to initialize the custom client.
 
@@ -200,6 +202,7 @@ __all__ = [
     "LlamaIndexCallbackHandler",
     "auth_client_factory",
     "db_client_factory",
+    "HaystackAgentCallbackHandler",
     "run_sync",
     "make_async",
     "cache",

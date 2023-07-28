@@ -1,17 +1,14 @@
 from typing import Any, Dict, List, Optional, Union
-from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
-from langchain.schema import (
-    AgentAction,
-    AgentFinish,
-    BaseMessage,
-    LLMResult,
-)
-from chainlit.emitter import ChainlitEmitter
-from chainlit.context import get_emitter
-from chainlit.message import Message, ErrorMessage
+
+from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
+from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
+
 from chainlit.config import config
-from chainlit.types import LLMSettings
+from chainlit.context import get_emitter
+from chainlit.emitter import ChainlitEmitter
+from chainlit.message import ErrorMessage, Message
 from chainlit.sync import run_sync
+from chainlit.types import LLMSettings
 
 IGNORE_LIST = ["AgentExecutor"]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -44,13 +41,17 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
     # Keep track of the LLM settings for the last prompt
-    llm_settings: LLMSettings
+    llm_settings: Optional[LLMSettings]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
-    sequence: List[str]
+    sequence: List[Message]
     # Keep track of the last prompt for each session
     last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
+    # The stream we can use to stream the final answer from a chain
+    final_stream: Union[Message, None]
+    # Message at the root of the chat we should attach child messages to
+    root_message: Message
     # Should we stream the final answer?
     stream_final_answer: bool = False
     # Token sequence that prefixes the answer
@@ -72,6 +73,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         strip_tokens: bool = True,
         stream_prefix: bool = False,
         stream_final_answer: bool = False,
+        root_message: Optional[Message] = None,
     ) -> None:
         self.emitter = get_emitter()
         self.prompts = []
@@ -79,6 +81,14 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.sequence = []
         self.last_prompt = None
         self.stream = None
+
+        if root_message:
+            self.root_message = root_message
+        elif root_message := self.emitter.session.root_message:
+            self.root_message = root_message
+        else:
+            self.root_message = Message(author=config.ui.name, content="")
+            run_sync(self.root_message.send())
 
         # Langchain final answer streaming logic
         if answer_prefix_tokens is None:
@@ -116,33 +126,29 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             return self.last_tokens == self.answer_prefix_tokens
 
     def start_stream(self):
-        author, indent, llm_settings = self.get_message_params()
-
+        author = self.get_author()
         if author in IGNORE_LIST:
             return
 
         self.pop_prompt()
+        prompt = self.consume_last_prompt()
+        parent_id = self.get_last_message().parent_id
 
-        streamed_message = Message(
-            author=author,
-            indent=indent,
-            llm_settings=llm_settings,
-            prompt=self.consume_last_prompt(),
-            content="",
+        self.stream = self.create_message(
+            prompt=prompt, author=author, parent_id=parent_id
         )
-        self.stream = streamed_message
 
     def end_stream(self):
         self.stream = None
 
-    def add_in_sequence(self, name: str):
-        self.sequence.append(name)
+    def add_in_sequence(self, message: Message):
+        self.sequence.append(message)
 
     def pop_sequence(self):
         if self.sequence:
             return self.sequence.pop()
 
-    def add_prompt(self, prompt: str, llm_settings: LLMSettings = None):
+    def add_prompt(self, prompt: str, llm_settings: Optional[LLMSettings] = None):
         self.prompts.append(prompt)
         self.llm_settings = llm_settings
 
@@ -155,50 +161,69 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.last_prompt = None
         return last_prompt
 
-    def get_message_params(self):
-        llm_settings = self.llm_settings
-
-        indent = len(self.sequence) if self.sequence else 0
-
+    def get_author(self):
         if self.sequence:
-            author = self.sequence[-1]
-        else:
-            author = config.ui.name
+            return self.sequence[-1].author
+        return config.ui.name
 
-        return author, indent, llm_settings
+    def get_last_message(self):
+        for message in reversed(self.sequence):
+            if message.author not in IGNORE_LIST:
+                return message
+        return self.root_message
+
+    def create_error(self, error: Exception):
+        if isinstance(error, InterruptedError):
+            return None
+
+        return ErrorMessage(str(error), author=self.get_author())
+
+    def create_message(
+        self,
+        content: str = "",
+        prompt: Optional[str] = None,
+        author: Optional[str] = None,
+        parent_id: Optional[str] = None,
+    ):
+        if parent_id is None:
+            last_message = self.get_last_message()
+            parent_id = last_message.id
+
+        return Message(
+            content,
+            author=author or self.get_author(),
+            prompt=prompt,
+            parent_id=parent_id,
+            llm_settings=self.llm_settings,
+        )
 
 
 class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
+    def on_error(self, error, **_):
+        if error := self.create_error(error):
+            run_sync(error.send())
+            self.pop_sequence()
+
+    on_tool_error = on_error
+    on_llm_error = on_error
+    on_chain_error = on_error
+
     def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
             run_sync(stream.stream_token(token))
             self.has_streamed_final_answer = final
 
-    def add_message(self, message, prompt: str = None, error=False):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            run_sync(ErrorMessage(author=author, content=message).send())
-            self.end_stream()
+    def add_message(self, message: Message):
+        if message.author in IGNORE_LIST:
             return
 
         if self.stream:
             run_sync(self.stream.send())
             self.end_stream()
+
         else:
-            run_sync(
-                Message(
-                    author=author,
-                    content=message,
-                    indent=indent,
-                    prompt=prompt,
-                    llm_settings=llm_settings,
-                ).send()
-            )
+            run_sync(message.send())
 
     # Callbacks for various events
 
@@ -249,38 +274,30 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         if self.final_stream:
             run_sync(self.final_stream.send())
 
-    def on_llm_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        pass
-
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        self.add_message("")
+        message = self.create_message(author=serialized["id"][-1])
+        self.add_in_sequence(message)
+        self.add_message(message)
 
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            self.add_message(outputs[output_key], prompt)
-        self.pop_sequence()
-
-    def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        self.add_message(str(error), error=True)
+            parent_id = self.get_last_message().parent_id
+            message = self.create_message(
+                outputs[output_key], prompt, parent_id=parent_id
+            )
+            self.add_message(message)
         self.pop_sequence()
 
     def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
-        self.add_message("")
+        message = self.create_message(author=serialized["name"])
+        self.add_in_sequence(message)
+        self.add_message(message)
 
     def on_tool_end(
         self,
@@ -290,16 +307,9 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        self.add_message(output, prompt)
-        self.pop_sequence()
-
-    def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        self.add_message(str(error), error=True)
+        parent_id = self.get_last_message().parent_id
+        message = self.create_message(output, prompt, parent_id=parent_id)
+        self.add_message(message)
         self.pop_sequence()
 
     def on_text(self, text: str, **kwargs: Any) -> None:
@@ -314,34 +324,31 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
 
 
 class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackHandler):
+    async def on_error(self, error, **_):
+        if error := self.create_error(error):
+            await error.send()
+            self.pop_sequence()
+
+    on_tool_error = on_error
+    on_llm_error = on_error
+    on_chain_error = on_error
+
     async def send_token(self, token: str, final: bool = False):
         stream = self.final_stream if final else self.stream
         if stream:
             await stream.stream_token(token)
             self.has_streamed_final_answer = final
 
-    async def add_message(self, message, prompt: str = None, error=False):
-        author, indent, llm_settings = self.get_message_params()
-
-        if author in IGNORE_LIST:
-            return
-
-        if error:
-            await ErrorMessage(author=author, content=message).send()
-            self.end_stream()
+    async def add_message(self, message: Message):
+        if message.author in IGNORE_LIST:
             return
 
         if self.stream:
             await self.stream.send()
             self.end_stream()
+
         else:
-            await Message(
-                author=author,
-                content=message,
-                indent=indent,
-                prompt=prompt,
-                llm_settings=llm_settings,
-            ).send()
+            await message.send()
 
     # Callbacks for various events
 
@@ -390,38 +397,30 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         if self.final_stream:
             await self.final_stream.send()
 
-    async def on_llm_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        pass
-
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["id"][-1])
-        # Useful to display details button in the UI
-        await self.add_message("")
+        message = self.create_message(author=serialized["id"][-1])
+        self.add_in_sequence(message)
+        await self.add_message(message)
 
     async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
             prompt = self.consume_last_prompt()
-            await self.add_message(outputs[output_key], prompt)
-        self.pop_sequence()
-
-    async def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
+            parent_id = self.get_last_message().parent_id
+            message = self.create_message(
+                outputs[output_key], prompt, parent_id=parent_id
+            )
+            await self.add_message(message)
         self.pop_sequence()
 
     async def on_tool_start(
-        self, serialized: Dict[str, Any], inputs: Any, **kwargs: Any
+        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
-        self.add_in_sequence(serialized["name"])
-        await self.add_message("")
+        message = self.create_message(author=serialized["name"])
+        self.add_in_sequence(message)
+        await self.add_message(message)
 
     async def on_tool_end(
         self,
@@ -431,16 +430,9 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         **kwargs: Any,
     ) -> None:
         prompt = self.consume_last_prompt()
-        await self.add_message(output, prompt)
-        self.pop_sequence()
-
-    async def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
-        """Do nothing."""
-        if isinstance(error, InterruptedError):
-            return
-        await self.add_message(str(error), error=True)
+        parent_id = self.get_last_message().parent_id
+        message = self.create_message(output, prompt, parent_id=parent_id)
+        await self.add_message(message)
         self.pop_sequence()
 
     async def on_text(self, text: str, **kwargs: Any) -> None:

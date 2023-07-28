@@ -1,31 +1,32 @@
-from typing import Dict, Any, Optional
-import uuid
-
 import asyncio
+import uuid
+from typing import Any, Dict, Mapping, Optional, cast
+
 import aiohttp
+from starlette.datastructures import Headers
 from python_graphql_client import GraphqlClient
 
-from chainlit.client.base import UserDict
-
-from .base import BaseDBClient, BaseAuthClient, PaginatedResponse, PageInfo, UserDict
-
-from chainlit.logger import logger
+from chainlit.client.base import MessageDict, UserDict
 from chainlit.config import config
+from chainlit.logger import logger
+
+from .base import BaseAuthClient, BaseDBClient, PageInfo, PaginatedResponse, UserDict
 
 
 class GraphQLClient:
-    def __init__(self, project_id: str, access_token: str):
+    def __init__(self, project_id: str, access_token: Optional[str]):
         self.project_id = project_id
-        self.headers = {
-            "Authorization": access_token,
-            "content-type": "application/json",
-        }
+
+        self.headers = {"content-type": "application/json"}
+        if access_token:
+            self.headers["Authorization"] = access_token
+
         graphql_endpoint = f"{config.chainlit_server}/api/graphql"
         self.graphql_client = GraphqlClient(
             endpoint=graphql_endpoint, headers=self.headers
         )
 
-    def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
         Execute a GraphQL query.
 
@@ -33,7 +34,7 @@ class GraphQLClient:
         :param variables: A dictionary of variables for the query.
         :return: The response data as a dictionary.
         """
-        return self.graphql_client.execute_async(query=query, variables=variables)
+        return await self.graphql_client.execute_async(query=query, variables=variables)
 
     def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
         if "errors" in response:
@@ -43,7 +44,9 @@ class GraphQLClient:
             return True
         return False
 
-    def mutation(self, mutation: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def mutation(
+        self, mutation: str, variables: Mapping[str, Any] = {}
+    ) -> Dict[str, Any]:
         """
         Execute a GraphQL mutation.
 
@@ -51,12 +54,29 @@ class GraphQLClient:
         :param variables: A dictionary of variables for the mutation.
         :return: The response data as a dictionary.
         """
-        return self.graphql_client.execute_async(query=mutation, variables=variables)
+        return await self.graphql_client.execute_async(
+            query=mutation, variables=variables
+        )
 
 
 class CloudAuthClient(BaseAuthClient, GraphQLClient):
-    def __init__(self, project_id: str, access_token: str):
-        super().__init__(project_id, access_token)
+    def __init__(
+        self,
+        project_id: str,
+        handshake_headers: Optional[Dict[str, str]] = None,
+        request_headers: Optional[Headers] = None,
+    ):
+        access_token = None
+
+        if handshake_headers:
+            access_token = handshake_headers.get("HTTP_AUTHORIZATION")
+        elif request_headers:
+            access_token = request_headers.get("Authorization")
+
+        if access_token is None:
+            raise ConnectionRefusedError("No access token provided")
+
+        GraphQLClient.__init__(self, project_id, access_token)
 
     async def get_user_infos(
         self,
@@ -75,7 +95,9 @@ class CloudAuthClient(BaseAuthClient, GraphQLClient):
 
                 json = await r.json()
                 self.user_infos = json
-                return self.user_infos
+                # replace with unpacking when Mypy 1.5.0 is out:
+                # return UserDict(**self.user_infos)
+                return cast(UserDict, self.user_infos)
 
     async def is_project_member(self) -> bool:
         try:
@@ -90,8 +112,24 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
 
-    def __init__(self, project_id: str, access_token: str):
+    def __init__(
+        self,
+        project_id: str,
+        handshake_headers: Optional[Dict[str, str]] = None,
+        request_headers: Optional[Headers] = None,
+    ):
         self.lock = asyncio.Lock()
+
+        access_token = None
+
+        if handshake_headers:
+            access_token = handshake_headers.get("HTTP_AUTHORIZATION")
+        elif request_headers:
+            access_token = request_headers.get("Authorization")
+
+        if access_token is None:
+            raise ConnectionRefusedError("No access token provided")
+
         super().__init__(project_id, access_token)
 
     async def create_user(self, variables: UserDict) -> bool:
@@ -127,7 +165,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return members
 
-    async def create_conversation(self) -> int:
+    async def create_conversation(self) -> Optional[str]:
         # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
         async with self.lock:
             if self.conversation_id:
@@ -147,14 +185,14 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 logger.warning("Could not create conversation.")
                 return None
 
-            return int(res["data"]["createConversation"]["id"])
+            return res["data"]["createConversation"]["id"]
 
     async def get_conversation_id(self):
         self.conversation_id = await self.create_conversation()
 
         return self.conversation_id
 
-    async def delete_conversation(self, conversation_id: int):
+    async def delete_conversation(self, conversation_id: str):
         mutation = """
         mutation ($id: ID!) {
             deleteConversation(id: $id) {
@@ -168,7 +206,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return True
 
-    async def get_conversation(self, conversation_id: int):
+    async def get_conversation(self, conversation_id: str):
         query = """
         query ($id: ID!) {
             conversation(id: $id) {
@@ -177,6 +215,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 messages {
                     id
                     isError
+                    parentId
                     indent
                     author
                     content
@@ -293,7 +332,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     async def get_message(self):
         raise NotImplementedError
 
-    async def create_message(self, variables: Dict[str, Any]) -> int:
+    async def create_message(self, variables: MessageDict) -> Optional[str]:
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -303,8 +342,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         variables["conversationId"] = c_id
 
         mutation = """
-        mutation ($conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
-            createMessage(conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
+        mutation ($id: ID, $conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $parentId: String, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
+            createMessage(id: $id, conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, parentId: $parentId, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
                 id
             }
         }
@@ -314,18 +353,17 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             logger.warning("Could not create message.")
             return None
 
-        return int(res["data"]["createMessage"]["id"])
+        return res["data"]["createMessage"]["id"]
 
-    async def update_message(self, message_id: int, variables: Dict[str, Any]) -> bool:
+    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
         mutation = """
-        mutation ($messageId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json) {
-            updateMessage(messageId: $messageId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
+        mutation ($messageId: ID!, $author: String!, $content: String!, $parentId: String, $language: String, $prompt: String, $llmSettings: Json) {
+            updateMessage(messageId: $messageId, author: $author, content: $content, parentId: $parentId, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
                 id
             }
         }
         """
-        variables["messageId"] = message_id
-        res = await self.mutation(mutation, variables)
+        res = await self.mutation(mutation, dict(message_id=message_id, **variables))
 
         if self.check_for_errors(res):
             logger.warning("Could not update message.")
@@ -333,7 +371,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return True
 
-    async def delete_message(self, message_id: int) -> bool:
+    async def delete_message(self, message_id: str) -> bool:
         mutation = """
         mutation ($messageId: ID!) {
             deleteMessage(messageId: $messageId) {
@@ -379,51 +417,63 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["element"]
 
-    async def upsert_element(self, variables):
+    async def create_element(self, variables):
         c_id = await self.get_conversation_id()
 
         if not c_id:
             logger.warning("Missing conversation ID, could not persist the element.")
             return None
 
-        if "id" in variables:
-            mutation_name = "updateElement"
-            mutation = """
-            mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
-                updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
-                    id,
-                }
+        mutation = """
+        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+                id,
+                type,
+                url,
+                name,
+                display,
+                size,
+                language,
+                forIds
             }
-            """
-            variables["conversationId"] = c_id
-            res = await self.mutation(mutation, variables)
-        else:
-            mutation_name = "createElement"
-            mutation = """
-            mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
-                createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
-                    id,
-                    type,
-                    url,
-                    name,
-                    display,
-                    size,
-                    language,
-                    forIds
-                }
-            }
-            """
-            variables["conversationId"] = c_id
-            res = await self.mutation(mutation, variables)
+        }
+        """
+        variables["conversationId"] = c_id
+        res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
-            logger.warning("Could not persist element.")
+            logger.warning("Could not create element.")
             return None
 
-        return res["data"][mutation_name]
+        return res["data"]["createElement"]
+
+    async def update_element(self, variables):
+        c_id = await self.get_conversation_id()
+
+        if not c_id:
+            logger.warning("Missing conversation ID, could not persist the element.")
+            return None
+
+        mutation = """
+        mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
+            updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
+                id,
+            }
+        }
+        """
+
+        variables = variables.copy()
+        variables["conversationId"] = c_id
+        res = await self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not update element.")
+            return None
+
+        return res["data"]["updateElement"]
 
     async def upload_element(self, content: bytes, mime: str) -> str:
-        id = f"{uuid.uuid4()}"
+        id = str(uuid.uuid4())
         body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 
         path = f"/api/upload/file"

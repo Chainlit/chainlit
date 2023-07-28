@@ -1,5 +1,8 @@
-from secrets import token_urlsafe
-from typing import Dict, Optional, Callable, Any, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+
+if TYPE_CHECKING:
+    from chainlit.message import Message
+
 from chainlit.client.base import BaseAuthClient, BaseDBClient
 from chainlit.types import AskResponse
 
@@ -18,6 +21,8 @@ class Session:
 
     def __init__(
         self,
+        # Id from the session cookie
+        id: str,
         # Associated socket id
         socket_id: str,
         # Function to emit a message to the user
@@ -30,25 +35,28 @@ class Session:
         db_client: Optional[BaseDBClient],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
-        # Headers received during the initial request
-        headers: Dict[str, str],
+        # Headers received during the websocket connection handshake
+        handshake_headers: Dict[str, str],
         # Optional langchain agent
-        agent: Any = None,
+        agent: Optional[Any] = None,
         # Optional llama instance
-        llama_instance: Any = None,
+        llama_instance: Optional[Any] = None,
+        # Last message at the root of the chat
+        root_message: Optional["Message"] = None,
     ):
         self.socket_id = socket_id
         self.ask_user = ask_user
         self.emit = emit
         self.user_env = user_env
-        self.headers = headers
+        self.handshake_headers = handshake_headers
         self.agent = agent
         self.llama_instance = llama_instance
         self.auth_client = auth_client
         self.db_client = db_client
+        self.root_message = root_message
         self.should_stop = False
         self.restored = False
-        self.id = token_urlsafe()
+        self.id = id
 
         sessions_id[self.id] = self
         sessions_sid[socket_id] = self

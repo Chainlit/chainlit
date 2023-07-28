@@ -8,14 +8,14 @@ import Code from 'components/atoms/Code';
 import ElementRef from 'components/atoms/element/ref';
 
 import { IAction } from 'state/action';
-import { IElements } from 'state/element';
+import { IMessageElement } from 'state/element';
 
 import InlinedElements from './inlined';
 
 interface Props {
   id?: string;
   content?: string;
-  elements: IElements;
+  elements: IMessageElement[];
   actions: IAction[];
   language?: string;
   authorIsUser?: boolean;
@@ -36,10 +36,13 @@ const isGlobalMatch = (forIds: string[] | undefined) => {
   return !forIds || !forIds.length;
 };
 
+function escapeRegExp(string: string) {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function prepareContent({ id, elements, actions, content, language }: Props) {
-  const elementNames = elements
-    .filter((e) => e.type !== 'avatar')
-    .map((e) => e.name);
+  const elementNames = elements.map((e) => escapeRegExp(e.name));
 
   // Sort by descending length to avoid matching substrings
   elementNames.sort((a, b) => b.length - a.length);
@@ -56,10 +59,10 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   });
 
   let preparedContent = content ? content.trim() : '';
-  const inlinedElements: IElements = elements.filter(
+  const inlinedElements = elements.filter(
     (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
   );
-  const refElements: IElements = [];
+  const refElements: IMessageElement[] = [];
 
   if (elementRegexp) {
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {

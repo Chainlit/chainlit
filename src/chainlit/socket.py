@@ -1,29 +1,22 @@
-import json
 import asyncio
-from http.cookies import SimpleCookie
-
-
-from chainlit.context import emitter_var, loop_var
-from chainlit.config import config
-from chainlit.session import Session
-from chainlit.user_session import user_sessions
-from chainlit.client.utils import (
-    get_db_client,
-    get_auth_client,
-)
-from chainlit.emitter import ChainlitEmitter
+import json
 from chainlit.action import Action
-from chainlit.message import Message, ErrorMessage
-from chainlit.telemetry import trace_event
+from chainlit.client.base import MessageDict
 from chainlit.client.cloud import CloudAuthClient
+from chainlit.client.utils import get_auth_client, get_db_client
+from chainlit.config import config
+from chainlit.context import emitter_var, loop_var
+from chainlit.emitter import ChainlitEmitter
 from chainlit.logger import logger
+from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
+from chainlit.session import Session
+from chainlit.telemetry import trace_event
+from chainlit.user_session import user_sessions
 
 
-def restore_existing_session(sid, auth, emit_fn, ask_user_fn):
+def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
     """Restore a session from the sessionId provided by the client."""
-
-    session_id = auth and auth.get("sessionId")
     if session := Session.get_by_id(session_id):
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
@@ -50,17 +43,6 @@ def load_user_env(user_env):
     return user_env
 
 
-def load_chainlit_headers(http_cookie):
-    cookie = SimpleCookie(http_cookie)
-    cookie_string = cookie.get("chainlit-headers").value
-    if cookie_string:
-        chainlit_headers = json.loads(cookie_string)
-    else:
-        chainlit_headers = {}
-
-    return chainlit_headers
-
-
 @socket.on("connect")
 async def connect(sid, environ, auth):
     # Function to send a message to this particular session
@@ -79,34 +61,36 @@ async def connect(sid, environ, auth):
                 raise InterruptedError("Task stopped by user")
         return socket.call("ask", data, timeout=timeout, to=sid)
 
-    if restore_existing_session(sid, auth, emit_fn, ask_user_fn):
-        return
+    session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
+    if restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
+        return True
 
+    db_client = None
     user_env = environ.get("HTTP_USER_ENV")
-    authorization = environ.get("HTTP_AUTHORIZATION")
-    chainlit_headers = load_chainlit_headers(environ.get("HTTP_COOKIE"))
 
     try:
-        auth_client = await get_auth_client(authorization, chainlit_headers)
-        db_client = await get_db_client(
-            authorization, chainlit_headers, auth_client.user_infos
-        )
+        auth_client = await get_auth_client(handshake_headers=environ)
+        if config.project.database:
+            db_client = await get_db_client(
+                handshake_headers=environ,
+                headers=None,
+                user_infos=auth_client.user_infos,
+            )
         user_env = load_user_env(user_env)
     except ConnectionRefusedError as e:
         logger.error(f"ConnectionRefusedError: {e}")
         return False
 
-    session = Session(
+    Session(
+        id=session_id,
         socket_id=sid,
         emit=emit_fn,
         ask_user=ask_user_fn,
         auth_client=auth_client,
         db_client=db_client,
         user_env=user_env,
-        headers=chainlit_headers,
+        handshake_headers=environ,
     )
-
-    await socket.emit("session", data={"sessionId": session.id}, to=sid)
 
     trace_event("connection_successful")
     return True
@@ -130,6 +114,16 @@ async def connection_successful(sid):
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start()
+
+
+@socket.on("clear_session")
+async def clean_session(sid):
+    if session := Session.get(sid):
+        # Clean up the user session
+        if session.id in user_sessions:
+            user_sessions.pop(session.id)
+        # Clean up the session
+        session.delete()
 
 
 @socket.on("disconnect")
@@ -162,28 +156,19 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: Session, author: str, input_str: str):
+async def process_message(session: Session, message_dict: MessageDict):
     """Process a message from the user."""
-
     try:
         emitter = ChainlitEmitter(session)
         emitter_var.set(emitter)
         loop_var.set(asyncio.get_event_loop())
 
         await emitter.task_start()
+        await emitter.process_user_message(message_dict)
 
-        if session.db_client:
-            # If cloud is enabled, persist the message
-            await session.db_client.create_message(
-                {
-                    "author": author,
-                    "content": input_str,
-                    "authorIsUser": True,
-                }
-            )
-
+        message = Message.from_dict(message_dict)
         if config.code.on_message:
-            await config.code.on_message(input_str)
+            await config.code.on_message(message.content.strip(), message.id)
     except InterruptedError:
         pass
     except Exception as e:
@@ -196,15 +181,12 @@ async def process_message(session: Session, author: str, input_str: str):
 
 
 @socket.on("ui_message")
-async def message(sid, data):
+async def message(sid, message):
     """Handle a message sent by the User."""
     session = Session.require(sid)
     session.should_stop = False
 
-    input_str = data["content"].strip()
-    author = data["author"]
-
-    await process_message(session, author, input_str)
+    await process_message(session, message)
 
 
 async def process_action(action: Action):
