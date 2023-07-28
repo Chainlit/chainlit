@@ -5,11 +5,8 @@ import { useRecoilState } from 'recoil';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
-import Switch from 'components/atoms/switch';
 import InputLabel from 'components/molecules/inputLabel';
-import SelectInput from 'components/organisms/inputs/selectInput';
-import TextInput from 'components/organisms/inputs/textInput';
-import Slider from 'components/organisms/slider';
+import FormInput from 'components/organisms/FormInput';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 
@@ -95,23 +92,32 @@ export default function Design(): JSX.Element {
         >
           {`Dark mode`}
         </Typography>
-        <Switch
-          onChange={onDarkModeChange}
-          checked={isDarkMode}
-          inputProps={{
-            'aria-labelledby': 'switch-theme'
+        <FormInput
+          element={{
+            initial: isDarkMode,
+            type: 'switch',
+            id: 'design-switch',
+            onChange: onDarkModeChange,
+            checked: isDarkMode,
+            inputProps: {
+              'aria-labelledby': 'switch-theme'
+            }
           }}
         />
       </Box>
 
       <ContainerBox name="Inputs">
         <ComponentBox name="TextInput">
-          <TextInput
-            label="my label"
-            tooltip="Ok bro"
-            description="My description"
-            onChange={voidFunction}
-            id={'design-input'}
+          <FormInput
+            element={{
+              initial: 'first',
+              type: 'textinput',
+              label: 'my label',
+              tooltip: 'Ok bro',
+              description: 'My description',
+              onChange: voidFunction,
+              id: 'design-input'
+            }}
           />
         </ComponentBox>
         <ComponentBox name="InputLabel">
@@ -122,39 +128,53 @@ export default function Design(): JSX.Element {
           />
         </ComponentBox>
         <ComponentBox name="Select">
-          <SelectInput
-            label="Author"
-            tooltip="This is my author"
-            id="author-filter-select"
-            description="test"
-            value={'first'}
-            onChange={voidFunction}
-            items={[
-              { label: 'First', value: 'first' },
-              { label: 'Second', value: 'second', notificationCount: 20 },
-              { label: 'Third', value: 'third' }
-            ]}
+          <FormInput
+            element={{
+              initial: 'first',
+              type: 'select',
+              description: 'test',
+              id: 'author-filter-select',
+              label: 'Author',
+              tooltip: 'This is my author',
+              value: 'first',
+              onChange: voidFunction,
+              items: [
+                { label: 'First', value: 'first' },
+                { label: 'Second', value: 'second', notificationCount: 20 },
+                { label: 'Third', value: 'third' }
+              ]
+            }}
           />
         </ComponentBox>
       </ContainerBox>
 
       <ContainerBox name="Uncategorized">
-        <ComponentBox name="Select">
-          <Slider
-            label="Temperature"
-            name="temperature"
-            min={0}
-            max={1}
-            step={0.1}
+        <ComponentBox name="Slider">
+          <FormInput
+            element={{
+              initial: 0,
+              type: 'slider',
+              id: 'design-slider',
+              label: 'Temperature',
+              name: 'temperature',
+              min: 0,
+              max: 1,
+              step: 0.1
+            }}
           />
         </ComponentBox>
 
         <ComponentBox name="Switch">
-          <Switch
-            onChange={onDarkModeChange}
-            checked={isDarkMode}
-            inputProps={{
-              'aria-labelledby': 'switch-theme'
+          <FormInput
+            element={{
+              initial: false,
+              type: 'switch',
+              id: 'design-switch',
+              onChange: onDarkModeChange,
+              checked: isDarkMode,
+              inputProps: {
+                'aria-labelledby': 'switch-theme'
+              }
             }}
           />
         </ComponentBox>

@@ -10,6 +10,8 @@ import NotificationCount from 'components/atoms/notificationCount';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 
+import { IInput } from 'types/Input';
+
 import InputStateHandler from './inputStateHandler';
 
 export type SelectItem = {
@@ -20,19 +22,12 @@ export type SelectItem = {
 
 export type SelectInputProps = {
   children?: React.ReactNode;
-  description?: string;
-  disabled?: boolean;
-  hasError?: boolean;
-  id: string;
   items?: SelectItem[];
-  label?: string;
   name?: string;
   onChange: (e: SelectChangeEvent) => void;
   renderLabel?: () => string;
-  size?: 'small' | 'medium';
-  tooltip?: string;
   value?: string | number;
-};
+} & IInput;
 
 type MenuItemProps = {
   index: number;
