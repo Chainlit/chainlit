@@ -30,6 +30,8 @@ jobs:
 
       - name: Install Poetry
         run: pip install poetry
+      - name: Install dependencies
+        run: poetry install --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
