@@ -12,7 +12,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "(cd src/chainlit/frontend && pnpm run test) && (cd src && poetry run pytest) && pnpm exec ts-node ./cypress/support/e2e.ts",
+    "test": "(cd src/chainlit/frontend && pnpm run test) && (cd src && poetry run pytest --setup-plan) && pnpm exec ts-node ./cypress/support/e2e.ts",
     "prepare": "husky install",
     "lintUi": "cd src/chainlit/frontend && pnpm run lint",
     "formatUi": "cd src/chainlit/frontend && pnpm run format",
