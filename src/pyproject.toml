@@ -81,6 +81,10 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+pythonpath = "tests"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
