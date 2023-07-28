@@ -150,8 +150,13 @@ def auth_client_factory(
 
 @trace
 def db_client_factory(
-    func: Callable[[Optional["UserDict"]], "BaseDBClient"]
-) -> Callable[[Optional["UserDict"]], "BaseDBClient"]:
+    func: Callable[
+        [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]],
+        "BaseDBClient",
+    ]
+) -> Callable[
+    [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]], "BaseDBClient"
+]:
     """
     Callback to call when to initialize the custom client.
 
