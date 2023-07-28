@@ -1,4 +1,4 @@
-from typing import Dict, Optional, TypedDict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, TypedDict
 
 if TYPE_CHECKING:
     from chainlit.client.base import UserDict

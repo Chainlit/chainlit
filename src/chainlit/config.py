@@ -8,13 +8,12 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
-
 from chainlit.logger import logger
 from chainlit.version import __version__
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.client.base import BaseDBClient, BaseAuthClient
+    from chainlit.client.base import BaseAuthClient, BaseDBClient
 
 PACKAGE_ROOT = os.path.dirname(__file__)
 

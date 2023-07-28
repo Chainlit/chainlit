@@ -3,8 +3,8 @@ import uuid
 from typing import Any, Dict, Mapping, Optional, cast
 
 import aiohttp
-from starlette.datastructures import Headers
 from python_graphql_client import GraphqlClient
+from starlette.datastructures import Headers
 
 from chainlit.client.base import MessageDict, UserDict
 from chainlit.config import config

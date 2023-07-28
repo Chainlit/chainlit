@@ -1,10 +1,9 @@
 import asyncio
 import os
-from typing import TYPE_CHECKING, Dict, Any, Callable, Optional
-
-from starlette.datastructures import Headers
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 from dotenv import load_dotenv
+from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict

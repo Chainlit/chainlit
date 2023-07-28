@@ -1,10 +1,7 @@
 from typing import Optional
 
 import chainlit as cl
-from chainlit.client.base import (
-    BaseAuthClient,
-    UserDict,
-)
+from chainlit.client.base import BaseAuthClient, UserDict
 
 
 class CustomAuthClient(BaseAuthClient):
