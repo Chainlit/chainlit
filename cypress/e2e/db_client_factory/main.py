@@ -65,7 +65,7 @@ class CustomDBClient(BaseDBClient):
 
 
 @cl.db_client_factory
-async def db_client_factory(headers, user_infos):
+async def db_client_factory(handshake_headers, request_headers, user_infos):
     return CustomDBClient()
 
 

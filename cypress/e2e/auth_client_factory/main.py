@@ -1,13 +1,8 @@
-from typing import Optional
-
 import chainlit as cl
 from chainlit.client.base import BaseAuthClient, UserDict
 
 
 class CustomAuthClient(BaseAuthClient):
-    user_infos: Optional[UserDict] = None
-    access_token: Optional[str] = None
-
     async def is_project_member(self) -> bool:
         raise ConnectionRefusedError
 
@@ -16,7 +11,7 @@ class CustomAuthClient(BaseAuthClient):
 
 
 @cl.auth_client_factory
-async def auth_client_factory(headers):
+async def auth_client_factory(handshake_headers, request_headers):
     return CustomAuthClient()
 
 

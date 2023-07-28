@@ -39,7 +39,7 @@ class UserSession:
         user_session["id"] = emitter.session.id
         user_session["env"] = emitter.session.user_env
         user_session["user_infos"] = emitter.session.auth_client.user_infos
-        user_session["headers"] = emitter.session.headers
+        user_session["initial_headers"] = emitter.session.initial_headers
 
         if emitter.session.root_message:
             user_session["root_message"] = emitter.session.root_message

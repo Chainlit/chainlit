@@ -324,10 +324,17 @@ async def get_favicon():
 
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
-    async def serve(path: str):
+    async def serve(request: Request, path: str):
         html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
+
+        response.set_cookie(
+            key="chainlit-initial-headers",
+            value=json.dumps(dict(request.headers)),
+            httponly=True,
+        )
+
         return response
 
 
