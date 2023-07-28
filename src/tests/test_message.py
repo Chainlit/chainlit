@@ -1,6 +1,8 @@
 import unittest.mock
 import uuid
 
+import pytest
+
 from chainlit.message import Message
 
 
