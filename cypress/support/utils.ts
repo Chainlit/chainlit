@@ -51,16 +51,23 @@ export async function runTest(test: string) {
       }
 
       await new Promise(async (resolve, reject) => {
+        let testError: string | undefined = undefined;
+
         try {
           childProcess = await runChainlit(testDir, file, localDb);
           runSpec(test);
+        } catch (err) {
+          testError = err;
         } finally {
           kill(childProcess.pid, "SIGKILL", function (err) {
             if (err) {
               console.log("Error while trying to kill process");
-              resolve(true);
             } else {
               console.log("Process killed successfully");
+            }
+            if (testError) {
+              reject(testError);
+            } else {
               resolve(true);
             }
           });
