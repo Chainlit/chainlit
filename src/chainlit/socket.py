@@ -20,7 +20,10 @@ from chainlit.user_session import user_sessions
 
 def load_chainlit_initial_headers(http_cookie):
     cookie = SimpleCookie(http_cookie)
-    cookie_string = cookie.get("chainlit-initial-headers").value
+    cookie_string = ""
+    initial_headers = cookie.get("chainlit-initial-headers")
+    if (initial_headers):
+        cookie_string = initial_headers.value
     if cookie_string:
         try:
             chainlit_initial_headers = json.loads(cookie_string)
