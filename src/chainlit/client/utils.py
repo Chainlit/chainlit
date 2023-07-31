@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Optional
 
 from fastapi import Request
@@ -8,16 +7,6 @@ from chainlit.client.base import BaseAuthClient, BaseDBClient, UserDict
 from chainlit.client.cloud import CloudAuthClient, CloudDBClient
 from chainlit.client.local import LocalAuthClient, LocalDBClient
 from chainlit.config import config
-
-
-def load_chainlit_cookie(request: Request):
-    cookie_string = request.cookies.get("chainlit-headers")
-    if cookie_string:
-        chainlit_headers = json.loads(cookie_string)
-    else:
-        chainlit_headers = {}
-
-    return chainlit_headers
 
 
 async def get_auth_client(
