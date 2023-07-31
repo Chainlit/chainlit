@@ -94,7 +94,6 @@ export default function Design(): JSX.Element {
         </Typography>
         <FormInput
           element={{
-            initial: isDarkMode,
             type: 'switch',
             id: 'design-switch',
             onChange: onDarkModeChange,
@@ -110,7 +109,6 @@ export default function Design(): JSX.Element {
         <ComponentBox name="TextInput">
           <FormInput
             element={{
-              initial: 'first',
               type: 'textinput',
               label: 'my label',
               tooltip: 'Ok bro',
@@ -130,7 +128,6 @@ export default function Design(): JSX.Element {
         <ComponentBox name="Select">
           <FormInput
             element={{
-              initial: 'first',
               type: 'select',
               description: 'test',
               id: 'author-filter-select',
@@ -152,7 +149,6 @@ export default function Design(): JSX.Element {
         <ComponentBox name="Slider">
           <FormInput
             element={{
-              initial: 0,
               type: 'slider',
               id: 'design-slider',
               label: 'Temperature',
@@ -167,7 +163,6 @@ export default function Design(): JSX.Element {
         <ComponentBox name="Switch">
           <FormInput
             element={{
-              initial: false,
               type: 'switch',
               id: 'design-switch',
               onChange: onDarkModeChange,
