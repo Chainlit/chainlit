@@ -32,6 +32,8 @@ export default function TextInput({
         disabled={disabled}
         inputProps={{
           ...rest,
+          id: id,
+          name: id,
           sx: { height: size === 'small' ? '7px' : '15px' }
         }}
         fullWidth

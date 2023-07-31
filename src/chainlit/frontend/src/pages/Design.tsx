@@ -97,7 +97,7 @@ export default function Design(): JSX.Element {
             type: 'switch',
             id: 'design-switch',
             onChange: onDarkModeChange,
-            checked: isDarkMode,
+            value: isDarkMode,
             inputProps: {
               'aria-labelledby': 'switch-theme'
             }
@@ -166,7 +166,7 @@ export default function Design(): JSX.Element {
               type: 'switch',
               id: 'design-switch',
               onChange: onDarkModeChange,
-              checked: isDarkMode,
+              value: isDarkMode,
               inputProps: {
                 'aria-labelledby': 'switch-theme'
               }

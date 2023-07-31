@@ -20,7 +20,7 @@ export default function inputLabel({
     <Box display="flex" justifyContent="space-between" width="100%">
       <Box display="flex" gap={0.5} alignItems="center">
         <InputLabel
-          id={id}
+          htmlFor={id}
           sx={{
             fontWeight: 600,
             fontSize: '12px',

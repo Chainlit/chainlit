@@ -7,46 +7,45 @@ import TagsInput, { TagsInputProps } from './inputs/tagsInput';
 import TextInput, { TextInputProps } from './inputs/textInput';
 import Slider, { SliderProps } from './slider';
 
-export type FormInitial =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | undefined;
+export type TFormInputValue = string | number | boolean | string[] | undefined;
 
-export interface IFormInput<T> extends IInput {
+export interface IFormInput<T, V extends TFormInputValue> extends IInput {
   type: T;
+  value?: V;
+  setField?(field: string, value: V, shouldValidate?: boolean): void;
 }
 
 export type TFormInput =
-  | (SwitchProps & IFormInput<'switch'>)
-  | (SliderProps & IFormInput<'slider'>)
-  | (SelectInputProps & IFormInput<'select'>)
-  | (TextInputProps & IFormInput<'textinput'>)
-  | (TagsInputProps & IFormInput<'tags'>);
+  | (Omit<SwitchProps, 'checked'> & IFormInput<'switch', boolean>)
+  | (Omit<SliderProps, 'value'> & IFormInput<'slider', number>)
+  | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
+  | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
+  | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element.type) {
     case 'select':
-      return <SelectInput {...element} />;
+      return <SelectInput {...element} value={element.value ?? ''} />;
     case 'slider':
-      return <Slider {...element} />;
+      return <Slider {...element} value={element.value ?? 0} />;
     case 'tags':
-      return <TagsInput {...element} />;
+      return <TagsInput {...element} value={element.value ?? []} />;
     case 'switch':
       return (
         <Switch
           {...element}
+          checked={!!element.value}
           inputProps={{
-            id: element.id || undefined,
+            id: element.id,
             name: element.id
           }}
         />
       );
     case 'textinput':
-      return <TextInput {...element} placeholder={element.placeholder} />;
+      return <TextInput {...element} value={element.value ?? ''} />;
     default:
+      // Unimplemented element type if this errors
+      element satisfies never;
       return <></>;
   }
 };
