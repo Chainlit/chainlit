@@ -1,4 +1,4 @@
-import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
+import { MuiChipsInput } from 'mui-chips-input';
 
 import { IInput } from 'types/Input';
 
@@ -7,17 +7,18 @@ import InputStateHandler from './inputStateHandler';
 export type TagsInputProps = {
   placeholder?: string;
   value?: string[];
-  onChange?: (value: MuiChipsInputChip[]) => void;
-} & IInput;
+  setField?(field: string, value: string[], shouldValidate?: boolean): void;
+} & IInput &
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'color'>;
 
 export default function TagsInput({
   description,
-  disabled,
   hasError,
   id,
   label,
   size = 'small',
   tooltip,
+  setField,
   ...rest
 }: TagsInputProps): JSX.Element {
   return (
@@ -28,7 +29,15 @@ export default function TagsInput({
       label={label}
       tooltip={tooltip}
     >
-      <MuiChipsInput {...rest} size={size} name={id} id={id} />
+      <MuiChipsInput
+        {...rest}
+        size={size}
+        onChange={(value) => setField?.(id, value, false)}
+        inputProps={{
+          id: id,
+          name: id
+        }}
+      />
     </InputStateHandler>
   );
 }

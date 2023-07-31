@@ -98,7 +98,6 @@ export default function SelectInput({
         value={value?.toString()}
         onChange={onChange}
         size={size}
-        name={name || id}
         disabled={disabled}
         renderValue={() =>
           (renderLabel && renderLabel()) ||
@@ -111,6 +110,8 @@ export default function SelectInput({
             '0px 10px 10px 0px rgba(0, 0, 0, 0.05), 0px 2px 4px 0px rgba(0, 0, 0, 0.05)'
         }}
         inputProps={{
+          id: id,
+          name: name || id,
           sx: {
             px: '16px',
             py: size === 'small' ? '10px' : '14px'

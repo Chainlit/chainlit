@@ -20,7 +20,7 @@ import {
   sessionState
 } from 'state/chat';
 
-import FormInput, { FormInitial, TFormInput } from '../FormInput';
+import FormInput, { TFormInputValue } from '../FormInput';
 
 export default function ChatSettingsModal() {
   const session = useRecoilValue(sessionState);
@@ -42,7 +42,7 @@ export default function ChatSettingsModal() {
   const handleConfirm = () => {
     setChatSettingsValue(formik.values);
 
-    const values = mapValues(formik.values, (x: FormInitial) =>
+    const values = mapValues(formik.values, (x: TFormInputValue) =>
       x !== '' ? x : null
     );
     session?.socket.emit('chat_settings_change', values);
@@ -51,53 +51,6 @@ export default function ChatSettingsModal() {
   };
   const handleReset = () => {
     formik.setValues(chatSettingsDefaultValue);
-  };
-
-  const renderInput = (element: TFormInput): JSX.Element | undefined => {
-    switch (element.type) {
-      case 'switch':
-        return (
-          <FormInput
-            key={element.id}
-            element={{
-              ...element,
-              checked: formik.values[element.id] ?? false
-            }}
-          />
-        );
-      case 'slider':
-        return (
-          <FormInput
-            key={element.id}
-            element={{
-              ...element,
-              value: formik.values[element.id] ?? 0
-            }}
-          />
-        );
-      case 'select':
-        return (
-          <FormInput
-            key={element.id}
-            element={{
-              ...element,
-              value: formik.values[element.id] ?? ''
-            }}
-          />
-        );
-      case 'textinput':
-        return (
-          <FormInput
-            key={element.id}
-            element={{
-              ...element,
-              value: formik.values[element.id] ?? '',
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                formik.setFieldValue(element.id, e.target.value)
-            }}
-          />
-        );
-    }
   };
 
   return (
@@ -122,12 +75,17 @@ export default function ChatSettingsModal() {
             gap: '15px'
           }}
         >
-          {chatSettings.inputs.map((input) =>
-            renderInput({
-              ...input,
-              onChange: formik.handleChange
-            })
-          )}
+          {chatSettings.inputs.map((input) => (
+            <FormInput
+              key={input.id}
+              element={{
+                ...input,
+                value: formik.values[input.id],
+                onChange: formik.handleChange,
+                setField: formik.setFieldValue
+              }}
+            />
+          ))}
         </Box>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>

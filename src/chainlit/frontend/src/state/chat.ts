@@ -1,7 +1,7 @@
 import { atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 
-import { FormInitial, TFormInput } from 'components/organisms/FormInput';
+import { TFormInput, TFormInputValue } from 'components/organisms/FormInput';
 
 import { IMessageElement } from './element';
 import { IMember } from './user';
@@ -138,7 +138,7 @@ export const chatSettingsDefaultValueSelector = selector({
     return chatSettings.inputs.reduce(
       (
         form: { [key: string]: any },
-        input: TFormInput & { initial?: FormInitial }
+        input: TFormInput & { initial?: TFormInputValue }
       ) => ((form[input.id] = input.initial), form),
       {}
     );
