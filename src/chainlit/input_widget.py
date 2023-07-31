@@ -141,7 +141,8 @@ class Select(InputWidget):
 
         if items is not None:
             self.items = items
-        if values is not None:
+            self.initial = initial_value
+        elif values is not None:
             self.items = {value: value for value in values}
             self.initial = (
                 values[initial_index] if initial_index is not None else initial_value
