@@ -343,6 +343,9 @@ class AskUserMessage(AskMessageBase):
         if self.streaming:
             self.streaming = False
 
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
         msg_dict = await self._create()
 
         spec = AskSpec(type="text", timeout=self.timeout)
@@ -405,6 +408,9 @@ class AskFileMessage(AskMessageBase):
 
         if self.streaming:
             self.streaming = False
+
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
 
         msg_dict = await self._create()
 
