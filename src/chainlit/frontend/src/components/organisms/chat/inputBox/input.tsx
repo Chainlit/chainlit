@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
+import TuneIcon from '@mui/icons-material/Tune';
 import { IconButton, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import {
   askUserState,
+  chatSettingsState,
   historyOpenedState,
   loadingState,
   sessionState
@@ -31,6 +33,7 @@ function getLineCount(el: HTMLDivElement) {
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const hSetOpen = useSetRecoilState(historyOpenedState);
+  const [chatSettings, setChatSettings] = useRecoilState(chatSettingsState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
   const session = useRecoilValue(sessionState);
@@ -89,6 +92,21 @@ const Input = ({ onSubmit, onReply }: Props) => {
     }
   }, []);
 
+  const startAdornment = (
+    <>
+      {chatSettings.inputs.length > 0 && (
+        <IconButton
+          disabled={disabled}
+          color="inherit"
+          onClick={() => setChatSettings((old) => ({ ...old, open: true }))}
+        >
+          <TuneIcon />
+        </IconButton>
+      )}
+      <HistoryButton onClick={onHistoryClick} />
+    </>
+  );
+
   const endAdornment = (
     <IconButton disabled={disabled} color="inherit" onClick={() => submit()}>
       <SendIcon />
@@ -118,7 +136,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
             sx={{ ml: 1, color: 'text.secondary' }}
             position="start"
           >
-            <HistoryButton onClick={onHistoryClick} />
+            {startAdornment}
           </InputAdornment>
         ),
         endAdornment: (

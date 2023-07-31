@@ -1,17 +1,14 @@
 import { TextField } from '@mui/material';
 
+import { IInput } from 'types/Input';
+
 import InputStateHandler from './inputStateHandler';
 
-type TextInputProps = {
-  className?: string;
-  description?: string;
-  hasError?: boolean;
-  id: string;
-  label?: string;
-  size?: 'small' | 'medium';
-  tooltip?: string;
+export type TextInputProps = {
   value?: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
+  placeholder?: string;
+} & IInput &
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
 
 export default function TextInput({
   description,

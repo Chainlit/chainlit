@@ -3,27 +3,49 @@ import { green } from 'palette';
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 
-type SwitchProps = {
-  checked?: boolean;
-  disabled?: boolean;
+import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
+
+import { IInput } from 'types/Input';
+
+export type SwitchProps = {
+  checked: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   onChange: (
     event?: React.ChangeEvent<HTMLInputElement>,
     checked?: boolean
   ) => void;
-};
+} & IInput;
 
 export default function Switch(props: SwitchProps): JSX.Element {
-  const { checked, disabled, inputProps, onChange } = props;
+  const {
+    checked,
+    description,
+    disabled,
+    hasError,
+    id,
+    inputProps,
+    label,
+    onChange,
+    tooltip
+  } = props;
 
   return (
-    <StyledSwitch
-      disabled={disabled}
-      edge="end"
-      onChange={onChange}
-      checked={checked}
-      inputProps={inputProps}
-    />
+    <InputStateHandler
+      description={description}
+      hasError={hasError}
+      id={id}
+      label={label}
+      tooltip={tooltip}
+    >
+      <StyledSwitch
+        name={id}
+        disabled={disabled}
+        edge="end"
+        onChange={onChange}
+        checked={checked}
+        inputProps={inputProps}
+      />
+    </InputStateHandler>
   );
 }
 

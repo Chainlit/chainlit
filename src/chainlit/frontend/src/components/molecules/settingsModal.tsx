@@ -40,8 +40,9 @@ export default function SettingsModal() {
             <ListItemIcon>
               <ExpandIcon />
             </ListItemIcon>
-            <ListItemText id="switch-expand-all" primary="Expand Messages" />
+            <ListItemText id="list-expand-all" primary="Expand Messages" />
             <Switch
+              id="switch-expand-all"
               onChange={() =>
                 setSettings((old) => ({ ...old, expandAll: !old.expandAll }))
               }
@@ -57,6 +58,7 @@ export default function SettingsModal() {
             </ListItemIcon>
             <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
             <Switch
+              id="switch-hide-cot"
               onChange={() =>
                 setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
               }
@@ -72,6 +74,7 @@ export default function SettingsModal() {
             </ListItemIcon>
             <ListItemText id="switch-theme" primary="Dark mode" />
             <Switch
+              id="switch-theme"
               onChange={() => {
                 const variant = settings.theme === 'light' ? 'dark' : 'light';
                 localStorage.setItem('themeVariant', variant);

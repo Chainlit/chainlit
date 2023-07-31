@@ -8,8 +8,10 @@ from starlette.datastructures import Headers
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
 
+import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
+from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -133,6 +135,23 @@ def action_callback(name: str) -> Callable:
     return decorator
 
 
+def on_settings_update(
+    func: Callable[[Dict[str, Any]], Any]
+) -> Callable[[Dict[str, Any]], Any]:
+    """
+    Hook to react to the user changing any settings.
+
+    Args:
+        func (Callable[], Any]): The hook to execute after settings were changed.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
 @trace
 def auth_client_factory(
     func: Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
@@ -192,6 +211,8 @@ __all__ = [
     "TaskList",
     "TaskStatus",
     "Video",
+    "ChatSettings",
+    "input_widget",
     "Message",
     "ErrorMessage",
     "AskUserMessage",
@@ -200,6 +221,7 @@ __all__ = [
     "on_stop",
     "action_callback",
     "author_rename",
+    "on_settings_update",
     "sleep",
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",

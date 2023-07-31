@@ -66,6 +66,7 @@ const ModelSettings = () => {
 
   const temperature = (
     <Slider
+      id="slider-temperature"
       label="Temperature"
       name="temperature"
       value={formik.values.temperature}
@@ -95,6 +96,7 @@ const ModelSettings = () => {
 
   const topP = (
     <Slider
+      id="slider-top-p"
       label="Top P"
       name="top_p"
       value={formik.values.top_p}
@@ -107,6 +109,7 @@ const ModelSettings = () => {
 
   const frequencyPenalty = (
     <Slider
+      id="slider-frequency-penalty"
       label="Frequency penalty"
       name="frequency_penalty"
       value={formik.values.frequency_penalty}
@@ -119,6 +122,7 @@ const ModelSettings = () => {
 
   const presencePenalty = (
     <Slider
+      id="slider-presence-penalty"
       label="Presence penalty"
       name="presence_penalty"
       value={formik.values.presence_penalty}

@@ -77,7 +77,7 @@ pnpm install
 
 ```sh
 cd src
-poetry install
+poetry install --with tests --with mypy
 ```
 
 Make sure you have the Python code formatters `black` and `isort` installed as they are used in a pre-commit hook. Run `pip install black isort` if needed.

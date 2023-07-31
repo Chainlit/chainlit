@@ -157,6 +157,7 @@ class CodeSettings:
         Callable[[Optional[Dict[str, str]], Optional[Headers], Dict], "BaseDBClient"]
     ] = None
     author_rename: Optional[Callable[[str], str]] = None
+    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
 
     def validate(self):
         requires_one_of = [

@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Union, cast
+from typing import Any, Dict, Union, cast
 
 from socketio.exceptions import TimeoutError
 
@@ -145,3 +145,6 @@ class ChainlitEmitter:
         return self.emit(
             "stream_token", {"id": id, "token": token, "isSequence": is_sequence}
         )
+
+    def set_chat_settings(self, settings: Dict[str, Any]):
+        self.session.chat_settings = settings
