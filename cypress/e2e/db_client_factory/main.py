@@ -13,7 +13,7 @@ from chainlit.client.base import (
 )
 
 
-class CustomClient(BaseDBClient):
+class CustomDBClient(BaseDBClient):
     async def create_user(self, variables: UserDict) -> bool:
         raise NotImplementedError
 
@@ -64,9 +64,9 @@ class CustomClient(BaseDBClient):
         raise NotImplementedError
 
 
-@cl.client_factory
-async def client_factory(user_infos):
-    return CustomClient()
+@cl.db_client_factory
+async def db_client_factory(handshake_headers, request_headers, user_infos):
+    return CustomDBClient()
 
 
 @cl.on_chat_start

@@ -6,7 +6,6 @@ mimetypes.add_type("text/css", ".css")
 
 import asyncio
 import os
-import uuid
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -250,8 +249,8 @@ async def update_feedback(request: Request, update: UpdateFeedbackRequest):
 async def get_project_members(request: Request):
     """Get all the members of a project."""
 
-    get_db_client = await get_db_client_from_request(request)
-    res = await get_db_client.get_project_members()
+    db_client = await get_db_client_from_request(request)
+    res = await db_client.get_project_members()
     return JSONResponse(content=res)
 
 
@@ -325,10 +324,17 @@ async def get_favicon():
 
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
-    async def serve(path: str):
+    async def serve(request: Request, path: str):
         html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
+
+        response.set_cookie(
+            key="chainlit-initial-headers",
+            value=json.dumps(dict(request.headers)),
+            httponly=True,
+        )
+
         return response
 
 

@@ -13,6 +13,7 @@ from typing import (
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
+from starlette.datastructures import Headers
 
 from chainlit.types import (
     ConversationFilter,
@@ -86,7 +87,8 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
 
 class BaseAuthClient(ABC):
     user_infos: Optional[UserDict] = None
-    access_token: Optional[str] = None
+    handshake_headers: Optional[Dict[str, str]] = None
+    request_headers: Optional[Headers] = None
 
     @abstractmethod
     async def is_project_member(self) -> bool:

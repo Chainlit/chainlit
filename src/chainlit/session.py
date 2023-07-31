@@ -35,6 +35,8 @@ class Session:
         db_client: Optional[BaseDBClient],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
+        # Headers received during the websocket connection handshake
+        initial_headers: Dict[str, str],
         # Optional langchain agent
         agent: Optional[Any] = None,
         # Optional llama instance
@@ -46,6 +48,7 @@ class Session:
         self.ask_user = ask_user
         self.emit = emit
         self.user_env = user_env
+        self.initial_headers = initial_headers
         self.agent = agent
         self.llama_instance = llama_instance
         self.auth_client = auth_client

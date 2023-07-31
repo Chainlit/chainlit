@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, 
 import tomli
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
+from starlette.datastructures import Headers
 
 from chainlit.logger import logger
 from chainlit.version import __version__
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.client.base import BaseDBClient
+    from chainlit.client.base import BaseAuthClient, BaseDBClient
 
 PACKAGE_ROOT = os.path.dirname(__file__)
 
@@ -149,9 +150,14 @@ class CodeSettings:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
+    auth_client_factory: Optional[
+        Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
+    ] = None
+    db_client_factory: Optional[
+        Callable[[Optional[Dict[str, str]], Optional[Headers], Dict], "BaseDBClient"]
+    ] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    client_factory: Optional[Callable[[str], "BaseDBClient"]] = None
 
     def validate(self):
         requires_one_of = [

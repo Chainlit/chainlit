@@ -94,7 +94,9 @@ const Chat = () => {
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
         {session?.error && (
-          <Alert severity="error">Could not reach the server.</Alert>
+          <Alert id="session-error" severity="error">
+            Could not reach the server.
+          </Alert>
         )}
         {!!messages.length && (
           <ErrorBoundary>

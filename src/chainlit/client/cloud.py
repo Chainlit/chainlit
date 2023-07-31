@@ -4,6 +4,7 @@ from typing import Any, Dict, Mapping, Optional, cast
 
 import aiohttp
 from python_graphql_client import GraphqlClient
+from starlette.datastructures import Headers
 
 from chainlit.client.base import MessageDict, UserDict
 from chainlit.config import config
@@ -59,8 +60,23 @@ class GraphQLClient:
 
 
 class CloudAuthClient(BaseAuthClient, GraphQLClient):
-    def __init__(self, project_id: str, access_token: str):
-        super().__init__(project_id, access_token)
+    def __init__(
+        self,
+        project_id: str,
+        handshake_headers: Optional[Dict[str, str]] = None,
+        request_headers: Optional[Headers] = None,
+    ):
+        access_token = None
+
+        if handshake_headers:
+            access_token = handshake_headers.get("HTTP_AUTHORIZATION")
+        elif request_headers:
+            access_token = request_headers.get("Authorization")
+
+        if access_token is None:
+            raise ConnectionRefusedError("No access token provided")
+
+        GraphQLClient.__init__(self, project_id, access_token)
 
     async def get_user_infos(
         self,
@@ -96,8 +112,24 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
 
-    def __init__(self, project_id: str, access_token: Optional[str]):
+    def __init__(
+        self,
+        project_id: str,
+        handshake_headers: Optional[Dict[str, str]] = None,
+        request_headers: Optional[Headers] = None,
+    ):
         self.lock = asyncio.Lock()
+
+        access_token = None
+
+        if handshake_headers:
+            access_token = handshake_headers.get("HTTP_AUTHORIZATION")
+        elif request_headers:
+            access_token = request_headers.get("Authorization")
+
+        if access_token is None:
+            raise ConnectionRefusedError("No access token provided")
+
         super().__init__(project_id, access_token)
 
     async def create_user(self, variables: UserDict) -> bool:
