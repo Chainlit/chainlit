@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "preview": "vite preview",
-    "lint": "eslint ./src --ext .ts,.tsx",
+    "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
     "format": "prettier --config .prettierrc 'src/**/*.{ts,tsx}' --write --loglevel error"
   },
   "dependencies": {
