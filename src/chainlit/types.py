@@ -54,7 +54,7 @@ class BaseTemplate:
 @dataclass_json
 @dataclass
 class PromptMessage(BaseTemplate):
-    role: Optional[str] = None
+    role: Optional[Literal["system", "assistant", "user", "function"]] = None
 
 
 @dataclass_json

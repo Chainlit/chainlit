@@ -13,7 +13,7 @@ interface IBaseTemplate {
 }
 
 export interface IPromptMessage extends IBaseTemplate {
-  role: string;
+  role: 'system' | 'assistant' | 'user' | 'function';
 }
 
 export type ILLMSettings = Record<string, string | string[] | number>;

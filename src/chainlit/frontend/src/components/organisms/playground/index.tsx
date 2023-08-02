@@ -35,6 +35,7 @@ import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
 import VariableModal from './editor/variableModal';
+import getProvider from './helpers';
 import ModelSettings from './modelSettings';
 
 export type PromptMode = 'Template' | 'Formatted';
@@ -78,7 +79,9 @@ export default function Playground() {
 
   const submit = async () => {
     try {
+      const { provider } = getProvider(playground);
       const prompt = preparePrompt(playground.prompt);
+      prompt.provider = provider.id;
       setLoading(true);
       const completion = await client.getCompletion(prompt, userEnv);
       setPlayground((old) => {

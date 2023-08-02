@@ -18,6 +18,7 @@ import {
 import { playgroundState } from 'state/playground';
 
 import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
+import getProvider from './helpers';
 
 type Schema = {
   [key: string]: yup.Schema;
@@ -26,23 +27,7 @@ type Schema = {
 const ModelSettings = () => {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const isChat = !!playground?.prompt?.messages;
-
-  const providers = playground?.providers
-    ? playground.providers.filter((p) => p.is_chat === isChat)
-    : [];
-
-  if (!providers) {
-    throw new Error('No LLM provider available.');
-  }
-
-  let provider = providers.find(
-    (provider) => provider.id === playground.prompt?.provider
-  );
-
-  const providerFound = !!provider;
-
-  provider = provider || providers[0];
+  const { provider, providerFound } = getProvider(playground);
 
   const providerWarning = !providerFound ? (
     <Alert severity="warning">
@@ -95,7 +80,6 @@ const ModelSettings = () => {
     setPlayground((old) =>
       merge(cloneDeep(old), {
         prompt: {
-          provider: provider?.id,
           settings: formik.values
         }
       })

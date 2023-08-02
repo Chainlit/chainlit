@@ -53,6 +53,19 @@ def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
         return Prompt(inputs=inputs, messages=messages)
 
 
+def convert_role(role: str):
+    if role == "human" or role == "chat":
+        return "user"
+    elif role == "system":
+        return "system"
+    elif role == "ai":
+        return "assistant"
+    elif role == "function":
+        return "function"
+    else:
+        raise ValueError(f"Unsupported role {role}")
+
+
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
     emitter: ChainlitEmitter
     # Keep track of the prompt to display them in the prompt playground.
@@ -210,14 +223,15 @@ def _on_chat_model_start(
         if self.current_prompt.messages:
             for idx, m in enumerate(messages[0]):
                 self.current_prompt.messages[idx].formatted = m.content
-                self.current_prompt.messages[idx].role = m.type
+                self.current_prompt.messages[idx].role = convert_role(m.type)
 
         elif self.current_prompt.template:
             formatted_prompt = "\n".join([m.content for m in messages[0]])
             self.current_prompt.formatted = formatted_prompt
     else:
         prompt_messages = [
-            PromptMessage(formatted=m.content, role=m.type) for m in messages[0]
+            PromptMessage(formatted=m.content, role=convert_role(m.type))
+            for m in messages[0]
         ]
         self.current_prompt = Prompt(
             messages=prompt_messages,
