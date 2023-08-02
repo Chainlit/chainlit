@@ -28,10 +28,10 @@ export default function Variable({
 
   useEffect(() => {
     if (prompt.inputs && decoratedText) {
-      const index = Object.entries(prompt.inputs).findIndex(
-        ([name, content]) =>
-          buildVariablePlaceholder(name, prompt.template_format) ==
-            decoratedText || content == decoratedText
+      const index = Object.keys(prompt.inputs).findIndex(
+        (name) =>
+          buildVariablePlaceholder(name, prompt.template_format) ===
+          decoratedText
       );
       if (index > -1) {
         setVariableIndex(index);

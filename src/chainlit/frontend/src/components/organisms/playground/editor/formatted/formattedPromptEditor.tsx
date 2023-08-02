@@ -19,7 +19,6 @@ import 'draft-js/dist/Draft.css';
 
 export interface IHighlight {
   name: string;
-  placeholder: string;
   styleIndex: number;
   content?: string;
 }
@@ -80,7 +79,11 @@ function highlight(
       const text = contentBlock.getText();
 
       // Add style if condition is met
-      const startIndices = matchVariable(text, highlight.placeholder, format);
+      const startIndices = matchVariable(text, highlight.name, format);
+
+      let offset = 0;
+
+      const content = highlight.content || highlight.name;
 
       startIndices.forEach((startIndex) => {
         if (startIndex === -1) {
@@ -88,15 +91,18 @@ function highlight(
         }
         const currentSelection = nextState.getSelection();
 
-        const end =
-          startIndex +
-          buildVariablePlaceholder(highlight.placeholder, format).length;
+        const placeholder = buildVariablePlaceholder(highlight.name, format);
+
+        const end = startIndex + offset + placeholder.length;
+
         const selectionToHighlight = new SelectionState({
           anchorKey: key,
-          anchorOffset: startIndex,
+          anchorOffset: startIndex + offset,
           focusKey: key,
           focusOffset: end
         });
+
+        offset += content.length - placeholder.length;
 
         contentState = nextState.getCurrentContent();
 
@@ -110,7 +116,7 @@ function highlight(
         contentState = Modifier.replaceText(
           contentState,
           selectionToHighlight,
-          highlight.content || highlight.placeholder,
+          content,
           OrderedSet.of(highlight.styleIndex.toString()),
           entityKey
         );

@@ -52,12 +52,15 @@ function formatPrompt(
     (a, b) => b.length - a.length
   );
 
-  variables.forEach(
-    (v) =>
-      (template = template.replace(buildVariableRegexp(v, format), inputs[v]))
-  );
+  const regexPattern = variables.map((v) => `\\b${v}\\b`).join('|');
+  const regexp = buildVariableRegexp(regexPattern, format);
 
-  return template;
+  return template.replace(regexp, (match) => {
+    const variableIndex = variables.findIndex(
+      (v) => buildVariablePlaceholder(v, format) === match
+    );
+    return Object.values(inputs || {})[variableIndex];
+  });
 }
 
 export function preparePrompt(prompt?: IPrompt): IPrompt {
@@ -89,6 +92,5 @@ export function preparePrompt(prompt?: IPrompt): IPrompt {
       }
     });
   }
-
   return prompt;
 }

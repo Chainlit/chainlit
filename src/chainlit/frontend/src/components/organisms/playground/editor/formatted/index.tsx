@@ -27,7 +27,6 @@ export default function FormattedPrompt({ prompt }: Props) {
       _hightlights.push({
         name: variableName,
         styleIndex: i,
-        placeholder: variableName,
         content: variableContent
       });
     }
