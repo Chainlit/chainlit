@@ -3,7 +3,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
-import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -13,9 +12,7 @@ import {
   Drawer,
   IconButton,
   Stack,
-  Theme,
-  Typography,
-  useMediaQuery
+  Typography
 } from '@mui/material';
 
 import { playgroundState } from 'state/playground';
