@@ -3,9 +3,20 @@ import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
+import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
-import { Alert, Stack, Typography } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import {
+  Alert,
+  Box,
+  Drawer,
+  IconButton,
+  Stack,
+  Theme,
+  Typography,
+  useMediaQuery
+} from '@mui/material';
 
 import { playgroundState } from 'state/playground';
 
@@ -128,4 +139,45 @@ const ModelSettings = () => {
   );
 };
 
-export default ModelSettings;
+interface Props {
+  isSmallScreen: boolean;
+  isDrawerOpen: boolean;
+  toggleDrawer: () => void;
+}
+
+export default function ResponsiveModelSettings({
+  isSmallScreen,
+  isDrawerOpen,
+  toggleDrawer
+}: Props) {
+  return !isSmallScreen ? (
+    <ModelSettings />
+  ) : (
+    <Drawer
+      sx={{
+        '& .MuiDrawer-paper': {
+          alignItems: 'center',
+          width: '300px'
+        }
+      }}
+      variant="persistent"
+      anchor="right"
+      open={isDrawerOpen}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: '100%',
+          paddingRight: '30px',
+          paddingTop: '10px'
+        }}
+      >
+        <IconButton onClick={toggleDrawer}>
+          <ChevronRightIcon />
+        </IconButton>
+      </Box>
+      {<ModelSettings />}
+    </Drawer>
+  );
+}

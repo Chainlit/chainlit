@@ -5,7 +5,6 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { useIsFirstRender, useToggle } from 'usehooks-ts';
 
 import { Check } from '@mui/icons-material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
@@ -14,7 +13,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Alert,
   Box,
-  Drawer,
   IconButton,
   Stack,
   Theme,
@@ -33,22 +31,28 @@ import { clientState } from 'state/client';
 import { playgroundState } from 'state/playground';
 import { userEnvState } from 'state/user';
 
-import Completion from './editor/completion';
-import FormattedPrompt from './editor/formatted';
-import TemplatePrompt from './editor/template';
-import VariablePrompt from './editor/variablePrompt';
+import ActionBar from './actionBar';
+import BasicPromptPlayground from './basic';
+import ChatPromptPlayground from './chat';
+import VariableModal from './editor/variableModal';
 import ModelSettings from './modelSettings';
+
+export type PromptMode = 'Template' | 'Formatted';
 
 export default function Playground() {
   const client = useRecoilValue(clientState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
   const userEnv = useRecoilValue(userEnvState);
 
+  const [isDrawerOpen, toggleDrawer] = useToggle(false);
+
+  const isSmallScreen = useMediaQuery<Theme>((theme) =>
+    theme.breakpoints.down('md')
+  );
   const [loading, setLoading] = useState(false);
-  const [toggle, setToggle] = useState('Template');
+  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
   const [providersError, setProvidersError] = useState();
 
-  const [isDrawerOpen, toggleDrawer] = useToggle(false);
   const isFirstRender = useIsFirstRender();
 
   if (isFirstRender) {
@@ -59,10 +63,6 @@ export default function Playground() {
       )
       .catch((err) => setProvidersError(err));
   }
-
-  const isSmallScreen = !useMediaQuery<Theme>((theme) =>
-    theme.breakpoints.up('sm')
-  );
 
   const theme = useTheme();
 
@@ -98,8 +98,6 @@ export default function Playground() {
     }
   };
 
-  const renderModalSettings = () => <ModelSettings />;
-
   if (!playground?.prompt) {
     return null;
   }
@@ -132,9 +130,9 @@ export default function Playground() {
           </Tooltip>
         </IconButton>
         <Toggle
-          value={toggle}
+          value={promptMode}
           items={['Template', 'Formatted']}
-          onChange={setToggle}
+          onChange={(v) => setPromptMode(v as PromptMode)}
         />
         <Box sx={{ ml: 'auto' }}>
           {isSmallScreen ? (
@@ -167,56 +165,17 @@ export default function Playground() {
             height: '100%'
           }}
         >
-          {toggle === 'Template' ? (
-            <TemplatePrompt prompt={playground.prompt} />
-          ) : null}
-          {toggle === 'Formatted' ? (
-            <FormattedPrompt prompt={playground.prompt} />
-          ) : null}
-          <Completion completion={playground.prompt.completion} />
-          <VariablePrompt />
-          {!isSmallScreen ? (
-            renderModalSettings()
-          ) : (
-            <Drawer
-              sx={{
-                '& .MuiDrawer-paper': {
-                  alignItems: 'center',
-                  width: '300px'
-                }
-              }}
-              variant="persistent"
-              anchor="right"
-              open={isDrawerOpen}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  width: '100%',
-                  paddingRight: '30px',
-                  paddingTop: '10px'
-                }}
-              >
-                <IconButton onClick={toggleDrawer}>
-                  <ChevronRightIcon />
-                </IconButton>
-              </Box>
-              {renderModalSettings()}
-            </Drawer>
-          )}
+          <VariableModal />
+          <BasicPromptPlayground prompt={playground.prompt} mode={promptMode} />
+          <ChatPromptPlayground prompt={playground.prompt} mode={promptMode} />
+          <ModelSettings
+            isSmallScreen={isSmallScreen}
+            isDrawerOpen={isDrawerOpen}
+            toggleDrawer={toggleDrawer}
+          />
         </Stack>
       </DialogContent>
-      <Stack
-        direction="row"
-        sx={{
-          backgroundColor: (theme) => theme.palette.background.paper,
-          padding: '16px 24px',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: 2
-        }}
-      >
+      <ActionBar>
         <Tooltip title="Restore original">
           <IconButton onClick={restore}>
             <RestoreIcon />
@@ -237,7 +196,7 @@ export default function Playground() {
         >
           Submit
         </LoadingButton>
-      </Stack>
+      </ActionBar>
     </Dialog>
   );
 }

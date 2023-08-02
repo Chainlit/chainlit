@@ -9,9 +9,9 @@ import RegularButton from 'components/atoms/buttons/button';
 
 import { playgroundState } from 'state/playground';
 
-import EditorWrapper from './editorWrapper';
+import EditorWrapper from './wrapper';
 
-const VariablePrompt = (): JSX.Element => {
+const VariableModal = (): JSX.Element => {
   const [state, setState] = useState<EditorState | undefined>();
   const [playground, setPlayground] = useRecoilState(playgroundState);
   const theme = useTheme();
@@ -118,4 +118,4 @@ const VariablePrompt = (): JSX.Element => {
   );
 };
 
-export default VariablePrompt;
+export default VariableModal;

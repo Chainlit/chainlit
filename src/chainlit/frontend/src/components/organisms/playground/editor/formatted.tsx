@@ -11,8 +11,9 @@ import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-import EditorWrapper from 'components/organisms/playground/editor/editorWrapper';
+import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
+import { IPrompt } from 'state/chat';
 import { playgroundState } from 'state/playground';
 
 import 'draft-js/dist/Draft.css';
@@ -25,8 +26,7 @@ export interface IHighlight {
 
 interface Props {
   template: string;
-  templateFormat: string;
-  highlights: IHighlight[];
+  prompt: IPrompt;
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
 }
@@ -153,11 +153,11 @@ function getEntityAtSelection(editorState: EditorState) {
   }
 }
 
-export default function FormattedPromptEditor({
+export default function FromattedEditor({
   template,
-  templateFormat,
-  highlights,
-  readOnly
+  prompt,
+  readOnly,
+  onChange
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
@@ -167,23 +167,34 @@ export default function FormattedPromptEditor({
   const customStyleMap = useCustomStyleMap();
 
   useEffect(() => {
+    if (!template || !prompt.inputs) {
+      return;
+    }
+    const variables = Object.keys(prompt.inputs);
+    const highlights: IHighlight[] = [];
+
+    for (let i = 0; i < variables.length; i++) {
+      const variableName = variables[i];
+
+      const variableContent = prompt.inputs[variableName];
+
+      highlights.push({
+        name: variableName,
+        styleIndex: i,
+        content: variableContent
+      });
+    }
+
     const state = EditorState.createWithContent(
       ContentState.createFromText(template)
     );
-    const nextState = highlight(state, highlights, templateFormat);
+    const nextState = highlight(state, highlights, prompt.template_format);
 
     setState(nextState);
-  }, [highlights, template]);
+  }, [prompt, template]);
 
   const handleOnEditorChange = (state: EditorState) => {
-    const formatted = state?.getCurrentContent().getPlainText();
-    setPlayground((old) => ({
-      ...old,
-      prompt: {
-        ...old.prompt!,
-        formatted
-      }
-    }));
+    onChange && onChange(state);
 
     const entity = getEntityAtSelection(state);
     if (entity) {
