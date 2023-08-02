@@ -5,7 +5,7 @@ import { useRecoilState } from 'recoil';
 import { Box, Modal, Typography, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import RegularButton from 'components/atoms/buttons/button';
+import AccentButton from 'components/atoms/buttons/accentButton';
 
 import { playgroundState } from 'state/playground';
 
@@ -71,7 +71,8 @@ const VariableModal = (): JSX.Element => {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           bgcolor: 'background.paper',
-          border: `1px solid ${grey[800]}`,
+          border: (theme) =>
+            theme.palette.mode === 'dark' ? `1px solid ${grey[800]}` : null,
           borderRadius: 1,
           padding: 2
         }}
@@ -105,13 +106,9 @@ const VariableModal = (): JSX.Element => {
             paddingTop: 2
           }}
         >
-          <RegularButton
-            onClick={updateVariable}
-            variant="outlined"
-            color="inherit"
-          >
+          <AccentButton onClick={updateVariable} variant="outlined">
             Edit
-          </RegularButton>
+          </AccentButton>
         </Box>
       </Box>
     </Modal>

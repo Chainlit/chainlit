@@ -103,12 +103,7 @@ const ModelSettings = () => {
   }, [formik.values]);
 
   return (
-    <Stack
-      spacing={2}
-      sx={{
-        marginLeft: '32px !important'
-      }}
-    >
+    <Stack spacing={2} width={250}>
       <Typography fontSize="16px" fontWeight={600} color="text.primary">
         Settings
       </Typography>
@@ -148,14 +143,13 @@ export default function ResponsiveModelSettings({
   toggleDrawer
 }: Props) {
   return !isSmallScreen ? (
-    <ModelSettings />
+    <Box ml="32px !important">
+      <ModelSettings />
+    </Box>
   ) : (
     <Drawer
       sx={{
-        '& .MuiDrawer-paper': {
-          alignItems: 'center',
-          width: '300px'
-        }
+        '& .MuiDrawer-paper': {}
       }}
       variant="persistent"
       anchor="right"
@@ -165,16 +159,17 @@ export default function ResponsiveModelSettings({
         sx={{
           display: 'flex',
           justifyContent: 'flex-end',
-          width: '100%',
-          paddingRight: '30px',
-          paddingTop: '10px'
+          pt: 2,
+          pr: 1
         }}
       >
         <IconButton onClick={toggleDrawer}>
           <ChevronRightIcon />
         </IconButton>
       </Box>
-      {<ModelSettings />}
+      <Box px={3}>
+        <ModelSettings />
+      </Box>
     </Drawer>
   );
 }
