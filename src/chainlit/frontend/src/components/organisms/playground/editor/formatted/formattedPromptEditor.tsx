@@ -6,6 +6,7 @@ import {
   SelectionState
 } from 'draft-js';
 import { useColors } from 'helpers/color';
+import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
@@ -18,13 +19,13 @@ import 'draft-js/dist/Draft.css';
 
 export interface IHighlight {
   name: string;
-  placeholder: string;
   styleIndex: number;
   content?: string;
 }
 
 interface Props {
   template: string;
+  templateFormat: string;
   highlights: IHighlight[];
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
@@ -45,19 +46,23 @@ function useCustomStyleMap() {
   return customStyleMap;
 }
 
-function matchVariable(text: string, placeholder: string) {
-  const regex = new RegExp(`(?<!\\{)${placeholder}(?!\\})`, 'g');
+function matchVariable(text: string, variableName: string, format: string) {
+  const regexp = buildVariableRegexp(variableName, format);
   const indices: number[] = [];
   let match: RegExpExecArray | null;
 
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = regexp.exec(text)) !== null) {
     indices.push(match.index);
   }
 
   return indices.length ? indices : [-1];
 }
 
-function highlight(state: EditorState, highlights: IHighlight[]) {
+function highlight(
+  state: EditorState,
+  highlights: IHighlight[],
+  format: string
+) {
   let contentState = state.getCurrentContent();
   let nextState = state;
 
@@ -74,7 +79,11 @@ function highlight(state: EditorState, highlights: IHighlight[]) {
       const text = contentBlock.getText();
 
       // Add style if condition is met
-      const startIndices = matchVariable(text, highlight.placeholder);
+      const startIndices = matchVariable(text, highlight.name, format);
+
+      let offset = 0;
+
+      const content = highlight.content || highlight.name;
 
       startIndices.forEach((startIndex) => {
         if (startIndex === -1) {
@@ -82,13 +91,18 @@ function highlight(state: EditorState, highlights: IHighlight[]) {
         }
         const currentSelection = nextState.getSelection();
 
-        const end = startIndex + highlight.placeholder.length;
+        const placeholder = buildVariablePlaceholder(highlight.name, format);
+
+        const end = startIndex + offset + placeholder.length;
+
         const selectionToHighlight = new SelectionState({
           anchorKey: key,
-          anchorOffset: startIndex,
+          anchorOffset: startIndex + offset,
           focusKey: key,
           focusOffset: end
         });
+
+        offset += content.length - placeholder.length;
 
         contentState = nextState.getCurrentContent();
 
@@ -102,7 +116,7 @@ function highlight(state: EditorState, highlights: IHighlight[]) {
         contentState = Modifier.replaceText(
           contentState,
           selectionToHighlight,
-          highlight.content || highlight.placeholder,
+          content,
           OrderedSet.of(highlight.styleIndex.toString()),
           entityKey
         );
@@ -141,6 +155,7 @@ function getEntityAtSelection(editorState: EditorState) {
 
 export default function FormattedPromptEditor({
   template,
+  templateFormat,
   highlights,
   readOnly
 }: Props) {
@@ -155,7 +170,7 @@ export default function FormattedPromptEditor({
     const state = EditorState.createWithContent(
       ContentState.createFromText(template)
     );
-    const nextState = highlight(state, highlights);
+    const nextState = highlight(state, highlights, templateFormat);
 
     setState(nextState);
   }, [highlights, template]);

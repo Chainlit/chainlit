@@ -1,6 +1,7 @@
 import { useFormik } from 'formik';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
+import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import * as yup from 'yup';
 
@@ -14,11 +15,6 @@ type Schema = {
   [key: string]: yup.Schema;
 };
 
-type InputEvent = {
-  name: string;
-  value: TFormInputValue;
-};
-
 const ModelSettings = () => {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
@@ -29,7 +25,7 @@ const ModelSettings = () => {
     : [];
 
   if (!providers) {
-    return <Alert severity="error">No LLM provider available.</Alert>;
+    throw new Error('No LLM provider available.');
   }
 
   let provider = providers.find(
@@ -87,13 +83,16 @@ const ModelSettings = () => {
     onSubmit: async () => undefined
   });
 
-  const updatePlayground = (input: InputEvent) => {
+  useEffect(() => {
     setPlayground((old) =>
       merge(cloneDeep(old), {
-        provider: { inputs: input }
+        prompt: {
+          provider: provider?.id,
+          settings: formik.values
+        }
       })
     );
-  };
+  }, [formik.values]);
 
   return (
     <Stack
@@ -114,7 +113,6 @@ const ModelSettings = () => {
             value: formik.values[input.id],
             onChange: (event: any): void => {
               formik.handleChange(event);
-              updatePlayground({ name: input.id, value: input.value });
             },
             setField: (
               field: string,
@@ -122,7 +120,6 @@ const ModelSettings = () => {
               shouldValidate?: boolean
             ): void => {
               formik.setFieldValue(field, value, shouldValidate);
-              updatePlayground({ name: input.id, value: input.value });
             }
           }}
         />

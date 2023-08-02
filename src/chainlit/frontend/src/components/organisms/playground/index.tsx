@@ -1,3 +1,4 @@
+import { preparePrompt } from 'helpers/format';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -76,13 +77,10 @@ export default function Playground() {
   };
 
   const submit = async () => {
-    // todo support chat models, provider.is_chat
-    if (!playground?.prompt?.settings || !playground.prompt?.formatted) {
-      return;
-    }
     try {
+      const prompt = preparePrompt(playground.prompt);
       setLoading(true);
-      const completion = await client.getCompletion(playground.prompt, userEnv);
+      const completion = await client.getCompletion(prompt, userEnv);
       setPlayground((old) => {
         if (!old?.prompt) return old;
 

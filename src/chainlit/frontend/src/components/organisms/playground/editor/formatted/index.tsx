@@ -21,13 +21,12 @@ export default function FormattedPrompt({ prompt }: Props) {
 
     for (let i = 0; i < variables.length; i++) {
       const variableName = variables[i];
-      const variablePlaceholder = `{${variableName}}`;
+
       const variableContent = prompt.inputs[variableName];
 
       _hightlights.push({
         name: variableName,
         styleIndex: i,
-        placeholder: variablePlaceholder,
         content: variableContent
       });
     }
@@ -38,5 +37,12 @@ export default function FormattedPrompt({ prompt }: Props) {
     return null;
   }
 
-  return <Editor readOnly template={prompt.template} highlights={highlights} />;
+  return (
+    <Editor
+      readOnly
+      template={prompt.template}
+      templateFormat={prompt.template_format}
+      highlights={highlights}
+    />
+  );
 }
