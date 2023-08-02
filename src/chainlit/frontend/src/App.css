@@ -1,0 +1,15 @@
+.markdown-body {
+  overflow-x: auto;
+}
+
+.markdown-body *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body p {
+  white-space: break-spaces;
+}

@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+jobs:
+  mypy:
+    uses: ./.github/workflows/mypy.yaml
+    secrets: inherit
+  tests:
+    uses: ./.github/workflows/tests.yaml
+    secrets: inherit
+  ci:
+    runs-on: ubuntu-latest
+    name: Run CI
+    needs: [mypy, tests]
+    steps:
+      - name: "Done"
+        run: echo "Done"
