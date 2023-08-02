@@ -1,32 +1,40 @@
 import { useColors } from 'helpers/color';
+import { buildVariablePlaceholder } from 'helpers/format';
 import React, { useEffect, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 
-import { IPrompt } from 'state/chat';
+import { Tooltip } from '@mui/material';
+
 import { playgroundState } from 'state/playground';
 
 interface Props {
   decoratedText: string;
-  prompt: IPrompt;
 }
 
 export default function Variable({
   children,
-  decoratedText,
-  prompt
+  decoratedText
 }: React.PropsWithChildren<Props>) {
-  const setPrompt = useSetRecoilState(playgroundState);
-
+  const [playground, setPlayground] = useRecoilState(playgroundState);
   const colors = useColors(true);
+  const [variableIndex, setVariableIndex] = useState<number | undefined>();
   const [styles, setStyles] = useState<React.CSSProperties>({});
+
+  const prompt = playground?.prompt;
+
+  if (!prompt) {
+    return null;
+  }
 
   useEffect(() => {
     if (prompt.inputs && decoratedText) {
       const index = Object.entries(prompt.inputs).findIndex(
         ([name, content]) =>
-          `{${name}}` == decoratedText || content == decoratedText
+          buildVariablePlaceholder(name, prompt.template_format) ==
+            decoratedText || content == decoratedText
       );
       if (index > -1) {
+        setVariableIndex(index);
         const colorIndex = index % (colors.length - 1);
         setStyles({
           backgroundColor: colors[colorIndex],
@@ -37,15 +45,26 @@ export default function Variable({
   }, [decoratedText, prompt]);
 
   const setVariableName = () => {
-    setPrompt((old) => ({
+    setPlayground((old) => ({
       ...old,
-      variableName: decoratedText.replace('{', '').replace('}', '')
+      variableName:
+        variableIndex !== undefined
+          ? Object.keys(prompt.inputs || {})[variableIndex]
+          : undefined
     }));
   };
 
   return (
-    <span style={styles} onMouseDown={setVariableName}>
-      {children}
-    </span>
+    <Tooltip
+      title={
+        variableIndex !== undefined
+          ? Object.values(prompt.inputs || {})[variableIndex]
+          : undefined
+      }
+    >
+      <span style={styles} onMouseDown={setVariableName}>
+        {children}
+      </span>
+    </Tooltip>
   );
 }

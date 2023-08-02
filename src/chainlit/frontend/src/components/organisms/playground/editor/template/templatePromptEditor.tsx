@@ -6,6 +6,7 @@ import {
   Editor,
   EditorState
 } from 'draft-js';
+import { buildTemplateRegexp } from 'helpers/format';
 import { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
@@ -42,20 +43,11 @@ export default function TemplatePromptEditor({ prompt }: Props) {
   if (isFirstRender) {
     const contentState = ContentState.createFromText(prompt.template!);
 
-    const variables = Object.keys(prompt.inputs || {}).sort(
-      (a, b) => b.length - a.length
-    );
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {
-        // Create a regex pattern from the variables array
-        const regexPattern = variables.map((v) => `\\b${v}\\b`).join('|');
-        const regex = new RegExp(`(?<!\\{)\\{(${regexPattern})\\}(?!\\})`, 'g');
-        findWithRegex(regex, contentBlock, callback);
+        findWithRegex(buildTemplateRegexp(prompt), contentBlock, callback);
       },
-      component: Variable,
-      props: {
-        prompt
-      }
+      component: Variable
     };
 
     const decorators = new CompositeDecorator([variableDecorator]);
