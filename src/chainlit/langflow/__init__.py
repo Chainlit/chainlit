@@ -14,7 +14,6 @@ from typing import Dict, Optional, Union
 
 import aiohttp
 
-from chainlit.config import config
 from chainlit.telemetry import trace_event
 
 
