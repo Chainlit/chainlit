@@ -68,7 +68,10 @@ export default function TemplateEditor({
   }
 
   return (
-    <EditorWrapper title={showTitle ? 'Template' : undefined}>
+    <EditorWrapper
+      className="template-editor"
+      title={showTitle ? 'Prompt Template' : undefined}
+    >
       <Editor
         editorState={state}
         onChange={(nextState) => {

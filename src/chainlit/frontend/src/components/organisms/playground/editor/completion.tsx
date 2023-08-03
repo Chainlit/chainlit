@@ -2,6 +2,11 @@ import { Editor, EditorState, Modifier, SelectionState } from 'draft-js';
 import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 
+import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
+import ArrowCircleUpOutlinedIcon from '@mui/icons-material/ArrowCircleUpOutlined';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
+
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import 'draft-js/dist/Draft.css';
@@ -15,11 +20,11 @@ const styleMap = {
 
 interface Props {
   completion?: string;
-  showTitle?: boolean;
 }
 
-export default function Completion({ completion, showTitle = true }: Props) {
+export default function Completion({ completion }: Props) {
   const [state, setState] = useState(EditorState.createEmpty());
+  const [isCompletionOpen, setCompletionOpen] = useState(true);
 
   useEffect(() => {
     let _state = EditorState.createEmpty();
@@ -28,6 +33,7 @@ export default function Completion({ completion, showTitle = true }: Props) {
     }
 
     setState(_state);
+    setCompletionOpen(true);
   }, [completion]);
 
   const insertCompletion = (state: EditorState, completion: string) => {
@@ -54,13 +60,49 @@ export default function Completion({ completion, showTitle = true }: Props) {
   };
 
   return (
-    <EditorWrapper title={showTitle ? 'Completion' : undefined}>
-      <Editor
-        readOnly
-        customStyleMap={styleMap}
-        editorState={state}
-        onChange={setState}
+    <Box sx={{ marginTop: 2 }}>
+      <Stack
+        sx={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
+          Completion
+        </Typography>
+        <IconButton onClick={() => setCompletionOpen(!isCompletionOpen)}>
+          {isCompletionOpen ? (
+            <ArrowCircleDownOutlinedIcon />
+          ) : (
+            <ArrowCircleUpOutlinedIcon />
+          )}
+        </IconButton>
+      </Stack>
+      <Box
+        sx={{
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          borderRadius: 1,
+          marginTop: 1
+        }}
       />
-    </EditorWrapper>
+      <Box
+        sx={{
+          display: isCompletionOpen ? 'block' : 'none',
+          maxHeight: '220px',
+          marginTop: 2,
+          overflowY: 'auto'
+        }}
+      >
+        <EditorWrapper className="completion-editor">
+          <Editor
+            readOnly
+            customStyleMap={styleMap}
+            editorState={state}
+            onChange={setState}
+          />
+        </EditorWrapper>
+      </Box>
+    </Box>
   );
 }

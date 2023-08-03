@@ -113,7 +113,7 @@ export default function PromptPlayground() {
             onChange={(v) => setPromptMode(v as PromptMode)}
           />
         ) : (
-          <Alert severity="warning">
+          <Alert severity="warning" id="template-warning">
             Prompt template not found. Only displaying formatted prompt instead.
           </Alert>
         )}

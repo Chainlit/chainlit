@@ -1,11 +1,11 @@
 import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder } from 'helpers/format';
 import React, { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { Tooltip } from '@mui/material';
 
-import { playgroundState } from 'state/playground';
+import { playgroundState, variableState } from 'state/playground';
 
 interface Props {
   decoratedText: string;
@@ -19,7 +19,8 @@ export default function Variable({
   children,
   decoratedText
 }: React.PropsWithChildren<Props>) {
-  const [playground, setPlayground] = useRecoilState(playgroundState);
+  const setVariableName = useSetRecoilState(variableState);
+  const playground = useRecoilValue(playgroundState);
   const colors = useColors(true);
   const [variableIndex, setVariableIndex] = useState<number | undefined>();
   const [styles, setStyles] = useState<React.CSSProperties>({});
@@ -48,25 +49,18 @@ export default function Variable({
     }
   }, [decoratedText, prompt]);
 
-  const setVariableName = () => {
-    setPlayground((old) => ({
-      ...old,
-      variableName:
-        variableIndex !== undefined
-          ? Object.keys(prompt.inputs || {})[variableIndex]
-          : undefined
-    }));
-  };
+  const [varName, varValue] =
+    variableIndex !== undefined
+      ? Object.entries(prompt.inputs || {})[variableIndex]
+      : [];
 
   return (
-    <Tooltip
-      title={
-        variableIndex !== undefined
-          ? truncate(Object.values(prompt.inputs || {})[variableIndex])
-          : undefined
-      }
-    >
-      <span style={styles} onMouseDown={setVariableName}>
+    <Tooltip title={varValue ? truncate(varValue) : undefined}>
+      <span
+        className={varName ? `input-${varName}` : undefined}
+        style={styles}
+        onMouseDown={() => setVariableName(varName)}
+      >
         {children}
       </span>
     </Tooltip>

@@ -8,14 +8,13 @@ import {
 import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
-import { useState } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { useIsFirstRender } from 'usehooks-ts';
+import { useCallback, useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
-import { playgroundState } from 'state/playground';
+import { variableState } from 'state/playground';
 
 import 'draft-js/dist/Draft.css';
 
@@ -164,15 +163,13 @@ export default function FormattedEditor({
   onChange,
   showTitle = false
 }: Props) {
-  const setPlayground = useSetRecoilState(playgroundState);
+  const [variableName, setVariable] = useRecoilState(variableState);
 
   const [state, setState] = useState<EditorState | undefined>();
-  const [_readOnly, setReadOnly] = useState(false);
-  const isFirstRender = useIsFirstRender();
 
   const customStyleMap = useCustomStyleMap();
 
-  if (isFirstRender) {
+  useEffect(() => {
     if (typeof template === 'string') {
       const inputs = prompt.inputs || {};
 
@@ -203,35 +200,41 @@ export default function FormattedEditor({
       );
       setState(nextState);
     }
-  }
+  }, [prompt.template, prompt.inputs]);
 
-  const handleOnEditorChange = (nextState: EditorState) => {
-    onChange && onChange(nextState);
-
-    const entity = getEntityAtSelection(nextState);
-    if (entity) {
-      setPlayground((old) => ({
-        ...old,
-        variableName: entity.data.name
-      }));
-    }
-
-    if (readOnly) {
-      setReadOnly(true);
-      setTimeout(() => setReadOnly(false), 100);
-    } else {
-      setState(nextState);
-    }
-  };
+  const handleOnEditorChange = useCallback(
+    (nextState: EditorState) => {
+      const entity = getEntityAtSelection(nextState);
+      if (entity && !variableName) {
+        setVariable(entity.data.name);
+      }
+      const hasSameContent =
+        state?.getCurrentContent().getPlainText() ===
+        nextState.getCurrentContent().getPlainText();
+      if (!readOnly) {
+        // update editor
+        onChange && onChange(nextState);
+        setState(nextState);
+      } else if (hasSameContent && !variableName) {
+        // We do not update the content but we still update the selection for copy paste
+        setState(EditorState.forceSelection(state, nextState.getSelection()));
+      } else if (state) {
+        setState(EditorState.createWithContent(state.getCurrentContent()));
+      }
+    },
+    [state, variableName, setVariable]
+  );
 
   if (!state) {
     return null;
   }
 
   return (
-    <EditorWrapper title={showTitle ? 'Formatted' : undefined}>
+    <EditorWrapper
+      className="formatted-editor"
+      title={showTitle ? 'Formatted prompt' : undefined}
+    >
       <Editor
-        readOnly={_readOnly}
         customStyleMap={customStyleMap}
         editorState={state}
         onChange={handleOnEditorChange}

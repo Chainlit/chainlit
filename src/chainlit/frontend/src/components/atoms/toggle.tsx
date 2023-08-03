@@ -54,7 +54,12 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         }}
       >
         {items.map((item) => (
-          <Tab key={`tab-${item}`} disableRipple label={item} />
+          <Tab
+            key={`tab-${item}`}
+            className={`tab-${item}`}
+            disableRipple
+            label={item}
+          />
         ))}
       </Tabs>
     </Box>

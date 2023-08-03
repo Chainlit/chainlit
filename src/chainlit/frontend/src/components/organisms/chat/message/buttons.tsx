@@ -1,6 +1,6 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import EditIcon from '@mui/icons-material/EditOutlined';
+import ScienceIcon from '@mui/icons-material/ScienceOutlined';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
 import { IMessage } from 'state/chat';
@@ -20,7 +20,7 @@ export default function Buttons({ message }: Props) {
   const showEditButton = !!message.prompt && !!message.content;
 
   const editButton = showEditButton && (
-    <Tooltip title="Open in prompt playground">
+    <Tooltip title="Inspect in prompt playground">
       <IconButton
         size="small"
         className="playground-button"
@@ -29,7 +29,7 @@ export default function Buttons({ message }: Props) {
           setPlayground((old) => ({ ...old, prompt: message.prompt }));
         }}
       >
-        <EditIcon sx={{ width: '16px', height: '16px' }} />
+        <ScienceIcon sx={{ width: '16px', height: '16px' }} />
       </IconButton>
     </Tooltip>
   );

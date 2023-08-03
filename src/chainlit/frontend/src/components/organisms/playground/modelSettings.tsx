@@ -16,10 +16,12 @@ import {
   Typography
 } from '@mui/material';
 
+import SelectInput from 'components/organisms/inputs/selectInput';
+
+import { ILLMSettings } from 'state/chat';
 import { ILLMProvider, playgroundState } from 'state/playground';
 
 import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
-import SelectInput from '../inputs/selectInput';
 import { getDefaultSettings, getProviders } from './helpers';
 
 type Schema = {
@@ -41,9 +43,18 @@ const ModelSettings = () => {
 
   let schema;
 
+  const settings: ILLMSettings = {};
+  const currentSettings = playground?.prompt?.settings || {};
+
   if (provider?.inputs) {
     schema = yup.object(
       provider.inputs.reduce((object: Schema, input: TFormInput) => {
+        if (currentSettings[input.id]) {
+          settings[input.id] = currentSettings[input.id];
+        } else if (input.initial !== undefined) {
+          settings[input.id] = input.initial;
+        }
+
         switch (input.type) {
           case 'select':
             object[input.id] = yup.string();
@@ -70,21 +81,19 @@ const ModelSettings = () => {
   }
 
   const formik = useFormik({
-    initialValues:
-      (providerFound && playground?.prompt?.settings) ||
-      getDefaultSettings(provider.id, providers),
+    initialValues: settings,
     validationSchema: schema,
     onSubmit: async () => undefined
   });
 
   useEffect(() => {
-    setPlayground((old) =>
-      merge(cloneDeep(old), {
-        prompt: {
-          settings: formik.values
-        }
-      })
-    );
+    setPlayground((old) => ({
+      ...old,
+      prompt: {
+        ...old.prompt!,
+        settings: formik.values
+      }
+    }));
   }, [formik.values]);
 
   const onSelectedProviderChange = (event: SelectChangeEvent) => {
@@ -101,6 +110,9 @@ const ModelSettings = () => {
 
   return (
     <Stack spacing={2} width={250}>
+      <Typography fontSize="16px" fontWeight={600} color="text.primary">
+        Settings
+      </Typography>
       <SelectInput
         items={providers?.map((provider: ILLMProvider) => ({
           label: provider.name,
@@ -108,7 +120,7 @@ const ModelSettings = () => {
         }))}
         id="prompt-providers"
         value={provider.id}
-        label="Providers"
+        label="Provider"
         onChange={onSelectedProviderChange}
         tooltip={
           isChat
@@ -116,9 +128,6 @@ const ModelSettings = () => {
             : 'Only non chat providers are displayed'
         }
       />
-      <Typography fontSize="16px" fontWeight={600} color="text.primary">
-        Settings
-      </Typography>
       {providerWarning}
       {provider.inputs.map((input: TFormInput) => (
         <FormInput

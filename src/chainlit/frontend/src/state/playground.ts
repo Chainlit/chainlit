@@ -28,10 +28,14 @@ export interface ILLMSettings {
 export interface IPlayground {
   providers?: ILLMProvider[];
   prompt?: IPrompt;
-  variableName?: string;
 }
 
 export const playgroundState = atom<IPlayground>({
   key: 'Playground',
+  default: undefined
+});
+
+export const variableState = atom<string | undefined>({
+  key: 'Variable',
   default: undefined
 });
