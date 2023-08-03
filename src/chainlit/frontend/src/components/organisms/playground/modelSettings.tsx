@@ -11,14 +11,16 @@ import {
   Box,
   Drawer,
   IconButton,
+  SelectChangeEvent,
   Stack,
   Typography
 } from '@mui/material';
 
-import { playgroundState } from 'state/playground';
+import { ILLMProvider, playgroundState } from 'state/playground';
 
 import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
-import getProvider from './helpers';
+import SelectInput from '../inputs/selectInput';
+import { getDefaultSettings, getProviders } from './helpers';
 
 type Schema = {
   [key: string]: yup.Schema;
@@ -27,7 +29,8 @@ type Schema = {
 const ModelSettings = () => {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const { provider, providerFound } = getProvider(playground);
+  const { provider, providers, providerFound, isChat } =
+    getProviders(playground);
 
   const providerWarning = !providerFound ? (
     <Alert severity="warning">
@@ -36,20 +39,11 @@ const ModelSettings = () => {
     </Alert>
   ) : null;
 
-  const settings = cloneDeep(playground?.prompt?.settings || {});
   let schema;
 
   if (provider?.inputs) {
     schema = yup.object(
       provider.inputs.reduce((object: Schema, input: TFormInput) => {
-        if (!settings[input.id]) {
-          if (typeof input.initial !== undefined) {
-            settings[input.id] = input.initial!;
-          } else {
-            delete settings[input.id];
-          }
-        }
-
         switch (input.type) {
           case 'select':
             object[input.id] = yup.string();
@@ -76,7 +70,9 @@ const ModelSettings = () => {
   }
 
   const formik = useFormik({
-    initialValues: settings,
+    initialValues:
+      (providerFound && playground?.prompt?.settings) ||
+      getDefaultSettings(provider.id, providers),
     validationSchema: schema,
     onSubmit: async () => undefined
   });
@@ -91,8 +87,35 @@ const ModelSettings = () => {
     );
   }, [formik.values]);
 
+  const onSelectedProviderChange = (event: SelectChangeEvent) => {
+    formik.setValues(getDefaultSettings(event.target.value, providers));
+
+    setPlayground((old) =>
+      merge(cloneDeep(old), {
+        prompt: {
+          provider: event.target.value
+        }
+      })
+    );
+  };
+
   return (
     <Stack spacing={2} width={250}>
+      <SelectInput
+        items={providers?.map((provider: ILLMProvider) => ({
+          label: provider.name,
+          value: provider.id
+        }))}
+        id="prompt-providers"
+        value={provider.id}
+        label="Providers"
+        onChange={onSelectedProviderChange}
+        tooltip={
+          isChat
+            ? 'Only provider with chat mode are displayed.'
+            : 'Only non chat providers are displayed'
+        }
+      />
       <Typography fontSize="16px" fontWeight={600} color="text.primary">
         Settings
       </Typography>

@@ -1,6 +1,6 @@
-import { IPlayground } from 'state/playground';
+import { ILLMProvider, IPlayground } from 'state/playground';
 
-export default function getProvider(playground: IPlayground) {
+const getProviders = (playground: IPlayground) => {
   const isChat = !!playground?.prompt?.messages;
 
   const providers = playground?.providers
@@ -20,7 +20,24 @@ export default function getProvider(playground: IPlayground) {
   provider = provider || providers[0];
 
   return {
+    isChat,
     provider,
-    providerFound
+    providerFound,
+    providers
   };
-}
+};
+
+const getDefaultSettings = (providerId: string, providers?: ILLMProvider[]) => {
+  if (!providers || providers.length === 0) return {};
+
+  const defaultSettings: { [key: string]: any } = {};
+  const provider = providers?.find((provider) => provider.id === providerId);
+
+  provider?.inputs?.forEach(
+    (input) => (defaultSettings[input.id] = input.initial)
+  );
+
+  return defaultSettings;
+};
+
+export { getDefaultSettings, getProviders };

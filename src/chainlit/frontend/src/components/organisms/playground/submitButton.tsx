@@ -10,7 +10,7 @@ import { clientState } from 'state/client';
 import { playgroundState } from 'state/playground';
 import { userEnvState } from 'state/user';
 
-import getProvider from './helpers';
+import { getProviders } from './helpers';
 
 export default function SubmitButton() {
   const [completionController, setCompletionController] = useState<
@@ -23,7 +23,7 @@ export default function SubmitButton() {
 
   const submit = async () => {
     try {
-      const { provider } = getProvider(playground);
+      const { provider } = getProviders(playground);
       const prompt = preparePrompt(playground.prompt);
       prompt.provider = provider.id;
       const controller = new AbortController();
