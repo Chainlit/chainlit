@@ -1,15 +1,3 @@
-function testPlayground(index, shouldContain: string) {
-  cy.get(".playground-button").eq(index).should("exist").click();
-
-  cy.get("#playground")
-    .should("exist")
-    .get("[contenteditable=true]")
-    .should("exist")
-    .should("contain", shouldContain);
-
-  cy.get("#playground").get("#close-playground").should("exist").click();
-}
-
 describe("Llama Index Callback", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
@@ -32,6 +20,14 @@ describe("Llama Index Callback", () => {
       .eq(0)
       .should("contain", "Source 0");
 
-    testPlayground(0, "This is the LLM prompt\nThis is the LLM response");
+    cy.get(".playground-button").eq(0).should("exist").click();
+
+    cy.get("#playground")
+      .should("exist")
+      .get("[contenteditable=true]")
+      .should("exist")
+      .should("contain", "This is the LLM prompt\nThis is the LLM response");
+
+    cy.get("#playground").get("#close-playground").should("exist").click();
   });
 });
