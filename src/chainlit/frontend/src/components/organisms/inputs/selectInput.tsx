@@ -105,9 +105,7 @@ export default function SelectInput({
         }
         sx={{
           backgroundColor: isDarkMode ? grey[900] : '',
-          my: 0.5,
-          boxShadow:
-            '0px 10px 10px 0px rgba(0, 0, 0, 0.05), 0px 2px 4px 0px rgba(0, 0, 0, 0.05)'
+          my: 0.5
         }}
         inputProps={{
           id: id,

@@ -4,11 +4,11 @@ import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useIsFirstRender, useToggle } from 'usehooks-ts';
 
-import { Check } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
-import SettingsIcon from '@mui/icons-material/Settings';
+import TuneIcon from '@mui/icons-material/Tune';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Alert,
@@ -51,10 +51,10 @@ export default function Playground() {
     theme.breakpoints.down('md')
   );
   const [loading, setLoading] = useState(false);
-  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
   const [providersError, setProvidersError] = useState();
-
   const isFirstRender = useIsFirstRender();
+
+  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
 
   if (isFirstRender) {
     client
@@ -105,6 +105,10 @@ export default function Playground() {
     return null;
   }
 
+  const hasTemplate = playground?.prompt?.messages
+    ? playground.prompt.messages.every((m) => typeof m.template === 'string')
+    : typeof playground?.prompt?.template === 'string';
+
   return (
     <Dialog
       open={!!playground.prompt}
@@ -132,11 +136,17 @@ export default function Playground() {
             <HelpIcon />
           </Tooltip>
         </IconButton>
-        <Toggle
-          value={promptMode}
-          items={['Template', 'Formatted']}
-          onChange={(v) => setPromptMode(v as PromptMode)}
-        />
+        {hasTemplate ? (
+          <Toggle
+            value={promptMode}
+            items={['Template', 'Formatted']}
+            onChange={(v) => setPromptMode(v as PromptMode)}
+          />
+        ) : (
+          <Alert severity="warning">
+            Prompt template not found. Only displaying formatted prompt instead.
+          </Alert>
+        )}
         <Box sx={{ ml: 'auto' }}>
           {isSmallScreen ? (
             <IconButton
@@ -145,7 +155,7 @@ export default function Playground() {
               onClick={toggleDrawer}
               sx={{ mr: '4px' }}
             >
-              <SettingsIcon />
+              <TuneIcon />
             </IconButton>
           ) : null}
           <IconButton edge="end" id="close-playground" onClick={handleClose}>
@@ -169,8 +179,16 @@ export default function Playground() {
           }}
         >
           <VariableModal />
-          <BasicPromptPlayground prompt={playground.prompt} mode={promptMode} />
-          <ChatPromptPlayground prompt={playground.prompt} mode={promptMode} />
+          <BasicPromptPlayground
+            hasTemplate={hasTemplate}
+            prompt={playground.prompt}
+            mode={hasTemplate ? promptMode : 'Formatted'}
+          />
+          <ChatPromptPlayground
+            hasTemplate={hasTemplate}
+            prompt={playground.prompt}
+            mode={hasTemplate ? promptMode : 'Formatted'}
+          />
           <ModelSettings
             isSmallScreen={isSmallScreen}
             isDrawerOpen={isDrawerOpen}
@@ -194,7 +212,7 @@ export default function Playground() {
             }
           }}
           loading={loading}
-          startIcon={<Check />}
+          startIcon={<CheckIcon />}
           color="inherit"
         >
           Submit
