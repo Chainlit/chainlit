@@ -2,11 +2,9 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { IPrompt } from 'state/chat';
 
-export function buildTemplateRegexp(prompt: IPrompt) {
-  const variables = Object.keys(prompt.inputs || {}).sort(
-    (a, b) => b.length - a.length
-  );
-  switch (prompt.template_format) {
+export function buildTemplateRegexp(inputs = {}, format: string) {
+  const variables = Object.keys(inputs).sort((a, b) => b.length - a.length);
+  switch (format) {
     case 'f-string': {
       // Create a regex pattern from the variables array
       const regexPattern = variables.map((v) => `\\b${v}\\b`).join('|');
@@ -14,7 +12,7 @@ export function buildTemplateRegexp(prompt: IPrompt) {
       return regex;
     }
     default:
-      throw new Error(`Unsupported template format ${prompt.template_format}`);
+      throw new Error(`Unsupported template format ${format}`);
   }
 }
 
@@ -48,15 +46,10 @@ function formatPrompt(
   inputs: Record<string, any>,
   format: string
 ) {
-  const variables = Object.keys(inputs || {}).sort(
-    (a, b) => b.length - a.length
-  );
-
-  const regexPattern = variables.map((v) => `\\b${v}\\b`).join('|');
-  const regexp = buildVariableRegexp(regexPattern, format);
+  const regexp = buildTemplateRegexp(inputs, format);
 
   return template.replace(regexp, (match) => {
-    const variableIndex = variables.findIndex(
+    const variableIndex = Object.keys(inputs).findIndex(
       (v) => buildVariablePlaceholder(v, format) === match
     );
     return Object.values(inputs || {})[variableIndex];
@@ -71,11 +64,11 @@ export function preparePrompt(prompt?: IPrompt): IPrompt {
 
   if (prompt.messages) {
     prompt.messages.forEach((m) => {
-      if (m.template && prompt!.inputs) {
+      if (m.template && prompt?.inputs) {
         m.formatted = formatPrompt(
           m.template,
-          prompt!.inputs,
-          prompt!.template_format
+          prompt.inputs,
+          prompt.template_format
         );
       } else if (!m.formatted) {
         throw new Error('Cannot format message prompt');

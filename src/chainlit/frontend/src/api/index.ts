@@ -36,7 +36,7 @@ export class ChainlitClient {
     return res.json();
   };
 
-  fetch = async (resource: string, options: object) => {
+  fetch = async (resource: string, options: RequestInit) => {
     const res = await fetch(`${httpEndpoint}${resource}`, {
       ...options,
       headers: this.headers
@@ -48,9 +48,15 @@ export class ChainlitClient {
     return res;
   };
 
-  getCompletion = async (prompt: IPrompt, userEnv = {}) => {
-    const res = await this.fetch(`/completion`, {
+  getCompletion = async (
+    prompt: IPrompt,
+    userEnv = {},
+    controller: AbortController,
+    tokenCb: (done: boolean, token: string) => void
+  ) => {
+    const response = await this.fetch(`/completion`, {
       method: 'POST',
+      signal: controller.signal,
       body: JSON.stringify({
         provider: prompt.provider,
         prompt: prompt.formatted,
@@ -60,8 +66,35 @@ export class ChainlitClient {
       })
     });
 
-    const completion = await res.text();
-    return completion;
+    const reader = response.body?.getReader();
+
+    const stream = new ReadableStream({
+      start(controller) {
+        function push() {
+          reader!
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                tokenCb(done, '');
+                return;
+              }
+              const string = new TextDecoder('utf-8').decode(value);
+              tokenCb(done, string);
+              controller.enqueue(value);
+              push();
+            })
+            .catch((err) => {
+              controller.close();
+              tokenCb(true, '');
+              console.error(err);
+            });
+        }
+        push();
+      }
+    });
+
+    return stream;
   };
 
   getRole = async () => {

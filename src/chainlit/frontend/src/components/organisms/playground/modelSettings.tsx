@@ -36,13 +36,19 @@ const ModelSettings = () => {
     </Alert>
   ) : null;
 
-  const defaultSettings: { [key: string]: any } = {};
+  const settings = cloneDeep(playground?.prompt?.settings || {});
   let schema;
 
   if (provider?.inputs) {
     schema = yup.object(
       provider.inputs.reduce((object: Schema, input: TFormInput) => {
-        defaultSettings[input.id] = input.initial;
+        if (!settings[input.id]) {
+          if (typeof input.initial !== undefined) {
+            settings[input.id] = input.initial!;
+          } else {
+            delete settings[input.id];
+          }
+        }
 
         switch (input.type) {
           case 'select':
@@ -70,8 +76,7 @@ const ModelSettings = () => {
   }
 
   const formik = useFormik({
-    initialValues:
-      (providerFound && playground?.prompt?.settings) || defaultSettings,
+    initialValues: settings,
     validationSchema: schema,
     onSubmit: async () => undefined
   });
@@ -97,7 +102,7 @@ const ModelSettings = () => {
           key={input.id}
           element={{
             ...input,
-            value: formik.values[input.id],
+            value: formik.values[input.id] as any,
             onChange: (event: any): void => {
               formik.handleChange(event);
             },

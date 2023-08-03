@@ -1,15 +1,11 @@
-import { preparePrompt } from 'helpers/format';
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useIsFirstRender, useToggle } from 'usehooks-ts';
 
-import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
 import TuneIcon from '@mui/icons-material/Tune';
-import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Alert,
   Box,
@@ -29,28 +25,26 @@ import Toggle from 'components/atoms/toggle';
 
 import { clientState } from 'state/client';
 import { playgroundState } from 'state/playground';
-import { userEnvState } from 'state/user';
 
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
 import VariableModal from './editor/variableModal';
-import getProvider from './helpers';
 import ModelSettings from './modelSettings';
+import SubmitButton from './submitButton';
 
 export type PromptMode = 'Template' | 'Formatted';
 
-export default function Playground() {
+export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
-  const userEnv = useRecoilValue(userEnvState);
 
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
     theme.breakpoints.down('md')
   );
-  const [loading, setLoading] = useState(false);
+
   const [providersError, setProvidersError] = useState();
   const isFirstRender = useIsFirstRender();
 
@@ -75,30 +69,6 @@ export default function Playground() {
 
   const handleClose = () => {
     setPlayground((old) => ({ ...old, prompt: undefined }));
-  };
-
-  const submit = async () => {
-    try {
-      const { provider } = getProvider(playground);
-      const prompt = preparePrompt(playground.prompt);
-      prompt.provider = provider.id;
-      setLoading(true);
-      const completion = await client.getCompletion(prompt, userEnv);
-      setPlayground((old) => {
-        if (!old?.prompt) return old;
-
-        return {
-          ...old,
-          prompt: { ...old.prompt!, completion }
-        };
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        toast.error(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
   };
 
   if (!playground?.prompt) {
@@ -202,21 +172,7 @@ export default function Playground() {
             <RestoreIcon />
           </IconButton>
         </Tooltip>
-        <LoadingButton
-          onClick={submit}
-          variant="outlined"
-          sx={{
-            padding: '8px 12px',
-            '& .MuiButton-startIcon': {
-              marginRight: '4px'
-            }
-          }}
-          loading={loading}
-          startIcon={<CheckIcon />}
-          color="inherit"
-        >
-          Submit
-        </LoadingButton>
+        <SubmitButton />
       </ActionBar>
     </Dialog>
   );

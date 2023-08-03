@@ -25,13 +25,13 @@ export interface ILLMSettings {
   };
 }
 
-export interface Playground {
+export interface IPlayground {
   providers?: ILLMProvider[];
   prompt?: IPrompt;
   variableName?: string;
 }
 
-export const playgroundState = atom<Playground>({
+export const playgroundState = atom<IPlayground>({
   key: 'Playground',
   default: undefined
 });

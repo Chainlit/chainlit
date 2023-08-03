@@ -1,6 +1,6 @@
-import { Playground } from 'state/playground';
+import { IPlayground } from 'state/playground';
 
-export default function getProvider(playground: Playground) {
+export default function getProvider(playground: IPlayground) {
   const isChat = !!playground?.prompt?.messages;
 
   const providers = playground?.providers

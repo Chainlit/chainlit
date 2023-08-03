@@ -1,6 +1,6 @@
 import os
 
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
@@ -60,13 +60,19 @@ class ChatOpenAIProvider(BaseProvider):
 
         request.settings["stop"] = stop
 
-        response = await openai.ChatCompletion.acreate(
-            api_key=api_key,
-            messages=messages,
-            **request.settings,
-        )
+        request.settings["stream"] = True
 
-        return PlainTextResponse(content=response["choices"][0]["message"]["content"])
+        async def create_event_stream():
+            response = await openai.ChatCompletion.acreate(
+                api_key=api_key,
+                messages=messages,
+                **request.settings,
+            )
+            async for stream_resp in response:
+                token = stream_resp.choices[0]["delta"].get("content", "")
+                yield token
+
+        return StreamingResponse(create_event_stream())
 
 
 class OpenAIProvider(BaseProvider):
@@ -92,13 +98,19 @@ class OpenAIProvider(BaseProvider):
 
         request.settings["stop"] = stop
 
-        response = await openai.Completion.acreate(
-            api_key=api_key,
-            prompt=request.prompt,
-            **request.settings,
-        )
+        request.settings["stream"] = True
 
-        return PlainTextResponse(content=response["choices"][0]["text"])
+        async def create_event_stream():
+            response = await openai.Completion.acreate(
+                api_key=api_key,
+                prompt=request.prompt,
+                **request.settings,
+            )
+            async for stream_resp in response:
+                token = stream_resp.get("choices")[0].get("text")
+                yield token
+
+        return StreamingResponse(create_event_stream())
 
 
 ChatOpenAI = ChatOpenAIProvider(

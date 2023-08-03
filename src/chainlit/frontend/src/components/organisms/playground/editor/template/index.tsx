@@ -44,7 +44,11 @@ export default function TemplateEditor({ prompt, template, onChange }: Props) {
 
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {
-        findWithRegex(buildTemplateRegexp(prompt), contentBlock, callback);
+        findWithRegex(
+          buildTemplateRegexp(prompt.inputs, prompt.template_format),
+          contentBlock,
+          callback
+        );
       },
       component: Variable
     };

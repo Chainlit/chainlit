@@ -1,6 +1,6 @@
 import os
 
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
@@ -42,9 +42,16 @@ class AnthropicProvider(BaseProvider):
 
         client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-        response = await client.completions.create(prompt=prompt, **request.settings)
+        request.settings["stream"] = True
 
-        return PlainTextResponse(content=response.completion)
+        async def create_event_stream():
+            stream = await client.completions.create(prompt=prompt, **request.settings)
+
+            async for data in stream:
+                token = data.completion
+                yield token
+
+        return StreamingResponse(create_event_stream())
 
 
 Anthropic = AnthropicProvider(
@@ -62,9 +69,9 @@ Anthropic = AnthropicProvider(
             id="max_tokens_to_sample",
             label="Max Tokens To Sample",
             min=1.0,
-            max=2048.0,
+            max=100000,
             step=1.0,
-            initial=1,
+            initial=1000,
         ),
         Tags(
             id="stop_sequences",

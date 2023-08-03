@@ -21,7 +21,7 @@ import {
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
-import Playground from '../playground';
+import PromptPlayground from '../playground';
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
 import ChatSettingsModal from './settings';
@@ -88,7 +88,7 @@ const Chat = () => {
   return (
     <ErrorBoundary>
       <Box display="flex" width="100%" height="0" flexGrow={1}>
-        <Playground />
+        <PromptPlayground />
         <ChatSettingsModal />
         <TaskList tasklist={tasklist} isMobile={false} />
         <SideView>

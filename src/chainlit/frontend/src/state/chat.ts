@@ -16,7 +16,7 @@ export interface IPromptMessage extends IBaseTemplate {
   role: 'system' | 'assistant' | 'user' | 'function';
 }
 
-export type ILLMSettings = Record<string, string | string[] | number>;
+export type ILLMSettings = Record<string, string | string[] | number | boolean>;
 
 export interface IPrompt extends IBaseTemplate {
   provider: string;
