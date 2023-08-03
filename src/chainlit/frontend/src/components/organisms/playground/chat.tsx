@@ -83,6 +83,7 @@ export default function ChatPromptPlayground({
               prompt={prompt}
               mode={mode}
               index={index}
+              key={`prompt-message-${index}`}
               onChange={onChange}
             />
           ))}
