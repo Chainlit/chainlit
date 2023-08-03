@@ -60,6 +60,7 @@ export default function PromptMessage({
 
   return (
     <Stack
+      className="prompt-message"
       key={index}
       direction="row"
       sx={{

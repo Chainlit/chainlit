@@ -78,7 +78,7 @@ export default function SubmitButton() {
     );
   } else {
     return (
-      <AccentButton variant="outlined" onClick={submit}>
+      <AccentButton id="submit-prompt" variant="outlined" onClick={submit}>
         Submit
       </AccentButton>
     );

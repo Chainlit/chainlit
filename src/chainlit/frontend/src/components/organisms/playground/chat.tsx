@@ -1,6 +1,4 @@
 import { EditorState } from 'draft-js';
-import cloneDeep from 'lodash/cloneDeep';
-import merge from 'lodash/merge';
 import { useSetRecoilState } from 'recoil';
 
 import { Box, Stack, Typography } from '@mui/material';
@@ -35,21 +33,21 @@ export default function ChatPromptPlayground({
     const text = nextState.getCurrentContent().getPlainText();
     const key = hasTemplate ? 'template' : 'formatted';
 
-    setPlayground((old) =>
-      merge(cloneDeep(old), {
-        prompt: {
-          messages: old.prompt?.messages?.map((message, mIndex) => {
-            if (mIndex === index) {
-              return {
-                ...message,
-                [key]: text
-              };
-            }
-            return message;
-          })
-        }
-      })
-    );
+    setPlayground((old) => ({
+      ...old,
+      prompt: {
+        ...old.prompt!,
+        messages: old.prompt?.messages?.map((message, mIndex) => {
+          if (mIndex === index) {
+            return {
+              ...message,
+              [key]: text
+            };
+          }
+          return message;
+        })
+      }
+    }));
   };
 
   return (

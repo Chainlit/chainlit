@@ -8,12 +8,14 @@ interface Props {
   title?: string;
   sx?: SxProps<Theme>;
   sxChildren?: SxProps<Theme>;
+  className?: string;
 }
 
 export default function EditorWrapper({
   children,
   title,
   sx,
+  className,
   sxChildren
 }: React.PropsWithChildren<Props>) {
   return (
@@ -25,6 +27,7 @@ export default function EditorWrapper({
         {title}
       </Typography>
       <Box
+        className={className}
         sx={merge(
           {
             fontFamily: 'Inter',

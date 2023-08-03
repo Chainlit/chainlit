@@ -40,6 +40,9 @@ class AnthropicProvider(BaseProvider):
         messages = [self._convert_one_message_to_text(m) for m in request.messages]
         prompt = "".join(messages)
 
+        if not prompt.endswith(anthropic.AI_PROMPT):
+            prompt += anthropic.AI_PROMPT
+
         client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
         request.settings["stream"] = True

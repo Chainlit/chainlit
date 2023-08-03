@@ -7,41 +7,33 @@ import { grey } from '@mui/material/colors';
 
 import AccentButton from 'components/atoms/buttons/accentButton';
 
-import { playgroundState } from 'state/playground';
+import { playgroundState, variableState } from 'state/playground';
 
 import EditorWrapper from './wrapper';
 
 const VariableModal = (): JSX.Element => {
   const [state, setState] = useState<EditorState | undefined>();
   const [playground, setPlayground] = useRecoilState(playgroundState);
+  const [variableName, setVariableName] = useRecoilState(variableState);
   const theme = useTheme();
 
   useEffect(() => {
-    if (
-      playground.prompt &&
-      playground.variableName &&
-      playground.prompt.inputs
-    ) {
+    if (variableName && playground.prompt?.inputs) {
       setState(
         EditorState.createWithContent(
-          ContentState.createFromText(
-            playground.prompt.inputs[playground.variableName]
-          )
+          ContentState.createFromText(playground.prompt.inputs[variableName])
         )
       );
     }
-  }, [playground?.variableName]);
+  }, [variableName]);
 
   const updateVariable = () => {
-    const variableName = playground?.variableName;
-
     if (variableName) {
       setPlayground((old) => {
         if (!old?.prompt) return old;
 
         return {
           ...old,
-          variableName: undefined,
           prompt: {
             ...old.prompt,
             inputs: {
@@ -51,18 +43,20 @@ const VariableModal = (): JSX.Element => {
           }
         };
       });
+      setVariableName(undefined);
     }
   };
 
   const resetVariableName = () => {
-    setPlayground((old) => ({
-      ...old,
-      variableName: undefined
-    }));
+    setVariableName(undefined);
   };
 
   return (
-    <Modal open={!!playground?.variableName} onClose={resetVariableName}>
+    <Modal
+      id="variable-modal"
+      open={!!variableName}
+      onClose={resetVariableName}
+    >
       <Box
         sx={{
           minWidth: '400px',
@@ -115,7 +109,11 @@ const VariableModal = (): JSX.Element => {
             paddingTop: 2
           }}
         >
-          <AccentButton onClick={updateVariable} variant="outlined">
+          <AccentButton
+            id="edit-variable"
+            onClick={updateVariable}
+            variant="outlined"
+          >
             Edit
           </AccentButton>
         </Box>

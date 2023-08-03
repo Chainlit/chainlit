@@ -32,10 +32,6 @@ describe("Chain of Thought", () => {
     cy.get("#tool-1-done").should("exist");
     cy.get("#tool-2-done").should("exist");
 
-    testPlayground(0, "Tool 1 prompt");
-    cy.wait(1000);
-    testPlayground(1, "Tool 2 prompt");
-
     cy.get(".message").should("have.length", 5);
   });
 });

@@ -94,7 +94,7 @@ export default function Completion({ completion }: Props) {
           overflowY: 'auto'
         }}
       >
-        <EditorWrapper>
+        <EditorWrapper className="completion-editor">
           <Editor
             readOnly
             customStyleMap={styleMap}
