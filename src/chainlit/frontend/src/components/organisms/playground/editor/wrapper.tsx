@@ -17,7 +17,10 @@ export default function EditorWrapper({
   sxChildren
 }: React.PropsWithChildren<Props>) {
   return (
-    <Stack spacing={title ? 1.5 : 0} sx={merge({ width: '100%' }, sx)}>
+    <Stack
+      spacing={title ? 1.5 : 0}
+      sx={merge({ width: '100%', flex: 1, overflowY: 'auto' }, sx)}
+    >
       <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
         {title}
       </Typography>

@@ -1,7 +1,7 @@
 import { EditorState } from 'draft-js';
 import { useSetRecoilState } from 'recoil';
 
-import { Alert } from '@mui/material';
+import { Alert, Stack } from '@mui/material';
 
 import { PromptMode } from 'components/organisms/playground/index';
 
@@ -54,6 +54,7 @@ export default function BasicPromptPlayground({
   const renderTemplate = () => {
     return (
       <TemplateEditor
+        showTitle={true}
         template={prompt.template || ''}
         prompt={prompt}
         onChange={onTemplateChange}
@@ -64,11 +65,17 @@ export default function BasicPromptPlayground({
   const renderFormatted = () => {
     if (hasTemplate) {
       return (
-        <FormattedEditor template={prompt.template!} prompt={prompt} readOnly />
+        <FormattedEditor
+          showTitle={true}
+          template={prompt.template!}
+          prompt={prompt}
+          readOnly
+        />
       );
     } else if (typeof prompt.formatted === 'string') {
       return (
         <FormattedEditor
+          showTitle={true}
           formatted={prompt.formatted}
           prompt={prompt}
           readOnly={false}
@@ -85,10 +92,10 @@ export default function BasicPromptPlayground({
   };
 
   return (
-    <>
+    <Stack width="100%" flex={1}>
       {mode === 'Template' ? renderTemplate() : null}
       {mode === 'Formatted' ? renderFormatted() : null}
       <Completion completion={prompt.completion} />
-    </>
+    </Stack>
   );
 }

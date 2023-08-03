@@ -229,7 +229,7 @@ export default function FormattedEditor({
   }
 
   return (
-    <EditorWrapper title={showTitle ? 'Formatted' : undefined}>
+    <EditorWrapper title={showTitle ? 'Formatted prompt' : undefined}>
       <Editor
         readOnly={_readOnly}
         customStyleMap={customStyleMap}
