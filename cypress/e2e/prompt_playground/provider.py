@@ -1,8 +1,8 @@
 from fastapi.responses import StreamingResponse
 
-from chainlit.playground.config import BaseProvider, add_llm_provider
-from chainlit.input_widget import Select, Slider
 import chainlit as cl
+from chainlit.input_widget import Select, Slider
+from chainlit.playground.config import BaseProvider, add_llm_provider
 
 
 class TestLLMProvider(BaseProvider):
