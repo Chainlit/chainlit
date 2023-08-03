@@ -8,8 +8,9 @@ import {
 import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+import { useIsFirstRender } from 'usehooks-ts';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
@@ -25,7 +26,8 @@ export interface IHighlight {
 }
 
 interface Props {
-  template: string;
+  template?: string;
+  formatted?: string;
   prompt: IPrompt;
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
@@ -153,8 +155,9 @@ function getEntityAtSelection(editorState: EditorState) {
   }
 }
 
-export default function FromattedEditor({
+export default function FormattedEditor({
   template,
+  formatted,
   prompt,
   readOnly,
   onChange
@@ -163,40 +166,47 @@ export default function FromattedEditor({
 
   const [state, setState] = useState<EditorState | undefined>();
   const [_readOnly, setReadOnly] = useState(false);
+  const isFirstRender = useIsFirstRender();
 
   const customStyleMap = useCustomStyleMap();
 
-  useEffect(() => {
-    if (!template || !prompt.inputs) {
-      return;
+  if (isFirstRender) {
+    if (typeof template === 'string') {
+      const inputs = prompt.inputs || {};
+
+      const variables = Object.keys(inputs);
+      const highlights: IHighlight[] = [];
+
+      for (let i = 0; i < variables.length; i++) {
+        const variableName = variables[i];
+
+        const variableContent = inputs[variableName];
+
+        highlights.push({
+          name: variableName,
+          styleIndex: i,
+          content: variableContent
+        });
+      }
+
+      const state = EditorState.createWithContent(
+        ContentState.createFromText(template)
+      );
+      const nextState = highlight(state, highlights, prompt.template_format);
+
+      setState(nextState);
+    } else if (typeof formatted === 'string') {
+      const nextState = EditorState.createWithContent(
+        ContentState.createFromText(formatted)
+      );
+      setState(nextState);
     }
-    const variables = Object.keys(prompt.inputs);
-    const highlights: IHighlight[] = [];
+  }
 
-    for (let i = 0; i < variables.length; i++) {
-      const variableName = variables[i];
+  const handleOnEditorChange = (nextState: EditorState) => {
+    onChange && onChange(nextState);
 
-      const variableContent = prompt.inputs[variableName];
-
-      highlights.push({
-        name: variableName,
-        styleIndex: i,
-        content: variableContent
-      });
-    }
-
-    const state = EditorState.createWithContent(
-      ContentState.createFromText(template)
-    );
-    const nextState = highlight(state, highlights, prompt.template_format);
-
-    setState(nextState);
-  }, [prompt, template]);
-
-  const handleOnEditorChange = (state: EditorState) => {
-    onChange && onChange(state);
-
-    const entity = getEntityAtSelection(state);
+    const entity = getEntityAtSelection(nextState);
     if (entity) {
       setPlayground((old) => ({
         ...old,
@@ -207,6 +217,8 @@ export default function FromattedEditor({
     if (readOnly) {
       setReadOnly(true);
       setTimeout(() => setReadOnly(false), 100);
+    } else {
+      setState(nextState);
     }
   };
 

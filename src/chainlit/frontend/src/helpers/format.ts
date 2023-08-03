@@ -69,16 +69,6 @@ export function preparePrompt(prompt?: IPrompt): IPrompt {
   }
   prompt = cloneDeep(prompt);
 
-  if (prompt.template && prompt.inputs) {
-    prompt.formatted = formatPrompt(
-      prompt.template,
-      prompt.inputs,
-      prompt.template_format
-    );
-  } else if (!prompt.formatted) {
-    throw new Error('Cannot format prompt');
-  }
-
   if (prompt.messages) {
     prompt.messages.forEach((m) => {
       if (m.template && prompt!.inputs) {
@@ -88,9 +78,18 @@ export function preparePrompt(prompt?: IPrompt): IPrompt {
           prompt!.template_format
         );
       } else if (!m.formatted) {
-        throw new Error('Cannot format messageprompt');
+        throw new Error('Cannot format message prompt');
       }
     });
+  } else if (prompt.template && prompt.inputs) {
+    prompt.formatted = formatPrompt(
+      prompt.template,
+      prompt.inputs,
+      prompt.template_format
+    );
+  } else if (!prompt.formatted) {
+    throw new Error('Cannot format prompt');
   }
+
   return prompt;
 }

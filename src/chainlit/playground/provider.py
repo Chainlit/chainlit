@@ -42,10 +42,12 @@ class BaseProvider:
         return True
 
     def require_prompt(self, request: CompletionRequest):
-        if self.is_chat and not request.messages:
-            raise ValueError("Chat LLM provider requires messages")
-        elif not request.prompt:
-            raise ValueError("No prompt provided")
+        if self.is_chat:
+            if not request.messages:
+                raise ValueError("Chat LLM provider requires messages")
+        else:
+            if not request.prompt:
+                raise ValueError("No prompt provided")
 
     def require_settings(self, settings: Dict[str, Any]):
         for _input in self.inputs:

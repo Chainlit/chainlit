@@ -7,6 +7,7 @@ from chainlit.context import get_emitter
 from chainlit.element import Text
 from chainlit.message import Message
 from chainlit.sync import run_sync
+from chainlit.types import Prompt
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,
@@ -90,7 +91,10 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                     content=payload.get(EventPayload.RESPONSE, ""),
                     author=event_type,
                     parent_id=parent_id,
-                    prompt=payload.get(EventPayload.PROMPT),
+                    prompt=Prompt(
+                        formatted=payload.get(EventPayload.PROMPT),
+                        completion=payload.get(EventPayload.RESPONSE, ""),
+                    ),
                 ).send()
             )
 

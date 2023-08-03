@@ -1,6 +1,6 @@
 import { EditorState } from 'draft-js';
 
-import { Box, Stack, Typography } from '@mui/material';
+import { Alert, Box, Stack, Typography } from '@mui/material';
 
 import { IPrompt, IPromptMessage } from 'state/chat';
 
@@ -24,13 +24,9 @@ export default function PromptMessage({
   onChange
 }: Props) {
   const renderTemplate = () => {
-    if (!message.template) {
-      return null;
-    }
-
     return (
       <TemplateEditor
-        template={message.template}
+        template={message.template!}
         prompt={prompt}
         onChange={(state) => onChange(index, state)}
       />
@@ -38,11 +34,25 @@ export default function PromptMessage({
   };
 
   const renderFormatted = () => {
-    if (!message.template) {
-      return null;
+    if (typeof message.template === 'string') {
+      return (
+        <FormattedEditor template={message.template} prompt={prompt} readOnly />
+      );
+    } else if (typeof message.formatted === 'string') {
+      return (
+        <FormattedEditor
+          onChange={(state) => onChange(index, state)}
+          formatted={message.formatted}
+          prompt={prompt}
+          readOnly={false}
+        />
+      );
     }
+
     return (
-      <FormattedEditor template={message.template} prompt={prompt} readOnly />
+      <Alert severity="error">
+        Neither template or formatted prompt provided.
+      </Alert>
     );
   };
 

@@ -31,7 +31,7 @@ const findWithRegex = (
 
 interface Props {
   prompt: IPrompt;
-  template?: string;
+  template: string;
   onChange(nextState: EditorState): void;
 }
 
@@ -40,9 +40,7 @@ export default function TemplateEditor({ prompt, template, onChange }: Props) {
   const isFirstRender = useIsFirstRender();
 
   if (isFirstRender) {
-    const contentState = ContentState.createFromText(
-      template || prompt.template!
-    );
+    const contentState = ContentState.createFromText(template);
 
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {

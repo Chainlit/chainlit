@@ -18,7 +18,12 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
     if invocation_params is None:
         return None, None
 
-    provider = invocation_params.pop("_type")
+    provider = invocation_params.pop("_type")  # type: str
+
+    if provider.startswith("openai"):
+        model_name = invocation_params.pop("model_name")
+        invocation_params["model"] = model_name
+
     return provider, invocation_params
 
 
@@ -226,8 +231,14 @@ def _on_chat_model_start(
                 self.current_prompt.messages[idx].role = convert_role(m.type)
 
         elif self.current_prompt.template:
-            formatted_prompt = "\n".join([m.content for m in messages[0]])
-            self.current_prompt.formatted = formatted_prompt
+            unique_message = messages[0][0]
+            prompt_message = PromptMessage(
+                template=self.current_prompt.template,
+                formatted=unique_message.content,
+                role=convert_role(unique_message.type),
+            )
+            self.current_prompt.messages = [prompt_message]
+            self.current_prompt.template = None
     else:
         prompt_messages = [
             PromptMessage(formatted=m.content, role=convert_role(m.type))

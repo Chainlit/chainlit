@@ -6,19 +6,25 @@ import { useSetRecoilState } from 'recoil';
 import { Box, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
+import { PromptMode } from 'components/organisms/playground/index';
+
 import { IPrompt } from 'state/chat';
 import { playgroundState } from 'state/playground';
 
-import { PromptMode } from '.';
 import Completion from './editor/completion';
 import PromptMessage from './editor/message';
 
 interface Props {
   prompt: IPrompt;
   mode: PromptMode;
+  hasTemplate: boolean;
 }
 
-export default function ChatPromptPlayground({ prompt, mode }: Props) {
+export default function ChatPromptPlayground({
+  hasTemplate,
+  prompt,
+  mode
+}: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
   if (!prompt.messages) {
@@ -27,6 +33,7 @@ export default function ChatPromptPlayground({ prompt, mode }: Props) {
 
   const onChange = (index: number, nextState: EditorState) => {
     const text = nextState.getCurrentContent().getPlainText();
+    const key = hasTemplate ? 'template' : 'formatted';
 
     setPlayground((old) =>
       merge(cloneDeep(old), {
@@ -35,7 +42,7 @@ export default function ChatPromptPlayground({ prompt, mode }: Props) {
             if (mIndex === index) {
               return {
                 ...message,
-                [mode.toLowerCase()]: text
+                [key]: text
               };
             }
             return message;

@@ -11,6 +11,10 @@ interface Props {
   decoratedText: string;
 }
 
+function truncate(str: string, n = 200) {
+  return str.length > n ? str.slice(0, n - 1) + '...' : str;
+}
+
 export default function Variable({
   children,
   decoratedText
@@ -58,7 +62,7 @@ export default function Variable({
     <Tooltip
       title={
         variableIndex !== undefined
-          ? Object.values(prompt.inputs || {})[variableIndex]
+          ? truncate(Object.values(prompt.inputs || {})[variableIndex])
           : undefined
       }
     >
