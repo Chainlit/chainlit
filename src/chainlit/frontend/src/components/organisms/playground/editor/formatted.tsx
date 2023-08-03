@@ -31,6 +31,7 @@ interface Props {
   prompt: IPrompt;
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
+  showTitle?: boolean;
 }
 
 function useCustomStyleMap() {
@@ -160,7 +161,8 @@ export default function FormattedEditor({
   formatted,
   prompt,
   readOnly,
-  onChange
+  onChange,
+  showTitle = false
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
@@ -227,7 +229,7 @@ export default function FormattedEditor({
   }
 
   return (
-    <EditorWrapper title="Formatted">
+    <EditorWrapper title={showTitle ? 'Formatted' : undefined}>
       <Editor
         readOnly={_readOnly}
         customStyleMap={customStyleMap}
