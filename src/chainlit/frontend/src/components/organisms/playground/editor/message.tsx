@@ -26,6 +26,7 @@ export default function PromptMessage({
   const renderTemplate = () => {
     return (
       <TemplateEditor
+        showTitle={false}
         template={message.template!}
         prompt={prompt}
         onChange={(state) => onChange(index, state)}
@@ -45,6 +46,7 @@ export default function PromptMessage({
           formatted={message.formatted}
           prompt={prompt}
           readOnly={false}
+          showTitle={false}
         />
       );
     }
@@ -71,7 +73,8 @@ export default function PromptMessage({
         sx={{
           flex: 1,
           fontSize: '12px',
-          fontWeight: 700
+          fontWeight: 700,
+          textAlign: 'center'
         }}
       >
         {message.role.toUpperCase()}
