@@ -65,12 +65,16 @@ const VariableModal = (): JSX.Element => {
     <Modal open={!!playground?.variableName} onClose={resetVariableName}>
       <Box
         sx={{
-          minWidth: '300px',
+          minWidth: '400px',
+          maxHeight: '80%',
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
           bgcolor: 'background.paper',
+          justifyContent: 'space-between',
+          display: 'flex',
+          flexDirection: 'column',
           border: (theme) =>
             theme.palette.mode === 'dark' ? `1px solid ${grey[800]}` : null,
           borderRadius: 1,
@@ -86,10 +90,15 @@ const VariableModal = (): JSX.Element => {
           Edit variable
         </Typography>
         {state ? (
-          <EditorWrapper title="Question">
+          <EditorWrapper
+            title="Question"
+            sx={{ minHeight: '150px' }}
+            sxChildren={{ padding: 1 }}
+          >
             <Editor
               customStyleFn={() => ({
-                color: theme.palette.text.primary
+                color: theme.palette.text.primary,
+                padding: '2px'
               })}
               editorState={state}
               onChange={(nextState) => {

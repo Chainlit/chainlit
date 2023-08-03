@@ -33,9 +33,15 @@ interface Props {
   prompt: IPrompt;
   template: string;
   onChange(nextState: EditorState): void;
+  showTitle?: boolean;
 }
 
-export default function TemplateEditor({ prompt, template, onChange }: Props) {
+export default function TemplateEditor({
+  prompt,
+  template,
+  onChange,
+  showTitle = true
+}: Props) {
   const [state, setState] = useState<EditorState | undefined>();
   const isFirstRender = useIsFirstRender();
 
@@ -62,7 +68,7 @@ export default function TemplateEditor({ prompt, template, onChange }: Props) {
   }
 
   return (
-    <EditorWrapper title="Template">
+    <EditorWrapper title={showTitle ? 'Template' : undefined}>
       <Editor
         editorState={state}
         onChange={(nextState) => {

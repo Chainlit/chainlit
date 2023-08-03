@@ -15,9 +15,10 @@ const styleMap = {
 
 interface Props {
   completion?: string;
+  showTitle?: boolean;
 }
 
-export default function Completion({ completion }: Props) {
+export default function Completion({ completion, showTitle = true }: Props) {
   const [state, setState] = useState(EditorState.createEmpty());
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function Completion({ completion }: Props) {
   };
 
   return (
-    <EditorWrapper title="Completion">
+    <EditorWrapper title={showTitle ? 'Completion' : undefined}>
       <Editor
         readOnly
         customStyleMap={styleMap}
