@@ -140,6 +140,10 @@ function getEntityAtSelection(editorState: EditorState) {
   // The block in which the selection starts
   const block = contentstate.getBlockForKey(selectionKey);
 
+  if (!block) {
+    return;
+  }
+
   // Entity key at the start selection
   const entityKey = block.getEntityAt(selectionState.getStartOffset());
 
@@ -206,21 +210,27 @@ export default function FormattedEditor({
     (nextState: EditorState) => {
       const entity = getEntityAtSelection(nextState);
       if (entity && !variableName) {
+        // Open the variable modal
         setVariable(entity.data.name);
+        // Clear the selection
+        nextState = EditorState.forceSelection(
+          nextState,
+          SelectionState.createEmpty('')
+        );
       }
-      const hasSameContent =
-        state?.getCurrentContent().getPlainText() ===
-        nextState.getCurrentContent().getPlainText();
+
       if (!readOnly) {
         // update editor
         onChange && onChange(nextState);
-        setState(nextState);
-      } else if (hasSameContent && !variableName) {
-        // We do not update the content but we still update the selection for copy paste
-        setState(EditorState.forceSelection(state, nextState.getSelection()));
       } else if (state) {
-        setState(EditorState.createWithContent(state.getCurrentContent()));
+        // Read only mode, force content but preserve selection
+        nextState = EditorState.push(
+          nextState,
+          state.getCurrentContent(),
+          'insert-characters'
+        );
       }
+      setState(nextState);
     },
     [state, variableName, setVariable]
   );

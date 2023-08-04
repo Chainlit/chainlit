@@ -43,7 +43,10 @@ async def start():
             completion=completion,
             template=template,
             inputs=inputs,
-            messages=[PromptMessage(template=template, role="system")],
+            messages=[
+                PromptMessage(template=template, role="system"),
+                PromptMessage(template=template, role="system"),
+            ],
         ),
     ).send()
 
@@ -54,6 +57,9 @@ async def start():
             completion=completion,
             template=template,
             inputs=inputs,
-            messages=[PromptMessage(formatted=formatted, role="system")],
+            messages=[
+                PromptMessage(formatted=formatted, role="system"),
+                PromptMessage(formatted=formatted, role="system"),
+            ],
         ),
     ).send()

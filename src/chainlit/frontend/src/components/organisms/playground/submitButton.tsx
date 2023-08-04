@@ -59,6 +59,8 @@ export default function SubmitButton() {
         });
       });
     } catch (err) {
+      setCompletionController(undefined);
+
       if (err instanceof Error) {
         toast.error(err.message);
       }

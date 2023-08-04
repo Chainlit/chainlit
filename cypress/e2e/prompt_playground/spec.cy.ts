@@ -17,7 +17,7 @@ const expectedFormatted = `This is a test formatted prompt`;
 
 const expectedCompletion = "This is the test completion";
 
-function testTemplate() {
+function testTemplate(chat?: boolean) {
   it("should display the template and highlight the variables", () => {
     cy.get(".tab-Template").should("exist").click();
 
@@ -25,9 +25,11 @@ function testTemplate() {
       .should("exist")
       .should("contain", expectedTemplate);
 
-    cy.get(".input-variable1").should("have.length", 2);
+    const expectedCount = chat ? 4 : 2;
 
-    cy.get(".input-variable2").should("have.length", 2);
+    cy.get(".input-variable1").should("have.length", expectedCount);
+
+    cy.get(".input-variable2").should("have.length", expectedCount);
   });
 
   it("should let the user click a variable to edit its value", () => {
@@ -49,6 +51,7 @@ function testTemplate() {
 
   it("should prevent the user to update the formatted template", () => {
     cy.get(".formatted-editor [contenteditable]")
+      .eq(0)
       .type("test")
       .should("contain", expectedFormattedTemplate);
   });
@@ -67,6 +70,7 @@ function testFormatted() {
 
   it("should let the user update the formatted prompt", () => {
     cy.get(".formatted-editor [contenteditable]")
+      .eq(0)
       .type("test")
       .should("contain", "test" + expectedFormatted);
   });
@@ -93,7 +97,7 @@ describe("PromptPlayground", () => {
     after(() => {
       closePlayground();
     });
-    testTemplate();
+    testTemplate(false);
     testCompletion();
   });
 
@@ -116,7 +120,7 @@ describe("PromptPlayground", () => {
     after(() => {
       closePlayground();
     });
-    testTemplate();
+    testTemplate(true);
     testCompletion();
   });
 
