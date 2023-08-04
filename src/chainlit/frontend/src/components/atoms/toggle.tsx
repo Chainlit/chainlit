@@ -1,4 +1,4 @@
-import { grey } from 'palette';
+import { grey, primary } from 'palette';
 import React from 'react';
 
 import { Box } from '@mui/material';
@@ -33,21 +33,24 @@ const Toggle = (props: ToggleProps): JSX.Element => {
           onChange(items[newValue])
         }
         sx={{
+          minHeight: '40px !important',
+
           '& .MuiButtonBase-root': {
             textTransform: 'none',
             zIndex: 1,
-            color: grey[600],
+            color: grey[isDarkMode ? 600 : 500],
             fontSize: '14px',
-            fontWeight: 600,
-            padding: 0
+            fontWeight: 500,
+            padding: 0,
+            minHeight: '40px !important',
+            width: '125px'
           },
           '& .Mui-selected': {
-            color: (theme) =>
-              `${isDarkMode ? 'white' : theme.palette.primary.main} !important`
+            color: 'white !important'
           },
           '& .MuiTabs-indicator': {
             background: (theme) =>
-              isDarkMode ? theme.palette.divider : theme.palette.primary.light,
+              isDarkMode ? theme.palette.divider : primary[600],
             height: '100%',
             borderRadius: '5px'
           }
