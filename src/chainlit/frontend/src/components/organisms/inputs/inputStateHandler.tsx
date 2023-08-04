@@ -1,4 +1,4 @@
-import { Box, FormControl, FormHelperText } from '@mui/material';
+import { Box, FormControl, FormHelperText, SxProps } from '@mui/material';
 
 import InputLabel from 'components/molecules/inputLabel';
 
@@ -6,6 +6,7 @@ import { IInput } from 'types/Input';
 
 export type InputStateHandlerProps = {
   children: React.ReactNode;
+  sx?: SxProps;
 } & IInput;
 
 export default function InputStateHandler(
@@ -18,11 +19,12 @@ export default function InputStateHandler(
     id,
     label,
     notificationsCount,
-    tooltip
+    tooltip,
+    sx
   } = props;
 
   return (
-    <Box width="100%">
+    <Box width="100%" sx={sx}>
       {label ? (
         <InputLabel
           id={id}
