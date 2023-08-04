@@ -1,3 +1,4 @@
+import map from 'lodash/map';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useIsFirstRender, useToggle } from 'usehooks-ts';
@@ -24,8 +25,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Toggle from 'components/atoms/toggle';
 
 import { clientState } from 'state/client';
-import { playgroundState } from 'state/playground';
+import { playgroundState, variableState } from 'state/playground';
 
+import SelectInput from '../inputs/selectInput';
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
@@ -38,19 +40,18 @@ export type PromptMode = 'Template' | 'Formatted';
 export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
+  const [variableName, setVariableName] = useRecoilState(variableState);
 
   const [restoredTime, setRestoredTime] = useState(0);
-
+  const [providersError, setProvidersError] = useState();
+  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
+  const isFirstRender = useIsFirstRender();
+  const theme = useTheme();
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
     theme.breakpoints.down('md')
   );
-
-  const [providersError, setProvidersError] = useState();
-  const isFirstRender = useIsFirstRender();
-
-  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
 
   if (isFirstRender) {
     client
@@ -60,8 +61,6 @@ export default function PromptPlayground() {
       )
       .catch((err) => setProvidersError(err));
   }
-
-  const theme = useTheme();
 
   const restore = () => {
     if (playground) {
@@ -84,6 +83,11 @@ export default function PromptPlayground() {
   const hasTemplate = playground?.prompt?.messages
     ? playground.prompt.messages.every((m) => typeof m.template === 'string')
     : typeof playground?.prompt?.template === 'string';
+
+  const variables = map(playground.prompt.inputs, (input, index) => ({
+    label: index,
+    value: index
+  }));
 
   return (
     <Dialog
@@ -123,6 +127,15 @@ export default function PromptPlayground() {
             Prompt template not found. Only displaying formatted prompt instead.
           </Alert>
         )}
+        <SelectInput
+          items={variables}
+          id="variable-select"
+          value={variableName || ''}
+          label="Variable name"
+          placeholder="Select a variable"
+          onChange={(e) => setVariableName(e.target.value)}
+          sx={{ maxWidth: '270px' }}
+        />
         <Box sx={{ ml: 'auto' }}>
           {isSmallScreen ? (
             <IconButton
