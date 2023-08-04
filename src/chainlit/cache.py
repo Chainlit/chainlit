@@ -6,7 +6,7 @@ from chainlit.logger import logger
 
 
 def is_langchain_installed():
-    from chainlit.lc import LANGCHAIN_INSTALLED
+    from chainlit.langchain import LANGCHAIN_INSTALLED
 
     return LANGCHAIN_INSTALLED
 

@@ -1,7 +1,7 @@
 from langchain import LLMMathChain, OpenAI
 
 import chainlit as cl
-from chainlit.lc.callbacks import AsyncLangchainCallbackHandler
+from chainlit.langchain.callbacks import AsyncLangchainCallbackHandler
 
 
 @cl.author_rename

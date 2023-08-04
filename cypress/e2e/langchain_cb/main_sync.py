@@ -1,7 +1,7 @@
 from langchain.schema import Generation, LLMResult, SystemMessage
 
 import chainlit as cl
-from chainlit.lc.callbacks import LangchainCallbackHandler
+from chainlit.langchain.callbacks import LangchainCallbackHandler
 
 
 @cl.on_chat_start
