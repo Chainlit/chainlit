@@ -65,8 +65,7 @@ export default function PromptMessage({
       direction="row"
       sx={{
         background: (theme) => theme.palette.background.default,
-        padding: '8px 24px',
-        alignItems: 'center'
+        padding: '8px 24px'
       }}
     >
       <Typography
@@ -75,12 +74,12 @@ export default function PromptMessage({
           flex: 1,
           fontSize: '12px',
           fontWeight: 700,
-          textAlign: 'center'
+          paddingTop: 3
         }}
       >
         {message.role.toUpperCase()}
       </Typography>
-      <Box sx={{ minWidth: '80%' }}>
+      <Box sx={{ width: '90%' }}>
         {mode === 'Template' ? renderTemplate() : null}
         {mode === 'Formatted' ? renderFormatted() : null}
       </Box>
