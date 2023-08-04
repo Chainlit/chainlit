@@ -39,6 +39,8 @@ export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
+  const [restoredTime, setRestoredTime] = useState(0);
+
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
@@ -63,7 +65,11 @@ export default function PromptPlayground() {
 
   const restore = () => {
     if (playground) {
-      setPlayground(playground);
+      setPlayground((old) => ({
+        ...old,
+        prompt: old.originalPrompt
+      }));
+      setRestoredTime((old) => old + 1);
     }
   };
 
@@ -150,11 +156,13 @@ export default function PromptPlayground() {
         >
           <VariableModal />
           <BasicPromptPlayground
+            restoredTime={restoredTime}
             hasTemplate={hasTemplate}
             prompt={playground.prompt}
             mode={hasTemplate ? promptMode : 'Formatted'}
           />
           <ChatPromptPlayground
+            restoredTime={restoredTime}
             hasTemplate={hasTemplate}
             prompt={playground.prompt}
             mode={hasTemplate ? promptMode : 'Formatted'}

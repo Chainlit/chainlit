@@ -26,7 +26,11 @@ export default function Buttons({ message }: Props) {
         className="playground-button"
         onClick={() => {
           if (!message.prompt) return;
-          setPlayground((old) => ({ ...old, prompt: message.prompt }));
+          setPlayground((old) => ({
+            ...old,
+            prompt: message.prompt,
+            originalPrompt: message.prompt
+          }));
         }}
       >
         <ScienceIcon sx={{ width: '16px', height: '16px' }} />

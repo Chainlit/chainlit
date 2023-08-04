@@ -28,6 +28,7 @@ export interface ILLMSettings {
 export interface IPlayground {
   providers?: ILLMProvider[];
   prompt?: IPrompt;
+  originalPrompt?: IPrompt;
 }
 
 export const playgroundState = atom<IPlayground>({

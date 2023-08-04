@@ -16,12 +16,14 @@ interface Props {
   prompt: IPrompt;
   mode: PromptMode;
   hasTemplate: boolean;
+  restoredTime: number;
 }
 
 export default function ChatPromptPlayground({
   hasTemplate,
   prompt,
-  mode
+  mode,
+  restoredTime
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
@@ -60,6 +62,7 @@ export default function ChatPromptPlayground({
         {'Prompt'}
       </Typography>
       <Box
+        key={restoredTime} // This will re-mount the component with restored messages
         sx={{
           flex: 1,
           height: 'auto',

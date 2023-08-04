@@ -16,12 +16,14 @@ interface Props {
   prompt: IPrompt;
   mode: PromptMode;
   hasTemplate: boolean;
+  restoredTime: number;
 }
 
 export default function BasicPromptPlayground({
   hasTemplate,
   prompt,
-  mode
+  mode,
+  restoredTime
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
@@ -92,7 +94,11 @@ export default function BasicPromptPlayground({
   };
 
   return (
-    <Stack width="100%" flex={1}>
+    <Stack
+      flex={1}
+      key={restoredTime} // This will re-mount the component with restored prompt
+      width="100%"
+    >
       {mode === 'Template' ? renderTemplate() : null}
       {mode === 'Formatted' ? renderFormatted() : null}
       <Completion completion={prompt.completion} />
