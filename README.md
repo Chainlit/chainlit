@@ -56,7 +56,7 @@ $ chainlit run demo.py -w
 
 ### 🔗 With LangChain
 
-Check out our plug-and-play [integration](https://docs.chainlit.io/langchain) with LangChain!
+Check out our plug-and-play [integration](https://docs.chainlit.io/integrations/langchain) with LangChain!
 
 ### 📚 More Examples - Cookbook
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
