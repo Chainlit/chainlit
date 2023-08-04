@@ -96,10 +96,17 @@ export default function Completion({ completion }: Props) {
       >
         <EditorWrapper className="completion-editor">
           <Editor
-            readOnly
             customStyleMap={styleMap}
             editorState={state}
-            onChange={setState}
+            onChange={(nextState) => {
+              // Read only mode, force content but preserve selection
+              nextState = EditorState.push(
+                nextState,
+                state.getCurrentContent(),
+                'insert-characters'
+              );
+              setState(nextState);
+            }}
           />
         </EditorWrapper>
       </Box>
