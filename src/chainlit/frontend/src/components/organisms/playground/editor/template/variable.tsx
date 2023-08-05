@@ -43,6 +43,7 @@ export default function Variable({
         const colorIndex = index % (colors.length - 1);
         setStyles({
           backgroundColor: colors[colorIndex],
+          borderRadius: '2px',
           cursor: 'pointer'
         });
       }

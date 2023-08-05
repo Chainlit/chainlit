@@ -8,8 +8,8 @@ import {
 import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
-import { useCallback, useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useEffect, useRef, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
@@ -41,6 +41,7 @@ function useCustomStyleMap() {
   for (let i = 0; i < colors.length; i++) {
     customStyleMap[i.toString()] = {
       background: colors[i],
+      borderRadius: '2px',
       cursor: 'pointer'
     };
   }
@@ -146,7 +147,6 @@ function getEntityAtSelection(editorState: EditorState) {
 
   // Entity key at the start selection
   const entityKey = block.getEntityAt(selectionState.getStartOffset());
-
   if (entityKey) {
     // The actual entity instance
     const entityInstance = contentstate.getEntity(entityKey);
@@ -167,7 +167,8 @@ export default function FormattedEditor({
   onChange,
   showTitle = false
 }: Props) {
-  const [variableName, setVariable] = useRecoilState(variableState);
+  const editorRef = useRef<Editor>(null);
+  const setVariable = useSetRecoilState(variableState);
 
   const [state, setState] = useState<EditorState | undefined>();
 
@@ -206,34 +207,30 @@ export default function FormattedEditor({
     }
   }, [prompt.template, prompt.inputs]);
 
-  const handleOnEditorChange = useCallback(
-    (nextState: EditorState) => {
-      const entity = getEntityAtSelection(nextState);
-      if (entity && !variableName) {
-        // Open the variable modal
-        setVariable(entity.data.name);
-        // Clear the selection
-        nextState = EditorState.forceSelection(
-          nextState,
-          SelectionState.createEmpty('')
-        );
-      }
+  const handleOnEditorChange = (nextState: EditorState) => {
+    const entity = getEntityAtSelection(nextState);
+    if (entity && editorRef.current) {
+      // Open the variable modal
+      setVariable(entity.data.name);
 
-      if (!readOnly) {
-        // update editor
-        onChange && onChange(nextState);
-      } else if (state) {
-        // Read only mode, force content but preserve selection
-        nextState = EditorState.push(
-          nextState,
-          state.getCurrentContent(),
-          'insert-characters'
-        );
-      }
-      setState(nextState);
-    },
-    [state, variableName, setVariable]
-  );
+      // If we do not blur the selection stay the same
+      // And we keep opening the variable
+      editorRef.current.blur();
+    }
+
+    if (!readOnly) {
+      // update editor
+      onChange && onChange(nextState);
+    } else if (state) {
+      // Read only mode, force content but preserve selection
+      nextState = EditorState.push(
+        nextState,
+        state.getCurrentContent(),
+        'insert-characters'
+      );
+    }
+    setState(nextState);
+  };
 
   if (!state) {
     return null;
@@ -245,6 +242,7 @@ export default function FormattedEditor({
       title={showTitle ? 'Formatted prompt' : undefined}
     >
       <Editor
+        ref={editorRef}
         customStyleMap={customStyleMap}
         editorState={state}
         onChange={handleOnEditorChange}

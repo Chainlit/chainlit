@@ -14,7 +14,8 @@ import 'draft-js/dist/Draft.css';
 const styleMap = {
   COMPLETION: {
     backgroundColor: '#d2f4d3',
-    color: 'black'
+    color: 'black',
+    borderRadius: '2px'
   }
 };
 
