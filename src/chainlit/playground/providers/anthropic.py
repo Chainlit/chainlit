@@ -27,12 +27,7 @@ class AnthropicProvider(BaseProvider):
         await super().create_completion(request)
         import anthropic
 
-        api_key = request.userEnv.get(
-            "ANTHROPIC_API_KEY", os.environ.get("ANTHROPIC_API_KEY")
-        )
-
-        if not api_key:
-            raise ValueError("ANTHROPIC_API_KEY not found")
+        env_settings = self.validate_env(request=request)
 
         self.require_settings(request.settings)
         self.require_prompt(request)
@@ -43,7 +38,7 @@ class AnthropicProvider(BaseProvider):
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT
 
-        client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        client = anthropic.AsyncAnthropic(**env_settings)
 
         request.settings["stream"] = True
 
@@ -60,7 +55,7 @@ class AnthropicProvider(BaseProvider):
 Anthropic = AnthropicProvider(
     id="anthropic-chat",
     name="Anthropic",
-    env_var=["ANTHROPIC_API_KEY"],
+    env_vars={"api_key": "ANTHROPIC_API_KEY"},
     inputs=[
         Select(
             id="model",

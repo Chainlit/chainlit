@@ -40,12 +40,7 @@ class ChatOpenAIProvider(BaseProvider):
         await super().create_completion(request)
         import openai
 
-        api_key = request.userEnv.get(
-            "OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY")
-        )
-
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY not found")
+        env_settings = self.validate_env(request=request)
 
         self.require_settings(request.settings)
         self.require_prompt(request)
@@ -64,7 +59,7 @@ class ChatOpenAIProvider(BaseProvider):
 
         async def create_event_stream():
             response = await openai.ChatCompletion.acreate(
-                api_key=api_key,
+                **env_settings,
                 messages=messages,
                 **request.settings,
             )
@@ -80,12 +75,7 @@ class OpenAIProvider(BaseProvider):
         await super().create_completion(request)
         import openai
 
-        api_key = request.userEnv.get(
-            "OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY")
-        )
-
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY not found")
+        env_settings = self.validate_env(request=request)
 
         self.require_settings(request.settings)
         self.require_prompt(request)
@@ -102,7 +92,7 @@ class OpenAIProvider(BaseProvider):
 
         async def create_event_stream():
             response = await openai.Completion.acreate(
-                api_key=api_key,
+                **env_settings,
                 prompt=request.prompt,
                 **request.settings,
             )
@@ -113,10 +103,37 @@ class OpenAIProvider(BaseProvider):
         return StreamingResponse(create_event_stream())
 
 
+openai_env_vars = {"api_key": "OPENAI_API_KEY"}
+
+azure_openai_env_vars = {
+    "api_key": "OPENAI_API_KEY",
+    "api_type": "OPENAI_API_TYPE",
+    "api_base": "OPENAI_API_BASE",
+    "api_version": "OPENAI_API_VERSION",
+    "deployment_id": "OPENAI_API_DEPLOYMENT_ID",
+}
+
 ChatOpenAI = ChatOpenAIProvider(
     id="openai-chat",
+    env_vars=openai_env_vars,
     name="ChatOpenAI",
-    env_var=["OPENAI_API_KEY"],
+    inputs=[
+        Select(
+            id="model",
+            label="Model",
+            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt4"],
+            initial_value="gpt-3.5-turbo",
+        ),
+        *openai_common_inputs,
+    ],
+    is_chat=True,
+)
+
+
+AzureChatOpenAI = ChatOpenAIProvider(
+    id="azure-openai-chat",
+    env_vars=azure_openai_env_vars,
+    name="AzureChatOpenAI",
     inputs=[
         Select(
             id="model",
@@ -132,7 +149,23 @@ ChatOpenAI = ChatOpenAIProvider(
 OpenAI = OpenAIProvider(
     id="openai",
     name="OpenAI",
-    env_var=["OPENAI_API_KEY"],
+    env_vars=openai_env_vars,
+    inputs=[
+        Select(
+            id="model",
+            label="Model",
+            values=["text-davinci-003", "text-davinci-002"],
+            initial_value="text-davinci-003",
+        ),
+        *openai_common_inputs,
+    ],
+    is_chat=False,
+)
+
+AzureOpenAI = OpenAIProvider(
+    id="azure",
+    name="AzureOpenAI",
+    env_vars=azure_openai_env_vars,
     inputs=[
         Select(
             id="model",

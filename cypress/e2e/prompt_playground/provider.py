@@ -25,7 +25,7 @@ class TestLLMProvider(BaseProvider):
 TestLLM = TestLLMProvider(
     id="test",
     name="Test",
-    env_var=["TEST_LLM_API_KEY"],
+    env_vars={"api_key": "TEST_LLM_API_KEY"},
     inputs=[
         Select(
             id="model",
@@ -48,7 +48,7 @@ TestLLM = TestLLMProvider(
 ChatTestLLM = TestLLMProvider(
     id="test-chat",
     name="TestChat",
-    env_var=["TEST_LLM_API_KEY"],
+    env_vars={"api_key": "TEST_LLM_API_KEY"},
     inputs=[
         Select(
             id="model",
