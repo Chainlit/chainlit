@@ -89,10 +89,11 @@ export default function Completion({ completion }: Props) {
       />
       <Box
         sx={{
-          display: isCompletionOpen ? 'block' : 'none',
-          maxHeight: '220px',
-          marginTop: 2,
-          overflowY: 'auto'
+          height: '100%',
+          maxHeight: isCompletionOpen ? '220px' : '0px',
+          transition: 'max-height 0.5s ease-in-out',
+          overflow: 'auto',
+          marginTop: 2
         }}
       >
         <EditorWrapper className="completion-editor">
