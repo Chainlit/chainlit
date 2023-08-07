@@ -1,4 +1,4 @@
-import { Box, FormControl, FormHelperText, SxProps } from '@mui/material';
+import { FormControl, FormHelperText, Stack, SxProps } from '@mui/material';
 
 import InputLabel from 'components/molecules/inputLabel';
 
@@ -24,7 +24,7 @@ export default function InputStateHandler(
   } = props;
 
   return (
-    <Box width="100%" sx={sx}>
+    <Stack width="100%" sx={sx} gap={0.5}>
       {label ? (
         <InputLabel
           id={id}
@@ -37,6 +37,6 @@ export default function InputStateHandler(
         {children}
         {description ? <FormHelperText>{description}</FormHelperText> : null}
       </FormControl>
-    </Box>
+    </Stack>
   );
 }
