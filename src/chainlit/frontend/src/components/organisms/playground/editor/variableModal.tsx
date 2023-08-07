@@ -85,7 +85,7 @@ const VariableModal = (): JSX.Element => {
         </Typography>
         {state ? (
           <EditorWrapper
-            title="Question"
+            title={variableName}
             sx={{ minHeight: '150px' }}
             sxChildren={{ padding: 1 }}
           >
