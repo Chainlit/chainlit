@@ -8,6 +8,7 @@ import { playgroundState } from 'state/playground';
 import { projectSettingsState } from 'state/project';
 
 import FeedbackButtons from './feedbackButtons';
+import CopyButton from './copyButton'
 
 interface Props {
   message: IMessage;
@@ -18,6 +19,7 @@ export default function Buttons({ message }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
   const showEditButton = !!message.prompt && !!message.content;
+  const showCopyButton = !message.authorIsUser && !message.waitForAnswer && !!message.content;
 
   const editButton = showEditButton && (
     <Tooltip title="Open in prompt playground">
@@ -44,11 +46,12 @@ export default function Buttons({ message }: Props) {
     !message.waitForAnswer &&
     !!message.content;
 
-  if (!showEditButton && !showFeedbackButtons) return null;
+  if (!showEditButton && !showFeedbackButtons && !showCopyButton) return null;
 
   return (
     <Stack direction="row" spacing={1}>
       {editButton}
+      {showCopyButton && <CopyButton message={message} />}
       {showFeedbackButtons && <FeedbackButtons message={message} />}
     </Stack>
   );
