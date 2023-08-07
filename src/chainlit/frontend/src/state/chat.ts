@@ -12,8 +12,10 @@ interface IBaseTemplate {
   template_format: string;
 }
 
+export type PromptMessageRole = 'system' | 'assistant' | 'user' | 'function'
+
 export interface IPromptMessage extends IBaseTemplate {
-  role: 'system' | 'assistant' | 'user' | 'function';
+  role: PromptMessageRole;
 }
 
 export type ILLMSettings = Record<string, string | string[] | number | boolean>;
