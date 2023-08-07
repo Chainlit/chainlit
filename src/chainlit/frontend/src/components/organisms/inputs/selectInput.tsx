@@ -114,7 +114,14 @@ export default function SelectInput({
         }}
         sx={{
           backgroundColor: isDarkMode ? grey[900] : '',
-          my: 0.5
+          backgroundColor: (theme) => theme.palette.background.paper,
+          borderRadius: 1,
+          padding: 0.5,
+          '&.MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: (theme) => `1px solid ${theme.palette.divider}`
+            }
+          }
         }}
         inputProps={{
           id: id,
@@ -124,7 +131,8 @@ export default function SelectInput({
             fontSize: '14px',
             fontWeight: 400,
             px: '16px',
-            py: size === 'small' ? '10px' : '14px'
+            py: size === 'small' ? '10px' : '14px',
+            h: '48px'
           },
           MenuProps: {
             sx: {
