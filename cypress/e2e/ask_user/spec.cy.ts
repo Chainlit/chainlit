@@ -1,10 +1,8 @@
-import { submitMessage } from "../../support/testUtils";
+import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("Ask User", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should send a new message containing the user input", () => {

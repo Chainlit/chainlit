@@ -1,4 +1,4 @@
-import { submitMessage } from "../../support/testUtils";
+import { runTestServer, submitMessage } from "../../support/testUtils";
 
 function testPlayground(index, shouldContain: string) {
   cy.get(".playground-button").eq(index).should("exist").click();
@@ -14,9 +14,7 @@ function testPlayground(index, shouldContain: string) {
 
 describe("Chain of Thought", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to display a nested CoT", () => {

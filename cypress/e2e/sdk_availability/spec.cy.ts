@@ -1,8 +1,8 @@
+import { runTestServer } from "../../support/testUtils";
+
 describe("Emitter should be reachable from all contexts", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should find the Emitter from async, make_async and async_from_sync contexts", () => {

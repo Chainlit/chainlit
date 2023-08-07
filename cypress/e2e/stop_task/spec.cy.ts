@@ -1,10 +1,8 @@
-import { submitMessage } from "../../support/testUtils";
+import { describeSyncAsync, runTestServer, submitMessage } from "../../support/testUtils";
 
-describe("Stop task", () => {
+describeSyncAsync("Stop task", (mode) => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer(mode)
   });
 
   it("should be able to stop a task", () => {

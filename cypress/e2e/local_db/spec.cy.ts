@@ -1,10 +1,8 @@
-import { submitMessage } from "../../support/testUtils";
+import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("Local db", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to see and interact with a stored conversation", () => {
@@ -26,7 +24,7 @@ describe("Local db", () => {
       .find(".positive-feedback-on")
       .should("have.length", 1);
 
-    cy.visit("http://127.0.0.1:8000/dataset");
+    cy.visit("dataset");
     cy.get(".conversation-row").should("have.length", 1);
 
     cy.get(".open-conversation-button").click();
