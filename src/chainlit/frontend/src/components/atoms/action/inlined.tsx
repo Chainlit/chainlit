@@ -12,7 +12,7 @@ export default function InlinedActionList({ actions }: Props) {
   return (
     <Stack direction="row" spacing={1}>
       {actions.map((a) => {
-        return <ActionRef key={a.name} action={a} />;
+        return <ActionRef key={a.id} action={a} />;
       })}
     </Stack>
   );
