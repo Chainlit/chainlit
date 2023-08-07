@@ -1,4 +1,3 @@
-import map from 'lodash/map';
 import { grey } from 'palette';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -26,22 +25,21 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Toggle from 'components/atoms/toggle';
 
 import { clientState } from 'state/client';
-import { playgroundState, variableState } from 'state/playground';
+import { playgroundState } from 'state/playground';
 
-import SelectInput from '../inputs/selectInput';
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
 import VariableModal from './editor/variableModal';
 import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
+import VariableInput from './variableInput';
 
 export type PromptMode = 'Template' | 'Formatted';
 
 export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
-  const [variableName, setVariableName] = useRecoilState(variableState);
 
   const [restoredTime, setRestoredTime] = useState(0);
   const [providersError, setProvidersError] = useState();
@@ -84,11 +82,6 @@ export default function PromptPlayground() {
   const hasTemplate = playground?.prompt?.messages
     ? playground.prompt.messages.every((m) => typeof m.template === 'string')
     : typeof playground?.prompt?.template === 'string';
-
-  const variables = map(playground.prompt.inputs, (input, index) => ({
-    label: index,
-    value: index
-  }));
 
   return (
     <Dialog
@@ -154,14 +147,7 @@ export default function PromptPlayground() {
                 instead.
               </Alert>
             )}
-            <SelectInput
-              items={variables}
-              id="variable-select"
-              value={variableName || ''}
-              label="Select a variable"
-              onChange={(e) => setVariableName(e.target.value)}
-              sx={{ maxWidth: '270px' }}
-            />
+            <VariableInput />
           </Stack>
           {providersError ? (
             <Alert severity="error">
