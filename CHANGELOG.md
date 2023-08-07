@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.6.2] - 2023-08-06
+
+### Added
+
+- Make the chat experience configurable with Chat Settings
+- Authenticate users based on custom headers with the Custom Auth client
+
+### Fixed
+- Author rename now works with all kinds of messages
+- Create message error with chainlit cloud (chenjuneking)
+
 ## [0.6.1] - 2023-07-24
 
 ### Added
