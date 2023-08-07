@@ -2,7 +2,15 @@ import { ContentState, Editor, EditorState } from 'draft-js';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
-import { Box, Modal, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 import AccentButton from 'components/atoms/buttons/accentButton';
@@ -52,63 +60,45 @@ const VariableModal = (): JSX.Element => {
   };
 
   return (
-    <Modal
+    <Dialog
       id="variable-modal"
       open={!!variableName}
       onClose={resetVariableName}
+      fullWidth
+      maxWidth="md"
+      sx={{
+        border: (theme) =>
+          theme.palette.mode === 'dark' ? `1px solid ${grey[800]}` : null,
+        borderRadius: 1
+      }}
     >
-      <Box
-        sx={{
-          minWidth: '400px',
-          maxHeight: '80%',
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          bgcolor: 'background.paper',
-          justifyContent: 'space-between',
-          display: 'flex',
-          flexDirection: 'column',
-          border: (theme) =>
-            theme.palette.mode === 'dark' ? `1px solid ${grey[800]}` : null,
-          borderRadius: 1,
-          padding: 2
-        }}
-      >
-        <Typography
-          fontSize="16px"
-          fontWeight={700}
-          color="text.secondary"
-          pb={2}
-        >
-          Edit variable
-        </Typography>
-        {state ? (
-          <EditorWrapper
-            title={variableName}
-            sx={{ minHeight: '150px' }}
-            sxChildren={{ padding: 1 }}
-          >
-            <Editor
-              customStyleFn={() => ({
-                color: theme.palette.text.primary,
-                padding: '2px'
-              })}
-              editorState={state}
-              onChange={(nextState) => {
-                nextState && setState(nextState);
-              }}
-            />
-          </EditorWrapper>
-        ) : null}
-        <Box
-          sx={{
-            justifyContent: 'flex-end',
-            display: 'flex',
-            width: '100%',
-            paddingTop: 2
-          }}
-        >
+      <Box bgcolor="background.paper">
+        <DialogTitle>
+          <Typography fontSize="16px" fontWeight={700} color="text.secondary">
+            Edit variable
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          {state ? (
+            <EditorWrapper
+              title={variableName}
+              sx={{ minHeight: '250px' }}
+              sxChildren={{ padding: 1 }}
+            >
+              <Editor
+                customStyleFn={() => ({
+                  color: theme.palette.text.primary,
+                  padding: '2px'
+                })}
+                editorState={state}
+                onChange={(nextState) => {
+                  nextState && setState(nextState);
+                }}
+              />
+            </EditorWrapper>
+          ) : null}
+        </DialogContent>
+        <DialogActions>
           <AccentButton
             id="edit-variable"
             onClick={updateVariable}
@@ -116,9 +106,9 @@ const VariableModal = (): JSX.Element => {
           >
             Edit
           </AccentButton>
-        </Box>
+        </DialogActions>
       </Box>
-    </Modal>
+    </Dialog>
   );
 };
 
