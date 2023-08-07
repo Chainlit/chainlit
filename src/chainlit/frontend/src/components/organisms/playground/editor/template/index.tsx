@@ -71,6 +71,7 @@ export default function TemplateEditor({
     <EditorWrapper
       className="template-editor"
       title={showTitle ? 'Prompt Template' : undefined}
+      clipboardValue={state?.getCurrentContent().getPlainText()}
     >
       <Editor
         editorState={state}

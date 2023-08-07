@@ -240,6 +240,7 @@ export default function FormattedEditor({
     <EditorWrapper
       className="formatted-editor"
       title={showTitle ? 'Formatted prompt' : undefined}
+      clipboardValue={state?.getCurrentContent().getPlainText()}
     >
       <Editor
         ref={editorRef}
