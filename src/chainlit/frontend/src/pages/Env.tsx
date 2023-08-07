@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { useFormik } from 'formik';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import * as yup from 'yup';
 
@@ -16,6 +17,19 @@ export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
   const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if(!!location && !!location.search) {
+      const params = new URLSearchParams(location.search)
+      const paramsData = Object.fromEntries(params)
+      if(Object.keys(paramsData).length > 0) {
+        localStorage.setItem('userEnv', JSON.stringify(paramsData));
+        setUserEnv(paramsData);
+        navigate('/');
+      }
+    }
+  }, [location]);
 
   const requiredKeys = pSettings?.project.user_env || [];
 
