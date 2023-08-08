@@ -1,12 +1,15 @@
 import os
 from typing import Any, Dict, List, Union
 
+from pydantic.dataclasses import dataclass
+
 from chainlit import input_widget
 from chainlit.config import config
 from chainlit.telemetry import trace_event
-from chainlit.types import CompletionRequest
+from chainlit.types import CompletionRequest, PromptMessage
 
 
+@dataclass
 class BaseProvider:
     id: str
     name: str
@@ -14,19 +17,34 @@ class BaseProvider:
     inputs: List[input_widget.InputWidget]
     is_chat: bool
 
-    def __init__(
-        self,
-        id: str,
-        name: str,
-        inputs: List[input_widget.InputWidget],
-        env_vars: Dict[str, str] = {},
-        is_chat=False,
-    ) -> None:
-        self.id = id
-        self.name = name
-        self.env_vars = env_vars
-        self.inputs = inputs
-        self.is_chat = is_chat
+    def format_message(self, message: PromptMessage):
+        return message
+
+    def message_to_string(self, message: PromptMessage):
+        return message.formatted
+
+    def concatenate_messages(self, messages: List[PromptMessage]):
+        return "".join([self.message_to_string(m) for m in messages])
+
+    def create_prompt(self, request: CompletionRequest):
+        if self.is_chat:
+            if request.messages:
+                return [self.format_message(m) for m in request.messages]
+            elif request.prompt:
+                return [
+                    self.format_message(
+                        PromptMessage(formatted=request.prompt, role="user")
+                    )
+                ]
+            else:
+                raise ValueError("Could not create prompt")
+        else:
+            if request.prompt:
+                return request.prompt
+            elif request.messages:
+                return self.concatenate_messages(request.messages)
+            else:
+                raise ValueError("Could not create prompt")
 
     async def create_completion(self, request: CompletionRequest):
         trace_event("completion")
@@ -48,12 +66,8 @@ class BaseProvider:
         return {k: self.get_var(request, v) for k, v in self.env_vars.items()}
 
     def require_prompt(self, request: CompletionRequest):
-        if self.is_chat:
-            if not request.messages:
-                raise ValueError("Chat LLM provider requires messages")
-        else:
-            if not request.prompt:
-                raise ValueError("No prompt provided")
+        if not request.prompt and not request.messages:
+            raise ValueError("Chat LLM provider requires messages")
 
     def require_settings(self, settings: Dict[str, Any]):
         for _input in self.inputs:

@@ -1,5 +1,3 @@
-import os
-
 from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
@@ -8,7 +6,7 @@ from chainlit.types import PromptMessage
 
 
 class AnthropicProvider(BaseProvider):
-    def _convert_one_message_to_text(self, message: PromptMessage) -> str:
+    def message_to_string(self, message: PromptMessage) -> str:
         import anthropic
 
         if message.role == "user":
@@ -32,8 +30,7 @@ class AnthropicProvider(BaseProvider):
         self.require_settings(request.settings)
         self.require_prompt(request)
 
-        messages = [self._convert_one_message_to_text(m) for m in request.messages]
-        prompt = "".join(messages)
+        prompt = self.concatenate_messages(self.create_prompt(request))
 
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT

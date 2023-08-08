@@ -9,7 +9,6 @@ export interface ILLMProvider {
   inputs: TFormInput[];
   name: string;
   settings: ILLMSettings;
-  is_chat: boolean;
 }
 
 export interface ILLMSettings {
