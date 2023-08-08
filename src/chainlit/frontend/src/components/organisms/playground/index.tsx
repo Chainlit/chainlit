@@ -1,3 +1,4 @@
+import { grey } from 'palette';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useIsFirstRender, useToggle } from 'usehooks-ts';
@@ -32,6 +33,7 @@ import ChatPromptPlayground from './chat';
 import VariableModal from './editor/variableModal';
 import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
+import VariableInput from './variableInput';
 
 export type PromptMode = 'Template' | 'Formatted';
 
@@ -40,17 +42,15 @@ export default function PromptPlayground() {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
   const [restoredTime, setRestoredTime] = useState(0);
-
+  const [providersError, setProvidersError] = useState();
+  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
+  const isFirstRender = useIsFirstRender();
+  const theme = useTheme();
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
     theme.breakpoints.down('md')
   );
-
-  const [providersError, setProvidersError] = useState();
-  const isFirstRender = useIsFirstRender();
-
-  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
 
   if (isFirstRender) {
     client
@@ -60,8 +60,6 @@ export default function PromptPlayground() {
       )
       .catch((err) => setProvidersError(err));
   }
-
-  const theme = useTheme();
 
   const restore = () => {
     if (playground) {
@@ -100,80 +98,93 @@ export default function PromptPlayground() {
       aria-labelledby="playground"
       aria-describedby="playground"
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography fontSize="18px" fontWeight={700}>
-          Prompt playground
-        </Typography>
-        <IconButton
-          href="https://docs.chainlit.io/concepts/prompt-playground"
-          target="_blank"
-        >
-          <Tooltip title="Help">
-            <HelpIcon />
-          </Tooltip>
-        </IconButton>
-        {hasTemplate ? (
-          <Toggle
-            value={promptMode}
-            items={['Template', 'Formatted']}
-            onChange={(v) => setPromptMode(v as PromptMode)}
-          />
-        ) : (
-          <Alert severity="warning" id="template-warning">
-            Prompt template not found. Only displaying formatted prompt instead.
-          </Alert>
-        )}
-        <Box sx={{ ml: 'auto' }}>
-          {isSmallScreen ? (
-            <IconButton
-              aria-label="open drawer"
-              edge="end"
-              onClick={toggleDrawer}
-              sx={{ mr: '4px' }}
-            >
-              <TuneIcon />
-            </IconButton>
-          ) : null}
-          <IconButton edge="end" id="close-playground" onClick={handleClose}>
-            <CloseIcon />
+      <DialogTitle sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Stack direction="row" alignItems="center">
+          <Typography fontSize="18px" fontWeight={700}>
+            Prompt playground
+          </Typography>
+          <IconButton
+            href="https://docs.chainlit.io/concepts/prompt-playground"
+            target="_blank"
+          >
+            <Tooltip title="Help">
+              <HelpIcon />
+            </Tooltip>
           </IconButton>
-        </Box>
-      </DialogTitle>
-      {providersError ? (
-        <Alert severity="error">
-          An error occurred while fetching providers settings
-        </Alert>
-      ) : null}
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            overflowY: 'auto',
-            paddingBottom: 2,
-            height: '100%'
-          }}
-        >
-          <VariableModal />
-          <BasicPromptPlayground
-            restoredTime={restoredTime}
-            hasTemplate={hasTemplate}
-            prompt={playground.prompt}
-            mode={hasTemplate ? promptMode : 'Formatted'}
-          />
-          <ChatPromptPlayground
-            restoredTime={restoredTime}
-            hasTemplate={hasTemplate}
-            prompt={playground.prompt}
-            mode={hasTemplate ? promptMode : 'Formatted'}
-          />
-          <ModelSettings
-            isSmallScreen={isSmallScreen}
-            isDrawerOpen={isDrawerOpen}
-            toggleDrawer={toggleDrawer}
-          />
+          <Box sx={{ ml: 'auto' }}>
+            {isSmallScreen ? (
+              <IconButton
+                aria-label="open drawer"
+                edge="end"
+                onClick={toggleDrawer}
+                sx={{ mr: '4px' }}
+              >
+                <TuneIcon />
+              </IconButton>
+            ) : null}
+            <IconButton edge="end" id="close-playground" onClick={handleClose}>
+              <CloseIcon
+                sx={{ height: '32px', width: '32px', color: grey[500] }}
+              />
+            </IconButton>
+          </Box>
         </Stack>
+      </DialogTitle>
+      <DialogContent sx={{ display: 'flex', direction: 'row' }}>
+        <Stack gap={3} width="100%">
+          <Stack direction="row" alignItems="center" gap={1}>
+            {hasTemplate ? (
+              <Toggle
+                label={'View'}
+                id="toggle-prompt-mode"
+                value={promptMode}
+                items={['Template', 'Formatted']}
+                onChange={(v) => setPromptMode(v as PromptMode)}
+              />
+            ) : (
+              <Alert severity="warning" id="template-warning">
+                Prompt template not found. Only displaying formatted prompt
+                instead.
+              </Alert>
+            )}
+            <VariableInput />
+          </Stack>
+          {providersError ? (
+            <Alert severity="error">
+              An error occurred while fetching providers settings
+            </Alert>
+          ) : null}
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{
+              overflowY: 'auto',
+              paddingBottom: 2,
+              height: '100%'
+            }}
+          >
+            <VariableModal />
+            <BasicPromptPlayground
+              restoredTime={restoredTime}
+              hasTemplate={hasTemplate}
+              prompt={playground.prompt}
+              mode={hasTemplate ? promptMode : 'Formatted'}
+            />
+            <ChatPromptPlayground
+              restoredTime={restoredTime}
+              hasTemplate={hasTemplate}
+              prompt={playground.prompt}
+              mode={hasTemplate ? promptMode : 'Formatted'}
+            />
+          </Stack>
+        </Stack>
+        <ModelSettings
+          isSmallScreen={isSmallScreen}
+          isDrawerOpen={isDrawerOpen}
+          toggleDrawer={toggleDrawer}
+        />
       </DialogContent>
+
       <ActionBar>
         <Tooltip title="Restore original">
           <IconButton onClick={restore}>

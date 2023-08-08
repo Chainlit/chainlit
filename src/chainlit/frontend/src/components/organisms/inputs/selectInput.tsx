@@ -25,6 +25,7 @@ export type SelectInputProps = {
   items?: SelectItem[];
   name?: string;
   onChange: (e: SelectChangeEvent) => void;
+  placeholder?: string;
   renderLabel?: () => string;
   value?: string | number;
 } & IInput;
@@ -81,7 +82,9 @@ export default function SelectInput({
   size = 'small',
   tooltip,
   value,
-  renderLabel
+  placeholder = 'Select',
+  renderLabel,
+  sx
 }: SelectInputProps): JSX.Element {
   const isDarkMode = useIsDarkMode();
 
@@ -92,6 +95,7 @@ export default function SelectInput({
       description={description}
       label={label}
       tooltip={tooltip}
+      sx={sx}
     >
       <MSelect
         labelId={id}
@@ -99,20 +103,36 @@ export default function SelectInput({
         onChange={onChange}
         size={size}
         disabled={disabled}
-        renderValue={() =>
-          (renderLabel && renderLabel()) ||
-          `${items?.find((item) => item.value === value)?.label}`
-        }
+        displayEmpty
+        renderValue={() => {
+          if (!value || value === '') return placeholder;
+
+          return (
+            (renderLabel && renderLabel()) ||
+            `${items?.find((item) => item.value === value)?.label}`
+          );
+        }}
         sx={{
           backgroundColor: isDarkMode ? grey[900] : '',
-          my: 0.5
+          backgroundColor: (theme) => theme.palette.background.paper,
+          borderRadius: 1,
+          padding: 0.5,
+          '&.MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: (theme) => `1px solid ${theme.palette.divider}`
+            }
+          }
         }}
         inputProps={{
           id: id,
           name: name || id,
           sx: {
+            color: grey[600],
+            fontSize: '14px',
+            fontWeight: 400,
             px: '16px',
-            py: size === 'small' ? '10px' : '14px'
+            py: size === 'small' ? '10px' : '14px',
+            h: '48px'
           },
           MenuProps: {
             sx: {
