@@ -1,12 +1,12 @@
 import os
 from typing import Any, Dict, List, Union
-from chainlit.types import PromptMessage
+
+from pydantic.dataclasses import dataclass
 
 from chainlit import input_widget
 from chainlit.config import config
 from chainlit.telemetry import trace_event
-from chainlit.types import CompletionRequest
-from pydantic.dataclasses import dataclass
+from chainlit.types import CompletionRequest, PromptMessage
 
 
 @dataclass

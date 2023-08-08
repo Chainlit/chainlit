@@ -1,4 +1,5 @@
 from typing import List
+
 from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags

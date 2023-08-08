@@ -6,8 +6,8 @@ from chainlit.playground.providers import (
     AzureChatOpenAI,
     AzureOpenAI,
     ChatOpenAI,
-    OpenAI,
     HFFlanT5,
+    OpenAI,
 )
 
 providers = []  # type: List[BaseProvider]

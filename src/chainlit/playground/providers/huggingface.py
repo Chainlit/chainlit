@@ -1,9 +1,9 @@
 from fastapi.responses import StreamingResponse
+from pydantic.dataclasses import dataclass
 
 from chainlit.input_widget import Slider
 from chainlit.playground.provider import BaseProvider
 from chainlit.sync import make_async
-from pydantic.dataclasses import dataclass
 
 
 @dataclass
