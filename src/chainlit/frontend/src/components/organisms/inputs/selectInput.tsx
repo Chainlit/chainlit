@@ -4,7 +4,7 @@ import React from 'react';
 
 import { KeyboardArrowDown } from '@mui/icons-material';
 import { MenuItem } from '@mui/material';
-import MSelect, { SelectChangeEvent } from '@mui/material/Select';
+import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
 import NotificationCount from 'components/atoms/notificationCount';
 
@@ -28,7 +28,8 @@ export type SelectInputProps = {
   placeholder?: string;
   renderLabel?: () => string;
   value?: string | number;
-} & IInput;
+} & IInput &
+  Omit<SelectProps<string>, 'onChange'>;
 
 type MenuItemProps = {
   index: number;
@@ -84,7 +85,8 @@ export default function SelectInput({
   value,
   placeholder = 'Select',
   renderLabel,
-  sx
+  sx,
+  ...rest
 }: SelectInputProps): JSX.Element {
   const isDarkMode = useIsDarkMode();
 
@@ -98,6 +100,7 @@ export default function SelectInput({
       sx={sx}
     >
       <MSelect
+        {...rest}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
@@ -113,7 +116,6 @@ export default function SelectInput({
           );
         }}
         sx={{
-          backgroundColor: isDarkMode ? grey[900] : '',
           backgroundColor: (theme) => theme.palette.background.paper,
           borderRadius: 1,
           padding: 0.5,

@@ -1,12 +1,20 @@
 import { EditorState } from 'draft-js';
+import { useSetRecoilState } from 'recoil';
+import { useToggle } from 'usehooks-ts';
 
 import { Alert, Box, Stack, Typography } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 
-import { IPrompt, IPromptMessage } from 'state/chat';
+import SelectInput from 'components/organisms/inputs/selectInput';
+
+import { IPrompt, IPromptMessage, PromptMessageRole } from 'state/chat';
+import { playgroundState } from 'state/playground';
 
 import { PromptMode } from '..';
 import FormattedEditor from './formatted';
 import TemplateEditor from './template';
+
+const roles = ['Assistant', 'System', 'User'];
 
 interface Props {
   message: IPromptMessage;
@@ -23,6 +31,9 @@ export default function PromptMessage({
   index,
   onChange
 }: Props) {
+  const setPlayground = useSetRecoilState(playgroundState);
+  const [isSelectRoleOpen, toggleSelectRole] = useToggle();
+
   const renderTemplate = () => {
     return (
       <TemplateEditor
@@ -58,6 +69,25 @@ export default function PromptMessage({
     );
   };
 
+  const onRoleSelected = (event: SelectChangeEvent) => {
+    const role = event.target.value as PromptMessageRole;
+
+    if (role) {
+      setPlayground((old) => ({
+        ...old,
+        prompt: {
+          ...old.prompt!,
+          messages: old.prompt?.messages?.map((message, mIndex) => ({
+            ...message,
+            ...(mIndex === index ? { role } : {}) // Update role if it's the selected message
+          }))
+        }
+      }));
+    }
+
+    toggleSelectRole();
+  };
+
   return (
     <Stack
       className="prompt-message"
@@ -68,17 +98,42 @@ export default function PromptMessage({
         padding: '8px 24px'
       }}
     >
-      <Typography
-        color="text.primary"
+      <Box
         sx={{
-          flex: 1,
           fontSize: '12px',
           fontWeight: 700,
-          paddingTop: 3
+          paddingTop: 3,
+          paddingRight: 2,
+          maxWidth: '100px',
+          width: '100%'
         }}
       >
-        {message.role.toUpperCase()}
-      </Typography>
+        {isSelectRoleOpen ? (
+          <SelectInput
+            defaultOpen
+            items={roles.map((role) => ({
+              label: role,
+              value: role.toLowerCase()
+            }))}
+            id="role-select"
+            value={message.role}
+            onChange={onRoleSelected}
+          />
+        ) : (
+          <Typography
+            onClick={toggleSelectRole}
+            color="text.primary"
+            sx={{
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 700
+            }}
+          >
+            {message.role.toUpperCase()}
+          </Typography>
+        )}
+      </Box>
+
       <Box sx={{ width: '90%' }}>
         {mode === 'Template' ? renderTemplate() : null}
         {mode === 'Formatted' ? renderFormatted() : null}
