@@ -96,7 +96,10 @@ export default function Completion({ completion }: Props) {
           marginTop: 2
         }}
       >
-        <EditorWrapper className="completion-editor">
+        <EditorWrapper
+          className="completion-editor"
+          clipboardValue={state.getCurrentContent().getPlainText()}
+        >
           <Editor
             customStyleMap={styleMap}
             editorState={state}

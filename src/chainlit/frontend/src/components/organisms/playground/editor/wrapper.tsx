@@ -4,24 +4,31 @@ import React from 'react';
 
 import { Box, Stack, SxProps, Theme, Typography } from '@mui/material';
 
+import ClipboardCopy from 'components/atoms/ClipboardCopy';
+
 interface Props {
-  title?: string;
+  className?: string;
+  clipboardValue?: string;
   sx?: SxProps<Theme>;
   sxChildren?: SxProps<Theme>;
-  className?: string;
+  title?: string;
 }
 
 export default function EditorWrapper({
   children,
-  title,
-  sx,
   className,
-  sxChildren
+  clipboardValue,
+  sx,
+  sxChildren,
+  title
 }: React.PropsWithChildren<Props>) {
   return (
     <Stack
       spacing={title ? 1.5 : 0}
-      sx={merge({ width: '100%', flex: 1, overflowY: 'auto' }, sx)}
+      sx={merge(
+        { width: '100%', flex: 1, overflowY: 'auto', position: 'relative' },
+        sx
+      )}
     >
       <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
         {title}
@@ -44,6 +51,7 @@ export default function EditorWrapper({
           sxChildren
         )}
       >
+        {clipboardValue ? <ClipboardCopy value={clipboardValue} /> : null}
         {children}
       </Box>
     </Stack>
