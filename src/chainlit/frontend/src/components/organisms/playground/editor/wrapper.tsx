@@ -41,12 +41,18 @@ export default function EditorWrapper({
             fontSize: '16px',
             lineHeight: '24px',
             padding: 3,
-            border: (theme: Theme) => `1px solid ${theme.palette.divider}`,
-            borderRadius: '0.375rem',
+            border: (theme: Theme) => `1.5px solid ${theme.palette.divider}`,
+            borderRadius: '8px',
             overflowY: 'auto',
             flexGrow: 1,
             caretColor: (theme: Theme) => theme.palette.text.primary,
-            backgroundColor: (theme: Theme) => theme.palette.background.paper
+            backgroundColor: (theme: Theme) => theme.palette.background.paper,
+            '&:hover': {
+              borderColor: (theme: Theme) =>
+                theme.palette.mode === 'light'
+                  ? theme.palette.primary.main
+                  : 'white'
+            }
           },
           sxChildren
         )}

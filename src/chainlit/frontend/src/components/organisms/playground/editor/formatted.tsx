@@ -11,6 +11,8 @@ import { OrderedSet } from 'immutable';
 import { useEffect, useRef, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
+import { SxProps } from '@mui/material';
+
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
@@ -31,6 +33,7 @@ interface Props {
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
   showTitle?: boolean;
+  sxEditorChildren?: SxProps;
 }
 
 function useCustomStyleMap() {
@@ -165,7 +168,8 @@ export default function FormattedEditor({
   prompt,
   readOnly,
   onChange,
-  showTitle = false
+  showTitle = false,
+  sxEditorChildren
 }: Props) {
   const editorRef = useRef<Editor>(null);
   const setVariable = useSetRecoilState(variableState);
@@ -241,6 +245,7 @@ export default function FormattedEditor({
       className="formatted-editor"
       title={showTitle ? 'Formatted prompt' : undefined}
       clipboardValue={state?.getCurrentContent().getPlainText()}
+      sxChildren={sxEditorChildren}
     >
       <Editor
         ref={editorRef}
