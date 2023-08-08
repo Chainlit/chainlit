@@ -56,7 +56,7 @@ export default function Author({ message, show }: Props) {
         {display}
         <MessageTime timestamp={message.createdAt} />
       </Box>
-      {!!message.indent && (
+      {(!!message.indent || message.parentId) && (
         <Box
           width="2px"
           borderRadius="13px"
