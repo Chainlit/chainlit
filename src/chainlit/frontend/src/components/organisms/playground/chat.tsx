@@ -68,7 +68,6 @@ export default function ChatPromptPlayground({
           height: 'auto',
           overflow: 'scroll',
           borderRadius: 1,
-          padding: 3,
           marginTop: 1,
           gap: 1,
           border: (theme) => `1px solid ${theme.palette.divider}`,

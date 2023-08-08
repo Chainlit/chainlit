@@ -41,21 +41,27 @@ export default function PromptMessage({
         template={message.template!}
         prompt={prompt}
         onChange={(state) => onChange(index, state)}
+        sxEditorChildren={{ padding: '14px' }}
       />
     );
   };
 
   const renderFormatted = () => {
+    const props = {
+      sxEditorChildren: { padding: '14px !important' },
+      prompt
+    };
+
     if (typeof message.template === 'string') {
       return (
-        <FormattedEditor template={message.template} prompt={prompt} readOnly />
+        <FormattedEditor {...props} template={message.template} readOnly />
       );
     } else if (typeof message.formatted === 'string') {
       return (
         <FormattedEditor
+          {...props}
           onChange={(state) => onChange(index, state)}
           formatted={message.formatted}
-          prompt={prompt}
           readOnly={false}
           showTitle={false}
         />
@@ -94,15 +100,13 @@ export default function PromptMessage({
       key={index}
       direction="row"
       sx={{
-        background: (theme) => theme.palette.background.default,
-        padding: '8px 24px'
+        padding: '8px 16px'
       }}
     >
-      <Box
+      <Stack
         sx={{
           fontSize: '12px',
           fontWeight: 700,
-          paddingTop: 3,
           paddingRight: 2,
           maxWidth: '100px',
           width: '100%'
@@ -118,21 +122,32 @@ export default function PromptMessage({
             id="role-select"
             value={message.role}
             onChange={onRoleSelected}
+            iconSx={{
+              px: 0,
+              marginRight: '2px !important'
+            }}
           />
         ) : (
           <Typography
             onClick={toggleSelectRole}
             color="text.primary"
             sx={{
+              marginTop: 2,
               cursor: 'pointer',
               fontSize: '12px',
-              fontWeight: 700
+              fontWeight: 700,
+              width: 'fit-content',
+              padding: '4px 8px',
+              '&:hover': {
+                backgroundColor: (theme) => theme.palette.divider,
+                borderRadius: 0.5
+              }
             }}
           >
             {message.role.toUpperCase()}
           </Typography>
         )}
-      </Box>
+      </Stack>
 
       <Box sx={{ width: '90%' }}>
         {mode === 'Template' ? renderTemplate() : null}

@@ -10,6 +10,8 @@ import { buildTemplateRegexp } from 'helpers/format';
 import { useState } from 'react';
 import { useIsFirstRender } from 'usehooks-ts';
 
+import { SxProps } from '@mui/material';
+
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
@@ -34,13 +36,15 @@ interface Props {
   template: string;
   onChange(nextState: EditorState): void;
   showTitle?: boolean;
+  sxEditorChildren?: SxProps;
 }
 
 export default function TemplateEditor({
   prompt,
   template,
   onChange,
-  showTitle = true
+  showTitle = true,
+  sxEditorChildren
 }: Props) {
   const [state, setState] = useState<EditorState | undefined>();
   const isFirstRender = useIsFirstRender();
@@ -72,6 +76,7 @@ export default function TemplateEditor({
       className="template-editor"
       title={showTitle ? 'Prompt Template' : undefined}
       clipboardValue={state?.getCurrentContent().getPlainText()}
+      sxChildren={sxEditorChildren}
     >
       <Editor
         editorState={state}
