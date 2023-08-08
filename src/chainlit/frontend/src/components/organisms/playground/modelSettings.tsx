@@ -31,8 +31,7 @@ type Schema = {
 const ModelSettings = () => {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const { provider, providers, providerFound, isChat } =
-    getProviders(playground);
+  const { provider, providers, providerFound } = getProviders(playground);
 
   const providerWarning = !providerFound ? (
     <Alert severity="warning">
@@ -122,11 +121,6 @@ const ModelSettings = () => {
         value={provider.id}
         label="Provider"
         onChange={onSelectedProviderChange}
-        tooltip={
-          isChat
-            ? 'Only provider with chat mode are displayed.'
-            : 'Only non chat providers are displayed'
-        }
       />
       {providerWarning}
       {provider.inputs.map((input: TFormInput) => (

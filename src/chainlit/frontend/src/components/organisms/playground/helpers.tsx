@@ -1,11 +1,7 @@
 import { ILLMProvider, IPlayground } from 'state/playground';
 
 const getProviders = (playground: IPlayground) => {
-  const isChat = !!playground?.prompt?.messages;
-
-  const providers = playground?.providers
-    ? playground.providers.filter((p) => p.is_chat === isChat)
-    : [];
+  const providers = playground?.providers || [];
 
   if (!providers?.length) {
     throw new Error('No LLM provider available');
@@ -20,7 +16,6 @@ const getProviders = (playground: IPlayground) => {
   provider = provider || providers[0];
 
   return {
-    isChat,
     provider,
     providerFound,
     providers

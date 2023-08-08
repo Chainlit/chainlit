@@ -7,6 +7,7 @@ from chainlit.playground.providers import (
     AzureOpenAI,
     ChatOpenAI,
     OpenAI,
+    HFFlanT5,
 )
 
 providers = []  # type: List[BaseProvider]
@@ -16,10 +17,15 @@ default_providers = [
     ChatOpenAI,
     OpenAI,
     Anthropic,
+    HFFlanT5,
 ]  # type: List[BaseProvider]
 
 
 def add_llm_provider(provider: BaseProvider):
+    if not provider.is_configured():
+        raise ValueError(
+            f"{provider.name} LLM provider requires the following environment variables: {', '.join(provider.env_vars.values())}"
+        )
     providers.append(provider)
 
 

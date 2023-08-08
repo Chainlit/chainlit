@@ -1,5 +1,4 @@
-import os
-
+from typing import List
 from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
@@ -13,6 +12,14 @@ openai_common_inputs = [
         max=1.0,
         step=0.01,
         initial=0.9,
+    ),
+    Slider(
+        id="max_tokens",
+        label="Max Tokens",
+        min=0.0,
+        max=8000,
+        step=1,
+        initial=256,
     ),
     Slider(id="top_p", label="Top P", min=0.0, max=1.0, step=0.01, initial=1.0),
     Slider(
@@ -36,6 +43,12 @@ openai_common_inputs = [
 
 
 class ChatOpenAIProvider(BaseProvider):
+    def format_message(self, message):
+        return {"role": message.role, "content": message.formatted}
+
+    def message_to_string(self, message):
+        return f"\n\n{message.role}: {message.formatted}"
+
     async def create_completion(self, request):
         await super().create_completion(request)
         import openai
@@ -45,7 +58,7 @@ class ChatOpenAIProvider(BaseProvider):
         self.require_settings(request.settings)
         self.require_prompt(request)
 
-        messages = [{"role": m.role, "content": m.formatted} for m in request.messages]
+        messages = self.create_prompt(request)
 
         stop = request.settings["stop"]
 
@@ -71,6 +84,9 @@ class ChatOpenAIProvider(BaseProvider):
 
 
 class OpenAIProvider(BaseProvider):
+    def message_to_string(self, message):
+        return f"\n\n{message.role}: {message.formatted}"
+
     async def create_completion(self, request):
         await super().create_completion(request)
         import openai
@@ -79,6 +95,8 @@ class OpenAIProvider(BaseProvider):
 
         self.require_settings(request.settings)
         self.require_prompt(request)
+
+        prompt = self.create_prompt(request)
 
         stop = request.settings["stop"]
 
@@ -93,7 +111,7 @@ class OpenAIProvider(BaseProvider):
         async def create_event_stream():
             response = await openai.Completion.acreate(
                 **env_settings,
-                prompt=request.prompt,
+                prompt=prompt,
                 **request.settings,
             )
             async for stream_resp in response:

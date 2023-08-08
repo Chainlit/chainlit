@@ -67,6 +67,7 @@ python_version = "3.8"
 [[tool.mypy.overrides]]
 module = [
     "anthropic",
+    "huggingface_hub.inference_api",
     "fastapi_socketio",
     "filetype",
     "haystack.*",
