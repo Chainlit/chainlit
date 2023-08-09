@@ -25,10 +25,7 @@ export default function EditorWrapper({
   return (
     <Stack
       spacing={title ? 1.5 : 0}
-      sx={merge(
-        { width: '100%', flex: 1, overflowY: 'auto', position: 'relative' },
-        sx
-      )}
+      sx={merge({ width: '100%', flex: 1, overflowY: 'auto' }, sx)}
     >
       <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
         {title}
@@ -37,6 +34,7 @@ export default function EditorWrapper({
         className={className}
         sx={merge(
           {
+            position: 'relative',
             fontFamily: 'Inter',
             fontSize: '16px',
             lineHeight: '24px',
