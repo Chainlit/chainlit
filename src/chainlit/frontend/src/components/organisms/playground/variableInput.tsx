@@ -5,7 +5,7 @@ import { playgroundState, variableState } from 'state/playground';
 
 import SelectInput from '../inputs/selectInput';
 
-const VariableInput = (): JSX.Element => {
+const VariableInput = (): JSX.Element | null => {
   const [variableName, setVariableName] = useRecoilState(variableState);
   const playground = useRecoilValue(playgroundState);
 
@@ -14,7 +14,7 @@ const VariableInput = (): JSX.Element => {
     value: index
   }));
 
-  return (
+  return variables?.length > 0 ? (
     <SelectInput
       items={variables}
       id="variable-select"
@@ -23,7 +23,7 @@ const VariableInput = (): JSX.Element => {
       onChange={(e) => setVariableName(e.target.value)}
       sx={{ maxWidth: '270px' }}
     />
-  );
+  ) : null;
 };
 
 export default VariableInput;
