@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
 import { grey } from 'palette';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 import { AutoDelete } from '@mui/icons-material';
@@ -14,7 +14,6 @@ import {
   Typography
 } from '@mui/material';
 
-import { historyOpenedState } from 'state/chat';
 import { MessageHistory, chatHistoryState } from 'state/chatHistory';
 
 interface Props {
@@ -59,18 +58,18 @@ function buildHistory(historyMessages: MessageHistory[]) {
 
 export default function HistoryButton({ onClick }: Props) {
   const [chatHistory, setChatHistory] = useRecoilState(chatHistoryState);
-  const [open, setOpen] = useRecoilState(historyOpenedState);
 
   const ref = useRef<any>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  useEffect(() => {
-    if (open) {
-      if (ref.current) {
-        setAnchorEl(ref.current);
-      }
+  if (chatHistory.open && !anchorEl) {
+    if (ref.current) {
+      setAnchorEl(ref.current);
     }
-  }, [open]);
+  }
+
+  const toggleChatHistoryMenu = (open: boolean) =>
+    setChatHistory((old) => ({ ...old, open }));
 
   const header = (
     // @ts-ignore
@@ -88,13 +87,10 @@ export default function HistoryButton({ onClick }: Props) {
       >
         Last messages
       </Typography>
-      <IconButton>
-        <AutoDelete
-          onClick={() => {
-            setChatHistory((old) => ({ ...old, messages: [] }));
-            // setOpen(false);
-          }}
-        />
+      <IconButton
+        onClick={() => setChatHistory((old) => ({ ...old, messages: [] }))}
+      >
+        <AutoDelete />
       </IconButton>
     </Stack>
   );
@@ -167,7 +163,7 @@ export default function HistoryButton({ onClick }: Props) {
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              setOpen(false);
+              toggleChatHistoryMenu(false);
               onClick(h.content);
             }}
             disableRipple
@@ -205,8 +201,8 @@ export default function HistoryButton({ onClick }: Props) {
     <Menu
       autoFocus
       anchorEl={anchorEl}
-      open={open}
-      onClose={() => setOpen(false)}
+      open={chatHistory.open}
+      onClose={() => toggleChatHistoryMenu(false)}
       PaperProps={{
         sx: {
           p: 1,
@@ -235,7 +231,11 @@ export default function HistoryButton({ onClick }: Props) {
     <div>
       {menu}
       <Tooltip title="Show history">
-        <IconButton color="inherit" onClick={() => setOpen(!open)} ref={ref}>
+        <IconButton
+          color="inherit"
+          onClick={() => toggleChatHistoryMenu(!chatHistory.open)}
+          ref={ref}
+        >
           <KeyboardDoubleArrowUpIcon />
         </IconButton>
       </Tooltip>

@@ -22,10 +22,12 @@ const localStorageEffect =
   };
 
 export const chatHistoryState = atom<{
+  open: boolean;
   messages: MessageHistory[];
 }>({
   key: 'ChatHistory',
   default: {
+    open: false,
     messages: []
   },
   effects: [localStorageEffect(KEY)]
