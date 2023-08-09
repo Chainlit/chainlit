@@ -98,7 +98,7 @@ const VariableModal = (): JSX.Element => {
             </EditorWrapper>
           ) : null}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ padding: theme.spacing(0, 3, 2) }}>
           <AccentButton
             id="edit-variable"
             onClick={updateVariable}
