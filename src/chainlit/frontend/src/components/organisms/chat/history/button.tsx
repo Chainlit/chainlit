@@ -200,7 +200,7 @@ export default function HistoryButton({
     });
   }
 
-  const menu = (
+  const menu = anchorEl ? (
     <Menu
       autoFocus
       anchorEl={anchorEl}
@@ -228,7 +228,7 @@ export default function HistoryButton({
     >
       {menuEls}
     </Menu>
-  );
+  ) : null;
 
   return (
     <div>
