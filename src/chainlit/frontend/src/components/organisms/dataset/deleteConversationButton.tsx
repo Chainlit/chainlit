@@ -1,3 +1,4 @@
+import { ClientError } from 'api';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
@@ -39,7 +40,7 @@ export default function DeleteConversationButton({
       loading: 'Deleting conversation...',
       success: 'Conversation deleted!',
       error: (err) => {
-        if (err instanceof Error) {
+        if (err instanceof ClientError) {
           return <span>{err.message}</span>;
         } else {
           return <span></span>;

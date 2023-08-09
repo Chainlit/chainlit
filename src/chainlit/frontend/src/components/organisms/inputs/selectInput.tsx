@@ -20,17 +20,17 @@ export type SelectItem = {
   value: string | number;
 };
 
-export type SelectInputProps = {
-  children?: React.ReactNode;
-  items?: SelectItem[];
-  name?: string;
-  onChange: (e: SelectChangeEvent) => void;
-  placeholder?: string;
-  renderLabel?: () => string;
-  value?: string | number;
-  iconSx?: SxProps;
-} & IInput &
-  Omit<SelectProps<string>, 'onChange'>;
+export type SelectInputProps = IInput &
+  Omit<SelectProps<string>, 'value' | 'onChange'> & {
+    children?: React.ReactNode;
+    items?: SelectItem[];
+    name?: string;
+    onChange: (e: SelectChangeEvent) => void;
+    placeholder?: string;
+    renderLabel?: () => string;
+    value?: string | number;
+    iconSx?: SxProps;
+  };
 
 type MenuItemProps = {
   index: number;

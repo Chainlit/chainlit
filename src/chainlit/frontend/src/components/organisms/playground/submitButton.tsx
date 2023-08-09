@@ -1,3 +1,4 @@
+import { ClientError } from 'api';
 import { preparePrompt } from 'helpers/format';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -61,8 +62,8 @@ export default function SubmitButton() {
     } catch (err) {
       setCompletionController(undefined);
 
-      if (err instanceof Error) {
-        toast.error(err.message);
+      if (err instanceof ClientError) {
+        toast.error(err.toString());
       }
     }
   };

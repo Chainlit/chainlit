@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic.dataclasses import dataclass
 
@@ -28,18 +29,21 @@ class BaseHuggingFaceProvider(BaseProvider):
 
         prompt = self.create_prompt(request)
 
-        async def create_event_stream():
-            response = await make_async(client)(inputs=prompt, params=request.settings)
+        response = await make_async(client)(inputs=prompt, params=request.settings)
 
-            if "error" in response:
-                raise ValueError(f"Error raised by inference API: {response['error']}")
-            if client.task == "text2text-generation":
-                # Text generation return includes the starter text.
+        if "error" in response:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error raised by inference API: {response['error']}",
+            )
+        if client.task == "text2text-generation":
+
+            def create_event_stream():
                 yield response[0]["generated_text"]
-            else:
-                raise ValueError("Unsupported task")
 
-        return StreamingResponse(create_event_stream())
+            return StreamingResponse(create_event_stream())
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported task")
 
 
 flan_hf_env_vars = {"api_token": "HUGGINGFACE_API_TOKEN"}
