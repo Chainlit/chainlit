@@ -1,15 +1,3 @@
-function testPlayground(index, shouldContain: string) {
-  cy.get(".playground-button").eq(index).should("exist").click();
-
-  cy.get("#playground")
-    .should("exist")
-    .get("[contenteditable=true]")
-    .should("exist")
-    .should("contain", shouldContain);
-
-  cy.get("#playground").get("#close-playground").should("exist").click();
-}
-
 describe("Langchain Callback", () => {
   before(() => {
     cy.intercept("/project/settings").as("settings");
@@ -30,6 +18,17 @@ describe("Langchain Callback", () => {
 
     cy.get(".message").should("have.length", 4);
 
-    testPlayground(0, "This is prompt of llm1\nThis is the response of tool1");
+    cy.get(".playground-button").eq(0).should("exist").click();
+
+    cy.get("#playground")
+      .should("exist")
+      .get("[contenteditable=true]")
+      .should("exist")
+      .should(
+        "contain",
+        "This is prompt of llm1\nThis is the response of tool1"
+      );
+
+    cy.get("#playground").get("#close-playground").should("exist").click();
   });
 });
