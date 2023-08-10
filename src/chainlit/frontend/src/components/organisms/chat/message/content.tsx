@@ -7,7 +7,6 @@ import { Link, Stack, Typography } from '@mui/material';
 import Code from 'components/atoms/Code';
 import ElementRef from 'components/atoms/element/ref';
 
-import { IAction } from 'state/action';
 import { IMessageElement } from 'state/element';
 
 import InlinedElements from './inlined';
@@ -16,7 +15,6 @@ interface Props {
   id?: string;
   content?: string;
   elements: IMessageElement[];
-  actions: IAction[];
   language?: string;
   authorIsUser?: boolean;
 }
@@ -41,7 +39,7 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function prepareContent({ id, elements, actions, content, language }: Props) {
+function prepareContent({ id, elements, content, language }: Props) {
   const elementNames = elements.map((e) => escapeRegExp(e.name));
 
   // Sort by descending length to avoid matching substrings
@@ -50,13 +48,6 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   const elementRegexp = elementNames.length
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
-
-  const scopedActions = actions.filter((a) => {
-    if (a.forId) {
-      return a.forId === id;
-    }
-    return true;
-  });
 
   let preparedContent = content ? content.trim() : '';
   const inlinedElements = elements.filter(
@@ -99,8 +90,7 @@ function prepareContent({ id, elements, actions, content, language }: Props) {
   return {
     preparedContent,
     inlinedElements,
-    refElements,
-    scopedActions
+    refElements
   };
 }
 
@@ -108,61 +98,60 @@ export default memo(function MessageContent({
   id,
   content,
   elements,
-  actions,
   language,
   authorIsUser
 }: Props) {
-  const { preparedContent, inlinedElements, refElements, scopedActions } =
-    prepareContent({
-      id,
-      content,
-      language,
-      elements,
-      actions
-    });
+  const { preparedContent, inlinedElements, refElements } = prepareContent({
+    id,
+    content,
+    language,
+    elements
+  });
 
   if (!preparedContent) return null;
 
   return (
     <Stack width="100%">
-      <Typography
-        sx={{
-          width: '100%',
-          minHeight: '20px',
-          fontSize: '1rem',
-          lineHeight: '1.5rem',
-          fontFamily: 'Inter',
-          fontWeight: authorIsUser ? 500 : 300
-        }}
-        component="div"
-      >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          className="markdown-body"
-          components={{
-            a({ children, ...props }) {
-              const name = children[0] as string;
-              const element = refElements.find((e) => e.name === name);
-
-              if (element) {
-                return <ElementRef element={element} />;
-              } else {
-                return (
-                  <Link {...props} target="_blank">
-                    {children}
-                  </Link>
-                );
-              }
-            },
-            code({ ...props }) {
-              return <Code {...props} />;
-            }
+      <Stack direction="row">
+        <Typography
+          sx={{
+            width: '100%',
+            minHeight: '20px',
+            fontSize: '1rem',
+            lineHeight: '1.5rem',
+            fontFamily: 'Inter',
+            fontWeight: authorIsUser ? 500 : 300
           }}
+          component="div"
         >
-          {preparedContent}
-        </ReactMarkdown>
-      </Typography>
-      <InlinedElements elements={inlinedElements} actions={scopedActions} />
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            className="markdown-body"
+            components={{
+              a({ children, ...props }) {
+                const name = children[0] as string;
+                const element = refElements.find((e) => e.name === name);
+
+                if (element) {
+                  return <ElementRef element={element} />;
+                } else {
+                  return (
+                    <Link {...props} target="_blank">
+                      {children}
+                    </Link>
+                  );
+                }
+              },
+              code({ ...props }) {
+                return <Code {...props} />;
+              }
+            }}
+          >
+            {preparedContent}
+          </ReactMarkdown>
+        </Typography>
+      </Stack>
+      <InlinedElements elements={inlinedElements} />
     </Stack>
   );
 });
