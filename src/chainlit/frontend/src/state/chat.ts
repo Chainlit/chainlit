@@ -117,11 +117,6 @@ export const loadingState = atom<boolean>({
   default: false
 });
 
-export const historyOpenedState = atom<boolean>({
-  key: 'HistoryOpened',
-  default: false
-});
-
 export const askUserState = atom<IAsk | undefined>({
   key: 'AskUser',
   default: undefined

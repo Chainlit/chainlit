@@ -1,5 +1,3 @@
-import { SxProps } from '@mui/material';
-
 interface IInput {
   className?: string;
   description?: string;
@@ -9,7 +7,7 @@ interface IInput {
   label?: string;
   notificationsCount?: number | string;
   size?: 'small' | 'medium';
-  sx?: SxProps;
+  sx?: any;
   tooltip?: string;
 }
 

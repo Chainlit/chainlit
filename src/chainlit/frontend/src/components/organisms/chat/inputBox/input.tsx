@@ -9,10 +9,10 @@ import InputAdornment from '@mui/material/InputAdornment';
 import {
   askUserState,
   chatSettingsState,
-  historyOpenedState,
   loadingState,
   sessionState
 } from 'state/chat';
+import { chatHistoryState } from 'state/chatHistory';
 
 import HistoryButton from '../history';
 
@@ -32,7 +32,7 @@ function getLineCount(el: HTMLDivElement) {
 
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
-  const hSetOpen = useSetRecoilState(historyOpenedState);
+  const setChatHistory = useSetRecoilState(chatHistoryState);
   const [chatSettings, setChatSettings] = useRecoilState(chatSettingsState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
@@ -79,11 +79,11 @@ const Input = ({ onSubmit, onReply }: Props) => {
       } else if (e.key === 'ArrowUp') {
         const lineCount = getLineCount(e.currentTarget as HTMLDivElement);
         if (lineCount <= 1) {
-          hSetOpen(true);
+          setChatHistory((old) => ({ ...old, open: true }));
         }
       }
     },
-    [submit, hSetOpen, isComposing]
+    [submit, setChatHistory, isComposing]
   );
 
   const onHistoryClick = useCallback((content: string) => {

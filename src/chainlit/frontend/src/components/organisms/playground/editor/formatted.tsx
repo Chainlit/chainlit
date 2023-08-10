@@ -13,8 +13,6 @@ import { useRef, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import { SxProps } from '@mui/material';
-
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
@@ -35,7 +33,7 @@ interface Props {
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
   showTitle?: boolean;
-  sxEditorChildren?: SxProps;
+  sxEditorChildren?: any;
 }
 
 function useCustomStyleMap() {

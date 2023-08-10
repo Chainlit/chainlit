@@ -1,3 +1,5 @@
+import { runTestServer } from "../../support/testUtils";
+
 function openPlayground(index) {
   cy.get(".playground-button").eq(index).should("exist").click();
 }
@@ -88,8 +90,9 @@ function testCompletion() {
 
 describe("PromptPlayground", () => {
   before(() => {
-    cy.visit("http://127.0.0.1:8000");
+    runTestServer();
   });
+
   describe("Basic template", () => {
     before(() => {
       openPlayground(0);

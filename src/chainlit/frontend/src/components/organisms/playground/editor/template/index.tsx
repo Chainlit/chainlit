@@ -10,8 +10,6 @@ import { buildTemplateRegexp } from 'helpers/format';
 import { useState } from 'react';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import { SxProps } from '@mui/material';
-
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
@@ -36,7 +34,7 @@ interface Props {
   template: string;
   onChange(nextState: EditorState): void;
   showTitle?: boolean;
-  sxEditorChildren?: SxProps;
+  sxEditorChildren?: any;
 }
 
 export default function TemplateEditor({

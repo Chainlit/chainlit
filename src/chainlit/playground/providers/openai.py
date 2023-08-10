@@ -100,6 +100,11 @@ class ChatOpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
+        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+
+        if deployment_id:
+            env_settings["deployment_id"] = deployment_id
+
         self.require_settings(request.settings)
         self.require_prompt(request)
 
@@ -140,6 +145,11 @@ class OpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
+        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+
+        if deployment_id:
+            env_settings["deployment_id"] = deployment_id
+
         self.require_settings(request.settings)
         self.require_prompt(request)
 
@@ -177,7 +187,6 @@ azure_openai_env_vars = {
     "api_type": "OPENAI_API_TYPE",
     "api_base": "OPENAI_API_BASE",
     "api_version": "OPENAI_API_VERSION",
-    "deployment_id": "OPENAI_API_DEPLOYMENT_ID",
 }
 
 ChatOpenAI = ChatOpenAIProvider(
