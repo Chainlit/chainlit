@@ -1,7 +1,8 @@
+import uuid
 from typing import Optional
 
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import Field, dataclass
 
 from chainlit.context import get_emitter
 from chainlit.telemetry import trace_event
@@ -19,6 +20,8 @@ class Action(DataClassJsonMixin):
     description: str = ""
     # This should not be set manually, only used internally.
     forId: Optional[str] = None
+    # The ID of the action
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")

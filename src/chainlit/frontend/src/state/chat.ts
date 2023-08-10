@@ -12,7 +12,7 @@ interface IBaseTemplate {
   template_format: string;
 }
 
-export type PromptMessageRole = 'system' | 'assistant' | 'user' | 'function'
+export type PromptMessageRole = 'system' | 'assistant' | 'user' | 'function';
 
 export interface IPromptMessage extends IBaseTemplate {
   role: PromptMessageRole;

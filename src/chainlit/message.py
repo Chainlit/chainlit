@@ -246,7 +246,6 @@ class ErrorMessage(MessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        prompt: Optional[Prompt] = None,
         indent: int = 0,
         fail_on_persist_error: bool = False,
     ):

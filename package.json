@@ -1,11 +1,15 @@
 {
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@typescript-eslint/eslint-plugin": "^5.59.5",
     "cypress": "^12.9.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.40.0",
     "husky": "^8.0.0",
+    "kill-port": "^2.0.1",
+    "lint-staged": "^13.2.3",
     "prettier": "^2.8.8",
+    "shell-exec": "^1.1.2",
     "tree-kill": "^1.2.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"

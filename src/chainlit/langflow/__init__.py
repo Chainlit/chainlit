@@ -3,7 +3,7 @@ try:
 
     if langflow.__version__ < "0.1.4":
         raise ValueError(
-            "LlamaIndex version is too old, expected >= 0.1.4. Run `pip install langflow --upgrade`"
+            "Langflow version is too old, expected >= 0.1.4. Run `pip install langflow --upgrade`"
         )
 
     LANGFLOW_INSTALLED = True
@@ -14,7 +14,6 @@ from typing import Dict, Optional, Union
 
 import aiohttp
 
-from chainlit.config import config
 from chainlit.telemetry import trace_event
 
 

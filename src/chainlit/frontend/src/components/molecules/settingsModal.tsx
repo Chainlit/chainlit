@@ -4,6 +4,7 @@ import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 import ExpandIcon from '@mui/icons-material/Expand';
 import {
+  Box,
   Dialog,
   DialogContent,
   List,
@@ -36,55 +37,61 @@ export default function SettingsModal() {
           sx={{ width: '100%', maxWidth: 360 }}
           subheader={<ListSubheader>Settings</ListSubheader>}
         >
-          <ListItem sx={{ display: 'flex', gap: 1 }}>
+          <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
               <ExpandIcon />
             </ListItemIcon>
             <ListItemText id="list-expand-all" primary="Expand Messages" />
-            <Switch
-              id="switch-expand-all"
-              onChange={() =>
-                setSettings((old) => ({ ...old, expandAll: !old.expandAll }))
-              }
-              checked={settings.expandAll}
-              inputProps={{
-                'aria-labelledby': 'switch-expand-all'
-              }}
-            />
+            <Box>
+              <Switch
+                id="switch-expand-all"
+                onChange={() =>
+                  setSettings((old) => ({ ...old, expandAll: !old.expandAll }))
+                }
+                checked={settings.expandAll}
+                inputProps={{
+                  'aria-labelledby': 'switch-expand-all'
+                }}
+              />
+            </Box>
           </ListItem>
-          <ListItem sx={{ display: 'flex', gap: 1 }}>
+          <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
               <EmojiObjectsIcon />
             </ListItemIcon>
             <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
-            <Switch
-              id="switch-hide-cot"
-              onChange={() =>
-                setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
-              }
-              checked={settings.hideCot}
-              inputProps={{
-                'aria-labelledby': 'hide-cot'
-              }}
-            />
+            <Box>
+              <Switch
+                id="switch-hide-cot"
+                onChange={() =>
+                  setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
+                }
+                checked={settings.hideCot}
+                inputProps={{
+                  'aria-labelledby': 'hide-cot'
+                }}
+              />
+            </Box>
           </ListItem>
-          <ListItem sx={{ display: 'flex', gap: 1 }}>
+          <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
               <DarkModeOutlined />
             </ListItemIcon>
             <ListItemText id="switch-theme" primary="Dark mode" />
-            <Switch
-              id="switch-theme"
-              onChange={() => {
-                const variant = settings.theme === 'light' ? 'dark' : 'light';
-                localStorage.setItem('themeVariant', variant);
-                setSettings((old) => ({ ...old, theme: variant }));
-              }}
-              checked={settings.theme === 'dark'}
-              inputProps={{
-                'aria-labelledby': 'switch-theme'
-              }}
-            />
+            <Box>
+              <Switch
+                id="switch-theme"
+                onChange={() => {
+                  const variant = settings.theme === 'light' ? 'dark' : 'light';
+                  localStorage.setItem('themeVariant', variant);
+                  setSettings((old) => ({ ...old, theme: variant }));
+                }}
+                checked={settings.theme === 'dark'}
+                inputProps={{
+                  'aria-labelledby': 'switch-theme'
+                }}
+              />
+            </Box>
           </ListItem>
         </List>
       </DialogContent>

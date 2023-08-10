@@ -1,13 +1,14 @@
 from langchain.schema import Generation, LLMResult, SystemMessage
 
 import chainlit as cl
+from chainlit.langchain.callbacks import AsyncLangchainCallbackHandler
 
 
 @cl.on_chat_start
 async def main():
     await cl.Message(content="AsyncLangchainCb").send()
 
-    acb = cl.AsyncLangchainCallbackHandler()
+    acb = AsyncLangchainCallbackHandler()
 
     await acb.on_chain_start(serialized={"id": ["TestChain1"]}, inputs={})
 

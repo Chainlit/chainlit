@@ -1,11 +1,11 @@
-describe("Langchain Callback", () => {
+import { describeSyncAsync, runTestServer } from "../../support/testUtils";
+
+describeSyncAsync("Langchain Callback", (mode) => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer(mode);
   });
 
-  it("should be able to send messages to the UI with prompts", () => {
+  it("it should be able to send messages to the UI with prompts", () => {
     cy.get("#welcome-screen").should("exist");
 
     cy.get(".message").should("have.length", 1);
@@ -20,14 +20,15 @@ describe("Langchain Callback", () => {
 
     cy.get(".playground-button").eq(0).should("exist").click();
 
-    cy.get(".formatted-editor [contenteditable]")
+    cy.get("#playground")
       .should("exist")
-      .should("contain", "This is prompt of llm1");
-
-    cy.get(".completion-editor [contenteditable]")
+      .get("[contenteditable=true]")
       .should("exist")
-      .should("contain", "This is the response of llm1");
+      .should(
+        "contain",
+        "This is prompt of llm1\nThis is the response of tool1"
+      );
 
-    cy.get("#close-playground").should("exist").click();
+    cy.get("#playground").get("#close-playground").should("exist").click();
   });
 });

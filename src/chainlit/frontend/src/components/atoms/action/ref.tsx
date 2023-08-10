@@ -32,10 +32,18 @@ export default function ActionRef({ action }: Props) {
   }, [session]);
   const formattedName = action.name.trim().toLowerCase().replaceAll(' ', '-');
   const className = `action-${formattedName}`;
+  const actionId = action.id;
   const button = (
-    <LoadingButton className={className} onClick={call} disabled={loading}>
-      {action.label || action.name}
-    </LoadingButton>
+    <span>
+      <LoadingButton
+        className={className}
+        data-action-id={actionId}
+        onClick={call}
+        disabled={loading}
+      >
+        {action.label || action.name}
+      </LoadingButton>
+    </span>
   );
   if (action.description) {
     return (

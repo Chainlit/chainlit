@@ -14,7 +14,9 @@ export default function AudioElement({ element }: Props) {
     return null;
   }
   const className = `${element.display}-audio`;
-  const src = element.url || URL.createObjectURL(new Blob([element.content!]));
+  const src =
+    element.url ||
+    URL.createObjectURL(new Blob([element.content!], { type: 'audio/mpeg' }));
   return (
     <Box className={className}>
       <Box
