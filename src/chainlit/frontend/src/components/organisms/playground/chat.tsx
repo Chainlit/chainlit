@@ -27,7 +27,9 @@ export default function ChatPromptPlayground({
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
 
-  if (!prompt.messages) {
+  const messages = prompt.messages;
+
+  if (!messages) {
     return null;
   }
 
@@ -67,25 +69,34 @@ export default function ChatPromptPlayground({
           flex: 1,
           height: 'auto',
           overflow: 'scroll',
-          borderRadius: 1,
           marginTop: 1,
-          gap: 1,
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-          background: (theme) => theme.palette.background.paper
+          gap: 1
         }}
       >
-        <Stack>
-          {prompt.messages?.map((message, index) => (
-            <PromptMessage
-              message={message}
-              prompt={prompt}
-              mode={mode}
-              index={index}
-              key={`prompt-message-${index}`}
-              onChange={onChange}
-            />
-          ))}
-        </Stack>
+        {messages.length > 0 ? (
+          <Stack>
+            {messages.map((message, index) => (
+              <>
+                <PromptMessage
+                  message={message}
+                  prompt={prompt}
+                  mode={mode}
+                  index={index}
+                  key={`prompt-message-${index}`}
+                  onChange={onChange}
+                />
+                {index !== messages.length - 1 ? (
+                  <Box
+                    sx={{
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                      borderRadius: 1
+                    }}
+                  />
+                ) : null}
+              </>
+            ))}
+          </Stack>
+        ) : null}
       </Box>
       <Completion completion={prompt.completion} />
     </Stack>
