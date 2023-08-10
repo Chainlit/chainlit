@@ -2,13 +2,14 @@ from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.schema import NodeWithScore, TextNode
 
 import chainlit as cl
+from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
 
 
 @cl.on_chat_start
 async def start():
     await cl.Message(content="LlamaIndexCb").send()
 
-    cb = cl.LlamaIndexCallbackHandler()
+    cb = LlamaIndexCallbackHandler()
 
     cb.start_trace()
 

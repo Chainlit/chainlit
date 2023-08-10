@@ -26,9 +26,6 @@ from chainlit.element import (
     Text,
     Video,
 )
-from chainlit.haystack import HAYSTACK_INSTALLED
-from chainlit.lc import LANGCHAIN_INSTALLED
-from chainlit.llama_index import LLAMA_INDEX_INSTALLED
 from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
 from chainlit.sync import make_async, run_sync
@@ -37,18 +34,6 @@ from chainlit.types import LLMSettings
 from chainlit.user_session import user_session
 from chainlit.utils import wrap_user_function
 from chainlit.version import __version__
-
-if LANGCHAIN_INSTALLED:
-    from chainlit.lc.callbacks import (
-        AsyncLangchainCallbackHandler,
-        LangchainCallbackHandler,
-    )
-
-if LLAMA_INDEX_INSTALLED:
-    from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
-
-if HAYSTACK_INSTALLED:
-    from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
@@ -223,12 +208,8 @@ __all__ = [
     "author_rename",
     "on_settings_update",
     "sleep",
-    "LangchainCallbackHandler",
-    "AsyncLangchainCallbackHandler",
-    "LlamaIndexCallbackHandler",
     "auth_client_factory",
     "db_client_factory",
-    "HaystackAgentCallbackHandler",
     "run_sync",
     "make_async",
     "cache",
