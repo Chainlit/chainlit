@@ -12,6 +12,23 @@ const serverUrl = new URL(url);
 const httpEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
 export const wsEndpoint = httpEndpoint;
 
+export class ClientError extends Error {
+  detail?: string;
+
+  constructor(message: string, detail?: string) {
+    super(message);
+    this.detail = detail;
+  }
+
+  toString() {
+    if (this.detail) {
+      return `${this.message}: ${this.detail}`;
+    } else {
+      return this.message;
+    }
+  }
+}
+
 export class ChainlitClient {
   public headers: Headers;
 
@@ -43,7 +60,14 @@ export class ChainlitClient {
     });
 
     if (!res.ok) {
-      throw new Error(res.statusText);
+      let err: ClientError;
+      try {
+        const body = await res.json();
+        err = new ClientError(res.statusText, body.detail);
+      } catch (_) {
+        err = new ClientError(res.statusText);
+      }
+      throw err;
     }
     return res;
   };

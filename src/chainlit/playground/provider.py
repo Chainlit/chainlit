@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict, List, Union
 
+from fastapi import HTTPException
 from pydantic.dataclasses import dataclass
 
 from chainlit import input_widget
@@ -37,14 +38,14 @@ class BaseProvider:
                     )
                 ]
             else:
-                raise ValueError("Could not create prompt")
+                raise HTTPException(status_code=422, detail="Could not create prompt")
         else:
             if request.prompt:
                 return request.prompt
             elif request.messages:
                 return self.concatenate_messages(request.messages)
             else:
-                raise ValueError("Could not create prompt")
+                raise HTTPException(status_code=422, detail="Could not create prompt")
 
     async def create_completion(self, request: CompletionRequest):
         trace_event("completion")
@@ -67,13 +68,16 @@ class BaseProvider:
 
     def require_prompt(self, request: CompletionRequest):
         if not request.prompt and not request.messages:
-            raise ValueError("Chat LLM provider requires messages")
+            raise HTTPException(
+                status_code=422, detail="Chat LLM provider requires messages"
+            )
 
     def require_settings(self, settings: Dict[str, Any]):
         for _input in self.inputs:
             if _input.id not in settings:
-                raise ValueError(
-                    f"Field {_input.id} is a required setting but is not found."
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Field {_input.id} is a required setting but is not found.",
                 )
 
     def to_dict(self):

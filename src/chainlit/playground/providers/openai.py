@@ -1,5 +1,6 @@
-from typing import List
+from contextlib import contextmanager
 
+from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
@@ -43,6 +44,49 @@ openai_common_inputs = [
 ]
 
 
+@contextmanager
+def handle_openai_error():
+    import openai
+
+    try:
+        yield
+    except openai.error.Timeout as e:
+        raise HTTPException(
+            status_code=408,
+            detail=f"OpenAI API request timed out: {e}",
+        )
+    except openai.error.APIError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"OpenAI API returned an API Error: {e}",
+        )
+    except openai.error.APIConnectionError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"OpenAI API request failed to connect: {e}",
+        )
+    except openai.error.InvalidRequestError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"OpenAI API request was invalid: {e}",
+        )
+    except openai.error.AuthenticationError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"OpenAI API request was not authorized: {e}",
+        )
+    except openai.error.PermissionError as e:
+        raise HTTPException(
+            status_code=403,
+            detail=f"OpenAI API request was not permitted: {e}",
+        )
+    except openai.error.RateLimitError as e:
+        raise HTTPException(
+            status_code=429,
+            detail=f"OpenAI API request exceeded rate limit: {e}",
+        )
+
+
 class ChatOpenAIProvider(BaseProvider):
     def format_message(self, message):
         return {"role": message.role, "content": message.formatted}
@@ -71,12 +115,14 @@ class ChatOpenAIProvider(BaseProvider):
 
         request.settings["stream"] = True
 
-        async def create_event_stream():
+        with handle_openai_error():
             response = await openai.ChatCompletion.acreate(
                 **env_settings,
                 messages=messages,
                 **request.settings,
             )
+
+        async def create_event_stream():
             async for stream_resp in response:
                 token = stream_resp.choices[0]["delta"].get("content", "")
                 yield token
@@ -109,12 +155,14 @@ class OpenAIProvider(BaseProvider):
 
         request.settings["stream"] = True
 
-        async def create_event_stream():
+        with handle_openai_error():
             response = await openai.Completion.acreate(
                 **env_settings,
                 prompt=prompt,
                 **request.settings,
             )
+
+        async def create_event_stream():
             async for stream_resp in response:
                 token = stream_resp.get("choices")[0].get("text")
                 yield token

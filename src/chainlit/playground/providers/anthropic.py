@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
@@ -18,7 +19,7 @@ class AnthropicProvider(BaseProvider):
                 f"{anthropic.HUMAN_PROMPT} <admin>{message.formatted}</admin>"
             )
         else:
-            raise ValueError(f"Got unknown type {message}")
+            raise HTTPException(status_code=400, detail=f"Got unknown type {message}")
         return message_text
 
     async def create_completion(self, request):
@@ -39,9 +40,21 @@ class AnthropicProvider(BaseProvider):
 
         request.settings["stream"] = True
 
-        async def create_event_stream():
+        try:
             stream = await client.completions.create(prompt=prompt, **request.settings)
+        except anthropic.APIConnectionError as e:
+            raise HTTPException(
+                status_code=503,
+                detail=e.__cause__,
+            )
+        except anthropic.RateLimitError as e:
+            raise HTTPException(
+                status_code=429,
+            )
+        except anthropic.APIStatusError as e:
+            raise HTTPException(status_code=e.status_code, detail=e.response)
 
+        async def create_event_stream():
             async for data in stream:
                 token = data.completion
                 yield token

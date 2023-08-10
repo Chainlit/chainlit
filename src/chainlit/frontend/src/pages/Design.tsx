@@ -179,6 +179,7 @@ export default function Design(): JSX.Element {
 
         <ComponentBox name="Tab">
           <Toggle
+            id="design-toggle"
             value={tab}
             items={['Platform', 'Formatted']}
             onChange={setTab}
