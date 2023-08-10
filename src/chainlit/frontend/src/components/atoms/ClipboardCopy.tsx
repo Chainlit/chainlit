@@ -30,14 +30,14 @@ const ClipboardCopy = ({ value, theme }: ClipboardCopyProps): JSX.Element => {
       open={showTooltip}
       title={'Copied to clipboard!'}
       onClose={toggleTooltip}
+      sx={{ zIndex: 2 }}
     >
       <IconButton
         sx={{
           color: getColor(),
           position: 'absolute',
           right: 4,
-          top: 4,
-          zIndex: 1
+          top: 4
         }}
         onClick={() => {
           copy(value)
