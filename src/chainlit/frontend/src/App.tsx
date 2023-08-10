@@ -134,6 +134,7 @@ function App() {
         toastOptions={{
           className: 'toast',
           style: {
+            maxWidth: 500,
             fontFamily: 'Inter',
             background: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
