@@ -8,8 +8,10 @@ import {
 import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
-import { useEffect, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
+import { useRef, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+import { useIsFirstRender } from 'usehooks-ts';
 
 import { SxProps } from '@mui/material';
 
@@ -175,10 +177,12 @@ export default function FormattedEditor({
   const setVariable = useSetRecoilState(variableState);
 
   const [state, setState] = useState<EditorState | undefined>();
+  const [prevInputs, setPrevInputs] = useState<Record<string, string>>();
 
   const customStyleMap = useCustomStyleMap();
+  const isFirstRender = useIsFirstRender();
 
-  useEffect(() => {
+  if (isFirstRender || !isEqual(prompt.inputs, prevInputs)) {
     if (typeof template === 'string') {
       const inputs = prompt.inputs || {};
 
@@ -209,7 +213,8 @@ export default function FormattedEditor({
       );
       setState(nextState);
     }
-  }, [prompt.template, prompt.inputs]);
+    setPrevInputs(prompt.inputs);
+  }
 
   const handleOnEditorChange = (nextState: EditorState) => {
     const entity = getEntityAtSelection(nextState);
