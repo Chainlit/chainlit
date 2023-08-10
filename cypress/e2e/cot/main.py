@@ -9,7 +9,6 @@ async def main(message: str, message_id: str):
     await cl.sleep(1)
 
     tool1_msg.content = "I need to use tool 2"
-    tool1_msg.prompt = "Tool 1 prompt"
 
     await tool1_msg.update()
 
@@ -20,7 +19,6 @@ async def main(message: str, message_id: str):
     await cl.sleep(1)
 
     tool2_msg.content = "Response from tool 2"
-    tool2_msg.prompt = "Tool 2 prompt"
 
     await tool2_msg.update()
 
