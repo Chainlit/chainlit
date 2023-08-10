@@ -1,6 +1,5 @@
 import { Stack } from '@mui/material';
 
-import InlinedActionList from 'components/atoms/action/inlined';
 import InlinedAudioList from 'components/atoms/element/inlined/audios';
 import InlinedFileList from 'components/atoms/element/inlined/files';
 import InlinedImageList from 'components/atoms/element/inlined/images';
@@ -8,16 +7,14 @@ import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
 import InlinedVideoList from 'components/atoms/element/inlined/videos';
 
-import { IAction } from 'state/action';
 import { ElementType, IMessageElement } from 'state/element';
 
 interface Props {
   elements: IMessageElement[];
-  actions: IAction[];
 }
 
-export default function InlinedElements({ elements, actions }: Props) {
-  if (!elements.length && !actions.length) {
+export default function InlinedElements({ elements }: Props) {
+  if (!elements.length) {
     return null;
   }
 
@@ -63,7 +60,6 @@ export default function InlinedElements({ elements, actions }: Props) {
       {elementsByType.file?.length ? (
         <InlinedFileList items={elementsByType.file} />
       ) : null}
-      {actions.length ? <InlinedActionList actions={actions} /> : null}
     </Stack>
   );
 }

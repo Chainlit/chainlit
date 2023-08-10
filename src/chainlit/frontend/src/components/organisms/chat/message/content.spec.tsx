@@ -12,7 +12,6 @@ it('renders the message content', () => {
     <RecoilRoot>
       <MessageContent
         authorIsUser={false}
-        actions={[]}
         elements={[]}
         content="Hello World"
       />
@@ -27,7 +26,6 @@ it('highlights multiple sources correctly (no substring matching)', () => {
       <BrowserRouter>
         <MessageContent
           authorIsUser={false}
-          actions={[]}
           elements={[
             {
               name: 'source_1',
@@ -65,7 +63,6 @@ it('highlights sources containing regex characters correctly', () => {
       <BrowserRouter>
         <MessageContent
           authorIsUser={false}
-          actions={[]}
           elements={[
             {
               name: 'Document[1]',
