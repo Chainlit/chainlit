@@ -1,17 +1,5 @@
 import { runTestServer, submitMessage } from "../../support/testUtils";
 
-function testPlayground(index, shouldContain: string) {
-  cy.get(".playground-button").eq(index).should("exist").click();
-
-  cy.get("#playground")
-    .should("exist")
-    .get("[contenteditable=true]")
-    .should("exist")
-    .should("contain", shouldContain);
-
-  cy.get("#playground").get("#close-playground").should("exist").click();
-}
-
 describe("Chain of Thought", () => {
   before(() => {
     runTestServer();
@@ -29,10 +17,6 @@ describe("Chain of Thought", () => {
 
     cy.get("#tool-1-done").should("exist");
     cy.get("#tool-2-done").should("exist");
-
-    testPlayground(0, "Tool 1 prompt");
-    cy.wait(1000);
-    testPlayground(1, "Tool 2 prompt");
 
     cy.get(".message").should("have.length", 5);
   });

@@ -4,10 +4,6 @@ function openPlayground(index) {
   cy.get(".playground-button").eq(index).should("exist").click();
 }
 
-function closePlayground() {
-  cy.get("#close-playground").should("exist").click();
-}
-
 const expectedTemplate =
   "Hello, this is a template.This is a variable1 {variable1}And this is variable2 {variable2}And this is variable1 + variable2 {variable1} + {variable2}";
 
@@ -52,6 +48,7 @@ function testTemplate(chat?: boolean) {
   });
 
   it("should prevent the user to update the formatted template", () => {
+    cy.get(".tab-Formatted").should("exist").click();
     cy.get(".formatted-editor [contenteditable]")
       .eq(0)
       .type("test")
@@ -94,22 +91,18 @@ describe("PromptPlayground", () => {
   });
 
   describe("Basic template", () => {
-    before(() => {
+    beforeEach(() => {
+      cy.visit("/");
       openPlayground(0);
-    });
-    after(() => {
-      closePlayground();
     });
     testTemplate(false);
     testCompletion();
   });
 
   describe("Basic formatted", () => {
-    before(() => {
+    beforeEach(() => {
+      cy.visit("/");
       openPlayground(1);
-    });
-    after(() => {
-      closePlayground();
     });
 
     testFormatted();
@@ -117,22 +110,18 @@ describe("PromptPlayground", () => {
   });
 
   describe("Chat template", () => {
-    before(() => {
+    beforeEach(() => {
+      cy.visit("/");
       openPlayground(2);
-    });
-    after(() => {
-      closePlayground();
     });
     testTemplate(true);
     testCompletion();
   });
 
   describe("Chat formatted", () => {
-    before(() => {
+    beforeEach(() => {
+      cy.visit("/");
       openPlayground(3);
-    });
-    after(() => {
-      closePlayground();
     });
 
     testFormatted();
