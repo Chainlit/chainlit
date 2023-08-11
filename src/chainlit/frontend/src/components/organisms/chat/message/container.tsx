@@ -13,7 +13,7 @@ interface Props {
   elements: IMessageElement[];
   actions: IAction[];
   autoScroll?: boolean;
-  setAutoSroll?: (autoScroll: boolean) => void;
+  setAutoScroll?: (autoScroll: boolean) => void;
 }
 
 // Nest messages based on parent id
@@ -95,7 +95,7 @@ const MessageContainer = ({
   elements,
   actions,
   autoScroll,
-  setAutoSroll
+  setAutoScroll
 }: Props) => {
   const ref = useRef<HTMLDivElement>();
   const nestedMessages = nestMessages(messages);
@@ -107,22 +107,13 @@ const MessageContainer = ({
     ref.current.scrollTop = ref.current.scrollHeight;
   }, [messages, autoScroll]);
 
-  useEffect(() => {
-    if (!ref.current || !setAutoSroll) {
-      return;
-    }
+  const handleScroll = () => {
+    if (!ref.current || !setAutoScroll) return;
 
-    const handleScroll = () => {
-      if (!ref.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-      setAutoSroll(atBottom);
-    };
-    ref.current.addEventListener('scroll', handleScroll);
-    return () => {
-      ref.current?.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+    const { scrollTop, scrollHeight, clientHeight } = ref.current;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+    setAutoScroll(atBottom);
+  };
 
   return (
     <Box
@@ -132,6 +123,7 @@ const MessageContainer = ({
       flexDirection="column"
       overflow="auto"
       flexGrow={1}
+      onScroll={handleScroll}
     >
       <Messages
         indent={0}

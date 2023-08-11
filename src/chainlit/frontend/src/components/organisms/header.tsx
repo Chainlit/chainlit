@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -64,15 +64,12 @@ function Nav({ hasDb, hasReadme }: NavProps) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  useEffect(() => {
-    if (open) {
-      if (ref.current) {
-        setAnchorEl(ref.current);
-      }
-    }
-  }, [open]);
+  let anchorEl;
+
+  if (open && ref.current) {
+    anchorEl = ref.current;
+  }
 
   const matches = useMediaQuery(theme.breakpoints.down('md'));
 
