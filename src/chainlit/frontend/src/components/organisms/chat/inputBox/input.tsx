@@ -45,7 +45,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   useEffect(() => {
     if (ref.current && !loading && !disabled) {
-      ref.current.querySelector('textarea')?.focus();
+      ref.current.focus();
     }
   }, [loading, disabled]);
 
@@ -115,7 +115,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   return (
     <TextField
-      ref={ref}
+      inputRef={ref}
       id="chat-input"
       autoFocus
       multiline

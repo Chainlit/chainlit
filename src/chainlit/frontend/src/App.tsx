@@ -5,7 +5,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { router } from 'router';
 import makeTheme from 'theme';
 
-import { Box } from '@mui/material';
+import { Box, GlobalStyles } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
 
 import Hotkeys from 'components/Hotkeys';
@@ -27,10 +27,6 @@ function App() {
   const setRole = useSetRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
   const theme = makeTheme(themeVariant);
-
-  useEffect(() => {
-    document.body.style.backgroundColor = theme.palette.background.default;
-  }, [theme]);
 
   useEffect(() => {
     if (isAuthenticated && accessToken === undefined) {
@@ -69,6 +65,11 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <GlobalStyles
+        styles={{
+          body: { backgroundColor: theme.palette.background.default }
+        }}
+      />
       <Toaster
         toastOptions={{
           className: 'toast',
