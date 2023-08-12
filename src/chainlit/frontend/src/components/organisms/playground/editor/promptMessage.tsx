@@ -163,7 +163,7 @@ export default function PromptMessage({
         )}
       </Stack>
 
-      <Box sx={{ width: '90%' }}>
+      <Box sx={{ width: '100%' }}>
         {mode === 'Template' ? renderTemplate() : null}
         {mode === 'Formatted' ? renderFormatted() : null}
       </Box>

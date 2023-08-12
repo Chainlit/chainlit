@@ -261,7 +261,10 @@ export default function FormattedEditor({
       className="formatted-editor"
       title={showTitle ? title : undefined}
       clipboardValue={state?.getCurrentContent().getPlainText()}
-      sxChildren={merge(sxEditorChildren || {}, { caretColor: 'transparent' })}
+      sxChildren={merge(
+        sxEditorChildren || {},
+        readOnly ? { caretColor: 'transparent' } : {}
+      )}
     >
       <Editor
         ref={editorRef}

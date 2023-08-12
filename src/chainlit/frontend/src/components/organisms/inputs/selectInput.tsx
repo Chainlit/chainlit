@@ -137,16 +137,23 @@ export default function SelectInput({
             px: '16px',
             py: size === 'small' ? '10px' : '14px',
             h: '48px'
-          },
-          MenuProps: {
+          }
+        }}
+        MenuProps={{
+          PaperProps: {
             sx: {
+              border: (theme: any) => `1px solid ${theme.palette.divider}`,
+              boxShadow: (theme: any) =>
+                theme.palette.mode === 'light'
+                  ? '0px 2px 4px 0px #0000000D'
+                  : '0px 10px 10px 0px #0000000D',
               '&& .Mui-selected, .Mui-selected.Mui-selected:hover': {
                 backgroundColor: isDarkMode ? grey[800] : primary[50]
               }
-            },
-            MenuListProps: {
-              sx: { backgroundColor: isDarkMode ? grey[900] : '' }
             }
+          },
+          MenuListProps: {
+            sx: { backgroundColor: isDarkMode ? grey[900] : '' }
           }
         }}
         IconComponent={(props) => (

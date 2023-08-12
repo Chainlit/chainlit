@@ -106,7 +106,7 @@ const darkTheme = createTheme({
 
 const lightTheme = createTheme({
   typography,
-  components: components,
+  components,
   shape,
   palette: {
     mode: 'light',

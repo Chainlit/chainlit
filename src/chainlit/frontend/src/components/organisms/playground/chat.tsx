@@ -54,6 +54,13 @@ export default function ChatPromptPlayground({
     }));
   };
 
+  const title =
+    mode === 'Formatted'
+      ? hasTemplate
+        ? 'Formatted messages [Read Only]'
+        : 'Formatted messages'
+      : 'Prompt messages';
+
   return (
     <Stack
       sx={{
@@ -61,7 +68,7 @@ export default function ChatPromptPlayground({
       }}
     >
       <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
-        {'Prompt'}
+        {title}
       </Typography>
       <Box
         key={restoredTime} // This will re-mount the component with restored messages
