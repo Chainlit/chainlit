@@ -9,7 +9,9 @@ import { useColors } from 'helpers/color';
 import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
 import { isEqual } from 'lodash';
+import merge from 'lodash/merge';
 import { useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
 
@@ -229,10 +231,19 @@ export default function FormattedEditor({
       // update editor
       onChange && onChange(nextState);
     } else if (state) {
+      const currentContent = state.getCurrentContent();
+      const nextContent = nextState.getCurrentContent();
+
+      if (currentContent !== nextContent) {
+        toast.error(
+          'Please edit the prompt template/variables instead of the formatted prompt directly.'
+        );
+      }
+
       // Read only mode, force content but preserve selection
       nextState = EditorState.push(
         nextState,
-        state.getCurrentContent(),
+        currentContent,
         'insert-characters'
       );
     }
@@ -243,12 +254,14 @@ export default function FormattedEditor({
     return null;
   }
 
+  const title = readOnly ? 'Formatted prompt [Read Only]' : 'Formatted prompt';
+
   return (
     <EditorWrapper
       className="formatted-editor"
-      title={showTitle ? 'Formatted prompt' : undefined}
+      title={showTitle ? title : undefined}
       clipboardValue={state?.getCurrentContent().getPlainText()}
-      sxChildren={sxEditorChildren}
+      sxChildren={merge(sxEditorChildren || {}, { caretColor: 'transparent' })}
     >
       <Editor
         ref={editorRef}
