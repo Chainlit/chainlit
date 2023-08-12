@@ -2,7 +2,7 @@ import { EditorState } from 'draft-js';
 import { useSetRecoilState } from 'recoil';
 import { useToggle } from 'usehooks-ts';
 
-import { Alert, Box, Stack, Typography } from '@mui/material';
+import { Alert, Box, Stack, Typography, useTheme } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 
 import SelectInput from 'components/organisms/inputs/selectInput';
@@ -33,33 +33,44 @@ export default function PromptMessage({
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
   const [isSelectRoleOpen, toggleSelectRole] = useToggle();
+  const theme = useTheme();
+
+  const templateProps = {
+    prompt,
+    sxEditorChildren: {
+      padding: theme.spacing(2),
+      backgroundColor: '',
+      '&:hover': {
+        background: theme.palette.background.paper,
+        borderRadius: 0.5
+      }
+    }
+  };
 
   const renderTemplate = () => {
     return (
       <TemplateEditor
+        {...templateProps}
         showTitle={false}
         template={message.template!}
-        prompt={prompt}
         onChange={(state) => onChange(index, state)}
-        sxEditorChildren={{ padding: '14px' }}
       />
     );
   };
 
   const renderFormatted = () => {
-    const props = {
-      sxEditorChildren: { padding: '14px !important' },
-      prompt
-    };
-
     if (typeof message.template === 'string') {
       return (
-        <FormattedEditor {...props} template={message.template} readOnly />
+        <FormattedEditor
+          {...templateProps}
+          template={message.template}
+          readOnly
+        />
       );
     } else if (typeof message.formatted === 'string') {
       return (
         <FormattedEditor
-          {...props}
+          {...templateProps}
           onChange={(state) => onChange(index, state)}
           formatted={message.formatted}
           readOnly={false}
@@ -100,7 +111,10 @@ export default function PromptMessage({
       key={index}
       direction="row"
       sx={{
-        padding: '8px 16px'
+        padding: (theme) => theme.spacing(1, 2),
+        '&:hover': {
+          background: (theme) => theme.palette.background.paper
+        }
       }}
     >
       <Stack
@@ -137,7 +151,7 @@ export default function PromptMessage({
               fontSize: '12px',
               fontWeight: 700,
               width: 'fit-content',
-              padding: '4px 8px',
+              padding: (theme) => theme.spacing(0.5, 1),
               '&:hover': {
                 backgroundColor: (theme) => theme.palette.divider,
                 borderRadius: 0.5
