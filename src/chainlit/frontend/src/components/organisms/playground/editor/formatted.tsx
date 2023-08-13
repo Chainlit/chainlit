@@ -18,7 +18,7 @@ import { useIsFirstRender } from 'usehooks-ts';
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import { IPrompt } from 'state/chat';
-import { variableState } from 'state/playground';
+import { modeState, variableState } from 'state/playground';
 
 import 'draft-js/dist/Draft.css';
 
@@ -175,6 +175,7 @@ export default function FormattedEditor({
 }: Props) {
   const editorRef = useRef<Editor>(null);
   const setVariable = useSetRecoilState(variableState);
+  const setPromptMode = useSetRecoilState(modeState);
 
   const [state, setState] = useState<EditorState | undefined>();
   const [prevInputs, setPrevInputs] = useState<Record<string, string>>();
@@ -236,8 +237,9 @@ export default function FormattedEditor({
 
       if (currentContent !== nextContent) {
         toast.error(
-          'Please edit the prompt template/variables instead of the formatted prompt directly.'
+          'Formatted prompt is read only. Edit the template/variables instead.'
         );
+        setPromptMode('Template');
       }
 
       // Read only mode, force content but preserve selection

@@ -1,6 +1,6 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import ScienceIcon from '@mui/icons-material/ScienceOutlined';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
 import { IMessage } from 'state/chat';
@@ -33,7 +33,7 @@ export default function Buttons({ message }: Props) {
           }));
         }}
       >
-        <ScienceIcon sx={{ width: '16px', height: '16px' }} />
+        <BugReportIcon sx={{ width: '16px', height: '16px' }} />
       </IconButton>
     </Tooltip>
   );

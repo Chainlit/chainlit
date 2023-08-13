@@ -49,9 +49,12 @@ function testTemplate(chat?: boolean) {
 
   it("should prevent the user to update the formatted template", () => {
     cy.get(".tab-Formatted").should("exist").click();
+    cy.get(".formatted-editor [contenteditable]").eq(0).type("foobar");
+
+    cy.get(".tab-Formatted").click();
+
     cy.get(".formatted-editor [contenteditable]")
       .eq(0)
-      .type("test")
       .should("contain", expectedFormattedTemplate);
   });
 }
@@ -70,8 +73,8 @@ function testFormatted() {
   it("should let the user update the formatted prompt", () => {
     cy.get(".formatted-editor [contenteditable]")
       .eq(0)
-      .type("test")
-      .should("contain", "test" + expectedFormatted);
+      .type("foobar")
+      .should("contain", "foobar" + expectedFormatted);
   });
 }
 

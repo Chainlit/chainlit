@@ -89,7 +89,6 @@ export default function Completion({ completion }: Props) {
       />
       <Box
         sx={{
-          height: '100%',
           maxHeight: isCompletionOpen ? '220px' : '0px',
           transition: 'max-height 0.5s ease-in-out',
           overflow: 'auto',

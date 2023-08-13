@@ -22,8 +22,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import Toggle from 'components/atoms/toggle';
-
 import { clientState } from 'state/client';
 import { playgroundState } from 'state/playground';
 
@@ -31,11 +29,9 @@ import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
 import VariableModal from './editor/variableModal';
+import PlaygroundHeader from './header';
 import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
-import VariableInput from './variableInput';
-
-export type PromptMode = 'Template' | 'Formatted';
 
 export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
@@ -43,7 +39,6 @@ export default function PromptPlayground() {
 
   const [restoredTime, setRestoredTime] = useState(0);
   const [providersError, setProvidersError] = useState();
-  const [promptMode, setPromptMode] = useState<PromptMode>('Template');
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
   const isFirstRender = useIsFirstRender();
@@ -132,27 +127,7 @@ export default function PromptPlayground() {
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', direction: 'row' }}>
         <Stack gap={3} width="100%">
-          <Stack direction="row" alignItems="center" gap={1}>
-            {hasTemplate ? (
-              <Toggle
-                label={'View'}
-                id="toggle-prompt-mode"
-                value={promptMode}
-                items={['Template', 'Formatted']}
-                onChange={(v) => setPromptMode(v as PromptMode)}
-              />
-            ) : (
-              <Alert
-                sx={{ alignSelf: 'flex-end' }}
-                severity="warning"
-                id="template-warning"
-              >
-                Prompt template not found. Only displaying formatted prompt
-                instead.
-              </Alert>
-            )}
-            <VariableInput />
-          </Stack>
+          <PlaygroundHeader hasTemplate={hasTemplate} />
           {providersError ? (
             <Alert severity="error">
               An error occurred while fetching providers settings
@@ -172,13 +147,11 @@ export default function PromptPlayground() {
               restoredTime={restoredTime}
               hasTemplate={hasTemplate}
               prompt={playground.prompt}
-              mode={hasTemplate ? promptMode : 'Formatted'}
             />
             <ChatPromptPlayground
               restoredTime={restoredTime}
               hasTemplate={hasTemplate}
               prompt={playground.prompt}
-              mode={hasTemplate ? promptMode : 'Formatted'}
             />
           </Stack>
         </Stack>

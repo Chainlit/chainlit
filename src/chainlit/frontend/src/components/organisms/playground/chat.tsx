@@ -1,20 +1,17 @@
 import { EditorState } from 'draft-js';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { Box, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { PromptMode } from 'components/organisms/playground/index';
-
 import { IPrompt } from 'state/chat';
-import { playgroundState } from 'state/playground';
+import { modeState, playgroundState } from 'state/playground';
 
 import Completion from './editor/completion';
 import PromptMessage from './editor/promptMessage';
 
 interface Props {
   prompt: IPrompt;
-  mode: PromptMode;
   hasTemplate: boolean;
   restoredTime: number;
 }
@@ -22,10 +19,10 @@ interface Props {
 export default function ChatPromptPlayground({
   hasTemplate,
   prompt,
-  mode,
   restoredTime
 }: Props) {
   const setPlayground = useSetRecoilState(playgroundState);
+  const mode = useRecoilValue(modeState);
 
   const messages = prompt.messages;
 

@@ -36,6 +36,13 @@ export const playgroundState = atom<IPlayground>({
 });
 
 export const variableState = atom<string | undefined>({
-  key: 'Variable',
+  key: 'PlaygroundVariable',
   default: undefined
+});
+
+export type PromptMode = 'Template' | 'Formatted';
+
+export const modeState = atom<PromptMode>({
+  key: 'PlaygroundMode',
+  default: 'Template'
 });

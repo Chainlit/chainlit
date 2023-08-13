@@ -50,6 +50,14 @@ const components = {
         color: grey[500]
       }
     }
+  },
+  MuiTooltip: {
+    styleOverrides: {
+      tooltip: {
+        backgroundColor: 'black',
+        color: 'white'
+      }
+    }
   }
 };
 
