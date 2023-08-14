@@ -3,6 +3,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, Box } from '@mui/material';
 
 interface Props {
+  prefix?: string;
   children?: ReactNode;
 }
 
@@ -28,9 +29,12 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      const msg = this.props.prefix
+        ? `${this.props.prefix}: ${this.state.error}`
+        : this.state.error;
       return (
         <Box flexGrow={1}>
-          <Alert severity="error">{this.state.error}</Alert>
+          <Alert severity="error">{msg}</Alert>
         </Box>
       );
     }

@@ -101,19 +101,19 @@ const Chat = () => {
   const tasklist = tasklistElements.at(-1);
 
   return (
-    <ErrorBoundary>
-      <Box display="flex" width="100%" height="0" flexGrow={1}>
-        <PromptPlayground />
-        <ChatSettingsModal />
-        <TaskList tasklist={tasklist} isMobile={false} />
-        <SideView>
-          <TaskList tasklist={tasklist} isMobile={true} />
-          <Box my={1} />
-          {session?.error && (
-            <Alert id="session-error" severity="error">
-              Could not reach the server.
-            </Alert>
-          )}
+    <Box display="flex" width="100%" height="0" flexGrow={1}>
+      <PromptPlayground />
+      <ChatSettingsModal />
+      <TaskList tasklist={tasklist} isMobile={false} />
+      <SideView>
+        <TaskList tasklist={tasklist} isMobile={true} />
+        <Box my={1} />
+        {session?.error && (
+          <Alert id="session-error" severity="error">
+            Could not reach the server.
+          </Alert>
+        )}
+        <ErrorBoundary>
           {!!messages.length && (
             <MessageContainer
               actions={actions}
@@ -125,9 +125,9 @@ const Chat = () => {
           )}
           {!messages.length && <WelcomeScreen />}
           <InputBox onReply={onReply} onSubmit={onSubmit} />
-        </SideView>
-      </Box>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </SideView>
+    </Box>
   );
 };
 

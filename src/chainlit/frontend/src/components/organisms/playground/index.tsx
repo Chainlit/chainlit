@@ -22,6 +22,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import ErrorBoundary from 'components/atoms/errorBoundary';
+
 import { clientState } from 'state/client';
 import { playgroundState } from 'state/playground';
 
@@ -126,40 +128,42 @@ export default function PromptPlayground() {
         </Stack>
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', direction: 'row' }}>
-        <Stack gap={3} width="100%">
-          <PlaygroundHeader hasTemplate={hasTemplate} />
-          {providersError ? (
-            <Alert severity="error">
-              An error occurred while fetching providers settings
-            </Alert>
-          ) : null}
-          <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{
-              overflowY: 'auto',
-              paddingBottom: 2,
-              height: '100%'
-            }}
-          >
-            <VariableModal />
-            <BasicPromptPlayground
-              restoredTime={restoredTime}
-              hasTemplate={hasTemplate}
-              prompt={playground.prompt}
-            />
-            <ChatPromptPlayground
-              restoredTime={restoredTime}
-              hasTemplate={hasTemplate}
-              prompt={playground.prompt}
-            />
+        <ErrorBoundary prefix="Prompt Playground error">
+          <Stack gap={3} width="100%">
+            <PlaygroundHeader hasTemplate={hasTemplate} />
+            {providersError ? (
+              <Alert severity="error">
+                An error occurred while fetching providers settings
+              </Alert>
+            ) : null}
+            <Stack
+              direction="row"
+              spacing={1.5}
+              sx={{
+                overflowY: 'auto',
+                paddingBottom: 2,
+                height: '100%'
+              }}
+            >
+              <VariableModal />
+              <BasicPromptPlayground
+                restoredTime={restoredTime}
+                hasTemplate={hasTemplate}
+                prompt={playground.prompt}
+              />
+              <ChatPromptPlayground
+                restoredTime={restoredTime}
+                hasTemplate={hasTemplate}
+                prompt={playground.prompt}
+              />
+            </Stack>
           </Stack>
-        </Stack>
-        <ModelSettings
-          isSmallScreen={isSmallScreen}
-          isDrawerOpen={isDrawerOpen}
-          toggleDrawer={toggleDrawer}
-        />
+          <ModelSettings
+            isSmallScreen={isSmallScreen}
+            isDrawerOpen={isDrawerOpen}
+            toggleDrawer={toggleDrawer}
+          />
+        </ErrorBoundary>
       </DialogContent>
 
       <ActionBar>

@@ -218,8 +218,10 @@ export default function FormattedEditor({
   }
 
   const handleOnEditorChange = (nextState: EditorState) => {
+    const hasFocus = nextState.getSelection().getHasFocus();
+
     const entity = getEntityAtSelection(nextState);
-    if (entity && editorRef.current) {
+    if (entity && hasFocus && editorRef.current) {
       // Open the variable modal
       setVariable(entity.data.name);
 
