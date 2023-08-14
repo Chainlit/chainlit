@@ -91,7 +91,7 @@ function highlight(
 
       let offset = 0;
 
-      const content = highlight.content || highlight.name;
+      const content = highlight.content || '';
 
       startIndices.forEach((startIndex) => {
         if (startIndex === -1) {
