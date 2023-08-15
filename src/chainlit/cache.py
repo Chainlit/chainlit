@@ -2,14 +2,19 @@ import os
 import threading
 
 from chainlit.config import config
-from chainlit.lc import LANGCHAIN_INSTALLED
 from chainlit.logger import logger
+
+
+def is_langchain_installed():
+    from chainlit.langchain import LANGCHAIN_INSTALLED
+
+    return LANGCHAIN_INSTALLED
 
 
 def init_lc_cache():
     use_cache = config.run.no_cache is False and config.run.ci is False
 
-    if LANGCHAIN_INSTALLED and use_cache:
+    if use_cache and is_langchain_installed():
         import langchain
         from langchain.cache import SQLiteCache
 

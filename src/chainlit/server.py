@@ -329,9 +329,15 @@ def register_wildcard_route_handler():
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
 
+        key = "chainlit-initial-headers"
+
+        chainlit_initial_headers = dict(request.headers)
+        if "cookie" in chainlit_initial_headers:
+            del chainlit_initial_headers["cookie"]
+
         response.set_cookie(
-            key="chainlit-initial-headers",
-            value=json.dumps(dict(request.headers)),
+            key=key,
+            value=json.dumps(chainlit_initial_headers),
             httponly=True,
         )
 

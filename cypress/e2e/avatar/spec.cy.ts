@@ -1,8 +1,8 @@
+import { runTestServer } from "../../support/testUtils";
+
 describe("Avatar", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to display a nested CoT", () => {

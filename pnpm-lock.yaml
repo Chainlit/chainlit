@@ -23,18 +23,24 @@ devDependencies:
   husky:
     specifier: ^8.0.0
     version: 8.0.0
+  kill-port:
+    specifier: ^2.0.1
+    version: 2.0.1
   lint-staged:
     specifier: ^13.2.3
     version: 13.2.3
   prettier:
     specifier: ^2.8.8
     version: 2.8.8
+  shell-exec:
+    specifier: ^1.1.2
+    version: 1.1.2
   tree-kill:
     specifier: ^1.2.2
     version: 1.2.2
   ts-node:
     specifier: ^10.9.1
-    version: 10.9.1(@types/node@14.18.53)(typescript@5.0.4)
+    version: 10.9.1(@types/node@14.18.53)(@types/node@14.18.53)(typescript@5.0.4)
   typescript:
     specifier: ^5.0.4
     version: 5.0.4
@@ -1334,6 +1340,10 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /get-them-args@1.3.2:
+    resolution: {integrity: sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==}
+    dev: true
+
   /getos@3.2.1:
     resolution: {integrity: sha512-U56CfOK17OKgTVqozZjUKNdkfEv6jk5WISBJ8SHoagjE6L69zOwl3Z+O8myjY9MEW3i2HPWQBt/LTbCgcC973Q==}
     dependencies:
@@ -1640,6 +1650,14 @@ packages:
       extsprintf: 1.3.0
       json-schema: 0.4.0
       verror: 1.10.0
+    dev: true
+
+  /kill-port@2.0.1:
+    resolution: {integrity: sha512-e0SVOV5jFo0mx8r7bS29maVWp17qGqLBZ5ricNSajON6//kmb7qqqNnml4twNE8Dtj97UQD+gNFOaipS/q1zzQ==}
+    hasBin: true
+    dependencies:
+      get-them-args: 1.3.2
+      shell-exec: 1.0.2
     dev: true
 
   /lazy-ass@1.6.0:
@@ -2091,6 +2109,15 @@ packages:
   /shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+    dev: true
+
+  /shell-exec@1.0.2:
+    resolution: {integrity: sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==}
+    dev: true
+
+  /shell-exec@1.1.2:
+    resolution: {integrity: sha512-v2NWVDP0ws+S7miKy2oSpJ/OuL6NKuMosPNUZLDWFBlMnBtuoZxZOwxpQJwhsFZgMb+r7frpDTT8p4OSnhkpsg==}
+    engines: {node: '>=12'}
     dev: true
 
   /side-channel@1.0.4:

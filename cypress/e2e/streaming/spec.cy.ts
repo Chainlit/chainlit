@@ -1,3 +1,5 @@
+import { runTestServer } from "../../support/testUtils";
+
 function testStreamedMessage(index: number) {
   const tokenList = ["the", "quick", "brown", "fox"];
   for (const token of tokenList) {
@@ -8,9 +10,7 @@ function testStreamedMessage(index: number) {
 
 describe("Streaming", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to stream a message", () => {

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
@@ -9,7 +9,6 @@ import ErrorBoundary from 'components/atoms/errorBoundary';
 import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
-import useLocalChatHistory from 'hooks/localChatHistory';
 
 import { actionState } from 'state/action';
 import {
@@ -18,6 +17,7 @@ import {
   messagesState,
   sessionState
 } from 'state/chat';
+import { chatHistoryState } from 'state/chatHistory';
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
@@ -36,7 +36,8 @@ const Chat = () => {
   const tasklistElements = useRecoilValue(tasklistState);
   const actions = useRecoilValue(actionState);
   const pSettings = useRecoilValue(projectSettingsState);
-  const { persistChatLocally } = useLocalChatHistory();
+  const setChatHistory = useSetRecoilState(chatHistoryState);
+
   const [autoScroll, setAutoScroll] = useState(true);
 
   const onSubmit = useCallback(
@@ -55,7 +56,22 @@ const Chat = () => {
         createdAt: new Date().toISOString()
       };
 
-      persistChatLocally(msg);
+      setChatHistory((old) => {
+        const MAX_SIZE = 50;
+        const messages = [...(old.messages || [])];
+        messages.push({
+          content: msg,
+          createdAt: new Date().getTime()
+        });
+
+        return {
+          ...old,
+          messages:
+            messages.length > MAX_SIZE
+              ? messages.slice(messages.length - MAX_SIZE)
+              : messages
+        };
+      });
 
       setAutoScroll(true);
       setMessages((oldMessages) => [...oldMessages, message]);

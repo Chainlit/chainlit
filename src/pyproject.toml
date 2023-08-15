@@ -57,7 +57,7 @@ farm-haystack = "^1.18.0"
 optional = true
 
 [tool.poetry.group.mypy.dependencies]
-mypy = "^1.4.1"
+mypy = "1.4.1"
 types-requests = "^2.31.0.2"
 types-aiofiles = "^23.1.0.5"
 

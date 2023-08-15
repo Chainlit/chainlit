@@ -1,4 +1,4 @@
-import { submitMessage } from "../../support/testUtils";
+import { runTestServer, submitMessage } from "../../support/testUtils";
 
 function newSession() {
   cy.get("#new-chat-button").should("exist").click();
@@ -12,9 +12,7 @@ function newSession() {
 
 describe("User Session", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to store data related per user session", () => {

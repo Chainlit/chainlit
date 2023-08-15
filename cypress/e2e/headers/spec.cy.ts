@@ -1,10 +1,11 @@
+import { runTestServer } from "../../support/testUtils";
+
 describe("Initial headers", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000", {
+    runTestServer()
+    cy.visit("/", {
       headers: { "test-header": "test header value" },
     });
-    cy.wait(["@settings"]);
   });
 
   it("should be able to access initial headers", () => {

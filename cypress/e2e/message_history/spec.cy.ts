@@ -1,14 +1,13 @@
 import {
   closeHistory,
   openHistory,
+  runTestServer,
   submitMessage,
 } from "../../support/testUtils";
 
 describe("Message History", () => {
   before(() => {
-    cy.intercept("/project/settings").as("settings");
-    cy.visit("http://127.0.0.1:8000");
-    cy.wait(["@settings"]);
+    runTestServer()
   });
 
   it("should be able to show the last message in the message history", () => {

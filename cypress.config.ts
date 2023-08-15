@@ -13,8 +13,14 @@ export default defineConfig({
     supportFile: false,
     defaultCommandTimeout: 10000,
     video: false,
+    baseUrl: "http://127.0.0.1:8000",
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      on("task", {
+        log(message) {
+          console.log(message);
+          return null;
+        }
+      });
     },
   },
 });
