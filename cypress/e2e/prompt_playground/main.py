@@ -1,7 +1,7 @@
 from provider import ChatTestLLM, TestLLM
 
 import chainlit as cl
-from chainlit.types import Prompt, PromptMessage
+from chainlit.prompt import Prompt, PromptMessage
 
 template = """Hello, this is a template.
 This is a variable1 {variable1}

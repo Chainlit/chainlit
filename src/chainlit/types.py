@@ -1,8 +1,10 @@
 from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
-from dataclasses_json import DataClassJsonMixin, dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
+
+from chainlit.prompt import PromptMessage
 
 InputWidgetType = Literal["switch", "slider", "select", "textinput", "tags"]
 ElementType = Literal[
@@ -41,31 +43,6 @@ class AskFileResponse:
     size: int
     type: str
     content: bytes
-
-
-@dataclass_json
-@dataclass
-class BaseTemplate:
-    template: Optional[str] = None
-    formatted: Optional[str] = None
-    template_format: Optional[str] = "f-string"
-
-
-@dataclass_json
-@dataclass
-class PromptMessage(BaseTemplate):
-    role: Optional[Literal["system", "assistant", "user", "function"]] = None
-
-
-@dataclass_json
-@dataclass
-class Prompt(BaseTemplate):
-    provider: Optional[str] = None
-    id: Optional[str] = None
-    inputs: Optional[Dict[str, str]] = None
-    completion: Optional[str] = None
-    settings: Optional[Dict[str, Any]] = None
-    messages: Optional[List[PromptMessage]] = None
 
 
 class CompletionRequest(BaseModel):

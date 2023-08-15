@@ -1,27 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Generic, List, Literal, Optional, TypedDict, TypeVar
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
+from chainlit.prompt import Prompt
 from chainlit.types import (
     ConversationFilter,
     ElementDisplay,
     ElementSize,
     ElementType,
     Pagination,
-    Prompt,
 )
 
 

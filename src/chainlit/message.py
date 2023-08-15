@@ -9,8 +9,9 @@ from chainlit.config import config
 from chainlit.context import get_emitter
 from chainlit.element import ElementBased
 from chainlit.logger import logger
+from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
-from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec, Prompt
+from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec
 
 
 class MessageBase(ABC):

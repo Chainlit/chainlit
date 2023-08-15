@@ -6,8 +6,8 @@ from llama_index.callbacks.schema import CBEventType, EventPayload
 from chainlit.context import get_emitter
 from chainlit.element import Text
 from chainlit.message import Message
+from chainlit.prompt import Prompt
 from chainlit.sync import run_sync
-from chainlit.types import Prompt
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,

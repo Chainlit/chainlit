@@ -7,8 +7,8 @@ from chainlit.config import config
 from chainlit.context import get_emitter
 from chainlit.emitter import ChainlitEmitter
 from chainlit.message import ErrorMessage, Message
+from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
-from chainlit.types import Prompt, PromptMessage
 
 IGNORE_LIST = ["AgentExecutor"]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
