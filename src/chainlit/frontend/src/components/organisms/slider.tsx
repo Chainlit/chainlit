@@ -35,7 +35,8 @@ const StyledSlider = styled(Slider)(({ theme }) => {
   const isLightMode = theme.palette.mode === 'light';
 
   return {
-    width: 'calc(100% - 7px)',
+    width: 'calc(100% - 18px)',
+    marginLeft: '8px',
     color: grey[isLightMode ? 300 : 850],
     height: 3,
     '& .MuiSlider-track': {

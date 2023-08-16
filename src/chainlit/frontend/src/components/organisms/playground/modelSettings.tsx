@@ -108,41 +108,51 @@ const ModelSettings = () => {
   };
 
   return (
-    <Stack spacing={2} width={250}>
+    <Box width={250} sx={{ height: 'inherit' }}>
       <Typography fontSize="16px" fontWeight={600} color="text.primary">
         Settings
       </Typography>
-      <SelectInput
-        items={providers?.map((provider: ILLMProvider) => ({
-          label: provider.name,
-          value: provider.id
-        }))}
-        id="prompt-providers"
-        value={provider.id}
-        label="Provider"
-        onChange={onSelectedProviderChange}
-      />
-      {providerWarning}
-      {provider.inputs.map((input: TFormInput) => (
-        <FormInput
-          key={input.id}
-          element={{
-            ...input,
-            value: formik.values[input.id] as any,
-            onChange: (event: any): void => {
-              formik.handleChange(event);
-            },
-            setField: (
-              field: string,
-              value: TFormInputValue,
-              shouldValidate?: boolean
-            ): void => {
-              formik.setFieldValue(field, value, shouldValidate);
-            }
-          }}
+      <Stack
+        spacing={2}
+        sx={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          height: '100%',
+          paddingBottom: '10px'
+        }}
+      >
+        <SelectInput
+          items={providers?.map((provider: ILLMProvider) => ({
+            label: provider.name,
+            value: provider.id
+          }))}
+          id="prompt-providers"
+          value={provider.id}
+          label="Provider"
+          onChange={onSelectedProviderChange}
         />
-      ))}
-    </Stack>
+        {providerWarning}
+        {provider.inputs.map((input: TFormInput) => (
+          <FormInput
+            key={input.id}
+            element={{
+              ...input,
+              value: formik.values[input.id] as any,
+              onChange: (event: any): void => {
+                formik.handleChange(event);
+              },
+              setField: (
+                field: string,
+                value: TFormInputValue,
+                shouldValidate?: boolean
+              ): void => {
+                formik.setFieldValue(field, value, shouldValidate);
+              }
+            }}
+          />
+        ))}
+      </Stack>
+    </Box>
   );
 };
 
@@ -158,7 +168,7 @@ export default function ResponsiveModelSettings({
   toggleDrawer
 }: Props) {
   return !isSmallScreen ? (
-    <Box ml="32px !important">
+    <Box ml="32px !important" height="100%">
       <ModelSettings />
     </Box>
   ) : (
