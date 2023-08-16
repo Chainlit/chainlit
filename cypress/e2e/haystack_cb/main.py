@@ -3,7 +3,6 @@ from haystack.agents.agent_step import AgentStep
 from haystack.nodes import PromptNode
 
 import chainlit as cl
-from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
 
 
 @cl.on_chat_start
@@ -13,7 +12,7 @@ async def start():
     fake_prompt_node = PromptNode(model_name_or_path="gpt-3.5-turbo", api_key="fakekey")
 
     agent = Agent(fake_prompt_node)
-    cb = HaystackAgentCallbackHandler(agent)
+    cb = cl.HaystackAgentCallbackHandler(agent)
 
     cb.on_agent_start(name="agent")
 

@@ -104,7 +104,6 @@ const Message = ({
           >
             <MessageContent
               authorIsUser={message.authorIsUser}
-              actions={actions}
               elements={elements}
               id={message.id}
               content={message.content}
@@ -117,7 +116,7 @@ const Message = ({
               loading={isRunning}
             />
             {!isRunning && isLast && message.waitForAnswer && <UploadButton />}
-            <Buttons message={message} />
+            <Buttons message={message} actions={actions} />
           </Stack>
         </Stack>
       </Box>

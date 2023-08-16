@@ -1,3 +1,4 @@
+import importlib
 import inspect
 from typing import Callable
 
@@ -49,3 +50,18 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 await emitter.task_end()
 
     return wrapper
+
+
+def make_module_getattr(registry):
+    """Leverage PEP 562 to make imports lazy in an __init__.py
+
+    The registry must be a dictionary with the items to import as keys and the
+    modules they belong to as a value.
+    """
+
+    def __getattr__(name):
+        module_path = registry[name]
+        module = importlib.import_module(module_path, __package__)
+        return getattr(module, name)
+
+    return __getattr__

@@ -31,7 +31,7 @@ from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Messa
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
 from chainlit.user_session import user_session
-from chainlit.utils import wrap_user_function
+from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
 
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
@@ -180,6 +180,15 @@ def sleep(duration: int):
     return asyncio.sleep(duration)
 
 
+__getattr__ = make_module_getattr(
+    {
+        "LangchainCallbackHandler": "chainlit.langchain.callbacks",
+        "AsyncLangchainCallbackHandler": "chainlit.langchain.callbacks",
+        "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
+        "HaystackAgentCallbackHandler": "chainlit.haystack.callbacks",
+    }
+)
+
 __all__ = [
     "user_session",
     "Action",
@@ -211,4 +220,8 @@ __all__ = [
     "run_sync",
     "make_async",
     "cache",
+    "LangchainCallbackHandler",
+    "AsyncLangchainCallbackHandler",
+    "LlamaIndexCallbackHandler",
+    "HaystackAgentCallbackHandler",
 ]
