@@ -39,6 +39,7 @@ export default function EditorWrapper({
             fontSize: '16px',
             lineHeight: '24px',
             padding: 3,
+            paddingRight: 4,
             border: (theme: Theme) => `1.5px solid ${theme.palette.divider}`,
             borderRadius: '8px',
             overflowY: 'auto',
