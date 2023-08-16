@@ -157,7 +157,7 @@ export default function PromptMessage({
               }
             }}
           >
-            {message.role.toUpperCase()}
+            {message?.role?.toUpperCase()}
           </Typography>
         )}
       </Stack>

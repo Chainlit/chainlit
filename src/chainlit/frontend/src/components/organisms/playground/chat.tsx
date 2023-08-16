@@ -1,4 +1,5 @@
 import { EditorState } from 'draft-js';
+import { Fragment } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { Box, Stack, Typography } from '@mui/material';
@@ -80,13 +81,12 @@ export default function ChatPromptPlayground({
         {messages.length > 0 ? (
           <Stack>
             {messages.map((message, index) => (
-              <>
+              <Fragment key={`prompt-message-${index}`}>
                 <PromptMessage
                   message={message}
                   prompt={prompt}
                   mode={mode}
                   index={index}
-                  key={`prompt-message-${index}`}
                   onChange={onChange}
                 />
                 {index !== messages.length - 1 ? (
@@ -97,7 +97,7 @@ export default function ChatPromptPlayground({
                     }}
                   />
                 ) : null}
-              </>
+              </Fragment>
             ))}
           </Stack>
         ) : null}
