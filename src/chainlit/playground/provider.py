@@ -51,7 +51,12 @@ class BaseProvider:
         trace_event("completion")
 
     def get_var(self, request: CompletionRequest, var: str) -> Union[str, None]:
-        return request.userEnv.get(var, os.environ.get(var))
+        user_env = config.project.user_env or []
+
+        if var in user_env:
+            return request.userEnv.get(var)
+        else:
+            return os.environ.get(var)
 
     def _is_env_var_available(self, var: str) -> bool:
         user_env = config.project.user_env or []
