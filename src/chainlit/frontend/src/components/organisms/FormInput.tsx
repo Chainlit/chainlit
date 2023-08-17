@@ -36,9 +36,7 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
         />
       );
     case 'slider':
-      return (
-        <Slider {...omit(element, 'setField')} value={element.value ?? 0} />
-      );
+      return <Slider {...element} value={element.value ?? 0} />;
     case 'tags':
       return <TagsInput {...element} value={element.value ?? []} />;
     case 'switch':

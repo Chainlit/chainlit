@@ -125,7 +125,7 @@ export default function Design(): JSX.Element {
           <InputLabel
             label={'Test'}
             tooltip="This is my tooltip"
-            notificationsCount={10}
+            notificationsProps={{ count: 10 }}
           />
         </ComponentBox>
         <ComponentBox name="Select">

@@ -18,7 +18,7 @@ export default function InputStateHandler(
     hasError,
     id,
     label,
-    notificationsCount,
+    notificationsProps,
     tooltip,
     sx
   } = props;
@@ -30,7 +30,7 @@ export default function InputStateHandler(
           id={id}
           label={label}
           tooltip={tooltip}
-          notificationsCount={notificationsCount}
+          notificationsProps={notificationsProps}
         />
       ) : null}
       <FormControl error={hasError} fullWidth>

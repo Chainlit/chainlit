@@ -66,7 +66,7 @@ export const renderMenuItem = ({
   >
     {item.label || item.value}
     {item.notificationCount ? (
-      <NotificationCount notificationsCount={item.notificationCount} />
+      <NotificationCount count={item.notificationCount} />
     ) : null}
   </MenuItem>
 );
