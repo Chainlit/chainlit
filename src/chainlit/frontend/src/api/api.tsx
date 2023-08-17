@@ -24,7 +24,7 @@ const api = {
         body: JSON.stringify(data)
       });
       return res;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.statusText);
     }
   },

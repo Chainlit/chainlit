@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
@@ -8,30 +6,17 @@ import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/message/container';
 import PromptPlaground from 'components/organisms/playground';
 
+import { useApi } from 'hooks/useApi';
+
 import { IAction } from 'state/action';
 import { IChat } from 'state/chat';
-import { clientState } from 'state/client';
 
 export default function Conversation() {
   const { id } = useParams();
-  const client = useRecoilValue(clientState);
-  const [error, setError] = useState<string | undefined>();
-  const [conversation, setConversation] = useState<IChat | undefined>();
 
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    setError(undefined);
-
-    client
-      .getConversation(id)
-      .then((conversation) => setConversation(conversation))
-      .catch((err) => {
-        setError(err.message);
-      });
-  }, [client, id]);
+  const { data: conversation, error } = useApi<IChat>(
+    id ? `/project/conversation/${id}` : null
+  );
 
   if (!conversation || error) {
     return null;

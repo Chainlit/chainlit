@@ -2,8 +2,6 @@ import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
 import { IChat, IPrompt } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
-import { IMessageElement } from 'state/element';
-import { IMember, Role } from 'state/user';
 
 const devServer = 'http://127.0.0.1:8000';
 const url = import.meta.env.DEV ? devServer : window.origin;
@@ -118,28 +116,11 @@ export class ChainlitClient {
     return stream;
   };
 
-  getRole = async () => {
-    const res = await this.fetch(`/project/role`, {
-      method: 'GET'
-    });
-
-    const role = await res.text();
-    return role as Role;
-  };
-
   setHumanFeedback = async (messageId: string, feedback: number) => {
     await this.fetch(`/message/feedback`, {
       method: 'PUT',
       body: JSON.stringify({ messageId, feedback })
     });
-  };
-
-  getProjectMembers = async (): Promise<IMember[]> => {
-    const res = await this.fetch(`/project/members`, {
-      method: 'GET'
-    });
-
-    return res.json();
   };
 
   getConversations = async (
@@ -153,28 +134,6 @@ export class ChainlitClient {
       method: 'POST',
       body: JSON.stringify({ pagination, filter })
     });
-
-    return res.json();
-  };
-
-  getConversation = async (conversationId: string): Promise<IChat> => {
-    const res = await this.fetch(`/project/conversation/${conversationId}`, {
-      method: 'GET'
-    });
-
-    return res.json();
-  };
-
-  getElement = async (
-    conversationId: number | string,
-    elementId: number | string
-  ): Promise<IMessageElement> => {
-    const res = await this.fetch(
-      `/project/conversation/${conversationId}/element/${elementId}`,
-      {
-        method: 'GET'
-      }
-    );
 
     return res.json();
   };
