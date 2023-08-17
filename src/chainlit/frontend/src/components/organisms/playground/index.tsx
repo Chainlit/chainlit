@@ -30,7 +30,7 @@ import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
 
 export default function PromptPlayground() {
-  const client = useRecoilValue(clientState);
+  const accessToken = useRecoilValue(accessTokenState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
   const [restoredTime, setRestoredTime] = useState(0);
@@ -44,8 +44,7 @@ export default function PromptPlayground() {
   );
 
   if (isFirstRender) {
-    client
-      .getLLMProviders()
+    ChainlitAPI.getLLMProviders()
       .then((res) =>
         setPlayground((old) => ({ ...old, providers: res.providers }))
       )

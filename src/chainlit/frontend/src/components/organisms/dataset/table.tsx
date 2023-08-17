@@ -1,3 +1,4 @@
+import { ChainlitAPI } from 'api/chainlitApi';
 import { useCallback, useEffect, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList } from 'react-window';
@@ -7,8 +8,8 @@ import { useRecoilValue } from 'recoil';
 import { Alert, Box, Stack, Typography } from '@mui/material';
 
 import { IChat } from 'state/chat';
-import { clientState } from 'state/client';
 import { datasetFiltersState } from 'state/dataset';
+import { accessTokenState } from 'state/user';
 
 import DeleteConversationButton from './deleteConversationButton';
 import OpenConversationButton from './openConversationButton';
@@ -38,18 +39,20 @@ const serializeDate = (timestamp: number | string) => {
 
 export default function ConversationTable() {
   const df = useRecoilValue(datasetFiltersState);
+  const accessToken = useRecoilValue(accessTokenState);
+
   const [conversations, setConversations] = useState<IChat[]>([]);
   const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
-  const client = useRecoilValue(clientState);
   const [error, setError] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   const fetchConversations = useCallback(
     async (cursor?: string | number) => {
       try {
-        const { pageInfo, data } = await client.getConversations(
+        const { pageInfo, data } = await ChainlitAPI.getConversations(
           { first: BATCH_SIZE, cursor },
-          df
+          df,
+          accessToken
         );
         setPrevPageInfo(pageInfo);
         setError(undefined);
@@ -60,7 +63,7 @@ export default function ConversationTable() {
         setLoading(false);
       }
     },
-    [client, df]
+    [accessToken, df]
   );
 
   const refetchConversations = useCallback(async () => {

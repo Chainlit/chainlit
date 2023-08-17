@@ -1,4 +1,4 @@
-import { api } from 'api/api';
+import { api } from 'api';
 import { useRecoilValue } from 'recoil';
 import useSWR from 'swr';
 

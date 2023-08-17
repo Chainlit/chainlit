@@ -32,17 +32,17 @@ const api = {
   get: async (endpoint: string, token: string) =>
     await api.fetch('GET', endpoint, token),
 
-  post: async (endpoint: string, data: any, token: string) =>
+  post: async (endpoint: string, data: any, token?: string) =>
     await api.fetch('POST', endpoint, token, data),
 
-  put: async (endpoint: string, data: any, token: string) =>
+  put: async (endpoint: string, data: any, token?: string) =>
     await api.fetch('PUT', endpoint, token, data),
 
   patch: async (endpoint: string, data: any, token?: string) =>
     await api.fetch('PATCH', endpoint, token, data),
 
-  delete: async (endpoint: string, token: string) =>
-    await api.fetch('DELETE', endpoint, token)
+  delete: async (endpoint: string, data: any, token?: string) =>
+    await api.fetch('DELETE', endpoint, token, data)
 };
 
 export { api };
