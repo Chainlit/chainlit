@@ -2,7 +2,14 @@ import merge from 'lodash/merge';
 import { grey } from 'palette';
 import React from 'react';
 
-import { Box, Stack, SxProps, Theme, Typography } from '@mui/material';
+import {
+  Box,
+  Stack,
+  SxProps,
+  Theme,
+  Typography,
+  useTheme
+} from '@mui/material';
 
 import ClipboardCopy from 'components/atoms/ClipboardCopy';
 
@@ -22,6 +29,8 @@ export default function EditorWrapper({
   sxChildren,
   title
 }: React.PropsWithChildren<Props>) {
+  const theme = useTheme();
+
   return (
     <Stack
       spacing={title ? 1.5 : 0}
@@ -40,17 +49,14 @@ export default function EditorWrapper({
             lineHeight: '24px',
             padding: 3,
             paddingRight: 4,
-            border: (theme: Theme) => `1.5px solid ${theme.palette.divider}`,
+            border: `1.5px solid ${theme.palette.divider}`,
             borderRadius: '8px',
             overflowY: 'auto',
             flexGrow: 1,
-            caretColor: (theme: Theme) => theme.palette.text.primary,
-            backgroundColor: (theme: Theme) => theme.palette.background.paper,
+            caretColor: theme.palette.text.primary,
+            backgroundColor: theme.palette.background.paper,
             '&:hover': {
-              borderColor: (theme: Theme) =>
-                theme.palette.mode === 'light'
-                  ? theme.palette.primary.main
-                  : 'white'
+              borderColor: theme.palette.mode === 'light' ? grey[400] : 'white'
             }
           },
           sxChildren

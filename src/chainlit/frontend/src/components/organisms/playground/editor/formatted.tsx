@@ -10,10 +10,13 @@ import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
 import { OrderedSet } from 'immutable';
 import { isEqual } from 'lodash';
 import merge from 'lodash/merge';
+import { grey } from 'palette';
 import { useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
+
+import { Theme } from '@mui/material';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
@@ -267,7 +270,14 @@ export default function FormattedEditor({
       clipboardValue={state?.getCurrentContent().getPlainText()}
       sxChildren={merge(
         sxEditorChildren || {},
-        readOnly ? { caretColor: 'transparent' } : {}
+        readOnly
+          ? {
+              caretColor: 'transparent',
+              backgroundColor: (theme: Theme) => theme.palette.background.paper,
+              borderColor: (theme: Theme) =>
+                theme.palette.mode === 'light' ? grey[400] : 'white'
+            }
+          : {}
       )}
     >
       <Editor
@@ -275,6 +285,9 @@ export default function FormattedEditor({
         customStyleMap={customStyleMap}
         editorState={state}
         onChange={handleOnEditorChange}
+        customStyleFn={() => ({
+          fontStyle: 'italic'
+        })}
       />
     </EditorWrapper>
   );
