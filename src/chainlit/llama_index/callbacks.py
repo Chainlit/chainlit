@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
+from llama_index.llms.base import ChatResponse
 
 from chainlit.context import context
 from chainlit.element import Text
@@ -85,9 +86,12 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 )
 
         if event_type == CBEventType.LLM:
+            response = payload.get(EventPayload.RESPONSE)
+            content = response.message.content if response else ""
+
             run_sync(
                 Message(
-                    content=payload.get(EventPayload.RESPONSE, ""),
+                    content=content,
                     author=event_type,
                     parent_id=parent_id,
                     prompt=payload.get(EventPayload.PROMPT),
