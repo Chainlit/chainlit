@@ -472,7 +472,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["updateElement"]
 
-    async def upload_element(self, content: Union[bytes, str], mime: str):
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
         id = str(uuid.uuid4())
         body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 
