@@ -8,7 +8,7 @@ from chainlit.client.base import MessageDict
 from chainlit.client.cloud import CloudAuthClient
 from chainlit.client.utils import get_auth_client, get_db_client
 from chainlit.config import config
-from chainlit.context import emitter_var, loop_var
+from chainlit.context import init_context
 from chainlit.emitter import ChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
@@ -122,18 +122,17 @@ async def connect(sid, environ, auth):
 
 @socket.on("connection_successful")
 async def connection_successful(sid):
-    session = Session.require(sid)
-    if session.restored:
+    context = init_context(sid)
+    if context.session.restored:
         return
 
-    emitter_var.set(ChainlitEmitter(session))
-    loop_var.set(asyncio.get_event_loop())
-
-    if isinstance(session.auth_client, CloudAuthClient) and config.project.database in [
+    if isinstance(
+        context.session.auth_client, CloudAuthClient
+    ) and config.project.database in [
         "local",
         "custom",
     ]:
-        await session.db_client.create_user(session.auth_client.user_infos)
+        await context.session.db_client.create_user(session.auth_client.user_infos)
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
@@ -169,9 +168,7 @@ async def stop(sid):
     if session := Session.get(sid):
         trace_event("stop_task")
 
-        emitter_var.set(ChainlitEmitter(session))
-        loop_var.set(asyncio.get_event_loop())
-
+        context = init_context(session)
         await Message(author="System", content="Task stopped by the user.").send()
 
         session.should_stop = True
@@ -183,12 +180,10 @@ async def stop(sid):
 async def process_message(session: Session, message_dict: MessageDict):
     """Process a message from the user."""
     try:
-        emitter = ChainlitEmitter(session)
-        emitter_var.set(emitter)
-        loop_var.set(asyncio.get_event_loop())
+        context = init_context(session)
 
-        await emitter.task_start()
-        await emitter.process_user_message(message_dict)
+        await context.emitter.task_start()
+        await context.emitter.process_user_message(message_dict)
 
         message = Message.from_dict(message_dict)
         if config.code.on_message:
@@ -201,7 +196,7 @@ async def process_message(session: Session, message_dict: MessageDict):
             author="Error", content=str(e) or e.__class__.__name__
         ).send()
     finally:
-        await emitter.task_end()
+        await context.emitter.task_end()
 
 
 @socket.on("ui_message")
@@ -224,9 +219,7 @@ async def process_action(action: Action):
 @socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
-    session = Session.require(sid)
-    emitter_var.set(ChainlitEmitter(session))
-    loop_var.set(asyncio.get_event_loop())
+    init_context(sid)
 
     action = Action(**action)
 
@@ -236,12 +229,10 @@ async def call_action(sid, action):
 @socket.on("chat_settings_change")
 async def change_settings(sid, settings: Dict[str, Any]):
     """Handle change settings submit from the UI."""
-    session = Session.require(sid)
-    emitter_var.set(ChainlitEmitter(session))
-    loop_var.set(asyncio.get_event_loop())
+    context = init_context(sid)
 
     for key, value in settings.items():
-        session.chat_settings[key] = value
+        context.session.chat_settings[key] = value
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)

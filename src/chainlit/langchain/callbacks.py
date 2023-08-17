@@ -4,8 +4,7 @@ from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 
 from chainlit.config import config
-from chainlit.context import get_emitter
-from chainlit.emitter import ChainlitEmitter
+from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
 from chainlit.sync import run_sync
 from chainlit.types import LLMSettings
@@ -37,7 +36,6 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
 
 
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
-    emitter: ChainlitEmitter
     # Keep track of the formatted prompts to display them in the prompt playground.
     prompts: List[str]
     # Keep track of the LLM settings for the last prompt
@@ -75,7 +73,6 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         stream_final_answer: bool = False,
         root_message: Optional[Message] = None,
     ) -> None:
-        self.emitter = get_emitter()
         self.prompts = []
         self.llm_settings = None
         self.sequence = []
@@ -84,7 +81,7 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
 
         if root_message:
             self.root_message = root_message
-        elif root_message := self.emitter.session.root_message:
+        elif root_message := context.session.root_message:
             self.root_message = root_message
         else:
             self.root_message = Message(author=config.ui.name, content="")
@@ -287,7 +284,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
                     run_sync(
-                        self.emitter.update_token_count(token_usage["total_tokens"])
+                        context.emitter.update_token_count(token_usage["total_tokens"])
                     )
         if self.final_stream:
             run_sync(self.final_stream.send())
@@ -411,7 +408,9 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
-                    await self.emitter.update_token_count(token_usage["total_tokens"])
+                    await context.emitter.update_token_count(
+                        token_usage["total_tokens"]
+                    )
         if self.final_stream:
             await self.final_stream.send()
 

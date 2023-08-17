@@ -1,6 +1,10 @@
-from asyncio import AbstractEventLoop
+import asyncio
 from contextvars import ContextVar
 from typing import TYPE_CHECKING
+
+from lazify import LazyProxy
+
+from chainlit.session import Session
 
 if TYPE_CHECKING:
     from chainlit.emitter import ChainlitEmitter
@@ -11,19 +15,36 @@ class ChainlitContextException(Exception):
         super().__init__(msg, *args, **kwargs)
 
 
-emitter_var: ContextVar["ChainlitEmitter"] = ContextVar("emitter")
-loop_var: ContextVar[AbstractEventLoop] = ContextVar("loop")
+class ChainlitContext:
+    loop: asyncio.AbstractEventLoop
+    emitter: "ChainlitEmitter"
+    session: Session
+
+    def __init__(self, session: Session):
+        from chainlit.emitter import ChainlitEmitter
+
+        self.loop = asyncio.get_event_loop()
+        self.session = session
+        self.emitter = ChainlitEmitter(session)
 
 
-def get_emitter() -> "ChainlitEmitter":
+context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
+
+
+def init_context(session_or_sid) -> ChainlitContext:
+    if not isinstance(session_or_sid, Session):
+        session_or_sid = Session.require(session_or_sid)
+
+    context = ChainlitContext(session_or_sid)
+    context_var.set(context)
+    return context
+
+
+def get_context() -> ChainlitContext:
     try:
-        return emitter_var.get()
+        return context_var.get()
     except LookupError:
         raise ChainlitContextException()
 
 
-def get_loop() -> AbstractEventLoop:
-    try:
-        return loop_var.get()
-    except LookupError:
-        raise ChainlitContextException()
+context = LazyProxy(get_context, enable_cache=False)

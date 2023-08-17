@@ -4,7 +4,7 @@ from typing import Optional
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.telemetry import trace_event
 
 
@@ -25,13 +25,12 @@ class Action(DataClassJsonMixin):
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        self.emit = get_emitter().emit
 
     async def send(self, for_id: str):
         trace_event(f"send {self.__class__.__name__}")
         self.forId = for_id
-        await self.emit("action", self.to_dict())
+        await context.emitter.emit("action", self.to_dict())
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
-        await self.emit("remove_action", self.to_dict())
+        await context.emitter.emit("remove_action", self.to_dict())

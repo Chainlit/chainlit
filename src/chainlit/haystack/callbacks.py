@@ -5,8 +5,7 @@ from haystack.agents.agent_step import AgentStep
 
 import chainlit as cl
 from chainlit.config import config
-from chainlit.context import get_emitter
-from chainlit.emitter import ChainlitEmitter
+from chainlit.context import context
 
 T = TypeVar("T")
 
@@ -33,7 +32,6 @@ class Stack(Generic[T]):
 
 class HaystackAgentCallbackHandler:
     stack: Stack[cl.Message]
-    emitter: ChainlitEmitter
     latest_agent_message: Optional[cl.Message]
 
     def __init__(self, agent: Agent):
@@ -47,13 +45,11 @@ class HaystackAgentCallbackHandler:
         agent.tm.callback_manager.on_tool_error += self.on_tool_error
 
     def get_root_message(self):
-        self.emitter = self.emitter if hasattr(self, "emitter") else get_emitter()
-
-        if not self.emitter.session.root_message:
+        if not context.session.root_message:
             root_message = cl.Message(author=config.ui.name, content="")
             cl.run_sync(root_message.send())
 
-        return self.emitter.session.root_message
+        return context.session.root_message
 
     def on_agent_start(self, **kwargs: Any) -> None:
         # Prepare agent step message for streaming

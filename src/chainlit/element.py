@@ -9,7 +9,7 @@ import filetype
 from pydantic.dataclasses import Field, dataclass
 
 from chainlit.client.base import BaseDBClient, ElementDict
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementDisplay, ElementSize, ElementType
 
@@ -45,7 +45,6 @@ class Element:
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
-        self.emitter = get_emitter()
         self.persisted = False
 
         if not self.url and not self.path and not self.content:
@@ -99,7 +98,7 @@ class Element:
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
-        await self.emitter.emit("remove_element", {"id": self.id})
+        await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: Optional[str] = None):
         if not self.content and not self.url and self.path:
@@ -111,8 +110,8 @@ class Element:
             self.for_ids.append(for_id)
 
         # We have a client, persist the element
-        if self.emitter.db_client:
-            element_dict = await self.persist(self.emitter.db_client)
+        if context.emitter.db_client:
+            element_dict = await self.persist(context.emitter.db_client)
             self.id = element_dict["id"]
 
         elif not self.url and not self.content:
@@ -123,18 +122,18 @@ class Element:
         # Adding this out of to_dict since the dict will be persisted in the DB
         emit_dict["content"] = self.content
 
-        if self.emitter.emit:
+        if context.emitter.emit:
             # Element was already sent
             if len(self.for_ids) > 1:
                 trace_event(f"update {self.__class__.__name__}")
-                await self.emitter.emit(
+                await context.emitter.emit(
                     "update_element",
                     {"id": self.id, "forIds": self.for_ids},
                 )
             else:
                 trace_event(f"send {self.__class__.__name__}")
                 emit_dict = await self.before_emit(emit_dict)
-                await self.emitter.emit("element", emit_dict)
+                await context.emitter.emit("element", emit_dict)
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)
@@ -165,10 +164,10 @@ class Avatar(Element):
         # Adding this out of to_dict since the dict will be persisted in the DB
         element["content"] = self.content
 
-        if self.emitter.emit and element:
+        if context.emitter.emit and element:
             trace_event(f"send {self.__class__.__name__}")
             element = await self.before_emit(element)
-            await self.emitter.emit("element", element)
+            await context.emitter.emit("element", element)
 
 
 @dataclass
