@@ -246,6 +246,10 @@ class Message(MessageBase):
 
         return True
 
+    async def remove_actions(self):
+        for action in self.actions:
+            await action.remove()
+
 
 class ErrorMessage(MessageBase):
     """
