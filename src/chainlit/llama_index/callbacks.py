@@ -22,9 +22,6 @@ DEFAULT_IGNORE = [
 class LlamaIndexCallbackHandler(BaseCallbackHandler):
     """Base callback handler that can be used to track event starts and ends."""
 
-    # Message at the root of the chat we should attach child messages to
-    root_message: Optional[Message] = None
-
     def __init__(
         self,
         event_starts_to_ignore: List[CBEventType] = DEFAULT_IGNORE,
@@ -75,7 +72,8 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         # actually send messages.
         context_var.set(self.context)
 
-        parent_id = self.root_message.id if self.root_message else None
+        root_message = self.context.session.root_message
+        parent_id = root_message.id if root_message else None
 
         if event_type == CBEventType.RETRIEVE:
             sources = payload.get(EventPayload.NODES)
@@ -111,15 +109,8 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 ).send()
             )
 
-    def start_trace(self, trace_id: Optional[str] = None) -> None:
-        """Run when an overall trace is launched."""
-        self.root_message = self.context.session.root_message
+    def _noop(self, *args, **kwargs):
+        pass
 
-    def end_trace(
-        self,
-        trace_id: Optional[str] = None,
-        trace_map: Optional[Dict[str, List[str]]] = None,
-    ) -> None:
-        """Run when an overall trace is exited."""
-
-        self.root_message = None
+    start_trace = _noop
+    end_trace = _noop
