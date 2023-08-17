@@ -4,7 +4,7 @@ from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.llms.base import ChatResponse
 
-from chainlit.context import context
+from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.message import Message
 from chainlit.sync import run_sync
@@ -31,6 +31,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         event_ends_to_ignore: List[CBEventType] = DEFAULT_IGNORE,
     ) -> None:
         """Initialize the base callback handler."""
+        self.context = context_var.get()
         self.event_starts_to_ignore = tuple(event_starts_to_ignore)
         self.event_ends_to_ignore = tuple(event_ends_to_ignore)
 
@@ -42,6 +43,8 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> str:
         """Run when an event starts and return id of event."""
+        context_var.set(self.context)
+
         run_sync(
             Message(
                 author=event_type,
@@ -61,6 +64,16 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         """Run when an event ends."""
         if payload is None:
             return
+
+        # Chainlit context is local to the main thread, and LlamaIndex
+        # runs the callbacks in its own threads, so they don't have a
+        # Chainlit context by default.
+        #
+        # This line restores the context in which the callback handler
+        # has been created (it's always created in the main thread)
+        # before running the rest of the method, so that we can
+        # actually send messages.
+        context_var.set(self.context)
 
         parent_id = self.root_message.id if self.root_message else None
 
@@ -100,7 +113,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
 
     def start_trace(self, trace_id: Optional[str] = None) -> None:
         """Run when an overall trace is launched."""
-        self.root_message = context.session.root_message
+        self.root_message = self.context.session.root_message
 
     def end_trace(
         self,
