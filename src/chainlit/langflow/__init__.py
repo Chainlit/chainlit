@@ -32,6 +32,6 @@ async def load_flow(schema: Union[Dict, str], tweaks: Optional[Dict] = None):
                     raise ValueError(f"Error: {reason}")
                 schema = await r.json()
 
-    flow = load_flow_from_json(input=schema, tweaks=tweaks)
+    flow = load_flow_from_json(flow=schema, tweaks=tweaks)
 
     return flow
