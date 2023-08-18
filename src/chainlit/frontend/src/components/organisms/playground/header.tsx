@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material';
 
-import CommitButton from './commitButton';
 import PromptModeToggle from './modeToggle';
+import SaveButton from './saveButton';
 import VariableInput from './variableInput';
 
 interface Props {
@@ -16,7 +16,7 @@ export default function PlaygroundHeader({ hasTemplate }: Props) {
         <VariableInput />
       </Stack>
       <Stack direction="row" alignItems="center" gap={1}>
-        <CommitButton hasTemplate={hasTemplate} />
+        <SaveButton hasTemplate={hasTemplate} />
       </Stack>
     </Stack>
   );

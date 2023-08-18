@@ -110,6 +110,7 @@ export default function PromptMessage({
       direction="row"
       sx={{
         padding: (theme) => theme.spacing(1, 2),
+        paddingRight: 0,
         '&:hover': {
           background: (theme) => theme.palette.background.paper
         }

@@ -2,13 +2,11 @@ import { Tooltip } from '@mui/material';
 
 import AccentButton from 'components/atoms/buttons/accentButton';
 
-import CommitIcon from 'assets/commit';
-
 interface Props {
   hasTemplate?: boolean;
 }
 
-export default function CommitButton({ hasTemplate }: Props) {
+export default function SaveButton({ hasTemplate }: Props) {
   if (!hasTemplate) {
     return null;
   }
@@ -16,9 +14,7 @@ export default function CommitButton({ hasTemplate }: Props) {
   return (
     <Tooltip title="Coming soon!">
       <span>
-        <AccentButton startIcon={<CommitIcon />} disabled>
-          Commit changes
-        </AccentButton>
+        <AccentButton disabled>Save changes</AccentButton>
       </span>
     </Tooltip>
   );
