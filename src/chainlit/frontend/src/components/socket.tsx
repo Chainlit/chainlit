@@ -218,6 +218,12 @@ export default memo(function Socket() {
       setElements((old) => {
         return old.filter((e) => e.id !== remove.id);
       });
+      setTasklists((old) => {
+        return old.filter((e) => e.id !== remove.id);
+      });
+      setAvatars((old) => {
+        return old.filter((e) => e.id !== remove.id);
+      });
     });
 
     socket.on('action', (action: IAction) => {
