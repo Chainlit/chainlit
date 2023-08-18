@@ -145,7 +145,7 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def upload_element(self, content: bytes, mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
         pass
 
     @abstractmethod

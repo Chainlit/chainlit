@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Mapping, Optional, cast
+from typing import Any, Dict, Mapping, Optional, Union, cast
 
 import aiohttp
 from python_graphql_client import GraphqlClient
@@ -472,7 +472,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["updateElement"]
 
-    async def upload_element(self, content: bytes, mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
         id = str(uuid.uuid4())
         body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 

@@ -33,7 +33,7 @@ class Element:
     # The local path of the element.
     path: Optional[str] = None
     # The byte content of the element.
-    content: Optional[bytes] = None
+    content: Optional[Union[bytes, str]] = None
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
     display: ElementDisplay = Field(default="side")
     # Controls element size
