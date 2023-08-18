@@ -32,24 +32,19 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         self.event_starts_to_ignore = tuple(event_starts_to_ignore)
         self.event_ends_to_ignore = tuple(event_ends_to_ignore)
 
-    def on_event_start(
-        self,
-        event_type: CBEventType,
-        payload: Optional[Dict[str, Any]] = None,
-        event_id: str = "",
-        **kwargs: Any,
-    ) -> str:
+    def start_trace(self, trace_id: Optional[str] = None) -> None:
         """Run when an event starts and return id of event."""
         context_var.set(self.context)
+        root_message = self.context.session.root_message
+        parent_id = root_message.id if root_message else None
 
         run_sync(
             Message(
-                author=event_type,
-                indent=1,
+                author=trace_id or "llama_index",
+                parent_id=parent_id,
                 content="",
             ).send()
         )
-        return ""
 
     def on_event_end(
         self,
@@ -112,5 +107,5 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
     def _noop(self, *args, **kwargs):
         pass
 
-    start_trace = _noop
+    on_event_start = _noop
     end_trace = _noop
