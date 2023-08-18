@@ -19,7 +19,7 @@ import { playgroundState, variableState } from 'state/playground';
 
 import EditorWrapper from './wrapper';
 
-const VariableModal = (): JSX.Element => {
+const VariableModal = (): JSX.Element | null => {
   const [state, setState] = useState<EditorState | undefined>();
   const [playground, setPlayground] = useRecoilState(playgroundState);
   const [variableName, setVariableName] = useRecoilState(variableState);
@@ -59,6 +59,8 @@ const VariableModal = (): JSX.Element => {
     setVariableName(undefined);
   };
 
+  if (!variableName) return null;
+
   return (
     <Dialog
       id="variable-modal"
@@ -75,13 +77,21 @@ const VariableModal = (): JSX.Element => {
       <Box bgcolor="background.paper">
         <DialogTitle>
           <Typography fontSize="16px" fontWeight={700} color="text.secondary">
-            Edit variable
+            {`Edit variable: ${variableName}`}
+          </Typography>
+          <Typography
+            fontSize="14px"
+            fontWeight={500}
+            color="text.secondary"
+            marginTop={1}
+          >
+            Editing a variable will update its value in the formatted view. If
+            you want to update the template instead, go to the template view.
           </Typography>
         </DialogTitle>
         <DialogContent>
           {state ? (
             <EditorWrapper
-              title={variableName}
               sx={{ minHeight: '250px' }}
               sxChildren={{ padding: 1 }}
             >
@@ -104,7 +114,7 @@ const VariableModal = (): JSX.Element => {
             onClick={updateVariable}
             variant="outlined"
           >
-            Edit
+            Save
           </AccentButton>
         </DialogActions>
       </Box>
