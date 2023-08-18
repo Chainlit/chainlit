@@ -23,7 +23,7 @@ class ChainlitContext:
     def __init__(self, session: Session):
         from chainlit.emitter import ChainlitEmitter
 
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.session = session
         self.emitter = ChainlitEmitter(session)
 
