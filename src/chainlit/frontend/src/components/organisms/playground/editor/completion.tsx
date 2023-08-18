@@ -66,7 +66,8 @@ export default function Completion({ completion }: Props) {
         sx={{
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          paddingRight: '6px'
         }}
       >
         <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
