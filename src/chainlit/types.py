@@ -80,13 +80,13 @@ class DeleteConversationRequest(BaseModel):
 
 class Pagination(BaseModel):
     first: int
-    cursor: Any
+    cursor: Any = None
 
 
 class ConversationFilter(BaseModel):
-    feedback: Optional[Literal[-1, 0, 1]]
-    authorEmail: Optional[str]
-    search: Optional[str]
+    feedback: Optional[Literal[-1, 0, 1]] = None
+    authorEmail: Optional[str] = None
+    search: Optional[str] = None
 
 
 class GetConversationsRequest(BaseModel):
