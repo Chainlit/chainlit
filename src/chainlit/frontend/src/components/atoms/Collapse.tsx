@@ -1,11 +1,7 @@
 import React from 'react';
 import { useToggle } from 'usehooks-ts';
 
-import {
-  ArrowCircleDown,
-  ArrowCircleUp,
-  DownloadRounded
-} from '@mui/icons-material';
+import { DownloadRounded, ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
   Box,
   IconButton,
@@ -43,7 +39,7 @@ const Collapse = ({ children, onDownload }: CollapseProps): JSX.Element => {
         direction="row"
       >
         <IconButton onClick={toggleExpandAll}>
-          {expandAll ? <ArrowCircleUp /> : <ArrowCircleDown />}
+          {expandAll ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
         <IconButton onClick={onDownload}>
           <DownloadRounded />
