@@ -1,3 +1,4 @@
+import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
@@ -130,7 +131,7 @@ class Message(MessageBase):
     If a project ID is configured, the message will be persisted in the cloud.
 
     Args:
-        content (str): The content of the message.
+        content (Union[str, Dict]): The content of the message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
@@ -143,7 +144,7 @@ class Message(MessageBase):
 
     def __init__(
         self,
-        content: str,
+        content: Union[str, Dict],
         author: str = config.ui.name,
         prompt: Optional[str] = None,
         llm_settings: Optional[LLMSettings] = None,
@@ -153,10 +154,18 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
     ):
-        self.content = content
+        self.language = language
+
+        if type(content) is dict:
+            self.content = json.dumps(content, indent=4)
+            self.language = "json"
+        elif type(content) is str:
+            self.content = content
+        else:
+            raise ValueError(f"Unsupported type {type(content)} for message content")
+
         self.author = author
         self.prompt = prompt
-        self.language = language
         self.parent_id = parent_id
         self.indent = indent
         self.actions = actions if actions is not None else []

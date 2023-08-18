@@ -49,10 +49,6 @@ function prepareContent({ id, elements, content, language }: Props) {
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  if (typeof content === 'object') {
-    content = JSON.stringify(content, null, 4);
-    language = 'json';
-  }
   let preparedContent = content ? content.trim() : '';
   const inlinedElements = elements.filter(
     (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
