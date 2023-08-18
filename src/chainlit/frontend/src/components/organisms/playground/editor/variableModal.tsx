@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 import {
+  Alert,
   Box,
   Dialog,
   DialogActions,
@@ -77,19 +78,14 @@ const VariableModal = (): JSX.Element | null => {
       <Box bgcolor="background.paper">
         <DialogTitle>
           <Typography fontSize="16px" fontWeight={700} color="text.secondary">
-            {`Edit variable: ${variableName}`}
-          </Typography>
-          <Typography
-            fontSize="14px"
-            fontWeight={500}
-            color="text.secondary"
-            marginTop={1}
-          >
-            Editing a variable will update its value in the formatted view. If
-            you want to update the template instead, go to the template view.
+            {`Edit ${variableName}`}
           </Typography>
         </DialogTitle>
         <DialogContent>
+          <Alert sx={{ my: 1 }} severity="info">
+            Editing a variable will update its value in the formatted view. If
+            you want to update the template instead, go to the template view.
+          </Alert>
           {state ? (
             <EditorWrapper
               sx={{ minHeight: '250px' }}

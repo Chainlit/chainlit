@@ -267,7 +267,13 @@ export default function FormattedEditor({
       clipboardValue={state?.getCurrentContent().getPlainText()}
       sxChildren={merge(
         sxEditorChildren || {},
-        readOnly ? { caretColor: 'transparent' } : {}
+        readOnly
+          ? {
+              caretColor: 'transparent',
+              backgroundColor: 'transparent',
+              borderColor: 'transparent !important'
+            }
+          : {}
       )}
     >
       <Editor

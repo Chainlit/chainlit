@@ -40,8 +40,7 @@ export default function PromptMessage({
       padding: theme.spacing(2),
       backgroundColor: '',
       '&:hover': {
-        background: theme.palette.background.paper,
-        borderRadius: 0.5
+        background: theme.palette.background.paper
       }
     }
   };
@@ -111,6 +110,7 @@ export default function PromptMessage({
       direction="row"
       sx={{
         padding: (theme) => theme.spacing(1, 2),
+        paddingRight: 0,
         '&:hover': {
           background: (theme) => theme.palette.background.paper
         }
@@ -152,8 +152,7 @@ export default function PromptMessage({
               width: 'fit-content',
               padding: (theme) => theme.spacing(0.5, 1),
               '&:hover': {
-                backgroundColor: (theme) => theme.palette.divider,
-                borderRadius: 0.5
+                backgroundColor: (theme) => theme.palette.divider
               }
             }}
           >
