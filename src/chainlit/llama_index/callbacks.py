@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.element import Text
 from chainlit.message import Message
 from chainlit.sync import run_sync
@@ -96,8 +96,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
 
     def start_trace(self, trace_id: Optional[str] = None) -> None:
         """Run when an overall trace is launched."""
-        emitter = get_emitter()
-        self.root_message = emitter.session.root_message
+        self.root_message = context.session.root_message
 
     def end_trace(
         self,
