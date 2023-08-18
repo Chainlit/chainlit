@@ -32,16 +32,32 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         self.event_starts_to_ignore = tuple(event_starts_to_ignore)
         self.event_ends_to_ignore = tuple(event_ends_to_ignore)
 
+    def _restore_context(self) -> None:
+        """Restore Chainlit context in the current thread
+
+        Chainlit context is local to the main thread, and LlamaIndex
+        runs the callbacks in its own threads, so they don't have a
+        Chainlit context by default.
+
+        This method restores the context in which the callback handler
+        has been created (it's always created in the main thread), so
+        that we can actually send messages.
+        """
+        context_var.set(self.context)
+
+    def _get_parent_id(self) -> Optional[str]:
+        """Get the parent message id"""
+        if root_message := self.context.session.root_message:
+            return root_message.id
+        return None
+
     def start_trace(self, trace_id: Optional[str] = None) -> None:
         """Run when an event starts and return id of event."""
-        context_var.set(self.context)
-        root_message = self.context.session.root_message
-        parent_id = root_message.id if root_message else None
-
+        self._restore_context()
         run_sync(
             Message(
                 author=trace_id or "llama_index",
-                parent_id=parent_id,
+                parent_id=self._get_parent_id(),
                 content="",
             ).send()
         )
@@ -57,18 +73,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         if payload is None:
             return
 
-        # Chainlit context is local to the main thread, and LlamaIndex
-        # runs the callbacks in its own threads, so they don't have a
-        # Chainlit context by default.
-        #
-        # This line restores the context in which the callback handler
-        # has been created (it's always created in the main thread)
-        # before running the rest of the method, so that we can
-        # actually send messages.
-        context_var.set(self.context)
-
-        root_message = self.context.session.root_message
-        parent_id = root_message.id if root_message else None
+        self._restore_context()
 
         if event_type == CBEventType.RETRIEVE:
             sources = payload.get(EventPayload.NODES)
@@ -87,7 +92,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                         content=content,
                         author=event_type,
                         elements=elements,
-                        parent_id=parent_id,
+                        parent_id=self._get_parent_id(),
                     ).send()
                 )
 
@@ -99,7 +104,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 Message(
                     content=content,
                     author=event_type,
-                    parent_id=parent_id,
+                    parent_id=self._get_parent_id(),
                     prompt=payload.get(EventPayload.PROMPT),
                 ).send()
             )
