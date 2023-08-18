@@ -253,7 +253,7 @@ class TaskList(Element):
     tasks: List[Task] = Field(default_factory=list, exclude=True)
     status: str = "Ready"
 
-    def __init__(self):
+    def __post_init__(self):
         self.tasks = []
         self.content = "dummy content to pass validation"
         self.name = "tasklist"
