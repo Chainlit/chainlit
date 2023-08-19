@@ -127,7 +127,7 @@ export default function PromptPlayground() {
           </Box>
         </Stack>
       </DialogTitle>
-      <DialogContent sx={{ display: 'flex', direction: 'row' }}>
+      <DialogContent sx={{ display: 'flex', direction: 'row', padding: 3 }}>
         <ErrorBoundary prefix="Prompt Playground error">
           <Stack gap={3} width="100%">
             <PlaygroundHeader hasTemplate={hasTemplate} />

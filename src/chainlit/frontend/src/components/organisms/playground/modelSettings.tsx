@@ -117,8 +117,7 @@ const ModelSettings = () => {
         sx={{
           overflowY: 'auto',
           overflowX: 'hidden',
-          height: '100%',
-          paddingBottom: '10px'
+          height: '100%'
         }}
       >
         <SelectInput
@@ -132,24 +131,29 @@ const ModelSettings = () => {
           onChange={onSelectedProviderChange}
         />
         {providerWarning}
-        {provider.inputs.map((input: TFormInput) => (
-          <FormInput
-            key={input.id}
-            element={{
-              ...input,
-              value: formik.values[input.id] as any,
-              onChange: (event: any): void => {
-                formik.handleChange(event);
-              },
-              setField: (
-                field: string,
-                value: TFormInputValue,
-                shouldValidate?: boolean
-              ): void => {
-                formik.setFieldValue(field, value, shouldValidate);
-              }
-            }}
-          />
+        {provider.inputs.map((input: TFormInput, index: number) => (
+          <Box
+            // This trick is to have padding at the end of the scroll
+            sx={{ paddingBottom: index === provider.inputs.length - 1 ? 2 : 0 }}
+          >
+            <FormInput
+              key={input.id}
+              element={{
+                ...input,
+                value: formik.values[input.id] as any,
+                onChange: (event: any): void => {
+                  formik.handleChange(event);
+                },
+                setField: (
+                  field: string,
+                  value: TFormInputValue,
+                  shouldValidate?: boolean
+                ): void => {
+                  formik.setFieldValue(field, value, shouldValidate);
+                }
+              }}
+            />
+          </Box>
         ))}
       </Stack>
     </Box>
