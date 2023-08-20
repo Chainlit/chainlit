@@ -71,6 +71,16 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
     );
   };
 
+  const buildProviderTooltip = () => {
+    if (provider.is_chat && !playground.prompt?.messages) {
+      return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
+    } else if (!provider.is_chat && playground.prompt?.messages) {
+      return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
+    } else {
+      return undefined;
+    }
+  };
+
   return (
     <Box width={250} sx={{ height: 'inherit' }}>
       <Typography fontSize="16px" fontWeight={600} color="text.primary">
@@ -92,6 +102,7 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
           id="llm-providers"
           value={provider.id}
           label="LLM Provider"
+          tooltip={buildProviderTooltip()}
           onChange={onSelectedProviderChange}
         />
         {providerWarning}
