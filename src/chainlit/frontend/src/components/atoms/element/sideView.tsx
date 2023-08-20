@@ -166,9 +166,8 @@ const SideView = ({ children }: SideViewProps) => {
 
 const MainDrawer = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'open'
-})<MainDrawerProps>(({ theme, open, width = DRAWER_DEFAULT_WIDTH }) => ({
+})<MainDrawerProps>(({ theme, open }) => ({
   width: '100%',
-  marginRight: !open && theme.breakpoints.up('sm') ? -width : 0,
   display: 'flex',
   flexDirection: 'column',
   boxSizing: 'border-box',
