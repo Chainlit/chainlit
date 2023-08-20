@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
-from chainlit.types import PromptMessage
+from chainlit.prompt import PromptMessage
 
 
 class AnthropicProvider(BaseProvider):
@@ -28,20 +28,20 @@ class AnthropicProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        self.require_settings(request.settings)
-        self.require_prompt(request)
+        llm_settings = request.prompt.settings
+        self.require_settings(llm_settings)
 
-        prompt = self.concatenate_messages(self.create_prompt(request))
+        prompt = self.concatenate_messages(self.create_prompt(request), joiner="")
 
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT
 
         client = anthropic.AsyncAnthropic(**env_settings)
 
-        request.settings["stream"] = True
+        llm_settings["stream"] = True
 
         try:
-            stream = await client.completions.create(prompt=prompt, **request.settings)
+            stream = await client.completions.create(prompt=prompt, **llm_settings)
         except anthropic.APIConnectionError as e:
             raise HTTPException(
                 status_code=503,

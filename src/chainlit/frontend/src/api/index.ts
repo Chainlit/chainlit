@@ -82,10 +82,7 @@ export class ChainlitClient {
       method: 'POST',
       signal: controller.signal,
       body: JSON.stringify({
-        provider: prompt.provider,
-        prompt: prompt.formatted,
-        messages: prompt.messages,
-        settings: prompt.settings,
+        prompt: prompt,
         userEnv
       })
     });

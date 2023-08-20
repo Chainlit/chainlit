@@ -4,9 +4,12 @@ import chainlit as cl
 from chainlit.prompt import Prompt, PromptMessage
 
 template = """Hello, this is a template.
-This is a variable1 {variable1}
-And this is variable2 {variable2}
-And this is variable1 + variable2 {variable1} + {variable2}
+This is a simple variable {variable1}
+This is a another simple {variable2}
+Those are two simple variables {variable1} + {variable2}
+This is a formatting test {{variable1}} {{{variable2}}} {variable3}
+This is another formatting test {{{{variable1}}}} {{{{{variable1}}}}}
+This is a curly braces formatting test {{ {{{{ }} }}}}
 """
 
 formatted = "This is a test formatted prompt"
@@ -14,6 +17,7 @@ formatted = "This is a test formatted prompt"
 inputs = {
     "variable1": "variable1 value",
     "variable2": "variable2 value",
+    "variable3": "{{variable3 value}}",
 }
 
 completion = "This is the original completion"

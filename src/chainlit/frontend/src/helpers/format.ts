@@ -1,21 +1,57 @@
-import cloneDeep from 'lodash/cloneDeep';
-
-import { IPrompt } from 'state/chat';
-
-export function buildTemplateRegexp(inputs = {}, format: string) {
-  const variables = Object.keys(inputs).sort((a, b) => b.length - a.length);
+// Helper function to match the placeholders for a given variable in the template
+export function buildTemplatePlaceholderRegexp(
+  variable: string,
+  format: string
+) {
   switch (format) {
     case 'f-string': {
-      // Create a regex pattern from the variables array
-      const regexPattern = variables.map((v) => `\\b${v}\\b`).join('|');
-      const regex = new RegExp(`(?<!\\{)\\{(${regexPattern})\\}(?!\\})`, 'g');
-      return regex;
+      return new RegExp(`\\{+(${variable}+)\\}+`, 'g');
     }
     default:
       throw new Error(`Unsupported template format ${format}`);
   }
 }
 
+// Helper function to match the placeholders for a all variables in the template
+export function buildTemplatePlaceholdersRegexp(inputs = {}, format: string) {
+  const variables = Object.keys(inputs).sort((a, b) => b.length - a.length);
+  switch (format) {
+    case 'f-string': {
+      // Create a regex pattern from the variables array
+      const regexPattern = variables.map((v) => `${v}`).join('|');
+      return buildTemplatePlaceholderRegexp(regexPattern, format);
+    }
+    default:
+      throw new Error(`Unsupported template format ${format}`);
+  }
+}
+
+// Helper function to escape the template
+export function escape(str: string, format: string) {
+  switch (format) {
+    case 'f-string': {
+      str = str.replaceAll('{{', '{');
+      str = str.replaceAll('}}', '}');
+      return str;
+    }
+    default:
+      throw new Error(`Unsupported template format ${format}`);
+  }
+}
+
+// Helper function to match all substrings to escape and or replace
+export function buildEscapeReplaceRegexp(format: string) {
+  switch (format) {
+    case 'f-string': {
+      // Match wrapped by {} or opening or closing braces
+      return /\{+([^{}]+)\}+|{{|}}/g;
+    }
+    default:
+      throw new Error(`Unsupported template format ${format}`);
+  }
+}
+
+// Helper function to build the template placeholder of a variable
 export function buildVariablePlaceholder(variable: string, format: string) {
   switch (format) {
     case 'f-string': {
@@ -26,63 +62,29 @@ export function buildVariablePlaceholder(variable: string, format: string) {
   }
 }
 
-export function buildVariableRegexp(variable: string, format: string) {
+export function validateVariablePlaceholder(
+  variableName: string,
+  match: string,
+  format: string
+) {
   switch (format) {
     case 'f-string': {
-      const regex = new RegExp(
-        `(?<!\\{)${buildVariablePlaceholder(variable, format)}(?!\\})`,
-        'g'
-      );
-
-      return regex;
+      // leading curly braces
+      const prefixBracesCount = match.split(variableName)[0].length;
+      // tailing curly braces
+      const suffixBracesCount = match.split(variableName)[1].length;
+      const isOdd = prefixBracesCount % 2;
+      const ok = isOdd && prefixBracesCount === suffixBracesCount;
+      const placeholder = buildVariablePlaceholder(variableName, format);
+      const localStartIndex = match.indexOf(placeholder);
+      const localEndIndex = localStartIndex + placeholder.length;
+      return {
+        ok,
+        localStartIndex,
+        localEndIndex
+      };
     }
     default:
       throw new Error(`Unsupported template format ${format}`);
   }
-}
-
-function formatPrompt(
-  template: string,
-  inputs: Record<string, any>,
-  format: string
-) {
-  const regexp = buildTemplateRegexp(inputs, format);
-
-  return template.replace(regexp, (match) => {
-    const variableIndex = Object.keys(inputs).findIndex(
-      (v) => buildVariablePlaceholder(v, format) === match
-    );
-    return Object.values(inputs || {})[variableIndex];
-  });
-}
-
-export function preparePrompt(prompt?: IPrompt): IPrompt {
-  if (!prompt) {
-    throw new Error('No prompt provided');
-  }
-  prompt = cloneDeep(prompt);
-
-  if (prompt.messages) {
-    prompt.messages.forEach((m) => {
-      if (m.template && prompt?.inputs) {
-        m.formatted = formatPrompt(
-          m.template,
-          prompt.inputs,
-          prompt.template_format
-        );
-      } else if (!m.formatted) {
-        throw new Error('Cannot format message prompt');
-      }
-    });
-  } else if (prompt.template && prompt.inputs) {
-    prompt.formatted = formatPrompt(
-      prompt.template,
-      prompt.inputs,
-      prompt.template_format
-    );
-  } else if (!prompt.formatted) {
-    throw new Error('Cannot format prompt');
-  }
-
-  return prompt;
 }

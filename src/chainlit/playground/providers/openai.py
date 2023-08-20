@@ -88,7 +88,8 @@ def handle_openai_error():
 
 
 class ChatOpenAIProvider(BaseProvider):
-    def format_message(self, message):
+    def format_message(self, message, prompt):
+        message = super().format_message(message, prompt)
         return {"role": message.role, "content": message.formatted}
 
     def message_to_string(self, message):
@@ -105,26 +106,27 @@ class ChatOpenAIProvider(BaseProvider):
         if deployment_id:
             env_settings["deployment_id"] = deployment_id
 
-        self.require_settings(request.settings)
-        self.require_prompt(request)
+        llm_settings = request.prompt.settings
+
+        self.require_settings(llm_settings)
 
         messages = self.create_prompt(request)
 
-        stop = request.settings["stop"]
+        stop = llm_settings["stop"]
 
         # OpenAI doesn't support an empty stop array, clear it
         if isinstance(stop, list) and len(stop) == 0:
             stop = None
 
-        request.settings["stop"] = stop
+        llm_settings["stop"] = stop
 
-        request.settings["stream"] = True
+        llm_settings["stream"] = True
 
         with handle_openai_error():
             response = await openai.ChatCompletion.acreate(
                 **env_settings,
                 messages=messages,
-                **request.settings,
+                **llm_settings,
             )
 
         async def create_event_stream():
@@ -137,7 +139,7 @@ class ChatOpenAIProvider(BaseProvider):
 
 class OpenAIProvider(BaseProvider):
     def message_to_string(self, message):
-        return f"\n\n{message.role}: {message.formatted}"
+        return f"{message.role}: {message.formatted}"
 
     async def create_completion(self, request):
         await super().create_completion(request)
@@ -150,26 +152,26 @@ class OpenAIProvider(BaseProvider):
         if deployment_id:
             env_settings["deployment_id"] = deployment_id
 
-        self.require_settings(request.settings)
-        self.require_prompt(request)
+        llm_settings = request.prompt.settings
+
+        self.require_settings(llm_settings)
 
         prompt = self.create_prompt(request)
-
-        stop = request.settings["stop"]
+        stop = llm_settings["stop"]
 
         # OpenAI doesn't support an empty stop array, clear it
         if isinstance(stop, list) and len(stop) == 0:
             stop = None
 
-        request.settings["stop"] = stop
+        llm_settings["stop"] = stop
 
-        request.settings["stream"] = True
+        llm_settings["stream"] = True
 
         with handle_openai_error():
             response = await openai.Completion.acreate(
                 **env_settings,
                 prompt=prompt,
-                **request.settings,
+                **llm_settings,
             )
 
         async def create_event_stream():

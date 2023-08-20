@@ -9,8 +9,8 @@ class TestLLMProvider(BaseProvider):
     async def create_completion(self, request):
         await super().create_completion(request)
 
-        self.require_settings(request.settings)
-        self.require_prompt(request)
+        self.create_prompt(request)
+        self.require_settings(request.prompt.settings)
 
         stream = ["This ", "is ", "the ", "test ", "completion"]
 

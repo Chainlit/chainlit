@@ -14,7 +14,9 @@ export default function SaveButton({ hasTemplate }: Props) {
   return (
     <Tooltip title="Coming soon!">
       <span>
-        <AccentButton disabled>Save changes</AccentButton>
+        <AccentButton size="large" variant="contained" disabled>
+          Save
+        </AccentButton>
       </span>
     </Tooltip>
   );

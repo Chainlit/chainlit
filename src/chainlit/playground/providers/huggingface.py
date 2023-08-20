@@ -17,9 +17,8 @@ class BaseHuggingFaceProvider(BaseProvider):
         from huggingface_hub.inference_api import InferenceApi
 
         env_settings = self.validate_env(request=request)
-
-        self.require_settings(request.settings)
-        self.require_prompt(request)
+        llm_settings = request.prompt.settings
+        self.require_settings(llm_settings)
 
         client = InferenceApi(
             repo_id=self.repo_id,
@@ -29,7 +28,7 @@ class BaseHuggingFaceProvider(BaseProvider):
 
         prompt = self.create_prompt(request)
 
-        response = await make_async(client)(inputs=prompt, params=request.settings)
+        response = await make_async(client)(inputs=prompt, params=llm_settings)
 
         if "error" in response:
             raise HTTPException(

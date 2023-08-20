@@ -6,7 +6,10 @@ import {
   Editor,
   EditorState
 } from 'draft-js';
-import { buildTemplateRegexp } from 'helpers/format';
+import {
+  buildTemplatePlaceholdersRegexp,
+  validateVariablePlaceholder
+} from 'helpers/format';
 import { useState } from 'react';
 import { useIsFirstRender } from 'usehooks-ts';
 
@@ -16,16 +19,26 @@ import { IPrompt } from 'state/chat';
 
 import Variable from './variable';
 
-const findWithRegex = (
+const findVariable = (
   regex: RegExp,
+  format: string,
   contentBlock: ContentBlock,
   callback: (start: number, end: number) => void
 ) => {
   const text = contentBlock.getText();
-  let matchArr: RegExpExecArray | null, start: number;
+  let matchArr: RegExpExecArray | null;
   while ((matchArr = regex.exec(text)) !== null) {
-    start = matchArr.index;
-    callback(start, start + matchArr[0].length);
+    const { ok, localEndIndex, localStartIndex } = validateVariablePlaceholder(
+      matchArr[1],
+      matchArr[0],
+      format
+    );
+    if (!ok) {
+      continue;
+    }
+    const start = matchArr.index + localStartIndex;
+    const end = matchArr.index + localEndIndex;
+    callback(start, end);
   }
 };
 
@@ -52,8 +65,12 @@ export default function TemplateEditor({
 
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {
-        findWithRegex(
-          buildTemplateRegexp(prompt.inputs, prompt.template_format),
+        findVariable(
+          buildTemplatePlaceholdersRegexp(
+            prompt.inputs,
+            prompt.template_format
+          ),
+          prompt.template_format,
           contentBlock,
           callback
         );

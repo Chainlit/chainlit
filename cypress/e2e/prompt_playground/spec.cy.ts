@@ -3,12 +3,11 @@ import { runTestServer } from "../../support/testUtils";
 function openPlayground(index) {
   cy.get(".playground-button").eq(index).should("exist").click();
 }
-
 const expectedTemplate =
-  "Hello, this is a template.This is a variable1 {variable1}And this is variable2 {variable2}And this is variable1 + variable2 {variable1} + {variable2}";
+  "Hello, this is a template.This is a simple variable {variable1}This is a another simple {variable2}Those are two simple variables {variable1} + {variable2}This is a formatting test {{variable1}} {{{variable2}}} {variable3}This is another formatting test {{{{variable1}}}} {{{{{variable1}}}}}This is a curly braces formatting test {{ {{{{ }} }}}}";
 
 const expectedFormattedTemplate =
-  "Hello, this is a template.This is a variable1 variable1 valueAnd this is variable2 variable2 valueAnd this is variable1 + variable2 variable1 value + variable2 value";
+  "Hello, this is a template.This is a simple variable variable1 valueThis is a another simple variable2 valueThose are two simple variables variable1 value + variable2 valueThis is a formatting test {variable1} {variable2 value} {{variable3 value}}This is another formatting test {{variable1}} {{variable1 value}}This is a curly braces formatting test { {{ } }}";
 const variable1ExpectedContent = "variable1 value";
 
 const expectedFormatted = `This is a test formatted prompt`;
@@ -23,7 +22,7 @@ function testTemplate(chat?: boolean) {
       .should("exist")
       .should("contain", expectedTemplate);
 
-    const expectedCount = chat ? 4 : 2;
+    const expectedCount = chat ? 6 : 3;
 
     cy.get(".input-variable1").should("have.length", expectedCount);
 
@@ -88,6 +87,22 @@ function testCompletion() {
   });
 }
 
+function testSettings(chat?: boolean) {
+  it("should be able to switch providers and preserve settings", () => {
+    const initialModel = chat ? "test-model-chat-2" : "test-model-2";
+    const nextModel = chat ? "test-model-2" : "test-model-chat-2";
+
+    const optionTarget = chat ? "[data-value=test]" : "[data-value=test-chat]";
+
+    cy.get("#model").invoke("val").should("equal", initialModel);
+    cy.get("#temperature").invoke("val").should("equal", "1");
+    cy.get("#llm-providers").parent().click();
+    cy.get(optionTarget).click();
+    cy.get("#model").invoke("val").should("equal", nextModel);
+    cy.get("#temperature").invoke("val").should("equal", "1");
+  });
+}
+
 describe("PromptPlayground", () => {
   before(() => {
     runTestServer();
@@ -100,6 +115,7 @@ describe("PromptPlayground", () => {
     });
     testTemplate(false);
     testCompletion();
+    testSettings(false);
   });
 
   describe("Basic formatted", () => {
@@ -110,6 +126,7 @@ describe("PromptPlayground", () => {
 
     testFormatted();
     testCompletion();
+    testSettings(false);
   });
 
   describe("Chat template", () => {
@@ -119,6 +136,7 @@ describe("PromptPlayground", () => {
     });
     testTemplate(true);
     testCompletion();
+    testSettings(true);
   });
 
   describe("Chat formatted", () => {
@@ -129,5 +147,6 @@ describe("PromptPlayground", () => {
 
     testFormatted();
     testCompletion();
+    testSettings(true);
   });
 });

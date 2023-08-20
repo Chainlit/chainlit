@@ -2,7 +2,7 @@ import { useFormik } from 'formik';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import * as yup from 'yup';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -22,15 +22,19 @@ import { ILLMSettings } from 'state/chat';
 import { ILLMProvider, playgroundState } from 'state/playground';
 
 import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
-import { getDefaultSettings, getProviders } from './helpers';
+import { getProviders } from './helpers';
 
 type Schema = {
   [key: string]: yup.Schema;
 };
 
-const ModelSettings = () => {
-  const [playground, setPlayground] = useRecoilState(playgroundState);
+interface IFormProps {
+  settings: ILLMSettings;
+  schema: Schema;
+}
 
+const SettingsForm = ({ settings, schema }: IFormProps) => {
+  const [playground, setPlayground] = useRecoilState(playgroundState);
   const { provider, providers, providerFound } = getProviders(playground);
 
   const providerWarning = !providerFound ? (
@@ -40,48 +44,10 @@ const ModelSettings = () => {
     </Alert>
   ) : null;
 
-  let schema;
-
-  const settings: ILLMSettings = {};
-  const currentSettings = playground?.prompt?.settings || {};
-
-  if (provider?.inputs) {
-    schema = yup.object(
-      provider.inputs.reduce((object: Schema, input: TFormInput) => {
-        if (currentSettings[input.id]) {
-          settings[input.id] = currentSettings[input.id];
-        } else if (input.initial !== undefined) {
-          settings[input.id] = input.initial;
-        }
-
-        switch (input.type) {
-          case 'select':
-            object[input.id] = yup.string();
-            break;
-          case 'slider': {
-            let schema = yup.number();
-            if (input.min) {
-              schema = schema.min(input.min);
-            }
-            if (input.max) {
-              schema = schema.max(input.max);
-            }
-            object[input.id] = schema;
-            break;
-          }
-          case 'tags':
-            object[input.id] = yup.array().of(yup.string());
-            break;
-        }
-
-        return object;
-      }, {})
-    );
-  }
-
   const formik = useFormik({
     initialValues: settings,
     validationSchema: schema,
+    enableReinitialize: true,
     onSubmit: async () => undefined
   });
 
@@ -96,8 +62,6 @@ const ModelSettings = () => {
   }, [formik.values]);
 
   const onSelectedProviderChange = (event: SelectChangeEvent) => {
-    formik.setValues(getDefaultSettings(event.target.value, providers));
-
     setPlayground((old) =>
       merge(cloneDeep(old), {
         prompt: {
@@ -125,9 +89,9 @@ const ModelSettings = () => {
             label: provider.name,
             value: provider.id
           }))}
-          id="prompt-providers"
+          id="llm-providers"
           value={provider.id}
-          label="Provider"
+          label="LLM Provider"
           onChange={onSelectedProviderChange}
         />
         {providerWarning}
@@ -140,6 +104,7 @@ const ModelSettings = () => {
               key={input.id}
               element={{
                 ...input,
+                id: input.id,
                 value: formik.values[input.id] as any,
                 onChange: (event: any): void => {
                   formik.handleChange(event);
@@ -157,6 +122,74 @@ const ModelSettings = () => {
         ))}
       </Stack>
     </Box>
+  );
+};
+
+const ModelSettings = () => {
+  const playground = useRecoilValue(playgroundState);
+
+  const { provider } = getProviders(playground);
+
+  if (!provider) {
+    return null;
+  }
+
+  const settings: ILLMSettings = {};
+  const currentSettings = playground?.prompt?.settings || {};
+  const origSettings = playground?.originalPrompt?.settings || {};
+
+  const isSettingCompatible = (
+    value: string | number | boolean | string[],
+    input: TFormInput
+  ) => {
+    if (input.type === 'select') {
+      return !!input?.items?.find((i) => i.value === value);
+    }
+    return true;
+  };
+
+  const schema = yup.object(
+    provider.inputs.reduce((object: Schema, input: TFormInput) => {
+      const settingValue =
+        currentSettings[input.id] !== undefined
+          ? currentSettings[input.id]
+          : origSettings[input.id];
+
+      if (
+        settingValue !== undefined &&
+        isSettingCompatible(settingValue, input)
+      ) {
+        settings[input.id] = settingValue;
+      } else if (input.initial !== undefined) {
+        settings[input.id] = input.initial;
+      }
+
+      switch (input.type) {
+        case 'select':
+          object[input.id] = yup.string();
+          break;
+        case 'slider': {
+          let schema = yup.number();
+          if (input.min) {
+            schema = schema.min(input.min);
+          }
+          if (input.max) {
+            schema = schema.max(input.max);
+          }
+          object[input.id] = schema;
+          break;
+        }
+        case 'tags':
+          object[input.id] = yup.array().of(yup.string());
+          break;
+      }
+
+      return object;
+    }, {})
+  );
+
+  return (
+    <SettingsForm schema={schema as unknown as Schema} settings={settings} />
   );
 };
 

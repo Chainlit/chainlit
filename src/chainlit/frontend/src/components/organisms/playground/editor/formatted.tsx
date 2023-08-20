@@ -6,7 +6,12 @@ import {
   SelectionState
 } from 'draft-js';
 import { useColors } from 'helpers/color';
-import { buildVariablePlaceholder, buildVariableRegexp } from 'helpers/format';
+import {
+  buildEscapeReplaceRegexp,
+  buildTemplatePlaceholderRegexp,
+  escape,
+  validateVariablePlaceholder
+} from 'helpers/format';
 import { OrderedSet } from 'immutable';
 import { isEqual } from 'lodash';
 import merge from 'lodash/merge';
@@ -22,7 +27,7 @@ import { modeState, variableState } from 'state/playground';
 
 import 'draft-js/dist/Draft.css';
 
-export interface IHighlight {
+export interface IVariable {
   name: string;
   styleIndex: number;
   content?: string;
@@ -54,86 +59,183 @@ function useCustomStyleMap() {
   return customStyleMap;
 }
 
-function matchVariable(text: string, variableName: string, format: string) {
-  const regexp = buildVariableRegexp(variableName, format);
-  const indices: number[] = [];
+/* This function takes a draftjs block content and matches all escaping and interpolation
+ * candidates using a regexp specific to the current template format. f-string example:
+ * "Hello this is a {{{{variable}}}}" would match "{{{{variable}}}}".
+ */
+function matchToEscapeOrReplace(text: string, format: string) {
+  const regexp = buildEscapeReplaceRegexp(format);
+  const matches: RegExpExecArray[] = [];
   let match: RegExpExecArray | null;
 
   while ((match = regexp.exec(text)) !== null) {
-    indices.push(match.index);
+    if (match.index > -1) {
+      matches.push(match);
+    }
   }
 
-  return indices.length ? indices : [-1];
+  return matches;
 }
 
-function highlight(
+// This function takes a text and tries to match a variable placeholder to replace
+function matchVariable(text: string, variableName: string, format: string) {
+  // Get the regex based on the current template format
+  const regex = buildTemplatePlaceholderRegexp(variableName, format);
+  const match = regex.exec(text);
+  const matchedVariable = match?.[0];
+  if (matchedVariable) {
+    // We found a variable candidate for instance {{{{variable}}}}".
+    // We now need to validate that we need to replace it.
+    const { ok } = validateVariablePlaceholder(
+      variableName,
+      matchedVariable,
+      format
+    );
+    return { match: matchedVariable, ok };
+  } else {
+    return { match: '', ok: false };
+  }
+}
+
+function formatTemplate(
   state: EditorState,
-  highlights: IHighlight[],
+  variables: IVariable[],
   format: string
 ) {
   let contentState = state.getCurrentContent();
   let nextState = state;
 
-  // Highlight if condition is met
-  for (const highlight of highlights) {
-    contentState = nextState.getCurrentContent();
+  // Iterate each block in the editor.
+  // At this point the editor content is still the template
+  contentState.getBlockMap().forEach((contentBlock) => {
+    if (!contentBlock) {
+      return;
+    }
 
-    contentState.getBlockMap().forEach((contentBlock) => {
-      if (!contentBlock) {
+    const key = contentBlock.getKey();
+    const text = contentBlock.getText();
+
+    // Get the substrings of the block to escape/replace
+    const ssmToEscapeOrReplace = matchToEscapeOrReplace(text, format);
+
+    // We start with escaping
+
+    // Each escaping will change the block text length.
+    // We need to keep track of the length diff (offset) to keep the escaping accurate.
+    let escapeOffset = 0;
+
+    const ssmToEscapeOrReplaceWithVariable = ssmToEscapeOrReplace.map((ssm) => {
+      const ss = ssm[0];
+
+      let variableFound = undefined;
+      // Iterate each variable and try to match it.
+      // If there is a match, flag it for replacement later on and break.
+      for (const variable of variables) {
+        const { match, ok } = matchVariable(ss, variable.name, format);
+        if (ok) {
+          variableFound = { variable, match };
+          break;
+        }
+      }
+
+      // start index of the selection to escape, accounting for offset
+      const startIndex = ssm.index + escapeOffset;
+      // end index of the selection to scape, accounting for offset
+      const endIndex = startIndex + ss.length;
+
+      // Define the selection of the template to escape
+      const selectionToEscape = new SelectionState({
+        anchorKey: key,
+        anchorOffset: startIndex,
+        focusKey: key,
+        focusOffset: endIndex
+      });
+
+      // Escape the substring
+      const content = escape(ss, format);
+
+      // Update the offset (new value length - old value length)
+      escapeOffset += content.length - ss.length;
+
+      // Perform the replace operation
+      contentState = Modifier.replaceText(
+        contentState,
+        selectionToEscape,
+        content
+      );
+      nextState = EditorState.push(state, contentState, 'apply-entity');
+
+      // Update the substring match since we just updated it
+      ssm[0] = content;
+      ssm.index = startIndex;
+
+      return { ssm, variableFound };
+    });
+
+    // At this point the template has been escaped
+    // We now perform replace operations
+
+    // Each replace will change the block text length.
+    // We need to keep track of the length diff (offset) to keep the replace accurate.
+    let replaceOffset = 0;
+
+    ssmToEscapeOrReplaceWithVariable.forEach(({ ssm, variableFound }) => {
+      if (!variableFound) {
+        // Nothing to replace
         return;
       }
 
-      const key = contentBlock.getKey();
-      const text = contentBlock.getText();
+      const { variable } = variableFound;
 
-      // Add style if condition is met
-      const startIndices = matchVariable(text, highlight.name, format);
+      const ss = ssm[0];
 
-      let offset = 0;
+      // It is important to preserve the selection to keep the text selectable (copy paste for instance)
+      const currentSelection = nextState.getSelection();
 
-      const content = highlight.content || '';
+      // We know the variable is here but we need to know the exact range to replace
+      // for instance {{{var1}}} was escaped to {{var1}} so we need to replace {var1}
+      const { localEndIndex, localStartIndex } = validateVariablePlaceholder(
+        variable.name,
+        ss,
+        format
+      );
 
-      startIndices.forEach((startIndex) => {
-        if (startIndex === -1) {
-          return;
-        }
-        const currentSelection = nextState.getSelection();
+      // The start of the range is the
+      // start index of the whole variable + the local start index
+      // of the exact variable match + the offset
+      const startIndex = ssm.index + localStartIndex + replaceOffset;
 
-        const placeholder = buildVariablePlaceholder(highlight.name, format);
+      // Same for the end index
+      const endIndex = ssm.index + localEndIndex + replaceOffset;
 
-        const end = startIndex + offset + placeholder.length;
-
-        const selectionToHighlight = new SelectionState({
-          anchorKey: key,
-          anchorOffset: startIndex + offset,
-          focusKey: key,
-          focusOffset: end
-        });
-
-        offset += content.length - placeholder.length;
-
-        contentState = nextState.getCurrentContent();
-
-        contentState = contentState.createEntity(
-          'TOKEN',
-          'SEGMENTED',
-          highlight
-        );
-        const entityKey = contentState.getLastCreatedEntityKey();
-
-        contentState = Modifier.replaceText(
-          contentState,
-          selectionToHighlight,
-          content,
-          OrderedSet.of(highlight.styleIndex.toString()),
-          entityKey
-        );
-
-        nextState = EditorState.push(nextState, contentState, 'apply-entity');
-        nextState = EditorState.forceSelection(nextState, currentSelection);
+      // Define the selection to replace
+      const selectionToHighlight = new SelectionState({
+        anchorKey: key,
+        anchorOffset: startIndex,
+        focusKey: key,
+        focusOffset: endIndex
       });
+
+      const content = variable.content || '';
+
+      // Update the offset
+      replaceOffset += content.length - (localEndIndex - localStartIndex);
+
+      // Perform the replace operation
+      contentState = nextState.getCurrentContent();
+      contentState = contentState.createEntity('TOKEN', 'SEGMENTED', variable);
+      const entityKey = contentState.getLastCreatedEntityKey();
+      contentState = Modifier.replaceText(
+        contentState,
+        selectionToHighlight,
+        content,
+        OrderedSet.of(variable.styleIndex.toString()),
+        entityKey
+      );
+      nextState = EditorState.push(nextState, contentState, 'apply-entity');
+      nextState = EditorState.forceSelection(nextState, currentSelection);
     });
-  }
+  });
 
   return nextState;
 }
@@ -187,25 +289,33 @@ export default function FormattedEditor({
     if (typeof template === 'string') {
       const inputs = prompt.inputs || {};
 
-      const variables = Object.keys(inputs);
-      const highlights: IHighlight[] = [];
+      const variableNames = Object.keys(inputs);
+      const variables: IVariable[] = [];
 
-      for (let i = 0; i < variables.length; i++) {
-        const variableName = variables[i];
+      for (let i = 0; i < variableNames.length; i++) {
+        const variableName = variableNames[i];
 
         const variableContent = inputs[variableName];
 
-        highlights.push({
+        variables.push({
           name: variableName,
           styleIndex: i,
           content: variableContent
         });
       }
 
+      const sortedVariables = variables.sort(
+        (a, b) => b.name.length - a.name.length
+      );
+
       const state = EditorState.createWithContent(
         ContentState.createFromText(template)
       );
-      const nextState = highlight(state, highlights, prompt.template_format);
+      const nextState = formatTemplate(
+        state,
+        sortedVariables,
+        prompt.template_format
+      );
 
       setState(nextState);
     } else if (typeof formatted === 'string') {

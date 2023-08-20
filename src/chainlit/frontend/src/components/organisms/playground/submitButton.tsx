@@ -1,5 +1,5 @@
 import { ClientError } from 'api';
-import { preparePrompt } from 'helpers/format';
+import { cloneDeep } from 'lodash';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -25,7 +25,7 @@ export default function SubmitButton() {
   const submit = async () => {
     try {
       const { provider } = getProviders(playground);
-      const prompt = preparePrompt(playground.prompt);
+      const prompt = cloneDeep(playground.prompt)!;
       prompt.provider = provider.id;
       const controller = new AbortController();
 

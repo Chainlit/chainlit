@@ -191,9 +191,12 @@ async def completion(request: CompletionRequest):
     providers = get_llm_providers()
 
     try:
-        provider = [p for p in providers if p.id == request.provider][0]
+        provider = [p for p in providers if p.id == request.prompt.provider][0]
     except IndexError:
-        raise ValueError(f"LLM provider '{request.provider}' not found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"LLM provider '{request.prompt.provider}' not found",
+        )
 
     response = await provider.create_completion(request)
 

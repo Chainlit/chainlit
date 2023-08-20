@@ -4,7 +4,7 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
-from chainlit.prompt import PromptMessage
+from chainlit.prompt import Prompt
 
 InputWidgetType = Literal["switch", "slider", "select", "textinput", "tags"]
 ElementType = Literal[
@@ -46,11 +46,8 @@ class AskFileResponse:
 
 
 class CompletionRequest(BaseModel):
-    prompt: Optional[str] = None
-    messages: Optional[List[PromptMessage]] = None
+    prompt: Prompt
     userEnv: Dict[str, str]
-    provider: str
-    settings: Dict[str, Any]
 
 
 class UpdateFeedbackRequest(BaseModel):

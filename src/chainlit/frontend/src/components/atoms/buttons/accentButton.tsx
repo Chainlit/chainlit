@@ -1,7 +1,10 @@
 import { useTheme } from '@mui/material';
 import Button, { ButtonProps } from '@mui/material/Button';
 
-export default function AccentButton({ children, ...props }: ButtonProps) {
+export default function AccentButton({
+  children,
+  ...props
+}: ButtonProps & { target?: string }) {
   const theme = useTheme();
   return (
     <span style={{ color: theme.palette.text.primary }}>
