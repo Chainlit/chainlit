@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Union
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
 from chainlit.config import config
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.prompt import Prompt
@@ -29,7 +29,6 @@ class MessageBase(ABC):
             self.id = str(uuid.uuid4())
         if not self.created_at:
             self.created_at = datetime.now(timezone.utc).isoformat()
-        self.emitter = get_emitter()
 
     @abstractmethod
     def to_dict(self):
@@ -37,9 +36,9 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-        if self.emitter.db_client and not self.persisted:
+        if context.emitter.db_client and not self.persisted:
             try:
-                persisted_id = await self.emitter.db_client.create_message(msg_dict)
+                persisted_id = await context.emitter.db_client.create_message(msg_dict)
                 if persisted_id:
                     msg_dict["id"] = persisted_id
                     self.id = persisted_id
@@ -61,10 +60,10 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if self.emitter.db_client and self.id:
-            await self.emitter.db_client.update_message(self.id, msg_dict)
+        if context.emitter.db_client and self.id:
+            await context.emitter.db_client.update_message(self.id, msg_dict)
 
-        await self.emitter.update_message(msg_dict)
+        await context.emitter.update_message(msg_dict)
 
         return True
 
@@ -75,10 +74,10 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        if self.emitter.db_client and self.id:
-            await self.emitter.db_client.delete_message(self.id)
+        if context.emitter.db_client and self.id:
+            await context.emitter.db_client.delete_message(self.id)
 
-        await self.emitter.delete_message(self.to_dict())
+        await context.emitter.delete_message(self.to_dict())
 
         return True
 
@@ -94,7 +93,7 @@ class MessageBase(ABC):
         if self.streaming:
             self.streaming = False
 
-        await self.emitter.send_message(msg_dict)
+        await context.emitter.send_message(msg_dict)
 
         return self.id
 
@@ -107,7 +106,7 @@ class MessageBase(ABC):
         if not self.streaming:
             self.streaming = True
             msg_dict = self.to_dict()
-            await self.emitter.stream_start(msg_dict)
+            await context.emitter.stream_start(msg_dict)
 
         if is_sequence:
             self.content = token
@@ -115,7 +114,9 @@ class MessageBase(ABC):
             self.content += token
 
         assert self.id
-        await self.emitter.send_token(id=self.id, token=token, is_sequence=is_sequence)
+        await context.emitter.send_token(
+            id=self.id, token=token, is_sequence=is_sequence
+        )
 
 
 class Message(MessageBase):
@@ -201,7 +202,7 @@ class Message(MessageBase):
         id = await super().send()
 
         if not self.parent_id:
-            self.emitter.session.root_message = self
+            context.session.root_message = self
 
         for action in self.actions:
             await action.send(for_id=str(id))
@@ -230,6 +231,10 @@ class Message(MessageBase):
             await element.send(for_id=self.id)
 
         return True
+
+    async def remove_actions(self):
+        for action in self.actions:
+            await action.remove()
 
 
 class ErrorMessage(MessageBase):
@@ -280,7 +285,7 @@ class AskMessageBase(MessageBase):
     async def remove(self):
         removed = await super().remove()
         if removed:
-            await self.emitter.clear_ask()
+            await context.emitter.clear_ask()
 
 
 class AskUserMessage(AskMessageBase):
@@ -335,7 +340,7 @@ class AskUserMessage(AskMessageBase):
 
         spec = AskSpec(type="text", timeout=self.timeout)
 
-        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         return res
 
@@ -407,7 +412,7 @@ class AskFileMessage(AskMessageBase):
             timeout=self.timeout,
         )
 
-        res = await self.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
 
         if res:
             return [AskFileResponse(**r) for r in res]

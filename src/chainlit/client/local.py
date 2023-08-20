@@ -3,7 +3,7 @@ import json
 import mimetypes
 import os
 import uuid
-from typing import Dict, Optional, cast
+from typing import Dict, Optional, Union, cast
 
 import aiofiles
 
@@ -267,7 +267,7 @@ class LocalDBClient(BaseDBClient):
         res = await Element.prisma().find_unique_or_raise(where={"id": element_id})
         return json.loads(res.json())
 
-    async def upload_element(self, content: bytes, mime: str):
+    async def upload_element(self, content: Union[bytes, str], mime: str):
         c_id = await self.get_conversation_id()
 
         if not c_id:
@@ -284,7 +284,7 @@ class LocalDBClient(BaseDBClient):
             os.makedirs(os.path.dirname(full_path))
 
         async with aiofiles.open(full_path, "wb") as out:
-            await out.write(content)
+            await out.write(content.encode() if isinstance(content, str) else content)
             await out.flush()
 
             url = f"/files/{sub_path}"

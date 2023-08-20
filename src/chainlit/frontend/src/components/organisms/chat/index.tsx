@@ -120,7 +120,7 @@ const Chat = () => {
               elements={elements}
               messages={messages}
               autoScroll={autoScroll}
-              setAutoSroll={setAutoScroll}
+              setAutoScroll={setAutoScroll}
             />
           )}
           {!messages.length && <WelcomeScreen />}

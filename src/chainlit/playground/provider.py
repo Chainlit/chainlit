@@ -52,7 +52,7 @@ class BaseProvider:
         if self.is_chat:
             if messages:
                 return messages
-            elif prompt.template:
+            elif prompt.template or prompt.formatted:
                 return [
                     self.format_message(
                         PromptMessage(

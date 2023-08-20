@@ -1,5 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, List, Literal, Optional, TypedDict, TypeVar
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -135,7 +145,7 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def upload_element(self, content: bytes, mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
         pass
 
     @abstractmethod

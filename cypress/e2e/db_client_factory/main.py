@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Union
 
 import chainlit as cl
 from chainlit.client.base import (
@@ -46,7 +46,7 @@ class CustomDBClient(BaseDBClient):
     async def delete_message(self, message_id: int) -> bool:
         raise NotImplementedError
 
-    async def upload_element(self, content: bytes, mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
         raise NotImplementedError
 
     async def create_element(self, variables: ElementDict) -> ElementDict:

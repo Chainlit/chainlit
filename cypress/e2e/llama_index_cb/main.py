@@ -1,4 +1,5 @@
 from llama_index.callbacks.schema import CBEventType, EventPayload
+from llama_index.llms.base import ChatMessage, ChatResponse
 from llama_index.schema import NodeWithScore, TextNode
 
 import chainlit as cl
@@ -25,10 +26,11 @@ async def start():
 
     cb.on_event_start(CBEventType.LLM)
 
+    response = ChatResponse(message=ChatMessage(content="This is the LLM response"))
     cb.on_event_end(
         CBEventType.LLM,
         payload={
-            EventPayload.RESPONSE: "This is the LLM response",
+            EventPayload.RESPONSE: response,
             EventPayload.PROMPT: "This is the LLM prompt",
         },
     )

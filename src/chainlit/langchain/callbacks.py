@@ -4,8 +4,7 @@ from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 
 from chainlit.config import config
-from chainlit.context import get_emitter
-from chainlit.emitter import ChainlitEmitter
+from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
 from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
@@ -76,7 +75,6 @@ def convert_role(role: str):
 
 
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
-    emitter: ChainlitEmitter
     # Keep track of the prompt sequence
     prompt_sequence: List[Prompt]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
@@ -110,14 +108,13 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         stream_final_answer: bool = False,
         root_message: Optional[Message] = None,
     ) -> None:
-        self.emitter = get_emitter()
         self.sequence = []
         self.prompt_sequence = []
         self.stream = None
 
         if root_message:
             self.root_message = root_message
-        elif root_message := self.emitter.session.root_message:
+        elif root_message := context.session.root_message:
             self.root_message = root_message
         else:
             self.root_message = Message(author=config.ui.name, content="")
@@ -368,7 +365,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
                     run_sync(
-                        self.emitter.update_token_count(token_usage["total_tokens"])
+                        context.emitter.update_token_count(token_usage["total_tokens"])
                     )
         if self.current_prompt:
             self.current_prompt.completion = response.generations[0][0].text
@@ -492,11 +489,11 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
                 if "total_tokens" in token_usage:
-                    await self.emitter.update_token_count(token_usage["total_tokens"])
+                    await context.emitter.update_token_count(
+                        token_usage["total_tokens"]
+                    )
         if self.current_prompt:
             self.current_prompt.completion = response.generations[0][0].text
-        if self.final_stream:
-            run_sync(self.final_stream.send())
         if self.final_stream:
             await self.final_stream.send()
 

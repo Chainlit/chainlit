@@ -12,7 +12,7 @@ import threading
 from asyncer import asyncify
 from syncer import sync
 
-from chainlit.context import get_loop
+from chainlit.context import context
 
 make_async = asyncify
 
@@ -25,6 +25,5 @@ def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
     if threading.current_thread() == threading.main_thread():
         return sync(co)
     else:
-        loop = get_loop()
-        result = asyncio.run_coroutine_threadsafe(co, loop=loop)
+        result = asyncio.run_coroutine_threadsafe(co, loop=context.loop)
         return result.result()

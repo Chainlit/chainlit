@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
+import cloneDeep from 'lodash/cloneDeep';
 import { grey } from 'palette';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -30,7 +31,9 @@ function buildHistory(historyMessages: MessageHistory[]) {
     }[]
   > = {};
 
-  historyMessages?.forEach((hm) => {
+  const reversedHistory = cloneDeep(historyMessages).reverse();
+
+  reversedHistory?.forEach((hm) => {
     const { createdAt, content } = hm;
     const dateOptions: Intl.DateTimeFormatOptions = {
       day: 'numeric',

@@ -17,6 +17,7 @@ export default function TextElement({ element }: Props) {
   const [error, setError] = useState(false);
   const [text, setText] = useState('');
 
+  // TODO: Replace it when useApi is ready
   useEffect(() => {
     if (fetching || !element.url) return;
     setFetching(true);

@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic.dataclasses import Field, dataclass
 
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.input_widget import InputWidget
 
 
@@ -17,7 +17,6 @@ class ChatSettings:
         inputs: List[InputWidget],
     ) -> None:
         self.inputs = inputs
-        self.emitter = get_emitter()
 
     def settings(self):
         return dict(
@@ -26,9 +25,9 @@ class ChatSettings:
 
     async def send(self):
         settings = self.settings()
-        self.emitter.set_chat_settings(settings)
+        context.emitter.set_chat_settings(settings)
 
         inputs_content = [input_widget.to_dict() for input_widget in self.inputs]
-        await self.emitter.emit("chat_settings", inputs_content)
+        await context.emitter.emit("chat_settings", inputs_content)
 
         return settings
