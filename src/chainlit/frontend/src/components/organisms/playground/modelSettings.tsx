@@ -39,8 +39,10 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
 
   const providerWarning = !providerFound ? (
     <Alert severity="warning">
-      {playground?.prompt?.provider} provider is not found, using{' '}
-      {provider.name} instead.
+      {playground.prompt?.provider
+        ? `${playground?.prompt?.provider} provider is not found, using 
+      ${provider.name} instead.`
+        : `Provider not specified, using ${provider.name} instead.`}
     </Alert>
   ) : null;
 

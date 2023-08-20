@@ -26,11 +26,7 @@ export default function PromptModeToggle({ hasTemplate }: Props) {
       onChange={(v) => setMode(v as PromptMode)}
     />
   ) : (
-    <Alert
-      sx={{ alignSelf: 'flex-end' }}
-      severity="warning"
-      id="template-warning"
-    >
+    <Alert sx={{ alignSelf: 'flex-end' }} severity="info" id="template-warning">
       Prompt template not found. Only displaying formatted prompt instead.
     </Alert>
   );
