@@ -7,7 +7,12 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
-
+    from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
+    from chainlit.langchain.callbacks import (
+        LangchainCallbackHandler,
+        AsyncLangchainCallbackHandler,
+    )
+    from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
