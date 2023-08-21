@@ -35,7 +35,7 @@ export default function PlaygroundHeader({
           target="_blank"
           href="https://docs.chainlit.io/concepts/prompt-playground"
         >
-          Documentation
+          Help
         </AccentButton>
         <SaveButton hasTemplate={hasTemplate} />
 
