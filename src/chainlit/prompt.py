@@ -15,6 +15,12 @@ class BaseTemplate(DataClassJsonMixin):
 class PromptMessage(BaseTemplate):
     role: Optional[Literal["system", "assistant", "user", "function"]] = None
 
+    def to_openai(self):
+        return {"role": self.role, "content": self.formatted}
+
+    def to_string(self):
+        return f"{self.role}: {self.formatted}"
+
 
 @dataclass
 class Prompt(BaseTemplate):

@@ -90,10 +90,7 @@ def handle_openai_error():
 class ChatOpenAIProvider(BaseProvider):
     def format_message(self, message, prompt):
         message = super().format_message(message, prompt)
-        return {"role": message.role, "content": message.formatted}
-
-    def message_to_string(self, message):
-        return f"\n\n{message.role}: {message.formatted}"
+        return message.to_openai()
 
     async def create_completion(self, request):
         await super().create_completion(request)
@@ -139,7 +136,7 @@ class ChatOpenAIProvider(BaseProvider):
 
 class OpenAIProvider(BaseProvider):
     def message_to_string(self, message):
-        return f"{message.role}: {message.formatted}"
+        return message.to_string()
 
     async def create_completion(self, request):
         await super().create_completion(request)
