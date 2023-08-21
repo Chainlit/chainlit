@@ -1,29 +1,26 @@
 import chainlit as cl
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.sync import make_async, run_sync
 
 
 async def async_function_from_sync():
     await cl.sleep(2)
-    emitter = get_emitter()
-    return emitter
+    return context.emitter
 
 
 def sync_function():
-    emitter_from_make_async = get_emitter()
+    emitter_from_make_async = context.emitter
     emitter_from_async_from_sync = run_sync(async_function_from_sync())
     return (emitter_from_make_async, emitter_from_async_from_sync)
 
 
 async def async_function():
-    emitter = await another_async_function()
-    return emitter
+    return await another_async_function()
 
 
 async def another_async_function():
     await cl.sleep(2)
-    emitter = get_emitter()
-    return emitter
+    return context.emitter
 
 
 @cl.on_chat_start

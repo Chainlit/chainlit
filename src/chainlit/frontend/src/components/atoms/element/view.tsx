@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -36,34 +36,30 @@ export const renderElement = (element: IMessageElement): JSX.Element | null => {
 const ElementView = () => {
   const { id } = useParams();
   const query = useQuery();
+
   const elements = useRecoilValue(elementState);
   const client = useRecoilValue(clientState);
-  const [element, setElement] = useState<IMessageElement | null>(null);
+
   const [error, setError] = useState<string | undefined>();
+  const [element, setElement] = useState<IMessageElement | null>(null);
 
   const conversationId = query.get('conversation');
 
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-
+  if (!element && id) {
     if (!conversationId) {
-      const element = elements.find((element) => element.id === id);
-      if (element) {
-        setElement(element);
+      const foundElement = elements.find((element) => element.id === id);
+      if (foundElement) {
+        setElement(foundElement);
       }
     } else {
       client
         .getElement(conversationId, id)
-        .then((element) => {
-          setElement(element);
-        })
+        .then(setElement)
         .catch((err) => {
           setError(err.message);
         });
     }
-  }, [id, conversationId]);
+  }
 
   if (!element || error) {
     return null;

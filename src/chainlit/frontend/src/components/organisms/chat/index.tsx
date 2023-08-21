@@ -121,7 +121,7 @@ const Chat = () => {
               elements={elements}
               messages={messages}
               autoScroll={autoScroll}
-              setAutoSroll={setAutoScroll}
+              setAutoScroll={setAutoScroll}
             />
           </ErrorBoundary>
         )}

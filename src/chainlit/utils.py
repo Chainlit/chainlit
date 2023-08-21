@@ -2,7 +2,7 @@ import importlib
 import inspect
 from typing import Callable
 
-from chainlit.context import get_emitter
+from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage
 
@@ -28,8 +28,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         }
 
         if with_task:
-            emitter = get_emitter()
-            await emitter.task_start()
+            await context.emitter.task_start()
 
         try:
             # Call the user-defined function with the arguments
@@ -46,8 +45,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
             ).send()
         finally:
             if with_task:
-                emitter = get_emitter()
-                await emitter.task_end()
+                await context.emitter.task_end()
 
     return wrapper
 

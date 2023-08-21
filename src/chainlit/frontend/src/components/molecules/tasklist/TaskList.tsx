@@ -1,5 +1,4 @@
 import { grey } from 'palette';
-import { useEffect, useState } from 'react';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
@@ -58,20 +57,16 @@ export default function TaskList({
   isMobile: boolean;
 }) {
   const theme = useTheme();
-  const [content, setContent] = useState<ITaskList | null>(null);
+  let content: ITaskList | null = null;
 
-  useEffect(() => {
-    try {
-      if (rawTasklist?.content) {
-        setContent(JSON.parse(rawTasklist.content));
-      } else {
-        setContent(null);
-      }
-    } catch (e) {
-      console.error(e);
-      setContent(null);
+  try {
+    if (rawTasklist?.content) {
+      content = JSON.parse(rawTasklist.content);
     }
-  }, [rawTasklist, setContent]);
+  } catch (e) {
+    console.error(e);
+    content = null;
+  }
 
   if (!content) {
     return null;

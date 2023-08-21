@@ -40,6 +40,15 @@ describe("Action", () => {
       .eq(4)
       .should("contain", "Action(id=multiple-action-two) has been removed!");
     cy.get("[id='multiple-action-two']").should("not.exist");
+
+    // Click on "all actions removed", should remove all buttons
+    cy.get("[id='all-actions-removed']").should("be.visible");
+    cy.get("[id='all-actions-removed']").click();
+    cy.get(".message")
+      .eq(5)
+      .should("contain", "All actions have been removed!");
+    cy.get("[id='all-actions-removed']").should("not.exist");
+    cy.get("[id='test-action']").should("not.exist");
     cy.get("[id='actions-button']").should("not.exist");
   });
 });
