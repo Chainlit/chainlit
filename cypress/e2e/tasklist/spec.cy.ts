@@ -1,4 +1,4 @@
-import { runTestServer } from "../../support/testUtils";
+import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("tasklist", () => {
   before(() => {
@@ -32,5 +32,9 @@ describe("tasklist", () => {
       "have.length",
       9
     );
+
+    submitMessage("ok");
+
+    cy.get(".tasklist").should("not.exist");
   });
 });
