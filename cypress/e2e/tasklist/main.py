@@ -21,9 +21,22 @@ fake_tasks = [
     "Preparing for shutdown",
 ]
 
+# Not a good practice in a normal chainlit server as it's global to all users
+# However it work in a testing scenario where we have just one user
+task_list = None
+
+
+@cl.on_message
+async def on_message():
+    # Waiting on a message to remove the tasklist to make sure
+    # all checks are successful before we remove it
+    await task_list.remove()
+
 
 @cl.on_chat_start
 async def main():
+    global task_list
+
     task_list = cl.TaskList()
     task_list.status = "Running..."
     for i in range(17):
