@@ -2,8 +2,8 @@ import { Editor, EditorState, Modifier, SelectionState } from 'draft-js';
 import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 
-import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
-import ArrowCircleUpOutlinedIcon from '@mui/icons-material/ArrowCircleUpOutlined';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
@@ -74,11 +74,7 @@ export default function Completion({ completion }: Props) {
           Completion
         </Typography>
         <IconButton onClick={() => setCompletionOpen(!isCompletionOpen)}>
-          {isCompletionOpen ? (
-            <ArrowCircleDownOutlinedIcon />
-          ) : (
-            <ArrowCircleUpOutlinedIcon />
-          )}
+          {isCompletionOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </Stack>
       <Box
