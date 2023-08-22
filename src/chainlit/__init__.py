@@ -230,3 +230,7 @@ __all__ = [
     "LlamaIndexCallbackHandler",
     "HaystackAgentCallbackHandler",
 ]
+
+
+def __dir__():
+    return __all__
