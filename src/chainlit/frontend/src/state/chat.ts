@@ -66,12 +66,18 @@ export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
 }
 
+export interface FileSpec {
+  accept?: string[] | Record<string, string[]>;
+  max_size_mb?: number;
+  max_files?: number;
+}
+
 export interface IAskResponse {
   content: string;
   author: string;
 }
 
-export interface IAskFileResponse {
+export interface IFileResponse {
   name: string;
   path?: string;
   size: number;
@@ -80,14 +86,11 @@ export interface IAskFileResponse {
 }
 
 export interface IAsk {
-  callback: (payload: IAskResponse | IAskFileResponse[]) => void;
+  callback: (payload: IAskResponse | IFileResponse[]) => void;
   spec: {
     type: 'text' | 'file';
     timeout: number;
-    accept?: string[] | Record<string, string[]>;
-    max_size_mb?: number;
-    max_files?: number;
-  };
+  } & FileSpec;
 }
 
 export interface ISession {
@@ -115,6 +118,11 @@ export const tokenCountState = atom<number>({
 export const loadingState = atom<boolean>({
   key: 'Loading',
   default: false
+});
+
+export const fileSpecState = atom<FileSpec | undefined>({
+  key: 'FileSpec',
+  default: undefined
 });
 
 export const askUserState = atom<IAsk | undefined>({
