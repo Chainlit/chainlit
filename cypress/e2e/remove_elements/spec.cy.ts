@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("remove_elements", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to remove elements", () => {

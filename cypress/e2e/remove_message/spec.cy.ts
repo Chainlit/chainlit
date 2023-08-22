@@ -2,7 +2,7 @@ import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("Delete Message", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to delete a message", () => {

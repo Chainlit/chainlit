@@ -1,13 +1,25 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, TextField, Theme, Typography, useTheme } from '@mui/material';
+
+export type NotificationCountProps = {
+  count?: number | string;
+  inputProps?: {
+    id: string;
+    max?: number;
+    min?: number;
+    onChange: (event: any) => void;
+    step?: number;
+  };
+};
 
 export default function NotificationCount({
-  notificationsCount
-}: {
-  notificationsCount: number | string;
-}): JSX.Element {
+  count,
+  inputProps
+}: NotificationCountProps): JSX.Element | null {
   const theme = useTheme();
 
-  return (
+  if (!count) return null;
+
+  const renderBox = () => (
     <Box
       display="flex"
       alignItems="center"
@@ -27,8 +39,53 @@ export default function NotificationCount({
           fontWeight: 600
         }}
       >
-        {notificationsCount}
+        {count}
       </Typography>
     </Box>
   );
+
+  const renderInput = () => {
+    const getInputWidth = (hasArrow?: boolean) => {
+      const contentWidth = count.toString().length * 8 + (hasArrow ? 18 : 0);
+      return `${contentWidth}px`;
+    };
+
+    return inputProps ? (
+      <TextField
+        id={inputProps.id}
+        inputProps={{
+          type: 'number',
+          max: inputProps.max,
+          min: inputProps.min,
+          step: inputProps.step || 1,
+          sx: {
+            width: getInputWidth(),
+            padding: (theme: Theme) => theme.spacing(0.5, 1),
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'text.secondary',
+            '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
+              display: 'none'
+            },
+            '&:focus': {
+              width: getInputWidth(true),
+              '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
+                display: 'flex'
+              }
+            }
+          }
+        }}
+        sx={{
+          borderRadius: '6px',
+          backgroundColor: (theme: Theme) =>
+            theme.palette.mode === 'light' ? 'grey.100' : 'grey.800',
+          '& fieldset': { border: 'none' }
+        }}
+        value={count}
+        onChange={inputProps.onChange}
+      />
+    ) : null;
+  };
+
+  return !inputProps ? renderBox() : renderInput();
 }

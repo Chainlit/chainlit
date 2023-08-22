@@ -2,7 +2,7 @@ import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("Ask User", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should send a new message containing the user input", () => {

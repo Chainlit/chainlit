@@ -7,7 +7,10 @@ import { IInput } from 'types/Input';
 
 import InputStateHandler from './inputs/inputStateHandler';
 
-export type SliderProps = IInput & MSliderProps;
+export type SliderProps = IInput &
+  MSliderProps & {
+    setField?(field: string, value: number, shouldValidate?: boolean): void;
+  };
 
 const _Slider = ({
   description,
@@ -15,8 +18,18 @@ const _Slider = ({
   id,
   label,
   tooltip,
+  setField,
   ...sliderProps
 }: SliderProps) => {
+  const onChange = (event: any) => {
+    const parsedValue = parseFloat(event.target.value);
+    const { min, max, onChange } = sliderProps;
+
+    if (max && parsedValue > max) setField && setField(id, max);
+    else if (min && parsedValue < min) setField && setField(id, min);
+    else onChange && onChange(event, parsedValue, 0);
+  };
+
   return (
     <InputStateHandler
       description={description}
@@ -24,7 +37,16 @@ const _Slider = ({
       id={id}
       label={label}
       tooltip={tooltip}
-      notificationsCount={sliderProps.value?.toString()}
+      notificationsProps={{
+        count: sliderProps.value?.toString() || '0',
+        inputProps: {
+          id,
+          max: sliderProps.max,
+          min: sliderProps.min,
+          step: sliderProps.step || 1,
+          onChange
+        }
+      }}
     >
       <StyledSlider {...sliderProps} id={id} name={id} />
     </InputStateHandler>
@@ -35,7 +57,8 @@ const StyledSlider = styled(Slider)(({ theme }) => {
   const isLightMode = theme.palette.mode === 'light';
 
   return {
-    width: 'calc(100% - 7px)',
+    width: 'calc(100% - 18px)',
+    marginLeft: '8px',
     color: grey[isLightMode ? 300 : 850],
     height: 3,
     '& .MuiSlider-track': {

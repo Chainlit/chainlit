@@ -1,3 +1,5 @@
+import omit from 'lodash/omit';
+
 import Switch, { SwitchProps } from 'components/atoms/switch';
 
 import { IInput } from 'types/Input';
@@ -12,6 +14,7 @@ export type TFormInputValue = string | number | boolean | string[] | undefined;
 export interface IFormInput<T, V extends TFormInputValue> extends IInput {
   type: T;
   value?: V;
+  initial?: V;
   setField?(field: string, value: V, shouldValidate?: boolean): void;
 }
 
@@ -25,7 +28,13 @@ export type TFormInput =
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element.type) {
     case 'select':
-      return <SelectInput {...element} value={element.value ?? ''} />;
+      // We omit the 'setField' prop to avoid React warnings and ensure it's available for <Tags/>.
+      return (
+        <SelectInput
+          {...omit(element, 'setField')}
+          value={element.value ?? ''}
+        />
+      );
     case 'slider':
       return <Slider {...element} value={element.value ?? 0} />;
     case 'tags':
@@ -33,7 +42,7 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
     case 'switch':
       return (
         <Switch
-          {...element}
+          {...omit(element, 'setField')}
           checked={!!element.value}
           inputProps={{
             id: element.id,
@@ -42,9 +51,12 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
         />
       );
     case 'textinput':
-      return <TextInput {...element} value={element.value ?? ''} />;
+      return (
+        <TextInput {...omit(element, 'setField')} value={element.value ?? ''} />
+      );
     default:
-      // Unimplemented element type if this errors
+      // If the element type is not recognized, we indicate an unimplemented type.
+      // This code path should not normally occur and serves as a fallback.
       element satisfies never;
       return <></>;
   }

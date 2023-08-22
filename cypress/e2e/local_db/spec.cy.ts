@@ -2,7 +2,7 @@ import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("Local db", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to see and interact with a stored conversation", () => {

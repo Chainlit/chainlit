@@ -1,20 +1,22 @@
 import { Info } from '@mui/icons-material';
 import { Box, InputLabel, Tooltip } from '@mui/material';
 
-import NotificationCount from 'components/atoms/notificationCount';
+import NotificationCount, {
+  NotificationCountProps
+} from 'components/atoms/notificationCount';
 
 type InputLabelProps = {
   id?: string;
   label: string | number;
   tooltip?: string;
-  notificationsCount?: number | string;
+  notificationsProps?: NotificationCountProps;
 };
 
 export default function inputLabel({
   id,
   label,
   tooltip,
-  notificationsCount
+  notificationsProps
 }: InputLabelProps): JSX.Element {
   return (
     <Box display="flex" justifyContent="space-between" width="100%">
@@ -35,8 +37,8 @@ export default function inputLabel({
           </Tooltip>
         ) : null}
       </Box>
-      {notificationsCount ? (
-        <NotificationCount notificationsCount={notificationsCount} />
+      {notificationsProps ? (
+        <NotificationCount {...notificationsProps} />
       ) : null}
     </Box>
   );

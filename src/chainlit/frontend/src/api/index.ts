@@ -1,6 +1,6 @@
 import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
-import { IChat, ILLMSettings } from 'state/chat';
+import { IChat, IPrompt } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
 import { IMessageElement } from 'state/element';
 import { IMember, Role } from 'state/user';
@@ -11,6 +11,23 @@ const serverUrl = new URL(url);
 
 const httpEndpoint = `${serverUrl.protocol}//${serverUrl.host}`;
 export const wsEndpoint = httpEndpoint;
+
+export class ClientError extends Error {
+  detail?: string;
+
+  constructor(message: string, detail?: string) {
+    super(message);
+    this.detail = detail;
+  }
+
+  toString() {
+    if (this.detail) {
+      return `${this.message}: ${this.detail}`;
+    } else {
+      return this.message;
+    }
+  }
+}
 
 export class ChainlitClient {
   public headers: Headers;
@@ -36,30 +53,69 @@ export class ChainlitClient {
     return res.json();
   };
 
-  fetch = async (resource: string, options: object) => {
+  fetch = async (resource: string, options: RequestInit) => {
     const res = await fetch(`${httpEndpoint}${resource}`, {
       ...options,
       headers: this.headers
     });
 
     if (!res.ok) {
-      throw new Error(res.statusText);
+      let err: ClientError;
+      try {
+        const body = await res.json();
+        err = new ClientError(res.statusText, body.detail);
+      } catch (_) {
+        err = new ClientError(res.statusText);
+      }
+      throw err;
     }
     return res;
   };
 
   getCompletion = async (
-    prompt: string,
-    settings: ILLMSettings,
-    userEnv = {}
+    prompt: IPrompt,
+    userEnv = {},
+    controller: AbortController,
+    tokenCb: (done: boolean, token: string) => void
   ) => {
-    const res = await this.fetch(`/completion`, {
+    const response = await this.fetch(`/completion`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, settings, userEnv })
+      signal: controller.signal,
+      body: JSON.stringify({
+        prompt: prompt,
+        userEnv
+      })
     });
 
-    const completion = await res.text();
-    return completion;
+    const reader = response.body?.getReader();
+
+    const stream = new ReadableStream({
+      start(controller) {
+        function push() {
+          reader!
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                tokenCb(done, '');
+                return;
+              }
+              const string = new TextDecoder('utf-8').decode(value);
+              tokenCb(done, string);
+              controller.enqueue(value);
+              push();
+            })
+            .catch((err) => {
+              controller.close();
+              tokenCb(true, '');
+              console.error(err);
+            });
+        }
+        push();
+      }
+    });
+
+    return stream;
   };
 
   getRole = async () => {
@@ -127,6 +183,17 @@ export class ChainlitClient {
     const res = await this.fetch(`/project/conversation`, {
       method: 'DELETE',
       body: JSON.stringify({ conversationId })
+    });
+
+    return res.json();
+  };
+
+  getLLMProviders = async () => {
+    const res = await this.fetch(`/project/llm-providers`, {
+      headers: {
+        'content-type': 'application/json'
+      },
+      method: 'GET'
     });
 
     return res.json();

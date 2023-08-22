@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("pyplot", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to display an inline chart", () => {

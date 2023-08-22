@@ -38,11 +38,24 @@ function hashCode(str: string) {
   );
 }
 
-export function useColorForName() {
-  const pSettings = useRecoilValue(projectSettingsState);
+export function useColors(inverted?: boolean) {
   const { theme } = useRecoilValue(settingsState);
 
-  const colors = theme === 'dark' ? darkColors : lightColors;
+  let colors = theme === 'dark' ? darkColors : lightColors;
+
+  if (inverted) {
+    if (colors === darkColors) {
+      colors = lightColors;
+    } else {
+      colors = darkColors;
+    }
+  }
+  return colors;
+}
+
+export function useColorForName() {
+  const pSettings = useRecoilValue(projectSettingsState);
+  const colors = useColors();
 
   return function (name: string, isUser?: boolean, isError?: boolean) {
     if (isError) {

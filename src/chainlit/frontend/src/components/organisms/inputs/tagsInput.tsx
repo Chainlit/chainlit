@@ -31,6 +31,7 @@ export default function TagsInput({
     >
       <MuiChipsInput
         {...rest}
+        sx={{ my: 0.5 }}
         size={size}
         onChange={(value) => setField?.(id, value, false)}
         inputProps={{

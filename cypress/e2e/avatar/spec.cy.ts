@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Avatar", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to display a nested CoT", () => {

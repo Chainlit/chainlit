@@ -1,148 +1,250 @@
 import { useFormik } from 'formik';
-import { MuiChipsInput } from 'mui-chips-input';
+import cloneDeep from 'lodash/cloneDeep';
+import merge from 'lodash/merge';
 import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import * as yup from 'yup';
 
-import { Box, Stack } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import {
+  Alert,
+  Box,
+  Drawer,
+  IconButton,
+  SelectChangeEvent,
+  Stack,
+  Typography
+} from '@mui/material';
 
-import InputLabel from 'components/molecules/inputLabel';
+import SelectInput from 'components/organisms/inputs/selectInput';
 
 import { ILLMSettings } from 'state/chat';
-import { playgroundSettingsState } from 'state/playground';
+import { ILLMProvider, playgroundState } from 'state/playground';
 
-import SelectCategoryInput from '../inputs/selectCategoryInput';
-import Slider from '../slider';
+import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
+import { getProviders } from './helpers';
 
-const models = {
-  GPT4: ['gpt-4'],
-  'Chat GPT': ['gpt-3.5-turbo'],
-  GPT3: ['text-davinci-003', 'text-davinci-002']
+type Schema = {
+  [key: string]: yup.Schema;
 };
 
-const ModelSettings = () => {
-  const [settings, setSettings] = useRecoilState(playgroundSettingsState);
+interface IFormProps {
+  settings: ILLMSettings;
+  schema: Schema;
+}
 
-  const schema = yup.object({
-    model_name: yup.string(),
-    stop: yup.array().of(yup.string()),
-    temperature: yup.number().min(0).max(1),
-    top_p: yup.number().min(0).max(1),
-    frequency_penalty: yup.number().min(0).max(1),
-    presence_penalty: yup.number().min(0).max(1)
-  });
+const SettingsForm = ({ settings, schema }: IFormProps) => {
+  const [playground, setPlayground] = useRecoilState(playgroundState);
+  const { provider, providers, providerFound } = getProviders(playground);
+
+  const providerWarning = !providerFound ? (
+    <Alert severity="warning">
+      {playground.prompt?.provider
+        ? `${playground?.prompt?.provider} provider is not found, using 
+      ${provider.name} instead.`
+        : `Provider not specified, using ${provider.name} instead.`}
+    </Alert>
+  ) : null;
 
   const formik = useFormik({
-    initialValues: settings || ({} as ILLMSettings),
+    initialValues: settings,
     validationSchema: schema,
+    enableReinitialize: true,
     onSubmit: async () => undefined
   });
 
   useEffect(() => {
-    if (settings) {
-      formik.setValues(settings);
-    }
-  }, [settings]);
-
-  useEffect(() => {
-    setSettings(formik.values);
+    setPlayground((old) => ({
+      ...old,
+      prompt: {
+        ...old.prompt!,
+        settings: formik.values
+      }
+    }));
   }, [formik.values]);
 
-  const modelSelect = (
-    <SelectCategoryInput
-      label="Model"
-      size="small"
-      name="model_name"
-      value={formik.values.model_name}
-      onChange={formik.handleChange}
-      id={'model_name'}
-      items={Object.entries(models).map(([category, models]) => {
-        const header = category;
-        const items = models.map((item) => ({ value: item, label: item }));
-        return { header, items };
-      })}
-    />
-  );
-
-  const temperature = (
-    <Slider
-      id="slider-temperature"
-      label="Temperature"
-      name="temperature"
-      value={formik.values.temperature}
-      onChange={formik.handleChange}
-      min={0}
-      max={1}
-      step={0.1}
-    />
-  );
-
-  const stopSequences = (
-    <Box>
-      <InputLabel label="Stop sequences" />
-      <MuiChipsInput
-        sx={{ mt: 1 }}
-        size="small"
-        placeholder=""
-        value={
-          Array.isArray(formik.values.stop)
-            ? formik.values.stop
-            : [formik.values.stop]
+  const onSelectedProviderChange = (event: SelectChangeEvent) => {
+    setPlayground((old) =>
+      merge(cloneDeep(old), {
+        prompt: {
+          provider: event.target.value
         }
-        onChange={(value) => formik.setFieldValue('stop', value)}
-      />
-    </Box>
-  );
+      })
+    );
+  };
 
-  const topP = (
-    <Slider
-      id="slider-top-p"
-      label="Top P"
-      name="top_p"
-      value={formik.values.top_p}
-      onChange={formik.handleChange}
-      min={0}
-      max={1}
-      step={0.1}
-    />
-  );
-
-  const frequencyPenalty = (
-    <Slider
-      id="slider-frequency-penalty"
-      label="Frequency penalty"
-      name="frequency_penalty"
-      value={formik.values.frequency_penalty}
-      onChange={formik.handleChange}
-      min={0}
-      max={1}
-      step={0.1}
-    />
-  );
-
-  const presencePenalty = (
-    <Slider
-      id="slider-presence-penalty"
-      label="Presence penalty"
-      name="presence_penalty"
-      value={formik.values.presence_penalty}
-      onChange={formik.handleChange}
-      min={0}
-      max={1}
-      step={0.1}
-    />
-  );
+  const buildProviderTooltip = () => {
+    if (provider.is_chat && !playground.prompt?.messages) {
+      return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
+    } else if (!provider.is_chat && playground.prompt?.messages) {
+      return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
+    } else {
+      return undefined;
+    }
+  };
 
   return (
-    <Stack spacing={2} sx={{ maxWidth: '250px' }}>
-      {modelSelect}
-      {temperature}
-      {stopSequences}
-      {topP}
-      {frequencyPenalty}
-      {presencePenalty}
-    </Stack>
+    <Box width={250} sx={{ height: 'inherit' }}>
+      <Typography fontSize="16px" fontWeight={600} color="text.primary">
+        Settings
+      </Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          height: '100%'
+        }}
+      >
+        <SelectInput
+          items={providers?.map((provider: ILLMProvider) => ({
+            label: provider.name,
+            value: provider.id
+          }))}
+          id="llm-providers"
+          value={provider.id}
+          label="LLM Provider"
+          tooltip={buildProviderTooltip()}
+          onChange={onSelectedProviderChange}
+        />
+        {providerWarning}
+        {provider.inputs.map((input: TFormInput, index: number) => (
+          <Box
+            // This trick is to have padding at the end of the scroll
+            sx={{ paddingBottom: index === provider.inputs.length - 1 ? 2 : 0 }}
+          >
+            <FormInput
+              key={input.id}
+              element={{
+                ...input,
+                id: input.id,
+                value: formik.values[input.id] as any,
+                onChange: (event: any): void => {
+                  formik.handleChange(event);
+                },
+                setField: (
+                  field: string,
+                  value: TFormInputValue,
+                  shouldValidate?: boolean
+                ): void => {
+                  formik.setFieldValue(field, value, shouldValidate);
+                }
+              }}
+            />
+          </Box>
+        ))}
+      </Stack>
+    </Box>
   );
 };
 
-export default ModelSettings;
+const ModelSettings = () => {
+  const playground = useRecoilValue(playgroundState);
+
+  const { provider } = getProviders(playground);
+
+  if (!provider) {
+    return null;
+  }
+
+  const settings: ILLMSettings = {};
+  const currentSettings = playground?.prompt?.settings || {};
+  const origSettings = playground?.originalPrompt?.settings || {};
+
+  const isSettingCompatible = (
+    value: string | number | boolean | string[],
+    input: TFormInput
+  ) => {
+    if (input.type === 'select') {
+      return !!input?.items?.find((i) => i.value === value);
+    }
+    return true;
+  };
+
+  const schema = yup.object(
+    provider.inputs.reduce((object: Schema, input: TFormInput) => {
+      const settingValue =
+        currentSettings[input.id] !== undefined
+          ? currentSettings[input.id]
+          : origSettings[input.id];
+
+      if (
+        settingValue !== undefined &&
+        isSettingCompatible(settingValue, input)
+      ) {
+        settings[input.id] = settingValue;
+      } else if (input.initial !== undefined) {
+        settings[input.id] = input.initial;
+      }
+
+      switch (input.type) {
+        case 'select':
+          object[input.id] = yup.string();
+          break;
+        case 'slider': {
+          let schema = yup.number();
+          if (input.min) {
+            schema = schema.min(input.min);
+          }
+          if (input.max) {
+            schema = schema.max(input.max);
+          }
+          object[input.id] = schema;
+          break;
+        }
+        case 'tags':
+          object[input.id] = yup.array().of(yup.string());
+          break;
+      }
+
+      return object;
+    }, {})
+  );
+
+  return (
+    <SettingsForm schema={schema as unknown as Schema} settings={settings} />
+  );
+};
+
+interface Props {
+  isSmallScreen: boolean;
+  isDrawerOpen: boolean;
+  toggleDrawer: () => void;
+}
+
+export default function ResponsiveModelSettings({
+  isSmallScreen,
+  isDrawerOpen,
+  toggleDrawer
+}: Props) {
+  return !isSmallScreen ? (
+    <Box ml="32px !important" height="100%">
+      <ModelSettings />
+    </Box>
+  ) : (
+    <Drawer
+      sx={{
+        '& .MuiDrawer-paper': {}
+      }}
+      variant="persistent"
+      anchor="right"
+      open={isDrawerOpen}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          pt: 2,
+          pr: 1
+        }}
+      >
+        <IconButton onClick={toggleDrawer}>
+          <ChevronRightIcon />
+        </IconButton>
+      </Box>
+      <Box px={3}>
+        <ModelSettings />
+      </Box>
+    </Drawer>
+  );
+}

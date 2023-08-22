@@ -12,7 +12,7 @@ function newSession() {
 
 describe("User Session", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to store data related per user session", () => {

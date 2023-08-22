@@ -50,6 +50,14 @@ const components = {
         color: grey[500]
       }
     }
+  },
+  MuiTooltip: {
+    styleOverrides: {
+      tooltip: {
+        backgroundColor: 'black',
+        color: 'white'
+      }
+    }
   }
 };
 
@@ -106,7 +114,7 @@ const darkTheme = createTheme({
 
 const lightTheme = createTheme({
   typography,
-  components: components,
+  components,
   shape,
   palette: {
     mode: 'light',

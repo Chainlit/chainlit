@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Error Handling", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should correctly display errors", () => {

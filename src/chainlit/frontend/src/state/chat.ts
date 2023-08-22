@@ -1,19 +1,32 @@
 import { atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 
-import { TFormInput, TFormInputValue } from 'components/organisms/FormInput';
+import { TFormInput } from 'components/organisms/FormInput';
 
 import { IMessageElement } from './element';
 import { IMember } from './user';
 
-export interface ILLMSettings {
-  model_name: string;
-  stop: string[] | string;
-  temperature: number;
-  max_tokens: number;
-  top_p: number;
-  frequency_penalty: number;
-  presence_penalty: number;
+interface IBaseTemplate {
+  template?: string;
+  formatted?: string;
+  template_format: string;
+}
+
+export type PromptMessageRole = 'system' | 'assistant' | 'user' | 'function';
+
+export interface IPromptMessage extends IBaseTemplate {
+  role: PromptMessageRole;
+}
+
+export type ILLMSettings = Record<string, string | string[] | number | boolean>;
+
+export interface IPrompt extends IBaseTemplate {
+  provider: string;
+  id?: string;
+  inputs?: Record<string, string>;
+  completion?: string;
+  settings?: ILLMSettings;
+  messages?: IPromptMessage[];
 }
 
 export interface IChat {
@@ -36,8 +49,7 @@ export interface IMessage {
   indent?: number;
   parentId?: string;
   isError?: boolean;
-  prompt?: string;
-  llmSettings?: ILLMSettings;
+  prompt?: IPrompt;
 }
 
 export interface IMessageUpdate extends IMessage {
@@ -131,10 +143,9 @@ export const chatSettingsDefaultValueSelector = selector({
   get: ({ get }) => {
     const chatSettings = get(chatSettingsState);
     return chatSettings.inputs.reduce(
-      (
-        form: { [key: string]: any },
-        input: TFormInput & { initial?: TFormInputValue }
-      ) => ((form[input.id] = input.initial), form),
+      (form: { [key: string]: any }, input: TFormInput) => (
+        (form[input.id] = input.initial), form
+      ),
       {}
     );
   }

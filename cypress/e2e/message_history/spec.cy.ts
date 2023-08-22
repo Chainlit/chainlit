@@ -7,7 +7,7 @@ import {
 
 describe("Message History", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to show the last message in the message history", () => {

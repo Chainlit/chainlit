@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Llama Index Callback", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to send messages to the UI with prompts and elements", () => {
@@ -22,12 +22,14 @@ describe("Llama Index Callback", () => {
 
     cy.get(".playground-button").eq(0).should("exist").click();
 
-    cy.get("#playground")
+    cy.get(".formatted-editor [contenteditable]")
       .should("exist")
-      .get("[contenteditable=true]")
-      .should("exist")
-      .should("contain", "This is the LLM prompt\nThis is the LLM response");
+      .should("contain", "This is the LLM prompt");
 
-    cy.get("#playground").get("#close-playground").should("exist").click();
+    cy.get(".completion-editor [contenteditable]")
+      .should("exist")
+      .should("contain", "This is the LLM response");
+
+    cy.get("#close-playground").should("exist").click();
   });
 });

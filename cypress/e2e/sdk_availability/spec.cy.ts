@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Emitter should be reachable from all contexts", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should find the Emitter from async, make_async and async_from_sync contexts", () => {

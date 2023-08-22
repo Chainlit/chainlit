@@ -34,6 +34,7 @@ Please see [here](https://docs.chainlit.io) for full documentation on:
 ### 🐍 Pure Python
 
 Create a new file `demo.py` with the following code:
+
 ```python
 import chainlit as cl
 
@@ -48,6 +49,7 @@ async def main(message: str):
 ```
 
 Now run it!
+
 ```
 $ chainlit run demo.py -w
 ```
@@ -59,9 +61,11 @@ $ chainlit run demo.py -w
 Check out our plug-and-play [integration](https://docs.chainlit.io/integrations/langchain) with LangChain!
 
 ### 📚 More Examples - Cookbook
+
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
 ## 🛣 Roadmap
+
 - [ ] New UI elements (spreadsheet, video, carousel...)
 - [ ] Create your own UI elements via component framework
 - [ ] DAG-based chain-of-thought interface
@@ -77,4 +81,5 @@ As an open-source initiative in a rapidly evolving domain, we welcome contributi
 For detailed information on how to contribute, see [here](.github/CONTRIBUTING.md).
 
 ## License
+
 Chainlit is open-source and licensed under the [Apache 2.0](LICENSE) license.

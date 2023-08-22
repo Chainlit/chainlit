@@ -2,7 +2,7 @@ import { runTestServer, submitMessage } from "../../support/testUtils";
 
 describe("User Env", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to ask a user for required keys", () => {

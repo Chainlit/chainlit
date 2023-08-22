@@ -2,13 +2,13 @@ import { sep } from "path";
 import { ExecutionMode } from "./utils";
 
 export function submitMessage(message: string) {
-  cy.wait(2000);
+  cy.wait(1000);
   cy.get(`#chat-input`).should("not.be.disabled");
   cy.get(`#chat-input`).type(`${message}{enter}`);
 }
 
 export function openHistory() {
-  cy.wait(2000);
+  cy.wait(1000);
   cy.get(`#chat-input`).should("not.be.disabled");
   cy.get(`#chat-input`).type(`{upArrow}`);
 }

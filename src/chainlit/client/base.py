@@ -15,6 +15,7 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
+from chainlit.prompt import Prompt
 from chainlit.types import (
     ConversationFilter,
     ElementDisplay,
@@ -30,8 +31,7 @@ class MessageDict(TypedDict):
     createdAt: Optional[int]
     content: str
     author: str
-    prompt: Optional[str]
-    llmSettings: Dict
+    prompt: Optional[Prompt]
     language: Optional[str]
     parentId: Optional[str]
     indent: Optional[int]
