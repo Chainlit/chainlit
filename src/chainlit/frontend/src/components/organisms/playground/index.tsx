@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { useIsFirstRender, useToggle } from 'usehooks-ts';
+import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { useToggle } from 'usehooks-ts';
 
 import RestoreIcon from '@mui/icons-material/Restore';
 import {
@@ -18,8 +18,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import ErrorBoundary from 'components/atoms/errorBoundary';
 
-import { clientState } from 'state/client';
-import { playgroundState } from 'state/playground';
+import { useApi } from 'hooks/useApi';
+
+import { IPlayground, playgroundState } from 'state/playground';
 
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
@@ -30,26 +31,22 @@ import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
 
 export default function PromptPlayground() {
-  const accessToken = useRecoilValue(accessTokenState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
+  const { data, error } = useApi<IPlayground>('/project/llm-providers');
+
   const [restoredTime, setRestoredTime] = useState(0);
-  const [providersError, setProvidersError] = useState();
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
-  const isFirstRender = useIsFirstRender();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
     theme.breakpoints.down('md')
   );
 
-  if (isFirstRender) {
-    ChainlitAPI.getLLMProviders()
-      .then((res) =>
-        setPlayground((old) => ({ ...old, providers: res.providers }))
-      )
-      .catch((err) => setProvidersError(err));
-  }
+  useEffect(() => {
+    if (!data) return;
+    setPlayground((old) => ({ ...old, providers: data.providers }));
+  }, [data]);
 
   const restore = () => {
     if (playground) {
@@ -99,7 +96,7 @@ export default function PromptPlayground() {
       <DialogContent sx={{ display: 'flex', direction: 'row', padding: 3 }}>
         <ErrorBoundary prefix="Prompt Playground error">
           <Stack gap={3} width="100%">
-            {providersError ? (
+            {error ? (
               <Alert severity="error">
                 An error occurred while fetching providers settings
               </Alert>

@@ -1,25 +1,54 @@
 import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
-import { IChat, ILLMSettings } from 'state/chat';
+import { IChat, IPrompt } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
 
 import { api } from '.';
 
 const ChainlitAPI = {
   getCompletion: async (
-    prompt: string,
-    settings: ILLMSettings,
+    prompt: IPrompt,
     userEnv = {},
-    accessToken?: string
+    controller: AbortController,
+    accessToken?: string,
+    tokenCb?: (done: boolean, token: string) => void
   ) => {
-    const res = await api.post(
+    const response = await api.post(
       `/completion`,
-      { prompt, settings, userEnv },
-      accessToken
+      { prompt, userEnv },
+      accessToken,
+      controller.signal
     );
 
-    const completion = await res.text();
-    return completion;
+    const reader = response?.body?.getReader();
+
+    const stream = new ReadableStream({
+      start(controller) {
+        function push() {
+          reader!
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                tokenCb && tokenCb(done, '');
+                return;
+              }
+              const string = new TextDecoder('utf-8').decode(value);
+              tokenCb && tokenCb(done, string);
+              controller.enqueue(value);
+              push();
+            })
+            .catch((err) => {
+              controller.close();
+              tokenCb && tokenCb(true, '');
+              console.error(err);
+            });
+        }
+        push();
+      }
+    });
+
+    return stream;
   },
 
   setHumanFeedback: async (
