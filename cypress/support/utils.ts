@@ -3,8 +3,8 @@ import { join } from "path";
 
 const ROOT = process.cwd();
 export const E2E_DIR = join(ROOT, "cypress/e2e");
-export const CHAINLIT_DIR = join(ROOT, "src");
-const FRONTEND_DIR = join(CHAINLIT_DIR, "chainlit", "frontend");
+export const CHAINLIT_DIR = join(ROOT, "src", "chainlit");
+const FRONTEND_DIR = join(ROOT, "src", "frontend");
 export const CHAINLIT_PORT = 8000;
 
 export enum ExecutionMode {
