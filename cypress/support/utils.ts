@@ -35,5 +35,6 @@ export function runCommand(command: string, cwd = ROOT) {
 
 export function installChainlit() {
   runCommand("pnpm run build", FRONTEND_DIR);
+  runCommand("cp -r src/frontend/dist src/chainlit/chainlit/frontend/", ROOT);
   runCommand(`poetry install -C ${CHAINLIT_DIR} --with tests`);
 }
