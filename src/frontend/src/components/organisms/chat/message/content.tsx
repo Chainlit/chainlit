@@ -1,3 +1,4 @@
+import { exportToFile } from 'helpers/export';
 import { memo } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -5,11 +6,14 @@ import remarkGfm from 'remark-gfm';
 import { Link, Stack, Typography } from '@mui/material';
 
 import Code from 'components/atoms/Code';
+import Collapse from 'components/atoms/Collapse';
 import ElementRef from 'components/atoms/element/ref';
 
 import { IMessageElement } from 'state/element';
 
 import InlinedElements from './inlined';
+
+const COLLAPSE_MIN_LENGTH = 300;
 
 interface Props {
   id?: string;
@@ -110,47 +114,57 @@ export default memo(function MessageContent({
 
   if (!preparedContent) return null;
 
+  const renderContent = () => (
+    <Stack direction="row">
+      <Typography
+        sx={{
+          width: '100%',
+          minHeight: '20px',
+          fontSize: '1rem',
+          lineHeight: '1.5rem',
+          fontFamily: 'Inter',
+          fontWeight: authorIsUser ? 500 : 300
+        }}
+        component="div"
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          className="markdown-body"
+          components={{
+            a({ children, ...props }) {
+              const name = children[0] as string;
+              const element = refElements.find((e) => e.name === name);
+
+              if (element) {
+                return <ElementRef element={element} />;
+              } else {
+                return (
+                  <Link {...props} target="_blank">
+                    {children}
+                  </Link>
+                );
+              }
+            },
+            code({ ...props }) {
+              return <Code {...props} />;
+            }
+          }}
+        >
+          {preparedContent}
+        </ReactMarkdown>
+      </Typography>
+    </Stack>
+  );
+
   return (
     <Stack width="100%">
-      <Stack direction="row">
-        <Typography
-          sx={{
-            width: '100%',
-            minHeight: '20px',
-            fontSize: '1rem',
-            lineHeight: '1.5rem',
-            fontFamily: 'Inter',
-            fontWeight: authorIsUser ? 500 : 300
-          }}
-          component="div"
-        >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            className="markdown-body"
-            components={{
-              a({ children, ...props }) {
-                const name = children[0] as string;
-                const element = refElements.find((e) => e.name === name);
-
-                if (element) {
-                  return <ElementRef element={element} />;
-                } else {
-                  return (
-                    <Link {...props} target="_blank">
-                      {children}
-                    </Link>
-                  );
-                }
-              },
-              code({ ...props }) {
-                return <Code {...props} />;
-              }
-            }}
-          >
-            {preparedContent}
-          </ReactMarkdown>
-        </Typography>
-      </Stack>
+      {preparedContent.length > COLLAPSE_MIN_LENGTH ? (
+        <Collapse onDownload={() => exportToFile(preparedContent, `${id}.txt`)}>
+          {renderContent()}
+        </Collapse>
+      ) : (
+        renderContent()
+      )}
       <InlinedElements elements={inlinedElements} />
     </Stack>
   );
