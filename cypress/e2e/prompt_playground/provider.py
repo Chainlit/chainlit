@@ -1,9 +1,12 @@
+import os
+
 from fastapi.responses import StreamingResponse
 
 import chainlit as cl
 from chainlit.input_widget import Select, Slider
 from chainlit.playground.config import BaseProvider, add_llm_provider
 
+os.environ["TEST_LLM_API_KEY"] = "sk..."
 
 class TestLLMProvider(BaseProvider):
     async def create_completion(self, request):
