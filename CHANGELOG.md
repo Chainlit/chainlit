@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.6.3] - 2023-08-22
+
+### Added
+
+- Complete rework of the Prompt playground. Now supports custom LLMs, templates, variables and more
+- Enhanced Langchain final answer streaming
+- `remove_actions` method on the `Message` class
+- Button to clear message history
+
+### Fixed
+
+- Chainlit CLI performance issue
+- Llama Index v0.8+ callback handler. Now supports messages prompts
+- Tasklist display, persistence and `.remove()`
+- Custom headers growing infinitely large
+- Action callback can now handle multiple actions
+- Langflow integration load_flow_from_json
+- Video and audio elements on Safari
+
 ## [0.6.2] - 2023-08-06
 
 ### Added
@@ -16,6 +35,7 @@ Nothing unreleased yet!
 - Authenticate users based on custom headers with the Custom Auth client
 
 ### Fixed
+
 - Author rename now works with all kinds of messages
 - Create message error with chainlit cloud (chenjuneking)
 
@@ -56,7 +76,7 @@ Migration guide available [here](https://docs.chainlit.io/guides/migration/0.6.0
 - The UI is now more mobile friendly
 - Avatar element Path parameter
 - Increased web socket message max size to 100 mb
-- Duplicated conversations  in the history tab
+- Duplicated conversations in the history tab
 
 ## [0.5.2] - 2023-07-10
 
@@ -80,6 +100,7 @@ Migration guide available [here](https://docs.chainlit.io/guides/migration/0.6.0
 - Microsoft auth
 
 ### Fixed
+
 - Files in app dir are now properly served (typical use case is displaying an image in the readme)
 - Add missing attribute `size` to Pyplot element
 
