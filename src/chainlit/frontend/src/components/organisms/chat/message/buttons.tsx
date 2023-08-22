@@ -1,6 +1,6 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import EditIcon from '@mui/icons-material/EditOutlined';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
 import ActionList from 'components/atoms/actionsList';
@@ -31,20 +31,20 @@ export default function Buttons({ message, actions }: Props) {
   const showEditButton = !!message.prompt && !!message.content;
 
   const editButton = showEditButton ? (
-    <Tooltip title="Open in prompt playground">
+    <Tooltip title="Inspect in prompt playground">
       <IconButton
         size="small"
         className="playground-button"
         onClick={() => {
           if (!message.prompt) return;
-          setPlayground({
-            llmSettings: message.llmSettings,
+          setPlayground((old) => ({
+            ...old,
             prompt: message.prompt,
-            completion: message.content!
-          });
+            originalPrompt: message.prompt
+          }));
         }}
       >
-        <EditIcon sx={{ width: '16px', height: '16px' }} />
+        <BugReportIcon sx={{ width: '16px', height: '16px' }} />
       </IconButton>
     </Tooltip>
   ) : null;

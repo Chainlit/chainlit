@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/message/container';
-import Playground from 'components/organisms/playground';
+import PromptPlaground from 'components/organisms/playground';
 
 import { IAction } from 'state/action';
 import { IChat } from 'state/chat';
@@ -42,7 +42,7 @@ export default function Conversation() {
 
   return (
     <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
-      <Playground />
+      <PromptPlaground />
 
       <SideView>
         <Box my={1} />

@@ -6,8 +6,8 @@ from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
+from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
-from chainlit.types import LLMSettings
 
 IGNORE_LIST = ["AgentExecutor"]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -15,35 +15,70 @@ DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
 def get_llm_settings(invocation_params: Union[Dict, None]):
     if invocation_params is None:
-        return None
-    elif invocation_params["_type"] == "openai":
-        return LLMSettings(
-            model_name=invocation_params["model_name"],
-            stop=invocation_params["stop"],
-            temperature=invocation_params["temperature"],
-            max_tokens=invocation_params["max_tokens"],
-            top_p=invocation_params["top_p"],
-            frequency_penalty=invocation_params["frequency_penalty"],
-            presence_penalty=invocation_params["presence_penalty"],
-        )
-    elif invocation_params["_type"] == "openai-chat":
-        return LLMSettings(
-            model_name=invocation_params["model_name"],
-            stop=invocation_params["stop"],
-        )
+        return None, None
+
+    provider = invocation_params.pop("_type")  # type: str
+
+    if provider.startswith("openai"):
+        model_name = invocation_params.pop("model_name")
+        invocation_params["model"] = model_name
+
+    return provider, invocation_params
+
+
+def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
+    inputs = {k: str(v) for (k, v) in inputs.items()}
+    prompt_params = serialized.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
+
+    _messages = prompt_params.get("messages")
+
+    if _messages:
+        messages = []
+        for m in _messages:
+            m_prompt_params = m.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
+            m_template = m_prompt_params.get("template")
+            m_template_format = m_prompt_params.get("template_format")
+            messages += [
+                PromptMessage(
+                    template=m_template,
+                    template_format=m_template_format,
+                    role=convert_role(m["id"][-1]),
+                )
+            ]
     else:
-        return None
+        messages = None
+
+    template = prompt_params.get("template")
+    template_format = prompt_params.get("template_format")
+
+    if template:
+        return Prompt(
+            template=template,
+            template_format=template_format,
+            inputs=inputs,
+        )
+    elif messages:
+        return Prompt(inputs=inputs, messages=messages)
+
+
+def convert_role(role: str):
+    if role in ["human", "chat", "HumanMessagePromptTemplate"]:
+        return "user"
+    elif role in ["system", "SystemMessagePromptTemplate"]:
+        return "system"
+    elif role in ["ai", "AIMessagePromptTemplate"]:
+        return "assistant"
+    elif role in ["function", "FunctionMessagePromptTemplate"]:
+        return "function"
+    else:
+        raise ValueError(f"Unsupported role {role}")
 
 
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
-    # Keep track of the formatted prompts to display them in the prompt playground.
-    prompts: List[str]
-    # Keep track of the LLM settings for the last prompt
-    llm_settings: Optional[LLMSettings]
+    # Keep track of the prompt sequence
+    prompt_sequence: List[Prompt]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
     sequence: List[Message]
-    # Keep track of the last prompt for each session
-    last_prompt: Union[str, None]
     # Keep track of the currently streamed message for the session
     stream: Union[Message, None]
     # The stream we can use to stream the final answer from a chain
@@ -73,10 +108,8 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         stream_final_answer: bool = False,
         root_message: Optional[Message] = None,
     ) -> None:
-        self.prompts = []
-        self.llm_settings = None
         self.sequence = []
-        self.last_prompt = None
+        self.prompt_sequence = []
         self.stream = None
 
         if root_message:
@@ -108,6 +141,13 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         self.stream_final_answer = stream_final_answer
         self.final_stream = None
         self.has_streamed_final_answer = False
+
+    @property
+    def current_prompt(self):
+        if self.prompt_sequence:
+            return self.prompt_sequence[-1]
+        else:
+            return None
 
     def append_to_last_tokens(self, token: str) -> None:
         self.last_tokens.append(token)
@@ -145,12 +185,10 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if author in IGNORE_LIST:
             return
 
-        self.pop_prompt()
-        prompt = self.consume_last_prompt()
         parent_id = self.get_last_message().parent_id
 
         self.stream = self.create_message(
-            prompt=prompt, author=author, parent_id=parent_id
+            prompt=self.current_prompt, author=author, parent_id=parent_id
         )
 
     def end_stream(self):
@@ -162,19 +200,6 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
     def pop_sequence(self):
         if self.sequence:
             return self.sequence.pop()
-
-    def add_prompt(self, prompt: str, llm_settings: Optional[LLMSettings] = None):
-        self.prompts.append(prompt)
-        self.llm_settings = llm_settings
-
-    def pop_prompt(self):
-        if self.prompts:
-            self.last_prompt = self.prompts.pop()
-
-    def consume_last_prompt(self):
-        last_prompt = self.last_prompt
-        self.last_prompt = None
-        return last_prompt
 
     def get_author(self):
         if self.sequence:
@@ -191,12 +216,12 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if isinstance(error, InterruptedError):
             return None
 
-        return ErrorMessage(str(error), author=self.get_author())
+        return ErrorMessage(content=str(error), author=self.get_author())
 
     def create_message(
         self,
         content: str = "",
-        prompt: Optional[str] = None,
+        prompt: Optional[Prompt] = None,
         author: Optional[str] = None,
         parent_id: Optional[str] = None,
     ):
@@ -209,7 +234,69 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
             author=author or self.get_author(),
             prompt=prompt,
             parent_id=parent_id,
-            llm_settings=self.llm_settings,
+        )
+
+
+def _on_chat_model_start(
+    self: BaseLangchainCallbackHandler,
+    serialized: Dict[str, Any],
+    messages: List[List[BaseMessage]],
+    **kwargs: Any,
+):
+    invocation_params = kwargs.get("invocation_params")
+    provider, settings = get_llm_settings(invocation_params)
+
+    if self.current_prompt:
+        self.current_prompt.provider = provider
+        self.current_prompt.settings = settings
+        if self.current_prompt.messages:
+            for idx, m in enumerate(messages[0]):
+                self.current_prompt.messages[idx].formatted = m.content
+                self.current_prompt.messages[idx].role = convert_role(m.type)
+
+        elif self.current_prompt.template:
+            unique_message = messages[0][0]
+            prompt_message = PromptMessage(
+                template=self.current_prompt.template,
+                formatted=unique_message.content,
+                role=convert_role(unique_message.type),
+            )
+            self.current_prompt.messages = [prompt_message]
+            self.current_prompt.template = None
+    else:
+        prompt_messages = [
+            PromptMessage(formatted=m.content, role=convert_role(m.type))
+            for m in messages[0]
+        ]
+        self.prompt_sequence.append(
+            Prompt(
+                messages=prompt_messages,
+                provider=provider,
+                settings=settings,
+            )
+        )
+
+
+def _on_llm_start(
+    self: BaseLangchainCallbackHandler,
+    serialized: Dict[str, Any],
+    prompts: List[str],
+    **kwargs: Any,
+) -> None:
+    invocation_params = kwargs.get("invocation_params")
+    provider, settings = get_llm_settings(invocation_params)
+
+    if self.current_prompt:
+        self.current_prompt.formatted = prompts[0]
+        self.current_prompt.provider = provider
+        self.current_prompt.settings = settings
+    else:
+        self.prompt_sequence.append(
+            Prompt(
+                formatted=prompts[0],
+                provider=provider,
+                settings=settings,
+            )
         )
 
 
@@ -245,9 +332,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
     def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
-        invocation_params = kwargs.get("invocation_params")
-        llm_settings = get_llm_settings(invocation_params)
-        self.add_prompt(prompts[0], llm_settings)
+        _on_llm_start(self, serialized, prompts, **kwargs)
 
     def on_chat_model_start(
         self,
@@ -255,10 +340,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         messages: List[List[BaseMessage]],
         **kwargs: Any,
     ) -> None:
-        invocation_params = kwargs.get("invocation_params")
-        llm_settings = get_llm_settings(invocation_params)
-        prompt = "\n".join([m.content for m in messages[0]])
-        self.add_prompt(prompt, llm_settings)
+        _on_chat_model_start(self, serialized, messages, **kwargs)
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         if not self.stream:
@@ -278,7 +360,6 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
             self.answer_reached = self.check_if_answer_reached()
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        self.pop_prompt()
         if response.llm_output is not None:
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
@@ -286,12 +367,17 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
                     run_sync(
                         context.emitter.update_token_count(token_usage["total_tokens"])
                     )
+        if self.current_prompt:
+            self.current_prompt.completion = response.generations[0][0].text
         if self.final_stream:
             run_sync(self.final_stream.send())
 
     def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
+        prompt = build_prompt(serialized, inputs)
+        if prompt:
+            self.prompt_sequence.append(prompt)
         message = self.create_message(author=serialized["id"][-1])
         self.add_in_sequence(message)
         self.add_message(message)
@@ -299,12 +385,14 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
-            prompt = self.consume_last_prompt()
             parent_id = self.get_last_message().parent_id
             message = self.create_message(
-                outputs[output_key], prompt, parent_id=parent_id
+                outputs[output_key], self.current_prompt, parent_id=parent_id
             )
             self.add_message(message)
+
+        if self.prompt_sequence:
+            self.prompt_sequence.pop()
         self.pop_sequence()
 
     def on_tool_start(
@@ -321,9 +409,8 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        prompt = self.consume_last_prompt()
         parent_id = self.get_last_message().parent_id
-        message = self.create_message(output, prompt, parent_id=parent_id)
+        message = self.create_message(output, None, parent_id=parent_id)
         self.add_message(message)
         self.pop_sequence()
 
@@ -370,9 +457,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
-        invocation_params = kwargs.get("invocation_params")
-        llm_settings = get_llm_settings(invocation_params)
-        self.add_prompt(prompts[0], llm_settings)
+        _on_llm_start(self, serialized, prompts, **kwargs)
 
     async def on_chat_model_start(
         self,
@@ -380,10 +465,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         messages: List[List[BaseMessage]],
         **kwargs: Any,
     ) -> None:
-        invocation_params = kwargs.get("invocation_params")
-        llm_settings = get_llm_settings(invocation_params)
-        prompt = "\n".join([m.content for m in messages[0]])
-        self.add_prompt(prompt, llm_settings)
+        _on_chat_model_start(self, serialized, messages, **kwargs)
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         if not self.stream:
@@ -403,7 +485,6 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
             self.answer_reached = self.check_if_answer_reached()
 
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        self.pop_prompt()
         if response.llm_output is not None:
             if "token_usage" in response.llm_output:
                 token_usage = response.llm_output["token_usage"]
@@ -411,12 +492,17 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
                     await context.emitter.update_token_count(
                         token_usage["total_tokens"]
                     )
+        if self.current_prompt:
+            self.current_prompt.completion = response.generations[0][0].text
         if self.final_stream:
             await self.final_stream.send()
 
     async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
+        prompt = build_prompt(serialized, inputs)
+        if prompt:
+            self.prompt_sequence.append(prompt)
         message = self.create_message(author=serialized["id"][-1])
         self.add_in_sequence(message)
         await self.add_message(message)
@@ -424,12 +510,13 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
     async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         output_key = list(outputs.keys())[0]
         if output_key:
-            prompt = self.consume_last_prompt()
             parent_id = self.get_last_message().parent_id
             message = self.create_message(
-                outputs[output_key], prompt, parent_id=parent_id
+                outputs[output_key], prompt=self.current_prompt, parent_id=parent_id
             )
             await self.add_message(message)
+        if self.prompt_sequence:
+            self.prompt_sequence.pop()
         self.pop_sequence()
 
     async def on_tool_start(
@@ -446,9 +533,8 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         llm_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        prompt = self.consume_last_prompt()
         parent_id = self.get_last_message().parent_id
-        message = self.create_message(output, prompt, parent_id=parent_id)
+        message = self.create_message(output, parent_id=parent_id)
         await self.add_message(message)
         self.pop_sequence()
 

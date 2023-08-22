@@ -1,131 +1,86 @@
-import {
-  ContentState,
-  Editor,
-  EditorState,
-  Modifier,
-  SelectionState
-} from 'draft-js';
-import { OrderedSet } from 'immutable';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { useToggle } from 'usehooks-ts';
+import { useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { useIsFirstRender, useToggle } from 'usehooks-ts';
 
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CloseIcon from '@mui/icons-material/Close';
-import HelpIcon from '@mui/icons-material/HelpOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LoadingButton from '@mui/lab/LoadingButton';
 import {
-  Box,
-  Drawer,
+  Alert,
   IconButton,
   Stack,
+  Theme,
   Tooltip,
-  Typography
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import ErrorBoundary from 'components/atoms/errorBoundary';
+
 import { clientState } from 'state/client';
-import { playgroundSettingsState, playgroundState } from 'state/playground';
-import { userEnvState } from 'state/user';
+import { playgroundState } from 'state/playground';
 
-import 'draft-js/dist/Draft.css';
-
+import ActionBar from './actionBar';
+import BasicPromptPlayground from './basic';
+import ChatPromptPlayground from './chat';
+import VariableModal from './editor/variableModal';
+import PlaygroundHeader from './header';
 import ModelSettings from './modelSettings';
+import SubmitButton from './submitButton';
 
-const styleMap = {
-  COMPLETION: {
-    backgroundColor: '#d2f4d3',
-    color: 'black'
-  }
-};
-
-export default function Playground() {
+export default function PromptPlayground() {
   const client = useRecoilValue(clientState);
-  const playground = useRecoilValue(playgroundState);
-  const setPlayground = useSetRecoilState(playgroundState);
-  const settings = useRecoilValue(playgroundSettingsState);
-  const userEnv = useRecoilValue(userEnvState);
-  const setPlaygroundSettings = useSetRecoilState(playgroundSettingsState);
+  const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const [state, setState] = useState(EditorState.createEmpty());
-  const [loading, setLoading] = useState(false);
+  const [restoredTime, setRestoredTime] = useState(0);
+  const [providersError, setProvidersError] = useState();
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
 
-  useEffect(() => {
-    if (playground?.prompt) {
-      const _state = EditorState.createWithContent(
-        ContentState.createFromText(playground.prompt)
-      );
-      setState(insertCompletion(_state, playground.completion));
-    }
-    if (playground?.llmSettings) {
-      setPlaygroundSettings({ ...playground.llmSettings });
-    }
-  }, [playground]);
+  const isFirstRender = useIsFirstRender();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery<Theme>((theme) =>
+    theme.breakpoints.down('md')
+  );
+
+  if (isFirstRender) {
+    client
+      .getLLMProviders()
+      .then((res) =>
+        setPlayground((old) => ({ ...old, providers: res.providers }))
+      )
+      .catch((err) => setProvidersError(err));
+  }
 
   const restore = () => {
     if (playground) {
-      setPlayground({ ...playground });
+      setPlayground((old) => ({
+        ...old,
+        prompt: old.originalPrompt
+      }));
+      setRestoredTime((old) => old + 1);
     }
-  };
-
-  const insertCompletion = (state: EditorState, completion: string) => {
-    const contentState = state.getCurrentContent();
-
-    const blockMap = contentState.getBlockMap();
-    const key = blockMap.last().getKey();
-    const length = blockMap.last().getLength();
-    const selection = new SelectionState({
-      anchorKey: key,
-      anchorOffset: length,
-      focusKey: key,
-      focusOffset: length
-    });
-
-    const ncs = Modifier.insertText(
-      contentState,
-      selection,
-      '\n' + completion,
-      OrderedSet.of('COMPLETION')
-    );
-    const es = EditorState.push(state, ncs, 'insert-characters');
-    return EditorState.forceSelection(es, ncs.getSelectionAfter());
   };
 
   const handleClose = () => {
-    setPlayground(undefined);
+    setPlayground((old) => ({ ...old, prompt: undefined }));
   };
 
-  const submit = async () => {
-    if (!settings) {
-      return;
-    }
-    const prompt = state.getCurrentContent().getPlainText();
-    try {
-      setLoading(true);
-      const completion = await client.getCompletion(prompt, settings, userEnv);
-      setState(insertCompletion(state, completion));
-    } catch (err) {
-      if (err instanceof Error) {
-        toast.error(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!playground?.prompt) {
+    return null;
+  }
+
+  const hasTemplate = playground?.prompt?.messages
+    ? playground.prompt.messages.every((m) => typeof m.template === 'string')
+    : typeof playground?.prompt?.template === 'string';
 
   return (
     <Dialog
-      open={!!playground}
+      open={!!playground.prompt}
       fullScreen
       PaperProps={{
         style: {
-          // backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.default,
           backgroundImage: 'none'
         }
       }}
@@ -134,98 +89,60 @@ export default function Playground() {
       aria-labelledby="playground"
       aria-describedby="playground"
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography fontSize="18px" fontWeight={700}>
-          Prompt playground
-        </Typography>
-        <IconButton
-          href="https://docs.chainlit.io/concepts/prompt-playground"
-          target="_blank"
-        >
-          <Tooltip title="Help">
-            <HelpIcon />
-          </Tooltip>
-        </IconButton>
-        <Box sx={{ ml: 'auto' }}>
-          <IconButton
-            aria-label="open drawer"
-            edge="end"
-            onClick={toggleDrawer}
-            sx={{ mr: '4px' }}
-          >
-            <SettingsIcon />
-          </IconButton>
-          <IconButton edge="end" id="close-playground" onClick={handleClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
+      <DialogTitle sx={{ display: 'flex', flexDirection: 'column' }}>
+        <PlaygroundHeader
+          hasTemplate={hasTemplate}
+          isSmallScreen={isSmallScreen}
+          toggleDrawer={toggleDrawer}
+          handleClose={handleClose}
+        />
       </DialogTitle>
-      <DialogContent>
-        <Stack direction="row" alignItems="flex-start">
-          <Box
-            sx={{
-              fontFamily: 'Inter',
-              fontSize: '16px',
-              lineHeight: '24px',
-              padding: '0.75rem',
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              borderRadius: '0.375rem',
-              overflowY: 'auto',
-              width: '100%',
-              flexGrow: 1,
-              caretColor: (theme) => theme.palette.text.primary,
-              height: '80vh'
-            }}
-          >
-            <Editor
-              customStyleMap={styleMap}
-              editorState={state}
-              onChange={setState}
-            />
-          </Box>
-          <Drawer
-            sx={{
-              '& .MuiDrawer-paper': {
-                alignItems: 'center',
-                width: '300px'
-              }
-            }}
-            variant="persistent"
-            anchor="right"
-            open={isDrawerOpen}
-          >
-            <Box
+      <DialogContent sx={{ display: 'flex', direction: 'row', padding: 3 }}>
+        <ErrorBoundary prefix="Prompt Playground error">
+          <Stack gap={3} width="100%">
+            {providersError ? (
+              <Alert severity="error">
+                An error occurred while fetching providers settings
+              </Alert>
+            ) : null}
+            <Stack
+              direction="row"
+              spacing={1.5}
               sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                width: '100%',
-                paddingRight: '30px',
-                paddingTop: '10px'
+                overflowY: 'auto',
+                paddingBottom: 2,
+                height: '100%'
               }}
             >
-              <IconButton onClick={toggleDrawer}>
-                <ChevronRightIcon />
-              </IconButton>
-            </Box>
-            <ModelSettings />
-          </Drawer>
-        </Stack>
-        <Stack direction="row" alignItems="center" mt={1} spacing={2}>
-          <LoadingButton
-            onClick={submit}
-            variant="contained"
-            sx={{ padding: '6px 12px', height: '35px' }}
-            loading={loading}
-          >
-            Submit
-          </LoadingButton>
-          <Tooltip title="Restore original">
-            <IconButton onClick={restore}>
-              <RestoreIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
+              <VariableModal />
+              <BasicPromptPlayground
+                restoredTime={restoredTime}
+                hasTemplate={hasTemplate}
+                prompt={playground.prompt}
+              />
+              <ChatPromptPlayground
+                restoredTime={restoredTime}
+                hasTemplate={hasTemplate}
+                prompt={playground.prompt}
+              />
+            </Stack>
+          </Stack>
+          <ModelSettings
+            isSmallScreen={isSmallScreen}
+            isDrawerOpen={isDrawerOpen}
+            toggleDrawer={toggleDrawer}
+          />
+        </ErrorBoundary>
       </DialogContent>
+
+      <ActionBar>
+        <Tooltip title="Restore original">
+          <IconButton onClick={restore}>
+            <RestoreIcon />
+          </IconButton>
+        </Tooltip>
+        <SubmitButton />
+      </ActionBar>
     </Dialog>
   );
 }

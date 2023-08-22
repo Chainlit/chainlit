@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Initial headers", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
     cy.visit("/", {
       headers: { "test-header": "test header value" },
     });

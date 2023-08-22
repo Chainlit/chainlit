@@ -2,11 +2,12 @@ from typing import Any, Dict, List, Optional
 
 from llama_index.callbacks.base import BaseCallbackHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
-from llama_index.llms.base import ChatResponse
+from llama_index.llms.base import ChatMessage, ChatResponse, CompletionResponse
 
 from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.message import Message
+from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
 
 DEFAULT_IGNORE = [
@@ -97,15 +98,37 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 )
 
         if event_type == CBEventType.LLM:
+            formatted_messages = payload.get(
+                EventPayload.MESSAGES
+            )  # type: Optional[List[ChatMessage]]
+            formatted_prompt = payload.get(EventPayload.PROMPT)
             response = payload.get(EventPayload.RESPONSE)
-            content = response.message.content if response else ""
+
+            if formatted_messages:
+                messages = [
+                    PromptMessage(role=m.role.value, formatted=m.content)
+                    for m in formatted_messages
+                ]
+            else:
+                messages = None
+
+            if isinstance(response, ChatResponse):
+                content = response.message.content or ""
+            elif isinstance(response, CompletionResponse):
+                content = response.text
+            else:
+                content = ""
 
             run_sync(
                 Message(
                     content=content,
                     author=event_type,
                     parent_id=self._get_parent_id(),
-                    prompt=payload.get(EventPayload.PROMPT),
+                    prompt=Prompt(
+                        formatted=formatted_prompt,
+                        messages=messages,
+                        completion=content,
+                    ),
                 ).send()
             )
 

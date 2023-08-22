@@ -2,17 +2,15 @@ import { grey } from 'palette';
 import { CodeProps } from 'react-markdown/lib/ast-to-react';
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useCopyToClipboard, useToggle } from 'usehooks-ts';
 
-import { CopyAll } from '@mui/icons-material';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box } from '@mui/material';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 
+import ClipboardCopy from './ClipboardCopy';
+
 export default function Code({ inline, children, ...props }: CodeProps) {
-  const [showTooltip, toggleTooltip] = useToggle();
   const isDarkMode = useIsDarkMode();
-  const [value, copy] = useCopyToClipboard();
 
   const match = /language-(\w+)/.exec(props.className || '');
   const showSyntaxHighlighter = !inline && match;
@@ -71,34 +69,11 @@ export default function Code({ inline, children, ...props }: CodeProps) {
   return (
     <code style={{ position: 'relative' }}>
       {!inline ? (
-        <Tooltip
-          open={showTooltip}
-          title={'Copied to clipboard!'}
-          onClose={toggleTooltip}
-        >
-          <IconButton
-            sx={{
-              color:
-                showSyntaxHighlighter || isDarkMode ? grey[200] : grey[800],
-              position: 'absolute',
-              right: 4,
-              top: 4,
-              zIndex: 1
-            }}
-            onClick={() => {
-              copy(children[0] as string)
-                .then(() => {
-                  toggleTooltip();
-                  console.log('Successfully copied: ', value);
-                })
-                .catch((err) =>
-                  console.log('An error occurred while copying: ', err)
-                );
-            }}
-          >
-            <CopyAll />
-          </IconButton>
-        </Tooltip>
+        <ClipboardCopy
+          value={children[0] as string}
+          // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
+          theme={showSyntaxHighlighter ? 'dark' : undefined}
+        />
       ) : null}
       {renderCode()}
     </code>

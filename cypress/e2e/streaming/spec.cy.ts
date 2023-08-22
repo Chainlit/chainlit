@@ -10,7 +10,7 @@ function testStreamedMessage(index: number) {
 
 describe("Streaming", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to stream a message", () => {

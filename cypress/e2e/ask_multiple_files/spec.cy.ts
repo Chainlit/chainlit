@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Upload multiple files", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to receive two files", () => {

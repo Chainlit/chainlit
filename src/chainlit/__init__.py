@@ -30,7 +30,6 @@ from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import LLMSettings
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -192,7 +191,6 @@ __getattr__ = make_module_getattr(
 
 __all__ = [
     "user_session",
-    "LLMSettings",
     "Action",
     "Audio",
     "Pdf",

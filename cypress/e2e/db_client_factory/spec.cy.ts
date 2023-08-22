@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Db Custom client", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should call the custom client", () => {

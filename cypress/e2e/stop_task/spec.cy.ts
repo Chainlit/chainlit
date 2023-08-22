@@ -1,8 +1,12 @@
-import { describeSyncAsync, runTestServer, submitMessage } from "../../support/testUtils";
+import {
+  describeSyncAsync,
+  runTestServer,
+  submitMessage,
+} from "../../support/testUtils";
 
 describeSyncAsync("Stop task", (mode) => {
   before(() => {
-    runTestServer(mode)
+    runTestServer(mode);
   });
 
   it("should be able to stop a task", () => {

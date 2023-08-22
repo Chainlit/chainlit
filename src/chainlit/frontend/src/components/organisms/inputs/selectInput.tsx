@@ -3,8 +3,8 @@ import { grey } from 'palette';
 import React from 'react';
 
 import { KeyboardArrowDown } from '@mui/icons-material';
-import { MenuItem } from '@mui/material';
-import MSelect, { SelectChangeEvent } from '@mui/material/Select';
+import { MenuItem, SxProps } from '@mui/material';
+import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
 import NotificationCount from 'components/atoms/notificationCount';
 
@@ -20,14 +20,17 @@ export type SelectItem = {
   value: string | number;
 };
 
-export type SelectInputProps = {
-  children?: React.ReactNode;
-  items?: SelectItem[];
-  name?: string;
-  onChange: (e: SelectChangeEvent) => void;
-  renderLabel?: () => string;
-  value?: string | number;
-} & IInput;
+export type SelectInputProps = IInput &
+  Omit<SelectProps<string>, 'value' | 'onChange'> & {
+    children?: React.ReactNode;
+    items?: SelectItem[];
+    name?: string;
+    onChange: (e: SelectChangeEvent) => void;
+    placeholder?: string;
+    renderLabel?: () => string;
+    value?: string | number;
+    iconSx?: SxProps;
+  };
 
 type MenuItemProps = {
   index: number;
@@ -63,7 +66,7 @@ export const renderMenuItem = ({
   >
     {item.label || item.value}
     {item.notificationCount ? (
-      <NotificationCount notificationsCount={item.notificationCount} />
+      <NotificationCount count={item.notificationCount} />
     ) : null}
   </MenuItem>
 );
@@ -81,7 +84,11 @@ export default function SelectInput({
   size = 'small',
   tooltip,
   value,
-  renderLabel
+  placeholder = 'Select',
+  renderLabel,
+  sx,
+  iconSx,
+  ...rest
 }: SelectInputProps): JSX.Element {
   const isDarkMode = useIsDarkMode();
 
@@ -92,39 +99,61 @@ export default function SelectInput({
       description={description}
       label={label}
       tooltip={tooltip}
+      sx={sx}
     >
       <MSelect
+        {...rest}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
         size={size}
         disabled={disabled}
-        renderValue={() =>
-          (renderLabel && renderLabel()) ||
-          `${items?.find((item) => item.value === value)?.label}`
-        }
+        displayEmpty
+        renderValue={() => {
+          if (!value || value === '') return placeholder;
+
+          return (
+            (renderLabel && renderLabel()) ||
+            `${items?.find((item) => item.value === value)?.label}`
+          );
+        }}
         sx={{
-          backgroundColor: isDarkMode ? grey[900] : '',
-          my: 0.5,
-          boxShadow:
-            '0px 10px 10px 0px rgba(0, 0, 0, 0.05), 0px 2px 4px 0px rgba(0, 0, 0, 0.05)'
+          backgroundColor: (theme) => theme.palette.background.paper,
+          borderRadius: 1,
+          padding: 0.5,
+          '&.MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: (theme) => `1px solid ${theme.palette.divider}`
+            }
+          }
         }}
         inputProps={{
           id: id,
           name: name || id,
           sx: {
+            color: grey[600],
+            fontSize: '14px',
+            fontWeight: 400,
             px: '16px',
-            py: size === 'small' ? '10px' : '14px'
-          },
-          MenuProps: {
+            py: size === 'small' ? '10px' : '14px',
+            h: '48px'
+          }
+        }}
+        MenuProps={{
+          PaperProps: {
             sx: {
+              border: (theme: any) => `1px solid ${theme.palette.divider}`,
+              boxShadow: (theme: any) =>
+                theme.palette.mode === 'light'
+                  ? '0px 2px 4px 0px #0000000D'
+                  : '0px 10px 10px 0px #0000000D',
               '&& .Mui-selected, .Mui-selected.Mui-selected:hover': {
                 backgroundColor: isDarkMode ? grey[800] : primary[50]
               }
-            },
-            MenuListProps: {
-              sx: { backgroundColor: isDarkMode ? grey[900] : '' }
             }
+          },
+          MenuListProps: {
+            sx: { backgroundColor: isDarkMode ? grey[900] : '' }
           }
         }}
         IconComponent={(props) => (
@@ -135,7 +164,8 @@ export default function SelectInput({
               px: '9px',
               color: !disabled
                 ? `${isDarkMode ? grey[300] : grey[600]} !important`
-                : ''
+                : '',
+              ...iconSx
             }}
           />
         )}

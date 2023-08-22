@@ -29,7 +29,7 @@ from chainlit.client.utils import (
 from chainlit.config import DEFAULT_HOST, config, load_module, reload_config
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
-from chainlit.telemetry import trace_event
+from chainlit.playground.config import get_llm_providers
 from chainlit.types import (
     CompletionRequest,
     DeleteConversationRequest,
@@ -185,39 +185,30 @@ def get_html_template():
 
 
 @app.post("/completion")
-async def completion(completion: CompletionRequest):
+async def completion(request: CompletionRequest):
     """Handle a completion request from the prompt playground."""
 
-    import openai
+    providers = get_llm_providers()
 
-    trace_event("completion")
-
-    api_key = completion.userEnv.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
-
-    model_name = completion.settings.model_name
-    stop = completion.settings.stop
-    # OpenAI doesn't support an empty stop array, clear it
-    if isinstance(stop, list) and len(stop) == 0:
-        stop = None
-
-    if model_name in ["gpt-3.5-turbo", "gpt-4"]:
-        response = await openai.ChatCompletion.acreate(
-            api_key=api_key,
-            model=model_name,
-            messages=[{"role": "user", "content": completion.prompt}],
-            stop=stop,
-            **completion.settings.to_settings_dict(),
+    try:
+        provider = [p for p in providers if p.id == request.prompt.provider][0]
+    except IndexError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"LLM provider '{request.prompt.provider}' not found",
         )
-        return PlainTextResponse(content=response["choices"][0]["message"]["content"])
-    else:
-        response = await openai.Completion.acreate(
-            api_key=api_key,
-            model=model_name,
-            prompt=completion.prompt,
-            stop=stop,
-            **completion.settings.to_settings_dict(),
-        )
-        return PlainTextResponse(content=response["choices"][0]["text"])
+
+    response = await provider.create_completion(request)
+
+    return response
+
+
+@app.get("/project/llm-providers")
+async def get_providers():
+    """List the providers."""
+    providers = get_llm_providers()
+    providers = [p.to_dict() for p in providers]
+    return JSONResponse(content={"providers": providers})
 
 
 @app.get("/project/settings")

@@ -32,11 +32,11 @@ function getLineCount(el: HTMLDivElement) {
 
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
+  const setChatHistory = useSetRecoilState(chatHistoryState);
   const [chatSettings, setChatSettings] = useRecoilState(chatSettingsState);
   const loading = useRecoilValue(loadingState);
   const askUser = useRecoilValue(askUserState);
   const session = useRecoilValue(sessionState);
-  const setChatHistory = useSetRecoilState(chatHistoryState);
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
 

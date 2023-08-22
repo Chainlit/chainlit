@@ -223,7 +223,6 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                     humanFeedback
                     language
                     prompt
-                    llmSettings
                     authorIsUser
                     createdAt
                 }
@@ -342,8 +341,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
         variables["conversationId"] = c_id
 
         mutation = """
-        mutation ($id: ID!, $conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: String, $llmSettings: Json, $isError: Boolean, $parentId: String, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
-            createMessage(id: $id, conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, llmSettings: $llmSettings, isError: $isError, parentId: $parentId, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
+        mutation ($id: ID!, $conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: Json, $isError: Boolean, $parentId: String, $indent: Int, $authorIsUser: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
+            createMessage(id: $id, conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, isError: $isError, parentId: $parentId, indent: $indent, authorIsUser: $authorIsUser, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
                 id
             }
         }
@@ -357,8 +356,8 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
     async def update_message(self, message_id: str, variables: MessageDict) -> bool:
         mutation = """
-        mutation ($messageId: ID!, $author: String!, $content: String!, $parentId: String, $language: String, $prompt: String, $llmSettings: Json) {
-            updateMessage(messageId: $messageId, author: $author, content: $content, parentId: $parentId, language: $language, prompt: $prompt, llmSettings: $llmSettings) {
+        mutation ($messageId: ID!, $author: String!, $content: String!, $parentId: String, $language: String, $prompt: Json) {
+            updateMessage(messageId: $messageId, author: $author, content: $content, parentId: $parentId, language: $language,  prompt: $prompt) {
                 id
             }
         }

@@ -1,3 +1,5 @@
+import { NotificationCountProps } from 'components/atoms/notificationCount';
+
 interface IInput {
   className?: string;
   description?: string;
@@ -5,8 +7,9 @@ interface IInput {
   hasError?: boolean;
   id: string;
   label?: string;
-  notificationsCount?: number | string;
+  notificationsProps?: NotificationCountProps;
   size?: 'small' | 'medium';
+  sx?: any;
   tooltip?: string;
 }
 

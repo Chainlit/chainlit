@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Custom Route", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
     cy.visit("hello");
   });
 

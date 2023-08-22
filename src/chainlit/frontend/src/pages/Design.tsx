@@ -1,10 +1,12 @@
 import { green, grey, primary } from 'palette';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
+import Toggle from 'components/atoms/toggle';
 import InputLabel from 'components/molecules/inputLabel';
 import FormInput from 'components/organisms/FormInput';
 
@@ -16,6 +18,7 @@ export default function Design(): JSX.Element {
   const navigate = useNavigate();
   const [settings, setSettings] = useRecoilState(settingsState);
   const isDarkMode = useIsDarkMode();
+  const [tab, setTab] = useState('Platform');
 
   const voidFunction = (data?: any) => {
     console.log('Function called. Data: ', data);
@@ -122,7 +125,7 @@ export default function Design(): JSX.Element {
           <InputLabel
             label={'Test'}
             tooltip="This is my tooltip"
-            notificationsCount={10}
+            notificationsProps={{ count: 10 }}
           />
         </ComponentBox>
         <ComponentBox name="Select">
@@ -171,6 +174,15 @@ export default function Design(): JSX.Element {
                 'aria-labelledby': 'switch-theme'
               }
             }}
+          />
+        </ComponentBox>
+
+        <ComponentBox name="Tab">
+          <Toggle
+            id="design-toggle"
+            value={tab}
+            items={['Platform', 'Formatted']}
+            onChange={setTab}
           />
         </ComponentBox>
       </ContainerBox>

@@ -7,7 +7,6 @@ async def main():
         content="I need to use tool 2",
         author="Tool 1",
         indent=1,
-        prompt="Tool 1 prompt",
     ).send()
 
     await cl.Message(

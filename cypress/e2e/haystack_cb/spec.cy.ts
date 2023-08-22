@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Haystack Callback", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to send messages to the UI with prompts and elements", () => {

@@ -31,18 +31,18 @@ class LocalDBClient(BaseDBClient):
         self.user_infos = user_infos
 
     def before_write(self, variables: Dict):
-        if "llmSettings" in variables:
+        if "prompt" in variables:
             # Sqlite doesn't support json fields, so we need to serialize it.
-            variables["llmSettings"] = json.dumps(variables["llmSettings"])
+            variables["prompt"] = json.dumps(variables["prompt"])
 
         if "forIds" in variables:
             # Sqlite doesn't support list of primitives, so we need to serialize it.
             variables["forIds"] = json.dumps(variables["forIds"])
 
     def after_read(self, variables: Dict):
-        if "llmSettings" in variables:
+        if "prompt" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
-            variables["llmSettings"] = json.loads(variables["llmSettings"])
+            variables["prompt"] = json.loads(variables["prompt"])
 
     async def get_conversation_id(self):
         self.conversation_id = await self.create_conversation()
@@ -100,8 +100,8 @@ class LocalDBClient(BaseDBClient):
         )
 
         for m in c.messages or []:
-            if m.llmSettings:
-                m.llmSettings = json.loads(m.llmSettings)
+            if m.prompt:
+                m.prompt = json.loads(m.prompt)
 
         for e in c.elements or []:
             if e.forIds:

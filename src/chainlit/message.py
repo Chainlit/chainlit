@@ -9,14 +9,9 @@ from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import ElementBased
 from chainlit.logger import logger
+from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
-from chainlit.types import (
-    AskFileResponse,
-    AskFileSpec,
-    AskResponse,
-    AskSpec,
-    LLMSettings,
-)
+from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec
 
 
 class MessageBase(ABC):
@@ -132,8 +127,7 @@ class Message(MessageBase):
     Args:
         content (str): The content of the message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        prompt (str, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
-        llm_settings (LLMSettings, optional): Settings of the LLM used to generate the prompt. This is useful for debug purposes in the prompt playground.
+        prompt (Prompt, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
         indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
@@ -145,8 +139,7 @@ class Message(MessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        prompt: Optional[str] = None,
-        llm_settings: Optional[LLMSettings] = None,
+        prompt: Optional[Prompt] = None,
         language: Optional[str] = None,
         parent_id: Optional[str] = None,
         indent: int = 0,
@@ -161,13 +154,6 @@ class Message(MessageBase):
         self.indent = indent
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
-        self.llm_settings = None
-
-        if llm_settings is None and prompt is not None:
-            self.llm_settings = LLMSettings().to_dict()
-
-        if llm_settings:
-            self.llm_settings = llm_settings.to_dict()
 
         super().__post_init__()
 
@@ -186,8 +172,6 @@ class Message(MessageBase):
             message.id = _id
         if created_at := _dict.get("createdAt"):
             message.created_at = created_at
-        if llm_settings := _dict.get("llmSettings"):
-            message.llm_settings = llm_settings
 
         return message
 
@@ -196,12 +180,13 @@ class Message(MessageBase):
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
-            "prompt": self.prompt,
-            "llmSettings": self.llm_settings,
             "language": self.language,
             "parentId": self.parent_id,
             "indent": self.indent,
         }
+
+        if self.prompt:
+            _dict["prompt"] = self.prompt.to_dict()
 
         if self.id:
             _dict["id"] = self.id

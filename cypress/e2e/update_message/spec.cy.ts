@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Update Message", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to update a message", () => {

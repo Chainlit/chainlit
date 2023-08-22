@@ -2,7 +2,7 @@ import { runTestServer } from "../../support/testUtils";
 
 describe("Scoped Elements", () => {
   before(() => {
-    runTestServer()
+    runTestServer();
   });
 
   it("should be able to display inlined, side and page elements", () => {
