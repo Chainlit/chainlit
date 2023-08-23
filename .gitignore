@@ -8,7 +8,7 @@ dist
 poetry.lock
 
 venv
-
+.venv
 .DS_Store
 
 .chainlit
