@@ -156,7 +156,7 @@ class Message(MessageBase):
     ):
         self.language = language
 
-        if type(content) is dict:
+        if isinstance(content, dict):
             self.content = json.dumps(content, indent=4)
             self.language = "json"
         elif type(content) is str:
