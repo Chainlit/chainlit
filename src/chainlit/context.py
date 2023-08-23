@@ -47,4 +47,4 @@ def get_context() -> ChainlitContext:
         raise ChainlitContextException()
 
 
-context = LazyProxy(get_context, enable_cache=False)
+context: ChainlitContext = LazyProxy(get_context, enable_cache=False)
