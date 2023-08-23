@@ -47,6 +47,9 @@ user_env = []
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
 
+# Chainlit server address
+# chainlit_server = ""
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
@@ -89,7 +92,7 @@ generated_by = "{__version__}"
 """
 
 chainlit_prod_url = os.environ.get("CHAINLIT_PROD_URL")
-chainlit_server = "https://cloud.chainlit.io"
+default_chainlit_server = "https://cloud.chainlit.io"
 
 
 DEFAULT_HOST = "0.0.0.0"
@@ -193,6 +196,8 @@ class ProjectSettings(DataClassJsonMixin):
     local_fs_path: Optional[str] = None
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
+    # Chainlit server address
+    chainlit_server: Optional[str] = None
 
 
 @dataclass()
@@ -306,6 +311,11 @@ def load_config():
     init_config()
 
     settings = load_settings()
+
+    chainlit_server = default_chainlit_server
+    project_settings = settings.get("project")
+    if project_settings and project_settings.chainlit_server:
+        chainlit_server = project_settings.chainlit_server
 
     config = ChainlitConfig(
         chainlit_server=chainlit_server,
