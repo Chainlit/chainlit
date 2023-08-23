@@ -162,7 +162,7 @@ class Message(MessageBase):
         elif isinstance(content, str):
             self.content = content
         else:
-            raise ValueError(f"Unsupported type {type(content)} for message content")
+            raise TypeError(f"Unsupported type {type(content)} for message content")
 
         self.author = author
         self.prompt = prompt
