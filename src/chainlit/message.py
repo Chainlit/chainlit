@@ -159,7 +159,7 @@ class Message(MessageBase):
         if isinstance(content, dict):
             self.content = json.dumps(content, indent=4)
             self.language = "json"
-        elif type(content) is str:
+        elif isinstance(content, str):
             self.content = content
         else:
             raise ValueError(f"Unsupported type {type(content)} for message content")
