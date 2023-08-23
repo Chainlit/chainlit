@@ -3,7 +3,18 @@ import { memo } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { Link, Stack, Typography } from '@mui/material';
+import {
+  Link,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 
 import Code from 'components/atoms/Code';
 import Collapse from 'components/atoms/Collapse';
@@ -147,6 +158,44 @@ export default memo(function MessageContent({
             },
             code({ ...props }) {
               return <Code {...props} />;
+            },
+            table({ children, ...props }) {
+              return (
+                <TableContainer
+                  sx={{
+                    width: 'fit-content',
+                    minWidth: '300px',
+                    margin: 1
+                  }}
+                  elevation={0}
+                  component={Paper}
+                >
+                  <Table {...props}>{children}</Table>
+                </TableContainer>
+              );
+            },
+            thead({ children, ...props }) {
+              return <TableHead {...props}>{children}</TableHead>;
+            },
+            tr({ children, ...props }) {
+              return <TableRow {...props}>{children}</TableRow>;
+            },
+            th({ children, ...props }) {
+              return (
+                <TableCell {...props} align="right" sx={{ padding: 1 }}>
+                  {children}
+                </TableCell>
+              );
+            },
+            td({ children, ...props }) {
+              return (
+                <TableCell {...props} align="right" sx={{ padding: 1 }}>
+                  {children}
+                </TableCell>
+              );
+            },
+            tbody({ children, ...props }) {
+              return <TableBody {...props}>{children}</TableBody>;
             }
           }}
         >
