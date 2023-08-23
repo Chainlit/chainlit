@@ -1,0 +1,28 @@
+import sys
+from typing import Any, Coroutine, TypeVar
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
+
+import asyncio
+import threading
+
+from asyncer import asyncify
+from chainlit.context import context
+from syncer import sync
+
+make_async = asyncify
+
+T_Retval = TypeVar("T_Retval")
+T_ParamSpec = ParamSpec("T_ParamSpec")
+T = TypeVar("T")
+
+
+def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
+    if threading.current_thread() == threading.main_thread():
+        return sync(co)
+    else:
+        result = asyncio.run_coroutine_threadsafe(co, loop=context.loop)
+        return result.result()
