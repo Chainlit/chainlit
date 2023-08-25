@@ -24,7 +24,7 @@ import { IMessageElement } from 'state/element';
 
 import InlinedElements from './inlined';
 
-const COLLAPSE_MIN_LENGTH = 300;
+const COLLAPSE_MIN_LENGTH = 800;
 
 interface Props {
   id?: string;
