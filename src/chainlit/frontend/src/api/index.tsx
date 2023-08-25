@@ -56,6 +56,7 @@ const api = {
         toast.error(error.toString());
       }
       console.error(error);
+      throw error;
     }
   },
 
