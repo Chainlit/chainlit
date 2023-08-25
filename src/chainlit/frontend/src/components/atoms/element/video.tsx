@@ -1,4 +1,4 @@
-import { IVideoElement } from 'state/element';
+import { IVideoElement } from 'types/element';
 
 interface Props {
   element: IVideoElement;

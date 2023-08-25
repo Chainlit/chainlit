@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 
 import { Box } from '@mui/material';
 
-import { IAction } from 'state/action';
-import { IMessage, INestedMessage } from 'state/chat';
-import { IMessageElement } from 'state/element';
+import { IAction } from 'types/action';
+import { IMessage, INestedMessage } from 'types/chat';
+import { IMessageElement } from 'types/element';
 
 import Messages from './messages';
 

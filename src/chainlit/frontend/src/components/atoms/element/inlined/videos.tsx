@@ -1,4 +1,4 @@
-import { IVideoElement } from 'state/element';
+import { IVideoElement } from 'types/element';
 
 import VideoElement from '../video';
 import { ListWithSize } from './utils';

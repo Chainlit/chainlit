@@ -15,7 +15,7 @@ import { useIsFirstRender } from 'usehooks-ts';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
-import { IPrompt } from 'state/chat';
+import { IPrompt } from 'types/chat';
 
 import Variable from './variable';
 

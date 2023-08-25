@@ -1,7 +1,8 @@
 import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
-import { IChat, IPrompt } from 'state/chat';
 import { IDatasetFilters } from 'state/dataset';
+
+import { IChat, IPrompt } from 'types/chat';
 
 import { api } from '.';
 

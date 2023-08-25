@@ -8,8 +8,8 @@ import PromptPlaground from 'components/organisms/playground';
 
 import { useApi } from 'hooks/useApi';
 
-import { IAction } from 'state/action';
-import { IChat } from 'state/chat';
+import { IAction } from 'types/action';
+import { IChat } from 'types/chat';
 
 export default function Conversation() {
   const { id } = useParams();

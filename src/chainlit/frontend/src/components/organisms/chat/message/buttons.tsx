@@ -5,10 +5,11 @@ import { IconButton, Stack, Tooltip } from '@mui/material';
 
 import ActionList from 'components/atoms/actionsList';
 
-import { IAction } from 'state/action';
-import { IMessage } from 'state/chat';
 import { playgroundState } from 'state/playground';
 import { projectSettingsState } from 'state/project';
+
+import { IAction } from 'types/action';
+import { IMessage } from 'types/chat';
 
 import FeedbackButtons from './feedbackButtons';
 

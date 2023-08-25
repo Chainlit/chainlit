@@ -1,11 +1,9 @@
 import { useCallback } from 'react';
 
+import { MessageHistory } from 'types/chatHistory';
+
 const KEY = 'chatHistory';
 const MAX_SIZE = 50;
-
-export type MessageHistory = {
-  messages: { content: string; createdAt: number }[];
-};
 
 export default function useLocalChatHistory() {
   const getLocalChatHistory = useCallback(() => {
@@ -17,7 +15,7 @@ export default function useLocalChatHistory() {
   }, []);
 
   const persistChatLocally = useCallback((message: string) => {
-    const messageHistory: MessageHistory = {
+    const messageHistory: { messages: MessageHistory[] } = {
       messages: [
         {
           content: message,

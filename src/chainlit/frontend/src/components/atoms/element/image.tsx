@@ -1,4 +1,4 @@
-import { IImageElement } from 'state/element';
+import { IImageElement } from 'types/element';
 
 import ImageFrame from './frame';
 

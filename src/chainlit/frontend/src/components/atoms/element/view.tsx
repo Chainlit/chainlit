@@ -7,7 +7,9 @@ import { Box, Typography } from '@mui/material';
 import { useQuery } from 'hooks/query';
 import { useApi } from 'hooks/useApi';
 
-import { IMessageElement, elementState } from 'state/element';
+import { elementState } from 'state/element';
+
+import { IMessageElement } from 'types/element';
 
 import AudioElement from './audio';
 import FileElement from './file';

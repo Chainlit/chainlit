@@ -7,8 +7,10 @@ import { SelectChangeEvent } from '@mui/material/Select';
 
 import SelectInput from 'components/organisms/inputs/selectInput';
 
-import { IPrompt, IPromptMessage, PromptMessageRole } from 'state/chat';
-import { PromptMode, playgroundState } from 'state/playground';
+import { playgroundState } from 'state/playground';
+
+import { IPrompt, IPromptMessage, PromptMessageRole } from 'types/chat';
+import { PromptMode } from 'types/playground';
 
 import FormattedEditor from './formatted';
 import TemplateEditor from './template';

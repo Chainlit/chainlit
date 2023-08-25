@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 
-import { IPdfElement } from 'state/element';
+import { IPdfElement } from 'types/element';
 
 import PDFElement from '../pdf';
 

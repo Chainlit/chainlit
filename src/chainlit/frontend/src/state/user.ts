@@ -1,6 +1,8 @@
 import { DefaultValue, atom, selector } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Role } from 'types/user';
+
 export const accessTokenState = atom<string | undefined>({
   key: 'AccessToken',
   default: undefined
@@ -17,14 +19,6 @@ export const sessionIdState = selector({
   set: ({ set }, newValue) =>
     set(sessionIdAtom, newValue instanceof DefaultValue ? uuidv4() : newValue)
 });
-
-export type Role = 'USER' | 'ADMIN' | 'OWNER' | 'ANONYMOUS' | undefined;
-
-export interface IMember {
-  name: string;
-  email: string;
-  role: Role;
-}
 
 export const roleState = atom<Role>({
   key: 'Role',

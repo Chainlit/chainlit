@@ -16,7 +16,9 @@ import { useAuth } from 'hooks/auth';
 import { useApi } from 'hooks/useApi';
 
 import { settingsState } from 'state/settings';
-import { Role, accessTokenState, roleState } from 'state/user';
+import { accessTokenState, roleState } from 'state/user';
+
+import { Role } from 'types/user';
 
 import './App.css';
 

@@ -6,8 +6,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import GreyButton from 'components/atoms/buttons/greyButton';
 
-import { INestedMessage } from 'state/chat';
 import { settingsState } from 'state/settings';
+
+import { INestedMessage } from 'types/chat';
 
 interface Props {
   message: INestedMessage;

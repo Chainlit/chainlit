@@ -2,7 +2,7 @@ import { grey } from 'palette';
 
 import { Box, useTheme } from '@mui/material';
 
-import { IAudioElement } from 'state/element';
+import { IAudioElement } from 'types/element';
 
 interface Props {
   element: IAudioElement;

@@ -18,8 +18,10 @@ import {
 
 import SelectInput from 'components/organisms/inputs/selectInput';
 
-import { ILLMSettings } from 'state/chat';
-import { ILLMProvider, playgroundState } from 'state/playground';
+import { playgroundState } from 'state/playground';
+
+import { ILLMSettings } from 'types/chat';
+import { ILLMProvider } from 'types/playground';
 
 import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
 import { getProviders } from './helpers';
