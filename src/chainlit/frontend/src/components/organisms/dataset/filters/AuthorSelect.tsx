@@ -10,7 +10,9 @@ import SelectInput, {
 import { useApi } from 'hooks/useApi';
 
 import { datasetFiltersState } from 'state/dataset';
-import { IMember, roleState } from 'state/user';
+import { roleState } from 'state/user';
+
+import { IMember } from 'types/user';
 
 export default function AuthorSelect() {
   const role = useRecoilValue(roleState);

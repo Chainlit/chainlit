@@ -9,8 +9,10 @@ import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
-import { IMessage, messagesState } from 'state/chat';
+import { messagesState } from 'state/chat';
 import { accessTokenState } from 'state/user';
+
+import { IMessage } from 'types/chat';
 
 const size = '16px';
 

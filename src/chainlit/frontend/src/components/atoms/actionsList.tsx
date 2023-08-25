@@ -7,8 +7,10 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Menu, Stack, Theme, useMediaQuery } from '@mui/material';
 import { Tooltip } from '@mui/material';
 
-import { IAction } from 'state/action';
-import { ISession, loadingState, sessionState } from 'state/chat';
+import { loadingState, sessionState } from 'state/chat';
+
+import { IAction } from 'types/action';
+import { ISession } from 'types/chat';
 
 import RegularButton from './buttons/button';
 

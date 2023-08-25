@@ -22,8 +22,9 @@ import { useIsFirstRender } from 'usehooks-ts';
 
 import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
-import { IPrompt } from 'state/chat';
 import { modeState, variableState } from 'state/playground';
+
+import { IPrompt } from 'types/chat';
 
 import 'draft-js/dist/Draft.css';
 

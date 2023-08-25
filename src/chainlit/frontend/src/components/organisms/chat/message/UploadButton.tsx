@@ -6,8 +6,9 @@ import { Tooltip } from '@mui/material';
 
 import useUpload from 'hooks/useUpload';
 
-import { FileSpec, ISession, fileSpecState, sessionState } from 'state/chat';
-import { IFileResponse } from 'state/chat';
+import { fileSpecState, sessionState } from 'state/chat';
+
+import { FileSpec, IFileResponse, ISession } from 'types/chat';
 
 type UploadChildProps = {
   fileSpec: FileSpec;

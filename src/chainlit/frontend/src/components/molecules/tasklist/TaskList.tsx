@@ -2,10 +2,9 @@ import { grey } from 'palette';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
-import { ITasklistElement } from 'state/element';
+import { ITasklistElement } from 'types/element';
 
-import { Task } from './Task';
-import { ITaskList } from './types';
+import { ITaskList, Task } from './Task';
 
 const Header = ({ status }: { status: string }) => {
   const theme = useTheme();

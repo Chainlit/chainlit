@@ -11,15 +11,12 @@ import TaskList from 'components/molecules/tasklist';
 import { useAuth } from 'hooks/auth';
 
 import { actionState } from 'state/action';
-import {
-  IMessage,
-  askUserState,
-  messagesState,
-  sessionState
-} from 'state/chat';
+import { askUserState, messagesState, sessionState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
+
+import { IMessage } from 'types/chat';
 
 import PromptPlayground from '../playground';
 import InputBox from './inputBox';

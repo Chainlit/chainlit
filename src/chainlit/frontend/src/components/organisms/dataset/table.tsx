@@ -7,9 +7,10 @@ import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack, Typography } from '@mui/material';
 
-import { IChat } from 'state/chat';
 import { datasetFiltersState } from 'state/dataset';
 import { accessTokenState } from 'state/user';
+
+import { IChat } from 'types/chat';
 
 import DeleteConversationButton from './deleteConversationButton';
 import OpenConversationButton from './openConversationButton';

@@ -1,8 +1,10 @@
 import { useRecoilValue } from 'recoil';
 
-import { IAction } from 'state/action';
-import { INestedMessage, loadingState } from 'state/chat';
-import { IMessageElement } from 'state/element';
+import { loadingState } from 'state/chat';
+
+import { IAction } from 'types/action';
+import { INestedMessage } from 'types/chat';
+import { IMessageElement } from 'types/element';
 
 import Message from './message';
 

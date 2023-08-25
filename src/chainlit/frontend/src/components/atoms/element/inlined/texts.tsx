@@ -1,6 +1,6 @@
 import { Alert, AlertTitle, Stack } from '@mui/material';
 
-import { ITextElement } from 'state/element';
+import { ITextElement } from 'types/element';
 
 import TextElement from '../text';
 

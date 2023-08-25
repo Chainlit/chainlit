@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 
-import { IFileElement } from 'state/element';
+import { IFileElement } from 'types/element';
 
 import FileElement from '../file';
 

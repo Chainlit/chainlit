@@ -8,8 +8,9 @@ import Typography from '@mui/material/Typography';
 
 import useUpload from 'hooks/useUpload';
 
-import { IAsk, askUserState } from 'state/chat';
-import { IFileResponse } from 'state/chat';
+import { askUserState } from 'state/chat';
+
+import { IAsk, IFileResponse } from 'types/chat';
 
 const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   const upload = useUpload({

@@ -1,6 +1,6 @@
 import { ImageList, ImageListItem } from '@mui/material';
 
-import { IImageElement, IVideoElement } from 'state/element';
+import { IImageElement, IVideoElement } from 'types/element';
 
 export function sizeToUnit(element: IImageElement | IVideoElement) {
   if (element.size === 'small') {

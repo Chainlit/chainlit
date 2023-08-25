@@ -4,7 +4,9 @@ import { Alert } from '@mui/material';
 
 import Toggle from 'components/atoms/toggle';
 
-import { PromptMode, modeState } from 'state/playground';
+import { modeState } from 'state/playground';
+
+import { PromptMode } from 'types/playground';
 
 interface Props {
   hasTemplate?: boolean;

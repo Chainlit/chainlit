@@ -5,8 +5,9 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Box, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { IPrompt } from 'state/chat';
 import { modeState, playgroundState } from 'state/playground';
+
+import { IPrompt } from 'types/chat';
 
 import Completion from './editor/completion';
 import PromptMessage from './editor/promptMessage';

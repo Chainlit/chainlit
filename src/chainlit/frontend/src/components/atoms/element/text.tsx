@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 
 import { Link } from '@mui/material';
 
-import { ITextElement } from 'state/element';
+import { ITextElement } from 'types/element';
 
 import Code from '../Code';
 

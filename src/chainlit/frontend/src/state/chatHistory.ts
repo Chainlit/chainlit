@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
 
-const KEY = 'chat_history';
+import { MessageHistory } from 'types/chatHistory';
 
-export type MessageHistory = { content: string; createdAt: number };
+const KEY = 'chat_history';
 
 const localStorageEffect =
   (key: string) =>

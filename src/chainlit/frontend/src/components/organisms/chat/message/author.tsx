@@ -5,8 +5,9 @@ import { Box, Tooltip, Typography } from '@mui/material';
 
 import AvatarElement from 'components/atoms/element/avatar';
 
-import { IMessage } from 'state/chat';
 import { avatarState } from 'state/element';
+
+import { IMessage } from 'types/chat';
 
 import MessageTime from './time';
 

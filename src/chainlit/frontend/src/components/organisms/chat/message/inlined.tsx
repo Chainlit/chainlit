@@ -7,7 +7,7 @@ import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
 import InlinedVideoList from 'components/atoms/element/inlined/videos';
 
-import { ElementType, IMessageElement } from 'state/element';
+import { ElementType, IMessageElement } from 'types/element';
 
 interface Props {
   elements: IMessageElement[];

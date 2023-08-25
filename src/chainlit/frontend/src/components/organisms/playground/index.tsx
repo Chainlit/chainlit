@@ -20,7 +20,9 @@ import ErrorBoundary from 'components/atoms/errorBoundary';
 
 import { useApi } from 'hooks/useApi';
 
-import { IPlayground, playgroundState } from 'state/playground';
+import { playgroundState } from 'state/playground';
+
+import { IPlayground } from 'types/playground';
 
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';

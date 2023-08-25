@@ -11,11 +11,8 @@ import io from 'socket.io-client';
 
 import { useAuth } from 'hooks/auth';
 
-import { IAction, actionState } from 'state/action';
+import { actionState } from 'state/action';
 import {
-  IMessage,
-  IMessageUpdate,
-  IToken,
   askUserState,
   chatSettingsState,
   chatSettingsValueState,
@@ -25,14 +22,13 @@ import {
   sessionState,
   tokenCountState
 } from 'state/chat';
-import {
-  IElement,
-  avatarState,
-  elementState,
-  tasklistState
-} from 'state/element';
+import { avatarState, elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 import { sessionIdState, userEnvState } from 'state/user';
+
+import { IAction } from 'types/action';
+import { IMessage, IMessageUpdate, IToken } from 'types/chat';
+import { IElement } from 'types/element';
 
 import { TFormInput } from './organisms/FormInput';
 

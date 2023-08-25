@@ -15,7 +15,9 @@ import {
   Typography
 } from '@mui/material';
 
-import { MessageHistory, chatHistoryState } from 'state/chatHistory';
+import { chatHistoryState } from 'state/chatHistory';
+
+import { MessageHistory } from 'types/chatHistory';
 
 interface Props {
   onClick: (content: string) => void;

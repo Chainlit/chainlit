@@ -7,7 +7,7 @@ import {
 } from 'react-dropzone';
 import toast from 'react-hot-toast';
 
-import { FileSpec, IFileResponse } from 'state/chat';
+import { FileSpec, IFileResponse } from 'types/chat';
 
 interface useUploadProps {
   onResolved: (payloads: IFileResponse[]) => void;

@@ -20,7 +20,7 @@ import Code from 'components/atoms/Code';
 import Collapse from 'components/atoms/Collapse';
 import ElementRef from 'components/atoms/element/ref';
 
-import { IMessageElement } from 'state/element';
+import { IMessageElement } from 'types/element';
 
 import InlinedElements from './inlined';
 

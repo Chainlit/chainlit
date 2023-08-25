@@ -6,7 +6,17 @@ import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
 import { highlightMessage } from 'state/chat';
 
 import { TaskStatusIcon } from './TaskStatusIcon';
-import { ITask } from './types';
+
+export interface ITask {
+  title: string;
+  status: 'ready' | 'running' | 'done' | 'failed';
+  forId?: string;
+}
+
+export interface ITaskList {
+  status: 'ready' | 'running' | 'done';
+  tasks: ITask[];
+}
 
 export const Task = ({ index, task }: { index: number; task: ITask }) => {
   const setHighlightedMessage = useSetRecoilState(highlightMessage);
