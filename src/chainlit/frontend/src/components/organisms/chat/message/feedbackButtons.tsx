@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
 import { useToggle } from 'usehooks-ts';
 
+import { StickyNote2 } from '@mui/icons-material';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
@@ -30,7 +31,9 @@ export default function FeedbackButtons({ message }: Props) {
   const accessToken = useRecoilValue(accessTokenState);
   const messages = useRecoilValue(messagesState);
 
-  const [commentInput, setCommentInput] = useState('');
+  const [commentInput, setCommentInput] = useState(
+    message.humanFeedbackComment || ''
+  );
   const [feedback, setFeedback] = useState(
     message.humanFeedback || FeedbackStatus.DEFAULT
   );
@@ -60,7 +63,6 @@ export default function FeedbackButtons({ message }: Props) {
       }
 
       onSuccess && onSuccess();
-      setCommentInput('');
     } catch (err) {
       console.log(err);
     }
@@ -143,6 +145,13 @@ export default function FeedbackButtons({ message }: Props) {
           <UpIcon sx={{ width: size, height: size }} />
         </IconButton>
       </Tooltip>
+      {commentInput && commentInput !== '' ? (
+        <Tooltip title="Feedback comment">
+          <IconButton onClick={toggleFeedbackDialog} size="small">
+            <StickyNote2 sx={{ width: size, height: size }} />
+          </IconButton>
+        </Tooltip>
+      ) : null}
       {renderDialog()}
     </Stack>
   );
