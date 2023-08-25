@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, Union
 
 from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
@@ -26,25 +27,39 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
     return provider, invocation_params
 
 
+def get_placeholder_size(s):
+    return len(re.findall(r"\b\w+\(", s))
+
+
 def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
     inputs = {k: str(v) for (k, v) in inputs.items()}
     prompt_params = serialized.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
-
     _messages = prompt_params.get("messages")
 
     if _messages:
         messages = []
         for m in _messages:
-            m_prompt_params = m.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
-            m_template = m_prompt_params.get("template")
-            m_template_format = m_prompt_params.get("template_format")
-            messages += [
-                PromptMessage(
-                    template=m_template,
-                    template_format=m_template_format,
-                    role=convert_role(m["id"][-1]),
+            class_name = m["id"][-1]
+            # A placeholder holds a variable that itself is a list of messages, like chat_history
+            if class_name == "MessagesPlaceholder":
+                variable = inputs.get(m.get("kwargs").get("variable_name"))
+                # Todo: this is not ideal but did not find another way to count how many messages the placeholder represents
+                placeholder_size = get_placeholder_size(variable)
+                if placeholder_size:
+                    messages += [PromptMessage(placeholder_size=placeholder_size)]
+            else:
+                m_prompt_params = (
+                    m.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
                 )
-            ]
+                m_template = m_prompt_params.get("template")
+                m_template_format = m_prompt_params.get("template_format")
+                messages += [
+                    PromptMessage(
+                        template=m_template,
+                        template_format=m_template_format,
+                        role=convert_role(class_name),
+                    )
+                ]
     else:
         messages = None
 
@@ -246,14 +261,57 @@ def _on_chat_model_start(
     invocation_params = kwargs.get("invocation_params")
     provider, settings = get_llm_settings(invocation_params)
 
+    formatted_messages = messages[0]
+
     if self.current_prompt:
         self.current_prompt.provider = provider
         self.current_prompt.settings = settings
+        # Chat mode
         if self.current_prompt.messages:
-            for idx, m in enumerate(messages[0]):
-                self.current_prompt.messages[idx].formatted = m.content
-                self.current_prompt.messages[idx].role = convert_role(m.type)
-
+            # This is needed to compute the correct message index to read
+            placeholder_offset = 0
+            # The final list of messages
+            prompt_messages = []
+            # Looping the messages built in build_prompt
+            # They only contain the template
+            for templated_index, templated_message in enumerate(
+                self.current_prompt.messages
+            ):
+                # If a message has a placeholder size, we need to replace it
+                # With the N following messages, where N is the placeholder size
+                if templated_message.placeholder_size:
+                    for _ in range(templated_message.placeholder_size):
+                        formatted_message = formatted_messages[
+                            templated_index + placeholder_offset
+                        ]
+                        prompt_messages += [
+                            PromptMessage(
+                                role=convert_role(formatted_message.type),
+                                template=formatted_message.content,
+                                formatted=formatted_message.content,
+                            )
+                        ]
+                        # Increment the placeholder offset
+                        placeholder_offset += 1
+                    # Finally, decrement the placeholder offset by one
+                    # Because the message representing the placeholder is now consumed
+                    placeholder_offset -= 1
+                # The current message is not a placeholder
+                else:
+                    formatted_message = formatted_messages[
+                        templated_index + placeholder_offset
+                    ]
+                    # Update the role and formatted value, keep the template
+                    prompt_messages += [
+                        PromptMessage(
+                            template=templated_message.template,
+                            role=convert_role(formatted_message.type),
+                            formatted=formatted_message.content,
+                        )
+                    ]
+            # Finally set the prompt messages
+            self.current_prompt.messages = prompt_messages
+        # Non chat mode
         elif self.current_prompt.template:
             unique_message = messages[0][0]
             prompt_message = PromptMessage(
@@ -263,6 +321,7 @@ def _on_chat_model_start(
             )
             self.current_prompt.messages = [prompt_message]
             self.current_prompt.template = None
+    # No current prompt, create it (formatted only)
     else:
         prompt_messages = [
             PromptMessage(formatted=m.content, role=convert_role(m.type))

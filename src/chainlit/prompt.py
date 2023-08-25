@@ -13,6 +13,7 @@ class BaseTemplate(DataClassJsonMixin):
 
 @dataclass
 class PromptMessage(BaseTemplate):
+    placeholder_size: Optional[int] = None
     role: Optional[Literal["system", "assistant", "user", "function"]] = None
 
     def to_openai(self):
