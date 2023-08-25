@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material';
+import { TextField, TextFieldProps } from '@mui/material';
 
 import { IInput } from 'types/Input';
 
@@ -8,7 +8,8 @@ export type TextInputProps = {
   value?: string;
   placeholder?: string;
 } & IInput &
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> &
+  TextFieldProps;
 
 export default function TextInput({
   description,
@@ -18,6 +19,8 @@ export default function TextInput({
   label,
   size = 'small',
   tooltip,
+  multiline,
+  sx,
   ...rest
 }: TextInputProps): JSX.Element {
   return (
@@ -30,11 +33,15 @@ export default function TextInput({
     >
       <TextField
         disabled={disabled}
+        multiline={multiline}
         inputProps={{
           ...rest,
           id: id,
           name: id,
-          sx: { height: size === 'small' ? '7px' : '15px' }
+          sx: {
+            height: size === 'small' ? '7px' : '15px',
+            minHeight: multiline ? '100px' : 'auto'
+          }
         }}
         fullWidth
         sx={{
