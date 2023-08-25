@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 from starlette.datastructures import Headers
 
 from chainlit.client.base import BaseAuthClient, BaseDBClient, UserDict
@@ -30,7 +30,9 @@ async def get_auth_client(
         # Check if the user is a member of the project
         is_project_member = await auth_client.is_project_member()
         if not is_project_member:
-            raise ConnectionRefusedError("User is not a member of the project")
+            raise HTTPException(
+                status_code=401, detail="User is not a member of the project"
+            )
 
         return auth_client
 

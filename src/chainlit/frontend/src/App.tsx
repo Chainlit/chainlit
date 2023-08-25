@@ -35,7 +35,7 @@ function App() {
     if (roleData !== 'ANONYMOUS' && !role) {
       setRole(roleError ? 'ANONYMOUS' : roleData);
     }
-  }, [roleData]);
+  }, [roleData, roleError]);
 
   useEffect(() => {
     if (isAuthenticated && accessToken === undefined) {
