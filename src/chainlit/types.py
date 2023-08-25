@@ -53,9 +53,14 @@ class CompletionRequest(BaseModel):
     userEnv: Dict[str, str]
 
 
+class Feedback(BaseModel):
+    status: Literal[-1, 0, 1]
+    comment: Optional[str]
+
+
 class UpdateFeedbackRequest(BaseModel):
     messageId: str
-    feedback: Literal[-1, 0, 1]
+    feedback: Feedback
 
 
 class DeleteConversationRequest(BaseModel):

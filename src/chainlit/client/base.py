@@ -21,6 +21,7 @@ from chainlit.types import (
     ElementDisplay,
     ElementSize,
     ElementType,
+    Feedback,
     Pagination,
 )
 
@@ -161,7 +162,5 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def set_human_feedback(
-        self, message_id: str, feedback: Literal[-1, 0, 1]
-    ) -> bool:
+    async def set_human_feedback(self, message_id: str, feedback: Feedback) -> bool:
         pass

@@ -296,7 +296,8 @@ class LocalDBClient(BaseDBClient):
         await Message.prisma().update(
             where={"id": message_id},
             data={
-                "humanFeedback": feedback,
+                "humanFeedback": feedback.status,
+                "humanFeedbackComment": feedback.comment,
             },
         )
 

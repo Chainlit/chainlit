@@ -11,6 +11,7 @@ from chainlit.client.base import (
     Pagination,
     UserDict,
 )
+from chainlit.types import Feedback
 
 
 class CustomDBClient(BaseDBClient):
@@ -58,9 +59,7 @@ class CustomDBClient(BaseDBClient):
     async def get_element(self, conversation_id: int, element_id: int) -> ElementDict:
         raise NotImplementedError
 
-    async def set_human_feedback(
-        self, message_id: str, feedback: Literal[-1, 0, 1]
-    ) -> bool:
+    async def set_human_feedback(self, message_id: str, feedback: Feedback) -> bool:
         raise NotImplementedError
 
 

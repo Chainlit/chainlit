@@ -52,6 +52,7 @@ model Message {
   author         String
   content        String
   humanFeedback  Int          @default(0)
+  humanFeedbackComment String?
   language       String?
   parentId       String?
 
