@@ -52,7 +52,6 @@ const useUpload = ({ onResolved, spec }: useUploadProps) => {
       Promise.all(promises)
         .then((payloads) => {
           onResolved(payloads);
-          toast.success('Successfully uploaded');
           setUploading(false);
         })
         .catch((err) => {
