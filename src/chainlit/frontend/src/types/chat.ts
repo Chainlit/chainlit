@@ -42,6 +42,7 @@ export interface IMessage {
   content?: string;
   createdAt: number | string;
   humanFeedback?: number;
+  humanFeedbackComment?: string;
   language?: string;
   indent?: number;
   parentId?: string;

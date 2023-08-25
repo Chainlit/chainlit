@@ -3,6 +3,7 @@ import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 import { IDatasetFilters } from 'state/dataset';
 
 import { IChat, IPrompt } from 'types/chat';
+import { Feedback } from 'types/message';
 
 import { api } from '.';
 
@@ -54,7 +55,7 @@ const ChainlitAPI = {
 
   setHumanFeedback: async (
     messageId: string,
-    feedback: number,
+    feedback: Feedback,
     accessToken?: string
   ) => {
     await api.put(`/message/feedback`, { messageId, feedback }, accessToken);
