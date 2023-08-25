@@ -11,12 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import (
-    FileResponse,
-    HTMLResponse,
-    JSONResponse,
-    PlainTextResponse,
-)
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
@@ -251,7 +246,7 @@ async def get_member_role(request: Request):
 
     auth_client = await get_auth_client_from_request(request)
     role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
-    return PlainTextResponse(content=role)
+    return JSONResponse(content=role)
 
 
 @app.post("/project/conversations")

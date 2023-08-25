@@ -1,4 +1,5 @@
 import { ClientError } from 'api';
+import { ChainlitAPI } from 'api/chainlitApi';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
@@ -13,7 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { clientState } from 'state/client';
+import { accessTokenState } from 'state/user';
 
 interface Props {
   conversationId: number;
@@ -25,7 +26,7 @@ export default function DeleteConversationButton({
   onDelete
 }: Props) {
   const [open, setOpen] = useState(false);
-  const client = useRecoilValue(clientState);
+  const accessToken = useRecoilValue(accessTokenState);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -36,17 +37,20 @@ export default function DeleteConversationButton({
   };
 
   const handleConfirm = async () => {
-    await toast.promise(client.deleteConversation(conversationId), {
-      loading: 'Deleting conversation...',
-      success: 'Conversation deleted!',
-      error: (err) => {
-        if (err instanceof ClientError) {
-          return <span>{err.message}</span>;
-        } else {
-          return <span></span>;
+    await toast.promise(
+      ChainlitAPI.deleteConversation(conversationId, accessToken),
+      {
+        loading: 'Deleting conversation...',
+        success: 'Conversation deleted!',
+        error: (err) => {
+          if (err instanceof ClientError) {
+            return <span>{err.message}</span>;
+          } else {
+            return <span></span>;
+          }
         }
       }
-    });
+    );
     onDelete();
     handleClose();
   };

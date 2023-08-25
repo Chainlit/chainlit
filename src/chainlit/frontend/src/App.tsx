@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { router } from 'router';
 import makeTheme from 'theme';
 
@@ -13,20 +13,29 @@ import SettingsModal from 'components/molecules/settingsModal';
 import Socket from 'components/socket';
 
 import { useAuth } from 'hooks/auth';
+import { useApi } from 'hooks/useApi';
 
-import { clientState } from 'state/client';
 import { settingsState } from 'state/settings';
-import { accessTokenState, roleState } from 'state/user';
+import { Role, accessTokenState, roleState } from 'state/user';
 
 import './App.css';
 
 function App() {
-  const client = useRecoilValue(clientState);
   const { theme: themeVariant } = useRecoilValue(settingsState);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
-  const setRole = useSetRecoilState(roleState);
+  const [role, setRole] = useRecoilState(roleState);
   const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
   const theme = makeTheme(themeVariant);
+
+  const { data: roleData, error: roleError } = useApi<Role>(
+    !role && accessToken ? '/project/role' : null
+  );
+
+  useEffect(() => {
+    if (roleData !== 'ANONYMOUS' && !role) {
+      setRole(roleError ? 'ANONYMOUS' : roleData);
+    }
+  }, [roleData]);
 
   useEffect(() => {
     if (isAuthenticated && accessToken === undefined) {
@@ -46,22 +55,6 @@ function App() {
         });
     }
   }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
-
-  useEffect(() => {
-    if (!accessToken) {
-      return;
-    }
-    client.setAccessToken(accessToken);
-    client
-      .getRole()
-      .then(async (role) => {
-        setRole(role);
-      })
-      .catch((err) => {
-        console.log(err);
-        setRole('ANONYMOUS');
-      });
-  }, [accessToken]);
 
   return (
     <ThemeProvider theme={theme}>
