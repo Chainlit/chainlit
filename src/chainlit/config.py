@@ -153,6 +153,7 @@ class CodeSettings:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
+    on_file_upload: Optional[Callable[[str], Any]] = None
     auth_client_factory: Optional[
         Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
     ] = None

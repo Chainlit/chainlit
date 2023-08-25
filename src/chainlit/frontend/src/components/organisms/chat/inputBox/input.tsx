@@ -15,6 +15,7 @@ import {
 import { chatHistoryState } from 'state/chatHistory';
 
 import HistoryButton from '../history';
+import UploadButton from '../message/UploadButton';
 
 interface Props {
   onSubmit: (message: string) => void;
@@ -104,6 +105,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
         </IconButton>
       )}
       <HistoryButton onClick={onHistoryClick} />
+      <UploadButton />
     </>
   );
 

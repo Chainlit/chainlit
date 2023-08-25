@@ -19,6 +19,7 @@ import {
   askUserState,
   chatSettingsState,
   chatSettingsValueState,
+  fileSpecState,
   loadingState,
   messagesState,
   sessionState,
@@ -49,6 +50,7 @@ export default memo(function Socket() {
   const [session, setSession] = useRecoilState(sessionState);
   const setMessages = useSetRecoilState(messagesState);
   const setTokenCount = useSetRecoilState(tokenCountState);
+  const setFileSpecState = useSetRecoilState(fileSpecState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setAvatars = useSetRecoilState(avatarState);
@@ -177,6 +179,11 @@ export default memo(function Socket() {
     socket.on('ask', ({ msg, spec }, callback) => {
       setAskUser({ spec, callback });
       setMessages((oldMessages) => [...oldMessages, msg]);
+      setLoading(false);
+    });
+
+    socket.on('enable_file_upload', (spec) => {
+      setFileSpecState(spec);
       setLoading(false);
     });
 

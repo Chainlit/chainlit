@@ -15,6 +15,13 @@ ElementSize = Literal["small", "medium", "large"]
 
 
 @dataclass
+class FileSpec(DataClassJsonMixin):
+    accept: Union[List[str], Dict[str, List[str]]]
+    max_files: int
+    max_size_mb: int
+
+
+@dataclass
 class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
@@ -23,12 +30,8 @@ class AskSpec(DataClassJsonMixin):
 
 
 @dataclass
-class AskFileSpec(AskSpec, DataClassJsonMixin):
-    """Specification for asking the user for a file."""
-
-    accept: Union[List[str], Dict[str, List[str]]]
-    max_files: int
-    max_size_mb: int
+class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
+    """Specification for asking the user a file."""
 
 
 class AskResponse(TypedDict):

@@ -15,6 +15,7 @@ from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import Session
 from chainlit.telemetry import trace_event
+from chainlit.types import FileSpec
 from chainlit.user_session import user_sessions
 
 
@@ -134,6 +135,9 @@ async def connection_successful(sid):
     ]:
         await context.session.db_client.create_user(session.auth_client.user_infos)
 
+    if config.code.on_file_upload:
+        await context.emitter.enable_file_upload(config.code.on_file_upload_config)
+
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start()
@@ -236,3 +240,12 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@socket.on("file_upload")
+async def file_upload(sid, files: Any):
+    """Handle file upload from the UI."""
+    init_context(sid)
+
+    if config.code.on_file_upload:
+        await config.code.on_file_upload(files)
