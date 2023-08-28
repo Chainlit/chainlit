@@ -133,7 +133,9 @@ async def connection_successful(sid):
         "local",
         "custom",
     ]:
-        await context.session.db_client.create_user(session.auth_client.user_infos)
+        await context.session.db_client.create_user(
+            context.session.auth_client.user_infos
+        )
 
     if config.code.on_file_upload:
         await context.emitter.enable_file_upload(config.code.on_file_upload_config)
