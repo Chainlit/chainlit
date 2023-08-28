@@ -1,11 +1,6 @@
-try:
-    import langchain
+from chainlit.utils import check_module_version
 
-    if langchain.__version__ < "0.0.198":
-        raise ValueError(
-            "LangChain version is too old, expected >= 0.0.198. Run `pip install langchain --upgrade`"
-        )
-
-    LANGCHAIN_INSTALLED = True
-except ImportError:
-    LANGCHAIN_INSTALLED = False
+if not check_module_version("langchain", "0.0.198"):
+    raise ValueError(
+        "Expected LangChain version >= 0.0.198. Run `pip install langchain --upgrade`"
+    )

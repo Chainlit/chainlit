@@ -1,14 +1,9 @@
-try:
-    import langflow
+from chainlit.utils import check_module_version
 
-    if langflow.__version__ < "0.1.4":
-        raise ValueError(
-            "Langflow version is too old, expected >= 0.1.4. Run `pip install langflow --upgrade`"
-        )
-
-    LANGFLOW_INSTALLED = True
-except ImportError:
-    LANGFLOW_INSTALLED = False
+if not check_module_version("langflow", "0.1.4"):
+    raise ValueError(
+        "Expected Langflow version >= 0.1.4. Run `pip install langflow --upgrade`"
+    )
 
 from typing import Dict, Optional, Union
 

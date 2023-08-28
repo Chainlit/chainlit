@@ -5,17 +5,14 @@ from chainlit.config import config
 from chainlit.logger import logger
 
 
-def is_langchain_installed():
-    from chainlit.langchain import LANGCHAIN_INSTALLED
-
-    return LANGCHAIN_INSTALLED
-
-
 def init_lc_cache():
     use_cache = config.run.no_cache is False and config.run.ci is False
 
-    if use_cache and is_langchain_installed():
-        import langchain
+    if use_cache:
+        try:
+            import langchain
+        except ImportError:
+            return
         from langchain.cache import SQLiteCache
 
         if config.project.lc_cache_path is not None:
