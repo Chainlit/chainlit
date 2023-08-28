@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+  commands:
+    eslint-prettier:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: pnpm eslint --fix {staged_files} && pnpm prettier --write {staged_files}
+    tsc:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: tsc --skipLibCheck --noEmit
+    black-isort:
+      glob: "*.{py}"
+      run: black {staged_files} && isort --profile=black {staged_files}
+    mypy:
+      glob: "*.{py}"
+      root: "src/"
+      run: poetry run mypy {staged_files}

@@ -5,9 +5,8 @@
     "cypress": "^12.9.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.40.0",
-    "husky": "^8.0.0",
     "kill-port": "^2.0.1",
-    "lint-staged": "^13.2.3",
+    "lefthook": "^1.4.9",
     "prettier": "^2.8.8",
     "shell-exec": "^1.1.2",
     "ts-node": "^10.9.1",
@@ -16,7 +15,6 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd src/chainlit/frontend && pnpm run test)",
-    "prepare": "husky install",
     "lintUi": "cd src/chainlit/frontend && pnpm run lint",
     "formatUi": "cd src/chainlit/frontend && pnpm run format",
     "lintPython": "cd src/ && poetry run mypy chainlit/",
