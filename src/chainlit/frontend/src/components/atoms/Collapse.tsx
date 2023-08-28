@@ -1,13 +1,14 @@
 import React from 'react';
 import { useToggle } from 'usehooks-ts';
 
-import { DownloadRounded, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { DownloadOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
   Box,
   IconButton,
   Collapse as MCollapse,
   Stack,
-  Theme
+  Theme,
+  Tooltip
 } from '@mui/material';
 
 interface CollapseProps {
@@ -22,12 +23,13 @@ const Collapse = ({ children, onDownload }: CollapseProps): JSX.Element => {
     <Box>
       <MCollapse
         sx={{
-          border: (theme: Theme) => `3px solid ${theme.palette.divider}`,
+          border: (theme: Theme) => `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
           padding: 1
         }}
         in={expandAll}
-        collapsedSize={30}
+        collapsedSize={100}
+        timeout={0}
       >
         {children}
       </MCollapse>
@@ -38,12 +40,16 @@ const Collapse = ({ children, onDownload }: CollapseProps): JSX.Element => {
         }}
         direction="row"
       >
-        <IconButton onClick={toggleExpandAll}>
-          {expandAll ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
-        <IconButton onClick={onDownload}>
-          <DownloadRounded />
-        </IconButton>
+        <Tooltip title={expandAll ? 'Collapse' : 'Expand'}>
+          <IconButton onClick={toggleExpandAll}>
+            {expandAll ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Download">
+          <IconButton onClick={onDownload}>
+            <DownloadOutlined />
+          </IconButton>
+        </Tooltip>
       </Stack>
     </Box>
   );
