@@ -11,7 +11,7 @@ import { accessTokenState, userEnvState } from 'state/user';
 
 import { getProviders } from './helpers';
 
-export default function SubmitButton() {
+export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
   const [completionController, setCompletionController] = useState<
     AbortController | undefined
   >();
@@ -46,6 +46,8 @@ export default function SubmitButton() {
         controller,
         accessToken,
         (done, token) => {
+          onSubmit && onSubmit();
+
           if (done) {
             setCompletionController(undefined);
             return;
