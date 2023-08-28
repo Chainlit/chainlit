@@ -21,9 +21,10 @@ const styleMap = {
 
 interface Props {
   completion?: string;
+  chatMode?: boolean;
 }
 
-export default function Completion({ completion }: Props) {
+export default function Completion({ completion, chatMode }: Props) {
   const [state, setState] = useState(EditorState.createEmpty());
   const [isCompletionOpen, setCompletionOpen] = useState(true);
 
@@ -60,8 +61,29 @@ export default function Completion({ completion }: Props) {
     return EditorState.forceSelection(es, ncs.getSelectionAfter());
   };
 
-  return (
-    <Box sx={{ marginTop: 2 }}>
+  const renderEditor = () => (
+    <EditorWrapper
+      className="completion-editor"
+      clipboardValue={state.getCurrentContent().getPlainText()}
+    >
+      <Editor
+        customStyleMap={styleMap}
+        editorState={state}
+        onChange={(nextState) => {
+          // Read only mode, force content but preserve selection
+          nextState = EditorState.push(
+            nextState,
+            state.getCurrentContent(),
+            'insert-characters'
+          );
+          setState(nextState);
+        }}
+      />
+    </EditorWrapper>
+  );
+
+  return !chatMode ? (
+    <Box marginTop={2}>
       <Stack
         sx={{
           flexDirection: 'row',
@@ -92,25 +114,43 @@ export default function Completion({ completion }: Props) {
           marginTop: 2
         }}
       >
-        <EditorWrapper
-          className="completion-editor"
-          clipboardValue={state.getCurrentContent().getPlainText()}
-        >
-          <Editor
-            customStyleMap={styleMap}
-            editorState={state}
-            onChange={(nextState) => {
-              // Read only mode, force content but preserve selection
-              nextState = EditorState.push(
-                nextState,
-                state.getCurrentContent(),
-                'insert-characters'
-              );
-              setState(nextState);
-            }}
-          />
-        </EditorWrapper>
+        {renderEditor()}
       </Box>
+    </Box>
+  ) : (
+    <Box>
+      <Box
+        sx={{
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          borderRadius: 1
+        }}
+      />
+      <Stack
+        direction="row"
+        width="100%"
+        sx={{
+          paddingY: 1,
+          paddingRight: 0,
+          '&:hover': {
+            background: (theme) => theme.palette.background.paper
+          }
+        }}
+      >
+        <Typography
+          color="text.primary"
+          sx={{
+            marginTop: 2,
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 700,
+            paddingLeft: 3,
+            paddingRight: 5
+          }}
+        >
+          {'ASSISTANT'}
+        </Typography>
+        <Box width="100%">{renderEditor()}</Box>
+      </Stack>
     </Box>
   );
 }
