@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import EditorWrapper from 'components/organisms/playground/editor/wrapper';
+import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
 
 import 'draft-js/dist/Draft.css';
 

@@ -18,7 +18,7 @@ import AccentButton from 'components/atoms/buttons/accentButton';
 
 import { playgroundState, variableState } from 'state/playground';
 
-import EditorWrapper from './wrapper';
+import EditorWrapper from './EditorWrapper';
 
 const VariableModal = (): JSX.Element | null => {
   const [state, setState] = useState<EditorState | undefined>();

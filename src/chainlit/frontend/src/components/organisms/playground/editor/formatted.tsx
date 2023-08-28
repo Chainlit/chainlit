@@ -20,7 +20,7 @@ import { toast } from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import EditorWrapper from 'components/organisms/playground/editor/wrapper';
+import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
 
 import { modeState, variableState } from 'state/playground';
 
