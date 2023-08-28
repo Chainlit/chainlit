@@ -58,11 +58,7 @@ export const ChatPromptPlayground = forwardRef(
         : 'Prompt messages';
 
     return (
-      <Stack
-        sx={{
-          width: '100%'
-        }}
-      >
+      <Stack sx={{ width: '100%' }}>
         <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
           {title}
         </Typography>
@@ -88,14 +84,6 @@ export const ChatPromptPlayground = forwardRef(
                     index={index}
                     onChange={onChange}
                   />
-                  {index !== messages.length - 1 ? (
-                    <Box
-                      sx={{
-                        border: (theme) => `1px solid ${theme.palette.divider}`,
-                        borderRadius: 1
-                      }}
-                    />
-                  ) : null}
                 </Fragment>
               ))}
             </Stack>
