@@ -11,6 +11,8 @@ import EditorWrapper from 'components/organisms/playground/editor/wrapper';
 
 import 'draft-js/dist/Draft.css';
 
+import MessageWrapper from './MessageWrapper';
+
 const styleMap = {
   COMPLETION: {
     backgroundColor: '#d2f4d3',
@@ -118,39 +120,6 @@ export default function Completion({ completion, chatMode }: Props) {
       </Box>
     </Box>
   ) : (
-    <Box>
-      <Box
-        sx={{
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-          borderRadius: 1
-        }}
-      />
-      <Stack
-        direction="row"
-        width="100%"
-        sx={{
-          paddingY: 1,
-          paddingRight: 0,
-          '&:hover': {
-            background: (theme) => theme.palette.background.paper
-          }
-        }}
-      >
-        <Typography
-          color="text.primary"
-          sx={{
-            marginTop: 2,
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 700,
-            paddingLeft: 3,
-            paddingRight: 5
-          }}
-        >
-          {'ASSISTANT'}
-        </Typography>
-        <Box width="100%">{renderEditor()}</Box>
-      </Stack>
-    </Box>
+    <MessageWrapper role="ASSISTANT">{renderEditor()}</MessageWrapper>
   );
 }
