@@ -102,8 +102,8 @@ export default function ChatPromptPlayground({
             ))}
           </Stack>
         ) : null}
+        <Completion completion={prompt.completion} chatMode />
       </Box>
-      <Completion completion={prompt.completion} />
     </Stack>
   );
 }
