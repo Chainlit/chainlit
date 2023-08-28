@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { useToggle } from 'usehooks-ts';
 
@@ -39,6 +39,7 @@ export default function PromptPlayground() {
 
   const [restoredTime, setRestoredTime] = useState(0);
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
+  const chatPromptScrollRef = useRef<HTMLDivElement | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
@@ -119,6 +120,7 @@ export default function PromptPlayground() {
                 prompt={playground.prompt}
               />
               <ChatPromptPlayground
+                ref={chatPromptScrollRef}
                 restoredTime={restoredTime}
                 hasTemplate={hasTemplate}
                 prompt={playground.prompt}
@@ -139,7 +141,14 @@ export default function PromptPlayground() {
             <RestoreIcon />
           </IconButton>
         </Tooltip>
-        <SubmitButton />
+        <SubmitButton
+          onSubmit={() => {
+            if (!chatPromptScrollRef?.current) return;
+
+            chatPromptScrollRef.current.scrollTop =
+              chatPromptScrollRef.current.scrollHeight;
+          }}
+        />
       </ActionBar>
     </Dialog>
   );
