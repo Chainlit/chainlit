@@ -24,7 +24,8 @@ import { IMessageElement } from 'state/element';
 
 import InlinedElements from './inlined';
 
-const COLLAPSE_MIN_LENGTH = 800;
+const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
+const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
 
 interface Props {
   id?: string;
@@ -205,9 +206,14 @@ export default memo(function MessageContent({
     </Stack>
   );
 
+  const lineCount = preparedContent.split('\n').length;
+  const collapse =
+    lineCount > COLLAPSE_MIN_LINES ||
+    preparedContent.length > COLLAPSE_MIN_LENGTH;
+
   return (
     <Stack width="100%">
-      {preparedContent.length > COLLAPSE_MIN_LENGTH ? (
+      {collapse ? (
         <Collapse onDownload={() => exportToFile(preparedContent, `${id}.txt`)}>
           {renderContent()}
         </Collapse>
