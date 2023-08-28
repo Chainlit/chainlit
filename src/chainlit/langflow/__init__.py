@@ -2,7 +2,7 @@ from chainlit.utils import check_module_version
 
 if not check_module_version("langflow", "0.1.4"):
     raise ValueError(
-        "Langflow version is too old, expected >= 0.1.4. Run `pip install langflow --upgrade`"
+        "Expected Langflow version >= 0.1.4. Run `pip install langflow --upgrade`"
     )
 
 from typing import Dict, Optional, Union
