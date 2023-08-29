@@ -1,3 +1,4 @@
+import functools
 import importlib
 import inspect
 from typing import Callable
@@ -20,6 +21,7 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         Callable: The wrapped function.
     """
 
+    @functools.wraps(user_function)
     async def wrapper(*args):
         # Get the parameter names of the user-defined function
         user_function_params = list(inspect.signature(user_function).parameters.keys())
