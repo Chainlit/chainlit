@@ -196,7 +196,7 @@ ChatOpenAI = ChatOpenAIProvider(
         Select(
             id="model",
             label="Model",
-            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt4"],
+            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4"],
             initial_value="gpt-3.5-turbo",
         ),
         *openai_common_inputs,
@@ -213,7 +213,7 @@ AzureChatOpenAI = ChatOpenAIProvider(
         Select(
             id="model",
             label="Model",
-            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt4"],
+            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4"],
             initial_value="gpt-3.5-turbo",
         ),
         *openai_common_inputs,
