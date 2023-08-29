@@ -6,7 +6,7 @@ from chainlit.logger import logger
 
 
 def init_lc_cache():
-    use_cache = config.run.no_cache is False and config.run.ci is False
+    use_cache = config.project.cache is True and config.run.no_cache is False
 
     if use_cache:
         try:
