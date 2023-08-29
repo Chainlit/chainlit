@@ -1,4 +1,4 @@
-import { grey, primary, white } from 'palette';
+import { green, grey, primary, white } from 'palette';
 
 import { createTheme } from '@mui/material/styles';
 
@@ -66,7 +66,7 @@ const shape = {
 };
 
 const success = {
-  main: 'rgba(25, 195, 125, 1)',
+  main: green[500],
   contrastText: white
 };
 const error = {

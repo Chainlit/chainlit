@@ -13,14 +13,6 @@ import 'draft-js/dist/Draft.css';
 
 import MessageWrapper from './MessageWrapper';
 
-const styleMap = {
-  COMPLETION: {
-    backgroundColor: '#d2f4d3',
-    color: 'black',
-    borderRadius: '2px'
-  }
-};
-
 interface Props {
   completion?: string;
   chatMode?: boolean;
@@ -67,9 +59,14 @@ export default function Completion({ completion, chatMode }: Props) {
     <EditorWrapper
       className="completion-editor"
       clipboardValue={state.getCurrentContent().getPlainText()}
+      sxChildren={{
+        borderColor: (theme) => theme.palette.success.main,
+        '&:hover': {
+          borderColor: (theme) => theme.palette.success.main
+        }
+      }}
     >
       <Editor
-        customStyleMap={styleMap}
         editorState={state}
         onChange={(nextState) => {
           // Read only mode, force content but preserve selection
