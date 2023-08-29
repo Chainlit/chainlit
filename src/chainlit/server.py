@@ -25,6 +25,7 @@ from chainlit.config import DEFAULT_HOST, config, load_module, reload_config
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
+from chainlit.telemetry import trace_event
 from chainlit.types import (
     CompletionRequest,
     DeleteConversationRequest,
@@ -193,6 +194,7 @@ async def completion(request: CompletionRequest):
             detail=f"LLM provider '{request.prompt.provider}' not found",
         )
 
+    trace_event("pp_create_completion")
     response = await provider.create_completion(request)
 
     return response
@@ -201,6 +203,7 @@ async def completion(request: CompletionRequest):
 @app.get("/project/llm-providers")
 async def get_providers():
     """List the providers."""
+    trace_event("pp_get_llm_providers")
     providers = get_llm_providers()
     providers = [p.to_dict() for p in providers]
     return JSONResponse(content={"providers": providers})
