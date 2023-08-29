@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
 
-import { Add } from '@mui/icons-material';
+import Add from '@mui/icons-material/Add';
 import { LoadingButton } from '@mui/lab';
 import { Tooltip } from '@mui/material';
 

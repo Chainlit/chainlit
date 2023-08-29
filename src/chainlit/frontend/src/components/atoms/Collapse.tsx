@@ -1,7 +1,9 @@
 import React from 'react';
 import { useToggle } from 'usehooks-ts';
 
-import { DownloadOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
+import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import {
   Box,
   IconButton,

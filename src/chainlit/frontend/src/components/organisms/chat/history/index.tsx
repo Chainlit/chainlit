@@ -4,7 +4,7 @@ import { grey } from 'palette';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
-import { AutoDelete } from '@mui/icons-material';
+import AutoDelete from '@mui/icons-material/AutoDelete';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import {
   IconButton,

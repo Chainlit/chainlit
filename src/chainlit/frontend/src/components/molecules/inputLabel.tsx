@@ -1,4 +1,4 @@
-import { Info } from '@mui/icons-material';
+import Info from '@mui/icons-material/Info';
 import { Box, InputLabel, Tooltip } from '@mui/material';
 
 import NotificationCount, {
