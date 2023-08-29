@@ -48,6 +48,9 @@ user_env = []
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
 
+# Enable third parties caching (e.g LangChain cache)
+cache = false
+
 # Chainlit server address
 # chainlit_server = ""
 
@@ -198,6 +201,8 @@ class ProjectSettings(DataClassJsonMixin):
     local_fs_path: Optional[str] = None
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
+    # Enable third parties caching (e.g LangChain cache)
+    cache: bool = False
     # Chainlit server address
     chainlit_server: Optional[str] = None
 
