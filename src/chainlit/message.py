@@ -1,3 +1,4 @@
+import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
@@ -125,7 +126,7 @@ class Message(MessageBase):
     If a project ID is configured, the message will be persisted in the cloud.
 
     Args:
-        content (str): The content of the message.
+        content (Union[str, Dict]): The content of the message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
         prompt (Prompt, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
@@ -137,7 +138,7 @@ class Message(MessageBase):
 
     def __init__(
         self,
-        content: str,
+        content: Union[str, Dict],
         author: str = config.ui.name,
         prompt: Optional[Prompt] = None,
         language: Optional[str] = None,
@@ -146,10 +147,18 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
     ):
-        self.content = content
+        self.language = language
+
+        if isinstance(content, dict):
+            self.content = json.dumps(content, indent=4)
+            self.language = "json"
+        elif isinstance(content, str):
+            self.content = content
+        else:
+            raise TypeError(f"Unsupported type {type(content)} for message content")
+
         self.author = author
         self.prompt = prompt
-        self.language = language
         self.parent_id = parent_id
         self.indent = indent
         self.actions = actions if actions is not None else []
