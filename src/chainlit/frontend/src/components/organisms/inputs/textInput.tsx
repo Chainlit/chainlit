@@ -7,6 +7,7 @@ import InputStateHandler from './inputStateHandler';
 export type TextInputProps = {
   value?: string;
   placeholder?: string;
+  endAdornment?: React.ReactNode;
 } & IInput &
   Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
 
@@ -18,6 +19,7 @@ export default function TextInput({
   label,
   size = 'small',
   tooltip,
+  endAdornment,
   ...rest
 }: TextInputProps): JSX.Element {
   return (
@@ -30,6 +32,7 @@ export default function TextInput({
     >
       <TextField
         disabled={disabled}
+        InputProps={{ endAdornment }}
         inputProps={{
           ...rest,
           id: id,

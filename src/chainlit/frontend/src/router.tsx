@@ -10,6 +10,9 @@ import Home from 'pages/Home';
 import Login from 'pages/Login';
 import Page from 'pages/Page';
 import Readme from 'pages/Readme';
+import ResetPassword from 'pages/auth/ResetPassword';
+import SignIn from 'pages/auth/SignIn';
+import SignUp from 'pages/auth/SignUp';
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +54,18 @@ export const router = createBrowserRouter([
   {
     path: '/api/auth/callback',
     element: <AuthCallback />
+  },
+  {
+    path: '/sign-in',
+    element: <SignIn />
+  },
+  {
+    path: '/sign-up',
+    element: <SignUp />
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />
   },
   {
     path: '*',
