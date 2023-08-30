@@ -27,12 +27,7 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
     return provider, invocation_params
 
 
-def get_placeholder_size(s):
-    return len(re.findall(r"\b\w+\(", s))
-
-
 def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
-    inputs = {k: str(v) for (k, v) in inputs.items()}
     prompt_params = serialized.get("kwargs", {}).get("prompt", {}).get("kwargs", {})
     _messages = prompt_params.get("messages")
 
@@ -42,9 +37,9 @@ def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
             class_name = m["id"][-1]
             # A placeholder holds a variable that itself is a list of messages, like chat_history
             if class_name == "MessagesPlaceholder":
-                variable = inputs.get(m.get("kwargs").get("variable_name"))
-                # Todo: this is not ideal but did not find another way to count how many messages the placeholder represents
-                placeholder_size = get_placeholder_size(variable)
+                variable_name = m.get("kwargs", {}).get("variable_name")  # type: str
+                variable = inputs.get(variable_name, [])
+                placeholder_size = len(variable)
                 if placeholder_size:
                     messages += [PromptMessage(placeholder_size=placeholder_size)]
             else:
@@ -66,14 +61,16 @@ def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
     template = prompt_params.get("template")
     template_format = prompt_params.get("template_format")
 
+    stringified_inputs = inputs = {k: str(v) for (k, v) in inputs.items()}
+
     if template:
         return Prompt(
             template=template,
             template_format=template_format,
-            inputs=inputs,
+            inputs=stringified_inputs,
         )
     elif messages:
-        return Prompt(inputs=inputs, messages=messages)
+        return Prompt(inputs=stringified_inputs, messages=messages)
 
 
 def convert_role(role: str):
