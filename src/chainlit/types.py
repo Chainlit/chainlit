@@ -6,7 +6,9 @@ from pydantic.dataclasses import dataclass
 
 from chainlit.prompt import Prompt
 
-InputWidgetType = Literal["switch", "slider", "select", "textinput", "tags"]
+InputWidgetType = Literal[
+    "switch", "slider", "select", "textinput", "tags", "numberinput"
+]
 ElementType = Literal[
     "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"
 ]

@@ -18,6 +18,7 @@ class BaseProvider:
     env_vars: Dict[str, str]
     inputs: List[input_widget.InputWidget]
     is_chat: bool
+    is_automated: bool = False
 
     # Format the message based on the template provided
     def format_message(self, message: PromptMessage, prompt: Prompt):
@@ -120,4 +121,5 @@ class BaseProvider:
             "name": self.name,
             "inputs": [input_widget.to_dict() for input_widget in self.inputs],
             "is_chat": self.is_chat,
+            "is_automated": self.is_automated,
         }

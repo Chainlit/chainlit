@@ -114,9 +114,9 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
           <Box
             // This trick is to have padding at the end of the scroll
             sx={{ paddingBottom: index === provider.inputs.length - 1 ? 2 : 0 }}
+            key={input.id}
           >
             <FormInput
-              key={input.id}
               element={{
                 ...input,
                 id: input.id,

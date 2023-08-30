@@ -65,6 +65,8 @@ export default function PromptPlayground() {
     setPlayground((old) => ({ ...old, prompt: undefined }));
   };
 
+  // Only render the playground if it's open and we have providers.
+  // Prevents the "no provider" error from being thrown and a playground flash
   if (!playground?.prompt) {
     return null;
   }

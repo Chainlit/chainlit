@@ -149,4 +149,15 @@ describe("PromptPlayground", () => {
     testCompletion();
     testSettings(true);
   });
+
+  describe("Langchain provider", () => {
+    beforeEach(() => {
+      cy.visit("/");
+      openPlayground(3);
+      cy.get("#llm-providers").parent().click();
+      cy.get("[data-value=test-langchain]").click();
+    });
+
+    testCompletion();
+  });
 });

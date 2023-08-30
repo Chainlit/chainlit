@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic.dataclasses import dataclass
@@ -9,7 +11,7 @@ from chainlit.sync import make_async
 
 @dataclass
 class BaseHuggingFaceProvider(BaseProvider):
-    repo_id: str
+    repo_id: Optional[str] = None
     task = "text2text-generation"
 
     async def create_completion(self, request):
