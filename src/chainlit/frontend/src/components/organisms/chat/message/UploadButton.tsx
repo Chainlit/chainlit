@@ -34,6 +34,7 @@ const UploadChildButton = ({ fileSpec, session }: UploadChildProps) => {
           minWidth: 0,
           borderRadius: '50%'
         }}
+        color="inherit"
         {...getRootProps({ className: 'dropzone' })}
       >
         <input {...getInputProps()} />
