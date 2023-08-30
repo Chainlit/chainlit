@@ -81,7 +81,8 @@ export default function PromptMessage({
       canSelectRole
       index={index}
       message={message}
-      role={message?.role?.toUpperCase()}
+      role={message.role?.toUpperCase()}
+      name={message.name}
     >
       <>
         {mode === 'Template' ? renderTemplate() : null}

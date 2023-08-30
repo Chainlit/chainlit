@@ -24,6 +24,7 @@ interface MessageWrapperProps {
   index?: number;
   message?: IPromptMessage;
   role?: string;
+  name?: string;
 }
 
 const MessageWrapper = ({
@@ -31,7 +32,8 @@ const MessageWrapper = ({
   children,
   index,
   message,
-  role
+  role,
+  name
 }: MessageWrapperProps): JSX.Element => {
   const setPlayground = useSetRecoilState(playgroundState);
   const [isSelectRoleOpen, toggleSelectRole] = useToggle(false);
@@ -81,7 +83,8 @@ const MessageWrapper = ({
               onClick={() => canSelectRole && toggleSelectRole()}
               color="text.primary"
               sx={{
-                p: 1,
+                pl: 1,
+                pt: 1,
                 borderRadius: 0.5,
                 marginTop: 1,
                 cursor: canSelectRole ? 'pointer' : 'default',
@@ -114,6 +117,19 @@ const MessageWrapper = ({
               }}
             />
           )}
+          {name ? (
+            <Typography
+              color="text.secondary"
+              variant="caption"
+              sx={{
+                pl: 1,
+
+                width: 'fit-content'
+              }}
+            >
+              {name}
+            </Typography>
+          ) : null}
         </Box>
         <Box width="100%" flex={8}>
           {children}

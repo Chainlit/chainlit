@@ -13,6 +13,7 @@ export type PromptMessageRole = 'system' | 'assistant' | 'user' | 'function';
 
 export interface IPromptMessage extends IBaseTemplate {
   role: PromptMessageRole;
+  name?: string;
 }
 
 export type ILLMSettings = Record<string, string | string[] | number | boolean>;
