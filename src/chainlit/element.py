@@ -30,6 +30,8 @@ class Element:
     name: Optional[str] = None
     # The URL of the element if already hosted somehwere else.
     url: Optional[str] = None
+    # The S3 object key.
+    object_key: Optional[str] = None
     # The local path of the element.
     path: Optional[str] = None
     # The byte content of the element.
@@ -58,6 +60,7 @@ class Element:
                 "url": self.url or "",
                 "name": self.name or "",
                 "display": self.display,
+                "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
                 "language": getattr(self, "language", None),
                 "forIds": getattr(self, "for_ids", None),
@@ -84,7 +87,9 @@ class Element:
                 if self.type in mime_types
                 else filetype.guess_mime(self.content)
             )
-            self.url = await client.upload_element(content=self.content, mime=mime)
+            upload_res = await client.upload_element(content=self.content, mime=mime)
+            self.url = upload_res["url"]
+            self.object_key = upload_res["object_key"]
 
         if not self.persisted:
             element_dict = await client.create_element(self.to_dict())

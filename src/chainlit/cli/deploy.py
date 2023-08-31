@@ -57,7 +57,7 @@ def upload_tar_gz_archive(access_token: str, archive_path: str):
     json_res = res.json()
 
     upload_details = json_res["post"]
-    permanent_url = json_res["permanentUrl"]
+    signedUrl = json_res["signedUrl"]
 
     files = {"file": open(archive_path, "rb")}
 
@@ -69,7 +69,7 @@ def upload_tar_gz_archive(access_token: str, archive_path: str):
         raise Exception(f"Failed to upload archive: {res.text}")
 
     url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
-    return permanent_url, url
+    return signedUrl, url
 
 
 def deploy(target: str):
