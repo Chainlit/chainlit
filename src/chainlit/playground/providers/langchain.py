@@ -1,8 +1,7 @@
-from typing import List, Union
+from typing import Union
 
 from fastapi.responses import StreamingResponse
 
-from chainlit import input_widget
 from chainlit.playground.provider import BaseProvider
 from chainlit.prompt import PromptMessage
 from chainlit.sync import make_async
@@ -19,17 +18,14 @@ class LangchainGenericProvider(BaseProvider):
         id: str,
         name: str,
         llm: Union[LLM, BaseChatModel],
-        inputs: List[input_widget.InputWidget],
         is_chat: bool = False,
-        is_automated: bool = False,
     ):
         super().__init__(
             id=id,
             name=name,
             env_vars={},
-            inputs=inputs,
+            inputs=[],
             is_chat=is_chat,
-            is_automated=is_automated,
         )
         self.llm = llm
 
@@ -73,7 +69,6 @@ class LangchainGenericProvider(BaseProvider):
 
         result = await stream(
             input=messages,
-            **request.prompt.settings,
         )
 
         def create_event_stream():

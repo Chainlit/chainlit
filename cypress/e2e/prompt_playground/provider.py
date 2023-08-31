@@ -74,23 +74,13 @@ ChatTestLLM = TestLLMProvider(
     is_chat=True,
 )
 
-responses = ["This is the test completion"]
-llm = FakeListLLM(responses=responses)
+llm = FakeListLLM(responses=["This is the test completion"])
 
 LangchainTestLLM = LangchainGenericProvider(
     id="test-langchain",
     name="TestLangchain",
     llm=llm,
-    inputs=[
-        Select(
-            id="model",
-            label="Model",
-            values=["test-model-langchain-1", "test-model-langchain-2"],
-            initial_value="test-model-langchain-2",
-        ),
-    ],
     is_chat=False,
-    is_automated=False,
 )
 
 
