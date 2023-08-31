@@ -1,4 +1,4 @@
-import re
+import json
 from typing import Any, Dict, List, Optional, Union
 
 from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
@@ -10,7 +10,7 @@ from chainlit.message import ErrorMessage, Message
 from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
 
-IGNORE_LIST = ["AgentExecutor"]
+IGNORE_LIST = []  # type: List[str]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
 
@@ -84,6 +84,20 @@ def convert_role(role: str):
         return "function"
     else:
         raise ValueError(f"Unsupported role {role}")
+
+
+def convert_message(message: BaseMessage, template: Optional[str] = None):
+    function_call = message.additional_kwargs.get("function_call")
+    if function_call:
+        content = json.dumps(function_call, indent=4)
+    else:
+        content = message.content
+    return PromptMessage(
+        name=getattr(message, "name", None),
+        role=convert_role(message.type),
+        template=template,
+        formatted=content,
+    )
 
 
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
@@ -281,13 +295,7 @@ def _on_chat_model_start(
                         formatted_message = formatted_messages[
                             templated_index + placeholder_offset
                         ]
-                        prompt_messages += [
-                            PromptMessage(
-                                role=convert_role(formatted_message.type),
-                                template=formatted_message.content,
-                                formatted=formatted_message.content,
-                            )
-                        ]
+                        prompt_messages += [convert_message(formatted_message)]
                         # Increment the placeholder offset
                         placeholder_offset += 1
                     # Finally, decrement the placeholder offset by one
@@ -300,10 +308,8 @@ def _on_chat_model_start(
                     ]
                     # Update the role and formatted value, keep the template
                     prompt_messages += [
-                        PromptMessage(
-                            template=templated_message.template,
-                            role=convert_role(formatted_message.type),
-                            formatted=formatted_message.content,
+                        convert_message(
+                            formatted_message, template=templated_message.template
                         )
                     ]
             # Finally set the prompt messages
@@ -311,19 +317,14 @@ def _on_chat_model_start(
         # Non chat mode
         elif self.current_prompt.template:
             unique_message = messages[0][0]
-            prompt_message = PromptMessage(
-                template=self.current_prompt.template,
-                formatted=unique_message.content,
-                role=convert_role(unique_message.type),
+            prompt_message = convert_message(
+                unique_message, template=self.current_prompt.template
             )
             self.current_prompt.messages = [prompt_message]
             self.current_prompt.template = None
     # No current prompt, create it (formatted only)
     else:
-        prompt_messages = [
-            PromptMessage(formatted=m.content, role=convert_role(m.type))
-            for m in messages[0]
-        ]
+        prompt_messages = [convert_message(m) for m in messages[0]]
         self.prompt_sequence.append(
             Prompt(
                 messages=prompt_messages,
