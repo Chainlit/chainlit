@@ -86,6 +86,7 @@ export default function SelectInput({
   value,
   placeholder = 'Select',
   renderLabel,
+  onClose,
   sx,
   iconSx,
   ...rest
@@ -103,6 +104,7 @@ export default function SelectInput({
     >
       <MSelect
         {...rest}
+        onClose={onClose}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
