@@ -1,14 +1,6 @@
 from typing import List, Union
 
-from fastapi import HTTPException
-from fastapi.responses import PlainTextResponse, StreamingResponse
-from langchain.schema.messages import (
-    AIMessage,
-    BaseMessageChunk,
-    FunctionMessage,
-    HumanMessage,
-    SystemMessage,
-)
+from fastapi.responses import StreamingResponse
 
 from chainlit import input_widget
 from chainlit.playground.provider import BaseProvider
@@ -42,6 +34,13 @@ class LangchainGenericProvider(BaseProvider):
         self.llm = llm
 
     def prompt_message_to_langchain_message(self, message: PromptMessage):
+        from langchain.schema.messages import (
+            AIMessage,
+            FunctionMessage,
+            HumanMessage,
+            SystemMessage,
+        )
+
         content = "" if message.formatted is None else message.formatted
         if message.role == "user":
             return HumanMessage(content=content)
@@ -64,6 +63,8 @@ class LangchainGenericProvider(BaseProvider):
         return message.to_string()
 
     async def create_completion(self, request):
+        from langchain.schema.messages import BaseMessageChunk
+
         await super().create_completion(request)
 
         messages = self.create_prompt(request)
