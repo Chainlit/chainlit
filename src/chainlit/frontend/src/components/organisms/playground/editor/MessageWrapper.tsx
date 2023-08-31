@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { useToggle } from 'usehooks-ts';
 
 import {
   Box,
@@ -36,7 +35,7 @@ const MessageWrapper = ({
   name
 }: MessageWrapperProps): JSX.Element => {
   const setPlayground = useSetRecoilState(playgroundState);
-  const [isSelectRoleOpen, toggleSelectRole] = useToggle(false);
+  const [showSelectRole, setShowSelectRole] = useState(false);
 
   const onRoleSelected = (event: SelectChangeEvent) => {
     const role = event.target.value as PromptMessageRole;
@@ -54,7 +53,7 @@ const MessageWrapper = ({
       }));
     }
 
-    toggleSelectRole();
+    setShowSelectRole(false);
   };
 
   return (
@@ -78,9 +77,9 @@ const MessageWrapper = ({
         }}
       >
         <Box sx={{ flex: 1, paddingLeft: 2 }}>
-          {!isSelectRoleOpen ? (
+          {!showSelectRole ? (
             <Typography
-              onClick={() => canSelectRole && toggleSelectRole()}
+              onClick={() => canSelectRole && setShowSelectRole(true)}
               color="text.primary"
               sx={{
                 pl: 1,
@@ -102,6 +101,7 @@ const MessageWrapper = ({
             </Typography>
           ) : (
             <SelectInput
+              onClose={() => setShowSelectRole(false)}
               defaultOpen
               items={roles.map((role) => ({
                 label: role,
