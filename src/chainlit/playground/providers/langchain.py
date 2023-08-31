@@ -5,6 +5,7 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 from langchain.schema.messages import (
     AIMessage,
     BaseMessageChunk,
+    FunctionMessage,
     HumanMessage,
     SystemMessage,
 )
@@ -48,6 +49,10 @@ class LangchainGenericProvider(BaseProvider):
             return AIMessage(content=content)
         elif message.role == "system":
             return SystemMessage(content=content)
+        elif message.role == "function":
+            return FunctionMessage(
+                content=content, name=message.name if message.name else "function"
+            )
         else:
             raise ValueError(f"Got unknown type {message}")
 
