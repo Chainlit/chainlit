@@ -9,16 +9,17 @@ Generated using https://ecotrust-canada.github.io/markdown-toc/.
 I've copy/pasted the whole document there, without the previous two headings.
 -->
 
-- [Local setup](#local-setup)
-  - [Requirements](#requirements)
-  - [Setup the repo](#setup-the-repo)
-  - [Install JS dependencies](#install-js-dependencies)
-  - [Install python dependencies](#install-python-dependencies)
-- [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
-- [Start the UI from source](#start-the-ui-from-source)
-- [Run the tests](#run-the-tests)
-  - [Run one test](#run-one-test)
-
+- [Contribute to Chainlit](#contribute-to-chainlit)
+  - [Table of Contents](#table-of-contents)
+  - [Local setup](#local-setup)
+    - [Requirements](#requirements)
+    - [Setup the repo](#setup-the-repo)
+    - [Install JS dependencies](#install-js-dependencies)
+    - [Install python dependencies](#install-python-dependencies)
+  - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
+  - [Start the UI from source](#start-the-ui-from-source)
+  - [Run the tests](#run-the-tests)
+    - [Run one test](#run-one-test)
 
 ## Local setup
 
@@ -90,7 +91,7 @@ You need to build the UI once before starting the server.
 pnpm run buildUi
 ```
 
-Start by running `src/chainlit/hello.py` as an example.
+Start by running `backend/hello.py` as an example.
 
 ```sh
 cd src
@@ -108,7 +109,7 @@ First, you will have to start the server either [from source](#start-the-chainli
 Then, start the UI.
 
 ```sh
-cd src/chainlit/frontend
+cd frontend
 pnpm run dev --port 5174
 ```
 

@@ -1,20 +1,23 @@
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv';
+
+import { installChainlit, runTests } from './utils';
+
 dotenv.config();
-import { installChainlit, runTests } from "./utils";
 
 async function main() {
-  const matchName = process.env.SINGLE_TEST || "*";
+  const matchName = process.env.SINGLE_TEST || '*';
   const skipBuild = process.env.SKIP_BUILD;
 
   if (!skipBuild) {
     await installChainlit();
   }
+
   await runTests(matchName);
 }
 
 main()
   .then(() => {
-    console.log("Done!");
+    console.log('Done!');
     process.exit(0);
   })
   .catch((error) => {

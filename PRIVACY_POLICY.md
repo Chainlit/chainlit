@@ -2,7 +2,7 @@
 
 ## 📏 Telemetry
 
-Chainlit collects specific metadata points by default to help us better understand and improve the package based on community usage. We greatly value your privacy and ensure that the metadata we collect [is limited](/src/chainlit//telemetry.py).
+Chainlit collects specific metadata points by default to help us better understand and improve the package based on community usage. We greatly value your privacy and ensure that the metadata we collect [is limited](/backend/telemetry.py).
 
 ### 🕵️‍♀️ Scope
 

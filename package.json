@@ -15,13 +15,13 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd src/chainlit/frontend && pnpm run test)",
+    "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd frontend && pnpm run test)",
     "prepare": "husky install",
-    "lintUi": "cd src/chainlit/frontend && pnpm run lint",
-    "formatUi": "cd src/chainlit/frontend && pnpm run format",
-    "lintPython": "cd src/ && poetry run mypy chainlit/",
+    "lintUi": "cd frontend && pnpm run lint",
+    "formatUi": "cd frontend && pnpm run format",
+    "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "(cd src/chainlit/frontend && pnpm run build)",
-    "build": "(cd src/chainlit/frontend && pnpm run build) && (cd src && poetry build)"
+    "buildUi": "(cd frontend && pnpm run build)",
+    "build": "(cd frontend && pnpm run build) && (cd backend && poetry build)"
   }
 }
