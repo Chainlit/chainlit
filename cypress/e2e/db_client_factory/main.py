@@ -46,7 +46,7 @@ class CustomDBClient(BaseDBClient):
     async def delete_message(self, message_id: int) -> bool:
         raise NotImplementedError
 
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
         raise NotImplementedError
 
     async def create_element(self, variables: ElementDict) -> ElementDict:

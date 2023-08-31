@@ -53,6 +53,7 @@ class ElementDict(TypedDict):
     conversationId: Optional[str]
     type: ElementType
     url: str
+    objectKey: Optional[str]
     name: str
     display: ElementDisplay
     size: Optional[ElementSize]
@@ -145,7 +146,7 @@ class BaseDBClient(ABC):
         pass
 
     @abstractmethod
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
         pass
 
     @abstractmethod

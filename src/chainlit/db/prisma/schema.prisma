@@ -32,7 +32,8 @@ model Element {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   type           String
-  url            String
+  objectKey      String?
+  url            String?
   name           String
   display        String
   size           String?

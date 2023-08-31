@@ -424,11 +424,12 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
             return None
 
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $url: String!, $name: String!, $display: String!, $forIds: [String!]!, $size: String, $language: String) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+        mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
                 id,
                 type,
                 url,
+                objectKey,
                 name,
                 display,
                 size,
@@ -471,7 +472,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         return res["data"]["updateElement"]
 
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> str:
+    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
         id = str(uuid.uuid4())
         body = {"projectId": self.project_id, "fileName": id, "contentType": mime}
 
@@ -486,11 +487,12 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 if not r.ok:
                     reason = await r.text()
                     logger.error(f"Failed to upload file: {reason}")
-                    return ""
+                    return {"object_key": None, "url": None}
                 json_res = await r.json()
 
         upload_details = json_res["post"]
-        permanent_url = json_res["permanentUrl"]
+        object_key = upload_details["fields"]["key"]
+        signed_url = json_res["signedUrl"]
 
         form_data = aiohttp.FormData()
 
@@ -508,7 +510,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
                 if not upload_response.ok:
                     reason = await upload_response.text()
                     logger.error(f"Failed to upload file: {reason}")
-                    return ""
+                    return {"object_key": None, "url": None}
 
-                url = f'{upload_details["url"]}/{upload_details["fields"]["key"]}'
-                return permanent_url
+                url = f'{upload_details["url"]}/{object_key}'
+                return {"object_key": object_key, "url": signed_url}

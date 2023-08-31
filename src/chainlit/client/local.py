@@ -288,7 +288,7 @@ class LocalDBClient(BaseDBClient):
             await out.flush()
 
             url = f"/files/{sub_path}"
-            return url
+            return {"object_key": "", "url": url}
 
     async def set_human_feedback(self, message_id, feedback):
         from prisma.models import Message
