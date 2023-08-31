@@ -8,6 +8,7 @@ from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 from chainlit import input_widget
 from chainlit.config import config
 from chainlit.context import context
+from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.playground.config import add_llm_provider, has_llm_provider
 from chainlit.playground.providers.langchain import LangchainGenericProvider
@@ -35,40 +36,45 @@ def get_llm_settings(invocation_params: Union[Dict, None], serialized: Dict[str,
 
     # Automatically add the provider if it doesn't exist yet
     if not has_llm_provider(provider):
-        path = serialized.get("id", [])
-        provider_name = path[-1]
-        provider_path = ".".join(path[:-1])
+        try:
+            path = serialized.get("id", [])
+            provider_name = path[-1]
+            provider_path = ".".join(path[:-1])
 
-        module = importlib.import_module(provider_path)
-        llm_class = getattr(module, provider_name)
-        llm = llm_class()
-        inputs: List[input_widget.InputWidget] = []
-        for k, v in settings.items():
-            setting_type = type(v)
-            if setting_type is str:
-                inputs.append(
-                    input_widget.TextInput(
-                        id=k,
-                        label=k,
+            module = importlib.import_module(provider_path)
+            llm_class = getattr(module, provider_name)
+            llm = llm_class()
+            inputs: List[input_widget.InputWidget] = []
+            for k, v in settings.items():
+                setting_type = type(v)
+                if setting_type is str:
+                    inputs.append(
+                        input_widget.TextInput(
+                            id=k,
+                            label=k,
+                        )
                     )
-                )
-            elif setting_type is float or setting_type is int:
-                inputs.append(
-                    input_widget.NumberInput(
-                        id=k,
-                        label=k,
+                elif setting_type is float or setting_type is int:
+                    inputs.append(
+                        input_widget.NumberInput(
+                            id=k,
+                            label=k,
+                        )
                     )
+            add_llm_provider(
+                LangchainGenericProvider(
+                    id=llm._llm_type,
+                    name=provider_name,
+                    llm=llm,
+                    inputs=inputs,
+                    is_chat=".chat_models." in provider_path,
+                    is_automated=True,
                 )
-        add_llm_provider(
-            LangchainGenericProvider(
-                id=llm._llm_type,
-                name=provider_name,
-                llm=llm,
-                inputs=inputs,
-                is_chat=".chat_models." in provider_path,
-                is_automated=True,
             )
-        )
+        except Exception as e:
+            logger.warn(
+                f"Failed to dynamically create langchain llm provider: {str(e)}"
+            )
 
     return provider, settings
 
