@@ -35,7 +35,7 @@ import SubmitButton from './submitButton';
 export default function PromptPlayground() {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const { data, error } = useApi<IPlayground>('/project/llm-providers');
+  const { data, error, mutate } = useApi<IPlayground>('/project/llm-providers');
 
   const [restoredTime, setRestoredTime] = useState(0);
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
@@ -45,6 +45,12 @@ export default function PromptPlayground() {
   const isSmallScreen = useMediaQuery<Theme>((theme) =>
     theme.breakpoints.down('md')
   );
+
+  useEffect(() => {
+    // Refresh the providers when the playground is opened
+    if (!playground?.prompt) return;
+    mutate();
+  }, [playground?.prompt]);
 
   useEffect(() => {
     if (!data) return;
