@@ -1,12 +1,16 @@
+import importlib
 import json
 from typing import Any, Dict, List, Optional, Union
 
 from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 
+from chainlit import input_widget
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
+from chainlit.playground.config import add_llm_provider, has_llm_provider
+from chainlit.playground.providers.langchain import LangchainGenericProvider
 from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
 
@@ -14,7 +18,7 @@ IGNORE_LIST = []  # type: List[str]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
 
-def get_llm_settings(invocation_params: Union[Dict, None]):
+def get_llm_settings(invocation_params: Union[Dict, None], serialized: Dict[str, Any]):
     if invocation_params is None:
         return None, None
 
@@ -24,7 +28,49 @@ def get_llm_settings(invocation_params: Union[Dict, None]):
         model_name = invocation_params.pop("model_name")
         invocation_params["model"] = model_name
 
-    return provider, invocation_params
+    merged = {**invocation_params, **serialized.get("kwargs", {})}
+
+    # make sure there is no api key specification
+    settings = {k: v for k, v in merged.items() if not k.endswith("_api_key")}
+
+    # Automatically add the provider if it doesn't exist yet
+    if not has_llm_provider(provider):
+        path = serialized.get("id", [])
+        provider_name = path[-1]
+        provider_path = ".".join(path[:-1])
+
+        module = importlib.import_module(provider_path)
+        llm_class = getattr(module, provider_name)
+        llm = llm_class()
+        inputs: List[input_widget.InputWidget] = []
+        for k, v in settings.items():
+            setting_type = type(v)
+            if setting_type is str:
+                inputs.append(
+                    input_widget.TextInput(
+                        id=k,
+                        label=k,
+                    )
+                )
+            elif setting_type is float or setting_type is int:
+                inputs.append(
+                    input_widget.NumberInput(
+                        id=k,
+                        label=k,
+                    )
+                )
+        add_llm_provider(
+            LangchainGenericProvider(
+                id=llm._llm_type,
+                name=provider_name,
+                llm=llm,
+                inputs=inputs,
+                is_chat=".chat_models." in provider_path,
+                is_automated=True,
+            )
+        )
+
+    return provider, settings
 
 
 def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
@@ -270,7 +316,7 @@ def _on_chat_model_start(
     **kwargs: Any,
 ):
     invocation_params = kwargs.get("invocation_params")
-    provider, settings = get_llm_settings(invocation_params)
+    provider, settings = get_llm_settings(invocation_params, serialized)
 
     formatted_messages = messages[0]
 
@@ -341,7 +387,7 @@ def _on_llm_start(
     **kwargs: Any,
 ) -> None:
     invocation_params = kwargs.get("invocation_params")
-    provider, settings = get_llm_settings(invocation_params)
+    provider, settings = get_llm_settings(invocation_params, serialized)
 
     if self.current_prompt:
         self.current_prompt.formatted = prompts[0]

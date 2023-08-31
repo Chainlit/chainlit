@@ -199,6 +199,41 @@ class TextInput(InputWidget):
 
 
 @dataclass
+class NumberInput(InputWidget):
+    """Useful to create a number input."""
+
+    type: InputWidgetType = "numberinput"
+    initial: Optional[float] = None
+    placeholder: Optional[str] = None
+
+    def __init__(
+        self,
+        id: str,
+        label: str,
+        initial: Optional[float] = None,
+        placeholder: Optional[str] = None,
+        tooltip: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> None:
+        self.id = id
+        self.label = label
+        self.initial = initial
+        self.placeholder = placeholder
+        super().__post_init__(tooltip, description)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
+            "placeholder": self.placeholder,
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }
+
+
+@dataclass
 class Tags(InputWidget):
     """Useful to create an input for an array of strings."""
 

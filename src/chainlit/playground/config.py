@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from chainlit.playground.provider import BaseProvider
 from chainlit.playground.providers import (
@@ -10,15 +10,17 @@ from chainlit.playground.providers import (
     OpenAI,
 )
 
-providers = []  # type: List[BaseProvider]
-default_providers = [
-    AzureChatOpenAI,
-    AzureOpenAI,
-    ChatOpenAI,
-    OpenAI,
-    Anthropic,
-    HFFlanT5,
-]  # type: List[BaseProvider]
+providers = {
+    AzureChatOpenAI.id: AzureChatOpenAI,
+    AzureOpenAI.id: AzureOpenAI,
+    ChatOpenAI.id: ChatOpenAI,
+    OpenAI.id: OpenAI,
+    Anthropic.id: Anthropic,
+}  # type: Dict[str, BaseProvider]
+
+
+def has_llm_provider(id: str):
+    return id in providers
 
 
 def add_llm_provider(provider: BaseProvider):
@@ -26,10 +28,8 @@ def add_llm_provider(provider: BaseProvider):
         raise ValueError(
             f"{provider.name} LLM provider requires the following environment variables: {', '.join(provider.env_vars.values())}"
         )
-    providers.append(provider)
+    providers[provider.id] = provider
 
 
 def get_llm_providers():
-    list = default_providers if len(providers) == 0 else providers
-
-    return [provider for provider in list if provider.is_configured()]
+    return [provider for provider in providers.values() if provider.is_configured()]

@@ -81,6 +81,10 @@ export default function Completion({ completion, chatMode }: Props) {
     </EditorWrapper>
   );
 
+  if (!completion) {
+    return null;
+  }
+
   return !chatMode ? (
     <Box marginTop={2}>
       <Stack

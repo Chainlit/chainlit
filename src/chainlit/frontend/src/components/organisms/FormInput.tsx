@@ -23,6 +23,7 @@ export type TFormInput =
   | (Omit<SliderProps, 'value'> & IFormInput<'slider', number>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
+  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>)
   | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
@@ -53,6 +54,14 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
     case 'textinput':
       return (
         <TextInput {...omit(element, 'setField')} value={element.value ?? ''} />
+      );
+    case 'numberinput':
+      return (
+        <TextInput
+          {...omit(element, 'setField')}
+          type="number"
+          value={element.value?.toString() ?? '0'}
+        />
       );
     default:
       // If the element type is not recognized, we indicate an unimplemented type.
