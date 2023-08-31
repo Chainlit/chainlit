@@ -16,7 +16,6 @@ providers = {
     ChatOpenAI.id: ChatOpenAI,
     OpenAI.id: OpenAI,
     Anthropic.id: Anthropic,
-    HFFlanT5.id: HFFlanT5,
 }  # type: Dict[str, BaseProvider]
 
 
