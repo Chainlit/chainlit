@@ -39,6 +39,9 @@ class LocalDBClient(BaseDBClient):
             # Sqlite doesn't support list of primitives, so we need to serialize it.
             variables["forIds"] = json.dumps(variables["forIds"])
 
+        if "streaming" in variables:
+            del variables["streaming"]
+
     def after_read(self, variables: Dict):
         if "prompt" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
@@ -98,6 +101,8 @@ class LocalDBClient(BaseDBClient):
         c = await Conversation.prisma().find_unique_or_raise(
             where={"id": conversation_id}, include={"messages": True, "elements": True}
         )
+
+        print(c)
 
         for m in c.messages or []:
             if m.prompt:
@@ -186,7 +191,10 @@ class LocalDBClient(BaseDBClient):
 
         self.before_write(variables)
 
+        print(variables)
+
         res = await Message.prisma().create(data=variables)
+        print("\n\n", res, "\n\n")
         return res.id
 
     async def get_message(self, message_id):
