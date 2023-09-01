@@ -1,4 +1,4 @@
-import { IPdfElement } from 'types/element';
+import { IPdfElement } from '@chainlit/components';
 
 interface Props {
   element: IPdfElement;

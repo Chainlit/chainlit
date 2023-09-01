@@ -1,4 +1,4 @@
-import { IImageElement } from 'types/element';
+import { IImageElement } from '@chainlit/components';
 
 import ImageFrame from './frame';
 

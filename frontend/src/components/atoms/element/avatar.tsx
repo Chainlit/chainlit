@@ -1,6 +1,6 @@
 import { Avatar, Tooltip } from '@mui/material';
 
-import { IAvatarElement } from 'types/element';
+import { IAvatarElement } from '@chainlit/components';
 
 interface Props {
   element: IAvatarElement;

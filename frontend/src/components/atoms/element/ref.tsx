@@ -3,9 +3,9 @@ import { useSetRecoilState } from 'recoil';
 
 import { Link } from '@mui/material';
 
-import { sideViewState } from 'state/element';
+import { IMessageElement } from '@chainlit/components';
 
-import { IMessageElement } from 'types/element';
+import { sideViewState } from 'state/element';
 
 interface Props {
   element: IMessageElement;

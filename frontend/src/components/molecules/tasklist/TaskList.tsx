@@ -1,8 +1,7 @@
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
+import { ITasklistElement } from '@chainlit/components';
 import { grey } from '@chainlit/components/theme';
-
-import { ITasklistElement } from 'types/element';
 
 import { ITaskList, Task } from './Task';
 

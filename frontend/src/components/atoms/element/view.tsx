@@ -4,14 +4,12 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Typography } from '@mui/material';
 
-import { AudioElement } from '@chainlit/components';
+import { AudioElement, IMessageElement } from '@chainlit/components';
 
 import { useQuery } from 'hooks/query';
 import { useApi } from 'hooks/useApi';
 
 import { elementState } from 'state/element';
-
-import { IMessageElement } from 'types/element';
 
 import FileElement from './file';
 import ImageElement from './image';

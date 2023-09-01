@@ -1,6 +1,6 @@
 import { Alert, AlertTitle, Stack } from '@mui/material';
 
-import { ITextElement } from 'types/element';
+import { ITextElement } from '@chainlit/components';
 
 import TextElement from '../text';
 

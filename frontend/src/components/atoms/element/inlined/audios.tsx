@@ -1,8 +1,6 @@
 import { Box, Stack } from '@mui/material';
 
-import { AudioElement } from '@chainlit/components';
-
-import { IAudioElement } from 'types/element';
+import { AudioElement, IAudioElement } from '@chainlit/components';
 
 interface Props {
   items: IAudioElement[];

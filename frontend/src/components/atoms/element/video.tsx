@@ -1,4 +1,4 @@
-import { IVideoElement } from 'types/element';
+import { IVideoElement } from '@chainlit/components';
 
 interface Props {
   element: IVideoElement;

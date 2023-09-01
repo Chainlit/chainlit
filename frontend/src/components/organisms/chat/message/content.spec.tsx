@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import { expect, it } from 'vitest';
 
-import { ITextElement } from 'types/element';
+import { ITextElement } from '@chainlit/components';
 
 import MessageContent from './content';
 

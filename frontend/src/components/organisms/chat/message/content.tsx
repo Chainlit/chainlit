@@ -16,11 +16,11 @@ import {
   Typography
 } from '@mui/material';
 
+import { IMessageElement } from '@chainlit/components';
+
 import Code from 'components/atoms/Code';
 import Collapse from 'components/atoms/Collapse';
 import ElementRef from 'components/atoms/element/ref';
-
-import { IMessageElement } from 'types/element';
 
 import InlinedElements from './inlined';
 

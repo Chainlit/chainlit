@@ -1,4 +1,4 @@
-import { IVideoElement } from 'types/element';
+import { IVideoElement } from '@chainlit/components';
 
 import VideoElement from '../video';
 import { ListWithSize } from './utils';

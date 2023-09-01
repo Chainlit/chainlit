@@ -4,7 +4,7 @@ import {
   IAvatarElement,
   IMessageElement,
   ITasklistElement
-} from 'types/element';
+} from '@chainlit/components';
 
 export const elementState = atom<IMessageElement[]>({
   key: 'DisplayElements',
