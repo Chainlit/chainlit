@@ -122,7 +122,8 @@ app.mount("/public", StaticFiles(directory="public", check_dir=False), name="pub
 app.mount(
     "/assets",
     StaticFiles(
-        packages=[("chainlit", os.path.join(build_dir, "assets"))], follow_symlink=True
+        packages=[("chainlit", os.path.join(build_dir, "assets"))],
+        follow_symlink=config.project.follow_symlink,
     ),
     name="assets",
 )
