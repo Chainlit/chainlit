@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 from chainlit.playground.provider import BaseProvider
 from chainlit.playground.providers import (
@@ -6,7 +6,6 @@ from chainlit.playground.providers import (
     AzureChatOpenAI,
     AzureOpenAI,
     ChatOpenAI,
-    HFFlanT5,
     OpenAI,
 )
 
