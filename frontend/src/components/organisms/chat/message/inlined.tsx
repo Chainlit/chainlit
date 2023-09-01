@@ -1,8 +1,11 @@
 import { Stack } from '@mui/material';
 
-import { ElementType, IMessageElement } from '@chainlit/components';
+import {
+  ElementType,
+  IMessageElement,
+  InlinedAudioList
+} from '@chainlit/components';
 
-import InlinedAudioList from 'components/atoms/element/inlined/audios';
 import InlinedFileList from 'components/atoms/element/inlined/files';
 import InlinedImageList from 'components/atoms/element/inlined/images';
 import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
