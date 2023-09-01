@@ -5,12 +5,12 @@ import {
   IMessageElement,
   InlinedAudioList,
   InlinedFileList,
-  InlinedImageList
+  InlinedImageList,
+  InlinedVideoList
 } from '@chainlit/components';
 
 import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
-import InlinedVideoList from 'components/atoms/element/inlined/videos';
 
 interface Props {
   elements: IMessageElement[];

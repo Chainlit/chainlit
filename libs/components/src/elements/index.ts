@@ -8,3 +8,4 @@ export { VideoElement } from './Video';
 export { InlinedAudioList } from './InlinedAudioList';
 export { InlinedFileList } from './InlinedFileList';
 export { InlinedImageList } from './InlinedImageList';
+export { InlinedVideoList } from './InlinedVideoList';
