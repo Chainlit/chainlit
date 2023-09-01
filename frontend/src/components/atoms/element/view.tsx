@@ -7,7 +7,8 @@ import { Box, Typography } from '@mui/material';
 import {
   AudioElement,
   FileElement,
-  IMessageElement
+  IMessageElement,
+  ImageElement
 } from '@chainlit/components';
 
 import { useQuery } from 'hooks/query';
@@ -15,7 +16,6 @@ import { useApi } from 'hooks/useApi';
 
 import { elementState } from 'state/element';
 
-import ImageElement from './image';
 import PDFElement from './pdf';
 import TextElement from './text';
 import VideoElement from './video';
