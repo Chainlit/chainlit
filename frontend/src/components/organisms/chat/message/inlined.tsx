@@ -3,10 +3,10 @@ import { Stack } from '@mui/material';
 import {
   ElementType,
   IMessageElement,
-  InlinedAudioList
+  InlinedAudioList,
+  InlinedFileList
 } from '@chainlit/components';
 
-import InlinedFileList from 'components/atoms/element/inlined/files';
 import InlinedImageList from 'components/atoms/element/inlined/images';
 import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
