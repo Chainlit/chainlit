@@ -13,14 +13,14 @@ Nothing unreleased yet!
 ### Added
 
 - `@cl.on_file_upload` to enable spontaneous file uploads
-- All Langchain LLMs should be supported in the Prompt Playground
+- `LangchainGenericProvider` to add any Langchain LLM in the Prompt Playground
 - `cl.Message` content now support dict (previously only supported string)
 - Long messages are now collapsed by default
 
 ### Fixed
 
 - Deadlock in the Llama Index callback handler
-- Langchain MessagesPlaceholder are now correctly supported
+- Langchain MessagesPlaceholder and FunctionMessage are now correctly supported
 
 ## [0.6.3] - 2023-08-22
 
