@@ -102,8 +102,6 @@ class LocalDBClient(BaseDBClient):
             where={"id": conversation_id}, include={"messages": True, "elements": True}
         )
 
-        print(c)
-
         for m in c.messages or []:
             if m.prompt:
                 m.prompt = json.loads(m.prompt)
@@ -191,10 +189,7 @@ class LocalDBClient(BaseDBClient):
 
         self.before_write(variables)
 
-        print(variables)
-
         res = await Message.prisma().create(data=variables)
-        print("\n\n", res, "\n\n")
         return res.id
 
     async def get_message(self, message_id):
