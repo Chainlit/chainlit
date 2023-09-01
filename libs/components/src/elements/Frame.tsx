@@ -1,8 +1,8 @@
-import { Box, BoxProps } from '@mui/material/';
+import { Box } from '@mui/material/';
 
-import { grey } from '@chainlit/components/theme';
+import { grey } from '../../theme/palette';
 
-export default function ElementFrame(props: BoxProps) {
+const FrameElement = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box
       sx={{
@@ -14,7 +14,9 @@ export default function ElementFrame(props: BoxProps) {
         display: 'flex'
       }}
     >
-      {props.children}
+      {children}
     </Box>
   );
-}
+};
+
+export { FrameElement };
