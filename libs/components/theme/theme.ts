@@ -1,6 +1,6 @@
-import { green, grey, primary, white } from 'palette';
-
 import { createTheme } from '@mui/material/styles';
+
+import { green, grey, primary, white } from './palette';
 
 type Primary = {
   dark?: string;
@@ -147,7 +147,7 @@ const lightTheme = createTheme({
 const makeTheme = (variant: 'dark' | 'light') =>
   variant === 'dark' ? darkTheme : lightTheme;
 
-export const darkGreyButtonTheme = createTheme({
+const darkGreyButtonTheme = createTheme({
   typography,
   components,
   shape,
@@ -159,7 +159,7 @@ export const darkGreyButtonTheme = createTheme({
   }
 });
 
-export const lightGreyButtonTheme = createTheme({
+const lightGreyButtonTheme = createTheme({
   typography,
   components,
   shape,
@@ -171,4 +171,4 @@ export const lightGreyButtonTheme = createTheme({
   }
 });
 
-export default makeTheme;
+export { makeTheme, lightGreyButtonTheme, darkGreyButtonTheme };

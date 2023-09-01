@@ -124,12 +124,6 @@ devDependencies:
   '@types/node':
     specifier: ^20.5.7
     version: 20.5.7
-  '@types/react':
-    specifier: ^18.2.21
-    version: 18.2.21
-  '@types/react-dom':
-    specifier: ^18.2.7
-    version: 18.2.7
   '@types/react-resizable':
     specifier: ^3.0.4
     version: 3.0.4

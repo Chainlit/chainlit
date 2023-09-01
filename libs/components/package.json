@@ -9,16 +9,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme/index.mjs",
+      "require": "./dist/theme/index.js"
     }
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsup src/index.ts --dts --format=esm,cjs --clean --dts",
+    "build": "tsup src/index.ts theme/index.ts --dts --format=esm,cjs --clean --dts",
     "build:watch": "tsc && vite build --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/roboto": "^5.0.8",
+    "@mui/icons-material": "^5.14.7",
+    "@mui/material": "^5.14.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
