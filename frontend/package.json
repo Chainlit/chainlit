@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.1",
+    "@chainlit/components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.7",
@@ -53,8 +54,6 @@
     "@types/draft-js": "^0.11.10",
     "@types/lodash": "^4.14.197",
     "@types/node": "^20.5.7",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
     "@types/react-resizable": "^3.0.4",
     "@types/react-syntax-highlighter": "^15.5.7",
     "@types/react-window-infinite-loader": "^1.0.6",
