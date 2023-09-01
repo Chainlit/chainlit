@@ -4,10 +4,10 @@ import {
   ElementType,
   IMessageElement,
   InlinedAudioList,
-  InlinedFileList
+  InlinedFileList,
+  InlinedImageList
 } from '@chainlit/components';
 
-import InlinedImageList from 'components/atoms/element/inlined/images';
 import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
 import InlinedVideoList from 'components/atoms/element/inlined/videos';
