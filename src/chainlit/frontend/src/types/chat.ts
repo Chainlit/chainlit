@@ -48,6 +48,7 @@ export interface IMessage {
   parentId?: string;
   isError?: boolean;
   prompt?: IPrompt;
+  streaming?: boolean;
 }
 
 export interface IMessageUpdate extends IMessage {

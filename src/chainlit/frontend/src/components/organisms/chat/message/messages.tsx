@@ -16,6 +16,22 @@ interface Props {
   isRunning?: boolean;
 }
 
+function isLastMessage(messages: INestedMessage[], index: number) {
+  if (messages.length - 1 === index) {
+    return true;
+  }
+
+  for (let i = index + 1; i < messages.length; i++) {
+    if (messages[i].streaming) {
+      continue;
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export default function Messages({
   messages,
   elements,
@@ -24,21 +40,25 @@ export default function Messages({
   isRunning
 }: Props) {
   const loading = useRecoilValue(loadingState);
+  const isRoot = indent === 0;
   let previousAuthor = '';
+
   const filtered = messages.filter((m, i) => {
     const hasContent = !!m.content;
     const hasChildren = !!m.subMessages?.length;
     const isLast = i === messages.length - 1;
-    const _isRunning =
+    const messageRunning =
       isRunning === undefined ? loading && isLast : isRunning && isLast;
-    return hasContent || hasChildren || (!hasContent && _isRunning);
+    return hasContent || hasChildren || (!hasContent && messageRunning);
   });
   return (
     <>
       {filtered.map((m, i) => {
-        const isLast = i === filtered.length - 1;
-        const _isRunning =
-          isRunning === undefined ? loading && isLast : isRunning && isLast;
+        const isLast = isLastMessage(filtered, i);
+        let messageRunning = isRunning === undefined ? loading : isRunning;
+        if (isRoot) {
+          messageRunning = messageRunning && isLast;
+        }
         const showAvatar = m.author !== previousAuthor;
         const showBorder = false;
         previousAuthor = m.author;
@@ -49,9 +69,9 @@ export default function Messages({
             actions={actions}
             showAvatar={showAvatar}
             showBorder={showBorder}
-            key={i}
+            key={m.id}
             indent={indent}
-            isRunning={_isRunning}
+            isRunning={messageRunning}
             isLast={isLast}
           />
         );

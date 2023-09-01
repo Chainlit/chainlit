@@ -192,6 +192,7 @@ class Message(MessageBase):
             "language": self.language,
             "parentId": self.parent_id,
             "indent": self.indent,
+            "streaming": self.streaming,
         }
 
         if self.prompt:
