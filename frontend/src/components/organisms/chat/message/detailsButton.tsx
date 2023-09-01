@@ -4,7 +4,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import GreyButton from 'components/atoms/buttons/greyButton';
+import { GreyButton } from '@chainlit/components';
 
 import { settingsState } from 'state/settings';
 

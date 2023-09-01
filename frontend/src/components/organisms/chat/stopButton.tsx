@@ -3,7 +3,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
 
-import GreyButton from 'components/atoms/buttons/greyButton';
+import { GreyButton } from '@chainlit/components';
 
 import { loadingState, sessionState } from 'state/chat';
 
