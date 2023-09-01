@@ -82,8 +82,7 @@ const MessageWrapper = ({
               onClick={() => canSelectRole && setShowSelectRole(true)}
               color="text.primary"
               sx={{
-                pl: 1,
-                pt: 1,
+                p: 1,
                 borderRadius: 0.5,
                 marginTop: 1,
                 cursor: canSelectRole ? 'pointer' : 'default',
@@ -122,8 +121,7 @@ const MessageWrapper = ({
               color="text.secondary"
               variant="caption"
               sx={{
-                pl: 1,
-
+                ml: 1,
                 width: 'fit-content'
               }}
             >
