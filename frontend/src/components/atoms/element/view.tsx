@@ -8,7 +8,8 @@ import {
   AudioElement,
   FileElement,
   IMessageElement,
-  ImageElement
+  ImageElement,
+  VideoElement
 } from '@chainlit/components';
 
 import { useQuery } from 'hooks/query';
@@ -18,7 +19,6 @@ import { elementState } from 'state/element';
 
 import PDFElement from './pdf';
 import TextElement from './text';
-import VideoElement from './video';
 
 export const renderElement = (element: IMessageElement): JSX.Element | null => {
   switch (element.type) {
