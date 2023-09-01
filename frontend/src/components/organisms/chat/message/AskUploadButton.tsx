@@ -1,10 +1,11 @@
-import { grey } from 'palette';
 import { useRecoilValue } from 'recoil';
 
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import { LoadingButton } from '@mui/lab';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+
+import { grey } from '@chainlit/components/theme';
 
 import useUpload from 'hooks/useUpload';
 

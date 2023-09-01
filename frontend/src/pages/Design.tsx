@@ -1,10 +1,11 @@
-import { green, grey, primary } from 'palette';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
+
+import { green, grey, primary } from '@chainlit/components/theme';
 
 import Toggle from 'components/atoms/toggle';
 import InputLabel from 'components/molecules/inputLabel';

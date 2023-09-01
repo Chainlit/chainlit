@@ -1,6 +1,6 @@
-import { grey } from 'palette';
-
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import { ITasklistElement } from 'types/element';
 

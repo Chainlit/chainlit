@@ -1,6 +1,6 @@
-import { grey } from 'palette';
-
 import { Typography } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 interface Props {
   timestamp: number | string;

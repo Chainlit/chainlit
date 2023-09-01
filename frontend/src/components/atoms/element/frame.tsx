@@ -1,6 +1,6 @@
-import { grey } from 'palette';
-
 import { Box, BoxProps } from '@mui/material/';
+
+import { grey } from '@chainlit/components/theme';
 
 export default function ElementFrame(props: BoxProps) {
   return (

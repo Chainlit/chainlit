@@ -1,7 +1,8 @@
-import { grey } from 'palette';
 import { useSetRecoilState } from 'recoil';
 
 import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import { highlightMessage } from 'state/chat';
 

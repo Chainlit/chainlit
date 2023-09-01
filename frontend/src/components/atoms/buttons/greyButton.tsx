@@ -1,7 +1,10 @@
-import { darkGreyButtonTheme, lightGreyButtonTheme } from 'theme';
-
 import Button, { ButtonProps } from '@mui/material/Button';
 import { ThemeProvider, useTheme } from '@mui/material/styles';
+
+import {
+  darkGreyButtonTheme,
+  lightGreyButtonTheme
+} from '@chainlit/components/theme';
 
 export default function GreyButton(props: ButtonProps) {
   const theme = useTheme();

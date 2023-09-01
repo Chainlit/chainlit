@@ -1,7 +1,7 @@
-import { green } from 'palette';
-
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
+
+import { green } from '@chainlit/components/theme';
 
 import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 

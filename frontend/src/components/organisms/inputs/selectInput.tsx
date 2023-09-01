@@ -1,10 +1,11 @@
-import { primary } from 'palette';
-import { grey } from 'palette';
 import React from 'react';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { MenuItem, SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
+
+import { primary } from '@chainlit/components/theme';
+import { grey } from '@chainlit/components/theme';
 
 import NotificationCount from 'components/atoms/notificationCount';
 

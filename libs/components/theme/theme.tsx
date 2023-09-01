@@ -171,4 +171,5 @@ const lightGreyButtonTheme = createTheme({
   }
 });
 
-export { makeTheme, lightGreyButtonTheme, darkGreyButtonTheme };
+// Maybe we should not export dark and light theme button from the package
+export { makeTheme, darkGreyButtonTheme, lightGreyButtonTheme };

@@ -1,7 +1,7 @@
-import { grey } from 'palette';
-
 import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
+
+import { grey } from '@chainlit/components/theme';
 
 import { IInput } from 'types/Input';
 

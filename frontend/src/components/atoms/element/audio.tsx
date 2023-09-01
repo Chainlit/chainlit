@@ -1,6 +1,6 @@
-import { grey } from 'palette';
-
 import { Box, useTheme } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import { IAudioElement } from 'types/element';
 

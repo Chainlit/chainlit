@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
 import cloneDeep from 'lodash/cloneDeep';
-import { grey } from 'palette';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
@@ -14,6 +13,8 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import { chatHistoryState } from 'state/chatHistory';
 

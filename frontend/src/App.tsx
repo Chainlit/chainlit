@@ -3,10 +3,11 @@ import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { router } from 'router';
-import makeTheme from 'theme';
 
 import { Box, GlobalStyles } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
+
+import { makeTheme } from '@chainlit/components/theme';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
