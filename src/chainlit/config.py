@@ -51,6 +51,9 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
+# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
+# follow_symlink = false
+
 # Chainlit server address
 # chainlit_server = ""
 
@@ -203,6 +206,8 @@ class ProjectSettings(DataClassJsonMixin):
     session_timeout: int = 3600
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
+    # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
+    follow_symlink: bool = False
     # Chainlit server address
     chainlit_server: Optional[str] = None
 

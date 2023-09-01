@@ -155,7 +155,10 @@ class Message(MessageBase):
         elif isinstance(content, str):
             self.content = content
         else:
-            raise TypeError(f"Unsupported type {type(content)} for message content")
+            logger.warn(
+                f"Unsupported type {type(content)} for message content. Attempting to stringify it"
+            )
+            self.content = str(content)
 
         self.author = author
         self.prompt = prompt
@@ -192,6 +195,7 @@ class Message(MessageBase):
             "language": self.language,
             "parentId": self.parent_id,
             "indent": self.indent,
+            "streaming": self.streaming,
         }
 
         if self.prompt:

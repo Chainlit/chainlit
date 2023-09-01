@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "0.6.4"
+version = "0.6.401"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "A faster way to build chatbot UIs."
 authors = ["Chainlit"]
@@ -22,7 +22,7 @@ chainlit = 'chainlit.cli:cli'
 python = "^3.8.1"
 dataclasses_json = "^0.5.7"
 uvicorn = "^0.23.2"
-fastapi = "^0.103.0"
+fastapi = "^0.99.0"
 fastapi-socketio = "^0.0.10"
 aiohttp = "^3.8.4"
 aiofiles = "^23.1.0"

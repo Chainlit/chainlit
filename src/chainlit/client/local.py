@@ -39,6 +39,9 @@ class LocalDBClient(BaseDBClient):
             # Sqlite doesn't support list of primitives, so we need to serialize it.
             variables["forIds"] = json.dumps(variables["forIds"])
 
+        if "streaming" in variables:
+            del variables["streaming"]
+
     def after_read(self, variables: Dict):
         if "prompt" in variables:
             # Sqlite doesn't support json fields, so we need to parse it.
