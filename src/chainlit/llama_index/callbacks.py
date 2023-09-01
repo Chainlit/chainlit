@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Dict, List, Optional
 
 from llama_index.callbacks.base import BaseCallbackHandler
@@ -8,7 +9,6 @@ from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.message import Message
 from chainlit.prompt import Prompt, PromptMessage
-from chainlit.sync import run_sync
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,
@@ -61,13 +61,12 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         self._restore_context()
-        run_sync(
+        asyncio.run(
             Message(
                 content="",
                 author=event_type,
                 parent_id=self._get_parent_id(),
-            ).send(),
-            force_new_loop=True,
+            ).send()
         )
 
         return event_id
@@ -97,7 +96,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
                 )
                 content = f"Retrieved the following sources: {source_refs}"
 
-                run_sync(
+                asyncio.run(
                     Message(
                         content=content,
                         author=event_type,
@@ -128,7 +127,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
             else:
                 content = ""
 
-            run_sync(
+            asyncio.run(
                 Message(
                     content=content,
                     author=event_type,

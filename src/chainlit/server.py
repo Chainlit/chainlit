@@ -121,7 +121,9 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
 app.mount(
     "/assets",
-    StaticFiles(packages=[("chainlit", os.path.join(build_dir, "assets"))]),
+    StaticFiles(
+        packages=[("chainlit", os.path.join(build_dir, "assets"))], follow_symlink=True
+    ),
     name="assets",
 )
 
