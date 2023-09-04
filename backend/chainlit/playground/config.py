@@ -7,6 +7,8 @@ from chainlit.playground.providers import (
     AzureOpenAI,
     ChatOpenAI,
     OpenAI,
+    ChatVertexAI,
+    GenerationVertexAI,
 )
 
 providers = {
@@ -15,6 +17,8 @@ providers = {
     ChatOpenAI.id: ChatOpenAI,
     OpenAI.id: OpenAI,
     Anthropic.id: Anthropic,
+    ChatVertexAI.id: ChatVertexAI,
+    GenerationVertexAI.id: GenerationVertexAI,
 }  # type: Dict[str, BaseProvider]
 
 

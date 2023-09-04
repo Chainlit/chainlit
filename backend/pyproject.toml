@@ -80,6 +80,7 @@ module = [
     "socketio.*",
     "uptrace",
     "syncer",
+    "vertexai.language_models"
 ]
 ignore_missing_imports = true
 
