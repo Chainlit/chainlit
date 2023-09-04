@@ -37,8 +37,8 @@ jobs:
           python-version: "3.8"
       - name: Install Poetry
         uses: snok/install-poetry@v1
-      - name: Copy readme to src
-        run: cp README.md src/
+      - name: Copy readme to backend
+        run: cp README.md backend/
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build chainlit
@@ -46,5 +46,5 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: src/dist
+          packages-dir: backend/dist
           password: ${{ secrets.PYPI_API_TOKEN }}

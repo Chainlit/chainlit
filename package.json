@@ -1,27 +1,27 @@
 {
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.5",
-    "cypress": "^12.9.0",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.40.0",
-    "husky": "^8.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "cypress": "12.9.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.48.0",
+    "husky": "^8.0.3",
     "kill-port": "^2.0.1",
-    "lint-staged": "^13.2.3",
+    "lint-staged": "^13.3.0",
     "prettier": "^2.8.8",
     "shell-exec": "^1.1.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd src/chainlit/frontend && pnpm run test)",
+    "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd frontend && pnpm run test)",
     "prepare": "husky install",
-    "lintUi": "cd src/chainlit/frontend && pnpm run lint",
-    "formatUi": "cd src/chainlit/frontend && pnpm run format",
-    "lintPython": "cd src/ && poetry run mypy chainlit/",
+    "lintUi": "cd frontend && pnpm run lint",
+    "formatUi": "cd frontend && pnpm run format",
+    "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "(cd src/chainlit/frontend && pnpm run build)",
-    "build": "(cd src/chainlit/frontend && pnpm run build) && (cd src && poetry build)"
+    "buildUi": "(cd frontend && pnpm run build)",
+    "build": "(cd frontend && pnpm run build) && (cd backend && poetry build)"
   }
 }

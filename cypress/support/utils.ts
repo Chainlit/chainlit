@@ -3,8 +3,8 @@ import { join } from "path";
 
 const ROOT = process.cwd();
 export const E2E_DIR = join(ROOT, "cypress/e2e");
-export const CHAINLIT_DIR = join(ROOT, "src");
-const FRONTEND_DIR = join(CHAINLIT_DIR, "chainlit", "frontend");
+export const BACKEND_DIR = join(ROOT, "backend");
+const FRONTEND_DIR = join(ROOT, "frontend");
 export const CHAINLIT_PORT = 8000;
 
 export enum ExecutionMode {
@@ -35,5 +35,5 @@ export function runCommand(command: string, cwd = ROOT) {
 
 export function installChainlit() {
   runCommand("pnpm run build", FRONTEND_DIR);
-  runCommand(`poetry install -C ${CHAINLIT_DIR} --with tests`);
+  runCommand(`poetry install -C ${BACKEND_DIR} --with tests`);
 }
