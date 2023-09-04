@@ -9,6 +9,7 @@ import {
   FileElement,
   IMessageElement,
   ImageElement,
+  PDFElement,
   VideoElement
 } from '@chainlit/components';
 
@@ -17,7 +18,6 @@ import { useApi } from 'hooks/useApi';
 
 import { elementState } from 'state/element';
 
-import PDFElement from './pdf';
 import TextElement from './text';
 
 export const renderElement = (element: IMessageElement): JSX.Element | null => {

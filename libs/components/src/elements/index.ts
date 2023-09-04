@@ -3,6 +3,7 @@ export { AvatarElement } from './Avatar';
 export { FileElement } from './File';
 export { FrameElement } from './Frame';
 export { ImageElement } from './Image';
+export { PDFElement } from './PDF';
 export { VideoElement } from './Video';
 
 // Inlined
