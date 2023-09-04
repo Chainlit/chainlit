@@ -75,7 +75,7 @@ hide_cot = false
 # github = ""
 
 # Show the prompt playground
-show_playground = true
+show_prompt_playground = true
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -152,7 +152,7 @@ class UISettings(DataClassJsonMixin):
     github: Optional[str] = None
     theme: Optional[Theme] = None
     # Show the prompt playground
-    show_playground: bool = True
+    show_prompt_playground: bool = True
 
 
 @dataclass()

@@ -48,7 +48,7 @@ hide_cot = false
 # github = ""
 
 # Show the prompt playground.
-show_playground = false
+show_prompt_playground = false
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]

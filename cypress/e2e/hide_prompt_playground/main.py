@@ -1,5 +1,4 @@
 from chainlit.prompt import Prompt
-from provider import TestLLM
 
 import chainlit as cl
 
@@ -26,8 +25,6 @@ async def start():
     await cl.Message(
         content="This is a message with a basic prompt",
         prompt=Prompt(
-            provider=TestLLM.id,
-            completion=completion,
             template=template,
             inputs=inputs,
         ),
