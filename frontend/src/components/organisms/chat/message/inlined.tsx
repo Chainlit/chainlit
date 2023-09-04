@@ -6,10 +6,10 @@ import {
   InlinedAudioList,
   InlinedFileList,
   InlinedImageList,
+  InlinedPDFList,
   InlinedVideoList
 } from '@chainlit/components';
 
-import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
 import InlinedTextList from 'components/atoms/element/inlined/texts';
 
 interface Props {

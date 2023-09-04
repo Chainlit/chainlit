@@ -11,3 +11,4 @@ export { InlinedAudioList } from './InlinedAudioList';
 export { InlinedFileList } from './InlinedFileList';
 export { InlinedImageList } from './InlinedImageList';
 export { InlinedVideoList } from './InlinedVideoList';
+export { InlinedPDFList } from './InlinedPDFList';
