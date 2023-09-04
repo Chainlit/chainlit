@@ -39,8 +39,6 @@ jobs:
         uses: snok/install-poetry@v1
       - name: Copy readme to backend
         run: cp README.md backend/
-      - name: Copy built UI to backend
-        run: mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build chainlit

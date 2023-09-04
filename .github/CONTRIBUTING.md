@@ -88,14 +88,15 @@ Make sure you have the Python code formatters `black` and `isort` installed as t
 You need to build the UI once before starting the server.
 
 ```sh
-pnpm run build
+pnpm run buildUi
 ```
 
 Start by running `backend/hello.py` as an example.
 
 ```sh
 cd backend
-poetry run chainlit run chainlit/hello.py
+poetry shell
+chainlit run chainlit/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
