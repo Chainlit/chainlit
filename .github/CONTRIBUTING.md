@@ -77,7 +77,7 @@ pnpm install
 ### Install python dependencies
 
 ```sh
-cd src
+cd backend
 poetry install --with tests --with mypy
 ```
 
@@ -88,13 +88,13 @@ Make sure you have the Python code formatters `black` and `isort` installed as t
 You need to build the UI once before starting the server.
 
 ```sh
-pnpm run buildUi
+pnpm run build
 ```
 
 Start by running `backend/hello.py` as an example.
 
 ```sh
-cd src
+cd backend
 poetry run chainlit run chainlit/hello.py
 ```
 
