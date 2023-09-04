@@ -74,6 +74,9 @@ hide_cot = false
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
 
+# Show the prompt playground
+show_playground = true
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
@@ -148,6 +151,8 @@ class UISettings(DataClassJsonMixin):
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
+    # Show the prompt playground
+    show_playground: bool = True
 
 
 @dataclass()

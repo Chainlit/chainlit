@@ -49,6 +49,9 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message: {str(e)}")
 
+        if not config.ui.show_playground:
+            msg_dict.pop("prompt", None)
+
         return msg_dict
 
     async def update(
