@@ -1,20 +1,11 @@
 import { Box, TextField, Theme, Typography, useTheme } from '@mui/material';
 
-export type NotificationCountProps = {
-  count?: number | string;
-  inputProps?: {
-    id: string;
-    max?: number;
-    min?: number;
-    onChange: (event: any) => void;
-    step?: number;
-  };
-};
+import { NotificationCountProps } from './types/NotificationCount';
 
-export default function NotificationCount({
+const NotificationCount = ({
   count,
   inputProps
-}: NotificationCountProps): JSX.Element | null {
+}: NotificationCountProps): JSX.Element | null => {
   const theme = useTheme();
 
   if (!count) return null;
@@ -88,4 +79,6 @@ export default function NotificationCount({
   };
 
   return !inputProps ? renderBox() : renderInput();
-}
+};
+
+export { NotificationCount };

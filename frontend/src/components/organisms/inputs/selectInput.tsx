@@ -4,10 +4,9 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { MenuItem, SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
+import { NotificationCount } from '@chainlit/components';
 import { primary } from '@chainlit/components/theme';
 import { grey } from '@chainlit/components/theme';
-
-import NotificationCount from 'components/atoms/notificationCount';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 

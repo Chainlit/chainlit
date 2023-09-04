@@ -1,9 +1,10 @@
 import Info from '@mui/icons-material/Info';
 import { Box, InputLabel, Tooltip } from '@mui/material';
 
-import NotificationCount, {
+import {
+  NotificationCount,
   NotificationCountProps
-} from 'components/atoms/notificationCount';
+} from '@chainlit/components';
 
 type InputLabelProps = {
   id?: string;
