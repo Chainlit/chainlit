@@ -120,7 +120,7 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-build_dir = os.path.join(PACKAGE_ROOT, "frontend/dist")
+build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
 
 app = FastAPI(lifespan=lifespan)
 
