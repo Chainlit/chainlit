@@ -6,8 +6,9 @@ import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';
 
+import { TextInput } from '@chainlit/components';
+
 import TopBar from 'components/organisms/header';
-import TextInput from 'components/organisms/inputs/textInput';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
@@ -56,7 +57,9 @@ export default function Env() {
         size="medium"
         hasError={hasError}
         description={hasError ? formik.errors[key] : ''}
-        onChange={(e) => formik.setFieldValue(key, e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          formik.setFieldValue(key, e.target.value)
+        }
       />
     );
   };
