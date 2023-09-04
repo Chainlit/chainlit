@@ -1,8 +1,6 @@
 import { FormControl, FormHelperText, Stack, SxProps } from '@mui/material';
 
-import { IInput } from '@chainlit/components';
-
-import InputLabel from 'components/molecules/inputLabel';
+import { IInput, InputLabel } from '@chainlit/components';
 
 export type InputStateHandlerProps = {
   children: React.ReactNode;
