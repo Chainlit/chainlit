@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Tooltip, Typography } from '@mui/material';
 
-import AvatarElement from 'components/atoms/element/avatar';
+import { AvatarElement } from '@chainlit/components';
 
 import { avatarState } from 'state/element';
 
