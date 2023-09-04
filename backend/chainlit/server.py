@@ -1,3 +1,4 @@
+import glob
 import json
 import mimetypes
 
@@ -14,7 +15,14 @@ from chainlit.client.utils import (
     get_auth_client_from_request,
     get_db_client_from_request,
 )
-from chainlit.config import DEFAULT_HOST, config, load_module, reload_config
+from chainlit.config import (
+    APP_ROOT,
+    DEFAULT_HOST,
+    PACKAGE_ROOT,
+    config,
+    load_module,
+    reload_config,
+)
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
@@ -112,8 +120,7 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-build_dir = os.path.join(root_dir, "frontend/dist")
+build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -307,10 +314,19 @@ async def serve_file(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/favicon.svg")
+@app.get("/favicon")
 async def get_favicon():
-    favicon_path = os.path.join(build_dir, "favicon.svg")
-    return FileResponse(favicon_path, media_type="image/svg+xml")
+    custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
+    files = glob.glob(custom_favicon_path)
+
+    if files:
+        favicon_path = files[0]
+    else:
+        favicon_path = os.path.join(build_dir, "favicon.svg")
+
+    media_type, _ = mimetypes.guess_type(favicon_path)
+
+    return FileResponse(favicon_path, media_type=media_type)
 
 
 def register_wildcard_route_handler():

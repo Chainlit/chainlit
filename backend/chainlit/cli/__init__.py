@@ -13,18 +13,19 @@ from chainlit.cli.auth import login, logout
 from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.config import (
+    BACKEND_ROOT,
     DEFAULT_HOST,
     DEFAULT_PORT,
-    PACKAGE_ROOT,
     config,
     init_config,
     load_module,
 )
-from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
+
+from chainlit.db import init_local_db, migrate_local_db
 
 
 # Create the main command group for Chainlit CLI
@@ -166,7 +167,7 @@ def chainlit_deploy(target, args=None, **kwargs):
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
-    hello_path = os.path.join(PACKAGE_ROOT, "hello.py")
+    hello_path = os.path.join(BACKEND_ROOT, "hello.py")
     run_chainlit(hello_path)
 
 

@@ -14,7 +14,9 @@ if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.client.base import BaseAuthClient, BaseDBClient
 
-PACKAGE_ROOT = os.path.dirname(__file__)
+BACKEND_ROOT = os.path.dirname(__file__)
+PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
+
 
 # Get the directory the script is running from
 APP_ROOT = os.getcwd()

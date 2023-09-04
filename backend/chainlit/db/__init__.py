@@ -1,9 +1,9 @@
 import os
 
-from chainlit.config import PACKAGE_ROOT, config
+from chainlit.config import BACKEND_ROOT, config
 from chainlit.logger import logger
 
-SCHEMA_PATH = os.path.join(PACKAGE_ROOT, "db/prisma/schema.prisma")
+SCHEMA_PATH = os.path.join(BACKEND_ROOT, "db", "prisma", "schema.prisma")
 
 
 def db_push():
