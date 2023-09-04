@@ -1,15 +1,15 @@
 import { FormControl, FormHelperText, Stack, SxProps } from '@mui/material';
 
-import { IInput, InputLabel } from '@chainlit/components';
+import { IInput } from '../types/Input';
+
+import { InputLabel } from './InputLabel';
 
 export type InputStateHandlerProps = {
   children: React.ReactNode;
   sx?: SxProps;
 } & IInput;
 
-export default function InputStateHandler(
-  props: InputStateHandlerProps
-): JSX.Element {
+const InputStateHandler = (props: InputStateHandlerProps): JSX.Element => {
   const {
     children,
     description,
@@ -37,4 +37,6 @@ export default function InputStateHandler(
       </FormControl>
     </Stack>
   );
-}
+};
+
+export { InputStateHandler };

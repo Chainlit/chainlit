@@ -1,10 +1,8 @@
 import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
-import { IInput } from '@chainlit/components';
+import { IInput, InputStateHandler } from '@chainlit/components';
 import { grey } from '@chainlit/components/theme';
-
-import InputStateHandler from './inputs/inputStateHandler';
 
 export type SliderProps = IInput &
   MSliderProps & {

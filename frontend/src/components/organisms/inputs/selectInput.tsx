@@ -4,13 +4,15 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { MenuItem, SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
-import { IInput, NotificationCount } from '@chainlit/components';
+import {
+  IInput,
+  InputStateHandler,
+  NotificationCount
+} from '@chainlit/components';
 import { primary } from '@chainlit/components/theme';
 import { grey } from '@chainlit/components/theme';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
-
-import InputStateHandler from './inputStateHandler';
 
 export type SelectItem = {
   label: string;

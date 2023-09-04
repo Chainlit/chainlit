@@ -1,10 +1,8 @@
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 
-import { IInput } from '@chainlit/components';
+import { IInput, InputStateHandler } from '@chainlit/components';
 import { green } from '@chainlit/components/theme';
-
-import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 
 export type SwitchProps = {
   checked: boolean;

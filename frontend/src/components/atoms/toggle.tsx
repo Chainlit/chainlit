@@ -3,10 +3,8 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { Tab, Tabs } from '@mui/material';
 
-import { IInput } from '@chainlit/components';
+import { IInput, InputStateHandler } from '@chainlit/components';
 import { grey, primary } from '@chainlit/components/theme';
-
-import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
 
