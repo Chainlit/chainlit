@@ -1,6 +1,6 @@
 import { MuiChipsInput } from 'mui-chips-input';
 
-import { IInput } from 'types/Input';
+import { IInput } from '@chainlit/components';
 
 import InputStateHandler from './inputStateHandler';
 

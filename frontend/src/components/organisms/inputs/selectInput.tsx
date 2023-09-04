@@ -4,13 +4,11 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { MenuItem, SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
-import { NotificationCount } from '@chainlit/components';
+import { IInput, NotificationCount } from '@chainlit/components';
 import { primary } from '@chainlit/components/theme';
 import { grey } from '@chainlit/components/theme';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
-
-import { IInput } from 'types/Input';
 
 import InputStateHandler from './inputStateHandler';
 

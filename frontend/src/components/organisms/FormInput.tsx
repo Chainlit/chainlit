@@ -1,8 +1,8 @@
 import omit from 'lodash/omit';
 
-import Switch, { SwitchProps } from 'components/atoms/switch';
+import { IInput } from '@chainlit/components';
 
-import { IInput } from 'types/Input';
+import Switch, { SwitchProps } from 'components/atoms/switch';
 
 import SelectInput, { SelectInputProps } from './inputs/selectInput';
 import TagsInput, { TagsInputProps } from './inputs/tagsInput';

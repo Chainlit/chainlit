@@ -1,6 +1,6 @@
 import { TextField } from '@mui/material';
 
-import { IInput } from 'types/Input';
+import { IInput } from '@chainlit/components';
 
 import InputStateHandler from './inputStateHandler';
 
