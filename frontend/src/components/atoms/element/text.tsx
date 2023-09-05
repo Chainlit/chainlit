@@ -4,9 +4,7 @@ import remarkGfm from 'remark-gfm';
 
 import { Link } from '@mui/material';
 
-import { ITextElement } from '@chainlit/components';
-
-import Code from '../Code';
+import { Code, ITextElement } from '@chainlit/components';
 
 interface Props {
   element: ITextElement;

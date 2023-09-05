@@ -4,11 +4,12 @@ import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { Box } from '@mui/material';
 
-import { ClipboardCopy } from '@chainlit/components';
-import { useIsDarkMode } from '@chainlit/components/hooks';
-import { grey } from '@chainlit/components/theme';
+import { useIsDarkMode } from '../hooks/useIsDarkMode';
 
-export default function Code({ inline, children, ...props }: CodeProps) {
+import { grey } from '../theme/palette';
+import { ClipboardCopy } from './ClipboardCopy';
+
+const Code = ({ inline, children, ...props }: CodeProps) => {
   const isDarkMode = useIsDarkMode();
 
   const match = /language-(\w+)/.exec(props.className || '');
@@ -77,4 +78,6 @@ export default function Code({ inline, children, ...props }: CodeProps) {
       {renderCode()}
     </code>
   );
-}
+};
+
+export { Code };
