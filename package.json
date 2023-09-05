@@ -26,7 +26,7 @@
     "formatUi": "cd frontend && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "cd frontend && pnpm run build",
+    "buildUi": "(cd libs/components && pnpm run build) && (cd frontend && pnpm run build)",
     "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
   }
 }
