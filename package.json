@@ -10,6 +10,7 @@
     "lint-staged": "^13.3.0",
     "prettier": "^2.8.8",
     "shell-exec": "^1.1.2",
+    "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
@@ -21,7 +22,7 @@
     "formatUi": "cd frontend && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "(cd frontend && pnpm run build) && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend)",
-    "build": "(cd libs/components && pnpm run build) && (cd frontend && pnpm run build) && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
+    "buildUi": "(cd frontend && pnpm run build) && (shx mkdir -p backend/chainlit/frontend && shx cp -R frontend/dist backend/chainlit/frontend)",
+    "build": "pnpm run buildUi && (cd backend && poetry build)"
   }
 }
