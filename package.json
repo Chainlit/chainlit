@@ -22,7 +22,7 @@
     "formatUi": "cd frontend && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "(cd frontend && pnpm run build) && (shx mkdir -p backend/chainlit/frontend && shx cp -R frontend/dist backend/chainlit/frontend)",
+    "buildUi": "(cd frontend && pnpm run build) && (shx mkdir -p ./backend/chainlit/frontend && shx cp -R ./frontend/dist ./backend/chainlit/frontend)",
     "build": "pnpm run buildUi && (cd backend && poetry build)"
   }
 }
