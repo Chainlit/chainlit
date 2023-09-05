@@ -47,6 +47,7 @@ optional = true
 
 [tool.poetry.group.tests.dependencies]
 openai = "^0.27.7"
+litellm = "^0.1.500"
 langchain = "^0.0.262"
 llama-index = "^0.8.3"
 transformers = "^4.30.1"

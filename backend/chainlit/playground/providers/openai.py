@@ -93,7 +93,7 @@ class ChatOpenAIProvider(BaseProvider):
 
     async def create_completion(self, request):
         await super().create_completion(request)
-        import openai
+        import litellm
 
         env_settings = self.validate_env(request=request)
 
@@ -119,7 +119,7 @@ class ChatOpenAIProvider(BaseProvider):
         llm_settings["stream"] = True
 
         with handle_openai_error():
-            response = await openai.ChatCompletion.acreate(
+            response = await litellm.acompletion(
                 **env_settings,
                 messages=messages,
                 **llm_settings,
