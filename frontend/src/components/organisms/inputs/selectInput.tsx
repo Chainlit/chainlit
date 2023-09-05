@@ -9,10 +9,9 @@ import {
   InputStateHandler,
   NotificationCount
 } from '@chainlit/components';
+import { useIsDarkMode } from '@chainlit/components/hooks';
 import { primary } from '@chainlit/components/theme';
 import { grey } from '@chainlit/components/theme';
-
-import useIsDarkMode from 'hooks/useIsDarkMode';
 
 export type SelectItem = {
   label: string;

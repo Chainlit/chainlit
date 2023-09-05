@@ -3,7 +3,7 @@ import forEach from 'lodash/forEach';
 
 import { ListSubheader } from '@mui/material';
 
-import useIsDarkMode from 'hooks/useIsDarkMode';
+import { useIsDarkMode } from '@chainlit/components/hooks';
 
 import SelectInput, {
   SelectInputProps,

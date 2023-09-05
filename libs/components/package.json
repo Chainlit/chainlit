@@ -14,10 +14,15 @@
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.mjs",
       "require": "./dist/theme/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.mjs",
+      "require": "./dist/hooks/index.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts theme/index.ts --dts --format=esm,cjs --clean --dts",
+    "build": "tsup src/index.ts theme/index.ts hooks/index.ts --dts --format=esm,cjs --clean --dts",
     "build:watch": "tsc && vite build --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },

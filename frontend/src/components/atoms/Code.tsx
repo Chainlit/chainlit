@@ -4,9 +4,8 @@ import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { Box } from '@mui/material';
 
+import { useIsDarkMode } from '@chainlit/components/hooks';
 import { grey } from '@chainlit/components/theme';
-
-import useIsDarkMode from 'hooks/useIsDarkMode';
 
 import ClipboardCopy from './ClipboardCopy';
 
