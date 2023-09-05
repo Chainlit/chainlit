@@ -110,6 +110,9 @@ const Message = ({
               id={message.id}
               content={message.content}
               language={message.language}
+              preserveSize={
+                !!message.streaming || !appSettings.defaultCollapseContent
+              }
             />
             <DetailsButton
               message={message}

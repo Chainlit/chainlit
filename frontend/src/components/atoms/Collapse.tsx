@@ -16,10 +16,15 @@ import {
 interface CollapseProps {
   children: React.ReactNode;
   onDownload: () => void;
+  defaultExpandAll?: boolean;
 }
 
-const Collapse = ({ children, onDownload }: CollapseProps): JSX.Element => {
-  const [expandAll, toggleExpandAll] = useToggle(false);
+const Collapse = ({
+  children,
+  onDownload,
+  defaultExpandAll = false
+}: CollapseProps): JSX.Element => {
+  const [expandAll, toggleExpandAll] = useToggle(defaultExpandAll);
 
   return (
     <Box>

@@ -92,3 +92,39 @@ it('highlights sources containing regex characters correctly', () => {
   expect(getByRole('link', { name: 'source(12)' })).toBeInTheDocument();
   expect(getByRole('link', { name: 'page{12}' })).toBeInTheDocument();
 });
+
+it('preserves the box size when collapsing', () => {
+  const { getByRole } = render(
+    <RecoilRoot>
+      <BrowserRouter>
+        <MessageContent
+          authorIsUser={false}
+          elements={[
+            {
+              name: 'source_1',
+              type: 'text',
+              display: 'side',
+              content: 'source_1'
+            } as ITextElement,
+            {
+              name: 'source_12',
+              display: 'side',
+              type: 'text',
+              content: 'hi'
+            } as ITextElement,
+            {
+              name: 'source_121',
+              display: 'side',
+              type: 'text',
+              content: 'hi'
+            } as ITextElement
+          ]}
+          content={'hello'.repeat(650)}
+          preserveSize
+        />
+      </BrowserRouter>
+    </RecoilRoot>
+  );
+
+  expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
+});

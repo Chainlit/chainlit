@@ -23,6 +23,7 @@ export default function AppWrapper() {
     setPSettings(data);
     setAppSettings((prev) => ({
       ...prev,
+      defaultCollapseContent: data.ui.default_collapse_content ?? true,
       expandAll: !!data.ui.default_expand_messages,
       hideCot: !!data.ui.hide_cot
     }));
