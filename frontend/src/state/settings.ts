@@ -12,7 +12,7 @@ const theme = preferredTheme ? preferredTheme : defaultTheme;
 
 export const defaultSettingsState = {
   open: false,
-  defaultCollapsedContent: true,
+  defaultCollapseContent: true,
   expandAll: false,
   hideCot: false,
   theme
@@ -20,7 +20,7 @@ export const defaultSettingsState = {
 
 export const settingsState = atom<{
   open: boolean;
-  defaultCollapsedContent: boolean;
+  defaultCollapseContent: boolean;
   expandAll: boolean;
   hideCot: boolean;
   theme: ThemeVariant;

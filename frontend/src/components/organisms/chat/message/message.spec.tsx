@@ -81,13 +81,13 @@ describe('Message', () => {
     expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
   });
 
-  it('preserves the content size when app settings defaultCollapsedContent is false', () => {
+  it('preserves the content size when app settings defaultCollapseContent is false', () => {
     const { getByRole } = render(
       <RecoilRoot
         initializeState={(snapshot) => {
           snapshot.set(settingsState, {
             ...defaultSettingsState,
-            defaultCollapsedContent: false
+            defaultCollapseContent: false
           });
         }}
       >
