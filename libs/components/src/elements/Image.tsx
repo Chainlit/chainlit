@@ -1,6 +1,6 @@
-import { IImageElement } from 'types/element';
+import { IImageElement } from '../types/element';
 
-import ImageFrame from './frame';
+import { FrameElement } from './Frame';
 
 interface Props {
   element: IImageElement;
@@ -17,11 +17,12 @@ const handleImageClick = (name: string, src: string) => {
   document.body.removeChild(link);
 };
 
-export default function ImageElement({ element }: Props) {
+const ImageElement = ({ element }: Props) => {
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
   const className = `${element.display}-image`;
+
   return (
-    <ImageFrame>
+    <FrameElement>
       <img
         className={className}
         src={src}
@@ -42,6 +43,8 @@ export default function ImageElement({ element }: Props) {
         alt={element.name}
         loading="lazy"
       />
-    </ImageFrame>
+    </FrameElement>
   );
-}
+};
+
+export { ImageElement };

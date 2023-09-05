@@ -1,8 +1,8 @@
-import { grey } from 'palette';
-
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
 import { IconButton, Stack } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import AccentButton from 'components/atoms/buttons/accentButton';
 

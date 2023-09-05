@@ -1,4 +1,4 @@
-import { NotificationCountProps } from 'components/atoms/notificationCount';
+import { NotificationCountProps } from './NotificationCount';
 
 interface IInput {
   className?: string;

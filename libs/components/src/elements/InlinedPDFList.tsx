@@ -1,14 +1,14 @@
 import { Stack } from '@mui/material';
 
-import { IPdfElement } from 'types/element';
+import { IPdfElement } from '../types/element';
 
-import PDFElement from '../pdf';
+import { PDFElement } from './PDF';
 
 interface Props {
   items: IPdfElement[];
 }
 
-export default function InlinedPDFList({ items }: Props) {
+const InlinedPDFList = ({ items }: Props) => {
   return (
     <Stack spacing={1}>
       {items.map((pdf, i) => {
@@ -26,4 +26,6 @@ export default function InlinedPDFList({ items }: Props) {
       })}
     </Stack>
   );
-}
+};
+
+export { InlinedPDFList };

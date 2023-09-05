@@ -1,8 +1,6 @@
 import { MuiChipsInput } from 'mui-chips-input';
 
-import { IInput } from 'types/Input';
-
-import InputStateHandler from './inputStateHandler';
+import { IInput, InputStateHandler } from '@chainlit/components';
 
 export type TagsInputProps = {
   placeholder?: string;

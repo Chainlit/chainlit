@@ -8,6 +8,9 @@ dependencies:
   '@auth0/auth0-react':
     specifier: ^2.2.1
     version: 2.2.1(react-dom@18.2.0)(react@18.2.0)
+  '@chainlit/components':
+    specifier: workspace:^
+    version: link:../libs/components
   '@emotion/react':
     specifier: ^11.11.1
     version: 11.11.1(@types/react@18.2.21)(react@18.2.0)
@@ -121,12 +124,6 @@ devDependencies:
   '@types/node':
     specifier: ^20.5.7
     version: 20.5.7
-  '@types/react':
-    specifier: ^18.2.21
-    version: 18.2.21
-  '@types/react-dom':
-    specifier: ^18.2.7
-    version: 18.2.7
   '@types/react-resizable':
     specifier: ^3.0.4
     version: 3.0.4

@@ -16,20 +16,23 @@ jobs:
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
-          node-version: "16.15.0"
-          cache: "pnpm"
+          node-version: '16.15.0'
+          cache: 'pnpm'
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
-      - name: Install test JS dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Lint UI
-        run: pnpm run lintUi
-
+          python-version: '3.8'
+          cache: 'pip'
       - name: Install Poetry
         run: pip install poetry
+      - name: Install JS dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Build UI
+        run: pnpm run buildUi
+      - name: Lint UI
+        run: pnpm run lintUi
+      - name: Install Python dependencies
+        run: poetry install -C ./backend --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

@@ -27,12 +27,8 @@ export default function Variable({
 
   const prompt = playground?.prompt;
 
-  if (!prompt) {
-    return null;
-  }
-
   useEffect(() => {
-    if (prompt.inputs && decoratedText) {
+    if (prompt?.inputs && decoratedText) {
       const index = Object.keys(prompt.inputs).findIndex(
         (name) =>
           buildVariablePlaceholder(name, prompt.template_format) ===
@@ -48,7 +44,11 @@ export default function Variable({
         });
       }
     }
-  }, [decoratedText, prompt]);
+  }, [colors, decoratedText, prompt]);
+
+  if (!prompt) {
+    return null;
+  }
 
   const [varName, varValue] =
     variableIndex !== undefined

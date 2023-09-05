@@ -1,13 +1,16 @@
 import { Stack } from '@mui/material';
 
-import InlinedAudioList from 'components/atoms/element/inlined/audios';
-import InlinedFileList from 'components/atoms/element/inlined/files';
-import InlinedImageList from 'components/atoms/element/inlined/images';
-import InlinedPDFList from 'components/atoms/element/inlined/pdfs';
-import InlinedTextList from 'components/atoms/element/inlined/texts';
-import InlinedVideoList from 'components/atoms/element/inlined/videos';
+import {
+  ElementType,
+  IMessageElement,
+  InlinedAudioList,
+  InlinedFileList,
+  InlinedImageList,
+  InlinedPDFList,
+  InlinedVideoList
+} from '@chainlit/components';
 
-import { ElementType, IMessageElement } from 'types/element';
+import InlinedTextList from 'components/atoms/element/inlined/texts';
 
 interface Props {
   elements: IMessageElement[];

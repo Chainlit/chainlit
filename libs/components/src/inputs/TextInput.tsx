@@ -1,16 +1,17 @@
 import { TextField } from '@mui/material';
 
-import { IInput } from 'types/Input';
+import { IInput } from '../types/Input';
 
-import InputStateHandler from './inputStateHandler';
+import { InputStateHandler } from './InputStateHandler';
 
-export type TextInputProps = {
+type TextInputProps = {
   value?: string;
   placeholder?: string;
+  endAdornment?: React.ReactNode;
 } & IInput &
   Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
 
-export default function TextInput({
+const TextInput = ({
   description,
   disabled,
   hasError,
@@ -18,8 +19,9 @@ export default function TextInput({
   label,
   size = 'small',
   tooltip,
+  endAdornment,
   ...rest
-}: TextInputProps): JSX.Element {
+}: TextInputProps): JSX.Element => {
   return (
     <InputStateHandler
       description={description}
@@ -30,6 +32,7 @@ export default function TextInput({
     >
       <TextField
         disabled={disabled}
+        InputProps={{ endAdornment }}
         inputProps={{
           ...rest,
           id: id,
@@ -45,4 +48,7 @@ export default function TextInput({
       />
     </InputStateHandler>
   );
-}
+};
+
+export { TextInput };
+export type { TextInputProps };

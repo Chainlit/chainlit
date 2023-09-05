@@ -124,10 +124,10 @@ async def lifespan(app: FastAPI):
 def get_build_dir():
     local_build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
     packaged_build_dir = os.path.join(BACKEND_ROOT, "frontend", "dist")
-    if os.path.exists(packaged_build_dir):
-        return packaged_build_dir
-    elif os.path.exists(local_build_dir):
+    if os.path.exists(local_build_dir):
         return local_build_dir
+    elif os.path.exists(packaged_build_dir):
+        return packaged_build_dir
     else:
         raise FileNotFoundError("Built UI dir not found")
 

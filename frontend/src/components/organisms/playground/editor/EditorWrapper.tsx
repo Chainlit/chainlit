@@ -1,5 +1,4 @@
 import merge from 'lodash/merge';
-import { grey } from 'palette';
 import React from 'react';
 
 import {
@@ -10,6 +9,8 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
+
+import { grey } from '@chainlit/components/theme';
 
 import ClipboardCopy from 'components/atoms/ClipboardCopy';
 

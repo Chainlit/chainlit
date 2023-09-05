@@ -1,14 +1,12 @@
-import { grey, primary } from 'palette';
 import React from 'react';
 
 import { Box } from '@mui/material';
 import { Tab, Tabs } from '@mui/material';
 
-import InputStateHandler from 'components/organisms/inputs/inputStateHandler';
+import { IInput, InputStateHandler } from '@chainlit/components';
+import { grey, primary } from '@chainlit/components/theme';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
-
-import { IInput } from 'types/Input';
 
 interface ToggleProps extends IInput {
   items: string[];

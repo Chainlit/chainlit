@@ -122,9 +122,13 @@ Run `pnpm test`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
+You will need to rebuild the UI if you updated it between test runs.
+
+```sh
+pnpm run buildUi
+```
+
 ### Run one test
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
 2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements pnpm run test`).
-
-You can optionally skip the build phase when running a test by adding `SKIP_BUILD=true`.

@@ -1,4 +1,3 @@
-import { green, grey, primary } from 'palette';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
@@ -6,8 +5,10 @@ import { useRecoilState } from 'recoil';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
+import { InputLabel } from '@chainlit/components';
+import { green, grey, primary } from '@chainlit/components/theme';
+
 import Toggle from 'components/atoms/toggle';
-import InputLabel from 'components/molecules/inputLabel';
 import FormInput from 'components/organisms/FormInput';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';

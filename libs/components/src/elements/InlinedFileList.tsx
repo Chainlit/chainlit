@@ -1,14 +1,14 @@
 import { Stack } from '@mui/material';
 
-import { IFileElement } from 'types/element';
+import { IFileElement } from '../types/element';
 
-import FileElement from '../file';
+import { FileElement } from './File';
 
 interface Props {
   items: IFileElement[];
 }
 
-export default function InlinedFileList({ items }: Props) {
+const InlinedFileList = ({ items }: Props) => {
   return (
     <Stack spacing={1} direction="row">
       {items.map((file, i) => {
@@ -20,4 +20,6 @@ export default function InlinedFileList({ items }: Props) {
       })}
     </Stack>
   );
-}
+};
+
+export { InlinedFileList };

@@ -1,9 +1,14 @@
 {
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@types/react-dom": "^18.2.7",
+    "@types/react": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "cypress": "12.9.0",
     "dotenv": "^16.3.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
     "eslint": "^8.48.0",
     "husky": "^8.0.3",
     "kill-port": "^2.0.1",
@@ -21,7 +26,7 @@
     "formatUi": "cd frontend && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "(cd frontend && pnpm run build)",
-    "build": "(cd frontend && pnpm run build) && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
+    "buildUi": "cd libs/components && pnpm run build && cd ../../frontend && pnpm run build",
+    "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
   }
 }

@@ -1,12 +1,11 @@
 import omit from 'lodash/omit';
 
-import Switch, { SwitchProps } from 'components/atoms/switch';
+import { IInput, TextInput, TextInputProps } from '@chainlit/components';
 
-import { IInput } from 'types/Input';
+import Switch, { SwitchProps } from 'components/atoms/switch';
 
 import SelectInput, { SelectInputProps } from './inputs/selectInput';
 import TagsInput, { TagsInputProps } from './inputs/tagsInput';
-import TextInput, { TextInputProps } from './inputs/textInput';
 import Slider, { SliderProps } from './slider';
 
 export type TFormInputValue = string | number | boolean | string[] | undefined;

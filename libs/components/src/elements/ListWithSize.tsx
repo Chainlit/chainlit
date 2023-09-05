@@ -1,26 +1,27 @@
 import { ImageList, ImageListItem } from '@mui/material';
 
-import { IImageElement, IVideoElement } from 'types/element';
+import { IImageElement, IVideoElement } from '../types/element';
 
-export function sizeToUnit(element: IImageElement | IVideoElement) {
-  if (element.size === 'small') {
-    return 1;
-  } else if (element.size === 'medium') {
-    return 2;
-  } else if (element.size === 'large') {
-    return 4;
-  } else {
-    return 2;
+const sizeToUnit = (element: IImageElement | IVideoElement) => {
+  switch (element.size) {
+    case 'small':
+      return 1;
+    case 'medium':
+      return 2;
+    case 'large':
+      return 4;
+    default:
+      return 2;
   }
-}
+};
 
-export function ListWithSize<T extends IImageElement | IVideoElement>({
+const ListWithSize = <T extends IImageElement | IVideoElement>({
   elements,
   renderElement: Renderer
 }: {
   elements: T[];
   renderElement: ({ element }: { element: T }) => JSX.Element | null;
-}) {
+}) => {
   return (
     <ImageList
       sx={{
@@ -47,4 +48,6 @@ export function ListWithSize<T extends IImageElement | IVideoElement>({
       })}
     </ImageList>
   );
-}
+};
+
+export { ListWithSize };

@@ -1,18 +1,18 @@
-import { primary } from 'palette';
-import { grey } from 'palette';
 import React from 'react';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { MenuItem, SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
-import NotificationCount from 'components/atoms/notificationCount';
+import {
+  IInput,
+  InputStateHandler,
+  NotificationCount
+} from '@chainlit/components';
+import { primary } from '@chainlit/components/theme';
+import { grey } from '@chainlit/components/theme';
 
 import useIsDarkMode from 'hooks/useIsDarkMode';
-
-import { IInput } from 'types/Input';
-
-import InputStateHandler from './inputStateHandler';
 
 export type SelectItem = {
   label: string;

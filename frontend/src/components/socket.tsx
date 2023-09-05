@@ -9,6 +9,8 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 
+import { IElement } from '@chainlit/components';
+
 import { useAuth } from 'hooks/auth';
 
 import { actionState } from 'state/action';
@@ -28,7 +30,6 @@ import { sessionIdState, userEnvState } from 'state/user';
 
 import { IAction } from 'types/action';
 import { IMessage, IMessageUpdate, IToken } from 'types/chat';
-import { IElement } from 'types/element';
 
 import { TFormInput } from './organisms/FormInput';
 

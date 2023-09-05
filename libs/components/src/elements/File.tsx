@@ -1,15 +1,11 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { Link } from '@mui/material';
 
-import { IFileElement } from 'types/element';
+import { IFileElement } from '../types/element';
 
-import GreyButton from '../buttons/greyButton';
+import { GreyButton } from '../buttons/GreyButton';
 
-interface Props {
-  element: IFileElement;
-}
-
-export default function FileElement({ element }: Props) {
+const FileElement = ({ element }: { element: IFileElement }) => {
   if (!element.url && !element.content) {
     return null;
   }
@@ -34,4 +30,6 @@ export default function FileElement({ element }: Props) {
       {element.name}
     </GreyButton>
   );
-}
+};
+
+export { FileElement };

@@ -1,13 +1,13 @@
 import { Avatar, Tooltip } from '@mui/material';
 
-import { IAvatarElement } from 'types/element';
+import { IAvatarElement } from '../types';
 
 interface Props {
   element: IAvatarElement;
   author: string;
 }
 
-export default function AvatarElement({ element, author }: Props) {
+const AvatarElement = ({ element, author }: Props) => {
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
   const className = `message-avatar`;
   return (
@@ -17,4 +17,6 @@ export default function AvatarElement({ element, author }: Props) {
       </span>
     </Tooltip>
   );
-}
+};
+
+export { AvatarElement };
