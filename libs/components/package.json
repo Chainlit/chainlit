@@ -17,11 +17,9 @@
     }
   },
   "scripts": {
-    "dev": "vite",
     "build": "tsup src/index.ts theme/index.ts --dts --format=esm,cjs --clean --dts",
     "build:watch": "tsc && vite build --watch",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
