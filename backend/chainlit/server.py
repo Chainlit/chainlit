@@ -17,6 +17,7 @@ from chainlit.client.utils import (
 )
 from chainlit.config import (
     APP_ROOT,
+    BACKEND_ROOT,
     DEFAULT_HOST,
     PACKAGE_ROOT,
     config,
@@ -120,7 +121,18 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
+def get_build_dir():
+    local_build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
+    packaged_build_dir = os.path.join(BACKEND_ROOT, "frontend", "dist")
+    if os.path.exists(packaged_build_dir):
+        return packaged_build_dir
+    elif os.path.exists(local_build_dir):
+        return local_build_dir
+    else:
+        raise FileNotFoundError("Built UI dir not found")
+
+
+build_dir = get_build_dir()
 
 app = FastAPI(lifespan=lifespan)
 
