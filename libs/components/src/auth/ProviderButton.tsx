@@ -1,7 +1,4 @@
-import React from 'react';
-
-import { GitHub } from '@mui/icons-material';
-import Google from '@mui/icons-material/Google';
+import { GitHub, Google } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 
 import { grey } from '../../theme/palette';

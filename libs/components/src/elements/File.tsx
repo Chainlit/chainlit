@@ -1,4 +1,4 @@
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { AttachFile } from '@mui/icons-material';
 import { Link } from '@mui/material';
 
 import { IFileElement } from '../types/element';
@@ -21,7 +21,7 @@ const FileElement = ({ element }: { element: IFileElement }) => {
       color="primary"
       variant="contained"
       className={className}
-      startIcon={<AttachFileIcon />}
+      startIcon={<AttachFile />}
       href={src}
       LinkComponent={({ ...props }) => (
         <Link download={element.name} {...props} />
