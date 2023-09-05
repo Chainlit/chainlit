@@ -3,9 +3,9 @@ import { useCopyToClipboard, useToggle } from 'usehooks-ts';
 import CopyAll from '@mui/icons-material/CopyAll';
 import { IconButton, Tooltip } from '@mui/material';
 
-import { grey } from '@chainlit/components/theme';
+import { useIsDarkMode } from '../hooks/useIsDarkMode';
 
-import useIsDarkMode from 'hooks/useIsDarkMode';
+import { grey } from '../theme/palette';
 
 interface ClipboardCopyProps {
   value: string;
@@ -54,4 +54,4 @@ const ClipboardCopy = ({ value, theme }: ClipboardCopyProps): JSX.Element => {
   );
 };
 
-export default ClipboardCopy;
+export { ClipboardCopy };

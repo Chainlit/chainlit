@@ -4,10 +4,9 @@ import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { Box } from '@mui/material';
 
+import { ClipboardCopy } from '@chainlit/components';
 import { useIsDarkMode } from '@chainlit/components/hooks';
 import { grey } from '@chainlit/components/theme';
-
-import ClipboardCopy from './ClipboardCopy';
 
 export default function Code({ inline, children, ...props }: CodeProps) {
   const isDarkMode = useIsDarkMode();
