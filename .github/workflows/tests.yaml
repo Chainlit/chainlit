@@ -25,14 +25,14 @@ jobs:
           cache: 'pip'
       - name: Install Poetry
         run: pip install poetry
-      - name: Install Python dependencies
-        run: poetry install -C ./backend --with tests
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build UI
         run: pnpm run buildUi
       - name: Lint UI
         run: pnpm run lintUi
+      - name: Install Python dependencies
+        run: poetry install -C ./backend --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
