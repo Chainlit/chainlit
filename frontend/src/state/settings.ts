@@ -10,17 +10,21 @@ const preferredTheme = localStorage.getItem(
 
 const theme = preferredTheme ? preferredTheme : defaultTheme;
 
+export const defaultSettingsState = {
+  open: false,
+  defaultCollapsedContent: true,
+  expandAll: false,
+  hideCot: false,
+  theme
+};
+
 export const settingsState = atom<{
   open: boolean;
+  defaultCollapsedContent: boolean;
   expandAll: boolean;
   hideCot: boolean;
   theme: ThemeVariant;
 }>({
   key: 'AppSettings',
-  default: {
-    open: false,
-    expandAll: false,
-    hideCot: false,
-    theme
-  }
+  default: defaultSettingsState
 });

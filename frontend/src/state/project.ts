@@ -8,6 +8,7 @@ export interface IProjectSettings {
     name: string;
     description?: string;
     hide_cot?: boolean;
+    default_collapsed_content?: boolean;
     default_expand_messages?: boolean;
     github?: string;
   };

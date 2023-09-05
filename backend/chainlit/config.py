@@ -65,6 +65,9 @@ name = "Chatbot"
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
 
+# Large size content are by default collapsed for a cleaner ui
+default_collapsed_content = true
+
 # The default value for the expand messages settings.
 default_expand_messages = false
 
@@ -148,6 +151,8 @@ class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     hide_cot: bool = False
+    # Large size content are by default collapsed for a cleaner ui
+    default_collapsed_content: bool = True
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None

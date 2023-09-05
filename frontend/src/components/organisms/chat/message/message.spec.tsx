@@ -3,6 +3,8 @@ import { ComponentProps } from 'react';
 import { RecoilRoot } from 'recoil';
 import { describe, expect, it } from 'vitest';
 
+import { defaultSettingsState, settingsState } from 'state/settings';
+
 import Message from './message';
 
 describe('Message', () => {
@@ -71,6 +73,29 @@ describe('Message', () => {
             ...defaultProps.message,
             content: 'hello '.repeat(650),
             streaming: true
+          }}
+        />
+      </RecoilRoot>
+    );
+
+    expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
+  });
+
+  it('preserves the content size when app settings defaultCollapsedContent is false', () => {
+    const { getByRole } = render(
+      <RecoilRoot
+        initializeState={(snapshot) => {
+          snapshot.set(settingsState, {
+            ...defaultSettingsState,
+            defaultCollapsedContent: false
+          });
+        }}
+      >
+        <Message
+          {...defaultProps}
+          message={{
+            ...defaultProps.message,
+            content: 'hello '.repeat(650)
           }}
         />
       </RecoilRoot>
