@@ -29,12 +29,12 @@ jobs:
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
-          node-version: "16.15.0"
-          cache: "pnpm"
+          node-version: '16.15.0'
+          cache: 'pnpm'
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: '3.8'
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Copy readme to backend
