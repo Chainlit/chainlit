@@ -33,6 +33,7 @@ interface Props {
   elements: IMessageElement[];
   language?: string;
   authorIsUser?: boolean;
+  preserveSize?: boolean;
 }
 
 const isForIdMatch = (
@@ -115,7 +116,8 @@ export default memo(function MessageContent({
   content,
   elements,
   language,
-  authorIsUser
+  authorIsUser,
+  preserveSize
 }: Props) {
   const { preparedContent, inlinedElements, refElements } = prepareContent({
     id,
@@ -214,7 +216,10 @@ export default memo(function MessageContent({
   return (
     <Stack width="100%">
       {collapse ? (
-        <Collapse onDownload={() => exportToFile(preparedContent, `${id}.txt`)}>
+        <Collapse
+          defaultExpandAll={preserveSize}
+          onDownload={() => exportToFile(preparedContent, `${id}.txt`)}
+        >
           {renderContent()}
         </Collapse>
       ) : (
