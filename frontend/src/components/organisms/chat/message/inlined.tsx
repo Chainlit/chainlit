@@ -7,10 +7,9 @@ import {
   InlinedFileList,
   InlinedImageList,
   InlinedPDFList,
+  InlinedTextList,
   InlinedVideoList
 } from '@chainlit/components';
-
-import InlinedTextList from 'components/atoms/element/inlined/texts';
 
 interface Props {
   elements: IMessageElement[];

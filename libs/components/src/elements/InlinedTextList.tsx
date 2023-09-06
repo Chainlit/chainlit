@@ -1,12 +1,14 @@
 import { Alert, AlertTitle, Stack } from '@mui/material';
 
-import { ITextElement, TextElement } from '@chainlit/components';
+import { ITextElement } from '../types/element';
+
+import { TextElement } from './Text';
 
 interface Props {
   items: ITextElement[];
 }
 
-export default function InlinedTextList({ items }: Props) {
+const InlinedTextList = ({ items }: Props) => {
   return (
     <Stack spacing={1}>
       {items.map((el, i) => {
@@ -19,4 +21,6 @@ export default function InlinedTextList({ items }: Props) {
       })}
     </Stack>
   );
-}
+};
+
+export { InlinedTextList };
