@@ -1,19 +1,21 @@
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 
-import { IInput, InputStateHandler } from '@chainlit/components';
-import { green } from '@chainlit/components/theme';
+import { IInput } from '../types/Input';
 
-export type SwitchProps = {
+import { green } from '../../theme/palette';
+import { InputStateHandler } from './InputStateHandler';
+
+type SwitchInputProps = IInput & {
   checked: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   onChange: (
     event?: React.ChangeEvent<HTMLInputElement>,
     checked?: boolean
   ) => void;
-} & IInput;
+};
 
-export default function Switch(props: SwitchProps): JSX.Element {
+const SwitchInput = (props: SwitchInputProps): JSX.Element => {
   const {
     checked,
     description,
@@ -34,7 +36,7 @@ export default function Switch(props: SwitchProps): JSX.Element {
       label={label}
       tooltip={tooltip}
     >
-      <StyledSwitch
+      <StyledSwitchInput
         name={id}
         disabled={disabled}
         edge="end"
@@ -44,9 +46,9 @@ export default function Switch(props: SwitchProps): JSX.Element {
       />
     </InputStateHandler>
   );
-}
+};
 
-const StyledSwitch = styled((props: MSwitchProps) => (
+const StyledSwitchInput = styled((props: MSwitchProps) => (
   <MSwitch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
 ))(({ theme }) => {
   const isDarkMode = theme.palette.mode === 'dark';
@@ -94,3 +96,6 @@ const StyledSwitch = styled((props: MSwitchProps) => (
     }
   };
 });
+
+export { SwitchInput };
+export type { SwitchInputProps };
