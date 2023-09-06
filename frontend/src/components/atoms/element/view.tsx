@@ -10,6 +10,7 @@ import {
   IMessageElement,
   ImageElement,
   PDFElement,
+  TextElement,
   VideoElement
 } from '@chainlit/components';
 
@@ -17,8 +18,6 @@ import { useQuery } from 'hooks/query';
 import { useApi } from 'hooks/useApi';
 
 import { elementState } from 'state/element';
-
-import TextElement from './text';
 
 export const renderElement = (element: IMessageElement): JSX.Element | null => {
   switch (element.type) {

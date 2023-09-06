@@ -4,6 +4,7 @@ export { FileElement } from './File';
 export { FrameElement } from './Frame';
 export { ImageElement } from './Image';
 export { PDFElement } from './PDF';
+export { TextElement } from './Text';
 export { VideoElement } from './Video';
 
 // Inlined

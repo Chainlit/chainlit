@@ -1,8 +1,6 @@
 import { Alert, AlertTitle, Stack } from '@mui/material';
 
-import { ITextElement } from '@chainlit/components';
-
-import TextElement from '../text';
+import { ITextElement, TextElement } from '@chainlit/components';
 
 interface Props {
   items: ITextElement[];
