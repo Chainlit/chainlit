@@ -19,6 +19,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
+from chainlit.context import context
 from chainlit.element import (
     Audio,
     Avatar,
@@ -36,7 +37,7 @@ from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import FileSpec
+from chainlit.types import FileSpec, UserDetails
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -45,6 +46,24 @@ env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
 if env_found:
     logger.info("Loaded .env file")
+
+
+@trace
+def password_auth_callback(
+    func: Callable[[str, str], Optional[UserDetails]]
+) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user.
+
+    Args:
+        func (Callable[[str, str], Optional[UserDetails]]): The authentication callback to execute. Takes the email and password as parameters.
+
+    Returns:
+        Callable[[str, str], Optional[UserDetails]]: The decorated authentication callback.
+    """
+
+    config.code.password_auth_callback = wrap_user_function(func)
+    return func
 
 
 @trace

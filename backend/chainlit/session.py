@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from chainlit.message import Message
 
 from chainlit.client.base import BaseAuthClient, BaseDBClient
-from chainlit.types import AskResponse
+from chainlit.types import AskResponse, UserDetails
 
 
 class Session:
@@ -37,6 +37,10 @@ class Session:
         user_env: Dict[str, str],
         # Headers received during the websocket connection handshake
         initial_headers: Dict[str, str],
+        # Logged-in user informations
+        user: UserDetails,
+        # Logged-in user token
+        token: str,
         # Optional langchain agent
         agent: Optional[Any] = None,
         # Optional llama instance

@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, 
 
 import tomli
 from chainlit.logger import logger
+from chainlit.secret import random_secret
+from chainlit.types import UserDetails
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -57,6 +59,9 @@ cache = false
 
 # Chainlit server address
 # chainlit_server = ""
+
+# Secret token used to authenticate users. Changing it will invalidate all existing sessions.
+secret_token = "{random_secret()}"
 
 [features]
 # Show the prompt playground
@@ -171,6 +176,7 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
+    password_auth_callback: Optional[Callable[[str, str], Optional[UserDetails]]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
@@ -225,6 +231,8 @@ class ProjectSettings(DataClassJsonMixin):
     follow_symlink: bool = False
     # Chainlit server address
     chainlit_server: Optional[str] = None
+    # Secret token used to authenticate users. Default is a random string.
+    secret_token: Optional[str] = random_secret()
 
 
 @dataclass()

@@ -83,3 +83,38 @@ class GetConversationsRequest(BaseModel):
 class Theme(str, Enum):
     light = "light"
     dark = "dark"
+
+
+Roles = Literal["user", "admin", "owner"]
+
+
+# Used when logging-in a user
+class UserDetails:
+    id: str
+    username: str
+    role: Roles
+    tags: Optional[List[str]]
+    image: Optional[str]
+
+    def __init__(
+        self,
+        id: str,
+        role: Roles,
+        username: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        image: Optional[str] = None,
+    ):
+        self.id = id
+        self.username = id if username is None or username == "" else username
+        self.role = role
+        self.tags = tags
+        self.image = image
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "role": self.role,
+            "tags": self.tags,
+            "image": self.image,
+        }

@@ -11,7 +11,9 @@ import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Dict
 
+from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.client.utils import (
     get_auth_client_from_request,
     get_db_client_from_request,
@@ -36,11 +38,13 @@ from chainlit.types import (
     Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Query, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
+from typing_extensions import Annotated
 from watchfiles import awatch
 
 
@@ -189,9 +193,8 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
-    js = None
-    if config.ui.theme:
-        js = f"""<script>window.theme = {json.dumps(config.ui.theme.to_dict())}</script>"""
+    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}" if config.ui.theme else ""
+                          + f"window.auth = {json.dumps(get_configuration())}"}</script>"""
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
@@ -204,7 +207,10 @@ def get_html_template():
 
 
 @app.post("/completion")
-async def completion(request: CompletionRequest):
+async def completion(
+    request: CompletionRequest,
+    current_user: Annotated[Dict, Depends(get_current_user)],
+):
     """Handle a completion request from the prompt playground."""
 
     providers = get_llm_providers()
@@ -223,8 +229,32 @@ async def completion(request: CompletionRequest):
     return response
 
 
+@app.post("/login")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    if not config.code.password_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
+        )
+
+    user_details = await config.code.password_auth_callback(
+        form_data.username, form_data.password
+    )
+
+    if not user_details:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect login or password",
+        )
+
+    access_token = create_jwt(user_details)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
 @app.get("/project/llm-providers")
-async def get_providers():
+async def get_providers(current_user: Annotated[Dict, Depends(get_current_user)]):
     """List the providers."""
     trace_event("pp_get_llm_providers")
     providers = get_llm_providers()
@@ -233,7 +263,7 @@ async def get_providers():
 
 
 @app.get("/project/settings")
-async def project_settings():
+async def project_settings(current_user: Annotated[Dict, Depends(get_current_user)]):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return JSONResponse(
         content={
@@ -247,7 +277,11 @@ async def project_settings():
 
 
 @app.put("/message/feedback")
-async def update_feedback(request: Request, update: UpdateFeedbackRequest):
+async def update_feedback(
+    request: Request,
+    update: UpdateFeedbackRequest,
+    current_user: Annotated[Dict, Depends(get_current_user)],
+):
     """Update the human feedback for a particular message."""
 
     db_client = await get_db_client_from_request(request)
@@ -258,7 +292,9 @@ async def update_feedback(request: Request, update: UpdateFeedbackRequest):
 
 
 @app.get("/project/members")
-async def get_project_members(request: Request):
+async def get_project_members(
+    request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
+):
     """Get all the members of a project."""
 
     db_client = await get_db_client_from_request(request)
@@ -267,7 +303,9 @@ async def get_project_members(request: Request):
 
 
 @app.get("/project/role")
-async def get_member_role(request: Request):
+async def get_member_role(
+    request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
+):
     """Get the role of a member."""
 
     auth_client = await get_auth_client_from_request(request)
@@ -276,7 +314,11 @@ async def get_member_role(request: Request):
 
 
 @app.post("/project/conversations")
-async def get_project_conversations(request: Request, payload: GetConversationsRequest):
+async def get_project_conversations(
+    request: Request,
+    payload: GetConversationsRequest,
+    current_user: Annotated[Dict, Depends(get_current_user)],
+):
     """Get the conversations page by page."""
 
     db_client = await get_db_client_from_request(request)
@@ -285,7 +327,11 @@ async def get_project_conversations(request: Request, payload: GetConversationsR
 
 
 @app.get("/project/conversation/{conversation_id}")
-async def get_conversation(request: Request, conversation_id: str):
+async def get_conversation(
+    request: Request,
+    conversation_id: str,
+    current_user: Annotated[Dict, Depends(get_current_user)],
+):
     """Get a specific conversation."""
 
     db_client = await get_db_client_from_request(request)
@@ -295,7 +341,10 @@ async def get_conversation(request: Request, conversation_id: str):
 
 @app.get("/project/conversation/{conversation_id}/element/{element_id}")
 async def get_conversation_element(
-    request: Request, conversation_id: str, element_id: str
+    request: Request,
+    conversation_id: str,
+    element_id: str,
+    current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Get a specific conversation element."""
 
@@ -305,7 +354,11 @@ async def get_conversation_element(
 
 
 @app.delete("/project/conversation")
-async def delete_conversation(request: Request, payload: DeleteConversationRequest):
+async def delete_conversation(
+    request: Request,
+    payload: DeleteConversationRequest,
+    current_user: Annotated[Dict, Depends(get_current_user)],
+):
     """Delete a conversation."""
 
     db_client = await get_db_client_from_request(request)
@@ -314,7 +367,9 @@ async def delete_conversation(request: Request, payload: DeleteConversationReque
 
 
 @app.get("/files/{filename:path}")
-async def serve_file(filename: str):
+async def serve_file(
+    filename: str, current_user: Annotated[Dict, Depends(get_current_user)]
+):
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()
 

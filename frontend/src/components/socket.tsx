@@ -67,7 +67,7 @@ export default memo(function Socket() {
     const socket = io(wsEndpoint, {
       path: '/ws/socket.io',
       extraHeaders: {
-        Authorization: accessToken || '',
+        Authorization: localStorage.getItem('token') || '',
         'X-Chainlit-Session-Id': sessionId,
         'user-env': JSON.stringify(userEnv)
       }

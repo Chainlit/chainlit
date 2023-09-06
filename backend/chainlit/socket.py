@@ -4,6 +4,7 @@ from http.cookies import SimpleCookie
 from typing import Any, Dict
 
 from chainlit.action import Action
+from chainlit.auth import get_current_user
 from chainlit.client.base import MessageDict
 from chainlit.client.cloud import CloudAuthClient
 from chainlit.client.utils import get_auth_client, get_db_client
@@ -66,6 +67,12 @@ def load_user_env(user_env):
 
 @socket.on("connect")
 async def connect(sid, environ, auth):
+    authorization_header = environ.get("HTTP_AUTHORIZATION")
+    token = authorization_header.split(" ")[1] if authorization_header else None
+    user = await get_current_user(token=token)
+    if not user:
+        return False
+
     # Function to send a message to this particular session
     def emit_fn(event, data):
         if session := Session.get(sid):
@@ -115,6 +122,8 @@ async def connect(sid, environ, auth):
         db_client=db_client,
         user_env=user_env,
         initial_headers=request_headers,
+        user=user,
+        token=token,
     )
 
     trace_event("connection_successful")

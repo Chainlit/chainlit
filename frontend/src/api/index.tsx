@@ -36,6 +36,7 @@ const api = {
       const headers: { Authorization?: string; 'Content-Type': string } = {
         'Content-Type': 'application/json'
       };
+      token = localStorage.getItem('token') || '';
       if (token) headers['Authorization'] = token;
 
       const res = await fetch(httpEndpoint + endpoint, {
