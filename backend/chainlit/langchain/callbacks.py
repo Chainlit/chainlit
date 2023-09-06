@@ -20,7 +20,7 @@ def get_llm_settings(invocation_params: Union[Dict, None], serialized: Dict[str,
     if invocation_params is None:
         return None, None
 
-    provider = invocation_params.pop("_type")  # type: str
+    provider = invocation_params.pop("_type", "")  # type: str
 
     if provider.startswith("openai"):
         model_name = invocation_params.pop("model_name")
