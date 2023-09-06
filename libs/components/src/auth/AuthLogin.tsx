@@ -1,9 +1,11 @@
 import { useFormik } from 'formik';
+import { useEffect, useState } from 'react';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
+  Alert,
   Button,
   IconButton,
   InputAdornment,
@@ -12,46 +14,76 @@ import {
   Typography
 } from '@mui/material';
 
+import useWindowLocation from '../hooks/useLocation';
+
 import { grey } from '../../theme/palette';
 import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
-import ProviderButton, { Provider } from './ProviderButton';
+import { ProviderButton } from './ProviderButton';
 
-const providers: { name: Provider; link: string }[] = [
-  {
-    name: 'Google',
-    link: 'https://www.google.com'
-  },
-  {
-    name: 'GitHub',
-    link: 'https://www.github.com'
-  },
-  {
-    name: 'Microsoft',
-    link: 'https://www.microsoft.com'
+const signinErrors: Record<string, string> = {
+  default: 'Unable to sign in.',
+  signin: 'Try signing in with a different account.',
+  oauthsignin: 'Try signing in with a different account.',
+  oauthcallbackerror: 'Try signing in with a different account.',
+  oauthcreateaccount: 'Try signing in with a different account.',
+  emailcreateaccount: 'Try signing in with a different account.',
+  callback: 'Try signing in with a different account.',
+  oauthaccountnotlinked:
+    'To confirm your identity, sign in with the same account you used originally.',
+  emailsignin: 'The e-mail could not be sent.',
+  credentialssignin:
+    'Sign in failed. Check the details you provided are correct.',
+  sessionrequired: 'Please sign in to access this page.'
+};
+
+const getErrorMessage = (errorType: string | null): string => {
+  if (!errorType) {
+    return '';
   }
-];
+  return signinErrors[errorType.toLowerCase()] ?? signinErrors.default;
+};
 
 type AuthLoginProps = {
-  onContinue: (values: Record<string, string>) => void;
-  onForgotPassword?: () => void;
-  onProvider?: () => void;
-  onSignIn?: () => void;
-  onSignUp?: () => void;
-  isSignIn?: boolean;
+  title: string;
+  providers: string[];
+  callbackUrl: string;
+  onPasswordSignIn: (
+    email: string,
+    password: string,
+    callbackUrl: string
+  ) => any;
+  onOAuthSignIn: (provider: string, callbackUrl: string) => Promise<any>;
+  onSignUp?: (
+    email: string,
+    password: string,
+    callbackUrl: string
+  ) => Promise<any>;
+  onForgotPassword?: () => Promise<any>;
   renderLogo?: React.ReactElement;
 };
 
 const AuthLogin = ({
-  isSignIn = false,
-  onContinue,
+  title,
+  providers,
+  callbackUrl,
+  onPasswordSignIn,
+  onOAuthSignIn,
   onForgotPassword,
-  onProvider,
-  onSignIn,
   onSignUp,
   renderLogo
 }: AuthLoginProps) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showSignIn, toggleShowSignIn] = useToggle(true);
   const [showPassword, toggleShowPassword] = useToggle();
+  const location = useWindowLocation();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const errorType = searchParams.get('error');
+    setError(getErrorMessage(errorType));
+  }, [location]);
 
   const formik = useFormik({
     initialValues: {
@@ -66,13 +98,12 @@ const AuthLogin = ({
   });
 
   return (
-    <AuthTemplate
-      title={'Welcome'}
-      content={`${
-        isSignIn ? 'Sign In' : 'Sign Up'
-      } to Chainlit to continue to Chainlit Cloud.`}
-      renderLogo={renderLogo}
-    >
+    <AuthTemplate title={title} renderLogo={renderLogo}>
+      {error ? (
+        <Alert sx={{ my: 1 }} severity="error">
+          {error}
+        </Alert>
+      ) : null}
       <TextInput
         id="email"
         placeholder="Email adress"
@@ -106,36 +137,61 @@ const AuthLogin = ({
           </InputAdornment>
         }
       />
-      {isSignIn && onForgotPassword ? (
+      {showSignIn && onForgotPassword ? (
         <Link component="button" marginTop={1} onClick={onForgotPassword}>
           Forgot password?
         </Link>
       ) : null}
       <Button
+        disabled={loading}
         variant="contained"
         sx={{ marginTop: 3 }}
-        onClick={() => onContinue(formik.values)}
+        onClick={async () => {
+          setLoading(true);
+          try {
+            showSignIn
+              ? await onPasswordSignIn(
+                  formik.values.email,
+                  formik.values.password,
+                  callbackUrl
+                )
+              : onSignUp &&
+                (await onSignUp(
+                  formik.values.email,
+                  formik.values.password,
+                  callbackUrl
+                ));
+          } catch (err: unknown) {
+            if (err instanceof Error) {
+              setError(err.message);
+            }
+          } finally {
+            setLoading(false);
+          }
+        }}
       >
         Continue
       </Button>
-      <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
-        {isSignIn ? (
-          <>
-            <Typography>{`${"Don't have an account?"}`}</Typography>
-            <Link component="button" onClick={onSignUp}>
-              Sign Up
-            </Link>
-          </>
-        ) : (
-          <>
-            <Typography>{`${'Already have an account?'}`}</Typography>
-            <Link component="button" onClick={onSignIn}>
-              Sign In
-            </Link>
-          </>
-        )}
-      </Stack>
-      {onProvider ? (
+      {onSignUp ? (
+        <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
+          {showSignIn ? (
+            <>
+              <Typography>{`${"Don't have an account?"}`}</Typography>
+              <Link component="button" onClick={toggleShowSignIn}>
+                Sign Up
+              </Link>
+            </>
+          ) : (
+            <>
+              <Typography>{`${'Already have an account?'}`}</Typography>
+              <Link component="button" onClick={toggleShowSignIn}>
+                Sign In
+              </Link>
+            </>
+          )}
+        </Stack>
+      ) : null}
+      {providers ? (
         <>
           <Typography
             sx={{
@@ -159,8 +215,8 @@ const AuthLogin = ({
             {providers.map((provider, index) => (
               <ProviderButton
                 key={`provider-${index}`}
-                provider={provider.name}
-                onClick={onProvider}
+                provider={provider}
+                onClick={() => onOAuthSignIn(provider, callbackUrl)}
               />
             ))}
           </Stack>

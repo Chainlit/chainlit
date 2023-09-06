@@ -1,8 +1,7 @@
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 
-import { Link } from '@mui/material';
-import Button from '@mui/material/Button';
+import { Button, Link } from '@mui/material';
 
 import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
@@ -27,10 +26,7 @@ const AuthResetPassword = ({
   });
 
   return (
-    <AuthTemplate
-      title="Forgot your password?"
-      content="Enter your email address and we will send you instructions to reset your password."
-    >
+    <AuthTemplate title="Enter your email address and we will send you instructions to reset your password.">
       <TextInput
         id="email"
         placeholder="Email adress"
@@ -50,7 +46,7 @@ const AuthResetPassword = ({
         Continue
       </Button>
       <Link component="button" marginTop={1} onClick={onGoBack}>
-        Back to Chainlit Cloud
+        Go Back
       </Link>
     </AuthTemplate>
   );

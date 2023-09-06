@@ -1,4 +1,4 @@
-import { Box } from '@mui/material/';
+import { Box } from '@mui/material';
 
 import { grey } from '../../theme/palette';
 

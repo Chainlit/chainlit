@@ -1,18 +1,21 @@
 import { GitHub, Google } from '@mui/icons-material';
-import Button from '@mui/material/Button';
+import { Button } from '@mui/material';
 
 import { grey } from '../../theme/palette';
 
-const ICONS: { [key: string]: React.ReactNode } = {
-  google: <Google />,
-  github: <GitHub />
-  // microsoft: <Microsoft />
-};
-
-export type Provider = 'Google' | 'GitHub' | 'Microsoft';
+function renderProviderIcon(provider: string) {
+  switch (provider) {
+    case 'google':
+      return <Google />;
+    case 'github':
+      return <GitHub />;
+    default:
+      return null;
+  }
+}
 
 interface ProviderButtonProps {
-  provider: Provider;
+  provider: string;
   onClick: () => void;
   isSignIn?: boolean;
 }
@@ -26,7 +29,7 @@ const ProviderButton = ({
     <Button
       variant="outlined"
       color="inherit"
-      startIcon={ICONS[provider.toLowerCase()]}
+      startIcon={renderProviderIcon(provider.toLowerCase())}
       onClick={onClick}
       sx={{
         width: '100%',
@@ -40,4 +43,4 @@ const ProviderButton = ({
   );
 };
 
-export default ProviderButton;
+export { ProviderButton };

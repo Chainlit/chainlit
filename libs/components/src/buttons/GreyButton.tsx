@@ -1,4 +1,4 @@
-import Button, { ButtonProps } from '@mui/material/Button';
+import { Button, ButtonProps } from '@mui/material';
 import { ThemeProvider, useTheme } from '@mui/material/styles';
 
 import { darkGreyButtonTheme, lightGreyButtonTheme } from '../../theme/theme';
