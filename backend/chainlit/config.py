@@ -158,6 +158,8 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Show the prompt playground
     show_prompt_playground: bool = True
+    # Optional custom CSS file that allows you to customize the UI
+    custom_css: Optional[str] = None
 
 
 @dataclass()
