@@ -1,15 +1,17 @@
 import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
-import { IInput, InputStateHandler } from '@chainlit/components';
-import { grey } from '@chainlit/components/theme';
+import { IInput } from '../types/Input';
 
-export type SliderProps = IInput &
+import { grey } from '../../theme/palette';
+import { InputStateHandler } from './InputStateHandler';
+
+type SliderInputProps = IInput &
   MSliderProps & {
     setField?(field: string, value: number, shouldValidate?: boolean): void;
   };
 
-const _Slider = ({
+const SliderInput = ({
   description,
   hasError,
   id,
@@ -17,7 +19,7 @@ const _Slider = ({
   tooltip,
   setField,
   ...sliderProps
-}: SliderProps) => {
+}: SliderInputProps) => {
   const onChange = (event: any) => {
     const parsedValue = parseFloat(event.target.value);
     const { min, max, onChange } = sliderProps;
@@ -96,4 +98,5 @@ const StyledSlider = styled(Slider)(({ theme }) => {
   };
 });
 
-export default _Slider;
+export { SliderInput };
+export type { SliderInputProps };

@@ -4,6 +4,8 @@ import {
   IInput,
   SelectInput,
   SelectInputProps,
+  SliderInput,
+  SliderInputProps,
   TagsInput,
   TagsInputProps,
   TextInput,
@@ -11,8 +13,6 @@ import {
 } from '@chainlit/components';
 
 import Switch, { SwitchProps } from 'components/atoms/switch';
-
-import Slider, { SliderProps } from './slider';
 
 export type TFormInputValue = string | number | boolean | string[] | undefined;
 
@@ -25,7 +25,7 @@ export interface IFormInput<T, V extends TFormInputValue> extends IInput {
 
 export type TFormInput =
   | (Omit<SwitchProps, 'checked'> & IFormInput<'switch', boolean>)
-  | (Omit<SliderProps, 'value'> & IFormInput<'slider', number>)
+  | (Omit<SliderInputProps, 'value'> & IFormInput<'slider', number>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>)
@@ -42,7 +42,7 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
         />
       );
     case 'slider':
-      return <Slider {...element} value={element.value ?? 0} />;
+      return <SliderInput {...element} value={element.value ?? 0} />;
     case 'tags':
       return <TagsInput {...element} value={element.value ?? []} />;
     case 'switch':
