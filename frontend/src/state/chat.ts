@@ -1,6 +1,6 @@
 import { atom, selector } from 'recoil';
 
-import { TFormInput } from 'components/organisms/FormInput';
+import { TFormInput } from '@chainlit/components';
 
 import { FileSpec, IAsk, IMessage, ISession } from 'types/chat';
 

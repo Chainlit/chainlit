@@ -1,30 +1,23 @@
-import omit from 'lodash/omit';
+import { IInput } from '../types/Input';
 
-import {
-  IInput,
-  SelectInput,
-  SelectInputProps,
-  SliderInput,
-  SliderInputProps,
-  TagsInput,
-  TagsInputProps,
-  TextInput,
-  TextInputProps
-} from '@chainlit/components';
+import omit from '../../utils/omit';
+import { SliderInput, SliderInputProps } from './SliderInput';
+import { SwitchInput, SwitchInputProps } from './SwitchInput';
+import { TagsInput, TagsInputProps } from './TagsInput';
+import { TextInput, TextInputProps } from './TextInput';
+import { SelectInput, SelectInputProps } from './selects/SelectInput';
 
-import Switch, { SwitchProps } from 'components/atoms/switch';
+type TFormInputValue = string | number | boolean | string[] | undefined;
 
-export type TFormInputValue = string | number | boolean | string[] | undefined;
-
-export interface IFormInput<T, V extends TFormInputValue> extends IInput {
+interface IFormInput<T, V extends TFormInputValue> extends IInput {
   type: T;
   value?: V;
   initial?: V;
   setField?(field: string, value: V, shouldValidate?: boolean): void;
 }
 
-export type TFormInput =
-  | (Omit<SwitchProps, 'checked'> & IFormInput<'switch', boolean>)
+type TFormInput =
+  | (Omit<SwitchInputProps, 'checked'> & IFormInput<'switch', boolean>)
   | (Omit<SliderInputProps, 'value'> & IFormInput<'slider', number>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
@@ -32,7 +25,7 @@ export type TFormInput =
   | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
-  switch (element.type) {
+  switch (element?.type) {
     case 'select':
       // We omit the 'setField' prop to avoid React warnings and ensure it's available for <Tags/>.
       return (
@@ -47,7 +40,7 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
       return <TagsInput {...element} value={element.value ?? []} />;
     case 'switch':
       return (
-        <Switch
+        <SwitchInput
           {...omit(element, 'setField')}
           checked={!!element.value}
           inputProps={{
@@ -76,4 +69,5 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   }
 };
 
-export default FormInput;
+export { FormInput };
+export type { IFormInput, TFormInput, TFormInputValue };

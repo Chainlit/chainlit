@@ -10,6 +10,8 @@ import {
   DialogTitle
 } from '@mui/material';
 
+import { FormInput, TFormInputValue } from '@chainlit/components';
+
 import AccentButton from 'components/atoms/buttons/accentButton';
 import RegularButton from 'components/atoms/buttons/button';
 
@@ -19,8 +21,6 @@ import {
   chatSettingsValueState,
   sessionState
 } from 'state/chat';
-
-import FormInput, { TFormInputValue } from '../FormInput';
 
 export default function ChatSettingsModal() {
   const session = useRecoilValue(sessionState);

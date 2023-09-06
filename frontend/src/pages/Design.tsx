@@ -5,12 +5,11 @@ import { useRecoilState } from 'recoil';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
-import { InputLabel } from '@chainlit/components';
+import { FormInput, InputLabel } from '@chainlit/components';
 import { useIsDarkMode } from '@chainlit/components/hooks';
 import { green, grey, primary } from '@chainlit/components/theme';
 
 import Toggle from 'components/atoms/toggle';
-import FormInput from 'components/organisms/FormInput';
 
 import { settingsState } from 'state/settings';
 

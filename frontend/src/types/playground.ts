@@ -1,4 +1,4 @@
-import { TFormInput } from 'components/organisms/FormInput';
+import { TFormInput } from '@chainlit/components';
 
 import { IPrompt } from './chat';
 

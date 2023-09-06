@@ -9,7 +9,7 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 
-import { IElement } from '@chainlit/components';
+import { IElement, TFormInput } from '@chainlit/components';
 
 import { useAuth } from 'hooks/auth';
 
@@ -30,8 +30,6 @@ import { sessionIdState, userEnvState } from 'state/user';
 
 import { IAction } from 'types/action';
 import { IMessage, IMessageUpdate, IToken } from 'types/chat';
-
-import { TFormInput } from './organisms/FormInput';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;

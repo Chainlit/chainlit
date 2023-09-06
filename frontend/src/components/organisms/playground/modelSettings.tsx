@@ -16,14 +16,18 @@ import {
   Typography
 } from '@mui/material';
 
-import { SelectInput } from '@chainlit/components';
+import {
+  FormInput,
+  SelectInput,
+  TFormInput,
+  TFormInputValue
+} from '@chainlit/components';
 
 import { playgroundState } from 'state/playground';
 
 import { ILLMSettings } from 'types/chat';
 import { ILLMProvider } from 'types/playground';
 
-import FormInput, { TFormInput, TFormInputValue } from '../FormInput';
 import { getProviders } from './helpers';
 
 type Schema = {
