@@ -19,12 +19,11 @@ const handleImageClick = (name: string, src: string) => {
 
 const ImageElement = ({ element }: Props) => {
   const src = element.url || URL.createObjectURL(new Blob([element.content!]));
-  const className = `${element.display}-image`;
 
   return (
     <FrameElement>
       <img
-        className={className}
+        className={`${element.display}-image`}
         src={src}
         onClick={() => {
           if (element.display === 'inline') {

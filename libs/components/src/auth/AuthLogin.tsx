@@ -15,7 +15,7 @@ import {
 import { grey } from '../../theme/palette';
 import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
-import ProviderButton, { Provider } from './ProviderButton';
+import { Provider, ProviderButton } from './ProviderButton';
 
 const providers: { name: Provider; link: string }[] = [
   {

@@ -7,13 +7,8 @@ interface Props {
   items: IImageElement[];
 }
 
-const InlinedImageList = ({ items }: Props) => {
-  return (
-    <ListWithSize<IImageElement>
-      elements={items}
-      renderElement={ImageElement}
-    />
-  );
-};
+const InlinedImageList = ({ items }: Props) => (
+  <ListWithSize<IImageElement> elements={items} renderElement={ImageElement} />
+);
 
 export { InlinedImageList };

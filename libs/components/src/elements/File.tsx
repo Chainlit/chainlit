@@ -9,8 +9,7 @@ const FileElement = ({ element }: { element: IFileElement }) => {
   if (!element.url && !element.content) {
     return null;
   }
-  const className = `${element.display}-file`;
-  const src = element.url || URL.createObjectURL(new Blob([element.content!]));
+
   return (
     <GreyButton
       disableElevation
@@ -20,9 +19,9 @@ const FileElement = ({ element }: { element: IFileElement }) => {
       }}
       color="primary"
       variant="contained"
-      className={className}
+      className={`${element.display}-file`}
       startIcon={<AttachFile />}
-      href={src}
+      href={element.url || URL.createObjectURL(new Blob([element.content!]))}
       LinkComponent={({ ...props }) => (
         <Link download={element.name} {...props} />
       )}
