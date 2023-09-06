@@ -3,9 +3,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import Box from '@mui/material/Box';
 import { SelectChangeEvent } from '@mui/material/Select';
 
-import SelectInput, {
-  SelectItem
-} from 'components/organisms/inputs/selectInput';
+import { SelectInput, SelectItem } from '@chainlit/components';
 
 import { useApi } from 'hooks/useApi';
 

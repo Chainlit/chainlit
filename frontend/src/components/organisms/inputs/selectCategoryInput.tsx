@@ -3,13 +3,12 @@ import forEach from 'lodash/forEach';
 
 import { ListSubheader } from '@mui/material';
 
-import { useIsDarkMode } from '@chainlit/components/hooks';
-
-import SelectInput, {
+import {
+  SelectInput,
   SelectInputProps,
-  SelectItem,
-  renderMenuItem
-} from './selectInput';
+  SelectItem
+} from '@chainlit/components';
+import { useIsDarkMode } from '@chainlit/components/hooks';
 
 export type CategoryItem = {
   header: string;

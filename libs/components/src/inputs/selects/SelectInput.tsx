@@ -1,25 +1,24 @@
 import React from 'react';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import { MenuItem, SxProps } from '@mui/material';
+import { SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
-import {
-  IInput,
-  InputStateHandler,
-  NotificationCount
-} from '@chainlit/components';
-import { useIsDarkMode } from '@chainlit/components/hooks';
-import { primary } from '@chainlit/components/theme';
-import { grey } from '@chainlit/components/theme';
+import { useIsDarkMode } from '../../../hooks/useIsDarkMode';
 
-export type SelectItem = {
+import { IInput } from '../../types/Input';
+
+import { grey, primary } from '../../../theme';
+import { InputStateHandler } from '../InputStateHandler';
+import { MenuItem } from './MenuItem';
+
+type SelectItem = {
   label: string;
   notificationCount?: number;
   value: string | number;
 };
 
-export type SelectInputProps = IInput &
+type SelectInputProps = IInput &
   Omit<SelectProps<string>, 'value' | 'onChange'> & {
     children?: React.ReactNode;
     items?: SelectItem[];
@@ -31,46 +30,7 @@ export type SelectInputProps = IInput &
     iconSx?: SxProps;
   };
 
-type MenuItemProps = {
-  index: number;
-  item: SelectItem;
-  selected: boolean;
-  isDarkMode: boolean;
-};
-
-export const renderMenuItem = ({
-  item,
-  selected,
-  isDarkMode,
-  index
-}: MenuItemProps) => (
-  <MenuItem
-    value={item.value}
-    key={`select-${index}`}
-    sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      fontWeight: 500,
-      fontSize: '14px',
-      color: (isDarkMode && grey[400]) || (selected ? primary[500] : grey[700]),
-      '&:hover': {
-        backgroundColor: isDarkMode ? grey[800] : primary[50],
-        color: isDarkMode ? grey[400] : primary[500],
-        '& .notification-count': {
-          backgroundColor: isDarkMode ? grey[850] : primary[100],
-          color: isDarkMode ? grey[400] : primary[500]
-        }
-      }
-    }}
-  >
-    {item.label || item.value}
-    {item.notificationCount ? (
-      <NotificationCount count={item.notificationCount} />
-    ) : null}
-  </MenuItem>
-);
-
-export default function SelectInput({
+const SelectInput = ({
   children,
   description,
   disabled = false,
@@ -89,7 +49,7 @@ export default function SelectInput({
   sx,
   iconSx,
   ...rest
-}: SelectInputProps): JSX.Element {
+}: SelectInputProps): JSX.Element => {
   const isDarkMode = useIsDarkMode();
 
   return (
@@ -172,15 +132,18 @@ export default function SelectInput({
         )}
       >
         {children ||
-          items?.map((item, index) =>
-            renderMenuItem({
-              item,
-              index,
-              selected: item.value === value,
-              isDarkMode
-            })
-          )}
+          items?.map((item) => (
+            <MenuItem
+              isDarkMode={isDarkMode}
+              item={item}
+              selected={item.value === value}
+              value={item.value}
+            />
+          ))}
       </MSelect>
     </InputStateHandler>
   );
-}
+};
+
+export { SelectInput };
+export type { SelectItem, SelectInputProps };

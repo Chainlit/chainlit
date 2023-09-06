@@ -1,10 +1,15 @@
 import omit from 'lodash/omit';
 
-import { IInput, TextInput, TextInputProps } from '@chainlit/components';
+import {
+  IInput,
+  SelectInput,
+  SelectInputProps,
+  TextInput,
+  TextInputProps
+} from '@chainlit/components';
 
 import Switch, { SwitchProps } from 'components/atoms/switch';
 
-import SelectInput, { SelectInputProps } from './inputs/selectInput';
 import TagsInput, { TagsInputProps } from './inputs/tagsInput';
 import Slider, { SliderProps } from './slider';
 

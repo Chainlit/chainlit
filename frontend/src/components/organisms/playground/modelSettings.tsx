@@ -16,7 +16,7 @@ import {
   Typography
 } from '@mui/material';
 
-import SelectInput from 'components/organisms/inputs/selectInput';
+import { SelectInput } from '@chainlit/components';
 
 import { playgroundState } from 'state/playground';
 
