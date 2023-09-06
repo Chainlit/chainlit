@@ -35,9 +35,6 @@ dependencies:
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
-  mui-chips-input:
-    specifier: ^2.1.3
-    version: 2.1.3(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/icons-material@5.14.7)(@mui/material@5.14.7)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -4055,29 +4052,6 @@ packages:
 
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
-
-  /mui-chips-input@2.1.3(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/icons-material@5.14.7)(@mui/material@5.14.7)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-T8NJ/2PA2WKEdlddiem0/w53w7d6TPP4fb1DhtUondLIIgzn1Z4opu+S5g/XeanrkXhpdfEObwGQGPTRQQ2JYA==}
-    peerDependencies:
-      '@emotion/react': ^11.5.0
-      '@emotion/styled': ^11.3.0
-      '@mui/icons-material': ^5.0.0
-      '@mui/material': ^5.0.0
-      '@types/react': ^18.0.0
-      react: ^18.0.0
-      react-dom: ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@emotion/react': 11.11.1(@types/react@18.2.21)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.21)(react@18.2.0)
-      '@mui/icons-material': 5.14.7(@mui/material@5.14.7)(@types/react@18.2.21)(react@18.2.0)
-      '@mui/material': 5.14.7(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.21
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
 
   /nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}

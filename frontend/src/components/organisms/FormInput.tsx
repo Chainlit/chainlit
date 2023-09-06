@@ -4,13 +4,14 @@ import {
   IInput,
   SelectInput,
   SelectInputProps,
+  TagsInput,
+  TagsInputProps,
   TextInput,
   TextInputProps
 } from '@chainlit/components';
 
 import Switch, { SwitchProps } from 'components/atoms/switch';
 
-import TagsInput, { TagsInputProps } from './inputs/tagsInput';
 import Slider, { SliderProps } from './slider';
 
 export type TFormInputValue = string | number | boolean | string[] | undefined;
