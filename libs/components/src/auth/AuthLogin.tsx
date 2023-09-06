@@ -2,8 +2,7 @@ import { useFormik } from 'formik';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Button,
   IconButton,
