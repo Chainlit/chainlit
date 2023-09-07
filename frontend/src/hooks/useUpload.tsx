@@ -77,7 +77,6 @@ const useUpload = ({ onResolved, spec }: useUploadProps) => {
     dzAccept = accept;
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles: spec.max_files || 1,
