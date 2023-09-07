@@ -49,7 +49,7 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message: {str(e)}")
 
-        if not config.ui.show_prompt_playground:
+        if not config.features.prompt_playground:
             msg_dict.pop("prompt", None)
 
         return msg_dict
