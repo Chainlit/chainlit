@@ -1,10 +1,8 @@
 import { useRecoilValue } from 'recoil';
 
-import { IMessageElement, INestedMessage } from '@chainlit/components';
+import { IAction, IMessageElement, INestedMessage } from '@chainlit/components';
 
 import { loadingState } from 'state/chat';
-
-import { IAction } from 'types/action';
 
 import Message from './message';
 

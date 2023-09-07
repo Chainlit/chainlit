@@ -9,7 +9,7 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 
-import { IElement, IMessage, TFormInput } from '@chainlit/components';
+import { IAction, IElement, IMessage, TFormInput } from '@chainlit/components';
 
 import { useAuth } from 'hooks/auth';
 
@@ -28,7 +28,6 @@ import { avatarState, elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 import { sessionIdState, userEnvState } from 'state/user';
 
-import { IAction } from 'types/action';
 import { IMessageUpdate, IToken } from 'types/chat';
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {

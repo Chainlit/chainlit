@@ -3,14 +3,12 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
-import { IMessage } from '@chainlit/components';
+import { IAction, IMessage } from '@chainlit/components';
 
 import ActionList from 'components/atoms/actionsList';
 
 import { playgroundState } from 'state/playground';
 import { projectSettingsState } from 'state/project';
-
-import { IAction } from 'types/action';
 
 import FeedbackButtons from './feedbackButtons';
 

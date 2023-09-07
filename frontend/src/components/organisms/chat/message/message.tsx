@@ -4,12 +4,10 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Stack } from '@mui/material';
 
-import { IMessageElement, INestedMessage } from '@chainlit/components';
+import { IAction, IMessageElement, INestedMessage } from '@chainlit/components';
 
 import { highlightMessage } from 'state/chat';
 import { settingsState } from 'state/settings';
-
-import { IAction } from 'types/action';
 
 import AskUploadButton from './AskUploadButton';
 import Author, { authorBoxWidth } from './author';

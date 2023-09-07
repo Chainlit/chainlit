@@ -3,12 +3,11 @@ import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 
 import {
+  IAction,
   IMessage,
   IMessageElement,
   INestedMessage
 } from '@chainlit/components';
-
-import { IAction } from 'types/action';
 
 import Messages from './messages';
 
