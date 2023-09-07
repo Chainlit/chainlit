@@ -18,6 +18,7 @@ import {
 
 import {
   FormInput,
+  ILLMSettings,
   SelectInput,
   TFormInput,
   TFormInputValue
@@ -25,7 +26,6 @@ import {
 
 import { playgroundState } from 'state/playground';
 
-import { ILLMSettings } from 'types/chat';
 import { ILLMProvider } from 'types/playground';
 
 import { getProviders } from './helpers';

@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
+import { IMessage } from '@chainlit/components';
+
 import SideView from 'components/atoms/element/sideView';
 import ErrorBoundary from 'components/atoms/errorBoundary';
 import TaskList from 'components/molecules/tasklist';
@@ -15,8 +17,6 @@ import { askUserState, messagesState, sessionState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
-
-import { IMessage } from 'types/chat';
 
 import PromptPlayground from '../playground';
 import InputBox from './inputBox';

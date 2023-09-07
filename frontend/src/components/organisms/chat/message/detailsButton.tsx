@@ -4,11 +4,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { GreyButton } from '@chainlit/components';
+import { GreyButton, INestedMessage } from '@chainlit/components';
 
 import { settingsState } from 'state/settings';
-
-import { INestedMessage } from 'types/chat';
 
 interface Props {
   message: INestedMessage;

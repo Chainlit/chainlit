@@ -3,11 +3,9 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Tooltip, Typography } from '@mui/material';
 
-import { AvatarElement } from '@chainlit/components';
+import { AvatarElement, IMessage } from '@chainlit/components';
 
 import { avatarState } from 'state/element';
-
-import { IMessage } from 'types/chat';
 
 import MessageTime from './time';
 

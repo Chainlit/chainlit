@@ -1,6 +1,4 @@
-import { TFormInput } from '@chainlit/components';
-
-import { IPrompt } from './chat';
+import { IPrompt, TFormInput } from '@chainlit/components';
 
 export interface ILLMProvider {
   id: string;

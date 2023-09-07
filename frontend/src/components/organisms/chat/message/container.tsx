@@ -2,10 +2,13 @@ import { useEffect, useRef } from 'react';
 
 import { Box } from '@mui/material';
 
-import { IMessageElement } from '@chainlit/components';
+import {
+  IMessage,
+  IMessageElement,
+  INestedMessage
+} from '@chainlit/components';
 
 import { IAction } from 'types/action';
-import { IMessage, INestedMessage } from 'types/chat';
 
 import Messages from './messages';
 
