@@ -4,9 +4,8 @@ import Add from '@mui/icons-material/Add';
 import { LoadingButton } from '@mui/lab';
 import { Tooltip } from '@mui/material';
 
-import { FileSpec, IFileResponse } from '@chainlit/components/src/types/file';
-
-import useUpload from 'hooks/useUpload';
+import { FileSpec, IFileResponse } from '@chainlit/components';
+import { useUpload } from '@chainlit/components/hooks';
 
 import { fileSpecState, sessionState } from 'state/chat';
 

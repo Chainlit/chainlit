@@ -1,7 +1,6 @@
 import { Socket } from 'socket.io-client';
 
-import { IMessage } from '@chainlit/components';
-import { FileSpec, IFileResponse } from '@chainlit/components/src/types/file';
+import { FileSpec, IFileResponse, IMessage } from '@chainlit/components';
 
 import { IMessageElement } from './element';
 import { IMember } from './user';

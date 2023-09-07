@@ -5,22 +5,22 @@ import {
   FileWithPath,
   useDropzone
 } from 'react-dropzone';
-import toast from 'react-hot-toast';
 
-import { FileSpec, IFileResponse } from 'types/chat';
+import { FileSpec, IFileResponse } from '../src/types/file';
 
 interface useUploadProps {
   onResolved: (payloads: IFileResponse[]) => void;
+  onError?: (error: string) => void;
   spec: FileSpec;
 }
 
-const useUpload = ({ onResolved, spec }: useUploadProps) => {
+const useUpload = ({ onResolved, spec, onError }: useUploadProps) => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
     (acceptedFiles: FileWithPath[], fileRejections: FileRejection[]) => {
       if (fileRejections.length > 0) {
-        toast.error(fileRejections[0].errors[0].message);
+        onError && onError(fileRejections[0].errors[0].message);
         return;
       }
 
@@ -55,7 +55,7 @@ const useUpload = ({ onResolved, spec }: useUploadProps) => {
           setUploading(false);
         })
         .catch((err) => {
-          toast.error(err);
+          onError && onError(err);
           setUploading(false);
         });
     },
@@ -87,4 +87,4 @@ const useUpload = ({ onResolved, spec }: useUploadProps) => {
   return { getRootProps, getInputProps, uploading };
 };
 
-export default useUpload;
+export { useUpload };

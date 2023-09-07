@@ -5,10 +5,9 @@ import { LoadingButton } from '@mui/lab';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { IFileResponse } from '@chainlit/components/src/types/file';
+import { IFileResponse } from '@chainlit/components';
+import { useUpload } from '@chainlit/components/hooks';
 import { grey } from '@chainlit/components/theme';
-
-import useUpload from 'hooks/useUpload';
 
 import { askUserState } from 'state/chat';
 
