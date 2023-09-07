@@ -2,6 +2,10 @@
   overflow-x: auto;
 }
 
+.markdown-body img {
+  max-width: 100%;
+}
+
 .markdown-body *:first-child {
   margin-top: 0;
 }
