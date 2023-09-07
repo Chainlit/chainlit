@@ -1,7 +1,6 @@
 import glob
 import json
 import mimetypes
-from enum import Enum
 from typing import Optional
 
 mimetypes.add_type("application/javascript", ".js")
@@ -34,6 +33,7 @@ from chainlit.types import (
     CompletionRequest,
     DeleteConversationRequest,
     GetConversationsRequest,
+    Theme,
     UpdateFeedbackRequest,
 )
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -343,11 +343,6 @@ async def get_favicon():
     return FileResponse(favicon_path, media_type=media_type)
 
 
-class Theme(str, Enum):
-    light = "light"
-    dark = "dark"
-
-
 @app.get("/logo")
 async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     theme_value = theme.value if theme else Theme.light.value
@@ -364,7 +359,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
             break
 
     if not logo_path:
-        raise HTTPException(status_code=500, detail="Missing default logo")
+        raise HTTPException(status_code=404, detail="Missing default logo")
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
