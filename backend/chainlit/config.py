@@ -162,6 +162,8 @@ class UISettings(DataClassJsonMixin):
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
+    # Optional custom CSS file that allows you to customize the UI
+    custom_css: Optional[str] = None
 
 
 @dataclass()
