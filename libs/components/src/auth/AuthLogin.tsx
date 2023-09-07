@@ -94,7 +94,8 @@ const AuthLogin = ({
       email: yup.string().required(),
       password: yup.string().required()
     }),
-    onSubmit: async () => undefined
+    onSubmit: async () => undefined,
+    validateOnBlur: true
   });
 
   const handleSubmit = async (event: FormEvent) => {
@@ -137,7 +138,8 @@ const AuthLogin = ({
           size="medium"
           value={formik.values.email}
           hasError={!!formik.errors.email}
-          description={formik.errors.email}
+          description={formik.touched.email ? formik.errors.email : undefined}
+          onBlur={formik.handleBlur}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             formik.setFieldValue('email', e.target.value)
           }
@@ -147,7 +149,10 @@ const AuthLogin = ({
           placeholder="Password"
           value={formik.values.password}
           hasError={!!formik.errors.password}
-          description={formik.errors.password}
+          description={
+            formik.touched.password ? formik.errors.password : undefined
+          }
+          onBlur={formik.handleBlur}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             formik.setFieldValue('password', e.target.value)
           }
