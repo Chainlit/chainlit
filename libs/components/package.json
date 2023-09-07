@@ -29,7 +29,6 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.7",
     "@mui/material": "^5.14.7",
     "formik": "^2.4.3",
@@ -45,7 +44,6 @@
   "devDependencies": {
     "@types/react-resizable": "^3.0.4",
     "@types/react-syntax-highlighter": "^15.5.7",
-    "@vitejs/plugin-react-swc": "^3.3.2",
     "tsup": "^7.2.0",
     "vite": "^4.4.5"
   },
