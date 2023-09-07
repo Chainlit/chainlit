@@ -34,6 +34,7 @@ const WelcomeScreen = () => {
       >
         {pSettings?.markdown ? (
           <ReactMarkdown
+            className="markdown-body"
             remarkPlugins={[remarkGfm]}
             components={{
               a: ({ children, ...props }) => (
