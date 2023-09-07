@@ -16,9 +16,8 @@ import {
   Typography
 } from '@mui/material';
 
-import { Code, IMessageElement } from '@chainlit/components';
+import { Code, Collapse, IMessageElement } from '@chainlit/components';
 
-import Collapse from 'components/atoms/Collapse';
 import ElementRef from 'components/atoms/element/ref';
 
 import InlinedElements from './inlined';

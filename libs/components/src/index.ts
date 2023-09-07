@@ -6,4 +6,5 @@ export * from './types';
 
 export { ClipboardCopy } from './ClipboardCopy';
 export { Code } from './Code';
+export { Collapse } from './Collapse';
 export { NotificationCount } from './NotificationCount';
