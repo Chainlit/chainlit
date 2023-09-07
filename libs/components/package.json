@@ -18,13 +18,12 @@
   },
   "scripts": {
     "build": "tsup src/index.ts theme/index.ts --dts --format=esm,cjs --clean --dts",
-    "build:watch": "tsc && vite build --watch",
+    "build:watch": "tsup src/index.ts theme/index.ts --watch --format=esm,cjs --sourcemap",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.7",
     "@mui/material": "^5.14.7",
     "formik": "^2.4.3",
