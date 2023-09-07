@@ -23,19 +23,6 @@ export interface IToken {
   isSequence: boolean;
 }
 
-export interface IAskResponse {
-  content: string;
-  author: string;
-}
-
-export interface IAsk {
-  callback: (payload: IAskResponse | IFileResponse[]) => void;
-  spec: {
-    type: 'text' | 'file';
-    timeout: number;
-  } & FileSpec;
-}
-
 export interface ISession {
   socket: Socket;
   error?: boolean;

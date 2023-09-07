@@ -11,3 +11,16 @@ export interface IFileResponse {
   type: string;
   content: ArrayBuffer;
 }
+
+export interface IAskResponse {
+  content: string;
+  author: string;
+}
+
+export interface IAsk {
+  callback: (payload: IAskResponse | IFileResponse[]) => void;
+  spec: {
+    type: 'text' | 'file';
+    timeout: number;
+  } & FileSpec;
+}

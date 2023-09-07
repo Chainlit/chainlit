@@ -1,8 +1,8 @@
 import { atom, selector } from 'recoil';
 
-import { FileSpec, IMessage, TFormInput } from '@chainlit/components';
+import { FileSpec, IAsk, IMessage, TFormInput } from '@chainlit/components';
 
-import { IAsk, ISession } from 'types/chat';
+import { ISession } from 'types/chat';
 
 export const sessionState = atom<ISession | undefined>({
   key: 'Session',
