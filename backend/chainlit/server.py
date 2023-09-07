@@ -196,9 +196,7 @@ def get_html_template():
 
     css = None
     if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
+        css = f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
