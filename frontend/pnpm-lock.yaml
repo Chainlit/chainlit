@@ -53,9 +53,6 @@ dependencies:
   react-markdown:
     specifier: ^8.0.7
     version: 8.0.7(@types/react@18.2.21)(react@18.2.0)
-  react-resizable:
-    specifier: ^3.0.5
-    version: 3.0.5(react-dom@18.2.0)(react@18.2.0)
   react-router-dom:
     specifier: ^6.15.0
     version: 6.15.0(react-dom@18.2.0)(react@18.2.0)
@@ -121,9 +118,6 @@ devDependencies:
   '@types/node':
     specifier: ^20.5.7
     version: 20.5.7
-  '@types/react-resizable':
-    specifier: ^3.0.4
-    version: 3.0.4
   '@types/react-syntax-highlighter':
     specifier: ^15.5.7
     version: 15.5.7
@@ -2312,12 +2306,6 @@ packages:
       '@types/react': 18.2.21
     dev: false
 
-  /@types/react-resizable@3.0.4:
-    resolution: {integrity: sha512-+QguN9CDfC1lthq+4noG1fkxh8cqkV2Fv/Mu3mdknCCBiwwNLecnBdk1MmNNN7uJpT23Nx/aVkYsbt5NuWouFw==}
-    dependencies:
-      '@types/react': 18.2.21
-    dev: true
-
   /@types/react-syntax-highlighter@15.5.7:
     resolution: {integrity: sha512-bo5fEO5toQeyCp0zVHBeggclqf5SQ/Z5blfFmjwO5dkMVGPgmiwZsJh9nu/Bo5L7IHTuGWrja6LxJVE2uB5ZrQ==}
     dependencies:
@@ -2685,11 +2673,6 @@ packages:
 
   /client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
-    dev: false
-
-  /clsx@1.2.1:
-    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
-    engines: {node: '>=6'}
     dev: false
 
   /clsx@2.0.0:
@@ -4263,18 +4246,6 @@ packages:
       react: 18.2.0
       scheduler: 0.23.0
 
-  /react-draggable@4.4.5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-OMHzJdyJbYTZo4uQE393fHcqqPYsEtkjfMgvCHr6rejT+Ezn4OZbNyGH50vv+SunC1RMvwOTSWkEODQLzw1M9g==}
-    peerDependencies:
-      react: '>= 16.3.0'
-      react-dom: '>= 16.3.0'
-    dependencies:
-      clsx: 1.2.1
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
   /react-dropzone@14.2.3(react@18.2.0):
     resolution: {integrity: sha512-O3om8I+PkFKbxCukfIR3QAGftYXDZfOE2N1mr/7qebQJHs7U+/RSL/9xomJNpRg9kM5h9soQSdf0Gc7OHF5Fug==}
     engines: {node: '>= 10.13'}
@@ -4357,18 +4328,6 @@ packages:
     resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
     engines: {node: '>=0.10.0'}
     dev: true
-
-  /react-resizable@3.0.5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-vKpeHhI5OZvYn82kXOs1bC8aOXktGU5AmKAgaZS4F5JPburCtbmDPqE7Pzp+1kN4+Wb81LlF33VpGwWwtXem+w==}
-    peerDependencies:
-      react: '>= 16.3'
-    dependencies:
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-draggable: 4.4.5(react-dom@18.2.0)(react@18.2.0)
-    transitivePeerDependencies:
-      - react-dom
-    dev: false
 
   /react-router-dom@6.15.0(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-aR42t0fs7brintwBGAv2+mGlCtgtFQeOzK0BM1/OiqEzRejOZtpMZepvgkscpMUnKb8YO84G7s3LsHnnDNonbQ==}
