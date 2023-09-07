@@ -59,7 +59,7 @@ type AuthLoginProps = {
     password: string,
     callbackUrl: string
   ) => Promise<any>;
-  onForgotPassword?: () => void;
+  onForgotPassword?: () => Promise<any>;
   renderLogo?: React.ReactElement;
 };
 
