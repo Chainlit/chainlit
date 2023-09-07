@@ -202,7 +202,7 @@ const AuthLogin = ({
           )}
         </Stack>
       ) : null}
-      {providers?.length ? (
+      {providers.length ? (
         <>
           <Typography
             sx={{
