@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts theme/index.ts --dts --format=esm,cjs --clean --dts",
-    "build:watch": "tsup src/index.ts theme/index.ts --watch --format=esm,cjs --sourcemap",
+    "build:watch": "tsup src/index.ts theme/index.ts --watch --format=esm,cjs --sourcemap inline --dts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
