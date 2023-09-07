@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
@@ -52,7 +52,7 @@ type AuthLoginProps = {
     email: string,
     password: string,
     callbackUrl: string
-  ) => any;
+  ) => Promise<any>;
   onOAuthSignIn: (provider: string, callbackUrl: string) => Promise<any>;
   onSignUp?: (
     email: string,
@@ -97,6 +97,32 @@ const AuthLogin = ({
     onSubmit: async () => undefined
   });
 
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+
+    try {
+      showSignIn
+        ? await onPasswordSignIn(
+            formik.values.email,
+            formik.values.password,
+            callbackUrl
+          )
+        : onSignUp &&
+          (await onSignUp(
+            formik.values.email,
+            formik.values.password,
+            callbackUrl
+          ));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthTemplate title={title} renderLogo={renderLogo}>
       {error ? (
@@ -104,74 +130,54 @@ const AuthLogin = ({
           {error}
         </Alert>
       ) : null}
-      <TextInput
-        id="email"
-        placeholder="Email adress"
-        size="medium"
-        value={formik.values.email}
-        hasError={!!formik.errors.email}
-        description={formik.errors.email}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          formik.setFieldValue('email', e.target.value)
-        }
-      />
-      <TextInput
-        id="password"
-        placeholder="Password"
-        value={formik.values.password}
-        hasError={!!formik.errors.password}
-        description={formik.errors.password}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          formik.setFieldValue('password', e.target.value)
-        }
-        type={showPassword ? 'text' : 'password'}
-        size="medium"
-        endAdornment={
-          <InputAdornment position="end">
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={toggleShowPassword}
-            >
-              {showPassword ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        }
-      />
-      {showSignIn && onForgotPassword ? (
-        <Link component="button" marginTop={1} onClick={onForgotPassword}>
-          Forgot password?
-        </Link>
-      ) : null}
-      <Button
-        disabled={loading}
-        variant="contained"
-        sx={{ marginTop: 3 }}
-        onClick={async () => {
-          setLoading(true);
-          try {
-            showSignIn
-              ? await onPasswordSignIn(
-                  formik.values.email,
-                  formik.values.password,
-                  callbackUrl
-                )
-              : onSignUp &&
-                (await onSignUp(
-                  formik.values.email,
-                  formik.values.password,
-                  callbackUrl
-                ));
-          } catch (err: unknown) {
-            if (err instanceof Error) {
-              setError(err.message);
-            }
-          } finally {
-            setLoading(false);
+      <form onSubmit={handleSubmit}>
+        <TextInput
+          id="email"
+          placeholder="Email adress"
+          size="medium"
+          value={formik.values.email}
+          hasError={!!formik.errors.email}
+          description={formik.errors.email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('email', e.target.value)
           }
-        }}
-      >
-        Continue
-      </Button>
+        />
+        <TextInput
+          id="password"
+          placeholder="Password"
+          value={formik.values.password}
+          hasError={!!formik.errors.password}
+          description={formik.errors.password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('password', e.target.value)
+          }
+          type={showPassword ? 'text' : 'password'}
+          size="medium"
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={toggleShowPassword}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          }
+        />
+        {showSignIn && onForgotPassword ? (
+          <Link component="button" marginTop={1} onClick={onForgotPassword}>
+            Forgot password?
+          </Link>
+        ) : null}
+        <Button
+          type="submit"
+          disabled={loading}
+          variant="contained"
+          sx={{ marginTop: 3, width: '100%' }}
+        >
+          Continue
+        </Button>
+      </form>
       {onSignUp ? (
         <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
           {showSignIn ? (
