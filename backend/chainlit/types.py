@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from chainlit.prompt import Prompt
@@ -77,3 +78,8 @@ class ConversationFilter(BaseModel):
 class GetConversationsRequest(BaseModel):
     pagination: Pagination
     filter: ConversationFilter
+
+
+class Theme(str, Enum):
+    light = "light"
+    dark = "dark"

@@ -1,16 +1,14 @@
 import json
 from typing import Any, Dict, List, Optional, Union
 
-from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
-from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
-
+from chainlit import input_widget
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
 from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
-
-from chainlit import input_widget
+from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
+from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 
 IGNORE_LIST = []  # type: List[str]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -20,7 +18,7 @@ def get_llm_settings(invocation_params: Union[Dict, None], serialized: Dict[str,
     if invocation_params is None:
         return None, None
 
-    provider = invocation_params.pop("_type")  # type: str
+    provider = invocation_params.pop("_type", "")  # type: str
 
     if provider.startswith("openai"):
         model_name = invocation_params.pop("model_name")
