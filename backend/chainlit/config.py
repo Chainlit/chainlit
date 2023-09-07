@@ -58,6 +58,10 @@ cache = false
 # Chainlit server address
 # chainlit_server = ""
 
+[features]
+# Show the prompt playground
+prompt_playground = true
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
@@ -76,9 +80,6 @@ hide_cot = false
 
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
-
-# Show the prompt playground
-show_prompt_playground = true
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -147,6 +148,11 @@ class Theme(DataClassJsonMixin):
 
 
 @dataclass()
+class FeaturesSettings(DataClassJsonMixin):
+    prompt_playground: bool = True
+
+
+@dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
@@ -156,8 +162,6 @@ class UISettings(DataClassJsonMixin):
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
-    # Show the prompt playground
-    show_prompt_playground: bool = True
 
 
 @dataclass()
@@ -233,6 +237,7 @@ class ChainlitConfig:
     chainlit_prod_url = chainlit_prod_url
 
     run: RunSettings
+    features: FeaturesSettings
     ui: UISettings
     project: ProjectSettings
     code: CodeSettings
@@ -281,6 +286,7 @@ def load_settings():
         toml_dict = tomli.load(f)
         # Load project settings
         project_config = toml_dict.get("project", {})
+        features_settings = toml_dict.get("features", {})
         ui_settings = toml_dict.get("UI", {})
         meta = toml_dict.get("meta")
 
@@ -304,12 +310,15 @@ def load_settings():
             **project_config,
         )
 
+        features_settings = FeaturesSettings(**features_settings)
+
         ui_settings = UISettings(**ui_settings)
 
         if not project_settings.public and not project_settings.id:
             raise ValueError("Project ID is required when public is set to false.")
 
         return {
+            "features": features_settings,
             "ui": ui_settings,
             "project": project_settings,
             "code": CodeSettings(action_callbacks={}),
@@ -324,6 +333,7 @@ def reload_config():
 
     settings = load_settings()
 
+    config.features = settings["features"]
     config.code = settings["code"]
     config.ui = settings["ui"]
     config.project = settings["project"]
