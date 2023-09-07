@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io-client';
 
 import { IMessage } from '@chainlit/components';
+import { FileSpec, IFileResponse } from '@chainlit/components/src/types/file';
 
 import { IMessageElement } from './element';
 import { IMember } from './user';
@@ -23,23 +24,9 @@ export interface IToken {
   isSequence: boolean;
 }
 
-export interface FileSpec {
-  accept?: string[] | Record<string, string[]>;
-  max_size_mb?: number;
-  max_files?: number;
-}
-
 export interface IAskResponse {
   content: string;
   author: string;
-}
-
-export interface IFileResponse {
-  name: string;
-  path?: string;
-  size: number;
-  type: string;
-  content: ArrayBuffer;
 }
 
 export interface IAsk {

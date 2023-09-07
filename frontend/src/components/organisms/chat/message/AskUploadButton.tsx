@@ -5,13 +5,14 @@ import { LoadingButton } from '@mui/lab';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { IFileResponse } from '@chainlit/components/src/types/file';
 import { grey } from '@chainlit/components/theme';
 
 import useUpload from 'hooks/useUpload';
 
 import { askUserState } from 'state/chat';
 
-import { IAsk, IFileResponse } from 'types/chat';
+import { IAsk } from 'types/chat';
 
 const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   const upload = useUpload({

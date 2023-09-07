@@ -4,11 +4,13 @@ import Add from '@mui/icons-material/Add';
 import { LoadingButton } from '@mui/lab';
 import { Tooltip } from '@mui/material';
 
+import { FileSpec, IFileResponse } from '@chainlit/components/src/types/file';
+
 import useUpload from 'hooks/useUpload';
 
 import { fileSpecState, sessionState } from 'state/chat';
 
-import { FileSpec, IFileResponse, ISession } from 'types/chat';
+import { ISession } from 'types/chat';
 
 type UploadChildProps = {
   fileSpec: FileSpec;
