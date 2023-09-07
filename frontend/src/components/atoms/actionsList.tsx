@@ -7,13 +7,11 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Menu, Stack, Theme, useMediaQuery } from '@mui/material';
 import { Tooltip } from '@mui/material';
 
-import { IAction } from '@chainlit/components';
+import { IAction, RegularButton } from '@chainlit/components';
 
 import { loadingState, sessionState } from 'state/chat';
 
 import { ISession } from 'types/chat';
-
-import RegularButton from './buttons/button';
 
 interface ActionProps {
   action: IAction;

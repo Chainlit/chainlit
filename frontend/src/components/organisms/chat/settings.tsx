@@ -10,10 +10,13 @@ import {
   DialogTitle
 } from '@mui/material';
 
-import { FormInput, TFormInputValue } from '@chainlit/components';
+import {
+  FormInput,
+  RegularButton,
+  TFormInputValue
+} from '@chainlit/components';
 
 import AccentButton from 'components/atoms/buttons/accentButton';
-import RegularButton from 'components/atoms/buttons/button';
 
 import {
   chatSettingsDefaultValueSelector,

@@ -1,13 +1,13 @@
 import Button, { ButtonProps } from '@mui/material/Button';
 
-import { grey } from '@chainlit/components/theme';
+import { grey } from '../../theme/palette';
 
 interface Props extends ButtonProps {
   component?: any;
   to?: any;
 }
 
-export default function RegularButton({ children, ...props }: Props) {
+const RegularButton = ({ children, ...props }: Props) => {
   return (
     <span>
       <Button
@@ -34,4 +34,6 @@ export default function RegularButton({ children, ...props }: Props) {
       </Button>
     </span>
   );
-}
+};
+
+export { RegularButton };

@@ -3,8 +3,9 @@ import { cloneDeep } from 'lodash';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
+import { RegularButton } from '@chainlit/components';
+
 import AccentButton from 'components/atoms/buttons/accentButton';
-import RegularButton from 'components/atoms/buttons/button';
 
 import { playgroundState } from 'state/playground';
 import { accessTokenState, userEnvState } from 'state/user';
