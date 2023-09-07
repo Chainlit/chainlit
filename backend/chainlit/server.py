@@ -1,6 +1,7 @@
 import glob
 import json
 import mimetypes
+from typing import Optional
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -32,9 +33,10 @@ from chainlit.types import (
     CompletionRequest,
     DeleteConversationRequest,
     GetConversationsRequest,
+    Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
@@ -339,6 +341,28 @@ async def get_favicon():
     media_type, _ = mimetypes.guess_type(favicon_path)
 
     return FileResponse(favicon_path, media_type=media_type)
+
+
+@app.get("/logo")
+async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
+    theme_value = theme.value if theme else Theme.light.value
+    logo_path = None
+
+    for path in [
+        f"logo_{theme_value}.*",
+        os.path.join("assets", f"logo_{theme_value}*.*"),
+    ]:
+        files = glob.glob(os.path.join(build_dir, path))
+
+        if files:
+            logo_path = files[0]
+            break
+
+    if not logo_path:
+        raise HTTPException(status_code=404, detail="Missing default logo")
+    media_type, _ = mimetypes.guess_type(logo_path)
+
+    return FileResponse(logo_path, media_type=media_type)
 
 
 def register_wildcard_route_handler():
