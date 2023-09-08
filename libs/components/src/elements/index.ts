@@ -12,6 +12,7 @@ export { VideoElement } from './Video';
 
 // Inlined
 export { InlinedAudioList } from './InlinedAudioList';
+export { InlinedElements } from './InlinedElements';
 export { InlinedFileList } from './InlinedFileList';
 export { InlinedImageList } from './InlinedImageList';
 export { InlinedPDFList } from './InlinedPDFList';

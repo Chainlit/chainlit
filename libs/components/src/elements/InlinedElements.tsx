@@ -1,21 +1,19 @@
 import { Stack } from '@mui/material';
 
-import {
-  ElementType,
-  IMessageElement,
-  InlinedAudioList,
-  InlinedFileList,
-  InlinedImageList,
-  InlinedPDFList,
-  InlinedTextList,
-  InlinedVideoList
-} from '@chainlit/components';
+import { ElementType, IMessageElement } from '../types/element';
+
+import { InlinedAudioList } from './InlinedAudioList';
+import { InlinedFileList } from './InlinedFileList';
+import { InlinedImageList } from './InlinedImageList';
+import { InlinedPDFList } from './InlinedPDFList';
+import { InlinedTextList } from './InlinedTextList';
+import { InlinedVideoList } from './InlinedVideoList';
 
 interface Props {
   elements: IMessageElement[];
 }
 
-export default function InlinedElements({ elements }: Props) {
+const InlinedElements = ({ elements }: Props) => {
   if (!elements.length) {
     return null;
   }
@@ -64,4 +62,6 @@ export default function InlinedElements({ elements }: Props) {
       ) : null}
     </Stack>
   );
-}
+};
+
+export { InlinedElements };

@@ -16,11 +16,14 @@ import {
   Typography
 } from '@mui/material';
 
-import { Code, Collapse, IMessageElement } from '@chainlit/components';
+import {
+  Code,
+  Collapse,
+  IMessageElement,
+  InlinedElements
+} from '@chainlit/components';
 
 import ElementRef from 'components/atoms/element/ref';
-
-import InlinedElements from './inlined';
 
 const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
