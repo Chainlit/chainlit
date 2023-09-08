@@ -1,39 +1,52 @@
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import * as yup from 'yup';
 
-import { MailOutline } from '@mui/icons-material';
-import { Alert, Box, Button, Link } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 
-import { TextInput } from '../inputs/TextInput';
+import { TextInput } from '../inputs';
 import { AuthTemplate } from './AuthTemplate';
 
 interface AuthResetPasswordProps {
-  onGoBack: () => void;
-  onContinue: (value: string) => Promise<void>;
+  callbackUrl: string;
+  onResetPassword: (
+    email: string,
+    token: string,
+    callbackUrl: string
+  ) => Promise<any>;
+  renderLogo?: ReactElement;
+  title: string;
+  token: string;
 }
 
 const AuthResetPassword = ({
-  onGoBack,
-  onContinue
+  callbackUrl,
+  onResetPassword,
+  renderLogo,
+  title,
+  token
 }: AuthResetPasswordProps): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      email: ''
+      newPassword: '',
+      confirmPassword: ''
     },
     validationSchema: yup.object({
-      email: yup.string().email().required()
+      newPassword: yup.string().required('New password is a required field'),
+      confirmPassword: yup
+        .string()
+        .oneOf([yup.ref('newPassword'), undefined], 'Passwords must match')
+        .required('Confirm password is a required field')
     }),
-    onSubmit: async ({ email }) => {
+    onSubmit: async ({ newPassword }) => {
       setLoading(true);
+      setError('');
 
       try {
-        await onContinue(email);
-        setShowConfirmation(true);
+        await onResetPassword(newPassword, token, callbackUrl);
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message);
@@ -42,79 +55,61 @@ const AuthResetPassword = ({
         setLoading(false);
       }
     },
-    validateOnBlur: true,
-    validateOnChange: false
+    validateOnBlur: true
   });
 
   return (
-    <AuthTemplate
-      renderLogo={
-        showConfirmation ? (
-          <Box
-            sx={{
-              border: 3,
-              borderColor: 'success.main',
-              borderRadius: 50,
-              width: 60,
-              height: 60,
-              display: 'grid',
-              placeItems: 'center'
-            }}
-          >
-            <MailOutline color="success" fontSize="large" />
-          </Box>
-        ) : undefined
-      }
-      title={
-        showConfirmation
-          ? `Please check the email address ${formik.values.email} for instructions to reset your password.`
-          : 'Enter your email address and we will send you instructions to reset your password.'
-      }
-    >
+    <AuthTemplate renderLogo={renderLogo} title={title}>
       {error ? (
         <Alert sx={{ my: 1 }} severity="error">
           {error}
         </Alert>
       ) : null}
 
-      {showConfirmation ? (
+      <form onSubmit={formik.handleSubmit}>
+        <TextInput
+          id="newPassword"
+          placeholder="New password"
+          size="medium"
+          value={formik.values.newPassword}
+          hasError={!!formik.errors.newPassword}
+          description={
+            formik.touched.newPassword ? formik.errors.newPassword : undefined
+          }
+          onBlur={formik.handleBlur}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('newPassword', e.target.value)
+          }
+          type="password"
+        />
+
+        <TextInput
+          id="confirmPassword"
+          placeholder="Confirm password"
+          size="medium"
+          value={formik.values.confirmPassword}
+          hasError={!!formik.errors.confirmPassword}
+          description={
+            formik.touched.confirmPassword
+              ? formik.errors.confirmPassword
+              : undefined
+          }
+          onBlur={formik.handleBlur}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('confirmPassword', e.target.value)
+          }
+          type="password"
+        />
+
         <Button
-          onClick={() => formik.handleSubmit()}
-          color="success"
-          variant="outlined"
-          sx={{ marginTop: 1 }}
+          type="submit"
+          disabled={loading}
+          variant="contained"
+          sx={{ marginTop: 3, width: '100%' }}
         >
-          Resend email
+          Reset Password
         </Button>
-      ) : (
-        <form onSubmit={formik.handleSubmit}>
-          <TextInput
-            id="email"
-            placeholder="Email adress"
-            size="medium"
-            value={formik.values.email}
-            hasError={!!formik.errors.email}
-            description={formik.errors.email}
-            onBlur={formik.handleBlur}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              formik.setFieldValue('email', e.target.value)
-            }
-          />
-
-          <Button
-            type="submit"
-            disabled={loading}
-            variant="contained"
-            sx={{ marginTop: 1, width: '100%' }}
-          >
-            Continue
-          </Button>
-        </form>
-      )}
-
-      <Link component="button" marginTop={1} onClick={onGoBack}>
-        Go Back
-      </Link>
+      </form>
     </AuthTemplate>
   );
 };

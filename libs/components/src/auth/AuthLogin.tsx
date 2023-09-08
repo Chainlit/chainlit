@@ -170,7 +170,12 @@ const AuthLogin = ({
           }
         />
         {showSignIn && onForgotPassword ? (
-          <Link component="button" marginTop={1} onClick={onForgotPassword}>
+          <Link
+            component="button"
+            marginTop={1}
+            onClick={onForgotPassword}
+            type="button"
+          >
             Forgot password?
           </Link>
         ) : null}
