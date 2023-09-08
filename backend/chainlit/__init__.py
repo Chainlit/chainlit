@@ -67,6 +67,22 @@ def password_auth_callback(
 
 
 @trace
+def header_auth_callback(func: Callable[[str], Optional[UserDetails]]) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via a header
+
+    Args:
+        func (Callable[[str], Optional[UserDetails]]): The authentication callback to execute. Takes the header value as a parameter.
+
+    Returns:
+        Callable[[str], Optional[UserDetails]]: The decorated authentication callback.
+    """
+
+    config.code.header_auth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
 def on_message(func: Callable) -> Callable:
     """
     Framework agnostic decorator to react to messages coming from the UI.

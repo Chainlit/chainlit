@@ -177,6 +177,7 @@ class CodeSettings:
     module: Any = None
     # Bunch of callbacks defined by the developer
     password_auth_callback: Optional[Callable[[str, str], Optional[UserDetails]]] = None
+    header_auth_callback: Optional[Callable[[str], Optional[UserDetails]]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None

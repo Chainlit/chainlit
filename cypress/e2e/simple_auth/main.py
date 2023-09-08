@@ -4,6 +4,15 @@ from chainlit.types import UserDetails
 
 import chainlit as cl
 
+
+@cl.header_auth_callback
+def header_auth_callback(header: str) -> Optional[UserDetails]:
+    if header == "admin_jwt":
+        return UserDetails(id="admin", role="admin", provider="header")
+    else:
+        return None
+
+
 # @cl.password_auth_callback
 # def auth_callback(username: str, password: str) -> Optional[UserDetails]:
 #     if (username, password) == ("admin", "admin"):

@@ -4,7 +4,7 @@ from http.cookies import SimpleCookie
 from typing import Any, Dict
 
 from chainlit.action import Action
-from chainlit.auth import get_current_user
+from chainlit.auth import get_current_user, require_login
 from chainlit.client.base import MessageDict
 from chainlit.client.cloud import CloudAuthClient
 from chainlit.client.utils import get_auth_client, get_db_client
@@ -71,7 +71,7 @@ async def connect(sid, environ, auth):
     token = None
     try:
         # Check if the authentication is required
-        if config.code.password_auth_callback is not None:
+        if not require_login():
             authorization_header = environ.get("HTTP_AUTHORIZATION")
             token = authorization_header.split(" ")[1] if authorization_header else None
             user = await get_current_user(token=token)

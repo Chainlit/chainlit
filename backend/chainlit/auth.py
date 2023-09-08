@@ -11,11 +11,18 @@ from chainlit import config
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
 
+def require_login():
+    return (
+        config.code.password_auth_callback is not None
+        or config.code.header_auth_callback is not None
+    )
+
+
 def get_configuration():
     return {
-        # Later requireLogin will also take into account the oauth providers
-        "requireLogin": config.code.password_auth_callback is not None,
+        "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
+        "headerAuth": config.code.header_auth_callback is not None,
         "oauthProviders": [],
     }
 
@@ -32,8 +39,7 @@ def create_jwt(data: UserDetails) -> str:
 
 
 async def get_current_user(token: str = Depends(reuseable_oauth)):
-    # Check if the authentication is required
-    if config.code.password_auth_callback is None:
+    if not require_login():
         return None
 
     try:
