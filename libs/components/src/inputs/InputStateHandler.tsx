@@ -4,7 +4,7 @@ import { IInput } from '../types/Input';
 
 import { InputLabel } from './InputLabel';
 
-export type InputStateHandlerProps = {
+type InputStateHandlerProps = {
   children: React.ReactNode;
   sx?: SxProps;
 } & IInput;
@@ -40,3 +40,4 @@ const InputStateHandler = (props: InputStateHandlerProps): JSX.Element => {
 };
 
 export { InputStateHandler };
+export type { InputStateHandlerProps };

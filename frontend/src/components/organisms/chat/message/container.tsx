@@ -1,138 +1,145 @@
-import { useEffect, useRef } from 'react';
+import { ChainlitAPI } from 'api/chainlitApi';
+import { useCallback } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { Box } from '@mui/material';
+import {
+  MessageContainer as CMessageContainer,
+  IAction,
+  IMessage,
+  IMessageElement
+} from '@chainlit/components';
 
-import { IMessageElement } from '@chainlit/components';
-
-import { IAction } from 'types/action';
-import { IMessage, INestedMessage } from 'types/chat';
-
-import Messages from './messages';
+import {
+  askUserState,
+  highlightMessage,
+  loadingState,
+  sessionState
+} from 'state/chat';
+import { avatarState, sideViewState } from 'state/element';
+import { playgroundState } from 'state/playground';
+import { projectSettingsState } from 'state/project';
+import { settingsState } from 'state/settings';
+import { accessTokenState } from 'state/user';
 
 interface Props {
-  messages: IMessage[];
-  elements: IMessageElement[];
   actions: IAction[];
+  elements: IMessageElement[];
+  messages: IMessage[];
   autoScroll?: boolean;
   setAutoScroll?: (autoScroll: boolean) => void;
 }
 
-// Nest messages based on parent id
-function nestMessages(messages: IMessage[]): INestedMessage[] {
-  const nestedMessages: INestedMessage[] = [];
-  const lookup: Record<string, INestedMessage> = {};
-
-  function addToParent(
-    parentId: string | undefined,
-    child: INestedMessage
-  ): void {
-    if (parentId) {
-      const parent = lookup[parentId];
-      if (!parent) return;
-      if (!parent.subMessages) parent.subMessages = [];
-      parent.subMessages.push(child);
-    } else {
-      nestedMessages.push(child);
-    }
-  }
-
-  for (const message of messages) {
-    const nestedMessage: INestedMessage = { ...message };
-    if (message.id) lookup[message.id] = nestedMessage;
-  }
-
-  for (const message of messages) {
-    if (!message.id) {
-      nestedMessages.push({ ...message });
-      continue;
-    }
-
-    const nestedMessage = lookup[message.id];
-    if (!nestedMessage) continue;
-
-    addToParent(message.parentId, nestedMessage);
-  }
-
-  return legacyNestMessages(nestedMessages);
-}
-
-// Nest messages based on deprecated indent parameter
-function legacyNestMessages(messages: INestedMessage[]): INestedMessage[] {
-  const nestedMessages: INestedMessage[] = [];
-  const parentStack: INestedMessage[] = [];
-
-  for (const message of messages) {
-    const nestedMessage: INestedMessage = { ...message };
-    const messageIndent = message.indent || 0;
-
-    if (messageIndent && !message.authorIsUser && !message.waitForAnswer) {
-      while (
-        parentStack.length > 0 &&
-        (parentStack[parentStack.length - 1].indent || 0) >= messageIndent
-      ) {
-        parentStack.pop();
-      }
-
-      const currentParent = parentStack[parentStack.length - 1];
-
-      if (currentParent) {
-        if (!currentParent.subMessages) {
-          currentParent.subMessages = [];
-        }
-        currentParent.subMessages.push(nestedMessage);
-      }
-    } else {
-      nestedMessages.push(nestedMessage);
-    }
-
-    parentStack.push(nestedMessage);
-  }
-
-  return nestedMessages;
-}
-
 const MessageContainer = ({
-  messages,
-  elements,
   actions,
   autoScroll,
+  elements,
+  messages,
   setAutoScroll
 }: Props) => {
-  const ref = useRef<HTMLDivElement>();
-  const nestedMessages = nestMessages(messages);
+  const accessToken = useRecoilValue(accessTokenState);
+  const appSettings = useRecoilValue(settingsState);
+  const askUser = useRecoilValue(askUserState);
+  const avatars = useRecoilValue(avatarState);
+  const highlightedMessage = useRecoilValue(highlightMessage);
+  const loading = useRecoilValue(loadingState);
+  const projectSettings = useRecoilValue(projectSettingsState);
+  const session = useRecoilValue(sessionState);
+  const setPlayground = useSetRecoilState(playgroundState);
+  const setSideView = useSetRecoilState(sideViewState);
 
-  useEffect(() => {
-    if (!ref.current || !autoScroll) {
-      return;
-    }
-    ref.current.scrollTop = ref.current.scrollHeight;
-  }, [messages, autoScroll]);
+  const navigate = useNavigate();
 
-  const handleScroll = () => {
-    if (!ref.current || !setAutoScroll) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = ref.current;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-    setAutoScroll(atBottom);
+  const onPlaygroundButtonClick = (message: IMessage) => {
+    setPlayground((old) => ({
+      ...old,
+      prompt: message.prompt,
+      originalPrompt: message.prompt
+    }));
   };
 
+  const onFeedbackUpdated = async (
+    messageId: string,
+    value: number,
+    onSuccess: () => void
+  ) => {
+    try {
+      await toast.promise(
+        ChainlitAPI.setHumanFeedback(messageId!, value, accessToken),
+        {
+          loading: 'Updating...',
+          success: 'Feedback updated!',
+          error: (err) => {
+            return <span>{err.message}</span>;
+          }
+        }
+      );
+
+      const globalMessage = messages.find((m) => m.id === messageId);
+      if (globalMessage) {
+        globalMessage.humanFeedback = value;
+      }
+      onSuccess();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onElementRefClick = (element: IMessageElement) => {
+    let path = `/element/${element.id}`;
+
+    if (element.display === 'side') {
+      setSideView(element);
+    }
+
+    if (element.conversationId) {
+      path += `?conversation=${element.conversationId}`;
+    }
+
+    navigate(element.display === 'page' ? path : '#');
+  };
+
+  const messageActions = actions.map((action) => ({
+    ...action,
+    onClick: async () => {
+      try {
+        const sessionId = session?.socket.id;
+
+        if (!sessionId) {
+          return;
+        }
+        session?.socket.emit('action_call', action);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error(err.message);
+        }
+      }
+    }
+  }));
+
   return (
-    <Box
-      ref={ref}
-      position="relative"
-      display="flex"
-      flexDirection="column"
-      overflow="auto"
-      flexGrow={1}
-      onScroll={handleScroll}
-    >
-      <Messages
-        indent={0}
-        messages={nestedMessages}
-        elements={elements}
-        actions={actions}
-      />
-    </Box>
+    <CMessageContainer
+      actions={messageActions}
+      elements={elements}
+      messages={messages}
+      autoScroll={autoScroll}
+      setAutoScroll={setAutoScroll}
+      context={{
+        askUser,
+        avatars,
+        defaultCollapseContent: appSettings.defaultCollapseContent,
+        expandAll: appSettings.expandAll,
+        hideCot: appSettings.hideCot,
+        highlightedMessage,
+        loading,
+        showFeedbackButtons: !!projectSettings?.project.database,
+        uiName: projectSettings?.ui?.name || '',
+        onPlaygroundButtonClick,
+        onFeedbackUpdated,
+        onElementRefClick
+      }}
+    />
   );
 };
 

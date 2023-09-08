@@ -4,9 +4,8 @@ import { Box } from '@mui/material';
 import { Tab, Tabs } from '@mui/material';
 
 import { IInput, InputStateHandler } from '@chainlit/components';
+import { useIsDarkMode } from '@chainlit/components/hooks';
 import { grey, primary } from '@chainlit/components/theme';
-
-import useIsDarkMode from 'hooks/useIsDarkMode';
 
 interface ToggleProps extends IInput {
   items: string[];

@@ -7,16 +7,15 @@ interface Props {
   author: string;
 }
 
-const AvatarElement = ({ element, author }: Props) => {
-  const src = element.url || URL.createObjectURL(new Blob([element.content!]));
-  const className = `message-avatar`;
-  return (
-    <Tooltip title={author}>
-      <span className={className}>
-        <Avatar sx={{ width: 38, height: 38, mt: '-4px' }} src={src} />
-      </span>
-    </Tooltip>
-  );
-};
+const AvatarElement = ({ element, author }: Props) => (
+  <Tooltip title={author}>
+    <span className={`message-avatar`}>
+      <Avatar
+        sx={{ width: 38, height: 38, mt: '-4px' }}
+        src={element.url || URL.createObjectURL(new Blob([element.content!]))}
+      />
+    </span>
+  </Tooltip>
+);
 
 export { AvatarElement };

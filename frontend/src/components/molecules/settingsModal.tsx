@@ -14,7 +14,7 @@ import {
   ListSubheader
 } from '@mui/material';
 
-import Switch from 'components/atoms/switch';
+import { SwitchInput } from '@chainlit/components';
 
 import { settingsState } from 'state/settings';
 
@@ -43,7 +43,7 @@ export default function SettingsModal() {
             </ListItemIcon>
             <ListItemText id="list-expand-all" primary="Expand Messages" />
             <Box>
-              <Switch
+              <SwitchInput
                 id="switch-expand-all"
                 onChange={() =>
                   setSettings((old) => ({ ...old, expandAll: !old.expandAll }))
@@ -61,7 +61,7 @@ export default function SettingsModal() {
             </ListItemIcon>
             <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
             <Box>
-              <Switch
+              <SwitchInput
                 id="switch-hide-cot"
                 onChange={() =>
                   setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
@@ -79,7 +79,7 @@ export default function SettingsModal() {
             </ListItemIcon>
             <ListItemText id="switch-theme" primary="Dark mode" />
             <Box>
-              <Switch
+              <SwitchInput
                 id="switch-theme"
                 onChange={() => {
                   const variant = settings.theme === 'light' ? 'dark' : 'light';

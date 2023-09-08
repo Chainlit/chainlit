@@ -2,7 +2,8 @@ import { EditorState } from 'draft-js';
 
 import { Alert, useTheme } from '@mui/material';
 
-import { IPrompt, IPromptMessage } from 'types/chat';
+import { IPrompt, IPromptMessage } from '@chainlit/components';
+
 import { PromptMode } from 'types/playground';
 
 import MessageWrapper from './MessageWrapper';

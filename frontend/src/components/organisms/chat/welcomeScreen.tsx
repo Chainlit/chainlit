@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 
 import { Box, Link } from '@mui/material';
 
-import Code from 'components/atoms/Code';
+import { Code } from '@chainlit/components';
 
 import { projectSettingsState } from 'state/project';
 

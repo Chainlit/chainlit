@@ -9,11 +9,13 @@ import {
   Typography
 } from '@mui/material';
 
-import SelectInput from 'components/organisms/inputs/selectInput';
+import {
+  IPromptMessage,
+  PromptMessageRole,
+  SelectInput
+} from '@chainlit/components';
 
 import { playgroundState } from 'state/playground';
-
-import { IPromptMessage, PromptMessageRole } from 'types/chat';
 
 const roles = ['Assistant', 'System', 'User'];
 

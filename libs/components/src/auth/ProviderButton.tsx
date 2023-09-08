@@ -9,7 +9,7 @@ const ICONS: { [key: string]: React.ReactNode } = {
   // microsoft: <Microsoft />
 };
 
-export type Provider = 'Google' | 'GitHub' | 'Microsoft';
+type Provider = 'Google' | 'GitHub' | 'Microsoft';
 
 interface ProviderButtonProps {
   provider: Provider;
@@ -40,4 +40,5 @@ const ProviderButton = ({
   );
 };
 
-export default ProviderButton;
+export { ProviderButton };
+export type { Provider };

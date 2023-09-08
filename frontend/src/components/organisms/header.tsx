@@ -15,7 +15,8 @@ import {
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import RegularButton from 'components/atoms/buttons/button';
+import { RegularButton } from '@chainlit/components';
+
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
 import NewChatButton from 'components/molecules/newChatButton';

@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
+import { IMessage } from '@chainlit/components';
+
 import SideView from 'components/atoms/element/sideView';
 import ErrorBoundary from 'components/atoms/errorBoundary';
 import TaskList from 'components/molecules/tasklist';
@@ -16,8 +18,6 @@ import { chatHistoryState } from 'state/chatHistory';
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
-import { IMessage } from 'types/chat';
-
 import PromptPlayground from '../playground';
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
@@ -29,10 +29,10 @@ const Chat = () => {
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const [messages, setMessages] = useRecoilState(messagesState);
-  const elements = useRecoilValue(elementState);
   const tasklistElements = useRecoilValue(tasklistState);
-  const actions = useRecoilValue(actionState);
   const pSettings = useRecoilValue(projectSettingsState);
+  const actions = useRecoilValue(actionState);
+  const elements = useRecoilValue(elementState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
 

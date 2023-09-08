@@ -1,8 +1,10 @@
+import { IPrompt } from '@chainlit/components';
+
 import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
 import { IDatasetFilters } from 'state/dataset';
 
-import { IChat, IPrompt } from 'types/chat';
+import { IChat } from 'types/chat';
 
 import { api } from '.';
 

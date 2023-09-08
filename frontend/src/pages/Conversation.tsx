@@ -2,13 +2,14 @@ import { useParams } from 'react-router-dom';
 
 import { Box } from '@mui/material';
 
+import { IAction } from '@chainlit/components';
+
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/message/container';
 import PromptPlaground from 'components/organisms/playground';
 
 import { useApi } from 'hooks/useApi';
 
-import { IAction } from 'types/action';
 import { IChat } from 'types/chat';
 
 export default function Conversation() {
