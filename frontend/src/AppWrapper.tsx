@@ -2,8 +2,7 @@ import App from 'App';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
-import AuthProvider from 'components/atoms/authProvider';
-
+import { useAuth } from 'hooks/auth';
 import { useApi } from 'hooks/useApi';
 
 import { IProjectSettings, projectSettingsState } from 'state/project';
@@ -12,9 +11,14 @@ import { settingsState } from 'state/settings';
 export default function AppWrapper() {
   const [pSettings, setPSettings] = useRecoilState(projectSettingsState);
   const setAppSettings = useSetRecoilState(settingsState);
+  const { isAuthenticated, isReady } = useAuth();
+
+  if (!isAuthenticated && window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
 
   const { data } = useApi<IProjectSettings>(
-    pSettings === undefined ? '/project/settings' : null
+    pSettings === undefined && isAuthenticated ? '/project/settings' : null
   );
 
   useEffect(() => {
@@ -27,11 +31,11 @@ export default function AppWrapper() {
       expandAll: !!data.ui.default_expand_messages,
       hideCot: !!data.ui.hide_cot
     }));
-  }, [data]);
+  }, [data, setPSettings, setAppSettings]);
 
-  return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  );
+  if (!isReady) {
+    return null;
+  }
+
+  return <App />;
 }

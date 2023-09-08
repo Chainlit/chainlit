@@ -13,7 +13,6 @@
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.2.1",
     "@chainlit/components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

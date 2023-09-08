@@ -67,10 +67,15 @@ def load_user_env(user_env):
 
 @socket.on("connect")
 async def connect(sid, environ, auth):
-    authorization_header = environ.get("HTTP_AUTHORIZATION")
-    token = authorization_header.split(" ")[1] if authorization_header else None
-    user = await get_current_user(token=token)
-    if not user:
+    user = None
+    token = None
+    try:
+        # Check if the authentication is required
+        if config.code.password_auth_callback is not None:
+            authorization_header = environ.get("HTTP_AUTHORIZATION")
+            token = authorization_header.split(" ")[1] if authorization_header else None
+            user = await get_current_user(token=token)
+    except Exception as e:
         return False
 
     # Function to send a message to this particular session

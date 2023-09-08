@@ -38,9 +38,9 @@ class Session:
         # Headers received during the websocket connection handshake
         initial_headers: Dict[str, str],
         # Logged-in user informations
-        user: UserDetails,
+        user: Optional[UserDetails],
         # Logged-in user token
-        token: str,
+        token: Optional[str],
         # Optional langchain agent
         agent: Optional[Any] = None,
         # Optional llama instance

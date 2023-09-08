@@ -36,7 +36,6 @@ const api = {
       const headers: { Authorization?: string; 'Content-Type': string } = {
         'Content-Type': 'application/json'
       };
-      token = localStorage.getItem('token') || '';
       if (token) headers['Authorization'] = token;
 
       const res = await fetch(httpEndpoint + endpoint, {
@@ -48,6 +47,9 @@ const api = {
 
       if (!res.ok) {
         const body = await res.json();
+        if (res.status === 401 && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         throw new ClientError(res.statusText, body.detail);
       }
 
@@ -61,7 +63,7 @@ const api = {
     }
   },
 
-  get: async (endpoint: string, token: string) =>
+  get: async (endpoint: string, token?: string) =>
     await api.fetch('GET', endpoint, token),
 
   post: async (
@@ -81,4 +83,4 @@ const api = {
     await api.fetch('DELETE', endpoint, token, data)
 };
 
-export { api };
+export { api, httpEndpoint };

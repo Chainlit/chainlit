@@ -38,9 +38,8 @@ const compareMessageIds = (a: IMessage, b: IMessage) => {
   return false;
 };
 
-export default memo(function Socket() {
-  const pSettings = useRecoilValue(projectSettingsState);
-  const { accessToken, authenticating } = useAuth();
+const Socket = memo(function Socket() {
+  const { accessToken, isAuthenticated } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const setLoading = useSetRecoilState(loadingState);
   const sessionId = useRecoilValue(sessionIdState);
@@ -57,7 +56,15 @@ export default memo(function Socket() {
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
 
   useEffect(() => {
-    if (authenticating || !pSettings) return;
+    if (!isAuthenticated && session?.socket) {
+      // Disconnect when logging out
+      session.socket.removeAllListeners();
+      session.socket.close();
+    }
+
+    // Wait for authentication to create the websocket connection
+    // If no auth is required, isAuthenticated is always true
+    if (!isAuthenticated) return;
 
     if (session?.socket) {
       session.socket.removeAllListeners();
@@ -67,7 +74,7 @@ export default memo(function Socket() {
     const socket = io(wsEndpoint, {
       path: '/ws/socket.io',
       extraHeaders: {
-        Authorization: localStorage.getItem('token') || '',
+        Authorization: accessToken || '',
         'X-Chainlit-Session-Id': sessionId,
         'user-env': JSON.stringify(userEnv)
       }
@@ -245,7 +252,9 @@ export default memo(function Socket() {
     socket.on('token_usage', (count: number) => {
       setTokenCount((old) => old + count);
     });
-  }, [userEnv, authenticating, pSettings]);
+  }, [userEnv, isAuthenticated]);
 
   return null;
 });
+
+export default Socket;

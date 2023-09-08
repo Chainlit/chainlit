@@ -1,32 +1,69 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { useRecoilValue } from 'recoil';
+import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import useSWRImmutable from 'swr/immutable';
+import { useLocalStorage } from 'usehooks-ts';
 
-import { projectSettingsState } from 'state/project';
-import { accessTokenState, roleState } from 'state/user';
+import { accessTokenState } from 'state/user';
+
+import { IUserDetails } from 'types/user';
+
+import { fetcher } from './useApi';
 
 export const useAuth = () => {
-  const pSettings = useRecoilValue(projectSettingsState);
-  const { isAuthenticated, isLoading: _isLoading, ...other } = useAuth0();
-  const accessToken = useRecoilValue(accessTokenState);
-  const role = useRecoilValue(roleState);
+  const { data: config, isLoading: isLoadingConfig } = useSWRImmutable(
+    '/auth/config',
+    fetcher
+  );
+  const isReady = !isLoadingConfig && config;
 
-  // If project id isn't set, the auth0 provider is not used and _isLoading is always true
-  const isLoading = _isLoading && pSettings?.project?.id;
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+  const [_, setToken] = useLocalStorage('token', accessToken);
+  const [user, setUser] = useState<IUserDetails | null>(null);
 
-  const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
+  useEffect(() => {
+    setToken(accessToken);
+    if (!accessToken) {
+      return;
+    }
+    try {
+      const { exp, ...userDetails } = JSON.parse(
+        atob(accessToken.split('.')[1])
+      );
+      setUser(userDetails as IUserDetails);
+    } catch (e) {
+      console.error('Invalid token, clearing token from local storage');
+      setUser(null);
+      setAccessToken('');
+    }
+  }, [accessToken, setAccessToken, setToken]);
 
-  const cloudAuthRequired =
-    pSettings?.project.id && pSettings?.project.public === false;
-  const authenticating = isLoading || (isAuthenticated && !accessToken);
+  const isAuthenticated = !!accessToken;
+
+  if (config && !config.requireLogin) {
+    return {
+      config,
+      user: null,
+      role: 'ANONYMOUS',
+      isReady,
+      isAuthenticated: true,
+      accessToken: '',
+      logout: () => {},
+      setAccessToken: () => {}
+    };
+  }
 
   return {
-    role,
-    accessToken,
+    config,
+    user: user,
+    role: user?.role,
     isAuthenticated,
-    authenticating,
-    isProjectMember,
-    isLoading,
-    cloudAuthRequired,
-    ...other
+    isReady,
+    accessToken: accessToken,
+    logout: () => {
+      setUser(null);
+      setAccessToken('');
+    },
+    setAccessToken: (accessToken: string) =>
+      setAccessToken(`Bearer ${accessToken}`)
   };
 };

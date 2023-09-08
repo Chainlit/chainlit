@@ -3,12 +3,12 @@ from typing import Dict
 
 import jwt
 from chainlit.types import UserDetails
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 from chainlit import config
 
-reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login")
+reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
 
 def get_configuration():
@@ -32,6 +32,10 @@ def create_jwt(data: UserDetails) -> str:
 
 
 async def get_current_user(token: str = Depends(reuseable_oauth)):
+    # Check if the authentication is required
+    if config.code.password_auth_callback is None:
+        return None
+
     try:
         dict = jwt.decode(
             token,
@@ -42,7 +46,5 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         del dict["exp"]
         user_details = UserDetails(**dict)
         return user_details
-    except jwt.PyJWTError as e:
-        pass
-
-    return None
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid authentication token")

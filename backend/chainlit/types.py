@@ -85,30 +85,34 @@ class Theme(str, Enum):
     dark = "dark"
 
 
-Roles = Literal["user", "admin", "owner"]
+Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
+Provider = Literal["credentials", "header"]
 
 
 # Used when logging-in a user
 class UserDetails:
     id: str
     username: str
-    role: Roles
+    role: Role
     tags: Optional[List[str]]
     image: Optional[str]
+    provider: Optional[Provider]
 
     def __init__(
         self,
         id: str,
-        role: Roles,
+        role: Role,
         username: Optional[str] = None,
         tags: Optional[List[str]] = None,
         image: Optional[str] = None,
+        provider: Optional[Provider] = None,
     ):
         self.id = id
         self.username = id if username is None or username == "" else username
         self.role = role
         self.tags = tags
         self.image = image
+        self.provider = provider
 
     def to_dict(self):
         return {
@@ -117,4 +121,5 @@ class UserDetails:
             "role": self.role,
             "tags": self.tags,
             "image": self.image,
+            "provider": self.provider,
         }

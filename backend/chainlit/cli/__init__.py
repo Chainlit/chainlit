@@ -9,8 +9,6 @@ import uvicorn
 nest_asyncio.apply()
 
 from chainlit.cache import init_lc_cache
-from chainlit.cli.auth import login, logout
-from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.config import (
     BACKEND_ROOT,
@@ -20,12 +18,11 @@ from chainlit.config import (
     init_config,
     load_module,
 )
+from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
-
-from chainlit.db import init_local_db, migrate_local_db
 
 
 # Create the main command group for Chainlit CLI
@@ -154,37 +151,12 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
     run_chainlit(target)
 
 
-@cli.command("deploy")
-@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.argument("args", nargs=-1)
-def chainlit_deploy(target, args=None, **kwargs):
-    trace_event("chainlit deploy")
-    raise NotImplementedError("Deploy is not yet implemented")
-    deploy(target)
-
-
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
     hello_path = os.path.join(BACKEND_ROOT, "hello.py")
     run_chainlit(hello_path)
-
-
-@cli.command("login")
-@click.argument("args", nargs=-1)
-def chainlit_login(args=None, **kwargs):
-    trace_event("chainlit login")
-    login()
-    sys.exit(0)
-
-
-@cli.command("logout")
-@click.argument("args", nargs=-1)
-def chainlit_logout(args=None, **kwargs):
-    trace_event("chainlit logout")
-    logout()
-    sys.exit(0)
 
 
 @cli.command("migrate")

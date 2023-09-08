@@ -46,7 +46,7 @@ const Chat = () => {
 
       const message: IMessage = {
         id: uuidv4(),
-        author: user?.name || 'User',
+        author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
         createdAt: new Date().toISOString()
@@ -81,7 +81,7 @@ const Chat = () => {
       if (!askUser) return;
       const message = {
         id: uuidv4(),
-        author: user?.name || 'User',
+        author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
         createdAt: new Date().toISOString()

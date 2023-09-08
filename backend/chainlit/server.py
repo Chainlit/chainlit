@@ -38,7 +38,7 @@ from chainlit.types import (
     Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import Depends, FastAPI, HTTPException, Request, Query, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -193,8 +193,7 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
-    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}" if config.ui.theme else ""
-                          + f"window.auth = {json.dumps(get_configuration())}"}</script>"""
+    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
@@ -204,6 +203,11 @@ def get_html_template():
         if js:
             content = content.replace(JS_PLACEHOLDER, js)
         return content
+
+
+@app.get("/auth/config")
+async def auth(request: Request):
+    return get_configuration()
 
 
 @app.post("/completion")
