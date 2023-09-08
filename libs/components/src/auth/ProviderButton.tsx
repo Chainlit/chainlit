@@ -1,7 +1,16 @@
-import { GitHub, Google } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { GitHub, Google, Microsoft } from '@mui/icons-material';
+import { Box, Button } from '@mui/material';
 
 import { grey } from '../../theme/palette';
+
+function getProviderName(provider: string) {
+  switch (provider) {
+    case 'azure-ad':
+      return 'Microsoft Account';
+    default:
+      return provider;
+  }
+}
 
 function renderProviderIcon(provider: string) {
   switch (provider) {
@@ -9,6 +18,8 @@ function renderProviderIcon(provider: string) {
       return <Google />;
     case 'github':
       return <GitHub />;
+    case 'azure-ad':
+      return <Microsoft />;
     default:
       return null;
   }
@@ -37,9 +48,15 @@ const ProviderButton = ({
         borderColor: grey[400],
         padding: 1.5,
         paddingLeft: 3,
-        justifyContent: 'flex-start'
+        justifyContent: 'flex-start',
+        whiteSpace: 'pre'
       }}
-    >{`${isSignIn ? 'Continue' : 'Sign up'} with ${provider}`}</Button>
+    >
+      {`${isSignIn ? 'Continue' : 'Sign up'} with `}
+      <Box component="span" sx={{ textTransform: 'capitalize' }}>
+        {getProviderName(provider)}
+      </Box>
+    </Button>
   );
 };
 
