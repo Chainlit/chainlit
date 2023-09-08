@@ -3,7 +3,7 @@ import { Box, Stack, Typography } from '@mui/material';
 interface AuthTemplateProps {
   children: React.ReactNode;
   renderLogo?: React.ReactElement;
-  title: string;
+  title?: string;
 }
 
 const AuthTemplate = ({
@@ -44,7 +44,7 @@ const AuthTemplate = ({
           }}
         >
           {renderLogo}
-          <Typography>{title}</Typography>
+          {title ? <Typography>{title}</Typography> : null}
         </Stack>
         <Stack gap={1} paddingX={3}>
           {children}
