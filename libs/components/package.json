@@ -24,7 +24,9 @@
   "scripts": {
     "build": "tsup src/index.ts theme/index.ts hooks/index.ts --dts --format=esm,cjs --clean --dts",
     "build:watch": "tsc && vite build --watch",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext .ts,.tsx && tsc --noemit",
+    "format": "prettier **/*.{ts,tsx} --write --loglevel error",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -41,11 +43,15 @@
     "remark-gfm": "^3.0.1",
     "swr": "^2.2.2",
     "usehooks-ts": "^2.9.1",
-    "yup": "^1.2.0"
+    "yup": "^1.2.0",
+    "vitest": "^0.34.3"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.0.0",
     "@types/react-resizable": "^3.0.4",
     "@types/react-syntax-highlighter": "^15.5.7",
+    "jsdom": "^22.1.0",
     "tsup": "^7.2.0",
     "vite": "^4.4.5"
   },

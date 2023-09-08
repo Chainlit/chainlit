@@ -18,7 +18,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "pnpm exec ts-node ./cypress/support/e2e.ts && (cd frontend && pnpm run test)",
+    "test": "pnpm exec ts-node ./cypress/support/e2e.ts",
     "prepare": "husky install",
     "lintUi": "cd frontend && pnpm run lint",
     "formatUi": "cd frontend && pnpm run format",
