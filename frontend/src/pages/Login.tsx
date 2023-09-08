@@ -45,7 +45,7 @@ export default function Login() {
         }
       }}
       onOAuthSignIn={async () => {}}
-      renderLogo={<img src={`/logo?theme=${theme}`} alt="logo" />}
+      renderLogo={<img src={`/logo?theme=${theme}`} alt="logo" width="100%" />}
     />
   );
 }
