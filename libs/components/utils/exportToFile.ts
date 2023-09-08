@@ -1,4 +1,4 @@
-export function exportToFile(data: string, filename: string) {
+const exportToFile = (data: string, filename: string) => {
   const blob = new Blob([data], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -8,4 +8,6 @@ export function exportToFile(data: string, filename: string) {
   link.click();
 
   URL.revokeObjectURL(url);
-}
+};
+
+export { exportToFile };

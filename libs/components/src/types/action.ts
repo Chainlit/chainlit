@@ -1,8 +1,9 @@
 export interface IAction {
-  id: string;
-  name: string;
-  value: string;
-  forId: string;
-  label?: string;
   description?: string;
+  forId: string;
+  id: string;
+  label?: string;
+  name: string;
+  onClick: () => void;
+  value: string;
 }

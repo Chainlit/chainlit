@@ -29,10 +29,10 @@ const Chat = () => {
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const [messages, setMessages] = useRecoilState(messagesState);
-  const elements = useRecoilValue(elementState);
   const tasklistElements = useRecoilValue(tasklistState);
-  const actions = useRecoilValue(actionState);
   const pSettings = useRecoilValue(projectSettingsState);
+  const actions = useRecoilValue(actionState);
+  const elements = useRecoilValue(elementState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
 

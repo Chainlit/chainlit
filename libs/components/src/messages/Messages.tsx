@@ -1,10 +1,12 @@
-import { useRecoilValue } from 'recoil';
+import { useContext } from 'react';
 
-import { IAction, IMessageElement, INestedMessage } from '@chainlit/components';
+import { IAction } from '../types/action';
+import { IMessageElement } from '../types/element';
+import { INestedMessage } from '../types/message';
 
-import { loadingState } from 'state/chat';
-
-import Message from './message';
+import { MessageContext } from '../../contexts/MessageContext';
+import { isLastMessage } from '../../utils/message';
+import { Message } from './Message';
 
 interface Props {
   messages: INestedMessage[];
@@ -14,30 +16,15 @@ interface Props {
   isRunning?: boolean;
 }
 
-function isLastMessage(messages: INestedMessage[], index: number) {
-  if (messages.length - 1 === index) {
-    return true;
-  }
-
-  for (let i = index + 1; i < messages.length; i++) {
-    if (messages[i].streaming) {
-      continue;
-    } else {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-export default function Messages({
+const Messages = ({
   messages,
   elements,
   actions,
   indent,
   isRunning
-}: Props) {
-  const loading = useRecoilValue(loadingState);
+}: Props) => {
+  const messageContext = useContext(MessageContext);
+
   const isRoot = indent === 0;
   let previousAuthor = '';
 
@@ -46,14 +33,18 @@ export default function Messages({
     const hasChildren = !!m.subMessages?.length;
     const isLast = i === messages.length - 1;
     const messageRunning =
-      isRunning === undefined ? loading && isLast : isRunning && isLast;
+      isRunning === undefined
+        ? messageContext.loading && isLast
+        : isRunning && isLast;
     return hasContent || hasChildren || (!hasContent && messageRunning);
   });
+
   return (
     <>
       {filtered.map((m, i) => {
         const isLast = isLastMessage(filtered, i);
-        let messageRunning = isRunning === undefined ? loading : isRunning;
+        let messageRunning =
+          isRunning === undefined ? messageContext.loading : isRunning;
         if (isRoot) {
           messageRunning = messageRunning && isLast;
         }
@@ -76,4 +67,6 @@ export default function Messages({
       })}
     </>
   );
-}
+};
+
+export { Messages };

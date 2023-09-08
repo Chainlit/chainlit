@@ -1,25 +1,23 @@
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useContext } from 'react';
 
-import BugReportIcon from '@mui/icons-material/BugReport';
+import { BugReport } from '@mui/icons-material';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
-import { IAction, IMessage } from '@chainlit/components';
+import { IAction } from '../../types/action';
+import { IMessage } from '../../types/message';
 
-import ActionList from 'components/atoms/actionsList';
-
-import { playgroundState } from 'state/playground';
-import { projectSettingsState } from 'state/project';
-
-import FeedbackButtons from './feedbackButtons';
+import { MessageContext } from '../../../contexts/MessageContext';
+import { ActionList } from '../../ActionList';
+import { FeedbackButtons } from './FeedbackButtons';
 
 interface Props {
   message: IMessage;
   actions: IAction[];
 }
 
-export default function Buttons({ message, actions }: Props) {
-  const projectSettings = useRecoilValue(projectSettingsState);
-  const setPlayground = useSetRecoilState(playgroundState);
+const Buttons = ({ message, actions }: Props) => {
+  const { onPlaygroundButtonClick, showFeedbackButtons: showFbButtons } =
+    useContext(MessageContext);
 
   const scopedActions = actions.filter((a) => {
     if (a.forId) {
@@ -37,20 +35,16 @@ export default function Buttons({ message, actions }: Props) {
         className="playground-button"
         onClick={() => {
           if (!message.prompt) return;
-          setPlayground((old) => ({
-            ...old,
-            prompt: message.prompt,
-            originalPrompt: message.prompt
-          }));
+          onPlaygroundButtonClick && onPlaygroundButtonClick(message);
         }}
       >
-        <BugReportIcon sx={{ width: '16px', height: '16px' }} />
+        <BugReport sx={{ width: '16px', height: '16px' }} />
       </IconButton>
     </Tooltip>
   ) : null;
 
   const showFeedbackButtons =
-    !!projectSettings?.project?.database &&
+    showFbButtons &&
     !message.authorIsUser &&
     !message.waitForAnswer &&
     !!message.content;
@@ -62,4 +56,6 @@ export default function Buttons({ message, actions }: Props) {
       {scopedActions.length ? <ActionList actions={scopedActions} /> : null}
     </Stack>
   );
-}
+};
+
+export { Buttons };

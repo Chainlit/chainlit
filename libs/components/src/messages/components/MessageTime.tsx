@@ -1,12 +1,12 @@
 import { Typography } from '@mui/material';
 
-import { grey } from '@chainlit/components/theme';
+import { grey } from '../../../theme/palette';
 
 interface Props {
   timestamp: number | string;
 }
 
-export default function MessageTime({ timestamp }: Props) {
+const MessageTime = ({ timestamp }: Props) => {
   if (!timestamp) return null;
   const dateOptions: Intl.DateTimeFormatOptions = {
     hour: '2-digit',
@@ -19,4 +19,6 @@ export default function MessageTime({ timestamp }: Props) {
       {date}
     </Typography>
   );
-}
+};
+
+export { MessageTime };

@@ -1,57 +1,32 @@
-import React from 'react';
-import { useCallback } from 'react';
-import { toast } from 'react-hot-toast';
-import { useRecoilValue } from 'recoil';
+import { useContext, useState } from 'react';
 
 import { LoadingButton } from '@mui/lab';
 import { Box, Menu, Stack, Theme, useMediaQuery } from '@mui/material';
 import { Tooltip } from '@mui/material';
 
-import { IAction, RegularButton } from '@chainlit/components';
+import { IAction } from './types/action';
 
-import { loadingState, sessionState } from 'state/chat';
-
-import { ISession } from 'types/chat';
+import { MessageContext } from '../contexts/MessageContext';
+import { RegularButton } from './buttons/RegularButton';
 
 interface ActionProps {
   action: IAction;
   loading: boolean;
-  session?: ISession;
 }
 
-const Action = ({ action, loading, session }: ActionProps) => {
-  const call = useCallback(async () => {
-    try {
-      const sessionId = session?.socket.id;
-
-      if (!sessionId) {
-        return;
-      }
-      session?.socket.emit('action_call', action);
-    } catch (err) {
-      if (err instanceof Error) {
-        toast.error(err.message);
-      }
-    }
-  }, [session]);
-
-  const button = (
-    <LoadingButton id={action.id} onClick={call} disabled={loading}>
-      {action.label || action.name}
-    </LoadingButton>
-  );
-
+const Action = ({ action, loading }: ActionProps) => {
   return (
     <Tooltip title={action.description} placement="top">
-      {button}
+      <LoadingButton id={action.id} onClick={action.onClick} disabled={loading}>
+        {action.label || action.name}
+      </LoadingButton>
     </Tooltip>
   );
 };
 
-export default function ActionList({ actions }: { actions: IAction[] }) {
-  const loading = useRecoilValue(loadingState);
-  const session = useRecoilValue(sessionState);
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+const ActionList = ({ actions }: { actions: IAction[] }) => {
+  const { loading } = useContext(MessageContext);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down('sm')
@@ -59,12 +34,7 @@ export default function ActionList({ actions }: { actions: IAction[] }) {
 
   const renderActions = (items: IAction[]) =>
     items.map((action) => (
-      <Action
-        key={action.id}
-        action={action}
-        loading={loading}
-        session={session}
-      />
+      <Action key={action.id} action={action} loading={loading} />
     ));
 
   return (
@@ -97,4 +67,6 @@ export default function ActionList({ actions }: { actions: IAction[] }) {
       ) : null}
     </Box>
   );
-}
+};
+
+export { ActionList };

@@ -1,15 +1,15 @@
-import { useRecoilValue } from 'recoil';
+import { useContext } from 'react';
 
-import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
+import { CloudUploadOutlined } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { Stack, Typography } from '@mui/material';
 
-import { IAsk, IFileResponse } from '@chainlit/components';
-import { useUpload } from '@chainlit/components/hooks';
-import { grey } from '@chainlit/components/theme';
+import { useUpload } from '../../../hooks/useUpload';
 
-import { askUserState } from 'state/chat';
+import { IAsk, IFileResponse } from '../../types/file';
+
+import { MessageContext } from '../../../contexts/MessageContext';
+import { grey } from '../../../theme/palette';
 
 const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   const upload = useUpload({
@@ -54,10 +54,12 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   );
 };
 
-export default function AskUploadButton() {
-  const askUser = useRecoilValue(askUserState);
+const AskUploadButton = () => {
+  const messageContext = useContext(MessageContext);
 
-  if (askUser?.spec.type !== 'file') return null;
+  if (messageContext.askUser?.spec.type !== 'file') return null;
 
-  return <AskUploadChildButton askUser={askUser} />;
-}
+  return <AskUploadChildButton askUser={messageContext.askUser} />;
+};
+
+export { AskUploadButton };

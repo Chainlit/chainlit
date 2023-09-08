@@ -1,20 +1,20 @@
 import { keyframes } from '@emotion/react';
-import { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useContext, useEffect, useState } from 'react';
 
 import { Box, Stack } from '@mui/material';
 
-import { IAction, IMessageElement, INestedMessage } from '@chainlit/components';
+import { AskUploadButton } from './components/AskUploadButton';
+import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
+import { Buttons } from './components/Buttons';
+import { DetailsButton } from './components/DetailsButton';
+import { MessageContent } from './components/MessageContent';
 
-import { highlightMessage } from 'state/chat';
-import { settingsState } from 'state/settings';
+import { IAction } from '../types/action';
+import { IMessageElement } from '../types/element';
+import { INestedMessage } from '../types/message';
 
-import AskUploadButton from './AskUploadButton';
-import Author, { authorBoxWidth } from './author';
-import Buttons from './buttons';
-import MessageContent from './content';
-import DetailsButton from './detailsButton';
-import Messages from './messages';
+import { MessageContext } from '../../contexts/MessageContext';
+import { Messages } from './Messages';
 
 interface Props {
   message: INestedMessage;
@@ -27,19 +27,6 @@ interface Props {
   isLast?: boolean;
 }
 
-// Uses yellow[500] with 50% opacity
-const flash = keyframes`
-  from {
-    background-color: transparent;
-  }
-  25% {
-    background-color: rgba(255, 173, 51, 0.5);
-  }
-  to {
-    background-color: transparent;
-  }
-`;
-
 const Message = ({
   message,
   elements,
@@ -50,15 +37,14 @@ const Message = ({
   isRunning,
   isLast
 }: Props) => {
-  const appSettings = useRecoilValue(settingsState);
-  const highlightedMessage = useRecoilValue(highlightMessage);
-  const [showDetails, setShowDetails] = useState(appSettings.expandAll);
+  const messageContext = useContext(MessageContext);
+  const [showDetails, setShowDetails] = useState(messageContext.expandAll);
 
   useEffect(() => {
-    setShowDetails(appSettings.expandAll);
-  }, [appSettings.expandAll]);
+    setShowDetails(messageContext.expandAll);
+  }, [messageContext.expandAll]);
 
-  if (appSettings.hideCot && indent) {
+  if (messageContext.hideCot && indent) {
     return null;
   }
 
@@ -83,13 +69,13 @@ const Message = ({
         <Stack
           id={`message-${message.id}`}
           direction="row"
-          ml={indent ? `${indent * (authorBoxWidth + 16)}px` : 0}
+          ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
           sx={{
             py: 2,
             borderBottom: (theme) =>
               showBorder ? `1px solid ${theme.palette.divider}` : 'none',
             animation:
-              message.id && highlightedMessage === message.id
+              message.id && messageContext.highlightedMessage === message.id
                 ? `3s ease-in-out 0.1s ${flash}`
                 : 'none'
           }}
@@ -109,7 +95,7 @@ const Message = ({
               content={message.content}
               language={message.language}
               preserveSize={
-                !!message.streaming || !appSettings.defaultCollapseContent
+                !!message.streaming || !messageContext.defaultCollapseContent
               }
             />
             <DetailsButton
@@ -138,4 +124,17 @@ const Message = ({
   );
 };
 
-export default Message;
+// Uses yellow[500] with 50% opacity
+const flash = keyframes`
+  from {
+    background-color: transparent;
+  }
+  25% {
+    background-color: rgba(255, 173, 51, 0.5);
+  }
+  to {
+    background-color: transparent;
+  }
+`;
+
+export { Message };

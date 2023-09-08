@@ -1,12 +1,12 @@
-import { useRecoilValue } from 'recoil';
+import { useContext } from 'react';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { GreyButton, INestedMessage } from '@chainlit/components';
+import { INestedMessage } from '../../types/message';
 
-import { settingsState } from 'state/settings';
+import { MessageContext } from '../../../contexts/MessageContext';
+import { GreyButton } from '../../buttons/GreyButton';
 
 interface Props {
   message: INestedMessage;
@@ -15,13 +15,8 @@ interface Props {
   onClick: () => void;
 }
 
-export default function DetailsButton({
-  message,
-  opened,
-  onClick,
-  loading
-}: Props) {
-  const { hideCot } = useRecoilValue(settingsState);
+const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
+  const messageContext = useContext(MessageContext);
 
   const nestedCount = message.subMessages?.length;
   const nested = !!nestedCount;
@@ -35,7 +30,7 @@ export default function DetailsButton({
 
   const show = nested || isRunningEmptyStep || isRunningUserMessage;
 
-  if (!show || hideCot) {
+  if (!show || messageContext.hideCot) {
     return null;
   }
 
@@ -74,17 +69,13 @@ export default function DetailsButton({
       }
       variant="contained"
       endIcon={
-        nested && tool ? (
-          opened ? (
-            <ExpandLessIcon />
-          ) : (
-            <ExpandMoreIcon />
-          )
-        ) : undefined
+        nested && tool ? opened ? <ExpandLess /> : <ExpandMore /> : undefined
       }
       onClick={tool ? onClick : undefined}
     >
       {text}
     </GreyButton>
   );
-}
+};
+
+export { DetailsButton };

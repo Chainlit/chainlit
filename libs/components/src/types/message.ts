@@ -1,3 +1,5 @@
+import { IMessageElement } from './element';
+
 interface IBaseTemplate {
   template?: string;
   formatted?: string;
@@ -39,4 +41,13 @@ export interface IMessage {
 
 export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
+}
+
+export interface IMessageContent {
+  authorIsUser?: boolean;
+  content?: string;
+  elements: IMessageElement[];
+  id?: string;
+  language?: string;
+  preserveSize?: boolean;
 }
