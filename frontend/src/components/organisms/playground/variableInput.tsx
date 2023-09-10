@@ -1,9 +1,9 @@
 import map from 'lodash/map';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { playgroundState, variableState } from 'state/playground';
+import { SelectInput } from '@chainlit/components';
 
-import SelectInput from '../inputs/selectInput';
+import { playgroundState, variableState } from 'state/playground';
 
 const VariableInput = (): JSX.Element | null => {
   const [variableName, setVariableName] = useRecoilState(variableState);

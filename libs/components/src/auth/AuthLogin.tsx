@@ -19,7 +19,7 @@ import useWindowLocation from '../hooks/useLocation';
 import { grey } from '../../theme/palette';
 import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
-import { ProviderButton } from './ProviderButton';
+import { Provider, ProviderButton } from './ProviderButton';
 
 const signinErrors: Record<string, string> = {
   default: 'Unable to sign in.',

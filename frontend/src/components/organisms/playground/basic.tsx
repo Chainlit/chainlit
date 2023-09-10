@@ -3,9 +3,9 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { Alert, Stack } from '@mui/material';
 
-import { modeState, playgroundState } from 'state/playground';
+import { IPrompt } from '@chainlit/components';
 
-import { IPrompt } from 'types/chat';
+import { modeState, playgroundState } from 'state/playground';
 
 import Completion from './editor/completion';
 import FormattedEditor from './editor/formatted';

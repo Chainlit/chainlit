@@ -10,9 +10,8 @@ import {
   useTheme
 } from '@mui/material';
 
+import { ClipboardCopy } from '@chainlit/components';
 import { grey } from '@chainlit/components/theme';
-
-import ClipboardCopy from 'components/atoms/ClipboardCopy';
 
 interface Props {
   className?: string;

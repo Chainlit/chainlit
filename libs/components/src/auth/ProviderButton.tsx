@@ -1,4 +1,4 @@
-import { GitHub, Google } from '@mui/icons-material';
+import { GitHub, Google, Microsoft } from '@mui/icons-material';
 import { Button } from '@mui/material';
 
 import { grey } from '../../theme/palette';
@@ -9,6 +9,8 @@ function renderProviderIcon(provider: string) {
       return <Google />;
     case 'github':
       return <GitHub />;
+    case 'microsoft':
+      return <Microsoft />;
     default:
       return null;
   }

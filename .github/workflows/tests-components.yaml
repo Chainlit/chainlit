@@ -1,0 +1,33 @@
+name: Tests @chainlit/components
+
+# on:
+#   push:
+#     paths:
+#       - 'libs/components'
+
+on: [workflow_call]
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.9
+      - name: Use Node.js 16.15.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.15.0'
+          cache: 'pnpm'
+      - name: Install JS dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Build components
+        run: pnpm run build:components
+      - name: Lint components
+        run: pnpm run lint:components
+      - name: Run tests
+        run: pnpm test:components

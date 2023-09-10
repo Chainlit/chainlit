@@ -20,11 +20,11 @@ import { toast } from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 import { useIsFirstRender } from 'usehooks-ts';
 
+import { IPrompt } from '@chainlit/components';
+
 import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
 
 import { modeState, variableState } from 'state/playground';
-
-import { IPrompt } from 'types/chat';
 
 import 'draft-js/dist/Draft.css';
 

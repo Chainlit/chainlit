@@ -1,12 +1,11 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react-refresh"],
+  "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -20,10 +19,6 @@
         "caughtErrorsIgnorePattern": "^_",
         "ignoreRestSiblings": true
       }
-    ],
-    "react-refresh/only-export-components": [
-      "warn",
-      { "allowConstantExport": true },
-    ],
+    ]
   }
 }
