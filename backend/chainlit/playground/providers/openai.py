@@ -10,9 +10,10 @@ openai_common_inputs = [
         id="temperature",
         label="Temperature",
         min=0.0,
-        max=1.0,
+        max=2.0,
         step=0.01,
         initial=0.9,
+        tooltip="Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.",
     ),
     Slider(
         id="max_tokens",
@@ -21,25 +22,41 @@ openai_common_inputs = [
         max=8000,
         step=1,
         initial=256,
+        tooltip="The maximum number of tokens to generate in the chat completion.",
     ),
-    Slider(id="top_p", label="Top P", min=0.0, max=1.0, step=0.01, initial=1.0),
     Slider(
-        id="frequency_penalty",
-        label="Frequency Penalty",
+        id="top_p",
+        label="Top P",
         min=0.0,
         max=1.0,
         step=0.01,
+        initial=1.0,
+        tooltip="An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.",
+    ),
+    Slider(
+        id="frequency_penalty",
+        label="Frequency Penalty",
+        min=-2.0,
+        max=2.0,
+        step=0.01,
         initial=0.0,
+        tooltip="Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
     ),
     Slider(
         id="presence_penalty",
         label="Presence Penalty",
-        min=0.0,
-        max=1.0,
+        min=-2.0,
+        max=2.0,
         step=0.01,
         initial=0.0,
+        tooltip="Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
     ),
-    Tags(id="stop", label="Stop Sequences", initial=[]),
+    Tags(
+        id="stop",
+        label="Stop Sequences",
+        initial=[],
+        tooltip="Up to 4 sequences where the API will stop generating further tokens.",
+    ),
 ]
 
 
@@ -97,10 +114,11 @@ class ChatOpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+        if "deployment_id" not in llm_settings:
+            deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
 
-        if deployment_id:
-            env_settings["deployment_id"] = deployment_id
+            if deployment_id:
+                env_settings["deployment_id"] = deployment_id
 
         llm_settings = request.prompt.settings
 
@@ -108,13 +126,14 @@ class ChatOpenAIProvider(BaseProvider):
 
         messages = self.create_prompt(request)
 
-        stop = llm_settings["stop"]
+        if "stop" in llm_settings:
+            stop = llm_settings["stop"]
 
-        # OpenAI doesn't support an empty stop array, clear it
-        if isinstance(stop, list) and len(stop) == 0:
-            stop = None
+            # OpenAI doesn't support an empty stop array, clear it
+            if isinstance(stop, list) and len(stop) == 0:
+                stop = None
 
-        llm_settings["stop"] = stop
+            llm_settings["stop"] = stop
 
         llm_settings["stream"] = True
 
@@ -143,23 +162,26 @@ class OpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+        if "deployment_id" not in llm_settings:
+            deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
 
-        if deployment_id:
-            env_settings["deployment_id"] = deployment_id
+            if deployment_id:
+                env_settings["deployment_id"] = deployment_id
 
         llm_settings = request.prompt.settings
 
         self.require_settings(llm_settings)
 
         prompt = self.create_prompt(request)
-        stop = llm_settings["stop"]
 
-        # OpenAI doesn't support an empty stop array, clear it
-        if isinstance(stop, list) and len(stop) == 0:
-            stop = None
+        if "stop" in llm_settings:
+            stop = llm_settings["stop"]
 
-        llm_settings["stop"] = stop
+            # OpenAI doesn't support an empty stop array, clear it
+            if isinstance(stop, list) and len(stop) == 0:
+                stop = None
+
+            llm_settings["stop"] = stop
 
         llm_settings["stream"] = True
 
@@ -209,12 +231,6 @@ AzureChatOpenAI = ChatOpenAIProvider(
     env_vars=azure_openai_env_vars,
     name="AzureChatOpenAI",
     inputs=[
-        Select(
-            id="model",
-            label="Model",
-            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-32k"],
-            initial_value="gpt-3.5-turbo",
-        ),
         *openai_common_inputs,
     ],
     is_chat=True,
@@ -241,12 +257,6 @@ AzureOpenAI = OpenAIProvider(
     name="AzureOpenAI",
     env_vars=azure_openai_env_vars,
     inputs=[
-        Select(
-            id="model",
-            label="Model",
-            values=["text-davinci-003", "text-davinci-002"],
-            initial_value="text-davinci-003",
-        ),
         *openai_common_inputs,
     ],
     is_chat=False,

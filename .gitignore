@@ -25,6 +25,7 @@ __pycache__
 
 *.db
 
+.mypy_cache
 
 chat_files
 
