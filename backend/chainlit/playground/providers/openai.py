@@ -228,9 +228,7 @@ AzureChatOpenAI = ChatOpenAIProvider(
     id="azure-openai-chat",
     env_vars=azure_openai_env_vars,
     name="AzureChatOpenAI",
-    inputs=[
-        *openai_common_inputs,
-    ],
+    inputs=openai_common_inputs,
     is_chat=True,
 )
 
@@ -254,8 +252,6 @@ AzureOpenAI = OpenAIProvider(
     id="azure",
     name="AzureOpenAI",
     env_vars=azure_openai_env_vars,
-    inputs=[
-        *openai_common_inputs,
-    ],
+    inputs=openai_common_inputs,
     is_chat=False,
 )
