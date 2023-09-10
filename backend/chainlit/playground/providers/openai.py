@@ -114,11 +114,10 @@ class ChatOpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        if "deployment_id" not in llm_settings:
-            deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
 
-            if deployment_id:
-                env_settings["deployment_id"] = deployment_id
+        if deployment_id:
+            env_settings["deployment_id"] = deployment_id
 
         llm_settings = request.prompt.settings
 
@@ -162,11 +161,10 @@ class OpenAIProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        if "deployment_id" not in llm_settings:
-            deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
+        deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
 
-            if deployment_id:
-                env_settings["deployment_id"] = deployment_id
+        if deployment_id:
+            env_settings["deployment_id"] = deployment_id
 
         llm_settings = request.prompt.settings
 
