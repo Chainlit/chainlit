@@ -11,6 +11,8 @@ import {
   IMessageElement
 } from '@chainlit/components';
 
+import { useAuth } from 'hooks/auth';
+
 import {
   askUserState,
   highlightMessage,
@@ -48,6 +50,9 @@ const MessageContainer = ({
   const session = useRecoilValue(sessionState);
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(sideViewState);
+  const { user } = useAuth();
+
+  const enableFeedback = !!(user && projectSettings?.dataPersistence);
 
   const navigate = useNavigate();
 
@@ -133,7 +138,7 @@ const MessageContainer = ({
         hideCot: appSettings.hideCot,
         highlightedMessage,
         loading,
-        showFeedbackButtons: !!projectSettings?.project.database,
+        showFeedbackButtons: enableFeedback,
         uiName: projectSettings?.ui?.name || '',
         onPlaygroundButtonClick,
         onFeedbackUpdated,

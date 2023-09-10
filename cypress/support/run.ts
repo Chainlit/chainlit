@@ -1,15 +1,9 @@
-import { join } from "path";
-import { spawn } from "child_process";
-import sh from "shell-exec";
-import { existsSync, unlinkSync } from "fs";
-import * as kill from "kill-port";
-import {
-  BACKEND_DIR,
-  CHAINLIT_PORT,
-  E2E_DIR,
-  ExecutionMode,
-  runCommand,
-} from "./utils";
+import { spawn } from 'child_process';
+import * as kill from 'kill-port';
+import { join } from 'path';
+import sh from 'shell-exec';
+
+import { BACKEND_DIR, CHAINLIT_PORT, E2E_DIR, ExecutionMode } from './utils';
 
 interface CmdResult {
   stdout: string;
@@ -17,7 +11,7 @@ interface CmdResult {
 }
 
 const killPort = async (port: number): Promise<CmdResult> => {
-  if (process.platform === "win32") return kill(port);
+  if (process.platform === 'win32') return kill(port);
 
   return sh(`lsof -nPi :${port}`).then((res) => {
     const { stdout } = res;
@@ -27,15 +21,6 @@ const killPort = async (port: number): Promise<CmdResult> => {
     );
   });
 };
-
-function cleanLocalData(testDir: string) {
-  if (existsSync(join(testDir, ".chainlit/chat_files"))) {
-    runCommand("rm -rf .chainlit/chat_files", testDir);
-  }
-  if (existsSync(join(testDir, ".chainlit/chat.db"))) {
-    unlinkSync(join(testDir, ".chainlit/chat.db"));
-  }
-}
 
 export const runChainlitForTest = async (
   testName: string,
@@ -49,45 +34,43 @@ export const runChainlitForTest = async (
   }
   return new Promise((resolve, reject) => {
     const dir = join(E2E_DIR, testName);
-    let file = "main.py";
-    if (mode === ExecutionMode.Async) file = "main_async.py";
-    if (mode === ExecutionMode.Sync) file = "main_sync.py";
-
-    cleanLocalData(dir);
+    let file = 'main.py';
+    if (mode === ExecutionMode.Async) file = 'main_async.py';
+    if (mode === ExecutionMode.Sync) file = 'main_sync.py';
 
     // Headless + CI mode
     const options = [
-      "run",
-      "-C",
+      'run',
+      '-C',
       BACKEND_DIR,
-      "chainlit",
-      "run",
+      'chainlit',
+      'run',
       file,
-      "-h",
-      "-c",
+      '-h',
+      '-c'
     ];
 
-    const server = spawn("poetry", options, {
-      cwd: dir,
+    const server = spawn('poetry', options, {
+      cwd: dir
     });
 
-    server.stdout.on("data", (data) => {
+    server.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
-      if (data.toString().includes("Your app is available at")) {
+      if (data.toString().includes('Your app is available at')) {
         resolve(server);
       }
     });
 
-    server.stderr.on("data", (data) => {
+    server.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
 
-    server.on("error", (error) => {
+    server.on('error', (error) => {
       reject(error.message);
     });
 
-    server.on("exit", function (code) {
-      reject("child process exited with code " + code);
+    server.on('exit', function (code) {
+      reject('child process exited with code ' + code);
     });
   });
 };

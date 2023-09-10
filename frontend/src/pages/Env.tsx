@@ -18,7 +18,7 @@ export default function Env() {
   const pSettings = useRecoilValue(projectSettingsState);
   const navigate = useNavigate();
 
-  const requiredKeys = pSettings?.project.user_env || [];
+  const requiredKeys = pSettings?.userEnv || [];
 
   const initialValues: Record<string, string> = {};
   const _schema: Record<string, yup.StringSchema> = {};

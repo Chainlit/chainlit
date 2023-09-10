@@ -13,6 +13,7 @@ from typing import (
 
 from chainlit.prompt import Prompt
 from chainlit.types import (
+    AppUser,
     ConversationFilter,
     ElementDisplay,
     ElementSize,
@@ -21,7 +22,6 @@ from chainlit.types import (
 )
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
-from starlette.datastructures import Headers
 
 
 class MessageDict(TypedDict):
@@ -38,13 +38,7 @@ class MessageDict(TypedDict):
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     humanFeedback: Optional[int]
-
-
-class UserDict(TypedDict):
-    id: int
-    name: Optional[str]
-    email: Optional[str]
-    role: str
+    disableHumanFeedback: Optional[bool]
 
 
 class ElementDict(TypedDict):
@@ -65,7 +59,7 @@ class ConversationDict(TypedDict):
     createdAt: Optional[int]
     elementCount: Optional[int]
     messageCount: Optional[int]
-    author: Optional[UserDict]
+    appUser: Optional[AppUser]
     messages: List[MessageDict]
     elements: Optional[List[ElementDict]]
 
@@ -85,29 +79,9 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     data: List[T]
 
 
-class BaseAuthClient(ABC):
-    user_infos: Optional[UserDict] = None
-    handshake_headers: Optional[Dict[str, str]] = None
-    request_headers: Optional[Headers] = None
-
-    @abstractmethod
-    async def is_project_member(self) -> bool:
-        pass
-
-    @abstractmethod
-    async def get_user_infos(self) -> UserDict:
-        pass
-
-
 class BaseDBClient(ABC):
-    user_infos: Optional[UserDict] = None
-
     @abstractmethod
-    async def create_user(self, variables: UserDict) -> bool:
-        pass
-
-    @abstractmethod
-    async def get_project_members(self) -> List[UserDict]:
+    async def create_user(self, variables: AppUser) -> bool:
         pass
 
     @abstractmethod

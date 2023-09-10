@@ -5,20 +5,22 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { accessTokenState } from 'state/user';
 
-import { IUserDetails } from 'types/user';
+import { IAppUser } from 'types/user';
 
 import { fetcher } from './useApi';
 
 export const useAuth = () => {
-  const { data: config, isLoading: isLoadingConfig } = useSWRImmutable(
-    '/auth/config',
-    fetcher
-  );
-  const isReady = !isLoadingConfig && config;
+  const { data: config, isLoading: isLoadingConfig } = useSWRImmutable<{
+    requireLogin: boolean;
+    passwordAuth: boolean;
+    headerAuth: boolean;
+    oauthProviders: string[];
+  }>('/auth/config', fetcher);
+  const isReady = !!(!isLoadingConfig && config);
 
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const [_, setToken] = useLocalStorage('token', accessToken);
-  const [user, setUser] = useState<IUserDetails | null>(null);
+  const [user, setUser] = useState<IAppUser | null>(null);
 
   useEffect(() => {
     setToken(accessToken);
@@ -26,10 +28,8 @@ export const useAuth = () => {
       return;
     }
     try {
-      const { exp, ...userDetails } = JSON.parse(
-        atob(accessToken.split('.')[1])
-      );
-      setUser(userDetails as IUserDetails);
+      const { exp, ...AppUser } = JSON.parse(atob(accessToken.split('.')[1]));
+      setUser(AppUser as IAppUser);
     } catch (e) {
       console.error('Invalid token, clearing token from local storage');
       setUser(null);

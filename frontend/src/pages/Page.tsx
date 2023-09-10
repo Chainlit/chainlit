@@ -22,8 +22,8 @@ const Page = ({ children }: Props) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (pSettings?.project?.user_env) {
-      for (const key of pSettings.project?.user_env || []) {
+    if (pSettings?.userEnv) {
+      for (const key of pSettings.userEnv || []) {
         if (!userEnv[key]) navigate('/env');
       }
     }

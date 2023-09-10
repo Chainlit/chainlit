@@ -1,15 +1,15 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Mapping, Optional, Union, cast
+from typing import Any, Dict, Mapping, Optional, Union
 
 import aiohttp
-from chainlit.client.base import MessageDict, UserDict
+from chainlit.client.base import AppUser, MessageDict
 from chainlit.config import config
 from chainlit.logger import logger
 from python_graphql_client import GraphqlClient
 from starlette.datastructures import Headers
 
-from .base import BaseAuthClient, BaseDBClient, PageInfo, PaginatedResponse, UserDict
+from .base import BaseDBClient, PageInfo, PaginatedResponse
 
 
 class GraphQLClient:
@@ -58,55 +58,6 @@ class GraphQLClient:
         )
 
 
-class CloudAuthClient(BaseAuthClient, GraphQLClient):
-    def __init__(
-        self,
-        project_id: str,
-        handshake_headers: Optional[Dict[str, str]] = None,
-        request_headers: Optional[Headers] = None,
-    ):
-        access_token = None
-
-        if handshake_headers:
-            access_token = handshake_headers.get("HTTP_AUTHORIZATION")
-        elif request_headers:
-            access_token = request_headers.get("Authorization")
-
-        if access_token is None:
-            raise ConnectionRefusedError("No access token provided")
-
-        GraphQLClient.__init__(self, project_id, access_token)
-
-    async def get_user_infos(
-        self,
-    ) -> UserDict:
-        data = {"projectId": self.project_id}
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{config.chainlit_server}/api/me",
-                json=data,
-                headers=self.headers,
-            ) as r:
-                if not r.ok:
-                    reason = await r.text()
-                    raise ValueError(f"Failed to get user infos. {r.status}: {reason}")
-
-                json = await r.json()
-                self.user_infos = json
-                # replace with unpacking when Mypy 1.5.0 is out:
-                # return UserDict(**self.user_infos)
-                return cast(UserDict, self.user_infos)
-
-    async def is_project_member(self) -> bool:
-        try:
-            user = await self.get_user_infos()
-            return user["role"] != "ANONYMOUS"
-        except ValueError as e:
-            logger.error(e)
-            return False
-
-
 class CloudDBClient(BaseDBClient, GraphQLClient):
     conversation_id: Optional[str] = None
     lock: asyncio.Lock
@@ -131,7 +82,7 @@ class CloudDBClient(BaseDBClient, GraphQLClient):
 
         super().__init__(project_id, access_token)
 
-    async def create_user(self, variables: UserDict) -> bool:
+    async def create_user(self, variables: AppUser) -> bool:
         raise NotImplementedError
 
     async def get_project_members(self):

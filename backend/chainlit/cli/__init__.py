@@ -18,7 +18,6 @@ from chainlit.config import (
     init_config,
     load_module,
 )
-from chainlit.db import init_local_db, migrate_local_db
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
@@ -51,9 +50,6 @@ def run_chainlit(target: str):
 
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
-
-    # Initialize the local database if configured to use it
-    init_local_db()
 
     log_level = "debug" if config.run.debug else "error"
 
@@ -157,14 +153,6 @@ def chainlit_hello(args=None, **kwargs):
     trace_event("chainlit hello")
     hello_path = os.path.join(BACKEND_ROOT, "hello.py")
     run_chainlit(hello_path)
-
-
-@cli.command("migrate")
-@click.argument("args", nargs=-1)
-def chainlit_migrate(args=None, **kwargs):
-    trace_event("chainlit migrate")
-    migrate_local_db()
-    sys.exit(0)
 
 
 @cli.command("init")

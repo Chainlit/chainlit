@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 if TYPE_CHECKING:
     from chainlit.message import Message
 
-from chainlit.client.base import BaseAuthClient, BaseDBClient
-from chainlit.types import AskResponse, UserDetails
+from chainlit.types import AppUser, AskResponse
 
 
 class Session:
@@ -29,22 +28,12 @@ class Session:
         emit: Callable[[str, Any], None],
         # Function to ask the user a question
         ask_user: Callable[[Any, Optional[int]], Union[AskResponse, None]],
-        # Optional client to authenticate users
-        auth_client: Optional[BaseAuthClient],
-        # Optional client to persist messages and files
-        db_client: Optional[BaseDBClient],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
-        # Headers received during the websocket connection handshake
-        initial_headers: Dict[str, str],
         # Logged-in user informations
-        user: Optional[UserDetails],
+        user: Optional[AppUser],
         # Logged-in user token
         token: Optional[str],
-        # Optional langchain agent
-        agent: Optional[Any] = None,
-        # Optional llama instance
-        llama_instance: Optional[Any] = None,
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
     ):
@@ -52,11 +41,8 @@ class Session:
         self.ask_user = ask_user
         self.emit = emit
         self.user_env = user_env
-        self.initial_headers = initial_headers
-        self.agent = agent
-        self.llama_instance = llama_instance
-        self.auth_client = auth_client
-        self.db_client = db_client
+        self.user = user
+        self.token = token
         self.root_message = root_message
         self.should_stop = False
         self.restored = False

@@ -90,8 +90,7 @@ Provider = Literal["credentials", "header"]
 
 
 # Used when logging-in a user
-class UserDetails:
-    id: str
+class AppUser:
     username: str
     role: Role
     tags: Optional[List[str]]
@@ -100,15 +99,13 @@ class UserDetails:
 
     def __init__(
         self,
-        id: str,
         role: Role,
-        username: Optional[str] = None,
+        username: str,
         tags: Optional[List[str]] = None,
         image: Optional[str] = None,
         provider: Optional[Provider] = None,
     ):
-        self.id = id
-        self.username = id if username is None or username == "" else username
+        self.username = username
         self.role = role
         self.tags = tags
         self.image = image
@@ -116,7 +113,6 @@ class UserDetails:
 
     def to_dict(self):
         return {
-            "id": self.id,
             "username": self.username,
             "role": self.role,
             "tags": self.tags,

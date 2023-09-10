@@ -3,7 +3,7 @@ import { Box, Stack, Typography } from '@mui/material';
 interface AuthTemplateProps {
   children: React.ReactNode;
   renderLogo?: React.ReactElement;
-  title: string;
+  title?: string;
 }
 
 const AuthTemplate = ({
@@ -14,7 +14,7 @@ const AuthTemplate = ({
   return (
     <Stack
       sx={{
-        backgroundColor: '#2A1351',
+        backgroundColor: (theme) => theme.palette.background.default,
         height: '100vh',
         width: '100vw',
         alignItems: 'center',
@@ -23,7 +23,8 @@ const AuthTemplate = ({
     >
       <Box
         sx={(theme) => ({
-          backgroundColor: 'white',
+          backgroundColor: (theme) => theme.palette.background.paper,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
           padding: theme.spacing(5, 5),
           width: '100%',
@@ -44,7 +45,7 @@ const AuthTemplate = ({
           }}
         >
           {renderLogo}
-          <Typography>{title}</Typography>
+          {title ? <Typography color="text.primary">{title}</Typography> : null}
         </Stack>
         <Stack gap={1} paddingX={3}>
           {children}

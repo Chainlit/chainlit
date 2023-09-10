@@ -29,7 +29,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   const { user, logout } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const setAppSettings = useSetRecoilState(settingsState);
-  const requiredKeys = !!pSettings?.project?.user_env?.length;
+  const requiredKeys = !!pSettings?.userEnv?.length;
   const navigate = useNavigate();
 
   const userNameItem = user && (
@@ -75,7 +75,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       key="logout"
       onClick={() => {
         logout();
-        navigate('/login');
+        navigate('/');
         handleClose();
       }}
     >

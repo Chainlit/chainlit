@@ -14,7 +14,8 @@ export default defineConfig({
       '@mui/icons-material': path.resolve(
         __dirname,
         './node_modules/@mui/icons-material'
-      )
+      ),
+      '@emotion/react': path.resolve(__dirname, './node_modules/@emotion/react')
     }
   }
 });

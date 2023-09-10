@@ -16,7 +16,7 @@ const WelcomeScreen = () => {
   }
 
   return (
-    <Box overflow="auto" flexGrow={1}>
+    <Box pt={2} overflow="auto" flexGrow={1}>
       <Box
         id="welcome-screen"
         sx={{

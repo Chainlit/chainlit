@@ -14,10 +14,6 @@ from pathlib import Path
 from typing import Dict
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
-from chainlit.client.utils import (
-    get_auth_client_from_request,
-    get_db_client_from_request,
-)
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -43,6 +39,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
+from starlette.datastructures import Headers
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
@@ -64,13 +61,6 @@ async def lifespan(app: FastAPI):
         # Add a delay before opening the browser
         await asyncio.sleep(1)
         webbrowser.open(url)
-
-    if config.project.database == "local":
-        from prisma import Client, register  # type: ignore[attr-defined]
-
-        client = Client()
-        register(client)
-        await client.connect()
 
     watch_task = None
     stop_event = asyncio.Event()
@@ -113,8 +103,6 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        if config.project.database == "local":
-            await client.disconnect()
         if watch_task:
             try:
                 stop_event.set()
@@ -219,6 +207,52 @@ async def auth(request: Request):
     return get_configuration()
 
 
+@app.post("/login")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    if not config.code.password_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
+        )
+
+    app_user = await config.code.password_auth_callback(
+        form_data.username, form_data.password
+    )
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="credentialssignin",
+        )
+    access_token = create_jwt(app_user)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+@app.post("/auth/header")
+async def header_auth(request: Request):
+    if not config.code.header_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No header_auth_callback defined",
+        )
+
+    app_user = await config.code.header_auth_callback(request.headers)
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(app_user)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
 @app.post("/completion")
 async def completion(
     request: CompletionRequest,
@@ -242,30 +276,6 @@ async def completion(
     return response
 
 
-@app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    if not config.code.password_auth_callback:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
-        )
-
-    user_details = await config.code.password_auth_callback(
-        form_data.username, form_data.password
-    )
-
-    if not user_details:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect login or password",
-        )
-
-    access_token = create_jwt(user_details)
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
-
-
 @app.get("/project/llm-providers")
 async def get_providers(current_user: Annotated[Dict, Depends(get_current_user)]):
     """List the providers."""
@@ -280,10 +290,9 @@ async def project_settings(current_user: Annotated[Dict, Depends(get_current_use
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return JSONResponse(
         content={
-            "chainlitServer": config.chainlit_server,
-            "prod": bool(config.chainlit_prod_url),
             "ui": config.ui.to_dict(),
-            "project": config.project.to_dict(),
+            "userEnv": config.project.user_env,
+            "dataPersistence": config.data_persistence,
             "markdown": get_markdown_str(config.root),
         }
     )
@@ -296,12 +305,12 @@ async def update_feedback(
     current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Update the human feedback for a particular message."""
-
-    db_client = await get_db_client_from_request(request)
-    await db_client.set_human_feedback(
-        message_id=update.messageId, feedback=update.feedback
-    )
-    return JSONResponse(content={"success": True})
+    # todo: cloud client
+    # db_client = await get_db_client_from_request(request)
+    # await db_client.set_human_feedback(
+    #     message_id=update.messageId, feedback=update.feedback
+    # )
+    # return JSONResponse(content={"success": True})
 
 
 @app.get("/project/members")
@@ -309,10 +318,10 @@ async def get_project_members(
     request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
 ):
     """Get all the members of a project."""
-
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_project_members()
-    return JSONResponse(content=res)
+    # todo: cloud client
+    # db_client = await get_db_client_from_request(request)
+    # res = await db_client.get_project_members()
+    # return JSONResponse(content=res)
 
 
 @app.get("/project/role")
@@ -320,10 +329,11 @@ async def get_member_role(
     request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
 ):
     """Get the role of a member."""
+    # todo: cloud client
 
-    auth_client = await get_auth_client_from_request(request)
-    role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
-    return JSONResponse(content=role)
+    # auth_client = await get_auth_client_from_request(request)
+    # role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
+    # return JSONResponse(content=role)
 
 
 @app.post("/project/conversations")
@@ -333,10 +343,11 @@ async def get_project_conversations(
     current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Get the conversations page by page."""
+    # todo: cloud client
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_conversations(payload.pagination, payload.filter)
-    return JSONResponse(content=res.to_dict())
+    # db_client = await get_db_client_from_request(request)
+    # res = await db_client.get_conversations(payload.pagination, payload.filter)
+    # return JSONResponse(content=res.to_dict())
 
 
 @app.get("/project/conversation/{conversation_id}")
@@ -346,10 +357,11 @@ async def get_conversation(
     current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Get a specific conversation."""
+    # todo: cloud client
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_conversation(conversation_id)
-    return JSONResponse(content=res)
+    # db_client = await get_db_client_from_request(request)
+    # res = await db_client.get_conversation(conversation_id)
+    # return JSONResponse(content=res)
 
 
 @app.get("/project/conversation/{conversation_id}/element/{element_id}")
@@ -360,10 +372,11 @@ async def get_conversation_element(
     current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Get a specific conversation element."""
+    # todo: cloud client
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_element(conversation_id, element_id)
-    return JSONResponse(content=res)
+    # db_client = await get_db_client_from_request(request)
+    # res = await db_client.get_element(conversation_id, element_id)
+    # return JSONResponse(content=res)
 
 
 @app.delete("/project/conversation")
@@ -373,10 +386,11 @@ async def delete_conversation(
     current_user: Annotated[Dict, Depends(get_current_user)],
 ):
     """Delete a conversation."""
+    # todo: cloud client
 
-    db_client = await get_db_client_from_request(request)
-    await db_client.delete_conversation(conversation_id=payload.conversationId)
-    return JSONResponse(content={"success": True})
+    # db_client = await get_db_client_from_request(request)
+    # await db_client.delete_conversation(conversation_id=payload.conversationId)
+    # return JSONResponse(content={"success": True})
 
 
 @app.get("/files/{filename:path}")
@@ -439,18 +453,6 @@ def register_wildcard_route_handler():
         html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
-
-        key = "chainlit-initial-headers"
-
-        chainlit_initial_headers = dict(request.headers)
-        if "cookie" in chainlit_initial_headers:
-            del chainlit_initial_headers["cookie"]
-
-        response.set_cookie(
-            key=key,
-            value=json.dumps(chainlit_initial_headers),
-            httponly=True,
-        )
 
         return response
 

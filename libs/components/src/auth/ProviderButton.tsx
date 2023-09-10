@@ -3,13 +3,26 @@ import { Button } from '@mui/material';
 
 import { grey } from '../../theme/palette';
 
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function getProviderName(provider: string) {
+  switch (provider) {
+    case 'azure-ad':
+      return 'Microsoft Account';
+    default:
+      return capitalizeFirstLetter(provider);
+  }
+}
+
 function renderProviderIcon(provider: string) {
   switch (provider) {
     case 'google':
       return <Google />;
     case 'github':
       return <GitHub />;
-    case 'microsoft':
+    case 'azure-ad':
       return <Microsoft />;
     default:
       return null;
@@ -41,7 +54,9 @@ const ProviderButton = ({
         paddingLeft: 3,
         justifyContent: 'flex-start'
       }}
-    >{`${isSignIn ? 'Continue' : 'Sign up'} with ${provider}`}</Button>
+    >
+      {`${isSignIn ? 'Continue' : 'Sign up'} with ${getProviderName(provider)}`}
+    </Button>
   );
 };
 

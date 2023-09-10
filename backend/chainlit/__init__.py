@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
-    from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
     from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
     from chainlit.langchain.callbacks import (
         LangchainCallbackHandler,
@@ -37,7 +36,7 @@ from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import FileSpec, UserDetails
+from chainlit.types import AppUser, FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -49,17 +48,15 @@ if env_found:
 
 
 @trace
-def password_auth_callback(
-    func: Callable[[str, str], Optional[UserDetails]]
-) -> Callable:
+def password_auth_callback(func: Callable[[str, str], Optional[AppUser]]) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
 
     Args:
-        func (Callable[[str, str], Optional[UserDetails]]): The authentication callback to execute. Takes the email and password as parameters.
+        func (Callable[[str, str], Optional[AppUser]]): The authentication callback to execute. Takes the email and password as parameters.
 
     Returns:
-        Callable[[str, str], Optional[UserDetails]]: The decorated authentication callback.
+        Callable[[str, str], Optional[AppUser]]: The decorated authentication callback.
     """
 
     config.code.password_auth_callback = wrap_user_function(func)
@@ -67,15 +64,15 @@ def password_auth_callback(
 
 
 @trace
-def header_auth_callback(func: Callable[[str], Optional[UserDetails]]) -> Callable:
+def header_auth_callback(func: Callable[[Headers], Optional[AppUser]]) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
 
     Args:
-        func (Callable[[str], Optional[UserDetails]]): The authentication callback to execute. Takes the header value as a parameter.
+        func (Callable[[Headers], Optional[AppUser]]): The authentication callback to execute.
 
     Returns:
-        Callable[[str], Optional[UserDetails]]: The decorated authentication callback.
+        Callable[[Headers], Optional[AppUser]]: The decorated authentication callback.
     """
 
     config.code.header_auth_callback = wrap_user_function(func)
@@ -178,41 +175,6 @@ def on_settings_update(
     return func
 
 
-@trace
-def auth_client_factory(
-    func: Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
-) -> Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]:
-    """
-    Callback to call when to initialize the custom client.
-
-    Args:
-        func (Callable[[Optional[UserDict]], BaseDBClient]): The action callback to execute. First parameter is the headers, second is the user infos if cloud auth is enabled.
-    """
-
-    config.code.auth_client_factory = wrap_user_function(func, with_task=False)
-    return func
-
-
-@trace
-def db_client_factory(
-    func: Callable[
-        [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]],
-        "BaseDBClient",
-    ]
-) -> Callable[
-    [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]], "BaseDBClient"
-]:
-    """
-    Callback to call when to initialize the custom client.
-
-    Args:
-        func (Callable[[Optional[UserDict]], BaseDBClient]): The action callback to execute. First parameter is the headers, second is the user infos if cloud auth is enabled.
-    """
-
-    config.code.db_client_factory = wrap_user_function(func, with_task=False)
-    return func
-
-
 def on_file_upload(
     accept: Union[List[str], Dict[str, List[str]]],
     max_size_mb: int = 2,
@@ -288,8 +250,6 @@ __all__ = [
     "author_rename",
     "on_settings_update",
     "sleep",
-    "auth_client_factory",
-    "db_client_factory",
     "run_sync",
     "make_async",
     "cache",

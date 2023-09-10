@@ -6,13 +6,13 @@ export interface IMember {
   role: Role;
 }
 
-export type UserDetailsProvider = 'credentials' | 'header';
+export type AppUserProvider = 'credentials' | 'header';
 
-export interface IUserDetails {
+export interface IAppUser {
   id: string;
   username: string;
   role: Role;
   tags?: string[];
   image?: string;
-  provider?: UserDetailsProvider;
+  provider?: AppUserProvider;
 }

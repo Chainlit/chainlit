@@ -13,13 +13,13 @@ export default function AppWrapper() {
   const setAppSettings = useSetRecoilState(settingsState);
   const { isAuthenticated, isReady } = useAuth();
 
-  if (!isAuthenticated && window.location.pathname !== '/login') {
-    window.location.href = '/login';
-  }
-
   const { data } = useApi<IProjectSettings>(
     pSettings === undefined && isAuthenticated ? '/project/settings' : null
   );
+
+  if (isReady && !isAuthenticated && window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
 
   useEffect(() => {
     if (!data) return;

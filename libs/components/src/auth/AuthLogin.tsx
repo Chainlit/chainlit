@@ -14,8 +14,6 @@ import {
   Typography
 } from '@mui/material';
 
-import useWindowLocation from '../hooks/useLocation';
-
 import { grey } from '../../theme/palette';
 import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
@@ -37,7 +35,7 @@ const signinErrors: Record<string, string> = {
   sessionrequired: 'Please sign in to access this page.'
 };
 
-const getErrorMessage = (errorType: string | null): string => {
+const getErrorMessage = (errorType?: string): string => {
   if (!errorType) {
     return '';
   }
@@ -46,14 +44,15 @@ const getErrorMessage = (errorType: string | null): string => {
 
 type AuthLoginProps = {
   title: string;
+  error?: string;
   providers: string[];
   callbackUrl: string;
-  onPasswordSignIn: (
+  onPasswordSignIn?: (
     email: string,
     password: string,
     callbackUrl: string
   ) => Promise<any>;
-  onOAuthSignIn: (provider: string, callbackUrl: string) => Promise<any>;
+  onOAuthSignIn?: (provider: string, callbackUrl: string) => Promise<any>;
   onSignUp?: (
     email: string,
     password: string,
@@ -65,6 +64,7 @@ type AuthLoginProps = {
 
 const AuthLogin = ({
   title,
+  error,
   providers,
   callbackUrl,
   onPasswordSignIn,
@@ -74,16 +74,13 @@ const AuthLogin = ({
   renderLogo
 }: AuthLoginProps) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showSignIn, toggleShowSignIn] = useToggle(true);
   const [showPassword, toggleShowPassword] = useToggle();
-  const location = useWindowLocation();
+  const [errorState, setErrorState] = useState(error);
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const errorType = searchParams.get('error');
-    setError(getErrorMessage(errorType));
-  }, [location]);
+    setErrorState(error);
+  }, [error]);
 
   const formik = useFormik({
     initialValues: {
@@ -102,6 +99,10 @@ const AuthLogin = ({
     event.preventDefault();
     setLoading(true);
 
+    if (!onPasswordSignIn) {
+      return;
+    }
+
     try {
       showSignIn
         ? await onPasswordSignIn(
@@ -117,7 +118,7 @@ const AuthLogin = ({
           ));
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        setErrorState(err.message);
       }
     } finally {
       setLoading(false);
@@ -128,61 +129,63 @@ const AuthLogin = ({
     <AuthTemplate title={title} renderLogo={renderLogo}>
       {error ? (
         <Alert sx={{ my: 1 }} severity="error">
-          {error}
+          {getErrorMessage(errorState)}
         </Alert>
       ) : null}
-      <form onSubmit={handleSubmit}>
-        <TextInput
-          id="email"
-          placeholder="Email adress"
-          size="medium"
-          value={formik.values.email}
-          hasError={!!formik.errors.email}
-          description={formik.touched.email ? formik.errors.email : undefined}
-          onBlur={formik.handleBlur}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            formik.setFieldValue('email', e.target.value)
-          }
-        />
-        <TextInput
-          id="password"
-          placeholder="Password"
-          value={formik.values.password}
-          hasError={!!formik.errors.password}
-          description={
-            formik.touched.password ? formik.errors.password : undefined
-          }
-          onBlur={formik.handleBlur}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            formik.setFieldValue('password', e.target.value)
-          }
-          type={showPassword ? 'text' : 'password'}
-          size="medium"
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={toggleShowPassword}
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-        />
-        {showSignIn && onForgotPassword ? (
-          <Link component="button" marginTop={1} onClick={onForgotPassword}>
-            Forgot password?
-          </Link>
-        ) : null}
-        <Button
-          type="submit"
-          disabled={loading}
-          variant="contained"
-          sx={{ marginTop: 3, width: '100%' }}
-        >
-          Continue
-        </Button>
-      </form>
+      {onPasswordSignIn ? (
+        <form onSubmit={handleSubmit}>
+          <TextInput
+            id="email"
+            placeholder="Email adress"
+            size="medium"
+            value={formik.values.email}
+            hasError={!!formik.errors.email}
+            description={formik.touched.email ? formik.errors.email : undefined}
+            onBlur={formik.handleBlur}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              formik.setFieldValue('email', e.target.value)
+            }
+          />
+          <TextInput
+            id="password"
+            placeholder="Password"
+            value={formik.values.password}
+            hasError={!!formik.errors.password}
+            description={
+              formik.touched.password ? formik.errors.password : undefined
+            }
+            onBlur={formik.handleBlur}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              formik.setFieldValue('password', e.target.value)
+            }
+            type={showPassword ? 'text' : 'password'}
+            size="medium"
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={toggleShowPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+          {showSignIn && onForgotPassword ? (
+            <Link href="#" marginTop={1} onClick={onForgotPassword}>
+              Forgot password?
+            </Link>
+          ) : null}
+          <Button
+            type="submit"
+            disabled={loading}
+            variant="contained"
+            sx={{ marginTop: 3, width: '100%' }}
+          >
+            Continue
+          </Button>
+        </form>
+      ) : null}
       {onSignUp ? (
         <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
           {showSignIn ? (
@@ -202,7 +205,7 @@ const AuthLogin = ({
           )}
         </Stack>
       ) : null}
-      {providers.length ? (
+      {onOAuthSignIn && providers.length ? (
         <>
           <Typography
             sx={{
@@ -226,6 +229,7 @@ const AuthLogin = ({
             {providers.map((provider, index) => (
               <ProviderButton
                 key={`provider-${index}`}
+                isSignIn={showSignIn}
                 provider={provider}
                 onClick={() => onOAuthSignIn(provider, callbackUrl)}
               />

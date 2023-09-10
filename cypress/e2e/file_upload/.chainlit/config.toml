@@ -1,18 +1,4 @@
 [project]
-# If true (default), the app will be available to anonymous users.
-# If false, users will need to authenticate and be part of the project to use the app.
-public = true
-
-# The project ID (found on https://cloud.chainlit.io).
-# The project ID is required when public is set to false or when using the cloud database.
-#id = ""
-
-# Uncomment if you want to persist the chats.
-# local will create a database in your .chainlit directory (requires node.js installed).
-# cloud will use the Chainlit cloud database.
-# custom will load use your custom client.
-# database = "local"
-
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 
@@ -28,8 +14,9 @@ cache = false
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
 # follow_symlink = false
 
-# Chainlit server address
-# chainlit_server = ""
+[features]
+# Show the prompt playground
+prompt_playground = true
 
 [UI]
 # Name of the app and chatbot.
@@ -37,6 +24,9 @@ name = "Chatbot"
 
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
+
+# Large size content are by default collapsed for a cleaner ui
+default_collapse_content = true
 
 # The default value for the expand messages settings.
 default_expand_messages = false
