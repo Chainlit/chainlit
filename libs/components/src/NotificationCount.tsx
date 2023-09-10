@@ -37,7 +37,10 @@ const NotificationCount = ({
 
   const renderInput = () => {
     const getInputWidth = (hasArrow?: boolean) => {
-      const contentWidth = count.toString().length * 8 + (hasArrow ? 18 : 0);
+      const countString = count.toString();
+      let contentWidth = countString.length * 8 + (hasArrow ? 22 : 0);
+      if (countString.includes('.') || countString.includes(','))
+        contentWidth -= 6;
       return `${contentWidth}px`;
     };
 
@@ -55,11 +58,13 @@ const NotificationCount = ({
             fontSize: '12px',
             fontWeight: 600,
             color: 'text.secondary',
+            MozAppearance: 'textfield',
             '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
               display: 'none'
             },
             '&:focus': {
               width: getInputWidth(true),
+              MozAppearance: 'auto',
               '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
                 display: 'flex'
               }
