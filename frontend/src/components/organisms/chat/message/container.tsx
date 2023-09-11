@@ -1,5 +1,4 @@
 import { ChainlitAPI } from 'api/chainlitApi';
-import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -10,8 +9,6 @@ import {
   IMessage,
   IMessageElement
 } from '@chainlit/components';
-
-import { useAuth } from 'hooks/auth';
 
 import {
   askUserState,
@@ -50,9 +47,8 @@ const MessageContainer = ({
   const session = useRecoilValue(sessionState);
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(sideViewState);
-  const { user } = useAuth();
 
-  const enableFeedback = !!(user && projectSettings?.dataPersistence);
+  const enableFeedback = !!projectSettings?.dataPersistence;
 
   const navigate = useNavigate();
 
