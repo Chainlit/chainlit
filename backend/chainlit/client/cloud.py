@@ -115,7 +115,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return True
 
-    async def get_conversation_author(self, conversation_id: str) -> str:
+    async def get_conversation_author(self, conversation_id: str) -> Optional[str]:
         query = """
         query ($id: ID!) {
             conversation(id: $id) {
@@ -130,12 +130,11 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         }
         res = await self.query(query, variables)
         self.check_for_errors(res, raise_error=True)
-        return (
-            res.get("data", {})
-            .get("conversation", {})
-            .get("appUser", {})
-            .get("username")
-        )
+        app_user = res.get("data", {}).get("conversation", {}).get("appUser")
+        if app_user:
+            return app_user.get("username")
+        else:
+            return None
 
     async def get_conversation(self, conversation_id: str) -> ConversationDict:
         query = """
