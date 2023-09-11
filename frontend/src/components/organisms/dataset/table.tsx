@@ -150,7 +150,7 @@ export default function ConversationTable() {
       >
         <RowText text={conversation.id} col={columns['Id']} />
         <RowText
-          text={conversation.author?.email || 'LocalUser'}
+          text={conversation.appUser?.username || 'Anonymous'}
           col={columns['Author']}
         />
         <RowText

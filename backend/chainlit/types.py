@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from chainlit.prompt import Prompt
 from dataclasses_json import DataClassJsonMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.dataclasses import dataclass
 
 InputWidgetType = Literal[
@@ -90,14 +90,21 @@ Provider = Literal["credentials", "header"]
 
 
 # Used when logging-in a user
+@dataclass
 class AppUser(DataClassJsonMixin):
     username: str
-    role: Role
-    tags: Optional[List[str]]
-    image: Optional[str]
-    provider: Optional[Provider]
+    role: Role = "USER"
+    tags: List[str] = Field(default_factory=list)
+    image: Optional[str] = None
+    provider: Optional[Provider] = None
 
 
-class PersistedAppUser(AppUser):
+@dataclass
+class PersistedAppUserFields:
     id: str
     createdAt: int
+
+
+@dataclass
+class PersistedAppUser(AppUser, PersistedAppUserFields):
+    pass

@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Optional, TypedDict
+from typing import TYPE_CHECKING, Dict, Optional, TypedDict, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
+    from chainlit.types import AppUser, PersistedAppUser
 
 from chainlit.context import context
 
@@ -10,6 +11,7 @@ class UserSessionDict(TypedDict):
     id: str
     env: Dict[str, str]
     headers: Dict[str, str]
+    user: Optional[Union["AppUser", "PersistedAppUser"]]
     root_message: Optional["Message"]
 
 
@@ -36,6 +38,7 @@ class UserSession:
         user_session["id"] = context.session.id
         user_session["env"] = context.session.user_env
         user_session["chat_settings"] = context.session.chat_settings
+        user_session["user"] = context.session.user
 
         if context.session.root_message:
             user_session["root_message"] = context.session.root_message

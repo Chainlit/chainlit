@@ -1,7 +1,7 @@
 import os
 import sys
 from importlib import util
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
 from chainlit.logger import logger

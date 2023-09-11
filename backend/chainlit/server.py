@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.client.acl import is_conversation_author
 from chainlit.client.cloud import chainlit_client
 from chainlit.config import (
     APP_ROOT,
@@ -41,7 +42,6 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
-from starlette.datastructures import Headers
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
@@ -319,45 +319,20 @@ async def update_feedback(
     ],
 ):
     """Update the human feedback for a particular message."""
-    # todo: cloud client
-    # db_client = await get_db_client_from_request(request)
-    # await db_client.set_human_feedback(
-    #     message_id=update.messageId, feedback=update.feedback
-    # )
-    # return JSONResponse(content={"success": True})
 
+    # todo check that message belong to a user's conversation
 
-@app.get("/project/members")
-async def get_project_members(
-    request: Request,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
-):
-    """Get all the members of a project."""
-    # todo: cloud client
-    # db_client = await get_db_client_from_request(request)
-    # res = await db_client.get_project_members()
-    # return JSONResponse(content=res)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-
-@app.get("/project/role")
-async def get_member_role(
-    request: Request,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
-):
-    """Get the role of a member."""
-    # todo: cloud client
-
-    # auth_client = await get_auth_client_from_request(request)
-    # role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
-    # return JSONResponse(content=role)
+    await chainlit_client.set_human_feedback(
+        message_id=update.messageId, feedback=update.feedback
+    )
+    return JSONResponse(content={"success": True})
 
 
 @app.post("/project/conversations")
-async def get_project_conversations(
+async def get_user_conversations(
     request: Request,
     payload: GetConversationsRequest,
     current_user: Annotated[
@@ -365,11 +340,14 @@ async def get_project_conversations(
     ],
 ):
     """Get the conversations page by page."""
-    # todo: cloud client
+    # Only show the current user conversations
 
-    # db_client = await get_db_client_from_request(request)
-    # res = await db_client.get_conversations(payload.pagination, payload.filter)
-    # return JSONResponse(content=res.to_dict())
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    payload.filter.username = current_user.username
+    res = await chainlit_client.get_conversations(payload.pagination, payload.filter)
+    return JSONResponse(content=res.to_dict())
 
 
 @app.get("/project/conversation/{conversation_id}")
@@ -381,11 +359,14 @@ async def get_conversation(
     ],
 ):
     """Get a specific conversation."""
-    # todo: cloud client
 
-    # db_client = await get_db_client_from_request(request)
-    # res = await db_client.get_conversation(conversation_id)
-    # return JSONResponse(content=res)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    res = await chainlit_client.get_conversation(conversation_id)
+    return JSONResponse(content=res)
 
 
 @app.get("/project/conversation/{conversation_id}/element/{element_id}")
@@ -398,11 +379,14 @@ async def get_conversation_element(
     ],
 ):
     """Get a specific conversation element."""
-    # todo: cloud client
 
-    # db_client = await get_db_client_from_request(request)
-    # res = await db_client.get_element(conversation_id, element_id)
-    # return JSONResponse(content=res)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    res = await chainlit_client.get_element(conversation_id, element_id)
+    return JSONResponse(content=res)
 
 
 @app.delete("/project/conversation")
@@ -414,11 +398,16 @@ async def delete_conversation(
     ],
 ):
     """Delete a conversation."""
-    # todo: cloud client
 
-    # db_client = await get_db_client_from_request(request)
-    # await db_client.delete_conversation(conversation_id=payload.conversationId)
-    # return JSONResponse(content={"success": True})
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    conversation_id = payload.conversationId
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    await chainlit_client.delete_conversation(conversation_id)
+    return JSONResponse(content={"success": True})
 
 
 @app.get("/files/{filename:path}")

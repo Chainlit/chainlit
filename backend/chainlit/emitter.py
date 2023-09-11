@@ -74,6 +74,7 @@ class ChainlitEmitter:
         assert uuid.UUID(message_dict["id"]).version == 4
 
         if chainlit_client:
+            message_dict["conversationId"] = await self.session.get_conversation_id()
             # We have to update the UI with the actual DB ID
             ui_message_update = cast(Dict, message_dict.copy())
             persisted_id = await chainlit_client.create_message(message_dict)

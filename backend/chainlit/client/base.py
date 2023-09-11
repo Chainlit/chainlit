@@ -1,4 +1,3 @@
-import os
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypedDict, TypeVar
 
 from chainlit.config import config
@@ -66,12 +65,10 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
 
 
 class ChainlitGraphQLClient:
-    def __init__(self):
-        chainlit_api_key = os.environ.get("CHAINLIT_API_KEY")
-
+    def __init__(self, api_key: str):
         self.headers = {"content-type": "application/json"}
-        if chainlit_api_key:
-            self.headers["x-api-key"] = chainlit_api_key
+        if api_key:
+            self.headers["x-api-key"] = api_key
         else:
             raise ValueError("Cannot instantiate Cloud Client without CHAINLIT_API_KEY")
 

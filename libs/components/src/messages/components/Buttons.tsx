@@ -45,6 +45,7 @@ const Buttons = ({ message, actions }: Props) => {
 
   const showFeedbackButtons =
     showFbButtons &&
+    !message.disableHumanFeedback &&
     !message.authorIsUser &&
     !message.waitForAnswer &&
     !!message.content;

@@ -1,6 +1,5 @@
 import asyncio
 import os
-import sys
 
 import click
 import nest_asyncio

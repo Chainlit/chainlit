@@ -1,16 +1,14 @@
 import { httpEndpoint } from 'api';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import { AuthLogin } from '@chainlit/components';
 
+import { Logo } from 'components/atoms/logo';
+
 import { useAuth } from 'hooks/auth';
 
-import { settingsState } from 'state/settings';
-
 export default function Login() {
-  const { theme } = useRecoilValue(settingsState);
   const { config, setAccessToken } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -74,13 +72,7 @@ export default function Login() {
       providers={[]}
       onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
       onOAuthSignIn={async () => {}}
-      renderLogo={
-        <img
-          src={`${httpEndpoint}/logo?theme=${theme}`}
-          alt="logo"
-          style={{ maxWidth: '60%' }}
-        />
-      }
+      renderLogo={<Logo style={{ maxWidth: '60%' }} />}
     />
   );
 }

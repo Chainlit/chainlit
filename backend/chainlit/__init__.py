@@ -1,8 +1,12 @@
-import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
+
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+
+import asyncio
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -18,7 +22,6 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
-from chainlit.context import context
 from chainlit.element import (
     Audio,
     Avatar,
@@ -40,8 +43,6 @@ from chainlit.types import AppUser, FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
-
-env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
 if env_found:
     logger.info("Loaded .env file")
@@ -227,6 +228,7 @@ __getattr__ = make_module_getattr(
 __all__ = [
     "user_session",
     "Action",
+    "AppUser",
     "Audio",
     "Pdf",
     "Image",
@@ -249,6 +251,8 @@ __all__ = [
     "action_callback",
     "author_rename",
     "on_settings_update",
+    "password_auth_callback",
+    "header_auth_callback",
     "sleep",
     "run_sync",
     "make_async",

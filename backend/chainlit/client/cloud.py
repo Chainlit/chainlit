@@ -1,28 +1,29 @@
-import asyncio
+import os
 import uuid
 from typing import Dict, Optional, Union
 
 import aiohttp
 from chainlit.config import config
 from chainlit.logger import logger
-from chainlit.types import AppUser, PersistedAppUser
+from chainlit.types import AppUser, ConversationFilter, Pagination, PersistedAppUser
 
-from .base import ChainlitGraphQLClient, MessageDict, PageInfo, PaginatedResponse
+from .base import (
+    ChainlitGraphQLClient,
+    ConversationDict,
+    ElementDict,
+    MessageDict,
+    PageInfo,
+    PaginatedResponse,
+)
 
 
 class ChainlitCloudClient(ChainlitGraphQLClient):
-    conversation_id: Optional[str] = None
-    lock: asyncio.Lock
-
-    def __init__(
-        self,
-    ):
-        self.lock = asyncio.Lock()
-        super().__init__()
+    def __init__(self, api_key: str):
+        super().__init__(api_key=api_key)
 
     async def create_app_user(self, app_user: AppUser) -> Optional[PersistedAppUser]:
         mutation = """
-            mutation ($username: String!, $role: Role!, $tags: [String], $provider: String, $image: String) {
+            mutation ($username: String!, $role: Role!, $tags: [String!], $provider: String, $image: String) {
                 createAppUser(username: $username, role: $role, tags: $tags, provider: $provider, image: $image) {
                     id,
                     username,
@@ -66,33 +67,41 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return PersistedAppUser.from_dict(res["data"]["getAppUser"])
 
-    async def create_conversation(self) -> Optional[str]:
-        # If we run multiple send concurrently, we need to make sure we don't create multiple conversations.
-        async with self.lock:
-            if self.conversation_id:
-                return self.conversation_id
-
-            mutation = """
-            mutation () {
-                createConversation() {
-                    id
+    async def delete_app_user(self, username: str) -> bool:
+        mutation = """
+                mutation ($username: String!) {
+                    deleteAppUser(username: $username) {
+                        id,
+                    }
                 }
+                """
+        variables = {"username": username}
+        res = await self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not delete app user.")
+            return False
+
+        return True
+
+    async def create_conversation(self, app_user_id: Optional[str]) -> Optional[str]:
+        mutation = """
+        mutation ($appUserId: String) {
+            createConversation (appUserId: $appUserId) {
+                id
             }
-            """
-            res = await self.mutation(mutation)
+        }
+        """
+        variables = {"appUserId": app_user_id} if app_user_id else {}
+        res = await self.mutation(mutation, variables)
 
-            if self.check_for_errors(res):
-                logger.warning("Could not create conversation.")
-                return None
+        if self.check_for_errors(res):
+            logger.warning("Could not create conversation.")
+            return None
 
-            return res["data"]["createConversation"]["id"]
+        return res["data"]["createConversation"]["id"]
 
-    async def get_conversation_id(self):
-        self.conversation_id = await self.create_conversation()
-
-        return self.conversation_id
-
-    async def delete_conversation(self, conversation_id: str):
+    async def delete_conversation(self, conversation_id: str) -> bool:
         mutation = """
         mutation ($id: ID!) {
             deleteConversation(id: $id) {
@@ -106,7 +115,29 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return True
 
-    async def get_conversation(self, conversation_id: str):
+    async def get_conversation_author(self, conversation_id: str) -> str:
+        query = """
+        query ($id: ID!) {
+            conversation(id: $id) {
+               appUser {
+                   username
+               }
+            }
+        }
+        """
+        variables = {
+            "id": conversation_id,
+        }
+        res = await self.query(query, variables)
+        self.check_for_errors(res, raise_error=True)
+        return (
+            res.get("data", {})
+            .get("conversation", {})
+            .get("appUser", {})
+            .get("username")
+        )
+
+    async def get_conversation(self, conversation_id: str) -> ConversationDict:
         query = """
         query ($id: ID!) {
             conversation(id: $id) {
@@ -121,7 +152,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                     content
                     waitForAnswer
                     humanFeedback
-                    humanFeedbackDisabled
+                    disableHumanFeedback
                     language
                     prompt
                     authorIsUser
@@ -149,7 +180,9 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return res["data"]["conversation"]
 
-    async def get_conversations(self, pagination, filter):
+    async def get_conversations(
+        self, pagination: Pagination, filter: ConversationFilter
+    ):
         query = """query (
         $first: Int
         $cursor: String
@@ -212,7 +245,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             data=conversations,
         )
 
-    async def set_human_feedback(self, message_id, feedback):
+    async def set_human_feedback(self, message_id: str, feedback: int) -> bool:
         mutation = """mutation ($messageId: ID!, $humanFeedback: Int!) {
                         setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback) {
                             id
@@ -229,14 +262,6 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         raise NotImplementedError
 
     async def create_message(self, variables: MessageDict) -> Optional[str]:
-        c_id = await self.get_conversation_id()
-
-        if not c_id:
-            logger.warning("Missing conversation ID, could not persist the message.")
-            return None
-
-        variables["conversationId"] = c_id
-
         mutation = """
         mutation ($id: ID!, $conversationId: ID!, $author: String!, $content: String!, $language: String, $prompt: Json, $isError: Boolean, $parentId: String, $indent: Int, $authorIsUser: Boolean, $disableHumanFeedback: Boolean, $waitForAnswer: Boolean, $createdAt: StringOrFloat) {
             createMessage(id: $id, conversationId: $conversationId, author: $author, content: $content, language: $language, prompt: $prompt, isError: $isError, parentId: $parentId, indent: $indent, authorIsUser: $authorIsUser, disableHumanFeedback: $disableHumanFeedback, waitForAnswer: $waitForAnswer, createdAt: $createdAt) {
@@ -283,7 +308,9 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return True
 
-    async def get_element(self, conversation_id, element_id):
+    async def get_element(
+        self, conversation_id: str, element_id: str
+    ) -> Optional[ElementDict]:
         query = """query (
         $conversationId: ID!
         $id: ID!
@@ -313,13 +340,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return res["data"]["element"]
 
-    async def create_element(self, variables):
-        c_id = await self.get_conversation_id()
-
-        if not c_id:
-            logger.warning("Missing conversation ID, could not persist the element.")
-            return None
-
+    async def create_element(self, variables: ElementDict) -> Optional[ElementDict]:
         mutation = """
         mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String) {
             createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
@@ -335,7 +356,6 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             }
         }
         """
-        variables["conversationId"] = c_id
         res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
@@ -344,13 +364,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return res["data"]["createElement"]
 
-    async def update_element(self, variables):
-        c_id = await self.get_conversation_id()
-
-        if not c_id:
-            logger.warning("Missing conversation ID, could not persist the element.")
-            return None
-
+    async def update_element(self, variables: ElementDict) -> Optional[ElementDict]:
         mutation = """
         mutation ($conversationId: ID!, $id: ID!, $forIds: [String!]!) {
             updateElement(conversationId: $conversationId, id: $id, forIds: $forIds) {
@@ -359,8 +373,6 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         }
         """
 
-        variables = variables.copy()
-        variables["conversationId"] = c_id
         res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
@@ -383,7 +395,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             ) as r:
                 if not r.ok:
                     reason = await r.text()
-                    logger.error(f"Failed to upload file: {reason}")
+                    logger.error(f"Failed to sign upload url: {reason}")
                     return {"object_key": None, "url": None}
                 json_res = await r.json()
 
@@ -413,7 +425,9 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                 return {"object_key": object_key, "url": signed_url}
 
 
-chainlit_client = None
+chainlit_client = None  # type: Optional[ChainlitCloudClient]
 
 if config.data_persistence:
-    chainlit_client = ChainlitCloudClient()
+    chainlit_client = ChainlitCloudClient(
+        api_key=os.environ.get("CHAINLIT_API_KEY", "")
+    )

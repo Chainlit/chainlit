@@ -69,6 +69,11 @@ class Element:
         )
         return _dict
 
+    async def with_conversation_id(self):
+        _dict = self.to_dict()
+        _dict["conversationId"] = await context.session.get_conversation_id()
+        return _dict
+
     async def preprocess_content(self):
         pass
 
@@ -79,7 +84,7 @@ class Element:
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: ChainlitCloudClient) -> ElementDict:
+    async def persist(self, client: ChainlitCloudClient) -> Optional[ElementDict]:
         if not self.url and self.content and not self.persisted:
             # Only guess the mime type when the content is binary
             mime = (
@@ -92,10 +97,14 @@ class Element:
             self.object_key = upload_res["object_key"]
 
         if not self.persisted:
-            element_dict = await client.create_element(self.to_dict())
+            element_dict = await client.create_element(
+                await self.with_conversation_id()
+            )
             self.persisted = True
         else:
-            element_dict = await client.update_element(self.to_dict())
+            element_dict = await client.update_element(
+                await self.with_conversation_id()
+            )
         return element_dict
 
     async def before_emit(self, element: Dict) -> Dict:
@@ -117,7 +126,8 @@ class Element:
         # We have a client, persist the element
         if chainlit_client:
             element_dict = await self.persist(chainlit_client)
-            self.id = element_dict["id"]
+            if element_dict:
+                self.id = element_dict["id"]
 
         elif not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")

@@ -33,11 +33,16 @@ class MessageBase(ABC):
             self.created_at = datetime.now(timezone.utc).isoformat()
 
     @abstractmethod
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         pass
 
+    async def with_conversation_id(self):
+        _dict = self.to_dict()
+        _dict["conversationId"] = await context.session.get_conversation_id()
+        return _dict
+
     async def _create(self):
-        msg_dict = self.to_dict()
+        msg_dict = await self.with_conversation_id()
         if chainlit_client and not self.persisted:
             try:
                 persisted_id = await chainlit_client.create_message(msg_dict)
@@ -138,6 +143,7 @@ class Message(MessageBase):
         indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
+        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
     """
 
     def __init__(
@@ -318,6 +324,7 @@ class AskUserMessage(AskMessageBase):
     Args:
         content (str): The content of the prompt.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -326,12 +333,14 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
+        disable_human_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
         self.content = content
         self.author = author
         self.timeout = timeout
+        self.disable_human_feedback = disable_human_feedback
         self.raise_on_timeout = raise_on_timeout
 
         super().__post_init__()
@@ -343,6 +352,7 @@ class AskUserMessage(AskMessageBase):
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
+            "disableHumanFeedback": self.disable_human_feedback,
         }
 
     async def send(self) -> Union[AskResponse, None]:
@@ -378,6 +388,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -389,6 +400,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
+        disable_human_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -399,6 +411,7 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
+        self.disable_human_feedback = disable_human_feedback
 
         super().__post_init__()
 
@@ -409,6 +422,7 @@ class AskFileMessage(AskMessageBase):
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
+            "disableHumanFeedback": self.disable_human_feedback,
         }
 
     async def send(self) -> Union[List[AskFileResponse], None]:
