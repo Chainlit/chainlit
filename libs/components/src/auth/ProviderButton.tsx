@@ -10,7 +10,7 @@ function capitalizeFirstLetter(string: string) {
 function getProviderName(provider: string) {
   switch (provider) {
     case 'azure-ad':
-      return 'Microsoft Account';
+      return 'Microsoft';
     default:
       return capitalizeFirstLetter(provider);
   }
