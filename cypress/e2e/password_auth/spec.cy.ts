@@ -1,6 +1,6 @@
 import { runTestServer } from '../../support/testUtils';
 
-describe('Auth Custom client', () => {
+describe('Password Auth', () => {
   before(() => {
     runTestServer();
   });
@@ -18,6 +18,6 @@ describe('Auth Custom client', () => {
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('.MuiAlert-message').should('not.exist');
-    cy.get('.message').eq(0).should('contain', 'Hello');
+    cy.get('.message').eq(0).should('contain', 'Hello admin');
   });
 });
