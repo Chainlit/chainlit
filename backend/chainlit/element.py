@@ -6,7 +6,8 @@ from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 
 import aiofiles
 import filetype
-from chainlit.client.base import BaseDBClient, ElementDict
+from chainlit.client.base import ElementDict
+from chainlit.client.cloud import ChainlitCloudClient, chainlit_client
 from chainlit.context import context
 from chainlit.telemetry import trace_event
 from chainlit.types import ElementDisplay, ElementSize, ElementType
@@ -78,7 +79,7 @@ class Element:
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: BaseDBClient) -> ElementDict:
+    async def persist(self, client: ChainlitCloudClient) -> ElementDict:
         if not self.url and self.content and not self.persisted:
             # Only guess the mime type when the content is binary
             mime = (
@@ -114,8 +115,8 @@ class Element:
             self.for_ids.append(for_id)
 
         # We have a client, persist the element
-        if context.emitter.db_client:
-            element_dict = await self.persist(context.emitter.db_client)
+        if chainlit_client:
+            element_dict = await self.persist(chainlit_client)
             self.id = element_dict["id"]
 
         elif not self.url and not self.content:

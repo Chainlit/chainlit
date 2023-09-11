@@ -1,27 +1,13 @@
-from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+import os
+from typing import Any, Dict, Generic, List, Mapping, Optional, TypedDict, TypeVar
 
+from chainlit.config import config
+from chainlit.logger import logger
 from chainlit.prompt import Prompt
-from chainlit.types import (
-    AppUser,
-    ConversationFilter,
-    ElementDisplay,
-    ElementSize,
-    ElementType,
-    Pagination,
-)
+from chainlit.types import AppUser, ElementDisplay, ElementSize, ElementType
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
+from python_graphql_client import GraphqlClient
 
 
 class MessageDict(TypedDict):
@@ -79,63 +65,49 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     data: List[T]
 
 
-class BaseDBClient(ABC):
-    @abstractmethod
-    async def create_user(self, variables: AppUser) -> bool:
-        pass
+class ChainlitGraphQLClient:
+    def __init__(self):
+        chainlit_api_key = os.environ.get("CHAINLIT_API_KEY")
 
-    @abstractmethod
-    async def create_conversation(self) -> Optional[str]:
-        pass
+        self.headers = {"content-type": "application/json"}
+        if chainlit_api_key:
+            self.headers["x-api-key"] = chainlit_api_key
+        else:
+            raise ValueError("Cannot instantiate Cloud Client without CHAINLIT_API_KEY")
 
-    @abstractmethod
-    async def delete_conversation(self, conversation_id: str) -> bool:
-        pass
+        graphql_endpoint = f"{config.chainlit_server}/api/graphql"
+        self.graphql_client = GraphqlClient(
+            endpoint=graphql_endpoint, headers=self.headers
+        )
 
-    @abstractmethod
-    async def get_conversation(self, conversation_id: str) -> ConversationDict:
-        pass
+    async def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+        """
+        Execute a GraphQL query.
 
-    @abstractmethod
-    async def get_conversations(
-        self, pagination: "Pagination", filter: "ConversationFilter"
-    ) -> PaginatedResponse[ConversationDict]:
-        pass
+        :param query: The GraphQL query string.
+        :param variables: A dictionary of variables for the query.
+        :return: The response data as a dictionary.
+        """
+        return await self.graphql_client.execute_async(query=query, variables=variables)
 
-    @abstractmethod
-    async def get_message(self, conversation_id: str, message_id: str) -> Dict:
-        pass
+    def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
+        if "errors" in response:
+            if raise_error:
+                raise Exception(response["errors"][0])
+            logger.error(response["errors"][0])
+            return True
+        return False
 
-    @abstractmethod
-    async def create_message(self, variables: MessageDict) -> Optional[str]:
-        pass
+    async def mutation(
+        self, mutation: str, variables: Mapping[str, Any] = {}
+    ) -> Dict[str, Any]:
+        """
+        Execute a GraphQL mutation.
 
-    @abstractmethod
-    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
-        pass
-
-    @abstractmethod
-    async def delete_message(self, message_id: str) -> bool:
-        pass
-
-    @abstractmethod
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
-        pass
-
-    @abstractmethod
-    async def create_element(self, variables: ElementDict) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def update_element(self, variables: ElementDict) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def get_element(self, conversation_id: str, element_id: str) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def set_human_feedback(
-        self, message_id: str, feedback: Literal[-1, 0, 1]
-    ) -> bool:
-        pass
+        :param mutation: The GraphQL mutation string.
+        :param variables: A dictionary of variables for the mutation.
+        :return: The response data as a dictionary.
+        """
+        return await self.graphql_client.execute_async(
+            query=mutation, variables=variables
+        )

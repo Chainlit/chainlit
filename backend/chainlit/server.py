@@ -1,7 +1,7 @@
 import glob
 import json
 import mimetypes
-from typing import Optional
+from typing import Optional, Union
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -11,9 +11,9 @@ import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Dict
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.client.cloud import chainlit_client
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -28,9 +28,11 @@ from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
+    AppUser,
     CompletionRequest,
     DeleteConversationRequest,
     GetConversationsRequest,
+    PersistedAppUser,
     Theme,
     UpdateFeedbackRequest,
 )
@@ -224,6 +226,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="credentialssignin",
         )
     access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -247,6 +251,8 @@ async def header_auth(request: Request):
         )
 
     access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -256,7 +262,9 @@ async def header_auth(request: Request):
 @app.post("/completion")
 async def completion(
     request: CompletionRequest,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Handle a completion request from the prompt playground."""
 
@@ -277,7 +285,9 @@ async def completion(
 
 
 @app.get("/project/llm-providers")
-async def get_providers(current_user: Annotated[Dict, Depends(get_current_user)]):
+async def get_providers(
+    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+):
     """List the providers."""
     trace_event("pp_get_llm_providers")
     providers = get_llm_providers()
@@ -286,7 +296,9 @@ async def get_providers(current_user: Annotated[Dict, Depends(get_current_user)]
 
 
 @app.get("/project/settings")
-async def project_settings(current_user: Annotated[Dict, Depends(get_current_user)]):
+async def project_settings(
+    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return JSONResponse(
         content={
@@ -302,7 +314,9 @@ async def project_settings(current_user: Annotated[Dict, Depends(get_current_use
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Update the human feedback for a particular message."""
     # todo: cloud client
@@ -315,7 +329,10 @@ async def update_feedback(
 
 @app.get("/project/members")
 async def get_project_members(
-    request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
+    request: Request,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get all the members of a project."""
     # todo: cloud client
@@ -326,7 +343,10 @@ async def get_project_members(
 
 @app.get("/project/role")
 async def get_member_role(
-    request: Request, current_user: Annotated[Dict, Depends(get_current_user)]
+    request: Request,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get the role of a member."""
     # todo: cloud client
@@ -340,7 +360,9 @@ async def get_member_role(
 async def get_project_conversations(
     request: Request,
     payload: GetConversationsRequest,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get the conversations page by page."""
     # todo: cloud client
@@ -354,7 +376,9 @@ async def get_project_conversations(
 async def get_conversation(
     request: Request,
     conversation_id: str,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get a specific conversation."""
     # todo: cloud client
@@ -369,7 +393,9 @@ async def get_conversation_element(
     request: Request,
     conversation_id: str,
     element_id: str,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get a specific conversation element."""
     # todo: cloud client
@@ -383,7 +409,9 @@ async def get_conversation_element(
 async def delete_conversation(
     request: Request,
     payload: DeleteConversationRequest,
-    current_user: Annotated[Dict, Depends(get_current_user)],
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Delete a conversation."""
     # todo: cloud client
@@ -395,7 +423,10 @@ async def delete_conversation(
 
 @app.get("/files/{filename:path}")
 async def serve_file(
-    filename: str, current_user: Annotated[Dict, Depends(get_current_user)]
+    filename: str,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()

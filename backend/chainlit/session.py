@@ -2,8 +2,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
-
-from chainlit.types import AppUser, AskResponse
+    from chainlit.types import AppUser, AskResponse, PersistedAppUser
 
 
 class Session:
@@ -31,7 +30,7 @@ class Session:
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
         # Logged-in user informations
-        user: Optional[AppUser],
+        user: Optional[Union[AppUser, PersistedAppUser]],
         # Logged-in user token
         token: Optional[str],
         # Last message at the root of the chat

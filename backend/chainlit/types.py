@@ -71,7 +71,7 @@ class Pagination(BaseModel):
 
 class ConversationFilter(BaseModel):
     feedback: Optional[Literal[-1, 0, 1]]
-    authorEmail: Optional[str]
+    username: Optional[str]
     search: Optional[str]
 
 
@@ -90,32 +90,14 @@ Provider = Literal["credentials", "header"]
 
 
 # Used when logging-in a user
-class AppUser:
+class AppUser(DataClassJsonMixin):
     username: str
     role: Role
     tags: Optional[List[str]]
     image: Optional[str]
     provider: Optional[Provider]
 
-    def __init__(
-        self,
-        role: Role,
-        username: str,
-        tags: Optional[List[str]] = None,
-        image: Optional[str] = None,
-        provider: Optional[Provider] = None,
-    ):
-        self.username = username
-        self.role = role
-        self.tags = tags
-        self.image = image
-        self.provider = provider
 
-    def to_dict(self):
-        return {
-            "username": self.username,
-            "role": self.role,
-            "tags": self.tags,
-            "image": self.image,
-            "provider": self.provider,
-        }
+class PersistedAppUser(AppUser):
+    id: str
+    createdAt: int

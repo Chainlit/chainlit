@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Any, Dict
 
 import jwt
+from chainlit.client.cloud import chainlit_client
+from chainlit.config import config
 from chainlit.secret import random_secret
 from chainlit.types import AppUser
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-
-from chainlit import config
 
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
@@ -32,7 +32,7 @@ def get_configuration():
 
 
 def create_jwt(data: AppUser) -> str:
-    to_encode = data.to_dict()
+    to_encode = data.to_dict()  # type: Dict[str, Any]
     to_encode.update(
         {
             "exp": datetime.utcnow() + timedelta(minutes=60 * 24 * 15),  # 15 days
@@ -55,6 +55,12 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         )
         del dict["exp"]
         app_user = AppUser(**dict)
-        return app_user
+
+        if chainlit_client:
+            persisted_app_user = await chainlit_client.get_app_user(app_user.username)
+            return persisted_app_user
+        else:
+            return app_user
+
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")

@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Union
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
+from chainlit.client.cloud import chainlit_client
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import ElementBased
@@ -37,9 +38,9 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-        if context.emitter.db_client and not self.persisted:
+        if chainlit_client and not self.persisted:
             try:
-                persisted_id = await context.emitter.db_client.create_message(msg_dict)
+                persisted_id = await chainlit_client.create_message(msg_dict)
                 if persisted_id:
                     msg_dict["id"] = persisted_id
                     self.id = persisted_id
@@ -64,8 +65,8 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if context.emitter.db_client and self.id:
-            await context.emitter.db_client.update_message(self.id, msg_dict)
+        if chainlit_client and self.id:
+            await chainlit_client.update_message(self.id, msg_dict)
 
         await context.emitter.update_message(msg_dict)
 
@@ -78,8 +79,8 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        if context.emitter.db_client and self.id:
-            await context.emitter.db_client.delete_message(self.id)
+        if chainlit_client and self.id:
+            await chainlit_client.delete_message(self.id)
 
         await context.emitter.delete_message(self.to_dict())
 
@@ -149,6 +150,7 @@ class Message(MessageBase):
         indent: int = 0,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
+        disable_human_feedback: Optional[bool] = False,
     ):
         self.language = language
 
@@ -169,6 +171,7 @@ class Message(MessageBase):
         self.indent = indent
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
+        self.ddisable_human_feedback = disable_human_feedback
 
         super().__post_init__()
 
@@ -181,6 +184,7 @@ class Message(MessageBase):
             language=_dict.get("language"),
             parent_id=_dict.get("parentId"),
             indent=_dict.get("indent") or 0,
+            disable_human_feedback=_dict.get("disableHumanFeedback"),
         )
 
         if _id := _dict.get("id"):
@@ -199,6 +203,7 @@ class Message(MessageBase):
             "parentId": self.parent_id,
             "indent": self.indent,
             "streaming": self.streaming,
+            "disableHumanFeedback": self.ddisable_human_feedback,
         }
 
         if self.prompt:
