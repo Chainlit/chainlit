@@ -9,7 +9,7 @@ import { Logo } from 'components/atoms/logo';
 import { useAuth } from 'hooks/auth';
 
 export default function Login() {
-  const { config, setAccessToken } = useAuth();
+  const { config, setAccessToken, user } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
 
@@ -62,7 +62,10 @@ export default function Login() {
     if (config.headerAuth) {
       handleHeaderAuth();
     }
-  }, [config, navigate]);
+    if (user) {
+      navigate('/');
+    }
+  }, [config, navigate, user]);
 
   return (
     <AuthLogin
