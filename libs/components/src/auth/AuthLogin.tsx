@@ -82,6 +82,10 @@ const AuthLogin = ({
   const [errorState, setErrorState] = useState(error);
 
   useEffect(() => {
+    setErrorState(undefined);
+    formik.resetForm();
+  }, [showSignIn]);
+  useEffect(() => {
     setErrorState(error);
   }, [error]);
 
@@ -118,7 +122,7 @@ const AuthLogin = ({
 
   return (
     <AuthTemplate title={title} renderLogo={renderLogo}>
-      {error ? (
+      {errorState ? (
         <Alert sx={{ my: 1 }} severity="error">
           {getErrorMessage(errorState)}
         </Alert>
