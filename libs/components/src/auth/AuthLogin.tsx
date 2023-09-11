@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
-import PasswordChecklist from 'react-password-checklist';
+import PasswordChecklist, { RuleNames } from 'react-password-checklist';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
@@ -62,6 +62,12 @@ type AuthLoginProps = {
   ) => Promise<any>;
   onForgotPassword?: () => Promise<any>;
   renderLogo?: React.ReactElement;
+  passwordChecklistSettings?: {
+    rules: RuleNames[];
+    messages?: Partial<Record<RuleNames, string>>;
+    minLength?: number;
+    maxLength?: number;
+  };
 };
 
 const AuthLogin = ({
@@ -73,10 +79,13 @@ const AuthLogin = ({
   onOAuthSignIn,
   onForgotPassword,
   onSignUp,
-  renderLogo
+  renderLogo,
+  passwordChecklistSettings
 }: AuthLoginProps) => {
   const [loading, setLoading] = useState(false);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(
+    !passwordChecklistSettings
+  );
   const [showSignIn, toggleShowSignIn] = useToggle(true);
   const [showPassword, toggleShowPassword] = useToggle();
   const [errorState, setErrorState] = useState(error);
@@ -167,7 +176,9 @@ const AuthLogin = ({
           }
         />
 
-        {!showSignIn && formik.values.password.length ? (
+        {!showSignIn &&
+        formik.values.password.length &&
+        passwordChecklistSettings ? (
           <Box
             sx={{
               border: 1,
@@ -183,15 +194,11 @@ const AuthLogin = ({
           >
             Your password must contain:
             <PasswordChecklist
-              rules={['minLength', 'specialChar', 'number', 'capital']}
-              minLength={8}
+              rules={passwordChecklistSettings.rules}
+              minLength={passwordChecklistSettings.minLength}
+              maxLength={passwordChecklistSettings.maxLength}
               value={formik.values.password}
-              messages={{
-                minLength: 'At least 8 characters',
-                specialChar: 'A special character',
-                number: 'A number',
-                capital: 'An upper case letter'
-              }}
+              messages={passwordChecklistSettings.messages}
               onChange={setIsPasswordValid}
             />
           </Box>
