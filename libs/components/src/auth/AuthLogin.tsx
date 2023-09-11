@@ -1,11 +1,13 @@
 import { useFormik } from 'formik';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import PasswordChecklist from 'react-password-checklist';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Alert,
+  Box,
   Button,
   IconButton,
   InputAdornment,
@@ -74,6 +76,7 @@ const AuthLogin = ({
   renderLogo
 }: AuthLoginProps) => {
   const [loading, setLoading] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [showSignIn, toggleShowSignIn] = useToggle(true);
   const [showPassword, toggleShowPassword] = useToggle();
   const [errorState, setErrorState] = useState(error);
@@ -91,39 +94,27 @@ const AuthLogin = ({
       email: yup.string().required(),
       password: yup.string().required()
     }),
-    onSubmit: async () => undefined,
+    onSubmit: async ({ email, password }) => {
+      setLoading(true);
+
+      if (!onPasswordSignIn) {
+        return;
+      }
+
+      try {
+        showSignIn
+          ? await onPasswordSignIn(email, password, callbackUrl)
+          : onSignUp && (await onSignUp(email, password, callbackUrl));
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setErrorState(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
     validateOnBlur: true
   });
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-
-    if (!onPasswordSignIn) {
-      return;
-    }
-
-    try {
-      showSignIn
-        ? await onPasswordSignIn(
-            formik.values.email,
-            formik.values.password,
-            callbackUrl
-          )
-        : onSignUp &&
-          (await onSignUp(
-            formik.values.email,
-            formik.values.password,
-            callbackUrl
-          ));
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorState(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <AuthTemplate title={title} renderLogo={renderLogo}>
@@ -132,60 +123,91 @@ const AuthLogin = ({
           {getErrorMessage(errorState)}
         </Alert>
       ) : null}
-      {onPasswordSignIn ? (
-        <form onSubmit={handleSubmit}>
-          <TextInput
-            id="email"
-            placeholder="Email adress"
-            size="medium"
-            value={formik.values.email}
-            hasError={!!formik.errors.email}
-            description={formik.touched.email ? formik.errors.email : undefined}
-            onBlur={formik.handleBlur}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              formik.setFieldValue('email', e.target.value)
-            }
-          />
-          <TextInput
-            id="password"
-            placeholder="Password"
-            value={formik.values.password}
-            hasError={!!formik.errors.password}
-            description={
-              formik.touched.password ? formik.errors.password : undefined
-            }
-            onBlur={formik.handleBlur}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              formik.setFieldValue('password', e.target.value)
-            }
-            type={showPassword ? 'text' : 'password'}
-            size="medium"
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={toggleShowPassword}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-          {showSignIn && onForgotPassword ? (
-            <Link href="#" marginTop={1} onClick={onForgotPassword}>
-              Forgot password?
-            </Link>
-          ) : null}
-          <Button
-            type="submit"
-            disabled={loading}
-            variant="contained"
-            sx={{ marginTop: 3, width: '100%' }}
+
+      <form onSubmit={formik.handleSubmit}>
+        <TextInput
+          id="email"
+          placeholder="Email address"
+          size="medium"
+          value={formik.values.email}
+          hasError={!!formik.errors.email}
+          description={formik.touched.email ? formik.errors.email : undefined}
+          onBlur={formik.handleBlur}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('email', e.target.value)
+          }
+        />
+        <TextInput
+          id="password"
+          placeholder="Password"
+          value={formik.values.password}
+          hasError={!!formik.errors.password}
+          description={
+            formik.touched.password ? formik.errors.password : undefined
+          }
+          onBlur={formik.handleBlur}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            formik.setFieldValue('password', e.target.value)
+          }
+          type={showPassword ? 'text' : 'password'}
+          size="medium"
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={toggleShowPassword}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          }
+        />
+
+        {!showSignIn && formik.values.password.length ? (
+          <Box
+            sx={{
+              border: 1,
+              marginTop: 1,
+              padding: 1.5,
+              borderRadius: 1,
+              borderColor: 'grey.400',
+              '& .checklist-icon': {
+                marginTop: 0.5
+              },
+              fontSize: 14
+            }}
           >
-            Continue
-          </Button>
-        </form>
-      ) : null}
+            Your password must contain:
+            <PasswordChecklist
+              rules={['minLength', 'specialChar', 'number', 'capital']}
+              minLength={8}
+              value={formik.values.password}
+              messages={{
+                minLength: 'At least 8 characters',
+                specialChar: 'A special character',
+                number: 'A number',
+                capital: 'An upper case letter'
+              }}
+              onChange={setIsPasswordValid}
+            />
+          </Box>
+        ) : null}
+
+        {showSignIn && onForgotPassword ? (
+          <Link href="#" marginTop={1} onClick={onForgotPassword}>
+            Forgot password?
+          </Link>
+        ) : null}
+        <Button
+          type="submit"
+          disabled={loading || (!showSignIn && !isPasswordValid)}
+          variant="contained"
+          sx={{ marginTop: 3, width: '100%' }}
+        >
+          Continue
+        </Button>
+      </form>
+
       {onSignUp ? (
         <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
           {showSignIn ? (
