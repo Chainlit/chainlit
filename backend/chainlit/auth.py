@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import jwt
 from chainlit.client.cloud import chainlit_client
@@ -27,7 +27,36 @@ def require_login():
     return (
         config.code.password_auth_callback is not None
         or config.code.header_auth_callback is not None
+        or len(get_configured_oauth_providers()) > 0
     )
+
+
+def get_oauth_provider(provider: str):
+    if (
+        provider == "github"
+        and os.environ.get("OAUTH_GITHUB_CLIENT_ID")
+        and os.environ.get("OAUTH_GITHUB_CLIENT_SECRET")
+    ):
+        return {
+            "name": "GitHub",
+            "client_id": os.environ["OAUTH_GITHUB_CLIENT_ID"],
+            "client_secret": os.environ["OAUTH_GITHUB_CLIENT_SECRET"],
+            "authorize_url": "https://github.com/login/oauth/authorize",
+            "authorize_params": {},
+            "access_token_url": "https://github.com/login/oauth/access_token",
+            "user_info_url": "https://api.github.com/user",
+        }
+
+
+def get_configured_oauth_providers():
+    providers = []
+
+    if os.environ.get("OAUTH_GITHUB_CLIENT_ID") and os.environ.get(
+        "OAUTH_GITHUB_CLIENT_SECRET"
+    ):
+        providers.append("github")
+
+    return providers
 
 
 def get_configuration():
@@ -35,7 +64,7 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": [],
+        "oauthProviders": get_configured_oauth_providers(),
     }
 
 

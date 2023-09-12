@@ -25,6 +25,8 @@ const signinErrors: Record<string, string> = {
   default: 'Unable to sign in.',
   signin: 'Try signing in with a different account.',
   oauthsignin: 'Try signing in with a different account.',
+  redirect_uri_mismatch:
+    'The redirect URI is not matching the oauth app configuration.',
   oauthcallbackerror: 'Try signing in with a different account.',
   oauthcreateaccount: 'Try signing in with a different account.',
   emailcreateaccount: 'Try signing in with a different account.',

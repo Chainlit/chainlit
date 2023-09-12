@@ -1,21 +1,26 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// import { Alert } from '@mui/material';
 import { useAuth } from 'hooks/auth';
+import { useQuery } from 'hooks/query';
 
 export default function AuthCallback() {
-  const { user } = useAuth();
+  const query = useQuery();
+  const { user, setAccessToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = query.get('access_token');
+    setAccessToken(token);
+    console.log('token', token);
+  }, [setAccessToken, query]);
+
+  useEffect(() => {
     if (user) {
+      console.log('user', user);
       navigate('/');
     }
   }, [user, navigate]);
 
-  // if (error) {
-  //   return <Alert severity="error">{error.message}</Alert>;
-  // }
   return null;
 }

@@ -7,8 +7,10 @@ import { AuthLogin } from '@chainlit/components';
 import { Logo } from 'components/atoms/logo';
 
 import { useAuth } from 'hooks/auth';
+import { useQuery } from 'hooks/query';
 
 export default function Login() {
+  const query = useQuery();
   const { config, setAccessToken, user } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -53,6 +55,10 @@ export default function Login() {
   };
 
   useEffect(() => {
+    setError(query.get('error') || '');
+  }, [query]);
+
+  useEffect(() => {
     if (!config) {
       return;
     }
@@ -72,9 +78,11 @@ export default function Login() {
       title="Login to access the app."
       error={error}
       callbackUrl="/"
-      providers={[]}
+      providers={config?.oauthProviders || []}
       onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
-      onOAuthSignIn={async () => {}}
+      onOAuthSignIn={async (provider: string) => {
+        window.location.href = httpEndpoint + '/auth/oauth/' + provider;
+      }}
       renderLogo={<Logo style={{ maxWidth: '60%' }} />}
     />
   );
