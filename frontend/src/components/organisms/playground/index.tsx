@@ -35,7 +35,10 @@ import SubmitButton from './submitButton';
 export default function PromptPlayground() {
   const [playground, setPlayground] = useRecoilState(playgroundState);
 
-  const { data, error, mutate } = useApi<IPlayground>('/project/llm-providers');
+  const { data, error, mutate } = useApi<IPlayground>(
+    '/project/llm-providers',
+    true
+  );
 
   const [restoredTime, setRestoredTime] = useState(0);
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
