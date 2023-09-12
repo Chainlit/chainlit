@@ -1,3 +1,4 @@
+import { removeToken } from 'helpers/localStorageToken';
 import toast from 'react-hot-toast';
 
 const devServer = 'http://127.0.0.1:8000';
@@ -48,6 +49,8 @@ const api = {
       if (!res.ok) {
         const body = await res.json();
         if (res.status === 401 && window.location.pathname !== '/login') {
+          // The credentials aren't correct, remove the token and redirect to login
+          removeToken();
           window.location.href = '/login';
         }
         throw new ClientError(res.statusText, body.detail);

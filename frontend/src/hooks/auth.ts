@@ -1,3 +1,4 @@
+import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
@@ -7,32 +8,6 @@ import { accessTokenState } from 'state/user';
 import { IAppUser } from 'types/user';
 
 import { fetcher } from './useApi';
-
-const tokenKey = 'token';
-
-function getToken() {
-  try {
-    return localStorage.getItem(tokenKey);
-  } catch (e) {
-    return;
-  }
-}
-
-function setToken(token: string) {
-  try {
-    return localStorage.setItem(tokenKey, token);
-  } catch (e) {
-    return;
-  }
-}
-
-function removeToken() {
-  try {
-    return localStorage.removeItem(tokenKey);
-  } catch (e) {
-    return;
-  }
-}
 
 export const useAuth = () => {
   const { data: config, isLoading: isLoadingConfig } = useSWRImmutable<{
