@@ -1,14 +1,14 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useEffect, useRef } from 'react';
+import { nestMessages } from 'utils/message';
 
 import { Box } from '@mui/material';
 
-import { IAction } from '../types/action';
-import { IMessageElement } from '../types/element';
-import { IMessage } from '../types/message';
-import { IMessageContext } from '../types/messageContext';
+import { IAction } from 'src/types/action';
+import { IMessageElement } from 'src/types/element';
+import { IMessage } from 'src/types/message';
+import { IMessageContext } from 'src/types/messageContext';
 
-import { MessageContext } from '../../contexts/MessageContext';
-import { nestMessages } from '../../utils/message';
 import { Messages } from './Messages';
 
 interface Props {

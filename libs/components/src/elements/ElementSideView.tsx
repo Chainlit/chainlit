@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { IMessageElement } from '../types/element';
+import { IMessageElement } from 'src/types/element';
 
 import { Element } from './Element';
 

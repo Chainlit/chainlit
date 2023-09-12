@@ -1,11 +1,11 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { isLastMessage } from 'utils/message';
 
-import { IAction } from '../types/action';
-import { IMessageElement } from '../types/element';
-import { INestedMessage } from '../types/message';
+import { IAction } from 'src/types/action';
+import { IMessageElement } from 'src/types/element';
+import { INestedMessage } from 'src/types/message';
 
-import { MessageContext } from '../../contexts/MessageContext';
-import { isLastMessage } from '../../utils/message';
 import { Message } from './Message';
 
 interface Props {

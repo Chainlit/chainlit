@@ -1,13 +1,14 @@
+import { InputStateHandler } from 'src/inputs/InputStateHandler';
+import { grey, primary } from 'theme/index';
+
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
-import { useIsDarkMode } from '../../../hooks/useIsDarkMode';
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import { IInput } from '../../types/Input';
+import { IInput } from 'src/types/Input';
 
-import { grey, primary } from '../../../theme';
-import { InputStateHandler } from '../InputStateHandler';
 import { MenuItem } from './MenuItem';
 
 type SelectItem = {

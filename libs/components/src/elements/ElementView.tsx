@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 
-import { IMessageElement } from '../types/element';
+import { IMessageElement } from 'src/types/element';
 
 import { Element } from './Element';
 

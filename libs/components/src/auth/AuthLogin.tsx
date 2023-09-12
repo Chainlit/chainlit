@@ -1,6 +1,8 @@
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import PasswordChecklist, { RuleNames } from 'react-password-checklist';
+import { TextInput } from 'src/inputs/TextInput';
+import { grey } from 'theme/palette';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
@@ -16,8 +18,6 @@ import {
   Typography
 } from '@mui/material';
 
-import { grey } from '../../theme/palette';
-import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
 import { ProviderButton } from './ProviderButton';
 

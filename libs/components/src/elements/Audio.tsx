@@ -1,8 +1,8 @@
+import { grey } from 'theme/palette';
+
 import { Box, useTheme } from '@mui/material';
 
-import { IAudioElement } from '../types/element';
-
-import { grey } from '../../theme/palette';
+import { IAudioElement } from 'src/types/element';
 
 const AudioElement = ({ element }: { element: IAudioElement }) => {
   const theme = useTheme();

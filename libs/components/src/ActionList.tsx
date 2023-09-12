@@ -1,3 +1,4 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 
 import { MoreHoriz } from '@mui/icons-material';
@@ -13,8 +14,6 @@ import {
 import { Tooltip } from '@mui/material';
 
 import { IAction } from './types/action';
-
-import { MessageContext } from '../contexts/MessageContext';
 
 interface ActionProps {
   action: IAction;

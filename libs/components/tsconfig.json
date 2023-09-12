@@ -19,7 +19,14 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "src/*": ["./src/*"],
+      "theme/*": ["./theme/*"],
+      "hooks/*": ["./hooks/*"],
+      "utils/*": ["./utils/*"],
+      "contexts/*": ["./contexts/*"]
+    }
   },
   "include": ["src", "theme", "hooks", "utils", "contexts"],
   "types": ["@testing-library/jest-dom", "node"],

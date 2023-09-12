@@ -1,6 +1,6 @@
 import { Box, Stack } from '@mui/material';
 
-import { IAudioElement } from '../types/element';
+import { IAudioElement } from 'src/types/element';
 
 import { AudioElement } from './Audio';
 

@@ -1,9 +1,10 @@
+import { grey } from 'theme/palette';
+
 import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
-import { IInput } from '../types/Input';
+import { IInput } from 'src/types/Input';
 
-import { grey } from '../../theme/palette';
 import { InputStateHandler } from './InputStateHandler';
 
 type SliderInputProps = IInput &

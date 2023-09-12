@@ -1,7 +1,7 @@
+import { grey } from 'theme/palette';
+
 import { GitHub, Google, Microsoft } from '@mui/icons-material';
 import { Button } from '@mui/material';
-
-import { grey } from '../../theme/palette';
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

@@ -1,11 +1,11 @@
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import { TextInput } from 'src/inputs/TextInput';
 import * as yup from 'yup';
 
 import { MailOutline } from '@mui/icons-material';
 import { Alert, Box, Button, Link } from '@mui/material';
 
-import { TextInput } from '../inputs/TextInput';
 import { AuthTemplate } from './AuthTemplate';
 
 interface AuthForgotPasswordProps {

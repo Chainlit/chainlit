@@ -1,4 +1,4 @@
-import { IVideoElement } from '../types/element';
+import { IVideoElement } from 'src/types/element';
 
 const VideoElement = ({ element }: { element: IVideoElement }) => {
   if (!element.url && !element.content) {

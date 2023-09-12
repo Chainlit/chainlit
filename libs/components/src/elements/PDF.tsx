@@ -1,4 +1,4 @@
-import { IPdfElement } from '../types/element';
+import { IPdfElement } from 'src/types/element';
 
 interface Props {
   element: IPdfElement;

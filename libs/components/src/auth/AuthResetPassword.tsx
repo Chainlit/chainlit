@@ -1,10 +1,10 @@
 import { useFormik } from 'formik';
 import { ReactElement, useState } from 'react';
+import { TextInput } from 'src/inputs';
 import * as yup from 'yup';
 
 import { Alert, Button } from '@mui/material';
 
-import { TextInput } from '../inputs';
 import { AuthTemplate } from './AuthTemplate';
 
 interface AuthResetPasswordProps {

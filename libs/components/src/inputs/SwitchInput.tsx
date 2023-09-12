@@ -1,9 +1,10 @@
+import { green } from 'theme/palette';
+
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 
-import { IInput } from '../types/Input';
+import { IInput } from 'src/types/Input';
 
-import { green } from '../../theme/palette';
 import { InputStateHandler } from './InputStateHandler';
 
 type SwitchInputProps = IInput & {

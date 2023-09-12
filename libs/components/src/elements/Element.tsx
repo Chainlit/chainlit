@@ -1,4 +1,4 @@
-import { IMessageElement } from '../types/element';
+import { IMessageElement } from 'src/types/element';
 
 import { AudioElement } from './Audio';
 import { FileElement } from './File';
