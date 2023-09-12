@@ -45,7 +45,11 @@ const AuthTemplate = ({
           }}
         >
           {renderLogo}
-          {title ? <Typography color="text.primary">{title}</Typography> : null}
+          {title ? (
+            <Typography textAlign="center" color="text.primary">
+              {title}
+            </Typography>
+          ) : null}
         </Stack>
         <Stack gap={1} paddingX={3}>
           {children}

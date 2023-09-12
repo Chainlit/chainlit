@@ -32,6 +32,7 @@ const signinErrors: Record<string, string> = {
   oauthaccountnotlinked:
     'To confirm your identity, sign in with the same account you used originally.',
   emailsignin: 'The e-mail could not be sent.',
+  emailverify: 'Please verify your email, a new email has been sent.',
   credentialssignin:
     'Sign in failed. Check the details you provided are correct.',
   sessionrequired: 'Please sign in to access this page.'
