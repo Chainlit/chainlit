@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Role } from 'types/user';
 
-export const accessTokenState = atom<string | null | undefined>({
+export const accessTokenState = atom<string | undefined>({
   key: 'AccessToken',
   default: undefined
 });

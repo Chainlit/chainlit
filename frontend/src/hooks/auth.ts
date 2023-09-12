@@ -47,7 +47,7 @@ export const useAuth = () => {
 
   const logout = () => {
     removeToken();
-    setAccessToken(null);
+    setAccessToken('');
     setUser(null);
   };
 
