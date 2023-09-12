@@ -61,7 +61,6 @@ export const useAuth = () => {
       setToken(token);
       setAccessToken(`Bearer ${token}`);
       setUser(AppUser as IAppUser);
-      console.log('AppUser', AppUser);
     } catch (e) {
       console.error('Invalid token, clearing token from local storage');
       logout();

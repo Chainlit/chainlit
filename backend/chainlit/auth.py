@@ -13,7 +13,7 @@ reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
 
 def get_jwt_secret():
-    return os.environ.get("CHAINLIT_JWT_SECRET")
+    return os.environ.get("CHAINLIT_AUTH_SECRET")
 
 
 def ensure_jwt_secret():
