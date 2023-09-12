@@ -1,18 +1,26 @@
+import os
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
 from chainlit.client.cloud import chainlit_client
 from chainlit.config import config
-from chainlit.secret import random_secret
 from chainlit.types import AppUser
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
-# TODO: make this an env variable with CLI command
-secret = random_secret()
+
+def get_jwt_secret():
+    return os.environ.get("CHAINLIT_AUTH_SECRET")
+
+
+def ensure_jwt_secret():
+    if require_login() and get_jwt_secret() is None:
+        raise ValueError(
+            "You must provide a JWT secret in the environment to use password authentication. Run `chainlit create-secret` to generate one."
+        )
 
 
 def require_login():
@@ -38,7 +46,7 @@ def create_jwt(data: AppUser) -> str:
             "exp": datetime.utcnow() + timedelta(minutes=60 * 24 * 15),  # 15 days
         }
     )
-    encoded_jwt = jwt.encode(to_encode, secret, algorithm="HS256")
+    encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
     return encoded_jwt
 
 
@@ -49,7 +57,7 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
     try:
         dict = jwt.decode(
             token,
-            secret,
+            get_jwt_secret(),
             algorithms=["HS256"],
             options={"verify_signature": True},
         )

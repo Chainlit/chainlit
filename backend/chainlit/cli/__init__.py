@@ -7,6 +7,7 @@ import uvicorn
 
 nest_asyncio.apply()
 
+from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.cli.utils import check_file
 from chainlit.config import (
@@ -19,6 +20,7 @@ from chainlit.config import (
 )
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
+from chainlit.secret import random_secret
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
 
@@ -41,6 +43,8 @@ def run_chainlit(target: str):
     # Load the module provided by the user
     config.run.module_name = target
     load_module(config.run.module_name)
+
+    ensure_jwt_secret()
 
     register_wildcard_route_handler()
 
@@ -159,3 +163,13 @@ def chainlit_hello(args=None, **kwargs):
 def chainlit_init(args=None, **kwargs):
     trace_event("chainlit init")
     init_config(log=True)
+
+
+@cli.command("create-secret")
+@click.argument("args", nargs=-1)
+def chainlit_create_secret(args=None, **kwargs):
+    trace_event("chainlit secret")
+
+    print(
+        f"Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\CHAINLIT_AUTH_SECRET={random_secret()}"
+    )
