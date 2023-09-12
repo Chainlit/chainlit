@@ -63,12 +63,17 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         )
         del dict["exp"]
         app_user = AppUser(**dict)
-
-        if chainlit_client:
-            persisted_app_user = await chainlit_client.get_app_user(app_user.username)
-            return persisted_app_user
-        else:
-            return app_user
-
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+    if chainlit_client:
+        try:
+            persisted_app_user = await chainlit_client.get_app_user(app_user.username)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+        if persisted_app_user == None:
+            raise HTTPException(status_code=401, detail="User does not exist")
+
+        return persisted_app_user
+    else:
+        return app_user
