@@ -92,6 +92,7 @@ const MessageContainer = ({
 
     if (element.display === 'side') {
       setSideView(element);
+      return;
     }
 
     if (element.conversationId) {

@@ -9,21 +9,12 @@ const fetcher = async (endpoint: string, token?: string) => {
   return res?.json();
 };
 
-function useApi<T>(endpoint: string | null, preventDefault?: boolean) {
+function useApi<T>(endpoint: string | null) {
   const { accessToken } = useAuth();
-
-  const options = preventDefault
-    ? {
-        revalidateIfStale: false,
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false
-      }
-    : undefined;
 
   return useSWR<T>(
     endpoint ? [endpoint, accessToken] : null,
-    ([url, token]: [url: string, token: string]) => fetcher(url, token),
-    options
+    ([url, token]: [url: string, token: string]) => fetcher(url, token)
   );
 }
 
