@@ -53,6 +53,8 @@ llama-index = "^0.8.3"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
+# forcing version until haystack fixes the issue
+tiktoken = "0.4.0"
 
 [tool.poetry.group.mypy]
 optional = true
