@@ -52,6 +52,8 @@
     "@testing-library/react": "^14.0.0",
     "@types/react-resizable": "^3.0.4",
     "@types/react-syntax-highlighter": "^15.5.7",
+    "vite-tsconfig-paths": "^4.2.0",
+    "@vitejs/plugin-react-swc": "^3.3.2",
     "jsdom": "^22.1.0",
     "tsup": "^7.2.0",
     "vite": "^4.4.5"

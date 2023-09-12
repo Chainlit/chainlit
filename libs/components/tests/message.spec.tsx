@@ -1,13 +1,8 @@
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+import { MessageContext, defaultMessageContext } from 'contexts/MessageContext';
 import { ComponentProps } from 'react';
+import { Message } from 'src/messages/Message';
 import { describe, expect, it } from 'vitest';
-
-import {
-  MessageContext,
-  defaultMessageContext
-} from '../contexts/MessageContext';
-import { Message } from '../src/messages/Message';
 
 describe('Message', () => {
   const defaultProps: ComponentProps<typeof Message> = {
