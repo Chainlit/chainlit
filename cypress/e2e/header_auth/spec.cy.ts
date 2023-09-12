@@ -16,5 +16,8 @@ describe('Header auth', () => {
     cy.visit('/');
     cy.get('.MuiAlert-message').should('not.exist');
     cy.get('.message').eq(0).should('contain', 'Hello admin');
+
+    cy.reload();
+    cy.get('.message').eq(0).should('contain', 'Hello admin');
   });
 });

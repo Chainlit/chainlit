@@ -19,5 +19,9 @@ describe('Password Auth', () => {
     cy.get("button[type='submit']").click();
     cy.get('.MuiAlert-message').should('not.exist');
     cy.get('.message').eq(0).should('contain', 'Hello admin');
+
+    cy.reload();
+    cy.get("input[name='email']").should('not.exist');
+    cy.get('.message').eq(0).should('contain', 'Hello admin');
   });
 });
