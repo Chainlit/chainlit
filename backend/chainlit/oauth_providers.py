@@ -1,7 +1,8 @@
 import os
+import urllib.parse
 from typing import List, Optional
 
-import httpx
+import aiohttp
 from chainlit.types import AppUser
 from fastapi import HTTPException
 
@@ -35,39 +36,37 @@ class GithubOAuthProvider(OAuthProvider):
         self.authorize_params = {}
 
     async def get_token(self, code: str):
-        async with httpx.AsyncClient() as client:
-            payload = {
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "code": code,
-            }
-            result = await client.post(
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+        }
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.post(
                 "https://github.com/login/oauth/access_token",
-                headers={"accept": "application/json"},
-                data=payload,
-            )
-            result.raise_for_status()
-
-            token = result.json().get("access_token")
-            if not token:
-                raise HTTPException(
-                    status_code=400, detail="Failed to get the access token"
-                )
-            return token
+                json=payload,
+            ) as result:
+                text = await result.text()
+                content = urllib.parse.parse_qs(text)
+                token = content.get("access_token", [""])[0]
+                if not token:
+                    raise HTTPException(
+                        status_code=400, detail="Failed to get the access token"
+                    )
+                return token
 
     async def get_user_info(self, token: str):
-        async with httpx.AsyncClient() as client:
-            auth_header = {"Authorization": f"token {token}"}
-            user_req_result = await client.get(
-                "https://api.github.com/user", headers=auth_header
-            )
-            user_req_result.raise_for_status()
-            user = user_req_result.json()
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.get(
+                "https://api.github.com/user",
+                headers={"Authorization": f"token {token}"},
+            ) as result:
+                user = await result.json()
 
-            app_user = AppUser(
-                username=user["login"], image=user["avatar_url"], provider="github"
-            )
-            return app_user
+                app_user = AppUser(
+                    username=user["login"], image=user["avatar_url"], provider="github"
+                )
+                return app_user
 
 
 class GoogleOAuthProvider(OAuthProvider):
@@ -85,41 +84,39 @@ class GoogleOAuthProvider(OAuthProvider):
         }
 
     async def get_token(self, code: str):
-        async with httpx.AsyncClient() as client:
-            payload = {
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "code": code,
-                "grant_type": "authorization_code",
-                # FIXME: This is hardcoded to localhost, but should be configurable
-                "redirect_uri": "http://127.0.0.1:8000/auth/oauth/google/callback",
-            }
-            result = await client.post(
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            # FIXME: This is hardcoded to localhost, but should be configurable
+            "redirect_uri": "http://localhost:8000/auth/oauth/google/callback",
+        }
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.post(
                 "https://oauth2.googleapis.com/token",
                 data=payload,
-            )
-            result.raise_for_status()
-
-            token = result.json().get("access_token")
-            if not token:
-                raise HTTPException(
-                    status_code=400, detail="Failed to get the access token"
-                )
-            return token
+            ) as result:
+                json = await result.json()
+                token = json["access_token"]
+                if not token:
+                    raise HTTPException(
+                        status_code=400, detail="Failed to get the access token"
+                    )
+                return token
 
     async def get_user_info(self, token: str):
-        async with httpx.AsyncClient() as client:
-            auth_header = {"Authorization": f"Bearer {token}"}
-            user_req_result = await client.get(
-                "https://www.googleapis.com/userinfo/v2/me", headers=auth_header
-            )
-            user_req_result.raise_for_status()
-            user = user_req_result.json()
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.get(
+                "https://www.googleapis.com/userinfo/v2/me",
+                headers={"Authorization": f"Bearer {token}"},
+            ) as result:
+                user = await result.json()
 
-            app_user = AppUser(
-                username=user["name"], image=user["picture"], provider="google"
-            )
-            return app_user
+                app_user = AppUser(
+                    username=user["name"], image=user["picture"], provider="google"
+                )
+                return app_user
 
 
 class AzureADOAuthProvider(OAuthProvider):
@@ -142,44 +139,43 @@ class AzureADOAuthProvider(OAuthProvider):
         }
 
     async def get_token(self, code: str):
-        async with httpx.AsyncClient() as client:
-            payload = {
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "code": code,
-                "grant_type": "authorization_code",
-                # FIXME: This is hardcoded to localhost, but should be configurable
-                "redirect_uri": "http://localhost:8000/auth/oauth/azure-ad/callback",
-            }
-            result = await client.post(
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            # FIXME: This is hardcoded to localhost, but should be configurable
+            "redirect_uri": "http://localhost:8000/auth/oauth/azure-ad/callback",
+        }
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.post(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 data=payload,
-            )
-            result.raise_for_status()
+            ) as result:
+                json = await result.json()
 
-            token = result.json().get("access_token")
-            if not token:
-                raise HTTPException(
-                    status_code=400, detail="Failed to get the access token"
-                )
-            return token
+                token = json["access_token"]
+                if not token:
+                    raise HTTPException(
+                        status_code=400, detail="Failed to get the access token"
+                    )
+                return token
 
     async def get_user_info(self, token: str):
-        async with httpx.AsyncClient() as client:
-            auth_header = {"Authorization": f"Bearer {token}"}
-            user_req_result = await client.get(
-                "https://graph.microsoft.com/v1.0/users/me", headers=auth_header
-            )
-            user_req_result.raise_for_status()
-            user = user_req_result.json()
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.get(
+                "https://graph.microsoft.com/v1.0/users/me",
+                headers={"Authorization": f"Bearer {token}"},
+            ) as result:
+                user = await result.json()
 
-            # FIXME: Fetch the user's profile picture
-            # endpoint: "https://graph.microsoft.com/v1.0/me/photo/48x48/$value" + convert it to a base64-encoded image string
+                # FIXME: Fetch the user's profile picture
+                # endpoint: "https://graph.microsoft.com/v1.0/me/photo/48x48/$value" + convert it to a base64-encoded image string
 
-            app_user = AppUser(
-                username=user["userPrincipalName"], image="", provider="azure-ad"
-            )
-            return app_user
+                app_user = AppUser(
+                    username=user["userPrincipalName"], image="", provider="azure-ad"
+                )
+                return app_user
 
 
 providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider()]

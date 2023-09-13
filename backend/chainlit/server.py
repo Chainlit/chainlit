@@ -4,7 +4,6 @@ import mimetypes
 import urllib.parse
 from typing import Optional, Union
 
-import httpx
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 
