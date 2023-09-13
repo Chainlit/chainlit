@@ -5,6 +5,7 @@ import urllib.parse
 from typing import Optional, Union
 
 import httpx
+from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 
 mimetypes.add_type("application/javascript", ".js")
@@ -16,12 +17,7 @@ import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from chainlit.auth import (
-    create_jwt,
-    get_configuration,
-    get_current_user,
-    get_oauth_provider,
-)
+from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.client.acl import is_conversation_author
 from chainlit.client.cloud import chainlit_client
 from chainlit.config import (
@@ -281,14 +277,14 @@ async def oauth_login(provider_id: str, request: Request):
 
     params = urllib.parse.urlencode(
         {
-            "client_id": provider["client_id"],
+            "client_id": provider.client_id,
             "redirect_uri": f"{request.url}/callback",
             "state": random,
-            **provider["authorize_params"],
+            **provider.authorize_params,
         }
     )
     response = RedirectResponse(
-        url=f"{provider['authorize_url']}?{params}",
+        url=f"{provider.authorize_url}?{params}",
     )
     response.set_cookie("oauth_state", random, httponly=True, max_age=3 * 60)
     return response
@@ -321,6 +317,12 @@ async def oauth_callback(
         )
         return response
 
+    if not code or not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing code or state",
+        )
+
     # Check the state from the oauth provider against the browser cookie
     oauth_state = request.cookies.get("oauth_state")
     if oauth_state != state:
@@ -329,52 +331,26 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
-    async with httpx.AsyncClient() as client:
-        # Exchange the code for an access token
-        payload = {
-            "client_id": provider["client_id"],
-            "client_secret": provider["client_secret"],
-            "code": code,
+    token = await provider.get_token(code)
+
+    app_user = await provider.get_user_info(token)
+
+    access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
+
+    params = urllib.parse.urlencode(
+        {
+            "access_token": access_token,
+            "token_type": "bearer",
         }
-        result = await client.post(
-            provider["access_token_url"],
-            headers={"accept": "application/json"},
-            data=payload,
-        )
-        result.raise_for_status()
-
-        token = result.json().get("access_token")
-        if not token:
-            raise HTTPException(
-                status_code=400, detail="Failed to get the access token"
-            )
-
-        # Get the user info
-        auth_header = {"Authorization": f"token {token}"}
-        user_req_result = await client.get(
-            provider["user_info_url"], headers=auth_header
-        )
-        user_req_result.raise_for_status()
-        user = user_req_result.json()
-
-        app_user = AppUser(
-            username=user["login"], image=user["avatar_url"], provider="github"
-        )
-        access_token = create_jwt(app_user)
-        if chainlit_client:
-            await chainlit_client.create_app_user(app_user=app_user)
-
-        params = urllib.parse.urlencode(
-            {
-                "access_token": access_token,
-                "token_type": "bearer",
-            }
-        )
-        response = RedirectResponse(
-            url=f"/login/callback?{params}",
-        )
-        response.delete_cookie("oauth_state")
-        return response
+    )
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"/login/callback?{params}",
+    )
+    response.delete_cookie("oauth_state")
+    return response
 
 
 @app.post("/completion")
