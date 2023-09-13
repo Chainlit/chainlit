@@ -169,9 +169,6 @@ class AzureADOAuthProvider(OAuthProvider):
             ) as result:
                 user = await result.json()
 
-                # FIXME: Fetch the user's profile picture
-                # endpoint: "https://graph.microsoft.com/v1.0/me/photo/48x48/$value" + convert it to a base64-encoded image string
-
                 app_user = AppUser(
                     username=user["userPrincipalName"], image="", provider="azure-ad"
                 )
