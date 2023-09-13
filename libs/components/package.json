@@ -1,7 +1,18 @@
 {
   "name": "@chainlit/components",
-  "private": true,
-  "version": "0.0.0",
+  "description": "Reusable components of the Chainlit UI.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Chainlit/"
+  },
+  "keywords": [
+    "llm",
+    "ai",
+    "chain of thought"
+  ],
+  "author": "Chainlit",
+  "license": "Apache-2.0",
+  "version": "0.0.1",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
@@ -26,7 +37,8 @@
     "build:watch": "tsup  src/index.ts theme/index.ts hooks/index.ts --watch --format=esm,cjs --sourcemap",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier **/*.{ts,tsx} --write --loglevel error",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublish": "pnpm run build && pnpm test"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
