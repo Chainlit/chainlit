@@ -8,6 +8,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased yet!
 
+## [0.7.0] - 2023-09-13
+
+### Changed
+
+- Authentication is now unopinionated:
+  1. `@cl.password_auth_callback` for login/password auth
+  2. `@cl.oauth_callback` for oAuth auth
+  3. `@cl.header_auth_callback` for header auth
+- Data persistence is now enabled through `CHAINLIT_API_KEY` env variable
+
+### Removed
+
+- `@cl.auth_client_factory` (see new authentication)
+- `@cl.db_client_factory` (see new data persistence)
+
+### Added
+
+- `disable_human_feedback` parameter on `cl.Message`
+- Configurable logo
+- Configurable favicon
+- Custom CSS injection
+- GCP Vertex AI LLM provider
+- Long message collpasing feature flag
+- Enable Prompt Playground feature flag
+
+### Fixed
+
+- History page filters now work properly
+- History page does not show empty conversations anymore
+- Langchain callback handler Message errors
+
 ## [0.6.4] - 2023-08-30
 
 ### Added
