@@ -5,6 +5,7 @@ from typing import Any, Dict
 import jwt
 from chainlit.client.cloud import chainlit_client
 from chainlit.config import config
+from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.types import AppUser
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -23,10 +24,15 @@ def ensure_jwt_secret():
         )
 
 
+def is_oauth_enabled():
+    return config.code.oauth_callback and len(get_configured_oauth_providers()) > 0
+
+
 def require_login():
     return (
         config.code.password_auth_callback is not None
         or config.code.header_auth_callback is not None
+        or is_oauth_enabled()
     )
 
 
@@ -35,7 +41,9 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": [],
+        "oauthProviders": get_configured_oauth_providers()
+        if is_oauth_enabled()
+        else [],
     }
 
 

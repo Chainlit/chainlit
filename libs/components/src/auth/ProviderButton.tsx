@@ -11,6 +11,8 @@ function getProviderName(provider: string) {
   switch (provider) {
     case 'azure-ad':
       return 'Microsoft';
+    case 'github':
+      return 'GitHub';
     default:
       return capitalizeFirstLetter(provider);
   }

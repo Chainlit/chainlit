@@ -17,7 +17,12 @@ export default function AppWrapper() {
     pSettings === undefined && isAuthenticated ? '/project/settings' : null
   );
 
-  if (isReady && !isAuthenticated && window.location.pathname !== '/login') {
+  if (
+    isReady &&
+    !isAuthenticated &&
+    window.location.pathname !== '/login' &&
+    window.location.pathname !== '/login/callback'
+  ) {
     window.location.href = '/login';
   }
 

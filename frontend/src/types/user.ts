@@ -1,6 +1,11 @@
 export type Role = 'USER' | 'ADMIN' | 'OWNER' | 'ANONYMOUS';
 
-export type AppUserProvider = 'credentials' | 'header';
+export type AppUserProvider =
+  | 'credentials'
+  | 'header'
+  | 'github'
+  | 'google'
+  | 'azure-ad';
 
 export interface IAppUser {
   id: string;

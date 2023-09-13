@@ -157,6 +157,9 @@ class CodeSettings:
     # Bunch of callbacks defined by the developer
     password_auth_callback: Optional[Callable[[str, str], Optional[AppUser]]] = None
     header_auth_callback: Optional[Callable[[Headers], Optional[AppUser]]] = None
+    oauth_callback: Optional[
+        Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]
+    ] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None

@@ -37,6 +37,7 @@ from chainlit.element import (
 )
 from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
+from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
 from chainlit.types import AppUser, FileSpec
@@ -77,6 +78,29 @@ def header_auth_callback(func: Callable[[Headers], Optional[AppUser]]) -> Callab
     """
 
     config.code.header_auth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
+def oauth_callback(
+    func: Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]
+) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via oauth
+
+    Args:
+        func (Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]): The authentication callback to execute.
+
+    Returns:
+        Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]: The decorated authentication callback.
+    """
+
+    if len(get_configured_oauth_providers()) == 0:
+        raise ValueError(
+            "You must set the environment variable for at least one oauth provider to use oauth authentication."
+        )
+
+    config.code.oauth_callback = wrap_user_function(func)
     return func
 
 

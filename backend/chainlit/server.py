@@ -1,7 +1,11 @@
 import glob
 import json
 import mimetypes
+import urllib.parse
 from typing import Optional, Union
+
+from chainlit.oauth_providers import get_oauth_provider
+from chainlit.secret import random_secret
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -37,8 +41,8 @@ from chainlit.types import (
     Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi import Cookie, Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
@@ -257,6 +261,118 @@ async def header_auth(request: Request):
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@app.get("/auth/oauth/{provider_id}")
+async def oauth_login(provider_id: str, request: Request):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    random = random_secret(32)
+
+    params = urllib.parse.urlencode(
+        {
+            "client_id": provider.client_id,
+            "redirect_uri": f"{request.url}/callback",
+            "state": random,
+            **provider.authorize_params,
+        }
+    )
+    response = RedirectResponse(
+        url=f"{provider.authorize_url}?{params}",
+    )
+    response.set_cookie("oauth_state", random, httponly=True, max_age=3 * 60)
+    return response
+
+
+@app.get("/auth/oauth/{provider_id}/callback")
+async def oauth_callback(
+    provider_id: str,
+    request: Request,
+    error: Optional[str] = None,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    if error:
+        params = urllib.parse.urlencode(
+            {
+                "error": error,
+            }
+        )
+        response = RedirectResponse(
+            # FIXME: redirect to the right frontend base url to improve the dev environment
+            url=f"/login?{params}",
+        )
+        return response
+
+    if not code or not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing code or state",
+        )
+
+    # Check the state from the oauth provider against the browser cookie
+    oauth_state = request.cookies.get("oauth_state")
+    if oauth_state != state:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    url = request.url.replace(query="").__str__()
+    token = await provider.get_token(code, url)
+
+    (raw_user_data, default_app_user) = await provider.get_user_info(token)
+
+    app_user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_app_user
+    )
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
+
+    params = urllib.parse.urlencode(
+        {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+    )
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"/login/callback?{params}",
+    )
+    response.delete_cookie("oauth_state")
+    return response
 
 
 @app.post("/completion")
