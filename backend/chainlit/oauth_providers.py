@@ -90,7 +90,7 @@ class GoogleOAuthProvider(OAuthProvider):
         self.client_id = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
         self.authorize_params = {
-            "scope": "https://www.googleapis.com/auth/userinfo.profile",
+            "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
             "response_type": "code",
             "access_type": "offline",
         }
