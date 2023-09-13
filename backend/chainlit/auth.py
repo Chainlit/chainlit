@@ -24,11 +24,15 @@ def ensure_jwt_secret():
         )
 
 
+def is_oauth_enabled():
+    return config.code.oauth_callback and len(get_configured_oauth_providers()) > 0
+
+
 def require_login():
     return (
         config.code.password_auth_callback is not None
         or config.code.header_auth_callback is not None
-        or len(get_configured_oauth_providers()) > 0
+        or is_oauth_enabled()
     )
 
 
@@ -38,7 +42,7 @@ def get_configuration():
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
         "oauthProviders": get_configured_oauth_providers()
-        if config.code.oauth_callback
+        if is_oauth_enabled()
         else [],
     }
 
