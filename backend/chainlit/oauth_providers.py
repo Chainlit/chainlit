@@ -33,7 +33,9 @@ class GithubOAuthProvider(OAuthProvider):
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_GITHUB_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_GITHUB_CLIENT_SECRET")
-        self.authorize_params = {}
+        self.authorize_params = {
+            "scope": "user:email",
+        }
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -63,10 +65,20 @@ class GithubOAuthProvider(OAuthProvider):
             ) as result:
                 user = await result.json()
 
-                app_user = AppUser(
-                    username=user["login"], image=user["avatar_url"], provider="github"
-                )
-                return (user, app_user)
+                async with session.get(
+                    "https://api.github.com/user/emails",
+                    headers={"Authorization": f"token {token}"},
+                ) as email_result:
+                    emails = await email_result.json()
+
+                    user.update({"emails": emails})
+
+                    app_user = AppUser(
+                        username=user["login"],
+                        image=user["avatar_url"],
+                        provider="github",
+                    )
+                    return (user, app_user)
 
 
 class GoogleOAuthProvider(OAuthProvider):
