@@ -265,6 +265,12 @@ async def header_auth(request: Request):
 
 @app.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
     provider = get_oauth_provider(provider_id)
     if not provider:
         raise HTTPException(
@@ -297,6 +303,12 @@ async def oauth_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
 ):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
     provider = get_oauth_provider(provider_id)
     if not provider:
         raise HTTPException(
@@ -330,9 +342,20 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
-    token = await provider.get_token(code)
+    url = request.url.replace(query="").__str__()
+    token = await provider.get_token(code, url)
 
-    app_user = await provider.get_user_info(token)
+    (raw_user_data, default_app_user) = await provider.get_user_info(token)
+
+    app_user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_app_user
+    )
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
     access_token = create_jwt(app_user)
     if chainlit_client:

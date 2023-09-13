@@ -37,7 +37,9 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": get_configured_oauth_providers(),
+        "oauthProviders": get_configured_oauth_providers()
+        if config.code.oauth_callback
+        else [],
     }
 
 

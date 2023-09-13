@@ -1,6 +1,6 @@
 import os
 import urllib.parse
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import aiohttp
 from chainlit.types import AppUser
@@ -13,15 +13,15 @@ class OAuthProvider:
     client_id: str
     client_secret: str
     authorize_url: str
-    authorize_params: dict
+    authorize_params: Dict[str, str]
 
     def is_configured(self):
         return all([os.environ.get(env) for env in self.env])
 
-    async def get_token(self, code: str) -> str:
+    async def get_token(self, code: str, url: str) -> str:
         raise NotImplementedError()
 
-    async def get_user_info(self, token: str) -> AppUser:
+    async def get_user_info(self, token: str) -> Tuple[Dict[str, str], AppUser]:
         raise NotImplementedError()
 
 
@@ -31,11 +31,11 @@ class GithubOAuthProvider(OAuthProvider):
     authorize_url = "https://github.com/login/oauth/authorize"
 
     def __init__(self):
-        self.client_id = os.environ["OAUTH_GITHUB_CLIENT_ID"]
-        self.client_secret = os.environ["OAUTH_GITHUB_CLIENT_SECRET"]
+        self.client_id = os.environ.get("OAUTH_GITHUB_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_GITHUB_CLIENT_SECRET")
         self.authorize_params = {}
 
-    async def get_token(self, code: str):
+    async def get_token(self, code: str, url: str):
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -66,7 +66,7 @@ class GithubOAuthProvider(OAuthProvider):
                 app_user = AppUser(
                     username=user["login"], image=user["avatar_url"], provider="github"
                 )
-                return app_user
+                return (user, app_user)
 
 
 class GoogleOAuthProvider(OAuthProvider):
@@ -75,22 +75,21 @@ class GoogleOAuthProvider(OAuthProvider):
     authorize_url = "https://accounts.google.com/o/oauth2/v2/auth"
 
     def __init__(self):
-        self.client_id = os.environ["OAUTH_GOOGLE_CLIENT_ID"]
-        self.client_secret = os.environ["OAUTH_GOOGLE_CLIENT_SECRET"]
+        self.client_id = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
         self.authorize_params = {
             "scope": "https://www.googleapis.com/auth/userinfo.profile",
             "response_type": "code",
             "access_type": "offline",
         }
 
-    async def get_token(self, code: str):
+    async def get_token(self, code: str, url: str):
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "code": code,
             "grant_type": "authorization_code",
-            # FIXME: This is hardcoded to localhost, but should be configurable
-            "redirect_uri": "http://localhost:8000/auth/oauth/google/callback",
+            "redirect_uri": url,
         }
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
@@ -116,7 +115,7 @@ class GoogleOAuthProvider(OAuthProvider):
                 app_user = AppUser(
                     username=user["name"], image=user["picture"], provider="google"
                 )
-                return app_user
+                return (user, app_user)
 
 
 class AzureADOAuthProvider(OAuthProvider):
@@ -129,23 +128,22 @@ class AzureADOAuthProvider(OAuthProvider):
     authorize_url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 
     def __init__(self):
-        self.client_id = os.environ["OAUTH_AZURE_AD_CLIENT_ID"]
-        self.client_secret = os.environ["OAUTH_AZURE_AD_CLIENT_SECRET"]
+        self.client_id = os.environ.get("OAUTH_AZURE_AD_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_AZURE_AD_CLIENT_SECRET")
         self.authorize_params = {
-            "tenant": os.environ["OAUTH_AZURE_AD_TENANT_ID"],
+            "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
             "scope": "https://graph.microsoft.com/User.Read",
             "response_mode": "query",
         }
 
-    async def get_token(self, code: str):
+    async def get_token(self, code: str, url: str):
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "code": code,
             "grant_type": "authorization_code",
-            # FIXME: This is hardcoded to localhost, but should be configurable
-            "redirect_uri": "http://localhost:8000/auth/oauth/azure-ad/callback",
+            "redirect_uri": url,
         }
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
@@ -172,7 +170,7 @@ class AzureADOAuthProvider(OAuthProvider):
                 app_user = AppUser(
                     username=user["userPrincipalName"], image="", provider="azure-ad"
                 )
-                return app_user
+                return (user, app_user)
 
 
 providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider()]

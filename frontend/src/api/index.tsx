@@ -1,7 +1,7 @@
 import { removeToken } from 'helpers/localStorageToken';
 import toast from 'react-hot-toast';
 
-const devServer = 'http://127.0.0.1:8000';
+const devServer = 'http://localhost:8000';
 const url = import.meta.env.DEV ? devServer : window.origin;
 const serverUrl = new URL(url);
 
