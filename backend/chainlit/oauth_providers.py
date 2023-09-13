@@ -91,6 +91,7 @@ class GoogleOAuthProvider(OAuthProvider):
                 "client_secret": self.client_secret,
                 "code": code,
                 "grant_type": "authorization_code",
+                # FIXME: This is hardcoded to localhost, but should be configurable
                 "redirect_uri": "http://127.0.0.1:8000/auth/oauth/google/callback",
             }
             result = await client.post(
@@ -121,7 +122,67 @@ class GoogleOAuthProvider(OAuthProvider):
             return app_user
 
 
-providers = [GithubOAuthProvider(), GoogleOAuthProvider()]
+class AzureADOAuthProvider(OAuthProvider):
+    id = "azure-ad"
+    env = [
+        "OAUTH_AZURE_AD_CLIENT_ID",
+        "OAUTH_AZURE_AD_CLIENT_SECRET",
+        "OAUTH_AZURE_AD_TENANT_ID",
+    ]
+    authorize_url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+
+    def __init__(self):
+        self.client_id = os.environ["OAUTH_AZURE_AD_CLIENT_ID"]
+        self.client_secret = os.environ["OAUTH_AZURE_AD_CLIENT_SECRET"]
+        self.authorize_params = {
+            "tenant": os.environ["OAUTH_AZURE_AD_TENANT_ID"],
+            "response_type": "code",
+            "scope": "https://graph.microsoft.com/User.Read",
+            "response_mode": "query",
+        }
+
+    async def get_token(self, code: str):
+        async with httpx.AsyncClient() as client:
+            payload = {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "code": code,
+                "grant_type": "authorization_code",
+                # FIXME: This is hardcoded to localhost, but should be configurable
+                "redirect_uri": "http://localhost:8000/auth/oauth/azure-ad/callback",
+            }
+            result = await client.post(
+                "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                data=payload,
+            )
+            result.raise_for_status()
+
+            token = result.json().get("access_token")
+            if not token:
+                raise HTTPException(
+                    status_code=400, detail="Failed to get the access token"
+                )
+            return token
+
+    async def get_user_info(self, token: str):
+        async with httpx.AsyncClient() as client:
+            auth_header = {"Authorization": f"Bearer {token}"}
+            user_req_result = await client.get(
+                "https://graph.microsoft.com/v1.0/users/me", headers=auth_header
+            )
+            user_req_result.raise_for_status()
+            user = user_req_result.json()
+
+            # FIXME: Fetch the user's profile picture
+            # endpoint: "https://graph.microsoft.com/v1.0/me/photo/48x48/$value" + convert it to a base64-encoded image string
+
+            app_user = AppUser(
+                username=user["userPrincipalName"], image="", provider="azure-ad"
+            )
+            return app_user
+
+
+providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider()]
 
 
 def get_oauth_provider(provider: str) -> Optional[OAuthProvider]:

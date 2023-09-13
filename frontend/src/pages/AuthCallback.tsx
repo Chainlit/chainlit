@@ -12,12 +12,10 @@ export default function AuthCallback() {
   useEffect(() => {
     const token = query.get('access_token');
     setAccessToken(token);
-    console.log('token', token);
   }, [setAccessToken, query]);
 
   useEffect(() => {
     if (user) {
-      console.log('user', user);
       navigate('/');
     }
   }, [user, navigate]);
