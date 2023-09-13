@@ -6,3 +6,6 @@ tests
 contexts
 tsconfig.json
 tsconfig.node.json
+vitest.config.ts
+!dist/hooks
+!dist/theme
