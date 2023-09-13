@@ -18,6 +18,7 @@ I've copy/pasted the whole document there, without the previous two headings.
     - [Install python dependencies](#install-python-dependencies)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
+  - [Develop locally on `libs/components`](#develop-locally-on--libs-components-)
   - [Run the tests](#run-the-tests)
     - [Run one test](#run-one-test)
 
@@ -115,6 +116,17 @@ pnpm run dev --port 5174
 ```
 
 If you visit `http://127.0.0.1:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
+
+## Develop locally on `libs/components`
+
+Once you have the frontend running in dev mode, proceed to work on the `libs/components`.
+
+```sh
+cd libs/components
+pnpm run build:watch
+```
+
+This will watch for file changes in `libs/components` and automatically rebuild the library as you develop.
 
 ## Run the tests
 
