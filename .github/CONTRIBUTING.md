@@ -119,7 +119,9 @@ If you visit `http://127.0.0.1:5174/`, it should connect to your local server. I
 
 ## Develop locally on `libs/components`
 
-Once you have the frontend running in dev mode, proceed to work on the `libs/components`.
+Reusable UI components are living in the separate npm package `libs/components`. The main Chainlit UI build and import that package automatically.
+
+You can enable hot module replacement for development.
 
 ```sh
 cd libs/components
