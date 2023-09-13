@@ -44,6 +44,29 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return PersistedAppUser.from_dict(res["data"]["createAppUser"])
 
+    async def update_app_user(self, app_user: AppUser) -> Optional[PersistedAppUser]:
+        mutation = """
+            mutation ($username: String!, $role: Role!, $tags: [String!], $provider: String, $image: String) {
+                updateAppUser(username: $username, role: $role, tags: $tags, provider: $provider, image: $image) {
+                    id,
+                    username,
+                    role,
+                    tags,
+                    provider,
+                    image,
+                    createdAt
+                }
+            }
+            """
+        variables = app_user.to_dict()
+        res = await self.mutation(mutation, variables)
+
+        if self.check_for_errors(res):
+            logger.warning("Could not update app user.")
+            return None
+
+        return PersistedAppUser.from_dict(res["data"]["updateAppUser"])
+
     async def get_app_user(self, username: str) -> Optional[PersistedAppUser]:
         query = """
              query ($username: String!) {
