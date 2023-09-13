@@ -451,8 +451,8 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     logo_path = None
 
     for path in [
-        f"logo_{theme_value}.*",
-        os.path.join("assets", f"logo_{theme_value}*.*"),
+        os.path.join(APP_ROOT, "public", f"logo_{theme_value}.*"),
+        os.path.join(build_dir, "assets", f"logo_{theme_value}*.*"),
     ]:
         files = glob.glob(os.path.join(build_dir, path))
 
