@@ -6,13 +6,13 @@ settings:
 
 dependencies:
   '@emotion/react':
-    specifier: ^11.11.1
+    specifier: ^11.0.0
     version: 11.11.1(@types/react@18.2.21)(react@18.2.0)
   '@emotion/styled':
-    specifier: ^11.11.0
+    specifier: ^11.0.0
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.21)(react@18.2.0)
   '@mui/icons-material':
-    specifier: ^5.14.7
+    specifier: ^5.0.0
     version: 5.14.7(@mui/material@5.14.7)(@types/react@18.2.21)(react@18.2.0)
   '@mui/lab':
     specifier: ^5.0.0-alpha.122
@@ -27,10 +27,10 @@ dependencies:
     specifier: ^2.1.3
     version: 2.1.3(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/icons-material@5.14.7)(@mui/material@5.14.7)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)
   react:
-    specifier: ^18.2.0
+    specifier: ^18.0.0
     version: 18.2.0
   react-dom:
-    specifier: ^18.2.0
+    specifier: ^18.0.0
     version: 18.2.0(react@18.2.0)
   react-dropzone:
     specifier: ^14.2.3
@@ -346,7 +346,7 @@ packages:
   /@emotion/babel-plugin@11.11.0:
     resolution: {integrity: sha512-m4HEDZleaaCH+XgDDsPF15Ht6wTLsgDTeR3WYj9Q/k76JtWhrJjcP4+/XlG8LGT/Rol9qUfOIztXeA84ATpqPQ==}
     dependencies:
-      '@babel/helper-module-imports': 7.22.5
+      '@babel/helper-module-imports': 7.22.15
       '@babel/runtime': 7.22.11
       '@emotion/hash': 0.9.1
       '@emotion/memoize': 0.8.1
