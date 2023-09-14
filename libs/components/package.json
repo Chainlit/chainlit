@@ -15,17 +15,29 @@
   "license": "Apache-2.0",
   "version": "0.0.2",
   "type": "module",
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.cjs",
+  "types": "dist/src/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "node": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.cjs",
+      "node": "./dist/src/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js",
+      "require": "./dist/hooks/index.cjs",
+      "node": "./dist/hooks/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme/index.js",
+      "require": "./dist/theme/index.cjs",
+      "node": "./dist/theme/index.js"
     }
   },
   "scripts": {
@@ -38,7 +50,9 @@
   },
   "tsup": {
     "entry": [
-      "src/index.ts"
+      "src/index.ts",
+      "theme/index.ts",
+      "hooks/index.ts"
     ],
     "cjsInterop": true,
     "treeshake": true,
