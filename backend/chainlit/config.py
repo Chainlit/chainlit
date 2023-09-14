@@ -1,10 +1,11 @@
 import os
 import sys
 from importlib import util
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
 from chainlit.logger import logger
+from chainlit.types import AppUser
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -12,7 +13,6 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.client.base import BaseAuthClient, BaseDBClient
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -26,20 +26,6 @@ config_file = os.path.join(config_dir, "config.toml")
 
 # Default config file created if none exists
 DEFAULT_CONFIG_STR = f"""[project]
-# If true (default), the app will be available to anonymous users.
-# If false, users will need to authenticate and be part of the project to use the app.
-public = true
-
-# The project ID (found on https://cloud.chainlit.io).
-# The project ID is required when public is set to false or when using the cloud database.
-#id = ""
-
-# Uncomment if you want to persist the chats.
-# local will create a database in your .chainlit directory (requires node.js installed).
-# cloud will use the Chainlit cloud database.
-# custom will load use your custom client.
-# database = "local"
-
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 
@@ -54,9 +40,6 @@ cache = false
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
 # follow_symlink = false
-
-# Chainlit server address
-# chainlit_server = ""
 
 [features]
 # Show the prompt playground
@@ -107,7 +90,6 @@ generated_by = "{__version__}"
 """
 
 chainlit_prod_url = os.environ.get("CHAINLIT_PROD_URL")
-default_chainlit_server = "https://cloud.chainlit.io"
 
 
 DEFAULT_HOST = "0.0.0.0"
@@ -173,16 +155,15 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
+    password_auth_callback: Optional[Callable[[str, str], Optional[AppUser]]] = None
+    header_auth_callback: Optional[Callable[[Headers], Optional[AppUser]]] = None
+    oauth_callback: Optional[
+        Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]
+    ] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
     on_file_upload: Optional[Callable[[str], Any]] = None
-    auth_client_factory: Optional[
-        Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
-    ] = None
-    db_client_factory: Optional[
-        Callable[[Optional[Dict[str, str]], Optional[Headers], Dict], "BaseDBClient"]
-    ] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
 
@@ -203,30 +184,18 @@ class CodeSettings:
 
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
-    # Enables Cloud features if provided
-    id: Optional[str] = None
-    # Whether the app is available to anonymous users or only to team members.
-    public: bool = True
-    # Storage type
-    database: Optional[Literal["local", "cloud", "custom"]] = None
-    # Whether to enable telemetry. No personal data is collected.
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
     lc_cache_path: Optional[str] = None
     # Path to the local chat db
-    local_db_path: Optional[str] = None
-    # Path to the local file system
-    local_fs_path: Optional[str] = None
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
     # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
     follow_symlink: bool = False
-    # Chainlit server address
-    chainlit_server: Optional[str] = None
 
 
 @dataclass()
@@ -235,6 +204,8 @@ class ChainlitConfig:
     root = APP_ROOT
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
+    # Whether or not a chainlit api key has been provided
+    data_persistence: bool
     # The url of the deployed app. Only set if the app is deployed.
     chainlit_prod_url = chainlit_prod_url
 
@@ -298,26 +269,15 @@ def load_settings():
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
-        local_db_path = os.path.join(config_dir, "chat.db")
-        local_fs_path = os.path.join(config_dir, "chat_files")
-
-        os.environ[
-            "LOCAL_DB_PATH"
-        ] = f"file:{local_db_path}?socket_timeout=10&connection_limit=1"
 
         project_settings = ProjectSettings(
             lc_cache_path=lc_cache_path,
-            local_db_path=local_db_path,
-            local_fs_path=local_fs_path,
             **project_config,
         )
 
         features_settings = FeaturesSettings(**features_settings)
 
         ui_settings = UISettings(**ui_settings)
-
-        if not project_settings.public and not project_settings.id:
-            raise ValueError("Project ID is required when public is set to false.")
 
         return {
             "features": features_settings,
@@ -347,13 +307,12 @@ def load_config():
 
     settings = load_settings()
 
-    chainlit_server = default_chainlit_server
-    project_settings = settings.get("project")
-    if project_settings and project_settings.chainlit_server:
-        chainlit_server = project_settings.chainlit_server
+    chainlit_server = os.environ.get("CHAINLIT_SERVER", "https://cloud.chainlit.io")
+    data_persistence = "CHAINLIT_API_KEY" in os.environ
 
     config = ChainlitConfig(
         chainlit_server=chainlit_server,
+        data_persistence=data_persistence,
         chainlit_prod_url=chainlit_prod_url,
         run=RunSettings(),
         **settings,

@@ -1,12 +1,11 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { GreyButton } from 'src/buttons/GreyButton';
 
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import CircularProgress from '@mui/material/CircularProgress';
+import { CircularProgress } from '@mui/material';
 
-import { INestedMessage } from '../../types/message';
-
-import { MessageContext } from '../../../contexts/MessageContext';
-import { GreyButton } from '../../buttons/GreyButton';
+import { INestedMessage } from 'src/types/message';
 
 interface Props {
   message: INestedMessage;

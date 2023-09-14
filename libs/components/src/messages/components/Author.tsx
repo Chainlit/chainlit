@@ -1,13 +1,13 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { AvatarElement } from 'src/elements/Avatar';
 
 import { Box, Tooltip, Typography } from '@mui/material';
 
-import { useColorForName } from '../../../hooks/useColors';
+import { useColorForName } from 'hooks/useColors';
 
-import { IMessage } from '../../types/message';
+import { IMessage } from 'src/types/message';
 
-import { MessageContext } from '../../../contexts/MessageContext';
-import { AvatarElement } from '../../elements/Avatar';
 import { MessageTime } from './MessageTime';
 
 interface Props {

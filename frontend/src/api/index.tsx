@@ -1,6 +1,7 @@
+import { removeToken } from 'helpers/localStorageToken';
 import toast from 'react-hot-toast';
 
-const devServer = 'http://127.0.0.1:8000';
+const devServer = 'http://localhost:8000';
 const url = import.meta.env.DEV ? devServer : window.origin;
 const serverUrl = new URL(url);
 
@@ -47,6 +48,11 @@ const api = {
 
       if (!res.ok) {
         const body = await res.json();
+        if (res.status === 401 && window.location.pathname !== '/login') {
+          // The credentials aren't correct, remove the token and redirect to login
+          removeToken();
+          window.location.href = '/login';
+        }
         throw new ClientError(res.statusText, body.detail);
       }
 
@@ -60,7 +66,7 @@ const api = {
     }
   },
 
-  get: async (endpoint: string, token: string) =>
+  get: async (endpoint: string, token?: string) =>
     await api.fetch('GET', endpoint, token),
 
   post: async (
@@ -80,4 +86,4 @@ const api = {
     await api.fetch('DELETE', endpoint, token, data)
 };
 
-export { api };
+export { api, httpEndpoint };

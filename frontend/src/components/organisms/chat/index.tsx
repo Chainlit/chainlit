@@ -18,10 +18,8 @@ import { chatHistoryState } from 'state/chatHistory';
 import { elementState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
-import PromptPlayground from '../playground';
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
-import ChatSettingsModal from './settings';
 import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
@@ -46,7 +44,7 @@ const Chat = () => {
 
       const message: IMessage = {
         id: uuidv4(),
-        author: user?.name || 'User',
+        author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
         createdAt: new Date().toISOString()
@@ -81,7 +79,7 @@ const Chat = () => {
       if (!askUser) return;
       const message = {
         id: uuidv4(),
-        author: user?.name || 'User',
+        author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
         createdAt: new Date().toISOString()
@@ -99,8 +97,6 @@ const Chat = () => {
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
-      <PromptPlayground />
-      <ChatSettingsModal />
       <TaskList tasklist={tasklist} isMobile={false} />
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />

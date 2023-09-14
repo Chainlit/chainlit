@@ -1,6 +1,11 @@
 import { memo } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Code } from 'src/Code';
+import { Collapse } from 'src/Collapse';
+import { InlinedElements } from 'src/elements/InlinedElements';
+import { exportToFile } from 'utils/exportToFile';
+import { prepareContent } from 'utils/message';
 
 import {
   Link,
@@ -15,13 +20,8 @@ import {
   Typography
 } from '@mui/material';
 
-import { IMessageContent } from '../../types/message';
+import { IMessageContent } from 'src/types/message';
 
-import { exportToFile } from '../../../utils/exportToFile';
-import { prepareContent } from '../../../utils/message';
-import { Code } from '../../Code';
-import { Collapse } from '../../Collapse';
-import { InlinedElements } from '../../elements/InlinedElements';
 import { ElementRef } from './ElementRef';
 
 const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing

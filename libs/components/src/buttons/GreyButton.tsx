@@ -1,7 +1,6 @@
-import Button, { ButtonProps } from '@mui/material/Button';
-import { ThemeProvider, useTheme } from '@mui/material/styles';
+import { darkGreyButtonTheme, lightGreyButtonTheme } from 'theme/theme';
 
-import { darkGreyButtonTheme, lightGreyButtonTheme } from '../../theme/theme';
+import { Button, ButtonProps, ThemeProvider, useTheme } from '@mui/material';
 
 const GreyButton = (props: ButtonProps) => {
   const theme = useTheme();

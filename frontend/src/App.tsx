@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { router } from 'router';
 
 import { Box, GlobalStyles, Theme } from '@mui/material';
@@ -11,15 +10,11 @@ import { makeTheme } from '@chainlit/components/theme';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
+import ChatSettingsModal from 'components/organisms/chat/settings';
+import PromptPlayground from 'components/organisms/playground';
 import Socket from 'components/socket';
 
-import { useAuth } from 'hooks/auth';
-import { useApi } from 'hooks/useApi';
-
 import { settingsState } from 'state/settings';
-import { accessTokenState, roleState } from 'state/user';
-
-import { Role } from 'types/user';
 
 import './App.css';
 
@@ -68,39 +63,7 @@ function overrideTheme(theme: Theme) {
 
 function App() {
   const { theme: themeVariant } = useRecoilValue(settingsState);
-  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
-  const [role, setRole] = useRecoilState(roleState);
-  const { isAuthenticated, getAccessTokenSilently, logout } = useAuth();
   const theme = overrideTheme(makeTheme(themeVariant));
-
-  const { data: roleData, error: roleError } = useApi<Role>(
-    !role && accessToken ? '/project/role' : null
-  );
-
-  useEffect(() => {
-    if (roleData !== 'ANONYMOUS' && !role) {
-      setRole(roleError ? 'ANONYMOUS' : roleData);
-    }
-  }, [roleData, roleError]);
-
-  useEffect(() => {
-    if (isAuthenticated && accessToken === undefined) {
-      getAccessTokenSilently({
-        authorizationParams: {
-          audience: 'chainlit-cloud'
-        }
-      })
-        .then((token) => setAccessToken(token))
-        .catch((err) => {
-          console.error(err);
-          logout({
-            logoutParams: {
-              returnTo: window.location.origin
-            }
-          });
-        });
-    }
-  }, [isAuthenticated, getAccessTokenSilently, accessToken, setAccessToken]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -127,6 +90,8 @@ function App() {
         }}
       />
       <Box display="flex" height="100vh" width="100vw">
+        <PromptPlayground />
+        <ChatSettingsModal />
         <Socket />
         <Hotkeys />
         <SettingsModal />

@@ -1,5 +1,4 @@
 import { ChainlitAPI } from 'api/chainlitApi';
-import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -49,6 +48,8 @@ const MessageContainer = ({
   const setPlayground = useSetRecoilState(playgroundState);
   const setSideView = useSetRecoilState(sideViewState);
 
+  const enableFeedback = !!projectSettings?.dataPersistence;
+
   const navigate = useNavigate();
 
   const onPlaygroundButtonClick = (message: IMessage) => {
@@ -91,6 +92,7 @@ const MessageContainer = ({
 
     if (element.display === 'side') {
       setSideView(element);
+      return;
     }
 
     if (element.conversationId) {
@@ -133,7 +135,7 @@ const MessageContainer = ({
         hideCot: appSettings.hideCot,
         highlightedMessage,
         loading,
-        showFeedbackButtons: !!projectSettings?.project.database,
+        showFeedbackButtons: enableFeedback,
         uiName: projectSettings?.ui?.name || '',
         onPlaygroundButtonClick,
         onFeedbackUpdated,

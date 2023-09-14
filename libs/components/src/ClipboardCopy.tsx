@@ -1,11 +1,10 @@
+import { grey } from 'theme/palette';
 import { useCopyToClipboard, useToggle } from 'usehooks-ts';
 
-import CopyAll from '@mui/icons-material/CopyAll';
+import { CopyAll } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
 
-import { useIsDarkMode } from '../hooks/useIsDarkMode';
-
-import { grey } from '../theme/palette';
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 interface ClipboardCopyProps {
   value: string;

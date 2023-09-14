@@ -16,35 +16,21 @@ type Props = {
 };
 
 const Page = ({ children }: Props) => {
-  const {
-    isProjectMember,
-    authenticating,
-    isAuthenticated,
-    accessToken,
-    role
-  } = useAuth();
+  const { isAuthenticated } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const userEnv = useRecoilValue(userEnvState);
   const navigate = useNavigate();
 
-  const isPrivate = pSettings && !pSettings.project?.public;
-
   useEffect(() => {
-    if (pSettings?.project?.user_env) {
-      for (const key of pSettings.project?.user_env || []) {
+    if (pSettings?.userEnv) {
+      for (const key of pSettings.userEnv || []) {
         if (!userEnv[key]) navigate('/env');
       }
     }
-    if (isPrivate && !isAuthenticated && !authenticating) {
+    if (!isAuthenticated) {
       navigate('/login');
     }
-  }, [pSettings, isAuthenticated, authenticating, userEnv]);
-
-  if (!pSettings || (isPrivate && (!accessToken || !role))) {
-    return null;
-  }
-
-  const notAllowed = isPrivate && role && !isProjectMember;
+  }, [pSettings, isAuthenticated, userEnv]);
 
   return (
     <Box
@@ -55,7 +41,7 @@ const Page = ({ children }: Props) => {
       }}
     >
       <Header />
-      {notAllowed ? (
+      {!isAuthenticated ? (
         <Alert severity="error">You are not part of this project.</Alert>
       ) : (
         children

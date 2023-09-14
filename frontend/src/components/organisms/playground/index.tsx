@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { useToggle } from 'usehooks-ts';
 
 import RestoreIcon from '@mui/icons-material/Restore';
@@ -15,6 +15,8 @@ import {
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+
+import { IPrompt } from '@chainlit/components';
 
 import ErrorBoundary from 'components/atoms/errorBoundary';
 
@@ -32,8 +34,12 @@ import PlaygroundHeader from './header';
 import ModelSettings from './modelSettings';
 import SubmitButton from './submitButton';
 
-export default function PromptPlayground() {
-  const [playground, setPlayground] = useRecoilState(playgroundState);
+interface Props {
+  prompt: IPrompt;
+}
+
+function _PromptPlayground({ prompt }: Props) {
+  const setPlayground = useSetRecoilState(playgroundState);
 
   const { data, error, mutate } = useApi<IPlayground>('/project/llm-providers');
 
@@ -48,9 +54,9 @@ export default function PromptPlayground() {
 
   useEffect(() => {
     // Refresh the providers when the playground is opened
-    if (!playground?.prompt) return;
+    if (!prompt) return;
     mutate();
-  }, [playground?.prompt]);
+  }, [prompt]);
 
   useEffect(() => {
     if (!data) return;
@@ -58,7 +64,7 @@ export default function PromptPlayground() {
   }, [data]);
 
   const restore = () => {
-    if (playground) {
+    if (prompt) {
       setPlayground((old) => ({
         ...old,
         prompt: old.originalPrompt
@@ -71,19 +77,17 @@ export default function PromptPlayground() {
     setPlayground((old) => ({ ...old, prompt: undefined }));
   };
 
-  // Only render the playground if it's open and we have providers.
-  // Prevents the "no provider" error from being thrown and a playground flash
-  if (!playground?.prompt) {
+  const hasTemplate = prompt?.messages
+    ? prompt.messages.every((m) => typeof m.template === 'string')
+    : typeof prompt?.template === 'string';
+
+  if (!data || error) {
     return null;
   }
 
-  const hasTemplate = playground?.prompt?.messages
-    ? playground.prompt.messages.every((m) => typeof m.template === 'string')
-    : typeof playground?.prompt?.template === 'string';
-
   return (
     <Dialog
-      open={!!playground.prompt}
+      open={!!prompt}
       fullScreen
       PaperProps={{
         style: {
@@ -125,13 +129,13 @@ export default function PromptPlayground() {
               <BasicPromptPlayground
                 restoredTime={restoredTime}
                 hasTemplate={hasTemplate}
-                prompt={playground.prompt}
+                prompt={prompt}
               />
               <ChatPromptPlayground
                 ref={chatPromptScrollRef}
                 restoredTime={restoredTime}
                 hasTemplate={hasTemplate}
-                prompt={playground.prompt}
+                prompt={prompt}
               />
             </Stack>
           </Stack>
@@ -160,4 +164,12 @@ export default function PromptPlayground() {
       </ActionBar>
     </Dialog>
   );
+}
+
+export default function PromptPlayground() {
+  const playground = useRecoilValue(playgroundState);
+  if (!playground?.prompt) {
+    return null;
+  }
+  return <_PromptPlayground prompt={playground.prompt} />;
 }

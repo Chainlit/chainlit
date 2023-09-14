@@ -12,7 +12,6 @@
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.2.1",
     "@chainlit/components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -24,7 +23,6 @@
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.1",
     "react-hotkeys-hook": "^4.4.1",
     "react-markdown": "^8.0.7",

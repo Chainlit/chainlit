@@ -1,15 +1,14 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { grey } from 'theme/palette';
 
 import { CloudUploadOutlined } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Stack, Typography } from '@mui/material';
 
-import { useUpload } from '../../../hooks/useUpload';
+import { useUpload } from 'hooks/useUpload';
 
-import { IAsk, IFileResponse } from '../../types/file';
-
-import { MessageContext } from '../../../contexts/MessageContext';
-import { grey } from '../../../theme/palette';
+import { IAsk, IFileResponse } from 'src/types/file';
 
 const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   const upload = useUpload({

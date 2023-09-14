@@ -1,16 +1,13 @@
 import json
 from typing import Any, Dict, List, Optional, Union
 
-from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
-from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
-
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.message import ErrorMessage, Message
 from chainlit.prompt import Prompt, PromptMessage
 from chainlit.sync import run_sync
-
-from chainlit import input_widget
+from langchain.callbacks.base import AsyncCallbackHandler, BaseCallbackHandler
+from langchain.schema import AgentAction, AgentFinish, BaseMessage, LLMResult
 
 IGNORE_LIST = []  # type: List[str]
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -87,13 +84,13 @@ def build_prompt(serialized: Dict[str, Any], inputs: Dict[str, Any]):
 
 
 def convert_role(role: str):
-    if role in ["human", "chat", "HumanMessagePromptTemplate"]:
+    if role in ["human", "chat", "HumanMessage", "HumanMessagePromptTemplate"]:
         return "user"
-    elif role in ["system", "SystemMessagePromptTemplate"]:
+    elif role in ["system", "SystemMessage", "SystemMessagePromptTemplate"]:
         return "system"
-    elif role in ["ai", "AIMessagePromptTemplate"]:
+    elif role in ["ai", "AIMessage", "AIMessagePromptTemplate"]:
         return "assistant"
-    elif role in ["function", "FunctionMessagePromptTemplate"]:
+    elif role in ["function", "FunctionMessage", "FunctionMessagePromptTemplate"]:
         return "function"
     else:
         raise ValueError(f"Unsupported role {role}")

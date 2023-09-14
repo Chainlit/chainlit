@@ -34,13 +34,14 @@ tomli = "^2.0.1"
 pydantic = "^1.10.8"
 python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
-auth0-python = "4.4.1"
 uptrace = "^1.18.0"
 watchfiles="^0.20.0"
 prisma="^0.10.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
+python-multipart = "^0.0.6"
+pyjwt = "^2.8.0"
 
 [tool.poetry.group.tests]
 optional = true
@@ -52,6 +53,8 @@ llama-index = "^0.8.3"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
+# forcing version until haystack fixes the issue
+tiktoken = "0.4.0"
 
 [tool.poetry.group.mypy]
 optional = true

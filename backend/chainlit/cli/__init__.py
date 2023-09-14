@@ -1,6 +1,5 @@
 import asyncio
 import os
-import sys
 
 import click
 import nest_asyncio
@@ -8,9 +7,8 @@ import uvicorn
 
 nest_asyncio.apply()
 
+from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
-from chainlit.cli.auth import login, logout
-from chainlit.cli.deploy import deploy
 from chainlit.cli.utils import check_file
 from chainlit.config import (
     BACKEND_ROOT,
@@ -22,10 +20,9 @@ from chainlit.config import (
 )
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
+from chainlit.secret import random_secret
 from chainlit.server import app, max_message_size, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
-
-from chainlit.db import init_local_db, migrate_local_db
 
 
 # Create the main command group for Chainlit CLI
@@ -47,6 +44,8 @@ def run_chainlit(target: str):
     config.run.module_name = target
     load_module(config.run.module_name)
 
+    ensure_jwt_secret()
+
     register_wildcard_route_handler()
 
     # Create the chainlit.md file if it doesn't exist
@@ -54,9 +53,6 @@ def run_chainlit(target: str):
 
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
-
-    # Initialize the local database if configured to use it
-    init_local_db()
 
     log_level = "debug" if config.run.debug else "error"
 
@@ -141,6 +137,8 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
+        # This is required for authenticationt tests
+        os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
 
     else:
         trace_event("chainlit run")
@@ -154,15 +152,6 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
     run_chainlit(target)
 
 
-@cli.command("deploy")
-@click.argument("target", required=True, envvar="CHAINLIT_RUN_TARGET")
-@click.argument("args", nargs=-1)
-def chainlit_deploy(target, args=None, **kwargs):
-    trace_event("chainlit deploy")
-    raise NotImplementedError("Deploy is not yet implemented")
-    deploy(target)
-
-
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
@@ -171,32 +160,18 @@ def chainlit_hello(args=None, **kwargs):
     run_chainlit(hello_path)
 
 
-@cli.command("login")
-@click.argument("args", nargs=-1)
-def chainlit_login(args=None, **kwargs):
-    trace_event("chainlit login")
-    login()
-    sys.exit(0)
-
-
-@cli.command("logout")
-@click.argument("args", nargs=-1)
-def chainlit_logout(args=None, **kwargs):
-    trace_event("chainlit logout")
-    logout()
-    sys.exit(0)
-
-
-@cli.command("migrate")
-@click.argument("args", nargs=-1)
-def chainlit_migrate(args=None, **kwargs):
-    trace_event("chainlit migrate")
-    migrate_local_db()
-    sys.exit(0)
-
-
 @cli.command("init")
 @click.argument("args", nargs=-1)
 def chainlit_init(args=None, **kwargs):
     trace_event("chainlit init")
     init_config(log=True)
+
+
+@cli.command("create-secret")
+@click.argument("args", nargs=-1)
+def chainlit_create_secret(args=None, **kwargs):
+    trace_event("chainlit secret")
+
+    print(
+        f"Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET={random_secret()}"
+    )

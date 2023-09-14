@@ -1,13 +1,18 @@
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import { SxProps } from '@mui/material';
-import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
+import { InputStateHandler } from 'src/inputs/InputStateHandler';
+import { grey, primary } from 'theme/index';
 
-import { useIsDarkMode } from '../../../hooks/useIsDarkMode';
+import { KeyboardArrowDown } from '@mui/icons-material';
+import {
+  Select as MSelect,
+  SelectChangeEvent,
+  SelectProps,
+  SxProps
+} from '@mui/material';
 
-import { IInput } from '../../types/Input';
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import { grey, primary } from '../../../theme';
-import { InputStateHandler } from '../InputStateHandler';
+import { IInput } from 'src/types/Input';
+
 import { MenuItem } from './MenuItem';
 
 type SelectItem = {

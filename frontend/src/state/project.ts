@@ -1,8 +1,6 @@
 import { atom } from 'recoil';
 
 export interface IProjectSettings {
-  chainlitServer: string;
-  prod: boolean;
   markdown?: string;
   ui: {
     name: string;
@@ -12,12 +10,8 @@ export interface IProjectSettings {
     default_expand_messages?: boolean;
     github?: string;
   };
-  project: {
-    id?: string;
-    public?: boolean;
-    user_env?: string[];
-    database?: string;
-  };
+  userEnv: string[];
+  dataPersistence: boolean;
 }
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({

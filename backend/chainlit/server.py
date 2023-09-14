@@ -1,7 +1,11 @@
 import glob
 import json
 import mimetypes
-from typing import Optional
+import urllib.parse
+from typing import Optional, Union
+
+from chainlit.oauth_providers import get_oauth_provider
+from chainlit.secret import random_secret
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -12,10 +16,9 @@ import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from chainlit.client.utils import (
-    get_auth_client_from_request,
-    get_db_client_from_request,
-)
+from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.client.acl import is_conversation_author
+from chainlit.client.cloud import chainlit_client
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -30,17 +33,21 @@ from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
+    AppUser,
     CompletionRequest,
     DeleteConversationRequest,
     GetConversationsRequest,
+    PersistedAppUser,
     Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi import Cookie, Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
+from typing_extensions import Annotated
 from watchfiles import awatch
 
 
@@ -60,13 +67,6 @@ async def lifespan(app: FastAPI):
         # Add a delay before opening the browser
         await asyncio.sleep(1)
         webbrowser.open(url)
-
-    if config.project.database == "local":
-        from prisma import Client, register  # type: ignore[attr-defined]
-
-        client = Client()
-        register(client)
-        await client.connect()
 
     watch_task = None
     stop_event = asyncio.Event()
@@ -109,8 +109,6 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        if config.project.database == "local":
-            await client.disconnect()
         if watch_task:
             try:
                 stop_event.set()
@@ -190,13 +188,13 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
-    js = None
-    if config.ui.theme:
-        js = f"""<script>window.theme = {json.dumps(config.ui.theme.to_dict())}</script>"""
+    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
     css = None
     if config.ui.custom_css:
-        css = f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
+        css = (
+            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
+        )
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
@@ -210,8 +208,180 @@ def get_html_template():
         return content
 
 
+@app.get("/auth/config")
+async def auth(request: Request):
+    return get_configuration()
+
+
+@app.post("/login")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    if not config.code.password_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
+        )
+
+    app_user = await config.code.password_auth_callback(
+        form_data.username, form_data.password
+    )
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="credentialssignin",
+        )
+    access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+@app.post("/auth/header")
+async def header_auth(request: Request):
+    if not config.code.header_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No header_auth_callback defined",
+        )
+
+    app_user = await config.code.header_auth_callback(request.headers)
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+@app.get("/auth/oauth/{provider_id}")
+async def oauth_login(provider_id: str, request: Request):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    random = random_secret(32)
+
+    params = urllib.parse.urlencode(
+        {
+            "client_id": provider.client_id,
+            "redirect_uri": f"{request.url}/callback",
+            "state": random,
+            **provider.authorize_params,
+        }
+    )
+    response = RedirectResponse(
+        url=f"{provider.authorize_url}?{params}",
+    )
+    response.set_cookie("oauth_state", random, httponly=True, max_age=3 * 60)
+    return response
+
+
+@app.get("/auth/oauth/{provider_id}/callback")
+async def oauth_callback(
+    provider_id: str,
+    request: Request,
+    error: Optional[str] = None,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+):
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    if error:
+        params = urllib.parse.urlencode(
+            {
+                "error": error,
+            }
+        )
+        response = RedirectResponse(
+            # FIXME: redirect to the right frontend base url to improve the dev environment
+            url=f"/login?{params}",
+        )
+        return response
+
+    if not code or not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing code or state",
+        )
+
+    # Check the state from the oauth provider against the browser cookie
+    oauth_state = request.cookies.get("oauth_state")
+    if oauth_state != state:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    url = request.url.replace(query="").__str__()
+    token = await provider.get_token(code, url)
+
+    (raw_user_data, default_app_user) = await provider.get_user_info(token)
+
+    app_user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_app_user
+    )
+
+    if not app_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(app_user)
+    if chainlit_client:
+        await chainlit_client.create_app_user(app_user=app_user)
+
+    params = urllib.parse.urlencode(
+        {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+    )
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"/login/callback?{params}",
+    )
+    response.delete_cookie("oauth_state")
+    return response
+
+
 @app.post("/completion")
-async def completion(request: CompletionRequest):
+async def completion(
+    request: CompletionRequest,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     """Handle a completion request from the prompt playground."""
 
     providers = get_llm_providers()
@@ -231,7 +401,9 @@ async def completion(request: CompletionRequest):
 
 
 @app.get("/project/llm-providers")
-async def get_providers():
+async def get_providers(
+    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+):
     """List the providers."""
     trace_event("pp_get_llm_providers")
     providers = get_llm_providers()
@@ -240,88 +412,127 @@ async def get_providers():
 
 
 @app.get("/project/settings")
-async def project_settings():
+async def project_settings(
+    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     return JSONResponse(
         content={
-            "chainlitServer": config.chainlit_server,
-            "prod": bool(config.chainlit_prod_url),
             "ui": config.ui.to_dict(),
-            "project": config.project.to_dict(),
+            "userEnv": config.project.user_env,
+            "dataPersistence": config.data_persistence,
             "markdown": get_markdown_str(config.root),
         }
     )
 
 
 @app.put("/message/feedback")
-async def update_feedback(request: Request, update: UpdateFeedbackRequest):
+async def update_feedback(
+    request: Request,
+    update: UpdateFeedbackRequest,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     """Update the human feedback for a particular message."""
 
-    db_client = await get_db_client_from_request(request)
-    await db_client.set_human_feedback(
+    # todo check that message belong to a user's conversation
+
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    await chainlit_client.set_human_feedback(
         message_id=update.messageId, feedback=update.feedback
     )
     return JSONResponse(content={"success": True})
 
 
-@app.get("/project/members")
-async def get_project_members(request: Request):
-    """Get all the members of a project."""
-
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_project_members()
-    return JSONResponse(content=res)
-
-
-@app.get("/project/role")
-async def get_member_role(request: Request):
-    """Get the role of a member."""
-
-    auth_client = await get_auth_client_from_request(request)
-    role = auth_client.user_infos["role"] if auth_client.user_infos else "ANONYMOUS"
-    return JSONResponse(content=role)
-
-
 @app.post("/project/conversations")
-async def get_project_conversations(request: Request, payload: GetConversationsRequest):
+async def get_user_conversations(
+    request: Request,
+    payload: GetConversationsRequest,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     """Get the conversations page by page."""
+    # Only show the current user conversations
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_conversations(payload.pagination, payload.filter)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    payload.filter.username = current_user.username
+    res = await chainlit_client.get_conversations(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())
 
 
 @app.get("/project/conversation/{conversation_id}")
-async def get_conversation(request: Request, conversation_id: str):
+async def get_conversation(
+    request: Request,
+    conversation_id: str,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     """Get a specific conversation."""
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_conversation(conversation_id)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    res = await chainlit_client.get_conversation(conversation_id)
     return JSONResponse(content=res)
 
 
 @app.get("/project/conversation/{conversation_id}/element/{element_id}")
 async def get_conversation_element(
-    request: Request, conversation_id: str, element_id: str
+    request: Request,
+    conversation_id: str,
+    element_id: str,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
 ):
     """Get a specific conversation element."""
 
-    db_client = await get_db_client_from_request(request)
-    res = await db_client.get_element(conversation_id, element_id)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    res = await chainlit_client.get_element(conversation_id, element_id)
     return JSONResponse(content=res)
 
 
 @app.delete("/project/conversation")
-async def delete_conversation(request: Request, payload: DeleteConversationRequest):
+async def delete_conversation(
+    request: Request,
+    payload: DeleteConversationRequest,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     """Delete a conversation."""
 
-    db_client = await get_db_client_from_request(request)
-    await db_client.delete_conversation(conversation_id=payload.conversationId)
+    if not chainlit_client:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    conversation_id = payload.conversationId
+
+    await is_conversation_author(current_user.username, conversation_id)
+
+    await chainlit_client.delete_conversation(conversation_id)
     return JSONResponse(content={"success": True})
 
 
 @app.get("/files/{filename:path}")
-async def serve_file(filename: str):
+async def serve_file(
+    filename: str,
+    current_user: Annotated[
+        Union[AppUser, PersistedAppUser], Depends(get_current_user)
+    ],
+):
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()
 
@@ -356,8 +567,8 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     logo_path = None
 
     for path in [
-        f"logo_{theme_value}.*",
-        os.path.join("assets", f"logo_{theme_value}*.*"),
+        os.path.join(APP_ROOT, "public", f"logo_{theme_value}.*"),
+        os.path.join(build_dir, "assets", f"logo_{theme_value}*.*"),
     ]:
         files = glob.glob(os.path.join(build_dir, path))
 
@@ -378,18 +589,6 @@ def register_wildcard_route_handler():
         html_template = get_html_template()
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
-
-        key = "chainlit-initial-headers"
-
-        chainlit_initial_headers = dict(request.headers)
-        if "cookie" in chainlit_initial_headers:
-            del chainlit_initial_headers["cookie"]
-
-        response.set_cookie(
-            key=key,
-            value=json.dumps(chainlit_initial_headers),
-            httponly=True,
-        )
 
         return response
 

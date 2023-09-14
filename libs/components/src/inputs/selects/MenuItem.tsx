@@ -1,7 +1,8 @@
+import { NotificationCount } from 'src/NotificationCount';
+import { grey, primary } from 'theme/index';
+
 import { MenuItem as MMenuItem } from '@mui/material';
 
-import { grey, primary } from '../../../theme';
-import { NotificationCount } from '../../NotificationCount';
 import { SelectItem } from './SelectInput';
 
 type MenuItemProps = {

@@ -11,13 +11,11 @@ import {
   Stack,
   Theme,
   Typography,
+  styled,
   useMediaQuery
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 
-import { IMessageElement } from '../types/element';
-
-import 'react-resizable/css/styles.css';
+import { IMessageElement } from 'src/types/element';
 
 import { Element } from './Element';
 

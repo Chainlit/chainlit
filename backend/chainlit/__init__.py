@@ -1,12 +1,15 @@
-import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
+
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+
+import asyncio
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
-    from chainlit.client.base import BaseDBClient, BaseAuthClient, UserDict
     from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
     from chainlit.langchain.callbacks import (
         LangchainCallbackHandler,
@@ -34,17 +37,83 @@ from chainlit.element import (
 )
 from chainlit.logger import logger
 from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
+from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import FileSpec
+from chainlit.types import AppUser, FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
 
-env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
-
 if env_found:
     logger.info("Loaded .env file")
+
+
+@trace
+def password_auth_callback(func: Callable[[str, str], Optional[AppUser]]) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user.
+
+    Args:
+        func (Callable[[str, str], Optional[AppUser]]): The authentication callback to execute. Takes the email and password as parameters.
+
+    Example:
+        @cl.password_auth_callback
+        async def password_auth_callback(username: str, password: str) -> Optional[AppUser]:
+
+    Returns:
+        Callable[[str, str], Optional[AppUser]]: The decorated authentication callback.
+    """
+
+    config.code.password_auth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
+def header_auth_callback(func: Callable[[Headers], Optional[AppUser]]) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via a header
+
+    Args:
+        func (Callable[[Headers], Optional[AppUser]]): The authentication callback to execute.
+
+    Example:
+        @cl.header_auth_callback
+        async def header_auth_callback(headers: Headers) -> Optional[AppUser]:
+
+    Returns:
+        Callable[[Headers], Optional[AppUser]]: The decorated authentication callback.
+    """
+
+    config.code.header_auth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
+def oauth_callback(
+    func: Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]
+) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via oauth
+
+    Args:
+        func (Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]): The authentication callback to execute.
+
+    Example:
+        @cl.oauth_callback
+        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: AppUser) -> Optional[AppUser]:
+
+    Returns:
+        Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]: The decorated authentication callback.
+    """
+
+    if len(get_configured_oauth_providers()) == 0:
+        raise ValueError(
+            "You must set the environment variable for at least one oauth provider to use oauth authentication."
+        )
+
+    config.code.oauth_callback = wrap_user_function(func)
+    return func
 
 
 @trace
@@ -143,41 +212,6 @@ def on_settings_update(
     return func
 
 
-@trace
-def auth_client_factory(
-    func: Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]
-) -> Callable[[Optional[Dict[str, str]], Optional[Headers]], "BaseAuthClient"]:
-    """
-    Callback to call when to initialize the custom client.
-
-    Args:
-        func (Callable[[Optional[UserDict]], BaseDBClient]): The action callback to execute. First parameter is the headers, second is the user infos if cloud auth is enabled.
-    """
-
-    config.code.auth_client_factory = wrap_user_function(func, with_task=False)
-    return func
-
-
-@trace
-def db_client_factory(
-    func: Callable[
-        [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]],
-        "BaseDBClient",
-    ]
-) -> Callable[
-    [Optional[Dict[str, str]], Optional[Headers], Optional["UserDict"]], "BaseDBClient"
-]:
-    """
-    Callback to call when to initialize the custom client.
-
-    Args:
-        func (Callable[[Optional[UserDict]], BaseDBClient]): The action callback to execute. First parameter is the headers, second is the user infos if cloud auth is enabled.
-    """
-
-    config.code.db_client_factory = wrap_user_function(func, with_task=False)
-    return func
-
-
 def on_file_upload(
     accept: Union[List[str], Dict[str, List[str]]],
     max_size_mb: int = 2,
@@ -230,6 +264,7 @@ __getattr__ = make_module_getattr(
 __all__ = [
     "user_session",
     "Action",
+    "AppUser",
     "Audio",
     "Pdf",
     "Image",
@@ -252,9 +287,9 @@ __all__ = [
     "action_callback",
     "author_rename",
     "on_settings_update",
+    "password_auth_callback",
+    "header_auth_callback",
     "sleep",
-    "auth_client_factory",
-    "db_client_factory",
     "run_sync",
     "make_async",
     "cache",

@@ -1,4 +1,5 @@
 import { keyframes } from '@emotion/react';
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useEffect, useState } from 'react';
 
 import { Box, Stack } from '@mui/material';
@@ -9,11 +10,10 @@ import { Buttons } from './components/Buttons';
 import { DetailsButton } from './components/DetailsButton';
 import { MessageContent } from './components/MessageContent';
 
-import { IAction } from '../types/action';
-import { IMessageElement } from '../types/element';
-import { INestedMessage } from '../types/message';
+import { IAction } from 'src/types/action';
+import { IMessageElement } from 'src/types/element';
+import { INestedMessage } from 'src/types/message';
 
-import { MessageContext } from '../../contexts/MessageContext';
 import { Messages } from './Messages';
 
 interface Props {

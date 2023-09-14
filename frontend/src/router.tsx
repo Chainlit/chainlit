@@ -49,7 +49,7 @@ export const router = createBrowserRouter([
     element: <Design />
   },
   {
-    path: '/api/auth/callback',
+    path: '/login/callback',
     element: <AuthCallback />
   },
   {

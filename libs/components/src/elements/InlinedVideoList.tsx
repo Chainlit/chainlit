@@ -1,4 +1,4 @@
-import { IVideoElement } from '../types/element';
+import { IVideoElement } from 'src/types/element';
 
 import { ListWithSize } from './ListWithSize';
 import { VideoElement } from './Video';

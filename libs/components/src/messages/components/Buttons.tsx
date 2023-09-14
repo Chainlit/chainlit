@@ -1,13 +1,13 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { ActionList } from 'src/ActionList';
 
 import { BugReport } from '@mui/icons-material';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
-import { IAction } from '../../types/action';
-import { IMessage } from '../../types/message';
+import { IAction } from 'src/types/action';
+import { IMessage } from 'src/types/message';
 
-import { MessageContext } from '../../../contexts/MessageContext';
-import { ActionList } from '../../ActionList';
 import { FeedbackButtons } from './FeedbackButtons';
 
 interface Props {
@@ -45,6 +45,7 @@ const Buttons = ({ message, actions }: Props) => {
 
   const showFeedbackButtons =
     showFbButtons &&
+    !message.disableHumanFeedback &&
     !message.authorIsUser &&
     !message.waitForAnswer &&
     !!message.content;

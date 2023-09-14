@@ -31,6 +31,7 @@ export interface IMessage {
   content?: string;
   createdAt: number | string;
   humanFeedback?: number;
+  disableHumanFeedback?: boolean;
   language?: string;
   indent?: number;
   parentId?: string;

@@ -1,6 +1,5 @@
 import { Stack } from '@mui/material';
 
-import AuthorSelect from './AuthorSelect';
 import FeedbackSelect from './FeedbackSelect';
 import SearchBar from './SearchBar';
 
@@ -10,7 +9,6 @@ export default function Filters() {
       <SearchBar />
       <Stack direction="row" alignItems="center" spacing={2}>
         <FeedbackSelect />
-        <AuthorSelect />
       </Stack>
     </Stack>
   );

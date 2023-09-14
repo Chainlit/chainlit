@@ -1,4 +1,4 @@
-import { IImageElement } from '../types/element';
+import { IImageElement } from 'src/types/element';
 
 import { ImageElement } from './Image';
 import { ListWithSize } from './ListWithSize';

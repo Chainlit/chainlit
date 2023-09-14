@@ -1,10 +1,9 @@
 import { render } from '@testing-library/react';
-import React from 'react';
 import { expect, it } from 'vitest';
 
-import { MessageContent } from '../src/messages/components/MessageContent';
+import { MessageContent } from 'src/messages/components/MessageContent';
 
-import { ITextElement } from '../src/types/element';
+import { ITextElement } from 'src/types/element';
 
 it('renders the message content', () => {
   const { getByText } = render(

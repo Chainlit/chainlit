@@ -1,18 +1,38 @@
-import { GitHub, Google } from '@mui/icons-material';
-import Button from '@mui/material/Button';
+import { grey } from 'theme/palette';
 
-import { grey } from '../../theme/palette';
+import { GitHub, Google, Microsoft } from '@mui/icons-material';
+import { Button } from '@mui/material';
 
-const ICONS: { [key: string]: React.ReactNode } = {
-  google: <Google />,
-  github: <GitHub />
-  // microsoft: <Microsoft />
-};
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
-type Provider = 'Google' | 'GitHub' | 'Microsoft';
+function getProviderName(provider: string) {
+  switch (provider) {
+    case 'azure-ad':
+      return 'Microsoft';
+    case 'github':
+      return 'GitHub';
+    default:
+      return capitalizeFirstLetter(provider);
+  }
+}
+
+function renderProviderIcon(provider: string) {
+  switch (provider) {
+    case 'google':
+      return <Google />;
+    case 'github':
+      return <GitHub />;
+    case 'azure-ad':
+      return <Microsoft />;
+    default:
+      return null;
+  }
+}
 
 interface ProviderButtonProps {
-  provider: Provider;
+  provider: string;
   onClick: () => void;
   isSignIn?: boolean;
 }
@@ -26,7 +46,7 @@ const ProviderButton = ({
     <Button
       variant="outlined"
       color="inherit"
-      startIcon={ICONS[provider.toLowerCase()]}
+      startIcon={renderProviderIcon(provider.toLowerCase())}
       onClick={onClick}
       sx={{
         width: '100%',
@@ -36,9 +56,10 @@ const ProviderButton = ({
         paddingLeft: 3,
         justifyContent: 'flex-start'
       }}
-    >{`${isSignIn ? 'Continue' : 'Sign up'} with ${provider}`}</Button>
+    >
+      {`${isSignIn ? 'Continue' : 'Sign up'} with ${getProviderName(provider)}`}
+    </Button>
   );
 };
 
 export { ProviderButton };
-export type { Provider };

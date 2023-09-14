@@ -1,14 +1,14 @@
 import { Socket } from 'socket.io-client';
 
-import { FileSpec, IFileResponse, IMessage } from '@chainlit/components';
+import { IMessage } from '@chainlit/components';
 
 import { IMessageElement } from './element';
-import { IMember } from './user';
+import { IAppUser } from './user';
 
 export interface IChat {
   id: number;
   createdAt: number | string;
-  author?: IMember;
+  appUser?: IAppUser;
   messages: IMessage[];
   elements: IMessageElement[];
 }

@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
 
 import { green, grey, primary, white } from './palette';
 
@@ -52,12 +52,6 @@ const error = {
   main: 'rgba(239, 65, 70, 1)',
   contrastText: white
 };
-
-declare module '@mui/material/styles' {
-  interface TypeBackground {
-    paperVariant: string;
-  }
-}
 
 const darkTheme = createTheme({
   typography,

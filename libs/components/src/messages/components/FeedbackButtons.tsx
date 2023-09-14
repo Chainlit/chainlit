@@ -1,3 +1,4 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 
 import {
@@ -8,9 +9,7 @@ import {
 } from '@mui/icons-material';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 
-import { IMessage } from '../../types/message';
-
-import { MessageContext } from '../../../contexts/MessageContext';
+import { IMessage } from 'src/types/message';
 
 const ICON_SIZE = '16px';
 

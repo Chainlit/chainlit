@@ -1,12 +1,12 @@
 import { CodeProps } from 'react-markdown/lib/ast-to-react';
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { grey } from 'theme/palette';
 
 import { Box } from '@mui/material';
 
-import { useIsDarkMode } from '../hooks/useIsDarkMode';
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import { grey } from '../theme/palette';
 import { ClipboardCopy } from './ClipboardCopy';
 
 const Code = ({ inline, children, ...props }: CodeProps) => {

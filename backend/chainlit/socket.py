@@ -1,39 +1,18 @@
 import asyncio
 import json
-from http.cookies import SimpleCookie
 from typing import Any, Dict
 
 from chainlit.action import Action
+from chainlit.auth import get_current_user, require_login
 from chainlit.client.base import MessageDict
-from chainlit.client.cloud import CloudAuthClient
-from chainlit.client.utils import get_auth_client, get_db_client
 from chainlit.config import config
 from chainlit.context import init_context
-from chainlit.emitter import ChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import Session
 from chainlit.telemetry import trace_event
-from chainlit.types import FileSpec
 from chainlit.user_session import user_sessions
-
-
-def load_chainlit_initial_headers(http_cookie):
-    cookie = SimpleCookie(http_cookie)
-    cookie_string = ""
-    initial_headers = cookie.get("chainlit-initial-headers")
-    if initial_headers:
-        cookie_string = initial_headers.value
-    if cookie_string:
-        try:
-            chainlit_initial_headers = json.loads(cookie_string)
-        except ValueError:
-            chainlit_initial_headers = {}
-    else:
-        chainlit_initial_headers = {}
-
-    return chainlit_initial_headers
 
 
 def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
@@ -66,6 +45,17 @@ def load_user_env(user_env):
 
 @socket.on("connect")
 async def connect(sid, environ, auth):
+    user = None
+    token = None
+    try:
+        # Check if the authentication is required
+        if require_login():
+            authorization_header = environ.get("HTTP_AUTHORIZATION")
+            token = authorization_header.split(" ")[1] if authorization_header else None
+            user = await get_current_user(token=token)
+    except Exception as e:
+        return False
+
     # Function to send a message to this particular session
     def emit_fn(event, data):
         if session := Session.get(sid):
@@ -86,35 +76,17 @@ async def connect(sid, environ, auth):
     if restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
         return True
 
-    request_headers = load_chainlit_initial_headers(environ.get("HTTP_COOKIE"))
-
-    db_client = None
-    user_env = environ.get("HTTP_USER_ENV")
-
-    try:
-        auth_client = await get_auth_client(
-            handshake_headers=environ, request_headers=request_headers
-        )
-        if config.project.database:
-            db_client = await get_db_client(
-                handshake_headers=environ,
-                request_headers=request_headers,
-                user_infos=auth_client.user_infos,
-            )
-        user_env = load_user_env(user_env)
-    except ConnectionRefusedError as e:
-        logger.error(f"ConnectionRefusedError: {e}")
-        return False
+    user_env_string = environ.get("HTTP_USER_ENV")
+    user_env = load_user_env(user_env_string)
 
     Session(
         id=session_id,
         socket_id=sid,
         emit=emit_fn,
         ask_user=ask_user_fn,
-        auth_client=auth_client,
-        db_client=db_client,
         user_env=user_env,
-        initial_headers=request_headers,
+        user=user,
+        token=token,
     )
 
     trace_event("connection_successful")
@@ -126,16 +98,6 @@ async def connection_successful(sid):
     context = init_context(sid)
     if context.session.restored:
         return
-
-    if isinstance(
-        context.session.auth_client, CloudAuthClient
-    ) and config.project.database in [
-        "local",
-        "custom",
-    ]:
-        await context.session.db_client.create_user(
-            context.session.auth_client.user_infos
-        )
 
     if config.code.on_file_upload:
         await context.emitter.enable_file_upload(config.code.on_file_upload_config)

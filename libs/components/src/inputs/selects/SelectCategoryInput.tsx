@@ -1,6 +1,6 @@
 import { ListSubheader } from '@mui/material';
 
-import { useIsDarkMode } from '../../../hooks/useIsDarkMode';
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { MenuItem } from './MenuItem';
 import { SelectInput, SelectInputProps, SelectItem } from './SelectInput';

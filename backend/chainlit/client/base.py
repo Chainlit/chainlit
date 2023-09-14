@@ -1,27 +1,12 @@
-from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Generic, List, Mapping, Optional, TypedDict, TypeVar
 
+from chainlit.config import config
+from chainlit.logger import logger
 from chainlit.prompt import Prompt
-from chainlit.types import (
-    ConversationFilter,
-    ElementDisplay,
-    ElementSize,
-    ElementType,
-    Pagination,
-)
+from chainlit.types import AppUser, ElementDisplay, ElementSize, ElementType
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
-from starlette.datastructures import Headers
+from python_graphql_client import GraphqlClient
 
 
 class MessageDict(TypedDict):
@@ -38,13 +23,7 @@ class MessageDict(TypedDict):
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     humanFeedback: Optional[int]
-
-
-class UserDict(TypedDict):
-    id: int
-    name: Optional[str]
-    email: Optional[str]
-    role: str
+    disableHumanFeedback: Optional[bool]
 
 
 class ElementDict(TypedDict):
@@ -65,7 +44,7 @@ class ConversationDict(TypedDict):
     createdAt: Optional[int]
     elementCount: Optional[int]
     messageCount: Optional[int]
-    author: Optional[UserDict]
+    appUser: Optional[AppUser]
     messages: List[MessageDict]
     elements: Optional[List[ElementDict]]
 
@@ -85,83 +64,47 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     data: List[T]
 
 
-class BaseAuthClient(ABC):
-    user_infos: Optional[UserDict] = None
-    handshake_headers: Optional[Dict[str, str]] = None
-    request_headers: Optional[Headers] = None
+class ChainlitGraphQLClient:
+    def __init__(self, api_key: str):
+        self.headers = {"content-type": "application/json"}
+        if api_key:
+            self.headers["x-api-key"] = api_key
+        else:
+            raise ValueError("Cannot instantiate Cloud Client without CHAINLIT_API_KEY")
 
-    @abstractmethod
-    async def is_project_member(self) -> bool:
-        pass
+        graphql_endpoint = f"{config.chainlit_server}/api/graphql"
+        self.graphql_client = GraphqlClient(
+            endpoint=graphql_endpoint, headers=self.headers
+        )
 
-    @abstractmethod
-    async def get_user_infos(self) -> UserDict:
-        pass
+    async def query(self, query: str, variables: Dict[str, Any] = {}) -> Dict[str, Any]:
+        """
+        Execute a GraphQL query.
 
+        :param query: The GraphQL query string.
+        :param variables: A dictionary of variables for the query.
+        :return: The response data as a dictionary.
+        """
+        return await self.graphql_client.execute_async(query=query, variables=variables)
 
-class BaseDBClient(ABC):
-    user_infos: Optional[UserDict] = None
+    def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
+        if "errors" in response:
+            if raise_error:
+                raise Exception(response["errors"][0])
+            logger.error(response["errors"][0])
+            return True
+        return False
 
-    @abstractmethod
-    async def create_user(self, variables: UserDict) -> bool:
-        pass
+    async def mutation(
+        self, mutation: str, variables: Mapping[str, Any] = {}
+    ) -> Dict[str, Any]:
+        """
+        Execute a GraphQL mutation.
 
-    @abstractmethod
-    async def get_project_members(self) -> List[UserDict]:
-        pass
-
-    @abstractmethod
-    async def create_conversation(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    async def delete_conversation(self, conversation_id: str) -> bool:
-        pass
-
-    @abstractmethod
-    async def get_conversation(self, conversation_id: str) -> ConversationDict:
-        pass
-
-    @abstractmethod
-    async def get_conversations(
-        self, pagination: "Pagination", filter: "ConversationFilter"
-    ) -> PaginatedResponse[ConversationDict]:
-        pass
-
-    @abstractmethod
-    async def get_message(self, conversation_id: str, message_id: str) -> Dict:
-        pass
-
-    @abstractmethod
-    async def create_message(self, variables: MessageDict) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    async def update_message(self, message_id: str, variables: MessageDict) -> bool:
-        pass
-
-    @abstractmethod
-    async def delete_message(self, message_id: str) -> bool:
-        pass
-
-    @abstractmethod
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
-        pass
-
-    @abstractmethod
-    async def create_element(self, variables: ElementDict) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def update_element(self, variables: ElementDict) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def get_element(self, conversation_id: str, element_id: str) -> ElementDict:
-        pass
-
-    @abstractmethod
-    async def set_human_feedback(
-        self, message_id: str, feedback: Literal[-1, 0, 1]
-    ) -> bool:
-        pass
+        :param mutation: The GraphQL mutation string.
+        :param variables: A dictionary of variables for the mutation.
+        :return: The response data as a dictionary.
+        """
+        return await self.graphql_client.execute_async(
+            query=mutation, variables=variables
+        )

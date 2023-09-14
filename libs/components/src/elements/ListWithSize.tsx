@@ -1,6 +1,6 @@
 import { ImageList, ImageListItem } from '@mui/material';
 
-import { IImageElement, IVideoElement } from '../types/element';
+import { IImageElement, IVideoElement } from 'src/types/element';
 
 const sizeToUnit = (element: IImageElement | IVideoElement) => {
   switch (element.size) {

@@ -1,9 +1,9 @@
+import { GreyButton } from 'src/buttons/GreyButton';
+
 import { AttachFile } from '@mui/icons-material';
 import { Link } from '@mui/material';
 
-import { IFileElement } from '../types/element';
-
-import { GreyButton } from '../buttons/GreyButton';
+import { IFileElement } from 'src/types/element';
 
 const FileElement = ({ element }: { element: IFileElement }) => {
   if (!element.url && !element.content) {

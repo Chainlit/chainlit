@@ -1,32 +1,78 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { useRecoilValue } from 'recoil';
+import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
+import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import useSWRImmutable from 'swr/immutable';
 
-import { projectSettingsState } from 'state/project';
-import { accessTokenState, roleState } from 'state/user';
+import { accessTokenState } from 'state/user';
+
+import { IAppUser } from 'types/user';
+
+import { fetcher } from './useApi';
 
 export const useAuth = () => {
-  const pSettings = useRecoilValue(projectSettingsState);
-  const { isAuthenticated, isLoading: _isLoading, ...other } = useAuth0();
-  const accessToken = useRecoilValue(accessTokenState);
-  const role = useRecoilValue(roleState);
+  const { data: config, isLoading: isLoadingConfig } = useSWRImmutable<{
+    requireLogin: boolean;
+    passwordAuth: boolean;
+    headerAuth: boolean;
+    oauthProviders: string[];
+  }>('/auth/config', fetcher);
+  const isReady = !!(!isLoadingConfig && config);
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+  const [user, setUser] = useState<IAppUser | null>(null);
 
-  // If project id isn't set, the auth0 provider is not used and _isLoading is always true
-  const isLoading = _isLoading && pSettings?.project?.id;
+  const logout = () => {
+    removeToken();
+    setAccessToken('');
+    setUser(null);
+  };
 
-  const isProjectMember = isAuthenticated && role && role !== 'ANONYMOUS';
+  const saveAndSetToken = (token: string | null | undefined) => {
+    if (!token) {
+      logout();
+      return;
+    }
+    try {
+      const { exp, ...AppUser } = JSON.parse(atob(token.split('.')[1]));
+      setToken(token);
+      setAccessToken(`Bearer ${token}`);
+      setUser(AppUser as IAppUser);
+    } catch (e) {
+      console.error('Invalid token, clearing token from local storage');
+      logout();
+    }
+  };
 
-  const cloudAuthRequired =
-    pSettings?.project.id && pSettings?.project.public === false;
-  const authenticating = isLoading || (isAuthenticated && !accessToken);
+  useEffect(() => {
+    if (!user && getToken()) {
+      // Initialize the token from local storage
+      saveAndSetToken(getToken());
+      return;
+    }
+  }, [accessToken]);
+
+  const isAuthenticated = !!accessToken;
+
+  if (config && !config.requireLogin) {
+    return {
+      config,
+      user: null,
+      role: 'ANONYMOUS',
+      isReady,
+      isAuthenticated: true,
+      accessToken: '',
+      logout: () => {},
+      setAccessToken: () => {}
+    };
+  }
 
   return {
-    role,
-    accessToken,
+    config,
+    user: user,
+    role: user?.role,
     isAuthenticated,
-    authenticating,
-    isProjectMember,
-    isLoading,
-    cloudAuthRequired,
-    ...other
+    isReady,
+    accessToken: accessToken,
+    logout: logout,
+    setAccessToken: saveAndSetToken
   };
 };

@@ -1,12 +1,12 @@
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Code } from 'src/Code';
 
 import { Link } from '@mui/material';
 
-import { ITextElement } from '../types/element';
+import { useApi } from 'hooks/index';
 
-import { useApi } from '../../hooks';
-import { Code } from '../Code';
+import { ITextElement } from 'src/types/element';
 
 interface Props {
   element: ITextElement;

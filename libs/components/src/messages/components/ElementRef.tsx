@@ -1,10 +1,9 @@
+import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
 import { Link } from '@mui/material';
 
-import { IMessageElement } from '../../types/element';
-
-import { MessageContext } from '../../../contexts/MessageContext';
+import { IMessageElement } from 'src/types/element';
 
 interface Props {
   element: IMessageElement;

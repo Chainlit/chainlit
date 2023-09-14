@@ -5,7 +5,9 @@ import Chat from 'components/organisms/chat/index';
 export default function Home() {
   return (
     <Page>
-      <Chat />
+      <>
+        <Chat />
+      </>
     </Page>
   );
 }

@@ -1,17 +1,16 @@
 import { api } from 'api';
-import { useRecoilValue } from 'recoil';
 import useSWR from 'swr';
 
-import { accessTokenState } from 'state/user';
+import { useAuth } from './auth';
 
-const fetcher = async (endpoint: string, token: string) => {
+const fetcher = async (endpoint: string, token?: string) => {
   const res = await api.get(endpoint, token);
 
   return res?.json();
 };
 
 function useApi<T>(endpoint: string | null) {
-  const accessToken = useRecoilValue(accessTokenState);
+  const { accessToken } = useAuth();
 
   return useSWR<T>(
     endpoint ? [endpoint, accessToken] : null,
@@ -19,4 +18,4 @@ function useApi<T>(endpoint: string | null) {
   );
 }
 
-export { useApi };
+export { useApi, fetcher };

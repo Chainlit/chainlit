@@ -14,7 +14,23 @@ export default defineConfig({
       '@mui/icons-material': path.resolve(
         __dirname,
         './node_modules/@mui/icons-material'
-      )
+      ),
+      '@mui/lab': path.resolve(__dirname, './node_modules/@mui/lab'),
+      '@emotion/react': path.resolve(
+        __dirname,
+        './node_modules/@emotion/react'
+      ),
+      '@emotion/styled': path.resolve(
+        __dirname,
+        './node_modules/@emotion/styled'
+      ),
+      formik: path.resolve(__dirname, './node_modules/formik'),
+      'react-markdown': path.resolve(
+        __dirname,
+        './node_modules/react-markdown'
+      ),
+      'remark-gfm': path.resolve(__dirname, './node_modules/remark-gfm'),
+      'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts')
     }
   }
 });
