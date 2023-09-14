@@ -57,6 +57,10 @@ def password_auth_callback(func: Callable[[str, str], Optional[AppUser]]) -> Cal
     Args:
         func (Callable[[str, str], Optional[AppUser]]): The authentication callback to execute. Takes the email and password as parameters.
 
+    Example:
+        @cl.password_auth_callback
+        async def password_auth_callback(username: str, password: str) -> Optional[AppUser]:
+
     Returns:
         Callable[[str, str], Optional[AppUser]]: The decorated authentication callback.
     """
@@ -72,6 +76,10 @@ def header_auth_callback(func: Callable[[Headers], Optional[AppUser]]) -> Callab
 
     Args:
         func (Callable[[Headers], Optional[AppUser]]): The authentication callback to execute.
+
+    Example:
+        @cl.header_auth_callback
+        async def header_auth_callback(headers: Headers) -> Optional[AppUser]:
 
     Returns:
         Callable[[Headers], Optional[AppUser]]: The decorated authentication callback.
@@ -90,6 +98,10 @@ def oauth_callback(
 
     Args:
         func (Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]): The authentication callback to execute.
+
+    Example:
+        @cl.oauth_callback
+        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: AppUser) -> Optional[AppUser]:
 
     Returns:
         Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]: The decorated authentication callback.
