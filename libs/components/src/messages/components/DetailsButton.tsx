@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { GreyButton } from 'src/buttons/GreyButton';
 
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import CircularProgress from '@mui/material/CircularProgress';
+import { CircularProgress } from '@mui/material';
 
 import { INestedMessage } from 'src/types/message';
 

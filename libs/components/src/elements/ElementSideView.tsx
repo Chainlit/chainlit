@@ -11,9 +11,9 @@ import {
   Stack,
   Theme,
   Typography,
+  styled,
   useMediaQuery
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 
 import { IMessageElement } from 'src/types/element';
 
