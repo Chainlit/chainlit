@@ -192,7 +192,10 @@ class OktaOAuthProvider(OAuthProvider):
         "OAUTH_OKTA_CLIENT_SECRET",
         "OAUTH_OKTA_DOMAIN",
     ]
-    authorize_url = f"https://{os.environ.get('OAUTH_OKTA_DOMAIN')}/oauth2/default/v1/authorize"
+    # Avoid trailing slash in domain if supplied
+    domain = f"https://{os.environ.get('OAUTH_OKTA_DOMAIN').rstrip('/')}"
+
+    authorize_url = f"{domain}/oauth2/default/v1/authorize"
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_OKTA_CLIENT_ID")
@@ -213,7 +216,7 @@ class OktaOAuthProvider(OAuthProvider):
         }
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.post(
-                f"https://{os.environ.get('OAUTH_OKTA_DOMAIN')}/oauth2/default/v1/token",
+                f"{self.domain}/oauth2/default/v1/token",
                 data=payload,
             ) as result:
                 json = await result.json()
@@ -228,7 +231,7 @@ class OktaOAuthProvider(OAuthProvider):
     async def get_user_info(self, token: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                f"https://{os.environ.get('OAUTH_OKTA_DOMAIN')}/oauth2/default/v1/userinfo",
+                f"{self.domain}/oauth2/default/v1/userinfo",
                 headers={"Authorization": f"Bearer {token}"},
             ) as result:
                 user = await result.json()
