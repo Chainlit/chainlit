@@ -86,7 +86,7 @@ class Theme(str, Enum):
 
 
 Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
-Provider = Literal["credentials", "header", "github", "google", "azure-ad"]
+Provider = Literal["credentials", "header", "github", "google", "azure-ad", "okta"]
 
 
 # Used when logging-in a user
