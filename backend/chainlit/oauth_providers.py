@@ -239,7 +239,7 @@ class OktaOAuthProvider(OAuthProvider):
                 return (user, app_user)
 
 
-providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider()]
+providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider(), OktaOAuthProvider()]
 
 
 def get_oauth_provider(provider: str) -> Optional[OAuthProvider]:
