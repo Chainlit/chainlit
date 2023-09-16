@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
 from chainlit.logger import logger
-from chainlit.types import AppUser
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -13,6 +12,7 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
+    from chainlit.client.base import AppUser
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -155,10 +155,10 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[Callable[[str, str], Optional[AppUser]]] = None
-    header_auth_callback: Optional[Callable[[Headers], Optional[AppUser]]] = None
+    password_auth_callback: Optional[Callable[[str, str], Optional["AppUser"]]] = None
+    header_auth_callback: Optional[Callable[[Headers], Optional["AppUser"]]] = None
     oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], AppUser], Optional[AppUser]]
+        Callable[[str, str, Dict[str, str], "AppUser"], Optional["AppUser"]]
     ] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
