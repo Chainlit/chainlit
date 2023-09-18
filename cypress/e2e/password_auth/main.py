@@ -1,14 +1,12 @@
 from typing import Optional
 
-from chainlit.types import AppUser
-
 import chainlit as cl
 
 
 @cl.password_auth_callback
-def auth_callback(username: str, password: str) -> Optional[AppUser]:
+def auth_callback(username: str, password: str) -> Optional[cl.AppUser]:
     if (username, password) == ("admin", "admin"):
-        return AppUser(username="admin", role="ADMIN", provider="credentials")
+        return cl.AppUser(username="admin", role="ADMIN", provider="credentials")
     else:
         return None
 
