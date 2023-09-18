@@ -21,8 +21,9 @@ from .base import (
 
 
 class ChainlitCloudClient(ChainlitGraphQLClient):
-    def __init__(self, chainlit_server: str, api_key: str):
-        super().__init__(chainlit_server=chainlit_server, api_key=api_key)
+    def __init__(self, api_key: str, chainlit_server="https://cloud.chainlit.io"):
+        super().__init__(api_key=api_key, chainlit_server=chainlit_server)
+        self.chainlit_server: str = self.chainlit_server
 
     async def create_app_user(self, app_user: AppUser) -> Optional[PersistedAppUser]:
         mutation = """
@@ -414,7 +415,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{config.chainlit_server}{path}",
+                f"{self.chainlit_server}{path}",
                 json=body,
                 headers=self.headers,
             ) as r:
@@ -454,6 +455,6 @@ chainlit_client = None  # type: Optional[ChainlitCloudClient]
 
 if config.data_persistence:
     chainlit_client = ChainlitCloudClient(
-        chainlit_server=config.chainlit_server,
         api_key=os.environ.get("CHAINLIT_API_KEY", ""),
+        chainlit_server=config.chainlit_server,
     )

@@ -115,7 +115,7 @@ class ConversationFilter(BaseModel):
 
 
 class ChainlitGraphQLClient:
-    def __init__(self, chainlit_server: str, api_key: str):
+    def __init__(self, api_key: str, chainlit_server: str):
         self.headers = {"content-type": "application/json"}
         if api_key:
             self.headers["x-api-key"] = api_key
