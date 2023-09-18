@@ -21,9 +21,11 @@ from .base import (
 
 
 class ChainlitCloudClient(ChainlitGraphQLClient):
+    chainlit_server: str
+
     def __init__(self, api_key: str, chainlit_server="https://cloud.chainlit.io"):
         super().__init__(api_key=api_key, chainlit_server=chainlit_server)
-        self.chainlit_server: str = self.chainlit_server
+        self.chainlit_server = chainlit_server
 
     async def create_app_user(self, app_user: AppUser) -> Optional[PersistedAppUser]:
         mutation = """
