@@ -193,7 +193,7 @@ class OktaOAuthProvider(OAuthProvider):
         "OAUTH_OKTA_DOMAIN",
     ]
     # Avoid trailing slash in domain if supplied
-    domain = f"https://{os.environ.get('OAUTH_OKTA_DOMAIN', "").rstrip('/')}"
+    domain = f"https://{os.environ.get('OAUTH_OKTA_DOMAIN', '').rstrip('/')}"
 
     authorize_url = f"{domain}/oauth2/default/v1/authorize"
 
