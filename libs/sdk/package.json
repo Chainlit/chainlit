@@ -2,7 +2,6 @@
   "name": "@chainlit/sdk",
   "version": "0.0.1",
   "description": "Chainlit typescript SDK",
-  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -26,6 +25,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.3"
+    "@types/uuid": "^9.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }

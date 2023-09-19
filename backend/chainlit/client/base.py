@@ -91,7 +91,7 @@ class ConversationDict(TypedDict):
 @dataclass
 class PageInfo:
     hasNextPage: bool
-    endCursor: Any
+    endCursor: str
 
 
 T = TypeVar("T")
@@ -105,7 +105,7 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
 
 class Pagination(BaseModel):
     first: int
-    cursor: Any
+    cursor: Optional[str]
 
 
 class ConversationFilter(BaseModel):

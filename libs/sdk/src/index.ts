@@ -76,7 +76,7 @@ export interface IConversation {
 
 export interface IPageInfo {
   hasNextPage: boolean;
-  endCursor: any;
+  endCursor: string;
 }
 
 export interface IPaginatedResponse<T> {
@@ -86,7 +86,7 @@ export interface IPaginatedResponse<T> {
 
 export interface IPagination {
   first: number;
-  cursor: any;
+  cursor?: string;
 }
 
 export interface IConversationFilter {
@@ -154,7 +154,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
             }
         `;
     const res = await this.mutation(mutation, appUser);
-    return res.data.createAppUser;
+    return res.createAppUser;
   }
 
   async updateAppUser(appUser: IAppUser): Promise<IPersistedAppUser> {
@@ -172,7 +172,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
                 }
             `;
     const res = await this.mutation(mutation, appUser);
-    return res.data.updateAppUser;
+    return res.updateAppUser;
   }
 
   async getAppUser(username: string): Promise<IPersistedAppUser> {
@@ -191,7 +191,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     `;
     const variables = { username: username };
     const res = await this.query(query, variables);
-    return res.data.getAppUser;
+    return res.getAppUser;
   }
 
   async deleteAppUser(username: string): Promise<boolean> {
@@ -217,7 +217,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     `;
     const variables = appUserId ? { appUserId: appUserId } : {};
     const res = await this.mutation(mutation, variables);
-    return res.data.createConversation.id;
+    return res.createConversation.id;
   }
 
   async deleteConversation(conversationId: string): Promise<boolean> {
@@ -245,7 +245,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     `;
     const variables = { id: conversationId };
     const res = await this.query(query, variables);
-    const appUser = res.data.conversation.appUser;
+    const appUser = res.conversation.appUser;
     if (appUser) {
       return appUser.username;
     } else {
@@ -290,12 +290,12 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     `;
     const variables = { id: conversationId };
     const res = await this.query(query, variables);
-    return res.data.conversation;
+    return res.conversation;
   }
 
   async getConversations(
     pagination: IPagination,
-    filter: IConversationFilter
+    filter?: IConversationFilter
   ): Promise<IPaginatedResponse<IConversation>> {
     const query = `
         query (
@@ -337,15 +337,13 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     const variables = {
       first: pagination.first,
       cursor: pagination.cursor,
-      withFeedback: filter.feedback,
-      username: filter.username,
-      search: filter.search
+      withFeedback: filter?.feedback,
+      username: filter?.username,
+      search: filter?.search
     };
     const res = await this.query(query, variables);
-    const conversations = res.data.conversations.edges.map(
-      (edge: any) => edge.node
-    );
-    const pageInfo = res.data.conversations.pageInfo;
+    const conversations = res.conversations.edges.map((edge: any) => edge.node);
+    const pageInfo = res.conversations.pageInfo;
     return {
       pageInfo: {
         hasNextPage: pageInfo.hasNextPage,
@@ -385,7 +383,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
         }
     `;
     const res = await this.mutation(mutation, variables);
-    return res.data.createMessage.id;
+    return res.createMessage.id;
   }
 
   async updateMessage(
@@ -439,7 +437,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     `;
     const variables = { conversationId: conversationId, id: elementId };
     const res = await this.query(query, variables);
-    return res.data.element;
+    return res.element;
   }
 
   async createElement(variables: IElement): Promise<IElement> {
@@ -459,7 +457,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
         }
     `;
     const res = await this.mutation(mutation, variables);
-    return res.data.createElement;
+    return res.createElement;
   }
 
   async updateElement(variables: IElement): Promise<IElement> {
@@ -471,7 +469,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
         }
     `;
     const res = await this.mutation(mutation, variables);
-    return res.data.updateElement;
+    return res.updateElement;
   }
 
   async uploadElement(content: Blob, mime: string) {
