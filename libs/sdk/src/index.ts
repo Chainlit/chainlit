@@ -19,7 +19,8 @@ export type Provider =
   | 'header'
   | 'github'
   | 'google'
-  | 'azure-ad';
+  | 'azure-ad'
+  | 'okta';
 
 export interface IAppUser {
   username: string;
@@ -135,6 +136,10 @@ class ChainlitGraphQLClient {
 export class ChainlitCloudClient extends ChainlitGraphQLClient {
   chainlitServer: string;
   constructor(apiKey: string, chainlitServer = 'https://cloud.chainlit.io') {
+    // Remove trailing slash
+    chainlitServer = chainlitServer.endsWith('/')
+      ? chainlitServer.slice(0, -1)
+      : chainlitServer;
     super(apiKey, chainlitServer);
     this.chainlitServer = chainlitServer;
   }

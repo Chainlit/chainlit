@@ -24,6 +24,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
     chainlit_server: str
 
     def __init__(self, api_key: str, chainlit_server="https://cloud.chainlit.io"):
+        # Remove trailing slash
+        chainlit_server = chainlit_server.rstrip("/")
         super().__init__(api_key=api_key, chainlit_server=chainlit_server)
         self.chainlit_server = chainlit_server
 
