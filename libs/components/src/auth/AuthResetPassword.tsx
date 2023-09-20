@@ -1,9 +1,10 @@
 import { useFormik } from 'formik';
 import { ReactElement, useState } from 'react';
-import { TextInput } from 'src/inputs';
+import { TextInput } from 'src/inputs/TextInput';
 import * as yup from 'yup';
 
-import { Alert, Button } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 
 import { AuthTemplate } from './AuthTemplate';
 

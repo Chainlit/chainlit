@@ -1,6 +1,6 @@
 import { grey } from 'theme/palette';
 
-import { Button, ButtonProps } from '@mui/material';
+import Button, { ButtonProps } from '@mui/material/Button';
 
 interface Props extends ButtonProps {
   component?: any;

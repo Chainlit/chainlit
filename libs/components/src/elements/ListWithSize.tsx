@@ -1,4 +1,5 @@
-import { ImageList, ImageListItem } from '@mui/material';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 
 import { IImageElement, IVideoElement } from 'src/types/element';
 

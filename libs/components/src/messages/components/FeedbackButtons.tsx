@@ -1,13 +1,13 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 
-import {
-  ThumbDownAlt,
-  ThumbDownAltOutlined,
-  ThumbUpAlt,
-  ThumbUpAltOutlined
-} from '@mui/icons-material';
-import { IconButton, Stack, Tooltip } from '@mui/material';
+import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
+import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
+import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
+import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 
 import { IMessage } from 'src/types/message';
 

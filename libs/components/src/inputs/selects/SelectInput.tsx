@@ -1,13 +1,9 @@
 import { InputStateHandler } from 'src/inputs/InputStateHandler';
 import { grey, primary } from 'theme/index';
 
-import { KeyboardArrowDown } from '@mui/icons-material';
-import {
-  Select as MSelect,
-  SelectChangeEvent,
-  SelectProps,
-  SxProps
-} from '@mui/material';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import type { SxProps } from '@mui/material';
+import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

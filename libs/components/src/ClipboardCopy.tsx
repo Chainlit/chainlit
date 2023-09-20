@@ -1,8 +1,9 @@
 import { grey } from 'theme/palette';
 import { useCopyToClipboard, useToggle } from 'usehooks-ts';
 
-import { CopyAll } from '@mui/icons-material';
-import { IconButton, Tooltip } from '@mui/material';
+import CopyAll from '@mui/icons-material/CopyAll';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

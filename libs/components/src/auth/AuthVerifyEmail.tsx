@@ -1,7 +1,11 @@
 import { useState } from 'react';
 
-import { MailOutline } from '@mui/icons-material';
-import { Alert, Box, Button, Link, Typography } from '@mui/material';
+import MailOutline from '@mui/icons-material/MailOutline';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 
 import { AuthTemplate } from './AuthTemplate';
 

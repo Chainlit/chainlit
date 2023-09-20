@@ -1,7 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
-import { Link } from '@mui/material';
+import Link from '@mui/material/Link';
 
 import { IMessageElement } from 'src/types/element';
 

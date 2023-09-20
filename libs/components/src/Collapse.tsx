@@ -1,14 +1,14 @@
 import { useToggle } from 'usehooks-ts';
 
-import { DownloadOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
-import {
-  Box,
-  IconButton,
-  Collapse as MCollapse,
-  Stack,
-  Theme,
-  Tooltip
-} from '@mui/material';
+import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import type { Theme } from '@mui/material';
+import Box from '@mui/material/Box';
+import MCollapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 
 interface CollapseProps {
   children: React.ReactNode;

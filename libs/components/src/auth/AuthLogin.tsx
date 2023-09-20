@@ -6,17 +6,16 @@ import { grey } from 'theme/palette';
 import { useToggle } from 'usehooks-ts';
 import * as yup from 'yup';
 
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import {
-  Alert,
-  Box,
-  Button,
-  IconButton,
-  InputAdornment,
-  Link,
-  Stack,
-  Typography
-} from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { AuthTemplate } from './AuthTemplate';
 import { ProviderButton } from './ProviderButton';

@@ -2,8 +2,10 @@ import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 import { ActionList } from 'src/ActionList';
 
-import { BugReport } from '@mui/icons-material';
-import { IconButton, Stack, Tooltip } from '@mui/material';
+import BugReport from '@mui/icons-material/BugReport';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 
 import { IAction } from 'src/types/action';
 import { IMessage } from 'src/types/message';
