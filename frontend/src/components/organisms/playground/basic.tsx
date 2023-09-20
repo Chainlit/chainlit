@@ -17,11 +17,7 @@ interface Props {
   restoredTime: number;
 }
 
-export default function BasicPromptPlayground({
-  hasTemplate,
-  prompt,
-  restoredTime
-}: Props) {
+export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
   const mode = useRecoilValue(modeState);
   const setPlayground = useSetRecoilState(playgroundState);
 
