@@ -1,0 +1,32 @@
+{
+  "name": "@chainlit/sdk",
+  "version": "0.0.1",
+  "description": "Chainlit typescript SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "keywords": [
+    "llm",
+    "ai",
+    "chain of thought",
+    "evaluation",
+    "dataset"
+  ],
+  "author": "Chainlit",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "graphql-request": "^6.1.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

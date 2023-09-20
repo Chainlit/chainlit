@@ -5,21 +5,29 @@ from typing import Dict, Optional, Union
 import aiohttp
 from chainlit.config import config
 from chainlit.logger import logger
-from chainlit.types import AppUser, ConversationFilter, Pagination, PersistedAppUser
 
 from .base import (
+    AppUser,
     ChainlitGraphQLClient,
     ConversationDict,
+    ConversationFilter,
     ElementDict,
     MessageDict,
     PageInfo,
     PaginatedResponse,
+    Pagination,
+    PersistedAppUser,
 )
 
 
 class ChainlitCloudClient(ChainlitGraphQLClient):
-    def __init__(self, api_key: str):
-        super().__init__(api_key=api_key)
+    chainlit_server: str
+
+    def __init__(self, api_key: str, chainlit_server="https://cloud.chainlit.io"):
+        # Remove trailing slash
+        chainlit_server = chainlit_server.rstrip("/")
+        super().__init__(api_key=api_key, chainlit_server=chainlit_server)
+        self.chainlit_server = chainlit_server
 
     async def create_app_user(self, app_user: AppUser) -> Optional[PersistedAppUser]:
         mutation = """
@@ -411,7 +419,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{config.chainlit_server}{path}",
+                f"{self.chainlit_server}{path}",
                 json=body,
                 headers=self.headers,
             ) as r:
@@ -451,5 +459,6 @@ chainlit_client = None  # type: Optional[ChainlitCloudClient]
 
 if config.data_persistence:
     chainlit_client = ChainlitCloudClient(
-        api_key=os.environ.get("CHAINLIT_API_KEY", "")
+        api_key=os.environ.get("CHAINLIT_API_KEY", ""),
+        chainlit_server=config.chainlit_server,
     )

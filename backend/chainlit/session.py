@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
-    from chainlit.types import AppUser, AskResponse
+    from chainlit.types import AskResponse
 
-from chainlit.client.cloud import chainlit_client
-from chainlit.types import PersistedAppUser
+from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
 
 
 class Session:

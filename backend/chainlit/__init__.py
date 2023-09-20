@@ -21,6 +21,7 @@ import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
+from chainlit.client.base import AppUser
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -40,7 +41,7 @@ from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Messa
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import AppUser, FileSpec
+from chainlit.types import FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__

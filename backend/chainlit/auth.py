@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
-from chainlit.client.cloud import chainlit_client
+from chainlit.client.cloud import AppUser, chainlit_client
 from chainlit.config import config
 from chainlit.oauth_providers import get_configured_oauth_providers
-from chainlit.types import AppUser
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 

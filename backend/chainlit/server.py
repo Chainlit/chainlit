@@ -18,7 +18,7 @@ from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.client.acl import is_conversation_author
-from chainlit.client.cloud import chainlit_client
+from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -33,15 +33,13 @@ from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
-    AppUser,
     CompletionRequest,
     DeleteConversationRequest,
     GetConversationsRequest,
-    PersistedAppUser,
     Theme,
     UpdateFeedbackRequest,
 )
-from fastapi import Cookie, Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -570,7 +568,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
         os.path.join(APP_ROOT, "public", f"logo_{theme_value}.*"),
         os.path.join(build_dir, "assets", f"logo_{theme_value}*.*"),
     ]:
-        files = glob.glob(os.path.join(build_dir, path))
+        files = glob.glob(path)
 
         if files:
             logo_path = files[0]

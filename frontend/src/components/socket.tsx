@@ -58,11 +58,6 @@ const Socket = memo(function Socket() {
       sessionId: string,
       accessToken?: string
     ) => {
-      if (session?.socket) {
-        session.socket.removeAllListeners();
-        session.socket.close();
-      }
-
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
@@ -258,13 +253,11 @@ const Socket = memo(function Socket() {
   const throttleCreateSocket = useCallback(throttle(createSocket, 1000), []);
 
   useEffect(() => {
-    if (!isAuthenticated && session?.socket) {
-      // Disconnect when logging out
+    if (session?.socket) {
       session.socket.removeAllListeners();
       session.socket.close();
     }
 
-    // Wait for authentication to create the websocket connection
     // If no auth is required, isAuthenticated is always true
     if (!isAuthenticated) return;
 
