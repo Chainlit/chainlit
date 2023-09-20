@@ -3,7 +3,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import aiohttp
-from chainlit.types import AppUser
+from chainlit.client.base import AppUser
 from fastapi import HTTPException
 
 

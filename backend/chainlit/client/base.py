@@ -1,12 +1,51 @@
-from typing import Any, Dict, Generic, List, Mapping, Optional, TypedDict, TypeVar
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    TypedDict,
+    TypeVar,
+)
 
-from chainlit.config import config
 from chainlit.logger import logger
 from chainlit.prompt import Prompt
-from chainlit.types import AppUser, ElementDisplay, ElementSize, ElementType
 from dataclasses_json import DataClassJsonMixin
+from pydantic import BaseModel, Field
 from pydantic.dataclasses import dataclass
 from python_graphql_client import GraphqlClient
+
+ElementType = Literal[
+    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"
+]
+ElementDisplay = Literal["inline", "side", "page"]
+ElementSize = Literal["small", "medium", "large"]
+
+Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
+Provider = Literal["credentials", "header", "github", "google", "azure-ad"]
+
+
+# Used when logging-in a user
+@dataclass
+class AppUser(DataClassJsonMixin):
+    username: str
+    role: Role = "USER"
+    tags: List[str] = Field(default_factory=list)
+    image: Optional[str] = None
+    provider: Optional[Provider] = None
+
+
+@dataclass
+class PersistedAppUserFields:
+    id: str
+    createdAt: int
+
+
+@dataclass
+class PersistedAppUser(AppUser, PersistedAppUserFields):
+    pass
 
 
 class MessageDict(TypedDict):
@@ -52,7 +91,7 @@ class ConversationDict(TypedDict):
 @dataclass
 class PageInfo:
     hasNextPage: bool
-    endCursor: Any
+    endCursor: str
 
 
 T = TypeVar("T")
@@ -64,15 +103,26 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
     data: List[T]
 
 
+class Pagination(BaseModel):
+    first: int
+    cursor: Optional[str]
+
+
+class ConversationFilter(BaseModel):
+    feedback: Optional[Literal[-1, 0, 1]]
+    username: Optional[str]
+    search: Optional[str]
+
+
 class ChainlitGraphQLClient:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, chainlit_server: str):
         self.headers = {"content-type": "application/json"}
         if api_key:
             self.headers["x-api-key"] = api_key
         else:
             raise ValueError("Cannot instantiate Cloud Client without CHAINLIT_API_KEY")
 
-        graphql_endpoint = f"{config.chainlit_server}/api/graphql"
+        graphql_endpoint = f"{chainlit_server}/api/graphql"
         self.graphql_client = GraphqlClient(
             endpoint=graphql_endpoint, headers=self.headers
         )

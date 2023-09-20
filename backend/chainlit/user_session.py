@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Dict, Optional, TypedDict, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
-    from chainlit.types import AppUser, PersistedAppUser
+    from chainlit.client.base import AppUser, PersistedAppUser
 
 from chainlit.context import context
 

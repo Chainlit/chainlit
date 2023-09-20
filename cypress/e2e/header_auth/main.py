@@ -1,14 +1,12 @@
 from typing import Optional
 
-from chainlit.types import AppUser
-
 import chainlit as cl
 
 
 @cl.header_auth_callback
-def header_auth_callback(headers) -> Optional[AppUser]:
+def header_auth_callback(headers) -> Optional[cl.AppUser]:
     if headers.get("test-header"):
-        return AppUser(username="admin", role="ADMIN", provider="header")
+        return cl.AppUser(username="admin", role="ADMIN", provider="header")
     else:
         return None
 
