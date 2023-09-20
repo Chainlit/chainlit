@@ -3,8 +3,11 @@ import { useState } from 'react';
 import { TextInput } from 'src/inputs/TextInput';
 import * as yup from 'yup';
 
-import { MailOutline } from '@mui/icons-material';
-import { Alert, Box, Button, Link } from '@mui/material';
+import MailOutline from '@mui/icons-material/MailOutline';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Link from '@mui/material/Link';
 
 import { AuthTemplate } from './AuthTemplate';
 
@@ -75,8 +78,7 @@ const AuthForgotPassword = ({
         <Alert sx={{ my: 1 }} severity="error">
           {error}
         </Alert>
-      ) : null}
-
+      ) : null}{' '}
       {showConfirmation ? (
         <Button
           onClick={() => formik.handleSubmit()}

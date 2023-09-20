@@ -1,6 +1,7 @@
 import { grey } from 'theme/palette';
 
-import { SliderProps as MSliderProps, Slider, styled } from '@mui/material';
+import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
+import styled from '@mui/material/styles/styled';
 
 import { IInput } from 'src/types/Input';
 

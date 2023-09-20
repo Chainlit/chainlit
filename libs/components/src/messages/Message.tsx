@@ -2,7 +2,8 @@ import { keyframes } from '@emotion/react';
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useEffect, useState } from 'react';
 
-import { Box, Stack } from '@mui/material';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
 import { AUTHOR_BOX_WIDTH, Author } from './components/Author';

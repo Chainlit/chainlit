@@ -2,7 +2,7 @@ import { MessageContext } from 'contexts/MessageContext';
 import { useEffect, useRef } from 'react';
 import { nestMessages } from 'utils/message';
 
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';

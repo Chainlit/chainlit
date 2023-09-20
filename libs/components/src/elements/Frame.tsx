@@ -1,6 +1,6 @@
 import { grey } from 'theme/palette';
 
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 
 const FrameElement = ({ children }: { children: React.ReactNode }) => (
   <Box

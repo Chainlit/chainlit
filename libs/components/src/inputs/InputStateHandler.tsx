@@ -1,4 +1,7 @@
-import { FormControl, FormHelperText, Stack, SxProps } from '@mui/material';
+import type { SxProps } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import Stack from '@mui/material/Stack';
 
 import { IInput } from 'src/types/Input';
 

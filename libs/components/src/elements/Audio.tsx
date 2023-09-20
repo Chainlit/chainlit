@@ -1,6 +1,7 @@
 import { grey } from 'theme/palette';
 
-import { Box, useTheme } from '@mui/material';
+import Box from '@mui/material/Box';
+import useTheme from '@mui/material/styles/useTheme';
 
 import { IAudioElement } from 'src/types/element';
 

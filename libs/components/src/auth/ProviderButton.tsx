@@ -1,8 +1,11 @@
 import { grey } from 'theme/palette';
 
-import { GitHub, Google, Microsoft } from '@mui/icons-material';
-import { Button } from '@mui/material';
-import { Okta } from './Okta.tsx';
+
+import GitHub from '@mui/icons-material/GitHub';
+import Google from '@mui/icons-material/Google';
+import Microsoft from '@mui/icons-material/Microsoft';
+import Button from '@mui/material/Button';
+import Okta from './Okta.tsx';
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

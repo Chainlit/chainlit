@@ -1,7 +1,7 @@
 import { GreyButton } from 'src/buttons/GreyButton';
 
-import { AttachFile } from '@mui/icons-material';
-import { Link } from '@mui/material';
+import AttachFile from '@mui/icons-material/AttachFile';
+import Link from '@mui/material/Link';
 
 import { IFileElement } from 'src/types/element';
 

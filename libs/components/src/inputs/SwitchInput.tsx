@@ -1,10 +1,7 @@
 import { green } from 'theme/palette';
 
-import {
-  Switch as MSwitch,
-  SwitchProps as MSwitchProps,
-  styled
-} from '@mui/material';
+import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
+import styled from '@mui/material/styles/styled';
 
 import { IInput } from 'src/types/Input';
 

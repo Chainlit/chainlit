@@ -2,18 +2,15 @@ import { SyntheticEvent, forwardRef, useState } from 'react';
 import { Resizable } from 'react-resizable';
 import { useWindowSize } from 'usehooks-ts';
 
-import { Close } from '@mui/icons-material';
-import {
-  Box,
-  BoxProps,
-  IconButton,
-  Drawer as MDrawer,
-  Stack,
-  Theme,
-  Typography,
-  styled,
-  useMediaQuery
-} from '@mui/material';
+import Close from '@mui/icons-material/Close';
+import type { Theme } from '@mui/material';
+import Box, { BoxProps } from '@mui/material/Box';
+import MDrawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import styled from '@mui/material/styles/styled';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { IMessageElement } from 'src/types/element';
 

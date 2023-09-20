@@ -2,7 +2,9 @@ import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 import { AvatarElement } from 'src/elements/Avatar';
 
-import { Box, Tooltip, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 
 import { useColorForName } from 'hooks/useColors';
 

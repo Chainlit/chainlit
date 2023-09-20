@@ -2,9 +2,10 @@ import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 import { grey } from 'theme/palette';
 
-import { CloudUploadOutlined } from '@mui/icons-material';
-import { LoadingButton } from '@mui/lab';
-import { Stack, Typography } from '@mui/material';
+import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { useUpload } from 'hooks/useUpload';
 
