@@ -55,7 +55,7 @@ export default function BasicPromptPlayground({
     return (
       <TemplateEditor
         showTitle={true}
-        template={prompt.template || ''}
+        template={prompt.template || prompt.formatted || ''}
         prompt={prompt}
         onChange={onTemplateChange}
       />
@@ -63,11 +63,11 @@ export default function BasicPromptPlayground({
   };
 
   const renderFormatted = () => {
-    if (hasTemplate) {
+    if (typeof prompt.template === 'string') {
       return (
         <FormattedEditor
           showTitle={true}
-          template={prompt.template!}
+          template={prompt.template}
           prompt={prompt}
           readOnly
         />
