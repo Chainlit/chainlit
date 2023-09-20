@@ -112,7 +112,7 @@ def convert_message(message: BaseMessage, template: Optional[str] = None):
 
 class BaseLangchainCallbackHandler(BaseCallbackHandler):
     # Keep track of the prompt sequence
-    prompt_sequence: List[Prompt]
+    prompt_sequence: List[Union[Prompt, None]]
     # Keep track of the call sequence, like [AgentExecutor, LLMMathChain, Calculator, ...]
     sequence: List[Message]
     # Keep track of the currently streamed message for the session
@@ -322,26 +322,32 @@ def _on_chat_model_start(
                             formatted_message, template=templated_message.template
                         )
                     ]
+            # If the chat llm has more message than the initial chain prompt, append them
+            # Typically happens with function agents
+            if len(formatted_messages) > len(prompt_messages):
+                prompt_messages += [
+                    convert_message(m)
+                    for m in formatted_messages[len(prompt_messages) :]
+                ]
             # Finally set the prompt messages
             self.current_prompt.messages = prompt_messages
         # Non chat mode
         elif self.current_prompt.template:
-            unique_message = messages[0][0]
+            unique_message = formatted_messages[0]
             prompt_message = convert_message(
                 unique_message, template=self.current_prompt.template
             )
             self.current_prompt.messages = [prompt_message]
             self.current_prompt.template = None
     # No current prompt, create it (formatted only)
-    else:
-        prompt_messages = [convert_message(m) for m in messages[0]]
-        self.prompt_sequence.append(
-            Prompt(
-                messages=prompt_messages,
-                provider=provider,
-                settings=settings,
-            )
+    elif len(self.prompt_sequence):
+        prompt_messages = [convert_message(m) for m in formatted_messages]
+        prompt = Prompt(
+            messages=prompt_messages,
+            provider=provider,
+            settings=settings,
         )
+        self.prompt_sequence[-1] = prompt
 
 
 def _on_llm_start(
@@ -357,14 +363,13 @@ def _on_llm_start(
         self.current_prompt.formatted = prompts[0]
         self.current_prompt.provider = provider
         self.current_prompt.settings = settings
-    else:
-        self.prompt_sequence.append(
-            Prompt(
-                formatted=prompts[0],
-                provider=provider,
-                settings=settings,
-            )
+    elif len(self.prompt_sequence):
+        prompt = Prompt(
+            formatted=prompts[0],
+            provider=provider,
+            settings=settings,
         )
+        self.prompt_sequence[-1] = prompt
 
 
 class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler):
@@ -443,8 +448,7 @@ class LangchainCallbackHandler(BaseLangchainCallbackHandler, BaseCallbackHandler
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         prompt = build_prompt(serialized, inputs)
-        if prompt:
-            self.prompt_sequence.append(prompt)
+        self.prompt_sequence.append(prompt)
         message = self.create_message(author=serialized["id"][-1])
         self.add_in_sequence(message)
         self.add_message(message)
@@ -568,8 +572,7 @@ class AsyncLangchainCallbackHandler(BaseLangchainCallbackHandler, AsyncCallbackH
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         prompt = build_prompt(serialized, inputs)
-        if prompt:
-            self.prompt_sequence.append(prompt)
+        self.prompt_sequence.append(prompt)
         message = self.create_message(author=serialized["id"][-1])
         self.add_in_sequence(message)
         await self.add_message(message)
