@@ -3,7 +3,7 @@ import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { grey } from 'theme/palette';
 
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

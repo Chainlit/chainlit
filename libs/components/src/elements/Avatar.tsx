@@ -1,6 +1,7 @@
 import { IAvatarElement } from 'src/types';
 
-import { Avatar, Tooltip } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
 
 interface Props {
   element: IAvatarElement;

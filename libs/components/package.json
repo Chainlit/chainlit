@@ -1,6 +1,15 @@
 {
   "name": "@chainlit/components",
   "description": "Reusable components of the Chainlit UI.",
+  "version": "0.0.4",
+  "scripts": {
+    "build": "tsup src/index.ts --clean --format esm,cjs --dts --external react --legacy-output --minify --sourcemap --treeshake",
+    "build:watch": "tsup  --watch --sourcemap",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier **/*.{ts,tsx} --write --loglevel error",
+    "test": "vitest run",
+    "prepublish": "pnpm run build && pnpm test"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Chainlit/"
@@ -13,70 +22,39 @@
   ],
   "author": "Chainlit",
   "license": "Apache-2.0",
-  "version": "0.0.3",
-  "type": "module",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
   "files": [
     "dist"
   ],
-  "exports": {
-    ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.cjs",
-      "node": "./dist/src/index.js"
-    },
-    "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "import": "./dist/hooks/index.js",
-      "require": "./dist/hooks/index.cjs",
-      "node": "./dist/hooks/index.js"
-    },
-    "./theme": {
-      "types": "./dist/theme/index.d.ts",
-      "import": "./dist/theme/index.js",
-      "require": "./dist/theme/index.cjs",
-      "node": "./dist/theme/index.js"
-    }
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "devDependencies": {
+    "@swc/core": "^1.3.86",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/react-resizable": "^3.0.4",
+    "@types/react-syntax-highlighter": "^15.5.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "jsdom": "^22.1.0",
+    "tslib": "^2.6.2",
+    "tsup": "^7.2.0",
+    "vite": "^4.4.9",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.34.4"
   },
-  "scripts": {
-    "build": "tsup",
-    "build:watch": "tsup  --watch --sourcemap",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "format": "prettier **/*.{ts,tsx} --write --loglevel error",
-    "test": "vitest run",
-    "prepublish": "pnpm run build && pnpm test"
-  },
-  "tsup": {
-    "entry": [
-      "src/index.ts",
-      "theme/index.ts",
-      "hooks/index.ts"
-    ],
-    "cjsInterop": true,
-    "treeshake": true,
-    "sourcemap": true,
-    "minify": true,
-    "clean": true,
-    "dts": true,
-    "splitting": false,
-    "format": [
-      "esm",
-      "cjs"
-    ],
-    "external": [
-      "react",
-      "react-dom",
-      "@emotion/react",
-      "@emotion/styled",
-      "@mui/material",
-      "@mui/icons-material"
-    ]
+  "peerDependencies": {
+    "@emotion/react": "^11.0.0",
+    "@emotion/styled": "^11.0.0",
+    "@mui/icons-material": "^5.0.0",
+    "@mui/lab": "^5.0.0-alpha.122",
+    "@mui/material": "^5.14.7",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "dependencies": {
     "formik": "^2.4.3",
-    "mui-chips-input": "^2.1.3",
+    "mui-chips-input": "2.0.0",
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
     "react-password-checklist": "^1.4.3",
@@ -85,27 +63,6 @@
     "remark-gfm": "^3.0.1",
     "swr": "^2.2.2",
     "usehooks-ts": "^2.9.1",
-    "yup": "^1.2.0",
-    "vitest": "^0.34.3"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^14.0.0",
-    "@types/react-resizable": "^3.0.4",
-    "@types/react-syntax-highlighter": "^15.5.7",
-    "vite-tsconfig-paths": "^4.2.0",
-    "@vitejs/plugin-react-swc": "^3.3.2",
-    "jsdom": "^22.1.0",
-    "tsup": "^7.2.0",
-    "vite": "^4.4.5"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "@emotion/react": "^11.0.0",
-    "@emotion/styled": "^11.0.0",
-    "@mui/icons-material": "^5.0.0",
-    "@mui/lab": "^5.0.0-alpha.122",
-    "@mui/material": "^5.14.7"
+    "yup": "^1.2.0"
   }
 }

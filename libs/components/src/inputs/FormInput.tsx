@@ -20,10 +20,10 @@ interface IFormInput<T, V extends TFormInputValue> extends IInput {
 type TFormInput =
   | (Omit<SwitchInputProps, 'checked'> & IFormInput<'switch', boolean>)
   | (Omit<SliderInputProps, 'value'> & IFormInput<'slider', number>)
+  | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
-  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>)
-  | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>);
+  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element?.type) {

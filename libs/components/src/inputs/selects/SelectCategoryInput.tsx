@@ -1,4 +1,4 @@
-import { ListSubheader } from '@mui/material';
+import ListSubheader from '@mui/material/ListSubheader';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

@@ -1,7 +1,9 @@
 import { NotificationCount } from 'src/NotificationCount';
 
-import { Info } from '@mui/icons-material';
-import { Box, InputLabel as MInputLabel, Tooltip } from '@mui/material';
+import Info from '@mui/icons-material/Info';
+import Box from '@mui/material/Box';
+import MInputLabel from '@mui/material/InputLabel';
+import Tooltip from '@mui/material/Tooltip';
 
 import { NotificationCountProps } from 'src/types/NotificationCount';
 

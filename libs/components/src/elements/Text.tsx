@@ -2,7 +2,7 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Code } from 'src/Code';
 
-import { Link } from '@mui/material';
+import Link from '@mui/material/Link';
 
 import { useApi } from 'hooks/index';
 
