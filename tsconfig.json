@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
     "lib": ["ESNext", "dom"],
     "types": ["cypress", "node"]
   },
