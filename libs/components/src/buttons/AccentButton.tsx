@@ -1,7 +1,7 @@
-import { useTheme } from '@mui/material';
 import Button, { ButtonProps } from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
 
-export default function AccentButton({
+function AccentButton({
   children,
   ...props
 }: ButtonProps & { target?: string }) {
@@ -17,3 +17,5 @@ export default function AccentButton({
     </span>
   );
 }
+
+export { AccentButton };

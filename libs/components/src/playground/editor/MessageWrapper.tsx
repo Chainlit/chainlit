@@ -1,21 +1,12 @@
-import React, { useState } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
+import React, { useContext, useState } from 'react';
+import { SelectInput } from 'src/inputs';
+import { IPromptMessage, PromptMessageRole } from 'src/types';
 
-import {
-  Box,
-  SelectChangeEvent,
-  Stack,
-  Theme,
-  Typography
-} from '@mui/material';
-
-import {
-  IPromptMessage,
-  PromptMessageRole,
-  SelectInput
-} from '@chainlit/components';
-
-import { playgroundState } from 'state/playground';
+import Box from '@mui/material/Box';
+import { SelectChangeEvent } from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 const roles = ['Assistant', 'System', 'User'];
 
@@ -36,8 +27,8 @@ const MessageWrapper = ({
   role,
   name
 }: MessageWrapperProps): JSX.Element => {
-  const setPlayground = useSetRecoilState(playgroundState);
   const [showSelectRole, setShowSelectRole] = useState(false);
+  const { setPlayground } = useContext(PlaygroundContext);
 
   const onRoleSelected = (event: SelectChangeEvent) => {
     const role = event.target.value as PromptMessageRole;
@@ -74,7 +65,7 @@ const MessageWrapper = ({
           flex: 10,
           paddingY: 1,
           '&:hover': {
-            background: (theme: Theme) => theme.palette.background.paper
+            background: (theme) => theme.palette.background.paper
           }
         }}
       >

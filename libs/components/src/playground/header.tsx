@@ -1,25 +1,24 @@
+import { AccentButton } from 'src/buttons';
+import { grey } from 'theme';
+
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
-import { IconButton, Stack } from '@mui/material';
-
-import { grey } from '@chainlit/components/theme';
-
-import AccentButton from 'components/atoms/buttons/accentButton';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 
 import PromptModeToggle from './modeToggle';
-import SaveButton from './saveButton';
 import VariableInput from './variableInput';
 
 interface Props {
   hasTemplate?: boolean;
-  isSmallScreen?: boolean;
+  showToggleDrawerButton?: boolean;
   toggleDrawer: () => void;
   handleClose: () => void;
 }
 
 export default function PlaygroundHeader({
   hasTemplate,
-  isSmallScreen,
+  showToggleDrawerButton,
   toggleDrawer,
   handleClose
 }: Props) {
@@ -37,9 +36,8 @@ export default function PlaygroundHeader({
         >
           Help
         </AccentButton>
-        <SaveButton hasTemplate={hasTemplate} />
 
-        {isSmallScreen ? (
+        {showToggleDrawerButton ? (
           <IconButton
             aria-label="open drawer"
             edge="end"

@@ -3,12 +3,12 @@ import { useContext, useState } from 'react';
 
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import LoadingButton from '@mui/lab/LoadingButton';
-import type { Theme } from '@mui/material';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+import type { Theme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { IAction } from './types/action';

@@ -1,14 +1,16 @@
-import { IPrompt, TFormInput } from '@chainlit/components';
+import { TFormInput } from 'src/inputs';
+
+import { IPrompt } from 'src/types/message';
 
 export interface ILLMProvider {
   id: string;
   inputs: TFormInput[];
   name: string;
-  settings: ILLMSettings;
+  settings: ILLMProviderSettings;
   is_chat: boolean;
 }
 
-export interface ILLMSettings {
+export interface ILLMProviderSettings {
   settings: {
     $schema: string;
     $ref: string;

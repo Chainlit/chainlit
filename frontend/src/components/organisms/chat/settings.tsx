@@ -11,12 +11,11 @@ import {
 } from '@mui/material';
 
 import {
+  AccentButton,
   FormInput,
   RegularButton,
   TFormInputValue
 } from '@chainlit/components';
-
-import AccentButton from 'components/atoms/buttons/accentButton';
 
 import {
   chatSettingsDefaultValueSelector,

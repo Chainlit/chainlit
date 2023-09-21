@@ -4,10 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import { IMessage } from '@chainlit/components';
+import { ErrorBoundary, IMessage } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
-import ErrorBoundary from 'components/atoms/errorBoundary';
 import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';

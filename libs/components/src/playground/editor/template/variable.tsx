@@ -1,11 +1,10 @@
-import { useColors } from 'helpers/color';
-import { buildVariablePlaceholder } from 'helpers/format';
-import React, { useEffect, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
+import React, { useContext, useEffect, useState } from 'react';
+import { buildVariablePlaceholder } from 'src/playground/helpers/format';
 
-import { Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 
-import { playgroundState, variableState } from 'state/playground';
+import { useColors } from 'hooks/useColors';
 
 interface Props {
   decoratedText: string;
@@ -19,8 +18,7 @@ export default function Variable({
   children,
   decoratedText
 }: React.PropsWithChildren<Props>) {
-  const setVariableName = useSetRecoilState(variableState);
-  const playground = useRecoilValue(playgroundState);
+  const { setVariableName, playground } = useContext(PlaygroundContext);
   const colors = useColors(true);
   const [variableIndex, setVariableIndex] = useState<number | undefined>();
   const [styles, setStyles] = useState<React.CSSProperties>({});

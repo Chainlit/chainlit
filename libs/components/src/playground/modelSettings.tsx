@@ -1,34 +1,28 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { useFormik } from 'formik';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
-import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import * as yup from 'yup';
-
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import {
-  Alert,
-  Box,
-  Drawer,
-  IconButton,
-  SelectChangeEvent,
-  Stack,
-  Typography
-} from '@mui/material';
-
+import { useContext, useEffect } from 'react';
 import {
   FormInput,
-  ILLMSettings,
   SelectInput,
   TFormInput,
   TFormInputValue
-} from '@chainlit/components';
+} from 'src/inputs';
+import { getProviders } from 'src/playground/helpers/provider';
+import * as yup from 'yup';
 
-import { playgroundState } from 'state/playground';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import { SelectChangeEvent } from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import { ILLMProvider } from 'types/playground';
-
-import { getProviders } from './helpers';
+import { ILLMSettings } from 'src/types/message';
+import { ILLMProvider } from 'src/types/playground';
 
 type Schema = {
   [key: string]: yup.Schema;
@@ -40,7 +34,12 @@ interface IFormProps {
 }
 
 const SettingsForm = ({ settings, schema }: IFormProps) => {
-  const [playground, setPlayground] = useRecoilState(playgroundState);
+  const { playground, setPlayground } = useContext(PlaygroundContext);
+
+  if (!playground || !playground?.providers) {
+    return null;
+  }
+
   const { provider, providers, providerFound } = getProviders(playground);
 
   const providerWarning = !providerFound ? (
@@ -145,7 +144,11 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
 };
 
 const ModelSettings = () => {
-  const playground = useRecoilValue(playgroundState);
+  const { playground } = useContext(PlaygroundContext);
+
+  if (!playground || !playground?.providers) {
+    return null;
+  }
 
   const { provider } = getProviders(playground);
 

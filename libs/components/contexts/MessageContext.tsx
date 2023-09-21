@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { IMessageContext } from '../src/types/messageContext';
+import { IMessageContext } from 'src/types/messageContext';
 
 const defaultMessageContext = {
   avatars: [],

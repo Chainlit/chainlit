@@ -6,16 +6,14 @@ import {
   Editor,
   EditorState
 } from 'draft-js';
+import { useState } from 'react';
+import EditorWrapper from 'src/playground/editor/EditorWrapper';
 import {
   buildTemplatePlaceholdersRegexp,
   validateVariablePlaceholder
-} from 'helpers/format';
-import { useState } from 'react';
+} from 'src/playground/helpers/format';
+import { IPrompt } from 'src/types';
 import { useIsFirstRender } from 'usehooks-ts';
-
-import { IPrompt } from '@chainlit/components';
-
-import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
 
 import Variable from './variable';
 
