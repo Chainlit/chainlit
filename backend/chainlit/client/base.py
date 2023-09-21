@@ -24,7 +24,7 @@ ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
 
 Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
-Provider = Literal["credentials", "header", "github", "google", "azure-ad"]
+Provider = Literal["credentials", "header", "github", "google", "azure-ad", "auth0"]
 
 
 # Used when logging-in a user
