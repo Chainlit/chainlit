@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -26,15 +26,17 @@ export default function Element() {
       : null
   );
 
-  if (data) {
-    setElement(data);
-  } else if (id && !conversationId && !element) {
-    const foundElement = elements.find((element) => element.id === id);
+  useEffect(() => {
+    if (data) {
+      setElement(data);
+    } else if (id && !conversationId && !element) {
+      const foundElement = elements.find((element) => element.id === id);
 
-    if (foundElement) {
-      setElement(foundElement);
+      if (foundElement) {
+        setElement(foundElement);
+      }
     }
-  }
+  }, [data, element, elements, id, conversationId]);
 
   if (!element || error) {
     return null;
