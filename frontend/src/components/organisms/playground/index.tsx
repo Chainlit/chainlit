@@ -78,7 +78,7 @@ function _PromptPlayground({ prompt }: Props) {
   };
 
   const hasTemplate = prompt?.messages
-    ? prompt.messages.every((m) => typeof m.template === 'string')
+    ? !!prompt.messages.find((m) => typeof m.template === 'string')
     : typeof prompt?.template === 'string';
 
   if (!data || error) {

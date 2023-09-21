@@ -43,7 +43,7 @@ export default function PromptMessage({
       <TemplateEditor
         {...templateProps}
         showTitle={false}
-        template={message.template!}
+        template={message.template || message.formatted || ''}
         onChange={(state) => onChange(index, state)}
       />
     );

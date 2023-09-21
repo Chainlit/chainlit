@@ -1,16 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": [
-      "ESNext",
-      "dom"
-    ],
-    "types": [
-      "cypress",
-      "node"
-    ]
+    "lib": ["ESNext", "dom"],
+    "types": ["cypress", "node"]
   },
-  "include": [
-    "cypress/**/*.ts"
-  ]
+  "include": ["cypress/**/*.ts"]
 }

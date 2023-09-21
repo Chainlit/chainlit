@@ -17,11 +17,7 @@ interface Props {
   restoredTime: number;
 }
 
-export default function BasicPromptPlayground({
-  hasTemplate,
-  prompt,
-  restoredTime
-}: Props) {
+export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
   const mode = useRecoilValue(modeState);
   const setPlayground = useSetRecoilState(playgroundState);
 
@@ -55,7 +51,7 @@ export default function BasicPromptPlayground({
     return (
       <TemplateEditor
         showTitle={true}
-        template={prompt.template || ''}
+        template={prompt.template || prompt.formatted || ''}
         prompt={prompt}
         onChange={onTemplateChange}
       />
@@ -63,11 +59,11 @@ export default function BasicPromptPlayground({
   };
 
   const renderFormatted = () => {
-    if (hasTemplate) {
+    if (typeof prompt.template === 'string') {
       return (
         <FormattedEditor
           showTitle={true}
-          template={prompt.template!}
+          template={prompt.template}
           prompt={prompt}
           readOnly
         />
