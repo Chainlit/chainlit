@@ -14,6 +14,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { IMessageElement } from 'src/types/element';
 
+import 'react-resizable/css/styles.css';
+
 import { Element } from './Element';
 
 const DRAWER_DEFAULT_WIDTH = 400;
