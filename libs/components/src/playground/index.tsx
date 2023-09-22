@@ -29,7 +29,8 @@ interface Props {
 }
 
 function _PromptPlayground() {
-  const { playground, setPlayground } = useContext(PlaygroundContext);
+  const { playground, setPlayground, promptMode, setPromptMode } =
+    useContext(PlaygroundContext);
   const [restoredTime, setRestoredTime] = useState(0);
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
   const chatPromptScrollRef = useRef<HTMLDivElement | null>(null);
@@ -41,9 +42,9 @@ function _PromptPlayground() {
 
   const restore = () => {
     if (playground?.prompt) {
-      setPlayground((old: IPlayground) => ({
+      setPlayground((old?: IPlayground) => ({
         ...old,
-        prompt: old.originalPrompt
+        prompt: old?.originalPrompt
       }));
       setRestoredTime((old) => old + 1);
     }
@@ -66,6 +67,11 @@ function _PromptPlayground() {
   const hasTemplate = prompt?.messages
     ? !!prompt.messages.find((m) => typeof m.template === 'string')
     : typeof prompt?.template === 'string';
+
+  if (!hasTemplate && promptMode === 'Template') {
+    setPromptMode('Formatted');
+    return null;
+  }
 
   return (
     <Dialog

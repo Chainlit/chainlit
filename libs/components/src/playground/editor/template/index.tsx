@@ -18,11 +18,14 @@ import { useIsFirstRender } from 'usehooks-ts';
 import Variable from './variable';
 
 const findVariable = (
-  regex: RegExp,
+  regex: RegExp | undefined,
   format: string,
   contentBlock: ContentBlock,
   callback: (start: number, end: number) => void
 ) => {
+  if (!regex) {
+    return;
+  }
   const text = contentBlock.getText();
   let matchArr: RegExpExecArray | null;
   while ((matchArr = regex.exec(text)) !== null) {
@@ -60,12 +63,11 @@ export default function TemplateEditor({
 
   if (isFirstRender) {
     const contentState = ContentState.createFromText(template);
-
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {
         findVariable(
           buildTemplatePlaceholdersRegexp(
-            prompt.inputs,
+            prompt.inputs || {},
             prompt.template_format
           ),
           prompt.template_format,

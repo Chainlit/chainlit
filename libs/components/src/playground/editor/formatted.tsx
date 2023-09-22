@@ -327,9 +327,9 @@ export default function FormattedEditor({
 
   const handleOnEditorChange = (nextState: EditorState) => {
     const hasFocus = nextState.getSelection().getHasFocus();
-
+    const isCollapsed = nextState.getSelection().isCollapsed();
     const entity = getEntityAtSelection(nextState);
-    if (entity && hasFocus && editorRef.current) {
+    if (entity && hasFocus && isCollapsed && editorRef.current) {
       // Open the variable modal
       setVariableName(entity.data.name);
 

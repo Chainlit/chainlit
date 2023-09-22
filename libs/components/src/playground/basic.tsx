@@ -29,7 +29,7 @@ export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
     setPlayground((old) => ({
       ...old,
       prompt: {
-        ...old.prompt!,
+        ...old!.prompt!,
         template
       }
     }));
@@ -40,7 +40,7 @@ export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
     setPlayground((old) => ({
       ...old,
       prompt: {
-        ...old.prompt!,
+        ...old!.prompt!,
         formatted
       }
     }));

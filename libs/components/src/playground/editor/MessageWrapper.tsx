@@ -37,8 +37,8 @@ const MessageWrapper = ({
       setPlayground((old) => ({
         ...old,
         prompt: {
-          ...old.prompt!,
-          messages: old.prompt?.messages?.map((message, mIndex) => ({
+          ...old!.prompt!,
+          messages: old?.prompt?.messages?.map((message, mIndex) => ({
             ...message,
             ...(mIndex === index ? { role } : {}) // Update role if it's the selected message
           }))

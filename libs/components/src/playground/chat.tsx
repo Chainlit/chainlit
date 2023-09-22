@@ -35,8 +35,8 @@ export const ChatPromptPlayground = forwardRef(
       setPlayground((old) => ({
         ...old,
         prompt: {
-          ...old.prompt!,
-          messages: old.prompt?.messages?.map((message, mIndex) => {
+          ...old!.prompt!,
+          messages: old?.prompt?.messages?.map((message, mIndex) => {
             if (mIndex === index) {
               return {
                 ...message,

@@ -16,7 +16,7 @@ interface ToggleProps extends IInput {
 }
 
 const Toggle = (props: ToggleProps): JSX.Element => {
-  const { id, items, label, onChange, value } = props;
+  const { id, items, label, onChange, value, disabled } = props;
 
   const isDarkMode = useIsDarkMode();
 
@@ -37,6 +37,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         }}
       >
         <Tabs
+          disabled={disabled}
           value={items.findIndex((item) => item === value)}
           onChange={(event: React.SyntheticEvent, newValue: number) =>
             onChange(items[newValue])
@@ -67,6 +68,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         >
           {items.map((item) => (
             <Tab
+              disabled={disabled}
               key={`tab-${item}`}
               className={`tab-${item}`}
               disableRipple
@@ -79,4 +81,4 @@ const Toggle = (props: ToggleProps): JSX.Element => {
   );
 };
 
-export default Toggle;
+export { Toggle };

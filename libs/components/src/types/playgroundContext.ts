@@ -12,7 +12,9 @@ interface IPlaygroundContext {
     mode: PromptMode | ((mode: PromptMode) => PromptMode)
   ) => void;
   setPlayground: (
-    playground: IPlayground | ((playground: IPlayground) => IPlayground)
+    playground?:
+      | IPlayground
+      | ((playground?: IPlayground) => IPlayground | undefined)
   ) => void;
   playground?: IPlayground;
   onNotification: (type: 'success' | 'error', content: string) => void;

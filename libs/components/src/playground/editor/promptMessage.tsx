@@ -1,6 +1,7 @@
 import { EditorState } from 'draft-js';
 
-import { Alert, useTheme } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import { useTheme } from '@mui/material/styles';
 
 import { IPrompt, IPromptMessage } from 'src/types/message';
 import { PromptMode } from 'src/types/playground';

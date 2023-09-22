@@ -88,7 +88,7 @@ def handle_openai_error():
         )
     except openai.error.AuthenticationError as e:
         raise HTTPException(
-            status_code=401,
+            status_code=403,
             detail=f"OpenAI API request was not authorized: {e}",
         )
     except openai.error.PermissionError as e:
