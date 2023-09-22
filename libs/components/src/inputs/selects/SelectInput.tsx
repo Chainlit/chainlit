@@ -137,6 +137,7 @@ const SelectInput = ({
               item={item}
               selected={item.value === value}
               value={item.value}
+              key={item.value}
             />
           ))}
       </MSelect>
