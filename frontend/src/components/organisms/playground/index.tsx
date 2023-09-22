@@ -67,7 +67,7 @@ export default function PlaygroundWrapper() {
         cb
       );
     },
-    []
+    [accessToken]
   );
 
   const fetchProviders = playground?.prompt && !playground?.providers?.length;
