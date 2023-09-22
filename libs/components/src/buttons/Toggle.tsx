@@ -37,7 +37,6 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         }}
       >
         <Tabs
-          disabled={disabled}
           value={items.findIndex((item) => item === value)}
           onChange={(event: React.SyntheticEvent, newValue: number) =>
             onChange(items[newValue])
