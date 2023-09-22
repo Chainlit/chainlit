@@ -47,6 +47,7 @@ const Handle = forwardRef(function Handle(
   return (
     <Box
       sx={{
+        boxSizing: 'content-box',
         width: '4px',
         height: '24px',
         position: 'absolute',
@@ -61,6 +62,7 @@ const Handle = forwardRef(function Handle(
     >
       <Box
         sx={{
+          boxSizing: 'content-box',
           width: '100%',
           height: '100%',
           backgroundColor: 'grey.300',
