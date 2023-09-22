@@ -3,7 +3,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": false,
@@ -19,6 +19,6 @@
     "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["src"],
+  "include": ["./src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

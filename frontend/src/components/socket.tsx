@@ -1,6 +1,6 @@
 import { wsEndpoint } from 'api';
 import { deepEqual } from 'helpers/object';
-import { throttle } from 'lodash';
+import throttle from 'lodash.throttle';
 import { memo, useCallback, useEffect } from 'react';
 import {
   useRecoilState,

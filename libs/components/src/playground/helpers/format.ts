@@ -13,8 +13,14 @@ export function buildTemplatePlaceholderRegexp(
 }
 
 // Helper function to match the placeholders for a all variables in the template
-export function buildTemplatePlaceholdersRegexp(inputs = {}, format: string) {
+export function buildTemplatePlaceholdersRegexp(
+  inputs: object,
+  format: string
+) {
   const variables = Object.keys(inputs).sort((a, b) => b.length - a.length);
+  if (!variables.length) {
+    return undefined;
+  }
   switch (format) {
     case 'f-string': {
       // Create a regex pattern from the variables array

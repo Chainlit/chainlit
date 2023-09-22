@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import mapValues from 'lodash/mapValues';
+import mapValues from 'lodash.mapvalues';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import {
@@ -11,12 +11,11 @@ import {
 } from '@mui/material';
 
 import {
+  AccentButton,
   FormInput,
   RegularButton,
   TFormInputValue
 } from '@chainlit/components';
-
-import AccentButton from 'components/atoms/buttons/accentButton';
 
 import {
   chatSettingsDefaultValueSelector,

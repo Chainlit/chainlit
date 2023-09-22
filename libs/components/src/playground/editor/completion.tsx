@@ -1,13 +1,15 @@
 import { Editor, EditorState, Modifier, SelectionState } from 'draft-js';
 import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
+import EditorWrapper from 'src/playground/editor/EditorWrapper';
+import { grey } from 'theme';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
-
-import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 
 import 'draft-js/dist/Draft.css';
 

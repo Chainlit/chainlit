@@ -1,11 +1,11 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { EditorState } from 'draft-js';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useContext } from 'react';
 
-import { Alert, Stack } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
-import { IPrompt } from '@chainlit/components';
-
-import { modeState, playgroundState } from 'state/playground';
+import { IPrompt } from 'src/types/message';
 
 import Completion from './editor/completion';
 import FormattedEditor from './editor/formatted';
@@ -18,8 +18,7 @@ interface Props {
 }
 
 export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
-  const mode = useRecoilValue(modeState);
-  const setPlayground = useSetRecoilState(playgroundState);
+  const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
   if (prompt.messages) {
     return null;
@@ -30,7 +29,7 @@ export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
     setPlayground((old) => ({
       ...old,
       prompt: {
-        ...old.prompt!,
+        ...old!.prompt!,
         template
       }
     }));
@@ -41,7 +40,7 @@ export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
     setPlayground((old) => ({
       ...old,
       prompt: {
-        ...old.prompt!,
+        ...old!.prompt!,
         formatted
       }
     }));
@@ -93,8 +92,8 @@ export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
       key={restoredTime} // This will re-mount the component with restored prompt
       width="100%"
     >
-      {mode === 'Template' ? renderTemplate() : null}
-      {mode === 'Formatted' ? renderFormatted() : null}
+      {promptMode === 'Template' ? renderTemplate() : null}
+      {promptMode === 'Formatted' ? renderFormatted() : null}
       <Completion completion={prompt.completion} />
     </Stack>
   );

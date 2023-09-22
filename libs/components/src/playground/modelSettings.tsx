@@ -1,34 +1,23 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { useFormik } from 'formik';
-import cloneDeep from 'lodash/cloneDeep';
-import merge from 'lodash/merge';
-import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import cloneDeep from 'lodash.clonedeep';
+import merge from 'lodash.merge';
+import { useContext, useEffect } from 'react';
+import { FormInput, SelectInput, TFormInput } from 'src/inputs';
+import { getProviders } from 'src/playground/helpers/provider';
 import * as yup from 'yup';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import {
-  Alert,
-  Box,
-  Drawer,
-  IconButton,
-  SelectChangeEvent,
-  Stack,
-  Typography
-} from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import { SelectChangeEvent } from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import {
-  FormInput,
-  ILLMSettings,
-  SelectInput,
-  TFormInput,
-  TFormInputValue
-} from '@chainlit/components';
-
-import { playgroundState } from 'state/playground';
-
-import { ILLMProvider } from 'types/playground';
-
-import { getProviders } from './helpers';
+import { ILLMSettings } from 'src/types/message';
+import { ILLMProvider } from 'src/types/playground';
 
 type Schema = {
   [key: string]: yup.Schema;
@@ -37,20 +26,21 @@ type Schema = {
 interface IFormProps {
   settings: ILLMSettings;
   schema: Schema;
+  provider: ILLMProvider;
+  providers: ILLMProvider[];
+  providerWarning: JSX.Element | null;
+  providerTooltip?: string;
 }
 
-const SettingsForm = ({ settings, schema }: IFormProps) => {
-  const [playground, setPlayground] = useRecoilState(playgroundState);
-  const { provider, providers, providerFound } = getProviders(playground);
-
-  const providerWarning = !providerFound ? (
-    <Alert severity="warning">
-      {playground.prompt?.provider
-        ? `${playground?.prompt?.provider} provider is not found, using 
-      ${provider.name} instead.`
-        : `Provider not specified, using ${provider.name} instead.`}
-    </Alert>
-  ) : null;
+const SettingsForm = ({
+  settings,
+  schema,
+  provider,
+  providers,
+  providerTooltip,
+  providerWarning
+}: IFormProps) => {
+  const { setPlayground } = useContext(PlaygroundContext);
 
   const formik = useFormik({
     initialValues: settings,
@@ -60,13 +50,19 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
   });
 
   useEffect(() => {
-    setPlayground((old) => ({
-      ...old,
-      prompt: {
-        ...old.prompt!,
-        settings: formik.values
-      }
-    }));
+    const debounceTimeout = setTimeout(() => {
+      setPlayground((old) => ({
+        ...old,
+        prompt: {
+          ...old!.prompt!,
+          settings: formik.values
+        }
+      }));
+    }, 500); // 500ms is the delay
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
   }, [formik.values]);
 
   const onSelectedProviderChange = (event: SelectChangeEvent) => {
@@ -77,16 +73,6 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
         }
       })
     );
-  };
-
-  const buildProviderTooltip = () => {
-    if (provider.is_chat && !playground.prompt?.messages) {
-      return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
-    } else if (!provider.is_chat && playground.prompt?.messages) {
-      return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
-    } else {
-      return undefined;
-    }
   };
 
   return (
@@ -110,7 +96,7 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
           id="llm-providers"
           value={provider.id}
           label="LLM Provider"
-          tooltip={buildProviderTooltip()}
+          tooltip={providerTooltip}
           onChange={onSelectedProviderChange}
         />
         {providerWarning}
@@ -125,16 +111,8 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
                 ...input,
                 id: input.id,
                 value: formik.values[input.id] as any,
-                onChange: (event: any): void => {
-                  formik.handleChange(event);
-                },
-                setField: (
-                  field: string,
-                  value: TFormInputValue,
-                  shouldValidate?: boolean
-                ): void => {
-                  formik.setFieldValue(field, value, shouldValidate);
-                }
+                onChange: formik.handleChange,
+                setField: formik.setFieldValue
               }}
             />
           </Box>
@@ -145,13 +123,36 @@ const SettingsForm = ({ settings, schema }: IFormProps) => {
 };
 
 const ModelSettings = () => {
-  const playground = useRecoilValue(playgroundState);
+  const { playground } = useContext(PlaygroundContext);
 
-  const { provider } = getProviders(playground);
+  if (!playground || !playground?.providers) {
+    return null;
+  }
+
+  const { provider, providerFound, providers } = getProviders(playground);
 
   if (!provider) {
     return null;
   }
+
+  const buildProviderTooltip = () => {
+    if (provider.is_chat && !playground.prompt?.messages) {
+      return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
+    } else if (!provider.is_chat && playground.prompt?.messages) {
+      return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
+    } else {
+      return undefined;
+    }
+  };
+
+  const providerWarning = !providerFound ? (
+    <Alert severity="warning">
+      {playground.prompt?.provider
+        ? `${playground?.prompt?.provider} provider is not found, using
+      ${provider.name} instead.`
+        : `Provider not specified, using ${provider.name} instead.`}
+    </Alert>
+  ) : null;
 
   const settings: ILLMSettings = {};
   const currentSettings = playground?.prompt?.settings || {};
@@ -208,7 +209,14 @@ const ModelSettings = () => {
   );
 
   return (
-    <SettingsForm schema={schema as unknown as Schema} settings={settings} />
+    <SettingsForm
+      provider={provider}
+      providers={providers}
+      providerWarning={providerWarning}
+      providerTooltip={buildProviderTooltip()}
+      schema={schema as unknown as Schema}
+      settings={settings}
+    />
   );
 };
 

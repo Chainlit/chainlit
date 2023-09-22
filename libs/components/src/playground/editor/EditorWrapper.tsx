@@ -1,17 +1,11 @@
-import merge from 'lodash/merge';
-import React from 'react';
+import merge from 'lodash.merge';
+import { ClipboardCopy } from 'src/ClipboardCopy';
+import { grey } from 'theme';
 
-import {
-  Box,
-  Stack,
-  SxProps,
-  Theme,
-  Typography,
-  useTheme
-} from '@mui/material';
-
-import { ClipboardCopy } from '@chainlit/components';
-import { grey } from '@chainlit/components/theme';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { SxProps, Theme, useTheme } from '@mui/material/styles';
 
 interface Props {
   className?: string;

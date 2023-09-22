@@ -1,33 +1,29 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { ContentState, Editor, EditorState } from 'draft-js';
-import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useContext, useEffect, useState } from 'react';
+import { AccentButton } from 'src/buttons';
+import { grey } from 'theme';
 
-import {
-  Alert,
-  Box,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-  useTheme
-} from '@mui/material';
-import { grey } from '@mui/material/colors';
-
-import AccentButton from 'components/atoms/buttons/accentButton';
-
-import { playgroundState, variableState } from 'state/playground';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 
 import EditorWrapper from './EditorWrapper';
 
 const VariableModal = (): JSX.Element | null => {
   const [state, setState] = useState<EditorState | undefined>();
-  const [playground, setPlayground] = useRecoilState(playgroundState);
-  const [variableName, setVariableName] = useRecoilState(variableState);
+  const { setPlayground, playground, variableName, setVariableName } =
+    useContext(PlaygroundContext);
+
   const theme = useTheme();
 
   useEffect(() => {
-    if (variableName && playground.prompt?.inputs) {
+    if (variableName && playground?.prompt?.inputs) {
       setState(
         EditorState.createWithContent(
           ContentState.createFromText(playground.prompt.inputs[variableName])

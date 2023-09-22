@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 
-import { Alert, Box } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 
 interface Props {
   prefix?: string;
@@ -43,4 +44,4 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default ErrorBoundary;
+export { ErrorBoundary };

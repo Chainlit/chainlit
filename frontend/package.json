@@ -12,15 +12,16 @@
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error"
   },
   "dependencies": {
-    "@chainlit/components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.7",
+    "@mui/icons-material": "^5.14.9",
+    "@mui/material": "^5.14.10",
     "@mui/lab": "^5.0.0-alpha.122",
-    "@mui/material": "^5.14.7",
-    "draft-js": "^0.11.7",
     "formik": "^2.4.3",
-    "lodash": "^4.17.21",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.mapvalues": "^4.6.0",
+    "lodash.throttle": "^4.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
@@ -36,16 +37,19 @@
     "swr": "^2.2.2",
     "usehooks-ts": "^2.9.1",
     "uuid": "^9.0.0",
-    "yup": "^1.2.0"
+    "yup": "^1.2.0",
+    "@chainlit/components": "workspace:^"
   },
   "devDependencies": {
-    "@types/draft-js": "^0.11.10",
-    "@types/lodash": "^4.14.197",
+    "@types/lodash.clonedeep": "^4.5.7",
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/lodash.mapvalues": "^4.6.7",
+    "@types/lodash.throttle": "^4.1.7",
     "@types/node": "^20.5.7",
+    "@types/react": "^18.2.0",
     "@types/react-window-infinite-loader": "^1.0.6",
     "@types/uuid": "^9.0.3",
     "@vitejs/plugin-react-swc": "^3.3.2",
-    "immutable": "^4.3.4",
     "vite": "^4.4.9",
     "vite-tsconfig-paths": "^4.2.0"
   }

@@ -1,3 +1,4 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import {
   ContentState,
   Editor,
@@ -5,26 +6,21 @@ import {
   Modifier,
   SelectionState
 } from 'draft-js';
-import { useColors } from 'helpers/color';
+import { OrderedSet } from 'immutable';
+import isEqual from 'lodash.isequal';
+import merge from 'lodash.merge';
+import { useContext, useRef, useState } from 'react';
+import EditorWrapper from 'src/playground/editor/EditorWrapper';
 import {
   buildEscapeReplaceRegexp,
   buildTemplatePlaceholderRegexp,
   escape,
   validateVariablePlaceholder
-} from 'helpers/format';
-import { OrderedSet } from 'immutable';
-import { isEqual } from 'lodash';
-import merge from 'lodash/merge';
-import { useRef, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useSetRecoilState } from 'recoil';
+} from 'src/playground/helpers/format';
+import { IPrompt } from 'src/types';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import { IPrompt } from '@chainlit/components';
-
-import EditorWrapper from 'components/organisms/playground/editor/EditorWrapper';
-
-import { modeState, variableState } from 'state/playground';
+import { useColors } from 'hooks/useColors';
 
 import 'draft-js/dist/Draft.css';
 
@@ -128,7 +124,8 @@ function formatTemplate(
     const ssmToEscapeOrReplaceWithVariable = ssmToEscapeOrReplace.map((ssm) => {
       const ss = ssm[0];
 
-      let variableFound = undefined;
+      let variableFound: { variable: IVariable; match: string } | undefined =
+        undefined;
       // Iterate each variable and try to match it.
       // If there is a match, flag it for replacement later on and break.
       for (const variable of variables) {
@@ -277,8 +274,8 @@ export default function FormattedEditor({
   sxEditorChildren
 }: Props) {
   const editorRef = useRef<Editor>(null);
-  const setVariable = useSetRecoilState(variableState);
-  const setPromptMode = useSetRecoilState(modeState);
+  const { setVariableName, setPromptMode, onNotification } =
+    useContext(PlaygroundContext);
 
   const [state, setState] = useState<EditorState | undefined>();
   const [prevInputs, setPrevInputs] = useState<Record<string, string>>();
@@ -330,11 +327,11 @@ export default function FormattedEditor({
 
   const handleOnEditorChange = (nextState: EditorState) => {
     const hasFocus = nextState.getSelection().getHasFocus();
-
+    const isCollapsed = nextState.getSelection().isCollapsed();
     const entity = getEntityAtSelection(nextState);
-    if (entity && hasFocus && editorRef.current) {
+    if (entity && hasFocus && isCollapsed && editorRef.current) {
       // Open the variable modal
-      setVariable(entity.data.name);
+      setVariableName(entity.data.name);
 
       // If we do not blur the selection stay the same
       // And we keep opening the variable
@@ -349,7 +346,8 @@ export default function FormattedEditor({
       const nextContent = nextState.getCurrentContent();
 
       if (currentContent !== nextContent) {
-        toast.error(
+        onNotification(
+          'error',
           'Formatted prompt is read only. Edit the template/variables instead.'
         );
         setPromptMode('Template');

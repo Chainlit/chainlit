@@ -3,8 +3,8 @@ import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { router } from 'router';
 
-import { Box, GlobalStyles, Theme } from '@mui/material';
-import { ThemeProvider } from '@mui/material';
+import { Box, GlobalStyles } from '@mui/material';
+import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { makeTheme } from '@chainlit/components/theme';
 

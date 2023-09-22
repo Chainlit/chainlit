@@ -1,25 +1,19 @@
-import { ChainlitAPI } from 'api/chainlitApi';
-import { cloneDeep } from 'lodash';
-import { useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-
-import { RegularButton } from '@chainlit/components';
-
-import AccentButton from 'components/atoms/buttons/accentButton';
-
-import { playgroundState } from 'state/playground';
-import { accessTokenState, userEnvState } from 'state/user';
-
-import { getProviders } from './helpers';
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
+import cloneDeep from 'lodash.clonedeep';
+import { useContext, useState } from 'react';
+import { AccentButton, RegularButton } from 'src/buttons';
+import { getProviders } from 'src/playground/helpers/provider';
 
 export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
   const [completionController, setCompletionController] = useState<
     AbortController | undefined
   >();
-  const accessToken = useRecoilValue(accessTokenState);
-  const [playground, setPlayground] = useRecoilState(playgroundState);
+  const { playground, setPlayground, createCompletion } =
+    useContext(PlaygroundContext);
 
-  const userEnv = useRecoilValue(userEnvState);
+  if (!playground || !playground.providers || !createCompletion) {
+    return null;
+  }
 
   const submit = async () => {
     try {
@@ -41,12 +35,10 @@ export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
         };
       });
 
-      await ChainlitAPI.getCompletion(
+      await createCompletion(
         prompt,
-        userEnv,
         controller,
-        accessToken,
-        (done, token) => {
+        (done: boolean, token: string) => {
           onSubmit && onSubmit();
 
           if (done) {

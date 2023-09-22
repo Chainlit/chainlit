@@ -1,6 +1,6 @@
 import { PropsWithChildren } from 'react';
 
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 
 export default function ActionBar({ children }: PropsWithChildren) {
   return (

@@ -1,11 +1,13 @@
+import { useIsDarkMode } from 'hooks';
 import React from 'react';
+import { InputStateHandler } from 'src/inputs';
+import { grey, primary } from 'theme';
 
-import { Box } from '@mui/material';
-import { Tab, Tabs } from '@mui/material';
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 
-import { IInput, InputStateHandler } from '@chainlit/components';
-import { useIsDarkMode } from '@chainlit/components/hooks';
-import { grey, primary } from '@chainlit/components/theme';
+import { IInput } from 'src/types/Input';
 
 interface ToggleProps extends IInput {
   items: string[];
@@ -14,7 +16,7 @@ interface ToggleProps extends IInput {
 }
 
 const Toggle = (props: ToggleProps): JSX.Element => {
-  const { id, items, label, onChange, value } = props;
+  const { id, items, label, onChange, value, disabled } = props;
 
   const isDarkMode = useIsDarkMode();
 
@@ -65,6 +67,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         >
           {items.map((item) => (
             <Tab
+              disabled={disabled}
               key={`tab-${item}`}
               className={`tab-${item}`}
               disableRipple
@@ -77,4 +80,4 @@ const Toggle = (props: ToggleProps): JSX.Element => {
   );
 };
 
-export default Toggle;
+export { Toggle };

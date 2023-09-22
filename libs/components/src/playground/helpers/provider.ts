@@ -1,4 +1,4 @@
-import { ILLMProvider, IPlayground } from 'types/playground';
+import { ILLMProvider, IPlayground } from 'src/types/playground';
 
 const getProviders = (playground: IPlayground) => {
   const providers = playground?.providers || [];

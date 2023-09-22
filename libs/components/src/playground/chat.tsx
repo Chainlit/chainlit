@@ -1,13 +1,13 @@
+import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { EditorState } from 'draft-js';
-import { Fragment, forwardRef } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { Fragment, forwardRef, useContext } from 'react';
+import { grey } from 'theme';
 
-import { Box, Stack, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import { IPrompt } from '@chainlit/components';
-
-import { modeState, playgroundState } from 'state/playground';
+import { IPrompt } from 'src/types/message';
 
 import Completion from './editor/completion';
 import PromptMessage from './editor/promptMessage';
@@ -20,8 +20,7 @@ interface Props {
 
 export const ChatPromptPlayground = forwardRef(
   ({ hasTemplate, prompt, restoredTime }: Props, ref) => {
-    const setPlayground = useSetRecoilState(playgroundState);
-    const mode = useRecoilValue(modeState);
+    const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
     const messages = prompt.messages;
 
@@ -36,8 +35,8 @@ export const ChatPromptPlayground = forwardRef(
       setPlayground((old) => ({
         ...old,
         prompt: {
-          ...old.prompt!,
-          messages: old.prompt?.messages?.map((message, mIndex) => {
+          ...old!.prompt!,
+          messages: old?.prompt?.messages?.map((message, mIndex) => {
             if (mIndex === index) {
               return {
                 ...message,
@@ -51,7 +50,7 @@ export const ChatPromptPlayground = forwardRef(
     };
 
     const title =
-      mode === 'Formatted'
+      promptMode === 'Formatted'
         ? hasTemplate
           ? 'Formatted messages [Read Only]'
           : 'Formatted messages'
@@ -80,7 +79,7 @@ export const ChatPromptPlayground = forwardRef(
                   <PromptMessage
                     message={message}
                     prompt={prompt}
-                    mode={mode}
+                    mode={promptMode}
                     index={index}
                     onChange={onChange}
                   />
