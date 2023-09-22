@@ -79,6 +79,8 @@ function testFormatted() {
 
 function testCompletion() {
   it('should be able to call the LLM provider and stream the completion', () => {
+    // Wait for the llm provider
+    cy.wait(1000);
     cy.get('#submit-prompt').should('exist').click();
     cy.get('.completion-editor [contenteditable]').should(
       'contain',
