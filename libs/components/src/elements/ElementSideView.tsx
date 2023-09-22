@@ -14,6 +14,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { IMessageElement } from 'src/types/element';
 
+import 'react-resizable/css/styles.css';
+
 import { Element } from './Element';
 
 const DRAWER_DEFAULT_WIDTH = 400;
@@ -45,6 +47,7 @@ const Handle = forwardRef(function Handle(
   return (
     <Box
       sx={{
+        boxSizing: 'content-box',
         width: '4px',
         height: '24px',
         position: 'absolute',
@@ -59,6 +62,7 @@ const Handle = forwardRef(function Handle(
     >
       <Box
         sx={{
+          boxSizing: 'content-box',
           width: '100%',
           height: '100%',
           backgroundColor: 'grey.300',
