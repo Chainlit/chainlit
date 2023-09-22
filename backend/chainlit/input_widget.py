@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
@@ -7,19 +7,18 @@ from pydantic.dataclasses import Field, dataclass
 
 
 @dataclass
-class InputWidget(ABC):
+class InputWidget:
     id: str
     label: str
     initial: Any = None
     tooltip: Optional[str] = None
     description: Optional[str] = None
 
-    def __post_init__(self, tooltip, description) -> None:
+    def __post_init__(
+        self,
+    ) -> None:
         if not self.id or not self.label:
             raise ValueError("Must provide key and label to load InputWidget")
-
-        self.tooltip = tooltip
-        self.description = description
 
     @abstractmethod
     def to_dict(self) -> Dict[str, Any]:
@@ -32,19 +31,6 @@ class Switch(InputWidget):
 
     type: InputWidgetType = "switch"
     initial: bool = False
-
-    def __init__(
-        self,
-        id: str,
-        label: str,
-        initial: bool,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
-        self.id = id
-        self.label = label
-        self.initial = initial
-        super().__post_init__(tooltip, description)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -66,25 +52,6 @@ class Slider(InputWidget):
     min: float = 0
     max: float = 10
     step: float = 1
-
-    def __init__(
-        self,
-        id: str,
-        label: str,
-        initial: float,
-        min: float = 0,
-        max: float = 10,
-        step: float = 1,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
-        self.id = id
-        self.label = label
-        self.initial = initial
-        self.min = min
-        self.max = max
-        self.step = step
-        super().__post_init__(tooltip, description)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -111,42 +78,33 @@ class Select(InputWidget):
     values: List[str] = Field(default_factory=lambda: list)
     items: Dict[str, str] = Field(default_factory=lambda: defaultdict(dict))
 
-    def __init__(
+    def __post_init__(
         self,
-        id: str,
-        label: str,
-        values: Optional[List[str]] = None,
-        items: Optional[Dict[str, str]] = None,
-        initial_index: Optional[int] = None,
-        initial_value: Optional[str] = None,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
     ) -> None:
-        if values is None and items is None:
+        super().__post_init__()
+
+        if not self.values and not self.items:
             raise ValueError("Must provide values or items to create a Select")
 
-        if values is not None and items is not None:
+        if self.values and self.items:
             raise ValueError(
                 "You can only provide either values or items to create a Select"
             )
 
-        if values is None and initial_index is not None:
+        if not self.values and self.initial_index is not None:
             raise ValueError(
                 "Initial_index can only be used in combination with values to create a Select"
             )
 
-        self.id = id
-        self.label = label
-
-        if items is not None:
-            self.items = items
-            self.initial = initial_value
-        elif values is not None:
-            self.items = {value: value for value in values}
+        if self.items:
+            self.initial = self.initial_value
+        elif self.values:
+            self.items = {value: value for value in self.values}
             self.initial = (
-                values[initial_index] if initial_index is not None else initial_value
+                self.values[self.initial_index]
+                if self.initial_index is not None
+                else self.initial_value
             )
-        super().__post_init__(tooltip, description)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -170,21 +128,6 @@ class TextInput(InputWidget):
     initial: Optional[str] = None
     placeholder: Optional[str] = None
 
-    def __init__(
-        self,
-        id: str,
-        label: str,
-        initial: Optional[str] = None,
-        placeholder: Optional[str] = None,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
-        self.id = id
-        self.label = label
-        self.initial = initial
-        self.placeholder = placeholder
-        super().__post_init__(tooltip, description)
-
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": self.type,
@@ -205,21 +148,6 @@ class NumberInput(InputWidget):
     initial: Optional[float] = None
     placeholder: Optional[str] = None
 
-    def __init__(
-        self,
-        id: str,
-        label: str,
-        initial: Optional[float] = None,
-        placeholder: Optional[str] = None,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
-        self.id = id
-        self.label = label
-        self.initial = initial
-        self.placeholder = placeholder
-        super().__post_init__(tooltip, description)
-
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": self.type,
@@ -239,20 +167,6 @@ class Tags(InputWidget):
     type: InputWidgetType = "tags"
     initial: List[str] = Field(default_factory=lambda: list)
     values: List[str] = Field(default_factory=lambda: list)
-
-    def __init__(
-        self,
-        id: str,
-        label: str,
-        initial: Optional[List[str]] = None,
-        tooltip: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
-        self.id = id
-        self.label = label
-        if initial is not None:
-            self.initial = initial
-        super().__post_init__(tooltip, description)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
