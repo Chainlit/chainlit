@@ -64,6 +64,9 @@ hide_cot = false
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
 
+# Specify a CSS file that can be used to customize the user interface.
+# custom_css = '/assets/test.css'
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
