@@ -37,8 +37,6 @@ class AnthropicProvider(BaseProvider):
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT
 
-        print(prompt)
-
         client = anthropic.AsyncAnthropic(**env_settings)
 
         llm_settings["stream"] = True
