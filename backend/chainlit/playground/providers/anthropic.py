@@ -13,6 +13,8 @@ class AnthropicProvider(BaseProvider):
             message_text = f"{anthropic.HUMAN_PROMPT} {message.formatted}"
         elif message.role == "assistant":
             message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
+        elif message.role == "function":
+            message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
         elif message.role == "system":
             message_text = (
                 f"{anthropic.HUMAN_PROMPT} <admin>{message.formatted}</admin>"
@@ -34,6 +36,8 @@ class AnthropicProvider(BaseProvider):
 
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT
+
+        print(prompt)
 
         client = anthropic.AsyncAnthropic(**env_settings)
 

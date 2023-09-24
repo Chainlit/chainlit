@@ -252,7 +252,12 @@ class BaseLangchainCallbackHandler(BaseCallbackHandler):
         if isinstance(error, InterruptedError):
             return None
 
-        return ErrorMessage(content=str(error), author=self.get_author())
+        last_message = self.get_last_message()
+        parent_id = last_message.id
+
+        return ErrorMessage(
+            content=str(error), parent_id=parent_id, author=self.get_author()
+        )
 
     def create_message(
         self,
