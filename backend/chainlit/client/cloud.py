@@ -115,15 +115,23 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return True
 
-    async def create_conversation(self, app_user_id: Optional[str]) -> Optional[str]:
+    async def create_conversation(
+        self, app_user_id: Optional[str], source: Optional[str]
+    ) -> Optional[str]:
         mutation = """
-        mutation ($appUserId: String) {
-            createConversation (appUserId: $appUserId) {
+        mutation ($appUserId: String, $source: String) {
+            createConversation (appUserId: $appUserId, source: $source) {
                 id
             }
         }
         """
-        variables = {"appUserId": app_user_id} if app_user_id else {}
+        variables = {}
+        if app_user_id is not None:
+            variables["appUserId"] = app_user_id
+
+        if source is not None:
+            variables["source"] = source
+
         res = await self.mutation(mutation, variables)
 
         if self.check_for_errors(res):
@@ -173,6 +181,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             conversation(id: $id) {
                 id
                 createdAt
+                source
                 messages {
                     id
                     isError
@@ -236,6 +245,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             node {
             id
             createdAt
+            source
             elementCount
             messageCount
             appUser {

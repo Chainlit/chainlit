@@ -40,13 +40,18 @@ class BaseSession:
         if not chainlit_client:
             return None
 
+        if isinstance(self, HTTPSession):
+            source = "api"
+        else:
+            source = "chat"
+
         if not self.conversation_id:
             async with self.lock:
                 app_user_id = (
                     self.user.id if isinstance(self.user, PersistedAppUser) else None
                 )
                 self.conversation_id = await chainlit_client.create_conversation(
-                    app_user_id=app_user_id
+                    app_user_id=app_user_id, source=source
                 )
 
         return self.conversation_id
@@ -71,8 +76,6 @@ class HTTPSession(BaseSession):
         super().__init__(
             id=id, user=user, token=token, user_env=user_env, root_message=root_message
         )
-        if root_message:
-            asyncio.run(root_message.send())
 
 
 class WebsocketSession(BaseSession):

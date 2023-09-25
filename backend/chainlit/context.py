@@ -49,7 +49,6 @@ def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitCon
 def init_http_context(
     user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
     auth_token: Optional[str] = None,
-    root_message: Optional["Message"] = None,
     user_env: Optional[Dict[str, str]] = None,
 ) -> ChainlitContext:
     session = HTTPSession(
@@ -57,7 +56,6 @@ def init_http_context(
         token=auth_token,
         user=user,
         user_env=user_env,
-        root_message=root_message,
     )
     context = ChainlitContext(session)
     context_var.set(context)
