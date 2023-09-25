@@ -287,9 +287,8 @@ class Auth0OAuthProvider(OAuthProvider):
                 headers={"Authorization": f"Bearer {token}"},
             ) as result:
                 user = await result.json()
-
                 app_user = AppUser(
-                    username=user.get("nickname"),
+                    username=user.get("email"),
                     image=user.get("picture", ""),
                     provider="auth0",
                 )
