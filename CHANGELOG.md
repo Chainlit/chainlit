@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased yet!
+### Added
+- Okta auth provider
+- Auth0 auth provider
+
+### Fixed
+- Langchain errors are now correctly indented
+- Langchain nested chains prompts are now correctly displayed
+- Actions are now displayed on mobile
+- Custom logo is now working as intended
 
 ## [0.7.0] - 2023-09-13
 
