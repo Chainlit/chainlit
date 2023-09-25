@@ -266,11 +266,8 @@ class TaskList(Element):
     type: ClassVar[ElementType] = "tasklist"
     tasks: List[Task] = Field(default_factory=list, exclude=True)
     status: str = "Ready"
-
-    def __init__(self):
-        super().__init__(name="tasklist", content="dummy content to pass validation")
-        self.type = "tasklist"
-        self.tasks = []
+    name: str = "tasklist"
+    content: str = "dummy content to pass validation"
 
     async def add_task(self, task: Task):
         self.tasks.append(task)
