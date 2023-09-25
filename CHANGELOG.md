@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Okta auth provider
 - Auth0 auth provider
-
+- Prompt playground support for mix of template/formatted prompts
 ### Fixed
 - Langchain errors are now correctly indented
 - Langchain nested chains prompts are now correctly displayed
