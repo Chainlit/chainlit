@@ -65,7 +65,8 @@ hide_cot = false
 # github = ""
 
 # Specify a CSS file that can be used to customize the user interface.
-# custom_css = '/assets/test.css'
+# The CSS fle can be served from the public directory or via an external link.
+# custom_css = '/public/test.css'
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
