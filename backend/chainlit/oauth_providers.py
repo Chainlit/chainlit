@@ -245,14 +245,15 @@ class OktaOAuthProvider(OAuthProvider):
 class Auth0OAuthProvider(OAuthProvider):
     id = "auth0"
     env = ["OAUTH_AUTH0_CLIENT_ID", "OAUTH_AUTH0_CLIENT_SECRET", "OAUTH_AUTH0_DOMAIN"]
-    # Ensure that the domain does not have a trailing slash
-    domain = f"https://{os.environ.get('OAUTH_AUTH0_DOMAIN', '').rstrip('/')}"
-
-    authorize_url = f"{domain}/authorize"
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_AUTH0_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_AUTH0_CLIENT_SECRET")
+        # Ensure that the domain does not have a trailing slash
+        self.domain = f"https://{os.environ.get('OAUTH_AUTH0_DOMAIN', '').rstrip('/')}"
+
+        self.authorize_url = f"{self.domain}/authorize"
+
         self.authorize_params = {
             "response_type": "code",
             "scope": "openid profile email",
