@@ -20,7 +20,8 @@ export type Provider =
   | 'github'
   | 'google'
   | 'azure-ad'
-  | 'okta';
+  | 'okta'
+  | 'auth0';
 
 export interface IAppUser {
   username: string;
@@ -77,7 +78,7 @@ export interface IConversation {
 
 export interface IPageInfo {
   hasNextPage: boolean;
-  endCursor: string;
+  endCursor?: string;
 }
 
 export interface IPaginatedResponse<T> {

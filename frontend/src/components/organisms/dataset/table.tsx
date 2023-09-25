@@ -17,7 +17,7 @@ import OpenConversationButton from './openConversationButton';
 
 export interface IPageInfo {
   hasNextPage: boolean;
-  endCursor: any;
+  endCursor?: string;
 }
 
 export interface IPagination {
@@ -79,7 +79,7 @@ export default function ConversationTable() {
   }, [refetchConversations]);
 
   const loadMoreItems = useCallback(() => {
-    if (prevPageInfo?.hasNextPage) {
+    if (prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
       fetchConversations(prevPageInfo.endCursor);
     }
   }, [prevPageInfo, fetchConversations]);
