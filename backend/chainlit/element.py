@@ -268,11 +268,9 @@ class TaskList(Element):
     status: str = "Ready"
 
     def __init__(self):
-        self.tasks = []
-        self.content = "dummy content to pass validation"
-        self.name = "tasklist"
+        super().__init__(name="tasklist", content="dummy content to pass validation")
         self.type = "tasklist"
-        super().__post_init__()
+        self.tasks = []
 
     async def add_task(self, task: Task):
         self.tasks.append(task)
