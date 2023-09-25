@@ -411,9 +411,14 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
         return res["data"]["updateElement"]
 
-    async def upload_element(self, content: Union[bytes, str], mime: str) -> Dict:
+    async def upload_element(
+        self, content: Union[bytes, str], mime: str, conversation_id: Optional[str]
+    ) -> Dict:
         id = str(uuid.uuid4())
         body = {"fileName": id, "contentType": mime}
+
+        if conversation_id:
+            body["conversationId"] = conversation_id
 
         path = f"/api/upload/file"
 

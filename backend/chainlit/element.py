@@ -91,7 +91,10 @@ class Element:
                 if self.type in mime_types
                 else filetype.guess_mime(self.content)
             )
-            upload_res = await client.upload_element(content=self.content, mime=mime)
+            conversation_id = await context.session.get_conversation_id()
+            upload_res = await client.upload_element(
+                content=self.content, mime=mime, conversation_id=conversation_id
+            )
             self.url = upload_res["url"]
             self.object_key = upload_res["object_key"]
 
