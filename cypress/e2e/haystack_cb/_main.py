@@ -1,3 +1,4 @@
+# Disabling this test until Haystack support pydantic v2.
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
 from haystack.nodes import PromptNode
