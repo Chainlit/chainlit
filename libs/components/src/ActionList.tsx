@@ -18,6 +18,8 @@ interface ActionProps {
   loading: boolean;
 }
 
+const DISPLAY_N_ACTIONS = 2;
+
 const Action = ({ action, loading }: ActionProps) => {
   return (
     <Tooltip title={action.description} placement="top">
@@ -47,14 +49,21 @@ const ActionList = ({ actions }: { actions: IAction[] }) => {
       <Action key={action.id} action={action} loading={loading} />
     ));
 
+  const displayedActions = isMobile
+    ? null
+    : renderActions(actions.slice(0, DISPLAY_N_ACTIONS));
+  const drawerActions = isMobile
+    ? renderActions(actions)
+    : renderActions(actions.slice(DISPLAY_N_ACTIONS, actions.length));
+
   return (
     <Box display="flex" alignItems="center" id="actions-list" margin="auto">
-      {!isMobile ? (
+      {displayedActions ? (
         <Stack direction="row" spacing={1}>
-          {renderActions(actions.slice(0, 2))}
+          {displayedActions}
         </Stack>
       ) : null}
-      {actions.length > 2 ? (
+      {isMobile || actions.length > DISPLAY_N_ACTIONS ? (
         <>
           <Tooltip title="Actions">
             <IconButton
@@ -82,9 +91,7 @@ const ActionList = ({ actions }: { actions: IAction[] }) => {
             }}
           >
             <Stack direction="column" paddingX={2} gap={1}>
-              {renderActions(
-                isMobile ? actions : actions.slice(2, actions.length)
-              )}
+              {drawerActions}
             </Stack>
           </Menu>
         </>
