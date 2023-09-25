@@ -242,11 +242,66 @@ class OktaOAuthProvider(OAuthProvider):
                 return (user, app_user)
 
 
+class Auth0OAuthProvider(OAuthProvider):
+    id = "auth0"
+    env = ["OAUTH_AUTH0_CLIENT_ID", "OAUTH_AUTH0_CLIENT_SECRET", "OAUTH_AUTH0_DOMAIN"]
+
+    def __init__(self):
+        self.client_id = os.environ.get("OAUTH_AUTH0_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_AUTH0_CLIENT_SECRET")
+        # Ensure that the domain does not have a trailing slash
+        self.domain = f"https://{os.environ.get('OAUTH_AUTH0_DOMAIN', '').rstrip('/')}"
+
+        self.authorize_url = f"{self.domain}/authorize"
+
+        self.authorize_params = {
+            "response_type": "code",
+            "scope": "openid profile email",
+            "audience": f"{self.domain}/userinfo",
+        }
+
+    async def get_token(self, code: str, url: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": url,
+        }
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.post(
+                f"{self.domain}/oauth/token",
+                json=payload,
+            ) as result:
+                json_content = await result.json()
+                token = json_content.get("access_token")
+                if not token:
+                    raise HTTPException(
+                        status_code=400, detail="Failed to get the access token"
+                    )
+                return token
+
+    async def get_user_info(self, token: str):
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with session.get(
+                f"{self.domain}/userinfo",
+                headers={"Authorization": f"Bearer {token}"},
+            ) as result:
+                user = await result.json()
+                app_user = AppUser(
+                    username=user.get("email"),
+                    image=user.get("picture", ""),
+                    provider="auth0",
+                )
+                return (user, app_user)
+
+
 providers = [
     GithubOAuthProvider(),
     GoogleOAuthProvider(),
     AzureADOAuthProvider(),
     OktaOAuthProvider(),
+    Auth0OAuthProvider(),
 ]
 
 

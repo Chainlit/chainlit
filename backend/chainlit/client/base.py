@@ -24,7 +24,9 @@ ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
 
 Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
-Provider = Literal["credentials", "header", "github", "google", "azure-ad", "okta"]
+Provider = Literal[
+    "credentials", "header", "github", "google", "azure-ad", "okta", "auth0"
+]
 
 
 # Used when logging-in a user
@@ -91,7 +93,7 @@ class ConversationDict(TypedDict):
 @dataclass
 class PageInfo:
     hasNextPage: bool
-    endCursor: str
+    endCursor: Optional[str]
 
 
 T = TypeVar("T")
