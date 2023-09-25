@@ -174,7 +174,7 @@ class AzureADOAuthProvider(OAuthProvider):
     async def get_user_info(self, token: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                "https://graph.microsoft.com/v1.0/users/me",
+                "https://graph.microsoft.com/v1.0/me",
                 headers={"Authorization": f"Bearer {token}"},
             ) as result:
                 user = await result.json()
