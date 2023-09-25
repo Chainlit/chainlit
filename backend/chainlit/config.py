@@ -167,20 +167,6 @@ class CodeSettings:
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
 
-    def validate(self):
-        requires_one_of = [
-            "on_message",
-            "on_chat_start",
-        ]
-
-        # Check if at least one of the required attributes is set
-        if not any(getattr(self, attr) for attr in requires_one_of):
-            raise ValueError(
-                f"Module should at least expose one of {', '.join(requires_one_of)} function"
-            )
-
-        return True
-
 
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
@@ -250,8 +236,6 @@ def load_module(target: str):
 
     # Remove the target's directory from the Python path
     sys.path.pop(0)
-
-    config.code.validate()
 
 
 def load_settings():

@@ -6,18 +6,18 @@ from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.client.base import MessageDict
 from chainlit.config import config
-from chainlit.context import init_context
+from chainlit.context import init_ws_context
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
-from chainlit.session import Session
+from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
 from chainlit.user_session import user_sessions
 
 
 def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
     """Restore a session from the sessionId provided by the client."""
-    if session := Session.get_by_id(session_id):
+    if session := WebsocketSession.get_by_id(session_id):
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.ask_user = ask_user_fn
@@ -45,6 +45,9 @@ def load_user_env(user_env):
 
 @socket.on("connect")
 async def connect(sid, environ, auth):
+    if not config.code.on_chat_start and not config.code.on_message:
+        raise ConnectionRefusedError("No websocket endpoint configured")
+
     user = None
     token = None
     try:
@@ -58,7 +61,7 @@ async def connect(sid, environ, auth):
 
     # Function to send a message to this particular session
     def emit_fn(event, data):
-        if session := Session.get(sid):
+        if session := WebsocketSession.get(sid):
             if session.should_stop:
                 session.should_stop = False
                 raise InterruptedError("Task stopped by user")
@@ -66,7 +69,7 @@ async def connect(sid, environ, auth):
 
     # Function to ask the user a question
     def ask_user_fn(data, timeout):
-        if session := Session.get(sid):
+        if session := WebsocketSession.get(sid):
             if session.should_stop:
                 session.should_stop = False
                 raise InterruptedError("Task stopped by user")
@@ -79,7 +82,7 @@ async def connect(sid, environ, auth):
     user_env_string = environ.get("HTTP_USER_ENV")
     user_env = load_user_env(user_env_string)
 
-    Session(
+    WebsocketSession(
         id=session_id,
         socket_id=sid,
         emit=emit_fn,
@@ -95,7 +98,7 @@ async def connect(sid, environ, auth):
 
 @socket.on("connection_successful")
 async def connection_successful(sid):
-    context = init_context(sid)
+    context = init_ws_context(sid)
     if context.session.restored:
         return
 
@@ -109,7 +112,7 @@ async def connection_successful(sid):
 
 @socket.on("clear_session")
 async def clean_session(sid):
-    if session := Session.get(sid):
+    if session := WebsocketSession.get(sid):
         # Clean up the user session
         if session.id in user_sessions:
             user_sessions.pop(session.id)
@@ -121,7 +124,7 @@ async def clean_session(sid):
 async def disconnect(sid):
     async def disconnect_on_timeout(sid):
         await asyncio.sleep(config.project.session_timeout)
-        if session := Session.get(sid):
+        if session := WebsocketSession.get(sid):
             # Clean up the user session
             if session.id in user_sessions:
                 user_sessions.pop(session.id)
@@ -133,10 +136,10 @@ async def disconnect(sid):
 
 @socket.on("stop")
 async def stop(sid):
-    if session := Session.get(sid):
+    if session := WebsocketSession.get(sid):
         trace_event("stop_task")
 
-        context = init_context(session)
+        context = init_ws_context(session)
         await Message(author="System", content="Task stopped by the user.").send()
 
         session.should_stop = True
@@ -145,16 +148,15 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: Session, message_dict: MessageDict):
+async def process_message(session: WebsocketSession, message_dict: MessageDict):
     """Process a message from the user."""
     try:
-        context = init_context(session)
+        context = init_ws_context(session)
 
         await context.emitter.task_start()
-        await context.emitter.process_user_message(message_dict)
-
-        message = Message.from_dict(message_dict)
         if config.code.on_message:
+            await context.emitter.process_user_message(message_dict)
+            message = Message.from_dict(message_dict)
             await config.code.on_message(message.content.strip(), message.id)
     except InterruptedError:
         pass
@@ -170,7 +172,7 @@ async def process_message(session: Session, message_dict: MessageDict):
 @socket.on("ui_message")
 async def message(sid, message):
     """Handle a message sent by the User."""
-    session = Session.require(sid)
+    session = WebsocketSession.require(sid)
     session.should_stop = False
 
     await process_message(session, message)
@@ -187,7 +189,7 @@ async def process_action(action: Action):
 @socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
-    init_context(sid)
+    init_ws_context(sid)
 
     action = Action(**action)
 
@@ -197,7 +199,7 @@ async def call_action(sid, action):
 @socket.on("chat_settings_change")
 async def change_settings(sid, settings: Dict[str, Any]):
     """Handle change settings submit from the UI."""
-    context = init_context(sid)
+    context = init_ws_context(sid)
 
     for key, value in settings.items():
         context.session.chat_settings[key] = value
@@ -209,7 +211,7 @@ async def change_settings(sid, settings: Dict[str, Any]):
 @socket.on("file_upload")
 async def file_upload(sid, files: Any):
     """Handle file upload from the UI."""
-    init_context(sid)
+    init_ws_context(sid)
 
     if config.code.on_file_upload:
         await config.code.on_file_upload(files)
