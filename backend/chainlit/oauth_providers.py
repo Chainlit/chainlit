@@ -174,7 +174,7 @@ class AzureADOAuthProvider(OAuthProvider):
     async def get_user_info(self, token: str):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             async with session.get(
-                "https://graph.microsoft.com/v1.0/users/me",
+                "https://graph.microsoft.com/v1.0/me",
                 headers={"Authorization": f"Bearer {token}"},
             ) as result:
                 user = await result.json()
@@ -242,7 +242,12 @@ class OktaOAuthProvider(OAuthProvider):
                 return (user, app_user)
 
 
-providers = [GithubOAuthProvider(), GoogleOAuthProvider(), AzureADOAuthProvider(), OktaOAuthProvider()]
+providers = [
+    GithubOAuthProvider(),
+    GoogleOAuthProvider(),
+    AzureADOAuthProvider(),
+    OktaOAuthProvider(),
+]
 
 
 def get_oauth_provider(provider: str) -> Optional[OAuthProvider]:
@@ -254,4 +259,3 @@ def get_oauth_provider(provider: str) -> Optional[OAuthProvider]:
 
 def get_configured_oauth_providers():
     return [p.id for p in providers if p.is_configured()]
-                                                                                                                                                                                                                                                                                                                                                                        
