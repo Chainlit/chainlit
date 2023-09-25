@@ -13,6 +13,8 @@ class AnthropicProvider(BaseProvider):
             message_text = f"{anthropic.HUMAN_PROMPT} {message.formatted}"
         elif message.role == "assistant":
             message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
+        elif message.role == "function":
+            message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
         elif message.role == "system":
             message_text = (
                 f"{anthropic.HUMAN_PROMPT} <admin>{message.formatted}</admin>"
