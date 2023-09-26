@@ -46,11 +46,6 @@ class AskFileResponse:
     content: bytes
 
 
-class Feedback(BaseModel):
-    status: Literal[-1, 0, 1]
-    comment: Optional[str]
-
-
 class CompletionRequest(BaseModel):
     prompt: Prompt
     userEnv: Dict[str, str]
@@ -58,7 +53,8 @@ class CompletionRequest(BaseModel):
 
 class UpdateFeedbackRequest(BaseModel):
     messageId: str
-    feedback: Feedback
+    feedback: Literal[-1, 0, 1]
+    feedbackComment: Optional[str]
 
 
 class DeleteConversationRequest(BaseModel):

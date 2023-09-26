@@ -442,6 +442,7 @@ async def update_feedback(
     await chainlit_client.set_human_feedback(
         message_id=update.messageId,
         feedback=update.feedback,
+        feedbackComment=update.feedbackComment,
     )
     return JSONResponse(content={"success": True})
 

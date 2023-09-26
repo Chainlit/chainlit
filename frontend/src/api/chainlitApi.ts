@@ -1,4 +1,4 @@
-import { IFeedback, IPrompt } from '@chainlit/components';
+import { IPrompt } from '@chainlit/components';
 
 import { IPageInfo, IPagination } from 'components/organisms/dataset/table';
 
@@ -56,10 +56,15 @@ const ChainlitAPI = {
 
   setHumanFeedback: async (
     messageId: string,
-    feedback: IFeedback,
+    feedback: number,
+    feedbackComment?: string,
     accessToken?: string
   ) => {
-    await api.put(`/message/feedback`, { messageId, feedback }, accessToken);
+    await api.put(
+      `/message/feedback`,
+      { messageId, feedback, feedbackComment },
+      accessToken
+    );
   },
 
   getConversations: async (

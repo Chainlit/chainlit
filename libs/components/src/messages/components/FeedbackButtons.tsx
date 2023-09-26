@@ -15,7 +15,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IFeedback, IMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 const ICON_SIZE = '16px';
 
@@ -25,28 +25,27 @@ interface Props {
 
 const FeedbackButtons = ({ message }: Props) => {
   const { onFeedbackUpdated } = useContext(MessageContext);
-  const [feedback, setFeedback] = useState<IFeedback['status']>(
-    message.humanFeedback || 0
-  );
+  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
   const [comment, setComment] = useState(message.humanFeedbackComment);
   const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
-  const [showFeedbackDialog, setShowFeedbackDialog] =
-    useState<IFeedback['status']>();
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
 
-  const handleFeedbackChanged = (
-    feedback: IFeedback['status'],
-    comment?: string
-  ) => {
+  const handleFeedbackChanged = (feedback: number, comment?: string) => {
     onFeedbackUpdated &&
-      onFeedbackUpdated(message.id, { status: feedback, comment }, () => {
-        setFeedback(feedback);
-        setComment(comment);
-      });
+      onFeedbackUpdated(
+        message.id,
+        feedback,
+        () => {
+          setFeedback(feedback);
+          setComment(comment);
+        },
+        comment
+      );
   };
 
-  const handleFeedbackClick = (status: IFeedback['status']) => {
+  const handleFeedbackClick = (status: number) => {
     if (feedback === status) {
       handleFeedbackChanged(0);
     } else {
