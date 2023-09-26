@@ -177,7 +177,7 @@ class Message(MessageBase):
         self.indent = indent
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
-        self.ddisable_human_feedback = disable_human_feedback
+        self.disable_human_feedback = disable_human_feedback
 
         super().__post_init__()
 
@@ -209,7 +209,7 @@ class Message(MessageBase):
             "parentId": self.parent_id,
             "indent": self.indent,
             "streaming": self.streaming,
-            "disableHumanFeedback": self.ddisable_human_feedback,
+            "disableHumanFeedback": self.disable_human_feedback,
         }
 
         if self.prompt:
