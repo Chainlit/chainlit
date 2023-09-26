@@ -478,9 +478,9 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     return res.updateElement;
   }
 
-  async uploadElement(content: Blob, mime: string) {
+  async uploadElement(content: Blob, mime: string, conversationId?: string) {
     const id = uuidv4();
-    const body = { fileName: id, contentType: mime };
+    const body = { fileName: id, contentType: mime, conversationId };
     const path = '/api/upload/file';
     const response = await fetch(`${this.chainlitServer}${path}`, {
       method: 'POST',
