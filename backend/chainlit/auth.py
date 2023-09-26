@@ -57,10 +57,7 @@ def create_jwt(data: AppUser) -> str:
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(reuseable_oauth)):
-    if not require_login():
-        return None
-
+async def authenticate_user(token: str = Depends(reuseable_oauth)):
     try:
         dict = jwt.decode(
             token,
@@ -84,3 +81,10 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         return persisted_app_user
     else:
         return app_user
+
+
+async def get_current_user(token: str = Depends(reuseable_oauth)):
+    if not require_login():
+        return None
+
+    return await authenticate_user(token)

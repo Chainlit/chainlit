@@ -21,7 +21,7 @@ import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
-from chainlit.client.base import AppUser
+from chainlit.client.base import AppUser, PersistedAppUser
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -266,6 +266,7 @@ __all__ = [
     "user_session",
     "Action",
     "AppUser",
+    "PersistedAppUser",
     "Audio",
     "Pdf",
     "Image",

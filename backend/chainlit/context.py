@@ -1,12 +1,15 @@
 import asyncio
+import uuid
 from contextvars import ContextVar
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from chainlit.session import Session
+from chainlit.session import HTTPSession, WebsocketSession
 from lazify import LazyProxy
 
 if TYPE_CHECKING:
-    from chainlit.emitter import ChainlitEmitter
+    from chainlit.client.cloud import AppUser, PersistedAppUser
+    from chainlit.emitter import BaseChainlitEmitter
+    from chainlit.message import Message
 
 
 class ChainlitContextException(Exception):
@@ -16,25 +19,45 @@ class ChainlitContextException(Exception):
 
 class ChainlitContext:
     loop: asyncio.AbstractEventLoop
-    emitter: "ChainlitEmitter"
-    session: Session
+    emitter: "BaseChainlitEmitter"
+    session: Union["HTTPSession", "WebsocketSession"]
 
-    def __init__(self, session: Session):
-        from chainlit.emitter import ChainlitEmitter
+    def __init__(self, session: Union["HTTPSession", "WebsocketSession"]):
+        from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
 
         self.loop = asyncio.get_running_loop()
         self.session = session
-        self.emitter = ChainlitEmitter(session)
+        if isinstance(self.session, HTTPSession):
+            self.emitter = BaseChainlitEmitter(self.session)
+        elif isinstance(self.session, WebsocketSession):
+            self.emitter = ChainlitEmitter(self.session)
 
 
 context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
 
 
-def init_context(session_or_sid) -> ChainlitContext:
-    if not isinstance(session_or_sid, Session):
-        session_or_sid = Session.require(session_or_sid)
+def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitContext:
+    if not isinstance(session_or_sid, WebsocketSession):
+        session = WebsocketSession.require(session_or_sid)
+    else:
+        session = session_or_sid
+    context = ChainlitContext(session)
+    context_var.set(context)
+    return context
 
-    context = ChainlitContext(session_or_sid)
+
+def init_http_context(
+    user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
+    auth_token: Optional[str] = None,
+    user_env: Optional[Dict[str, str]] = None,
+) -> ChainlitContext:
+    session = HTTPSession(
+        id=str(uuid.uuid4()),
+        token=auth_token,
+        user=user,
+        user_env=user_env,
+    )
+    context = ChainlitContext(session)
     context_var.set(context)
     return context
 

@@ -213,15 +213,24 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
     return true;
   }
 
-  async createConversation(appUserId?: string): Promise<string> {
+  async createConversation(
+    appUserId?: string,
+    tags?: string[]
+  ): Promise<string> {
     const mutation = `
-        mutation ($appUserId: String) {
-            createConversation (appUserId: $appUserId) {
-                id
-            }
-        }
+    mutation ($appUserId: String, $tags: [String!]) {
+      createConversation (appUserId: $appUserId, tags: $tags) {
+          id
+      }
+  }
     `;
-    const variables = appUserId ? { appUserId: appUserId } : {};
+    const variables: Record<string, unknown> = {};
+    if (appUserId) {
+      variables['appUserId'] = appUserId;
+    }
+    if (tags) {
+      variables['tags'] = tags;
+    }
     const res = await this.mutation(mutation, variables);
     return res.createConversation.id;
   }
