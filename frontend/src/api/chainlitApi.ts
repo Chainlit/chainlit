@@ -57,9 +57,14 @@ const ChainlitAPI = {
   setHumanFeedback: async (
     messageId: string,
     feedback: number,
+    feedbackComment?: string,
     accessToken?: string
   ) => {
-    await api.put(`/message/feedback`, { messageId, feedback }, accessToken);
+    await api.put(
+      `/message/feedback`,
+      { messageId, feedback, feedbackComment },
+      accessToken
+    );
   },
 
   getConversations: async (

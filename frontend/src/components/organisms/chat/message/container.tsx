@@ -62,12 +62,18 @@ const MessageContainer = ({
 
   const onFeedbackUpdated = async (
     messageId: string,
-    value: number,
-    onSuccess: () => void
+    feedback: number,
+    onSuccess: () => void,
+    feedbackComment?: string
   ) => {
     try {
       await toast.promise(
-        ChainlitAPI.setHumanFeedback(messageId!, value, accessToken),
+        ChainlitAPI.setHumanFeedback(
+          messageId!,
+          feedback,
+          feedbackComment,
+          accessToken
+        ),
         {
           loading: 'Updating...',
           success: 'Feedback updated!',
@@ -79,7 +85,8 @@ const MessageContainer = ({
 
       const globalMessage = messages.find((m) => m.id === messageId);
       if (globalMessage) {
-        globalMessage.humanFeedback = value;
+        globalMessage.humanFeedback = feedback;
+        globalMessage.humanFeedbackComment = feedbackComment;
       }
       onSuccess();
     } catch (err) {

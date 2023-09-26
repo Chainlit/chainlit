@@ -1,4 +1,4 @@
-import TextField from '@mui/material/TextField';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import { IInput } from 'src/types/Input';
 
@@ -9,7 +9,8 @@ type TextInputProps = {
   placeholder?: string;
   endAdornment?: React.ReactNode;
 } & IInput &
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> &
+  Pick<TextFieldProps, 'multiline'>;
 
 const TextInput = ({
   description,
@@ -19,6 +20,7 @@ const TextInput = ({
   label,
   size = 'small',
   tooltip,
+  multiline,
   endAdornment,
   ...rest
 }: TextInputProps): JSX.Element => {
@@ -37,9 +39,13 @@ const TextInput = ({
           ...rest,
           id: id,
           name: id,
-          sx: { height: size === 'small' ? '7px' : '15px' }
+          sx: {
+            height: size === 'small' ? '7px' : '15px',
+            minHeight: multiline ? '100px' : 'auto'
+          }
         }}
         fullWidth
+        multiline={multiline}
         sx={{
           fontSize: '14px',
           fontWeight: 400,

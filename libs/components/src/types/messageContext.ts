@@ -16,8 +16,9 @@ interface IMessageContext {
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
     messageId: string,
-    value: number,
-    onSuccess: () => void
+    feedback: number,
+    onSuccess: () => void,
+    feedbackComment?: string
   ) => void;
 }
 

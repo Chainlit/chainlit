@@ -285,14 +285,21 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             data=conversations,
         )
 
-    async def set_human_feedback(self, message_id: str, feedback: int) -> bool:
-        mutation = """mutation ($messageId: ID!, $humanFeedback: Int!) {
-                        setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback) {
+    async def set_human_feedback(
+        self, message_id: str, feedback: int, feedbackComment: Optional[str]
+    ) -> bool:
+        mutation = """mutation ($messageId: ID!, $humanFeedback: Int!, $humanFeedbackComment: String) {
+                    setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback, humanFeedbackComment: $humanFeedbackComment) {
                             id
                             humanFeedback
+                            humanFeedbackComment
                     }
                 }"""
-        variables = {"messageId": message_id, "humanFeedback": feedback}
+        variables = {
+            "messageId": message_id,
+            "humanFeedback": feedback,
+            "humanFeedbackComment": feedbackComment,
+        }
         res = await self.mutation(mutation, variables)
         self.check_for_errors(res, raise_error=True)
 
