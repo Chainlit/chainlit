@@ -6,4 +6,5 @@ export interface IAction {
   name: string;
   onClick: () => void;
   value: string;
+  collapsed: boolean;
 }

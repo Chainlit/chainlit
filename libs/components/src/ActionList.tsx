@@ -16,12 +16,12 @@ import { IAction } from './types/action';
 interface ActionProps {
   action: IAction;
   loading: boolean;
+  margin: number | string;
 }
 
 const ICON_SIZE = '16px';
-const DISPLAY_N_ACTIONS = 2;
 
-const Action = ({ action, loading }: ActionProps) => {
+const Action = ({ action, loading, margin }: ActionProps) => {
   return (
     <Tooltip title={action.description} placement="top">
       <LoadingButton
@@ -30,6 +30,7 @@ const Action = ({ action, loading }: ActionProps) => {
         id={action.id}
         onClick={action.onClick}
         disabled={loading}
+        sx={{ margin }}
       >
         {action.label || action.name}
       </LoadingButton>
@@ -45,26 +46,46 @@ const ActionList = ({ actions }: { actions: IAction[] }) => {
     theme.breakpoints.down('sm')
   );
 
-  const renderActions = (items: IAction[]) =>
+  const renderActions = (items: IAction[], collapsed: boolean = false) =>
     items.map((action) => (
-      <Action key={action.id} action={action} loading={loading} />
+      <Action
+        key={action.id}
+        action={action}
+        loading={loading}
+        margin={collapsed ? 0 : '5px'}
+      />
     ));
 
   const displayedActions = isMobile
     ? null
-    : renderActions(actions.slice(0, DISPLAY_N_ACTIONS));
+    : renderActions(actions.filter((a) => !a.collapsed));
   const drawerActions = isMobile
-    ? renderActions(actions)
-    : renderActions(actions.slice(DISPLAY_N_ACTIONS, actions.length));
+    ? renderActions(actions, true)
+    : renderActions(
+        actions.filter((a) => a.collapsed),
+        true
+      );
 
   return (
-    <Box display="flex" alignItems="center" id="actions-list" margin="auto">
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent={displayedActions?.length ? 'space-between' : 'end'}
+      id="actions-list"
+      margin="auto"
+      width={'100%'}
+    >
       {displayedActions ? (
-        <Stack direction="row" spacing={1}>
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          alignItems="center"
+          justifyContent="center"
+        >
           {displayedActions}
-        </Stack>
+        </Box>
       ) : null}
-      {isMobile || actions.length > DISPLAY_N_ACTIONS ? (
+      {isMobile || drawerActions?.length ? (
         <>
           <Tooltip title="Actions">
             <IconButton
@@ -82,12 +103,14 @@ const ActionList = ({ actions }: { actions: IAction[] }) => {
             open={!!anchorEl}
             onClose={() => setAnchorEl(null)}
             sx={{ marginTop: 1 }}
-            PaperProps={{
-              sx: {
-                boxShadow: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? '0px 2px 4px 0px #0000000D'
-                    : '0px 10px 10px 0px #0000000D'
+            slotProps={{
+              paper: {
+                sx: {
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'light'
+                      ? '0px 2px 4px 0px #0000000D'
+                      : '0px 10px 10px 0px #0000000D'
+                }
               }
             }}
           >
