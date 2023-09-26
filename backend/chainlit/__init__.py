@@ -151,6 +151,22 @@ def on_chat_start(func: Callable) -> Callable:
 
 
 @trace
+def on_chat_end(func: Callable) -> Callable:
+    """
+    Hook to react to the user websocket disconnect event.
+
+    Args:
+        func (Callable[], Any]): The disconnect hook to execute.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_chat_end = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
 def author_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
@@ -285,6 +301,7 @@ __all__ = [
     "AskUserMessage",
     "AskFileMessage",
     "on_chat_start",
+    "on_chat_end",
     "on_stop",
     "action_callback",
     "author_rename",
