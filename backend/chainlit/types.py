@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Literal, TypedDict, Union
+from typing import Dict, List, Literal, Optional, TypedDict, Union
 
 from chainlit.client.base import ConversationFilter, Pagination
 from chainlit.prompt import Prompt
@@ -46,6 +46,11 @@ class AskFileResponse:
     content: bytes
 
 
+class Feedback(BaseModel):
+    status: Literal[-1, 0, 1]
+    comment: Optional[str]
+
+
 class CompletionRequest(BaseModel):
     prompt: Prompt
     userEnv: Dict[str, str]
@@ -53,7 +58,7 @@ class CompletionRequest(BaseModel):
 
 class UpdateFeedbackRequest(BaseModel):
     messageId: str
-    feedback: Literal[-1, 0, 1]
+    feedback: Feedback
 
 
 class DeleteConversationRequest(BaseModel):

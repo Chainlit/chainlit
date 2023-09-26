@@ -30,7 +30,8 @@ export interface IMessage {
   waitForAnswer?: boolean;
   content?: string;
   createdAt: number | string;
-  humanFeedback?: number;
+  humanFeedback?: IFeedback['status'];
+  humanFeedbackComment?: IFeedback['comment'];
   disableHumanFeedback?: boolean;
   language?: string;
   indent?: number;
@@ -51,4 +52,9 @@ export interface IMessageContent {
   id?: string;
   language?: string;
   preserveSize?: boolean;
+}
+
+export interface IFeedback {
+  status: -1 | 0 | 1;
+  comment?: string;
 }

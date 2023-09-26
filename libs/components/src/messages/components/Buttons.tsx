@@ -53,7 +53,7 @@ const Buttons = ({ message, actions }: Props) => {
     !!message.content;
 
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" spacing={1} alignItems="center">
       {editButton}
       {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}
       {scopedActions.length ? <ActionList actions={scopedActions} /> : null}

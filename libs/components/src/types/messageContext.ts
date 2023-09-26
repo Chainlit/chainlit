@@ -1,6 +1,6 @@
 import { IAvatarElement, IMessageElement } from './element';
 import { IAsk } from './file';
-import { IMessage } from './message';
+import { IFeedback, IMessage } from './message';
 
 interface IMessageContext {
   askUser?: IAsk;
@@ -16,7 +16,7 @@ interface IMessageContext {
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
     messageId: string,
-    value: number,
+    value: IFeedback,
     onSuccess: () => void
   ) => void;
 }

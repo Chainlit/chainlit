@@ -18,6 +18,7 @@ interface ActionProps {
   loading: boolean;
 }
 
+const ICON_SIZE = '16px';
 const DISPLAY_N_ACTIONS = 2;
 
 const Action = ({ action, loading }: ActionProps) => {
@@ -72,7 +73,7 @@ const ActionList = ({ actions }: { actions: IAction[] }) => {
                 setAnchorEl(event.currentTarget)
               }
             >
-              <MoreHoriz />
+              <MoreHoriz sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
             </IconButton>
           </Tooltip>
           <Menu

@@ -6,6 +6,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   MessageContainer as CMessageContainer,
   IAction,
+  IFeedback,
   IMessage,
   IMessageElement
 } from '@chainlit/components';
@@ -62,12 +63,12 @@ const MessageContainer = ({
 
   const onFeedbackUpdated = async (
     messageId: string,
-    value: number,
+    feedback: IFeedback,
     onSuccess: () => void
   ) => {
     try {
       await toast.promise(
-        ChainlitAPI.setHumanFeedback(messageId!, value, accessToken),
+        ChainlitAPI.setHumanFeedback(messageId!, feedback, accessToken),
         {
           loading: 'Updating...',
           success: 'Feedback updated!',
@@ -79,7 +80,8 @@ const MessageContainer = ({
 
       const globalMessage = messages.find((m) => m.id === messageId);
       if (globalMessage) {
-        globalMessage.humanFeedback = value;
+        globalMessage.humanFeedback = feedback.status;
+        globalMessage.humanFeedbackComment = feedback.comment;
       }
       onSuccess();
     } catch (err) {
