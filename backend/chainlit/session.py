@@ -41,9 +41,9 @@ class BaseSession:
             return None
 
         if isinstance(self, HTTPSession):
-            source = "api"
+            tags = ["api"]
         else:
-            source = "chat"
+            tags = ["chat"]
 
         if not self.conversation_id:
             async with self.lock:
@@ -51,7 +51,7 @@ class BaseSession:
                     self.user.id if isinstance(self.user, PersistedAppUser) else None
                 )
                 self.conversation_id = await chainlit_client.create_conversation(
-                    app_user_id=app_user_id, source=source
+                    app_user_id=app_user_id, tags=tags
                 )
 
         return self.conversation_id

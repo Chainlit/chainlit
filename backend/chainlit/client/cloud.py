@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
 from chainlit.config import config
@@ -116,21 +116,21 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         return True
 
     async def create_conversation(
-        self, app_user_id: Optional[str], source: Optional[str]
+        self, app_user_id: Optional[str], tags: Optional[List[str]]
     ) -> Optional[str]:
         mutation = """
-        mutation ($appUserId: String, $source: String) {
-            createConversation (appUserId: $appUserId, source: $source) {
+        mutation ($appUserId: String, $tags: [String!]) {
+            createConversation (appUserId: $appUserId, tags: $tags) {
                 id
             }
         }
         """
-        variables = {}
+        variables = {}  # type: Dict[str, Any]
         if app_user_id is not None:
             variables["appUserId"] = app_user_id
 
-        if source is not None:
-            variables["source"] = source
+        if tags:
+            variables["tags"] = tags
 
         res = await self.mutation(mutation, variables)
 
@@ -181,7 +181,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             conversation(id: $id) {
                 id
                 createdAt
-                source
+                tags
                 messages {
                     id
                     isError
@@ -245,7 +245,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             node {
             id
             createdAt
-            source
+            tags
             elementCount
             messageCount
             appUser {
