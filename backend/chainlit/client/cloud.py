@@ -191,6 +191,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                     content
                     waitForAnswer
                     humanFeedback
+                    humanFeedbackComment
                     disableHumanFeedback
                     language
                     prompt
@@ -298,8 +299,9 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         variables = {
             "messageId": message_id,
             "humanFeedback": feedback,
-            "humanFeedbackComment": feedbackComment,
         }
+        if feedbackComment:
+            variables["humanFeedbackComment"] = feedbackComment
         res = await self.mutation(mutation, variables)
         self.check_for_errors(res, raise_error=True)
 
