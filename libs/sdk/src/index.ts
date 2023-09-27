@@ -274,6 +274,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
             conversation(id: $id) {
                 id
                 createdAt
+                tags
                 messages {
                     id
                     isError
@@ -283,6 +284,7 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
                     content
                     waitForAnswer
                     humanFeedback
+                    humanFeedbackComment
                     disableHumanFeedback
                     language
                     prompt
@@ -370,17 +372,24 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
 
   async setHumanFeedback(
     messageId: string,
-    feedback: number
+    feedback: number,
+    feedbackComment?: string
   ): Promise<boolean> {
     const mutation = `
-        mutation ($messageId: ID!, $humanFeedback: Int!) {
-            setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback) {
-                id
-                humanFeedback
-            }
-        }
+    mutation ($messageId: ID!, $humanFeedback: Int!, $humanFeedbackComment: String) {
+      setHumanFeedback(messageId: $messageId, humanFeedback: $humanFeedback, humanFeedbackComment: $humanFeedbackComment) {
+              id
+              humanFeedback
+              humanFeedbackComment
+      }
+  }
     `;
-    const variables = { messageId: messageId, humanFeedback: feedback };
+    const variables = {
+      messageId: messageId,
+      humanFeedback: feedback,
+      humanFeedbackComment: feedbackComment
+    };
+
     await this.mutation(mutation, variables);
     return true;
   }
