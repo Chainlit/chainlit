@@ -113,6 +113,10 @@ async def connection_successful(sid):
 @socket.on("clear_session")
 async def clean_session(sid):
     if session := WebsocketSession.get(sid):
+        if config.code.on_chat_end:
+            init_ws_context(session)
+            """Call the on_chat_end function provided by the developer."""
+            await config.code.on_chat_end()
         # Clean up the user session
         if session.id in user_sessions:
             user_sessions.pop(session.id)
@@ -122,6 +126,12 @@ async def clean_session(sid):
 
 @socket.on("disconnect")
 async def disconnect(sid):
+    session = WebsocketSession.get(sid)
+    if config.code.on_chat_end and session:
+        init_ws_context(session)
+        """Call the on_chat_end function provided by the developer."""
+        await config.code.on_chat_end()
+
     async def disconnect_on_timeout(sid):
         await asyncio.sleep(config.project.session_timeout)
         if session := WebsocketSession.get(sid):
@@ -139,7 +149,7 @@ async def stop(sid):
     if session := WebsocketSession.get(sid):
         trace_event("stop_task")
 
-        context = init_ws_context(session)
+        init_ws_context(session)
         await Message(author="System", content="Task stopped by the user.").send()
 
         session.should_stop = True

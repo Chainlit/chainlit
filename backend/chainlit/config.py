@@ -166,6 +166,7 @@ class CodeSettings:
     ] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
+    on_chat_end: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
     on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
