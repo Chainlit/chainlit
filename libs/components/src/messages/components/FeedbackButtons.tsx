@@ -105,7 +105,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
   return (
     <>
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} color="text.secondary">
         <ButtonGroup variant="text" color="inherit" sx={{ height: 26 }}>
           {buttons.map((FeedbackButton, index) => (
             <FeedbackButton key={`feedback-button-${index}`} />
