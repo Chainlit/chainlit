@@ -50,9 +50,9 @@ class ChatVertexAIProvider(BaseProvider):
         del llm_settings["model"]
         chat = model.start_chat()
 
-        def create_event_stream():
-            for response in cl.make_async(
-                chat.send_message_streaming(prompt[0].formatted, **llm_settings)
+        async def create_event_stream():
+            for response in await cl.make_async(chat.send_message_streaming)(
+                prompt[0].formatted, **llm_settings
             ):
                 yield response.text
 
@@ -82,9 +82,9 @@ class GenerationVertexAIProvider(BaseProvider):
             )
         del llm_settings["model"]
 
-        def create_event_stream():
-            for response in cl.make_async(
-                model.predict_streaming(prompt, **llm_settings)
+        async def create_event_stream():
+            for response in await cl.make_async(model.predict_streaming)(
+                prompt, **llm_settings
             ):
                 yield response.text
 
