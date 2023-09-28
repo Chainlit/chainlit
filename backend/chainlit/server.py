@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
+from starlette.datastructures import URL
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -47,6 +48,28 @@ from fastapi_socketio import SocketManager
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
+
+
+def get_user_facing_url(url: URL):
+    """
+    Return the user facing URL for a given URL.
+    Handles proxies and subdirectories installs (example: https://example.com/my-chainlit-app/).
+    """
+    url = url.replace(query="", fragment="")
+
+    # No config, we keep the URL as is
+    if config.ui.url == "":
+        return url.__str__()
+
+    config_url = URL(config.ui.url).replace(
+        query="",
+        fragment="",
+    )
+    # Remove trailing slash from config URL
+    if config_url.path.endswith("/"):
+        config_url = config_url.replace(path=config_url.path[:-1])
+
+    return config_url.__str__() + url.path
 
 
 @asynccontextmanager
@@ -281,7 +304,7 @@ async def oauth_login(provider_id: str, request: Request):
     params = urllib.parse.urlencode(
         {
             "client_id": provider.client_id,
-            "redirect_uri": f"{request.url}/callback",
+            "redirect_uri": f"{get_user_facing_url(request.url)}/callback",
             "state": random,
             **provider.authorize_params,
         }
@@ -340,7 +363,7 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
-    url = request.url.replace(query="").__str__()
+    url = get_user_facing_url(request.url)
     token = await provider.get_token(code, url)
 
     (raw_user_data, default_app_user) = await provider.get_user_info(token)

@@ -142,6 +142,7 @@ class FeaturesSettings(DataClassJsonMixin):
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
+    url: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
