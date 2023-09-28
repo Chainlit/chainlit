@@ -7,8 +7,8 @@ import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
 import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
-import { Buttons } from './components/Buttons';
 import { DetailsButton } from './components/DetailsButton';
+import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
 
 import { IAction } from 'src/types/action';
@@ -108,7 +108,7 @@ const Message = ({
             {!isRunning && isLast && message.waitForAnswer && (
               <AskUploadButton />
             )}
-            <Buttons message={message} actions={actions} />
+            <MessageButtons message={message} actions={actions} />
           </Stack>
         </Stack>
       </Box>
