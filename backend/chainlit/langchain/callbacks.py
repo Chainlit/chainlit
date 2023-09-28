@@ -25,6 +25,9 @@ def get_llm_settings(invocation_params: Union[Dict, None], serialized: Dict[str,
 
     model_kwargs = invocation_params.pop("model_kwargs", {})
 
+    if model_kwargs is None:
+        model_kwargs = {}
+
     merged = {
         **invocation_params,
         **model_kwargs,

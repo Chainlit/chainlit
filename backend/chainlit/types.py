@@ -54,7 +54,7 @@ class CompletionRequest(BaseModel):
 class UpdateFeedbackRequest(BaseModel):
     messageId: str
     feedback: Literal[-1, 0, 1]
-    feedbackComment: Optional[str]
+    feedbackComment: Optional[str] = None
 
 
 class DeleteConversationRequest(BaseModel):

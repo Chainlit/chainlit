@@ -26,7 +26,7 @@ export default function Conversation() {
   const actions: IAction[] = [];
 
   return (
-    <Box display="flex" flexGrow={1} width="100%" overflow="scroll">
+    <Box display="flex" flexGrow={1} width="100%">
       <SideView>
         <Box my={1} />
         <MessageContainer
