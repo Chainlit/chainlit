@@ -66,7 +66,10 @@ hide_cot = false
 
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
-# custom_css = '/public/test.css'
+# custom_css = "/public/test.css"
+
+# If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
+# base_url = "https://mydomain.com"
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -150,6 +153,9 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    # If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
+    # Example: https://mydomain.com
+    base_url: Optional[str] = None
 
 
 @dataclass()

@@ -44,6 +44,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager
+from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
@@ -206,6 +207,28 @@ def get_html_template():
         return content
 
 
+def get_user_facing_url(url: URL):
+    """
+    Return the user facing URL for a given URL.
+    Handles deployment with proxies (like cloud run).
+    """
+    url = url.replace(query="", fragment="")
+
+    # No config, we keep the URL as is
+    if not config.ui.base_url:
+        return url.__str__()
+
+    config_url = URL(config.ui.base_url).replace(
+        query="",
+        fragment="",
+    )
+    # Remove trailing slash from config URL
+    if config_url.path.endswith("/"):
+        config_url = config_url.replace(path=config_url.path[:-1])
+
+    return config_url.__str__() + url.path
+
+
 @app.get("/auth/config")
 async def auth(request: Request):
     return get_configuration()
@@ -281,7 +304,7 @@ async def oauth_login(provider_id: str, request: Request):
     params = urllib.parse.urlencode(
         {
             "client_id": provider.client_id,
-            "redirect_uri": f"{request.url}/callback",
+            "redirect_uri": f"{get_user_facing_url(request.url)}/callback",
             "state": random,
             **provider.authorize_params,
         }
@@ -340,7 +363,7 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
-    url = request.url.replace(query="").__str__()
+    url = get_user_facing_url(request.url)
     token = await provider.get_token(code, url)
 
     (raw_user_data, default_app_user) = await provider.get_user_info(token)
