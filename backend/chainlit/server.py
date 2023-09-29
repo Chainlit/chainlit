@@ -210,7 +210,7 @@ def get_html_template():
 def get_user_facing_url(url: URL):
     """
     Return the user facing URL for a given URL.
-    Handles proxies and subdirectories installs (example: https://example.com/my-chainlit-app/).
+    Handles deployment with proxies (like cloud run).
     """
     url = url.replace(query="", fragment="")
 
