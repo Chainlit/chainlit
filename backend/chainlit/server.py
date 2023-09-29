@@ -363,7 +363,7 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
-    url = get_user_facing_url(request.url).replace(query="").__str__()
+    url = get_user_facing_url(request.url)
     token = await provider.get_token(code, url)
 
     (raw_user_data, default_app_user) = await provider.get_user_info(token)
