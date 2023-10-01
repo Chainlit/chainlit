@@ -2,18 +2,19 @@ import { useRecoilValue } from 'recoil';
 
 import { Stack, Typography } from '@mui/material';
 
-import LogoDark from 'assets/logo_dark.svg';
-import LogoLight from 'assets/logo_light.svg';
+import { Logo } from 'components/atoms/logo';
 
-import { settingsState } from 'state/settings';
+import { projectSettingsState } from 'state/project';
 
 export default function WaterMark() {
-  const { theme } = useRecoilValue(settingsState);
-  const src = theme === 'light' ? LogoLight : LogoDark;
+  const pSettings = useRecoilValue(projectSettingsState);
+  const githubLink =
+    pSettings?.ui?.github ?? 'https://github.com/Chainlit/chainlit';
+  const watermarkText = pSettings?.ui?.watermark_text ?? 'Built with';
   return (
     <Stack mx="auto">
       <a
-        href="https://github.com/Chainlit/chainlit"
+        href={githubLink}
         target="_blank"
         style={{
           display: 'flex',
@@ -22,11 +23,9 @@ export default function WaterMark() {
         }}
       >
         <Typography fontSize="12px" color="text.secondary">
-          Built with
+          {watermarkText}
         </Typography>
-        <img
-          src={src}
-          alt="watermark"
+        <Logo
           style={{ width: 65, filter: 'grayscale(1)', marginLeft: '4px' }}
         />
       </a>

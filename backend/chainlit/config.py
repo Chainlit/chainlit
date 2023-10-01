@@ -71,6 +71,9 @@ hide_cot = false
 # If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
 # base_url = "https://mydomain.com"
 
+# The text displayed in the watermark. The original text is "Built with"
+# watermark_text = "Built by"
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
@@ -156,6 +159,8 @@ class UISettings(DataClassJsonMixin):
     # If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
     # Example: https://mydomain.com
     base_url: Optional[str] = None
+    # Optional watermark text, like 'Built by' or 'Built with'
+    watermark_text: Optional[str] = None
 
 
 @dataclass()
