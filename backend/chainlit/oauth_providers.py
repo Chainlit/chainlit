@@ -43,7 +43,9 @@ class GithubOAuthProvider(OAuthProvider):
             "client_secret": self.client_secret,
             "code": code,
         }
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.post(
                 "https://github.com/login/oauth/access_token",
                 json=payload,
@@ -58,7 +60,9 @@ class GithubOAuthProvider(OAuthProvider):
                 return token
 
     async def get_user_info(self, token: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.get(
                 "https://api.github.com/user",
                 headers={"Authorization": f"token {token}"},
@@ -103,7 +107,9 @@ class GoogleOAuthProvider(OAuthProvider):
             "grant_type": "authorization_code",
             "redirect_uri": url,
         }
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.post(
                 "https://oauth2.googleapis.com/token",
                 data=payload,
@@ -117,7 +123,9 @@ class GoogleOAuthProvider(OAuthProvider):
                 return token
 
     async def get_user_info(self, token: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.get(
                 "https://www.googleapis.com/userinfo/v2/me",
                 headers={"Authorization": f"Bearer {token}"},
@@ -157,7 +165,9 @@ class AzureADOAuthProvider(OAuthProvider):
             "grant_type": "authorization_code",
             "redirect_uri": url,
         }
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.post(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 data=payload,
@@ -172,7 +182,9 @@ class AzureADOAuthProvider(OAuthProvider):
                 return token
 
     async def get_user_info(self, token: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.get(
                 "https://graph.microsoft.com/v1.0/me",
                 headers={"Authorization": f"Bearer {token}"},
@@ -214,7 +226,9 @@ class OktaOAuthProvider(OAuthProvider):
             "grant_type": "authorization_code",
             "redirect_uri": url,
         }
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.post(
                 f"{self.domain}/oauth2/default/v1/token",
                 data=payload,
@@ -229,7 +243,9 @@ class OktaOAuthProvider(OAuthProvider):
                 return token
 
     async def get_user_info(self, token: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.get(
                 f"{self.domain}/oauth2/default/v1/userinfo",
                 headers={"Authorization": f"Bearer {token}"},
@@ -268,7 +284,9 @@ class Auth0OAuthProvider(OAuthProvider):
             "grant_type": "authorization_code",
             "redirect_uri": url,
         }
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.post(
                 f"{self.domain}/oauth/token",
                 json=payload,
@@ -282,7 +300,9 @@ class Auth0OAuthProvider(OAuthProvider):
                 return token
 
     async def get_user_info(self, token: str):
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with aiohttp.ClientSession(
+            trust_env=True, raise_for_status=True
+        ) as session:
             async with session.get(
                 f"{self.domain}/userinfo",
                 headers={"Authorization": f"Bearer {token}"},
