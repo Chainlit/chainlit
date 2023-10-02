@@ -145,7 +145,16 @@ class AzureADOAuthProvider(OAuthProvider):
         "OAUTH_AZURE_AD_CLIENT_SECRET",
         "OAUTH_AZURE_AD_TENANT_ID",
     ]
-    authorize_url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+    authorize_url = (
+        f"https://login.microsoftonline.com/{os.environ.get('OAUTH_AZURE_AD_TENANT_ID', '')}/oauth2/v2.0/authorize"
+        if os.environ.get("OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT")
+        else "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+    )
+    token_url = (
+        f"https://login.microsoftonline.com/{os.environ.get('OAUTH_AZURE_AD_TENANT_ID', '')}/oauth2/v2.0/token"
+        if os.environ.get("OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT")
+        else "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    )
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_AZURE_AD_CLIENT_ID")
@@ -169,7 +178,7 @@ class AzureADOAuthProvider(OAuthProvider):
             trust_env=True, raise_for_status=True
         ) as session:
             async with session.post(
-                "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                self.token_url,
                 data=payload,
             ) as result:
                 json = await result.json()
