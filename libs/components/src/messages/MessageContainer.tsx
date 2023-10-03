@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { IMessage, INestedMessage } from 'src/types/message';
+import { INestedMessage } from 'src/types/message';
 import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';

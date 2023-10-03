@@ -97,7 +97,7 @@ const useChat = () => {
         setSession((s) => ({ ...s!, error: false }));
       });
 
-      socket.on('connect_error', (err) => {
+      socket.on('connect_error', (_) => {
         setSession((s) => ({ ...s!, error: true }));
       });
 
