@@ -25,7 +25,7 @@ class UserSession:
     """
 
     def get(self, key, default=None):
-        if not context.emitter:
+        if not context.session:
             return default
 
         if context.session.id not in user_sessions:
@@ -46,7 +46,7 @@ class UserSession:
         return user_session.get(key, default)
 
     def set(self, key, value):
-        if not context.emitter:
+        if not context.session:
             return None
 
         if context.session.id not in user_sessions:
