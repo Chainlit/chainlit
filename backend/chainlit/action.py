@@ -21,6 +21,8 @@ class Action(DataClassJsonMixin):
     forId: Optional[str] = None
     # The ID of the action
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    # Show the action in a drawer menu
+    collapsed: bool = False
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")

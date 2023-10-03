@@ -31,12 +31,14 @@ async def main():
             name="multiple actions",
             value="multiple action one",
             label="multiple action one",
+            collapsed=True,
         ),
         cl.Action(
             id="multiple-action-two",
             name="multiple actions",
             value="multiple action two",
             label="multiple action two",
+            collapsed=True,
         ),
         cl.Action(id="all-actions-removed", name="all actions removed", value="test"),
     ]

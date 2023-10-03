@@ -4,6 +4,8 @@ import { ComponentProps } from 'react';
 import { Message } from 'src/messages/Message';
 import { describe, expect, it } from 'vitest';
 
+import { ThemeProvider, createTheme } from '@mui/material';
+
 describe('Message', () => {
   const defaultProps: ComponentProps<typeof Message> = {
     message: {
@@ -32,14 +34,24 @@ describe('Message', () => {
   };
 
   it('renders message content', () => {
-    const { getByText } = render(<Message {...defaultProps} />);
+    const theme = createTheme({});
+    const { getByText } = render(
+      <ThemeProvider theme={theme}>
+        <Message {...defaultProps} />
+      </ThemeProvider>
+    );
     const messageContent = getByText('Hello');
 
     expect(messageContent).toBeInTheDocument();
   });
 
   it('toggles the detail button', () => {
-    const { getByRole } = render(<Message {...defaultProps} />);
+    const theme = createTheme({});
+    const { getByRole } = render(
+      <ThemeProvider theme={theme}>
+        <Message {...defaultProps} />
+      </ThemeProvider>
+    );
     let detailsButton = getByRole('button', { name: 'Took 1 step' });
 
     expect(detailsButton).toBeInTheDocument();
@@ -54,33 +66,39 @@ describe('Message', () => {
   });
 
   it('preserves the content size when message is streamed', () => {
+    const theme = createTheme({});
     const { getByRole } = render(
-      <Message
-        {...defaultProps}
-        message={{
-          ...defaultProps.message,
-          content: 'hello '.repeat(650),
-          streaming: true
-        }}
-      />
+      <ThemeProvider theme={theme}>
+        <Message
+          {...defaultProps}
+          message={{
+            ...defaultProps.message,
+            content: 'hello '.repeat(650),
+            streaming: true
+          }}
+        />
+      </ThemeProvider>
     );
 
     expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
   });
 
   it('preserves the content size when app settings defaultCollapseContent is false', () => {
+    const theme = createTheme({});
     const { getByRole } = render(
-      <MessageContext.Provider
-        value={{ ...defaultMessageContext, defaultCollapseContent: false }}
-      >
-        <Message
-          {...defaultProps}
-          message={{
-            ...defaultProps.message,
-            content: 'hello '.repeat(650)
-          }}
-        />
-      </MessageContext.Provider>
+      <ThemeProvider theme={theme}>
+        <MessageContext.Provider
+          value={{ ...defaultMessageContext, defaultCollapseContent: false }}
+        >
+          <Message
+            {...defaultProps}
+            message={{
+              ...defaultProps.message,
+              content: 'hello '.repeat(650)
+            }}
+          />
+        </MessageContext.Provider>
+      </ThemeProvider>
     );
 
     expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
