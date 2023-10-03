@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 
 import { Box } from '@mui/material';
 
-import { IAction } from '@chainlit/components';
+import { IAction, nestMessages } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/message/container';
@@ -30,9 +30,11 @@ export default function Conversation() {
       <SideView>
         <Box my={1} />
         <MessageContainer
+          loading={false}
+          avatars={[]}
           actions={actions}
           elements={elements}
-          messages={conversation.messages}
+          messages={nestMessages(conversation.messages)}
         />
       </SideView>
     </Box>

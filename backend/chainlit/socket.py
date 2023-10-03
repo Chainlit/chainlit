@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
-from chainlit.client.base import MessageDict
+from chainlit.client.cloud import MessageDict, chainlit_client
 from chainlit.config import config
 from chainlit.context import init_ws_context
 from chainlit.logger import logger
@@ -131,6 +131,10 @@ async def disconnect(sid):
         init_ws_context(session)
         """Call the on_chat_end function provided by the developer."""
         await config.code.on_chat_end()
+
+    if chainlit_client and session and not session.has_user_message:
+        if session.conversation_id:
+            await chainlit_client.delete_conversation(session.conversation_id)
 
     async def disconnect_on_timeout(sid):
         await asyncio.sleep(config.project.session_timeout)

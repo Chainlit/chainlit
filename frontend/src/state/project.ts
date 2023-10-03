@@ -1,5 +1,7 @@
 import { atom } from 'recoil';
 
+import { IMessage, IMessageElement, TFormInput } from '@chainlit/components';
+
 export interface IProjectSettings {
   markdown?: string;
   ui: {
@@ -17,4 +19,19 @@ export interface IProjectSettings {
 export const projectSettingsState = atom<IProjectSettings | undefined>({
   key: 'ProjectSettings',
   default: undefined
+});
+
+export const sideViewState = atom<IMessageElement | undefined>({
+  key: 'SideView',
+  default: undefined
+});
+
+export const highlightMessage = atom<IMessage['id'] | null>({
+  key: 'HighlightMessage',
+  default: null
+});
+
+export const chatSettingsOpenState = atom<boolean>({
+  key: 'chatSettingsOpen',
+  default: false
 });

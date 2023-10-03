@@ -27,6 +27,7 @@ class BaseSession:
         self.user = user
         self.token = token
         self.root_message = root_message
+        self.has_user_message = False
         self.user_env = user_env or {}
 
         self.id = id

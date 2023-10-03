@@ -8,18 +8,6 @@ export const accessTokenState = atom<string | undefined>({
   default: undefined
 });
 
-const sessionIdAtom = atom<string>({
-  key: 'SessionId',
-  default: uuidv4()
-});
-
-export const sessionIdState = selector({
-  key: 'SessionIdSelector',
-  get: ({ get }) => get(sessionIdAtom),
-  set: ({ set }, newValue) =>
-    set(sessionIdAtom, newValue instanceof DefaultValue ? uuidv4() : newValue)
-});
-
 export const roleState = atom<Role>({
   key: 'Role',
   default: undefined

@@ -12,7 +12,6 @@ import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
 import PromptPlayground from 'components/organisms/playground';
-import Socket from 'components/socket';
 
 import { settingsState } from 'state/settings';
 
@@ -92,7 +91,6 @@ function App() {
       <Box display="flex" height="100vh" width="100vw">
         <PromptPlayground />
         <ChatSettingsModal />
-        <Socket />
         <Hotkeys />
         <SettingsModal />
         <RouterProvider router={router} />

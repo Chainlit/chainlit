@@ -37,9 +37,6 @@
     }
   },
   "exclude": ["**/test", "**/dist", "**/types", "**/__tests__"],
-  "typeAcquisition": {
-    "enable": true
-  },
   "include": ["src", "theme", "hooks", "utils", "contexts", "tests"],
   "types": ["@testing-library/jest-dom", "node"]
 }
