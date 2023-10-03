@@ -26,15 +26,9 @@ dependencies:
   formik:
     specifier: ^2.4.3
     version: 2.4.3(react@18.2.0)
-  lodash.clonedeep:
-    specifier: ^4.5.0
-    version: 4.5.0
-  lodash.debounce:
-    specifier: ^4.0.8
-    version: 4.0.8
-  lodash.mapvalues:
-    specifier: ^4.6.0
-    version: 4.6.0
+  lodash:
+    specifier: ^4.17.21
+    version: 4.17.21
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -85,15 +79,9 @@ dependencies:
     version: 1.2.0
 
 devDependencies:
-  '@types/lodash.clonedeep':
-    specifier: ^4.5.7
-    version: 4.5.7
-  '@types/lodash.debounce':
-    specifier: ^4.0.7
-    version: 4.0.7
-  '@types/lodash.mapvalues':
-    specifier: ^4.6.7
-    version: 4.6.7
+  '@types/lodash':
+    specifier: ^4.14.199
+    version: 4.14.199
   '@types/node':
     specifier: ^20.5.7
     version: 20.5.7
@@ -897,24 +885,6 @@ packages:
       '@types/unist': 2.0.8
     dev: false
 
-  /@types/lodash.clonedeep@4.5.7:
-    resolution: {integrity: sha512-ccNqkPptFIXrpVqUECi60/DFxjNKsfoQxSQsgcBJCX/fuX1wgyQieojkcWH/KpE3xzLoWN/2k+ZeGqIN3paSvw==}
-    dependencies:
-      '@types/lodash': 4.14.199
-    dev: true
-
-  /@types/lodash.debounce@4.0.7:
-    resolution: {integrity: sha512-X1T4wMZ+gT000M2/91SYj0d/7JfeNZ9PeeOldSNoE/lunLeQXKvkmIumI29IaKMotU/ln/McOIvgzZcQ/3TrSA==}
-    dependencies:
-      '@types/lodash': 4.14.199
-    dev: true
-
-  /@types/lodash.mapvalues@4.6.7:
-    resolution: {integrity: sha512-yGTo9zD60Iw1Q+YBvx4Ad7RDj5rA6EpvYTpVPVsfe6pwHcwDcGChSqL1n2sPBMbCeHJ3R5kcaqpkdlrFe/y4Vg==}
-    dependencies:
-      '@types/lodash': 4.14.199
-    dev: true
-
   /@types/lodash@4.14.199:
     resolution: {integrity: sha512-Vrjz5N5Ia4SEzWWgIVwnHNEnb1UE1XMkvY5DGXrAeOGE9imk0hgTHh5GyDjLDJi9OTCn9oo9dXH1uToK1VRfrg==}
     dev: true
@@ -1309,18 +1279,6 @@ packages:
 
   /lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
-    dev: false
-
-  /lodash.clonedeep@4.5.0:
-    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
-    dev: false
-
-  /lodash.debounce@4.0.8:
-    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
-    dev: false
-
-  /lodash.mapvalues@4.6.0:
-    resolution: {integrity: sha512-JPFqXFeZQ7BfS00H58kClY7SPVeHertPE0lNuCyZ26/XlN8TvakYD7b9bGyNmXbT/D3BbtPAAmq90gPWqLkxlQ==}
     dev: false
 
   /lodash@4.17.21:

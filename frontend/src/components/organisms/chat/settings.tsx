@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import mapValues from 'lodash.mapvalues';
+import mapValues from 'lodash/mapvalues';
 import { useRecoilState } from 'recoil';
 
 import {
