@@ -115,14 +115,9 @@ def run_chainlit(target: str):
     envvar="NO_CACHE",
     help="Useful to disable third parties cache, such as langchain.",
 )
-@click.option(
-    "--db",
-    type=click.Choice(["cloud", "local"]),
-    help="Useful to control database mode when running CI.",
-)
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
+def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
@@ -130,16 +125,12 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, db, host, port):
     if ci:
         logger.info("Running in CI mode")
 
-        if db:
-            config.project.database = db
-
         config.project.enable_telemetry = False
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
         # This is required for authenticationt tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
-
     else:
         trace_event("chainlit run")
 
