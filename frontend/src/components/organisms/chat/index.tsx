@@ -1,5 +1,4 @@
-import { wsEndpoint } from 'api';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,15 +14,13 @@ import { useAuth } from 'hooks/auth';
 
 import { chatHistoryState } from 'state/chatHistory';
 import { projectSettingsState } from 'state/project';
-import { userEnvState } from 'state/user';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
 import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
-  const { user, accessToken, isAuthenticated } = useAuth();
-  const userEnv = useRecoilValue(userEnvState);
+  const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -32,7 +29,6 @@ const Chat = () => {
     sendMessage,
     replyMessage,
     callAction,
-    connect,
     tasklists,
     error,
     messages,
@@ -42,12 +38,6 @@ const Chat = () => {
     avatars,
     loading
   } = useChat();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      connect(wsEndpoint, userEnv, accessToken);
-    }
-  }, [userEnv, accessToken, isAuthenticated, connect]);
 
   const onSubmit = useCallback(
     async (msg: string) => {
@@ -79,7 +69,7 @@ const Chat = () => {
       setAutoScroll(true);
       sendMessage(message);
     },
-    [user, isAuthenticated, pSettings, sendMessage]
+    [user, pSettings, sendMessage]
   );
 
   const onReply = useCallback(
