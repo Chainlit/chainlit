@@ -67,7 +67,8 @@ export const ChatPromptPlayground = forwardRef(
           sx={{
             flex: 1,
             height: 'auto',
-            overflow: 'scroll',
+            overflow: 'auto',
+            scrollbarGutter: 'stable',
             marginTop: 1,
             gap: 1
           }}
