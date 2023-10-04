@@ -33,7 +33,8 @@
       "theme/*": ["./theme/*"],
       "hooks/*": ["./hooks/*"],
       "utils/*": ["./utils/*"],
-      "contexts/*": ["./contexts/*"]
+      "contexts/*": ["./contexts/*"],
+      "react": ["./node_modules/@types/react"]
     }
   },
   "exclude": ["**/test", "**/dist", "**/types", "**/__tests__"],

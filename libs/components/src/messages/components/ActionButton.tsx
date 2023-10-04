@@ -18,7 +18,7 @@ const ActionButton = ({ action, margin }: ActionProps) => {
     <Tooltip title={action.description} placement="top">
       <LoadingButton
         size="small"
-        variant="outlined"
+        variant="contained"
         id={action.id}
         onClick={action.onClick}
         disabled={loading}

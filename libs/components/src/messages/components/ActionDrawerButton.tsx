@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { MoreVert } from '@mui/icons-material';
+import '@mui/icons-material/Bolt';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
@@ -19,13 +19,14 @@ const ActionDrawerButton = ({ actions }: { actions: IAction[] }) => {
     <>
       <Tooltip title="Actions">
         <IconButton
-          size="small"
+          color="primary"
           id="actions-drawer-button"
           onClick={(event: React.MouseEvent<HTMLElement>) =>
             setAnchorEl(event.currentTarget)
           }
+          edge="start"
         >
-          <MoreVert sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+          <Bolt sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
         </IconButton>
       </Tooltip>
       <Menu

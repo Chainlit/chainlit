@@ -125,7 +125,7 @@ const darkGreyButtonTheme = createTheme({
   shape,
   palette: {
     primary: {
-      main: grey[700],
+      main: grey[900],
       contrastText: grey[100]
     }
   }

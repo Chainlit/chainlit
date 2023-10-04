@@ -1,0 +1,66 @@
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import type { Theme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
+import { IAction } from 'src/types/action';
+import { IMessage } from 'src/types/message';
+
+import { ActionButton } from './ActionButton';
+import { ActionDrawerButton } from './ActionDrawerButton';
+
+interface Props {
+  message: IMessage;
+  actions: IAction[];
+}
+
+const MessageActions = ({ message, actions }: Props) => {
+  const isMobile = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down('sm')
+  );
+
+  const scopedActions = actions.filter((a) => {
+    if (a.forId) {
+      return a.forId === message.id;
+    }
+    return true;
+  });
+
+  const displayedActions = isMobile
+    ? []
+    : scopedActions.filter((a) => !a.collapsed);
+  const drawerActions = isMobile
+    ? scopedActions
+    : scopedActions.filter((a) => a.collapsed);
+
+  const show = displayedActions.length || drawerActions.length;
+
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <Stack
+      direction="row"
+      spacing={1}
+      alignItems="start"
+      justifyContent="space-between"
+      width="100%"
+    >
+      <Box id="actions-list">
+        {displayedActions.map((action) => (
+          <ActionButton
+            key={action.id}
+            action={action}
+            margin={'2px 8px 6px 0'}
+          />
+        ))}
+        {drawerActions.length ? (
+          <ActionDrawerButton actions={drawerActions} />
+        ) : null}
+      </Box>
+    </Stack>
+  );
+};
+
+export { MessageActions };

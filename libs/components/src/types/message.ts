@@ -46,10 +46,7 @@ export interface INestedMessage extends IMessage {
 }
 
 export interface IMessageContent {
-  authorIsUser?: boolean;
-  content?: string;
   elements: IMessageElement[];
-  id?: string;
-  language?: string;
+  message: IMessage;
   preserveSize?: boolean;
 }
