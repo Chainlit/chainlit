@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
-import { accessTokenState } from 'state/user';
+import { accessTokenState, userState } from 'state/user';
 
 import { IAppUser } from 'types/user';
 
@@ -19,7 +19,7 @@ export const useAuth = () => {
   }>('/auth/config', fetcher);
   const isReady = !!(!isLoadingConfig && config);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
-  const [user, setUser] = useState<IAppUser | null>(null);
+  const [user, setUser] = useRecoilState(userState);
 
   const logout = () => {
     removeToken();

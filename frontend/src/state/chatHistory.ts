@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { MessageHistory } from 'types/chatHistory';
+import { ConversationsHistory, MessageHistory } from 'types/chatHistory';
 
 const KEY = 'chat_history';
 
@@ -32,3 +32,14 @@ export const chatHistoryState = atom<{
   },
   effects: [localStorageEffect(KEY)]
 });
+
+export const conversationsHistoryState = atom<ConversationsHistory | undefined>(
+  {
+    key: 'ConversationsHistory',
+    default: {
+      conversations: [],
+      currentConversationId: undefined,
+      groupedConversations: undefined
+    }
+  }
+);
