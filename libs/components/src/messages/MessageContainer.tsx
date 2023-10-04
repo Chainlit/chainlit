@@ -54,6 +54,9 @@ const MessageContainer = ({
         display="flex"
         flexDirection="column"
         flexGrow={1}
+        sx={{
+          overflowY: 'auto'
+        }}
         onScroll={handleScroll}
       >
         <Messages

@@ -25,8 +25,7 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
       sx={{
         width: '100%',
         borderRadius: 1,
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? grey[800] : grey[200],
+        backgroundColor: (theme) => theme.palette.background.paper,
         boxSizing: 'border-box'
       }}
       direction="row"
