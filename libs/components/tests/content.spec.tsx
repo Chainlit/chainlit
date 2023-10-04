@@ -7,7 +7,16 @@ import { ITextElement } from 'src/types/element';
 
 it('renders the message content', () => {
   const { getByText } = render(
-    <MessageContent authorIsUser={false} elements={[]} content="Hello World" />
+    <MessageContent
+      message={{
+        authorIsUser: false,
+        content: 'Hello World',
+        id: 'test',
+        author: 'User',
+        createdAt: 0
+      }}
+      elements={[]}
+    />
   );
   expect(getByText('Hello World')).toBeInTheDocument();
 });
@@ -15,7 +24,13 @@ it('renders the message content', () => {
 it('highlights multiple sources correctly (no substring matching)', () => {
   const { getByRole } = render(
     <MessageContent
-      authorIsUser={false}
+      message={{
+        authorIsUser: false,
+        content: `Hello world source_121, source_1, source_12`,
+        id: 'test2',
+        author: 'Test',
+        createdAt: 0
+      }}
       elements={[
         {
           name: 'source_1',
@@ -36,7 +51,6 @@ it('highlights multiple sources correctly (no substring matching)', () => {
           content: 'hi'
         } as ITextElement
       ]}
-      content={`Hello world source_121, source_1, source_12`}
     />
   );
   expect(getByRole('link', { name: 'source_1' })).toBeInTheDocument();
@@ -47,7 +61,13 @@ it('highlights multiple sources correctly (no substring matching)', () => {
 it('highlights sources containing regex characters correctly', () => {
   const { getByRole } = render(
     <MessageContent
-      authorIsUser={false}
+      message={{
+        authorIsUser: false,
+        content: `Hello world: Document[1], source(12), page{12}`,
+        id: 'test2',
+        author: 'Test',
+        createdAt: 0
+      }}
       elements={[
         {
           name: 'Document[1]',
@@ -68,7 +88,6 @@ it('highlights sources containing regex characters correctly', () => {
           content: 'hi'
         } as ITextElement
       ]}
-      content={`Hello world: Document[1], source(12), page{12}`}
     />
   );
   expect(getByRole('link', { name: 'Document[1]' })).toBeInTheDocument();
@@ -79,7 +98,13 @@ it('highlights sources containing regex characters correctly', () => {
 it('preserves the box size when collapsing', () => {
   const { getByRole } = render(
     <MessageContent
-      authorIsUser={false}
+      message={{
+        authorIsUser: false,
+        content: 'hello'.repeat(650),
+        id: 'test2',
+        author: 'Test',
+        createdAt: 0
+      }}
       elements={[
         {
           name: 'source_1',
@@ -100,7 +125,6 @@ it('preserves the box size when collapsing', () => {
           content: 'hi'
         } as ITextElement
       ]}
-      content={'hello'.repeat(650)}
       preserveSize
     />
   );
