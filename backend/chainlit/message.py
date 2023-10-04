@@ -157,6 +157,7 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
         disable_human_feedback: Optional[bool] = False,
+        author_is_user: Optional[bool] = False,
     ):
         self.language = language
 
@@ -172,6 +173,7 @@ class Message(MessageBase):
             self.content = str(content)
 
         self.author = author
+        self.author_is_user = author_is_user
         self.prompt = prompt
         self.parent_id = parent_id
         self.indent = indent
@@ -191,6 +193,7 @@ class Message(MessageBase):
             parent_id=_dict.get("parentId"),
             indent=_dict.get("indent") or 0,
             disable_human_feedback=_dict.get("disableHumanFeedback"),
+            author_is_user=_dict.get("authorIsUser"),
         )
 
         if _id := _dict.get("id"):
@@ -205,6 +208,7 @@ class Message(MessageBase):
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
+            "authorIsUser": self.author_is_user,
             "language": self.language,
             "parentId": self.parent_id,
             "indent": self.indent,
