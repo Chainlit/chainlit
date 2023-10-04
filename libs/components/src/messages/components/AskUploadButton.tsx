@@ -1,6 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
-import { grey } from 'theme/palette';
 
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import LoadingButton from '@mui/lab/LoadingButton';
