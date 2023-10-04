@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import '@mui/icons-material/Bolt';
+import BoltIcon from '@mui/icons-material/Bolt';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
@@ -26,7 +26,7 @@ const ActionDrawerButton = ({ actions }: { actions: IAction[] }) => {
           }
           edge="start"
         >
-          <Bolt sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+          <BoltIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
         </IconButton>
       </Tooltip>
       <Menu
