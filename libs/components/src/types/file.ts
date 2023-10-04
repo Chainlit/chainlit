@@ -1,3 +1,5 @@
+import { IMessage } from './message';
+
 export interface FileSpec {
   accept?: string[] | Record<string, string[]>;
   max_size_mb?: number;
@@ -12,13 +14,8 @@ export interface IFileResponse {
   content: ArrayBuffer;
 }
 
-export interface IAskResponse {
-  content: string;
-  author: string;
-}
-
 export interface IAsk {
-  callback: (payload: IAskResponse | IFileResponse[]) => void;
+  callback: (payload: IMessage | IFileResponse[]) => void;
   spec: {
     type: 'text' | 'file';
     timeout: number;

@@ -6,7 +6,7 @@ import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
 import { FormInput, InputLabel, Toggle } from '@chainlit/components';
-import { useIsDarkMode } from '@chainlit/components/hooks';
+import { useIsDarkMode } from '@chainlit/components';
 import { green, grey, primary } from '@chainlit/components/theme';
 
 import { settingsState } from 'state/settings';

@@ -1,4 +1,4 @@
-import debounce from 'lodash.debounce';
+import { debounce } from 'lodash';
 import { useRef } from 'react';
 import { useRecoilState } from 'recoil';
 

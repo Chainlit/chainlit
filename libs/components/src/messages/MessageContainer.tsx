@@ -1,12 +1,11 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useEffect, useRef } from 'react';
-import { nestMessages } from 'utils/message';
 
 import Box from '@mui/material/Box';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { IMessage } from 'src/types/message';
+import { INestedMessage } from 'src/types/message';
 import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';
@@ -16,7 +15,7 @@ interface Props {
   autoScroll?: boolean;
   context: IMessageContext;
   elements: IMessageElement[];
-  messages: IMessage[];
+  messages: INestedMessage[];
   setAutoScroll?: (autoScroll: boolean) => void;
 }
 
@@ -29,7 +28,6 @@ const MessageContainer = ({
   setAutoScroll
 }: Props) => {
   const ref = useRef<HTMLDivElement>();
-  const nestedMessages = nestMessages(messages);
 
   useEffect(() => {
     if (!ref.current || !autoScroll) {
@@ -59,7 +57,7 @@ const MessageContainer = ({
       >
         <Messages
           indent={0}
-          messages={nestedMessages}
+          messages={messages}
           elements={elements}
           actions={actions}
         />

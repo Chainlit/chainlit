@@ -18,10 +18,7 @@
     "@mui/material": "^5.14.10",
     "@mui/lab": "^5.0.0-alpha.122",
     "formik": "^2.4.3",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.debounce": "^4.0.8",
-    "lodash.mapvalues": "^4.6.0",
-    "lodash.throttle": "^4.1.1",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
@@ -41,16 +38,14 @@
     "@chainlit/components": "workspace:^"
   },
   "devDependencies": {
-    "@types/lodash.clonedeep": "^4.5.7",
-    "@types/lodash.debounce": "^4.0.7",
-    "@types/lodash.mapvalues": "^4.6.7",
-    "@types/lodash.throttle": "^4.1.7",
+    "@types/lodash": "^4.14.199",
     "@types/node": "^20.5.7",
     "@types/react": "^18.2.0",
     "@types/react-window-infinite-loader": "^1.0.6",
     "@types/uuid": "^9.0.3",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "vite": "^4.4.9",
-    "vite-tsconfig-paths": "^4.2.0"
+    "vite-tsconfig-paths": "^4.2.0",
+    "typescript": "^5.2.2"
   }
 }

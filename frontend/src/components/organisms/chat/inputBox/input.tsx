@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
 import TuneIcon from '@mui/icons-material/Tune';
 import { IconButton, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import {
-  askUserState,
-  chatSettingsState,
-  loadingState,
-  sessionState
-} from 'state/chat';
+import { useChat } from '@chainlit/components';
+
 import { chatHistoryState } from 'state/chatHistory';
+import { chatSettingsOpenState } from 'state/project';
 
 import HistoryButton from '../history';
 import UploadButton from '../message/UploadButton';
@@ -34,15 +31,13 @@ function getLineCount(el: HTMLDivElement) {
 const Input = ({ onSubmit, onReply }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const setChatHistory = useSetRecoilState(chatHistoryState);
-  const [chatSettings, setChatSettings] = useRecoilState(chatSettingsState);
-  const loading = useRecoilValue(loadingState);
-  const askUser = useRecoilValue(askUserState);
-  const session = useRecoilValue(sessionState);
+  const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+  const { connected, loading, askUser, chatSettingsInputs } = useChat();
+
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
 
-  const socketOk = session?.socket && !session?.error;
-  const disabled = !socketOk || loading || askUser?.spec.type === 'file';
+  const disabled = !connected || loading || askUser?.spec.type === 'file';
 
   useEffect(() => {
     if (ref.current && !loading && !disabled) {
@@ -95,11 +90,11 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   const startAdornment = (
     <>
-      {chatSettings.inputs.length > 0 && (
+      {chatSettingsInputs.length > 0 && (
         <IconButton
           disabled={disabled}
           color="inherit"
-          onClick={() => setChatSettings((old) => ({ ...old, open: true }))}
+          onClick={() => setChatSettingsOpen(true)}
         >
           <TuneIcon />
         </IconButton>
