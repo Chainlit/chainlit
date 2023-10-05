@@ -54,8 +54,7 @@ async def main(message: str):
 
     # Send an intermediate response from Tool 1.
     await cl.Message(
-        author="Tool 1", content=f"Response from tool1", indent=1
-    ).send()
+        author="Tool 1", content=f"Response from tool1", indent=1).send()
 
     # Send the final answer.
     await cl.Message(content=f"This is the final answer").send()
