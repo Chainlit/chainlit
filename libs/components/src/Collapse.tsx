@@ -25,25 +25,10 @@ const Collapse = ({
 
   return (
     <Box>
-      <MCollapse
-        sx={{
-          border: (theme: Theme) => `1px solid ${theme.palette.divider}`,
-          borderRadius: 1,
-          padding: 1
-        }}
-        in={expandAll}
-        collapsedSize={100}
-        timeout={0}
-      >
+      <MCollapse in={expandAll} collapsedSize={100} timeout={0}>
         {children}
       </MCollapse>
-      <Stack
-        sx={{
-          position: 'absolute',
-          right: 0
-        }}
-        direction="row"
-      >
+      <Stack direction="row" justifyContent="end">
         <Tooltip title={expandAll ? 'Collapse' : 'Expand'}>
           <IconButton onClick={toggleExpandAll}>
             {expandAll ? <ExpandLess /> : <ExpandMore />}

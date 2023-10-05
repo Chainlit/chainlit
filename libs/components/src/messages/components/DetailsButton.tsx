@@ -58,11 +58,6 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
   return (
     <GreyButton
       id={id}
-      disableElevation
-      disableRipple
-      sx={{
-        textTransform: 'none'
-      }}
       color="primary"
       startIcon={
         loading ? <CircularProgress color="inherit" size={16} /> : undefined

@@ -1,7 +1,5 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import type { Theme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { IAction } from 'src/types/action';
 import { IMessage } from 'src/types/message';
@@ -15,10 +13,6 @@ interface Props {
 }
 
 const MessageActions = ({ message, actions }: Props) => {
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down('sm')
-  );
-
   const scopedActions = actions.filter((a) => {
     if (a.forId) {
       return a.forId === message.id;
@@ -26,12 +20,8 @@ const MessageActions = ({ message, actions }: Props) => {
     return true;
   });
 
-  const displayedActions = isMobile
-    ? []
-    : scopedActions.filter((a) => !a.collapsed);
-  const drawerActions = isMobile
-    ? scopedActions
-    : scopedActions.filter((a) => a.collapsed);
+  const displayedActions = scopedActions.filter((a) => !a.collapsed);
+  const drawerActions = scopedActions.filter((a) => a.collapsed);
 
   const show = displayedActions.length || drawerActions.length;
 
