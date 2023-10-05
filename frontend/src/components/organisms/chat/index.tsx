@@ -14,7 +14,7 @@ import { useAuth } from 'hooks/auth';
 import { actionState } from 'state/action';
 import { askUserState, messagesState, sessionState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
-import { elementState, tasklistState } from 'state/element';
+import { elementState, sideViewState, tasklistState } from 'state/element';
 import { projectSettingsState } from 'state/project';
 
 import InputBox from './inputBox';
@@ -30,6 +30,7 @@ const Chat = () => {
   const pSettings = useRecoilValue(projectSettingsState);
   const actions = useRecoilValue(actionState);
   const elements = useRecoilValue(elementState);
+  const sideViewElement = useRecoilValue(sideViewState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -96,7 +97,6 @@ const Chat = () => {
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
-      <TaskList tasklist={tasklist} isMobile={false} />
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
@@ -119,6 +119,9 @@ const Chat = () => {
           <InputBox onReply={onReply} onSubmit={onSubmit} />
         </ErrorBoundary>
       </SideView>
+      {sideViewElement ? null : (
+        <TaskList tasklist={tasklist} isMobile={false} />
+      )}
     </Box>
   );
 };
