@@ -21,16 +21,10 @@ class BaseChainlitEmitter:
         """Initialize with the user session."""
         self.session = session
 
-    def _get_session_property(self, property_name: str, raise_error=True):
-        """Stub method to get a property from the session."""
-        pass
-
-    @property
-    async def emit(self):
+    async def emit(self, event: str, data: Any):
         """Stub method to get the 'emit' property from the session."""
         pass
 
-    @property
     async def ask_user(self):
         """Stub method to get the 'ask_user' property from the session."""
         pass
