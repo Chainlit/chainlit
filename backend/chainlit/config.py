@@ -233,6 +233,15 @@ def load_module(target: str):
     # Add the target's directory to the Python path
     sys.path.insert(0, target_dir)
 
+    # Clear the modules related to the app from sys.modules
+    for module_name, module in list(sys.modules.items()):
+        if (
+            hasattr(module, "__file__")
+            and module.__file__
+            and module.__file__.startswith(target_dir)
+        ):
+            del sys.modules[module_name]
+
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:
         return
