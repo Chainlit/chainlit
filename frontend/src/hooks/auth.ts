@@ -1,4 +1,5 @@
 import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
+import jwt_decode from 'jwt-decode';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
@@ -32,12 +33,12 @@ export const useAuth = () => {
       return;
     }
     try {
-      const { exp, ...AppUser } = JSON.parse(atob(token.split('.')[1]));
+      const { exp, ...AppUser } = jwt_decode(token) as any;
       setToken(token);
       setAccessToken(`Bearer ${token}`);
       setUser(AppUser as IAppUser);
     } catch (e) {
-      console.error('Invalid token, clearing token from local storage');
+      console.error('Invalid token, clearing token from local storage', e);
       logout();
     }
   };

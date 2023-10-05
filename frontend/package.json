@@ -12,12 +12,14 @@
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error"
   },
   "dependencies": {
+    "@chainlit/components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.9",
-    "@mui/material": "^5.14.10",
     "@mui/lab": "^5.0.0-alpha.122",
+    "@mui/material": "^5.14.10",
     "formik": "^2.4.3",
+    "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -34,8 +36,7 @@
     "swr": "^2.2.2",
     "usehooks-ts": "^2.9.1",
     "uuid": "^9.0.0",
-    "yup": "^1.2.0",
-    "@chainlit/components": "workspace:^"
+    "yup": "^1.2.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.199",
@@ -44,8 +45,8 @@
     "@types/react-window-infinite-loader": "^1.0.6",
     "@types/uuid": "^9.0.3",
     "@vitejs/plugin-react-swc": "^3.3.2",
+    "typescript": "^5.2.2",
     "vite": "^4.4.9",
-    "vite-tsconfig-paths": "^4.2.0",
-    "typescript": "^5.2.2"
+    "vite-tsconfig-paths": "^4.2.0"
   }
 }
