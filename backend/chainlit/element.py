@@ -7,8 +7,9 @@ from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 import aiofiles
 import filetype
 from chainlit.client.base import ElementDict, ElementDisplay, ElementSize, ElementType
-from chainlit.client.cloud import ChainlitCloudClient, chainlit_client
+from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.context import context
+from chainlit.data import chainlit_client
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
 

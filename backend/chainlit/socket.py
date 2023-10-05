@@ -4,9 +4,10 @@ from typing import Any, Dict
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
-from chainlit.client.cloud import MessageDict, chainlit_client
+from chainlit.client.cloud import MessageDict
 from chainlit.config import config
 from chainlit.context import init_ws_context
+from chainlit.data import chainlit_client
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket

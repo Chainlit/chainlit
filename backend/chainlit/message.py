@@ -6,9 +6,9 @@ from typing import Dict, List, Optional, Union
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
-from chainlit.client.cloud import chainlit_client
 from chainlit.config import config
 from chainlit.context import context
+from chainlit.data import chainlit_client
 from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.prompt import Prompt

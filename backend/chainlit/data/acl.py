@@ -1,4 +1,4 @@
-from chainlit.client.cloud import chainlit_client
+from chainlit.data import chainlit_client
 from fastapi import HTTPException
 
 

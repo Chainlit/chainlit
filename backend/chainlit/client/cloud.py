@@ -1,9 +1,7 @@
-import os
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
-from chainlit.config import config
 from chainlit.logger import logger
 
 from .base import (
@@ -477,12 +475,3 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
                 url = f'{upload_details["url"]}/{object_key}'
                 return {"object_key": object_key, "url": signed_url}
-
-
-chainlit_client = None  # type: Optional[ChainlitCloudClient]
-
-if config.data_persistence:
-    chainlit_client = ChainlitCloudClient(
-        api_key=os.environ.get("CHAINLIT_API_KEY", ""),
-        chainlit_server=config.chainlit_server,
-    )

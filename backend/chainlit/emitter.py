@@ -2,7 +2,7 @@ import uuid
 from typing import Any, Dict, cast
 
 from chainlit.client.base import MessageDict
-from chainlit.client.cloud import chainlit_client
+from chainlit.data import chainlit_client
 from chainlit.message import Message
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.types import AskSpec, FileSpec
