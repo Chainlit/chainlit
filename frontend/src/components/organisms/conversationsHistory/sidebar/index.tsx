@@ -32,7 +32,6 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
 
   useEffect(() => {
     const saveScroll = () => {
-      console.log('REF', ref.current?.scrollTop);
       scrollTop = ref.current?.scrollTop || 0;
     };
 

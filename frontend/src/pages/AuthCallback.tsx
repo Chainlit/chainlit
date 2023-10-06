@@ -12,13 +12,13 @@ export default function AuthCallback() {
   useEffect(() => {
     const token = query.get('access_token');
     setAccessToken(token);
-  }, [setAccessToken, query]);
+  }, [query]);
 
   useEffect(() => {
     if (user) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user]);
 
   return null;
 }

@@ -1,6 +1,6 @@
 import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
 import jwt_decode from 'jwt-decode';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
@@ -22,9 +22,9 @@ export const useAuth = () => {
   const [user, setUser] = useRecoilState(userState);
 
   const logout = () => {
+    setUser(null);
     removeToken();
     setAccessToken('');
-    setUser(null);
   };
 
   const saveAndSetToken = (token: string | null | undefined) => {
@@ -38,7 +38,11 @@ export const useAuth = () => {
       setAccessToken(`Bearer ${token}`);
       setUser(AppUser as IAppUser);
     } catch (e) {
-      console.error('Invalid token, clearing token from local storage', e);
+      console.error(
+        'Invalid token, clearing token from local storage',
+        'error:',
+        e
+      );
       logout();
     }
   };
@@ -49,7 +53,7 @@ export const useAuth = () => {
       saveAndSetToken(getToken());
       return;
     }
-  }, [accessToken]);
+  }, []);
 
   const isAuthenticated = !!accessToken;
 

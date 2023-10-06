@@ -172,7 +172,6 @@ const ConversationsHistoryList = () => {
   };
 
   if (isRefetching || (!conversations?.groupedConversations && isLoading)) {
-    console.log('ON REFETCH LAAA');
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
         <Skeleton variant="rounded" width={100} height={10} />
@@ -208,8 +207,8 @@ const ConversationsHistoryList = () => {
 
   if (size(conversations?.groupedConversations) === 0) {
     return (
-      <Alert sx={{ mx: 1.5 }} severity="info">
-        No result
+      <Alert variant="outlined" sx={{ mx: 1.5 }} severity="info">
+        Empty...
       </Alert>
     );
   }
