@@ -81,6 +81,7 @@ const ConversationsHistoryList = ({
     } catch (error) {
       if (error instanceof Error) setError(error.message);
     } finally {
+      setIsLoading(false);
       setIsRefetching(false);
     }
   };
@@ -252,7 +253,7 @@ const ConversationsHistoryList = ({
             </li>
           );
         })}
-        {shouldLoadMore && isLoading ? (
+        {isLoading ? (
           <Stack alignItems={'center'} p={2}>
             <CircularProgress size={30} />
           </Stack>

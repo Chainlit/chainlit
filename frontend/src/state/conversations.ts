@@ -1,5 +1,5 @@
 import { groupByDate } from 'helpers/groupeByDate';
-import { deepEqual } from 'helpers/object';
+import { isEqual } from 'lodash';
 import { atom } from 'recoil';
 
 import { ConversationsHistory } from 'types/chatHistory';
@@ -31,8 +31,7 @@ export const conversationsHistoryState = atom<ConversationsHistory | undefined>(
 
             if (
               newValue.conversations &&
-              oldValue.groupedConversations &&
-              !deepEqual(newValue.conversations, oldValue.groupedConversations)
+              !isEqual(newValue.conversations, oldValue.groupedConversations)
             ) {
               groupedConversations = groupByDate(newValue.conversations);
             }
