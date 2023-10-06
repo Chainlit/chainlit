@@ -1,7 +1,6 @@
 import { ChainlitAPI } from 'api/chainlitApi';
 import { capitalize, map, size, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -15,14 +14,12 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { conversationsHistoryState } from 'state/chatHistory';
 import {
   IConversationsFilters,
-  conversationsFiltersState
+  conversationsFiltersState,
+  conversationsHistoryState
 } from 'state/conversations';
 import { accessTokenState } from 'state/user';
-
-import { IChat } from 'types/chat';
 
 import { DeleteConversationButton } from './DeleteConversationButton';
 
@@ -38,61 +35,16 @@ export interface IPagination {
 
 const BATCH_SIZE = 30;
 
-const groupByDate = (data: IChat[]) => {
-  const groupedData: { [key: string]: IChat[] } = {};
-
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(today.getDate() - 7);
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(today.getDate() - 30);
-
-  data.forEach((item) => {
-    const createdAt = new Date(item.createdAt);
-    const isToday = createdAt.toDateString() === today.toDateString();
-    const isYesterday = createdAt.toDateString() === yesterday.toDateString();
-    const isLast7Days = createdAt >= sevenDaysAgo;
-    const isLast30Days = createdAt >= thirtyDaysAgo;
-
-    let category: string;
-
-    if (isToday) {
-      category = 'Today';
-    } else if (isYesterday) {
-      category = 'Yesterday';
-    } else if (isLast7Days) {
-      category = 'Previous 7 days';
-    } else if (isLast30Days) {
-      category = 'Previous 30 days';
-    } else {
-      const monthYear = createdAt.toLocaleString('default', {
-        month: 'long',
-        year: 'numeric'
-      });
-
-      category = monthYear.split(' ').slice(0, 1).join(' ');
-    }
-
-    if (!groupedData[category]) {
-      groupedData[category] = [];
-    }
-
-    groupedData[category].push(item);
-  });
-
-  return groupedData;
-};
-
-const ConversationsHistoryList = () => {
+const ConversationsHistoryList = ({
+  shouldLoadMore
+}: {
+  shouldLoadMore: boolean;
+}) => {
   const navigate = useNavigate();
-  const { ref, inView } = useInView();
 
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState
   );
-
   const accessToken = useRecoilValue(accessTokenState);
   const filters = useRecoilValue(conversationsFiltersState);
 
@@ -115,29 +67,26 @@ const ConversationsHistoryList = () => {
 
       // Prevent conversations to be duplicated
       const allConversations = uniqBy(
-        conversations?.conversations?.concat(data),
+        // We should only concatenate conversations when we have a cursor indicating that we have loaded more items.
+        cursor ? conversations?.conversations?.concat(data) : data,
         'id'
       );
 
       if (allConversations) {
-        const groupedConversations = groupByDate(allConversations);
-
-        setConversations({
-          conversations: allConversations,
-          groupedConversations
-        });
+        setConversations((prev) => ({
+          ...prev,
+          conversations: allConversations
+        }));
       }
     } catch (error) {
       if (error instanceof Error) setError(error.message);
     } finally {
-      setIsLoading(false);
       setIsRefetching(false);
     }
   };
 
   const refetchConversations = async () => {
     setIsLoading(true);
-    setPrevPageInfo(undefined);
     fetchConversations(undefined);
   };
 
@@ -161,15 +110,11 @@ const ConversationsHistoryList = () => {
   }, [accessToken, filters]);
 
   useEffect(() => {
-    if (inView) loadMoreItems();
-  }, [inView]);
-
-  const loadMoreItems = () => {
     if (!isLoading && prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
       setIsLoading(true);
       fetchConversations(prevPageInfo.endCursor);
     }
-  };
+  }, [shouldLoadMore]);
 
   if (isRefetching || (!conversations?.groupedConversations && isLoading)) {
     return [1, 2, 3].map((index) => (
@@ -201,7 +146,7 @@ const ConversationsHistoryList = () => {
     );
   }
 
-  if (!conversations) {
+  if (!conversations?.groupedConversations) {
     return null;
   }
 
@@ -307,8 +252,8 @@ const ConversationsHistoryList = () => {
             </li>
           );
         })}
-        {prevPageInfo?.hasNextPage ? (
-          <Stack alignItems={'center'} p={2} ref={ref}>
+        {shouldLoadMore && isLoading ? (
+          <Stack alignItems={'center'} p={2}>
             <CircularProgress size={30} />
           </Stack>
         ) : null}

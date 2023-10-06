@@ -12,7 +12,8 @@ import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
 
-import { chatHistoryState, conversationsHistoryState } from 'state/chatHistory';
+import { chatHistoryState } from 'state/chatHistory';
+import { conversationsHistoryState } from 'state/conversations';
 import { projectSettingsState, sideViewState } from 'state/project';
 
 import InputBox from './inputBox';

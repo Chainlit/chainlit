@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 
 import { Conversation } from 'components/organisms/conversationsHistory/Conversation';
 
-import { conversationsHistoryState } from 'state/chatHistory';
+import { conversationsHistoryState } from 'state/conversations';
 
 import Page from './Page';
 

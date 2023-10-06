@@ -20,27 +20,34 @@ import Filters from './filters';
 
 const DRAWER_WIDTH = 240;
 
-let scrollTop = 0;
+let _scrollTop = 0;
 
 const ConversationsHistorySidebar = (): JSX.Element | null => {
-  const isMobile = useMediaQuery('(max-width:800px)');
-  const [open, setOpen] = useState(true);
-  const pSettings = useRecoilValue(projectSettingsState);
   const { user } = useAuth();
+  const isMobile = useMediaQuery('(max-width:800px)');
+
+  const pSettings = useRecoilValue(projectSettingsState);
+
+  const [open, setOpen] = useState(true);
+  const [shouldLoadMore, setShouldLoadMore] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
+  const handleScroll = () => {
+    if (!ref.current) return;
+
+    const { scrollHeight, clientHeight, scrollTop } = ref.current;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+    //We save the scroll top in order to scroll to the element when the page is changing.
+    _scrollTop = scrollTop;
+
+    setShouldLoadMore(atBottom);
+  };
+
   useEffect(() => {
-    const saveScroll = () => {
-      scrollTop = ref.current?.scrollTop || 0;
-    };
-
     ref.current?.scrollTo({
-      top: scrollTop
+      top: _scrollTop
     });
-    ref.current?.addEventListener('scroll', saveScroll);
-
-    return () => ref.current?.removeEventListener('scroll', saveScroll);
   }, []);
 
   if (!pSettings?.dataPersistence || !user) {
@@ -55,7 +62,8 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
         variant={isMobile ? 'temporary' : 'persistent'}
         hideBackdrop
         PaperProps={{
-          ref: ref
+          ref: ref,
+          onScroll: handleScroll
         }}
       >
         <Stack
@@ -81,7 +89,7 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
           </IconButton>
         </Stack>
         <Filters />
-        <ConversationsHistoryList />
+        <ConversationsHistoryList shouldLoadMore={shouldLoadMore} />
       </Drawer>
       <Box
         sx={{
