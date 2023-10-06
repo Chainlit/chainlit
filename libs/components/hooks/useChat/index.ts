@@ -1,7 +1,5 @@
-import { wsEndpoint } from 'api';
-import { deepEqual } from 'helpers/object';
-import throttle from 'lodash.throttle';
-import { memo, useCallback, useEffect } from 'react';
+import { debounce } from 'lodash';
+import { useCallback } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -9,53 +7,73 @@ import {
   useSetRecoilState
 } from 'recoil';
 import io from 'socket.io-client';
+import { TFormInput } from 'src/inputs';
+import { IAction, IElement, IFileResponse, IMessage } from 'src/types';
+import { nestMessages } from 'utils/message';
 
-import { IAction, IElement, IMessage, TFormInput } from '@chainlit/components';
-
-import { useAuth } from 'hooks/auth';
-
-import { actionState } from 'state/action';
 import {
+  actionState,
   askUserState,
-  chatSettingsState,
+  avatarState,
+  chatSettingsDefaultValueSelector,
+  chatSettingsInputsState,
   chatSettingsValueState,
+  elementState,
   fileSpecState,
+  firstUserMessageState,
   loadingState,
   messagesState,
+  sessionIdState,
   sessionState,
+  tasklistState,
   tokenCountState
-} from 'state/chat';
-import { avatarState, elementState, tasklistState } from 'state/element';
-import { sessionIdState, userEnvState } from 'state/user';
+} from './state';
 
-import { IMessageUpdate, IToken } from 'types/chat';
+export interface IMessageUpdate extends IMessage {
+  newId?: string;
+}
+
+export interface IToken {
+  id: number | string;
+  token: string;
+  isSequence: boolean;
+}
 
 const compareMessageIds = (a: IMessage, b: IMessage) => {
   if (a.id && b.id) return a.id === b.id;
   return false;
 };
 
-const Socket = memo(function Socket() {
-  const { accessToken, isAuthenticated } = useAuth();
-  const userEnv = useRecoilValue(userEnvState);
-  const setLoading = useSetRecoilState(loadingState);
+const useChat = () => {
   const sessionId = useRecoilValue(sessionIdState);
+  const [firstUserMessage, setFirstUserMessage] = useRecoilState(
+    firstUserMessageState
+  );
   const [session, setSession] = useRecoilState(sessionState);
-  const setMessages = useSetRecoilState(messagesState);
-  const setTokenCount = useSetRecoilState(tokenCountState);
-  const setFileSpecState = useSetRecoilState(fileSpecState);
-  const setAskUser = useSetRecoilState(askUserState);
-  const setElements = useSetRecoilState(elementState);
-  const setAvatars = useSetRecoilState(avatarState);
-  const setTasklists = useSetRecoilState(tasklistState);
-  const setActions = useSetRecoilState(actionState);
-  const setChatSettings = useSetRecoilState(chatSettingsState);
+  const [loading, setLoading] = useRecoilState(loadingState);
+  const [rawMessages, setMessages] = useRecoilState(messagesState);
+  const [fileSpec, setFileSpecState] = useRecoilState(fileSpecState);
+  const [askUser, setAskUser] = useRecoilState(askUserState);
+  const [elements, setElements] = useRecoilState(elementState);
+  const [avatars, setAvatars] = useRecoilState(avatarState);
+  const [tasklists, setTasklists] = useRecoilState(tasklistState);
+  const [actions, setActions] = useRecoilState(actionState);
+  const [chatSettingsInputs, setChatSettingsInputs] = useRecoilState(
+    chatSettingsInputsState
+  );
+  const chatSettingsValue = useRecoilValue(chatSettingsValueState);
+  const chatSettingsDefaultValue = useRecoilValue(
+    chatSettingsDefaultValueSelector
+  );
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
+  const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
+  const resetSessionId = useResetRecoilState(sessionIdState);
+  const setTokenCount = useSetRecoilState(tokenCountState);
 
-  const createSocket = useCallback(
+  const _connect = useCallback(
     (
+      wsEndpoint: string,
       userEnv: Record<string, string>,
-      sessionId: string,
       accessToken?: string
     ) => {
       const socket = io(wsEndpoint, {
@@ -66,9 +84,12 @@ const Socket = memo(function Socket() {
           'user-env': JSON.stringify(userEnv)
         }
       });
-
-      setSession({
-        socket
+      setSession((old) => {
+        old?.socket?.removeAllListeners();
+        old?.socket?.close();
+        return {
+          socket
+        };
       });
 
       socket.on('connect', () => {
@@ -76,8 +97,7 @@ const Socket = memo(function Socket() {
         setSession((s) => ({ ...s!, error: false }));
       });
 
-      socket.on('connect_error', (err) => {
-        console.error('failed to connect', err);
+      socket.on('connect_error', (_) => {
         setSession((s) => ({ ...s!, error: true }));
       });
 
@@ -109,6 +129,10 @@ const Socket = memo(function Socket() {
             ];
           }
         });
+      });
+
+      socket.on('init_conversation', (message: IMessage) => {
+        setFirstUserMessage(message);
       });
 
       socket.on('update_message', (message: IMessageUpdate) => {
@@ -188,7 +212,7 @@ const Socket = memo(function Socket() {
       });
 
       socket.on('chat_settings', (inputs: TFormInput[]) => {
-        setChatSettings((old) => ({ ...old, inputs }));
+        setChatSettingsInputs(inputs);
         resetChatSettingsValue();
       });
 
@@ -237,7 +261,7 @@ const Socket = memo(function Socket() {
 
       socket.on('remove_action', (action: IAction) => {
         setActions((old) => {
-          const index = old.findIndex((a) => deepEqual(a, action));
+          const index = old.findIndex((a) => a.id === action.id);
           if (index === -1) return old;
           return [...old.slice(0, index), ...old.slice(index + 1)];
         });
@@ -247,24 +271,105 @@ const Socket = memo(function Socket() {
         setTokenCount((old) => old + count);
       });
     },
-    []
+    [setSession, sessionId]
   );
 
-  const throttleCreateSocket = useCallback(throttle(createSocket, 1000), []);
+  const connect = useCallback(debounce(_connect, 1000), [_connect]);
 
-  useEffect(() => {
+  const disconnect = useCallback(() => {
     if (session?.socket) {
       session.socket.removeAllListeners();
       session.socket.close();
     }
+  }, [session]);
 
-    // If no auth is required, isAuthenticated is always true
-    if (!isAuthenticated) return;
+  const clear = useCallback(() => {
+    session?.socket.emit('clear_session');
+    session?.socket.disconnect();
+    resetSessionId();
+    setFirstUserMessage(undefined);
+    setMessages([]);
+    setElements([]);
+    setAvatars([]);
+    setTasklists([]);
+    setActions([]);
+    setTokenCount(0);
+    resetChatSettings();
+    resetChatSettingsValue();
+  }, [session]);
 
-    throttleCreateSocket(userEnv, sessionId, accessToken);
-  }, [userEnv, isAuthenticated, createSocket]);
+  const sendMessage = useCallback(
+    (message: IMessage) => {
+      setMessages((oldMessages) => [...oldMessages, message]);
+      session?.socket.emit('ui_message', message);
+    },
+    [session]
+  );
 
-  return null;
-});
+  const replyMessage = useCallback(
+    (message: IMessage) => {
+      if (askUser) {
+        setMessages((oldMessages) => [...oldMessages, message]);
+        askUser.callback(message);
+      }
+    },
+    [askUser, session]
+  );
 
-export default Socket;
+  const updateChatSettings = useCallback(
+    (values: object) => {
+      session?.socket.emit('chat_settings_change', values);
+    },
+    [session]
+  );
+
+  const stopTask = useCallback(() => {
+    setLoading(false);
+    session?.socket.emit('stop');
+  }, [session]);
+
+  const callAction = useCallback(
+    (action: IAction) => {
+      session?.socket.emit('action_call', action);
+    },
+    [session]
+  );
+
+  const uploadFiles = useCallback(
+    (payloads: IFileResponse[]) => {
+      session?.socket.emit('file_upload', payloads);
+    },
+    [session]
+  );
+
+  const messages = nestMessages(rawMessages);
+  const connected = session?.socket.connected && !session?.error;
+
+  return {
+    connect,
+    clear,
+    disconnect,
+    sendMessage,
+    updateChatSettings,
+    stopTask,
+    callAction,
+    uploadFiles,
+    replyMessage,
+    connected,
+    error: session?.error,
+    loading,
+    messages,
+    actions,
+    elements,
+    tasklists,
+    avatars,
+    chatSettingsInputs,
+    chatSettingsValue,
+    chatSettingsDefaultValue,
+    fileSpec,
+    askUser,
+    firstUserMessage
+  };
+};
+
+export { useChat };

@@ -1,7 +1,5 @@
 import { Box } from '@mui/material';
 
-// import { useRecoilValue } from 'recoil';
-// import { tokenCountState } from 'state/chat';
 import StopButton from '../stopButton';
 import Input from './input';
 import WaterMark from './waterMark';

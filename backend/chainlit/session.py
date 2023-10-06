@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.types import AskResponse
 
-from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
+from chainlit.client.cloud import AppUser, PersistedAppUser
+from chainlit.data import chainlit_client
 
 
 class BaseSession:
@@ -27,6 +28,7 @@ class BaseSession:
         self.user = user
         self.token = token
         self.root_message = root_message
+        self.has_user_message = False
         self.user_env = user_env or {}
 
         self.id = id

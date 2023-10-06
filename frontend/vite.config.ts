@@ -30,7 +30,13 @@ export default defineConfig({
         './node_modules/react-markdown'
       ),
       'remark-gfm': path.resolve(__dirname, './node_modules/remark-gfm'),
-      'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts')
+      'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts'),
+      lodash: path.resolve(__dirname, './node_modules/lodash'),
+      recoil: path.resolve(__dirname, './node_modules/recoil'),
+      'socket.io-client': path.resolve(
+        __dirname,
+        './node_modules/socket.io-client'
+      )
     }
   }
 });

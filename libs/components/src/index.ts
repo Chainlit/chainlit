@@ -8,6 +8,7 @@ export * from './types';
 export * from 'theme/index';
 export * from 'hooks/index';
 
+export { nestMessages } from 'utils/message';
 export { ErrorBoundary } from './ErrorBoundary';
 export { ClipboardCopy } from './ClipboardCopy';
 export { Code } from './Code';

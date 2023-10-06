@@ -1,4 +1,4 @@
-import merge from 'lodash.merge';
+import { merge } from 'lodash';
 import { ClipboardCopy } from 'src/ClipboardCopy';
 import { grey } from 'theme';
 

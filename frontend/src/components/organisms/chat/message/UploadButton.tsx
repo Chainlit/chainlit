@@ -1,26 +1,19 @@
-import { useRecoilValue } from 'recoil';
-
 import Add from '@mui/icons-material/Add';
 import { LoadingButton } from '@mui/lab';
 import { Tooltip } from '@mui/material';
 
-import { FileSpec, IFileResponse } from '@chainlit/components';
-import { useUpload } from '@chainlit/components/hooks';
-
-import { fileSpecState, sessionState } from 'state/chat';
-
-import { ISession } from 'types/chat';
+import { FileSpec, IFileResponse, useChat } from '@chainlit/components';
+import { useUpload } from '@chainlit/components';
 
 type UploadChildProps = {
   fileSpec: FileSpec;
-  session: ISession;
+  uploadFiles: (files: IFileResponse[]) => void;
 };
 
-const UploadChildButton = ({ fileSpec, session }: UploadChildProps) => {
+const UploadChildButton = ({ fileSpec, uploadFiles }: UploadChildProps) => {
   const upload = useUpload({
     spec: fileSpec,
-    onResolved: (payloads: IFileResponse[]) =>
-      session?.socket.emit('file_upload', payloads)
+    onResolved: (payloads: IFileResponse[]) => uploadFiles(payloads)
   });
 
   if (!upload) return null;
@@ -46,10 +39,9 @@ const UploadChildButton = ({ fileSpec, session }: UploadChildProps) => {
 };
 
 export default function UploadButton() {
-  const fileSpec = useRecoilValue(fileSpecState);
-  const session = useRecoilValue(sessionState);
+  const { fileSpec, uploadFiles } = useChat();
 
-  if (!fileSpec || !session) return null;
+  if (!fileSpec) return null;
 
-  return <UploadChildButton fileSpec={fileSpec} session={session} />;
+  return <UploadChildButton fileSpec={fileSpec} uploadFiles={uploadFiles} />;
 }

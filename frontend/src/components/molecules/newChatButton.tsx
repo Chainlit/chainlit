@@ -9,14 +9,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { AccentButton, RegularButton } from '@chainlit/components';
-
-import useClearChat from 'hooks/clearChat';
+import { AccentButton, RegularButton, useChat } from '@chainlit/components';
 
 export default function NewChatButton() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const clearChat = useClearChat();
+  const { clear } = useChat();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -27,7 +25,7 @@ export default function NewChatButton() {
   };
 
   const handleConfirm = () => {
-    clearChat();
+    clear();
     navigate('/');
     handleClose();
   };

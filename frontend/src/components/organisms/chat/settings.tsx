@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
-import mapValues from 'lodash.mapvalues';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { mapValues } from 'lodash';
+import { useRecoilState } from 'recoil';
 
 import {
   Box,
@@ -14,24 +14,21 @@ import {
   AccentButton,
   FormInput,
   RegularButton,
-  TFormInputValue
+  TFormInputValue,
+  useChat
 } from '@chainlit/components';
 
-import {
-  chatSettingsDefaultValueSelector,
-  chatSettingsState,
-  chatSettingsValueState,
-  sessionState
-} from 'state/chat';
+import { chatSettingsOpenState } from 'state/project';
 
 export default function ChatSettingsModal() {
-  const session = useRecoilValue(sessionState);
-  const [chatSettings, setChatSettings] = useRecoilState(chatSettingsState);
-  const [chatSettingsValue, setChatSettingsValue] = useRecoilState(
-    chatSettingsValueState
-  );
-  const chatSettingsDefaultValue = useRecoilValue(
-    chatSettingsDefaultValueSelector
+  const {
+    updateChatSettings,
+    chatSettingsValue,
+    chatSettingsInputs,
+    chatSettingsDefaultValue
+  } = useChat();
+  const [chatSettingsOpen, setChatSettingsOpen] = useRecoilState(
+    chatSettingsOpenState
   );
 
   const formik = useFormik({
@@ -40,14 +37,12 @@ export default function ChatSettingsModal() {
     onSubmit: async () => undefined
   });
 
-  const handleClose = () => setChatSettings((old) => ({ ...old, open: false }));
+  const handleClose = () => setChatSettingsOpen(false);
   const handleConfirm = () => {
-    setChatSettingsValue(formik.values);
-
     const values = mapValues(formik.values, (x: TFormInputValue) =>
       x !== '' ? x : null
     );
-    session?.socket.emit('chat_settings_change', values);
+    updateChatSettings(values);
 
     handleClose();
   };
@@ -57,7 +52,7 @@ export default function ChatSettingsModal() {
 
   return (
     <Dialog
-      open={chatSettings.open}
+      open={chatSettingsOpen}
       onClose={handleClose}
       id="chat-settings-dialog"
       PaperProps={{
@@ -77,7 +72,7 @@ export default function ChatSettingsModal() {
             gap: '15px'
           }}
         >
-          {chatSettings.inputs.map((input) => (
+          {chatSettingsInputs.map((input) => (
             <FormInput
               key={input.id}
               element={{

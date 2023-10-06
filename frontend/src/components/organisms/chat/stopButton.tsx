@@ -1,23 +1,17 @@
-import { useRecoilState, useRecoilValue } from 'recoil';
-
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
 
-import { GreyButton } from '@chainlit/components';
-
-import { loadingState, sessionState } from 'state/chat';
+import { GreyButton, useChat } from '@chainlit/components';
 
 export default function StopButton() {
-  const [loading, setLoading] = useRecoilState(loadingState);
-  const session = useRecoilValue(sessionState);
+  const { stopTask, loading } = useChat();
 
   if (!loading) {
     return null;
   }
 
   const handleClick = () => {
-    setLoading(false);
-    session?.socket.emit('stop');
+    stopTask();
   };
 
   return (

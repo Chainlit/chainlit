@@ -7,8 +7,9 @@ from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 import aiofiles
 import filetype
 from chainlit.client.base import ElementDict, ElementDisplay, ElementSize, ElementType
-from chainlit.client.cloud import ChainlitCloudClient, chainlit_client
+from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.context import context
+from chainlit.data import chainlit_client
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
 
@@ -139,18 +140,17 @@ class Element:
         # Adding this out of to_dict since the dict will be persisted in the DB
         emit_dict["content"] = self.content
 
-        if context.emitter.emit:
-            # Element was already sent
-            if len(self.for_ids) > 1:
-                trace_event(f"update {self.__class__.__name__}")
-                await context.emitter.emit(
-                    "update_element",
-                    {"id": self.id, "forIds": self.for_ids},
-                )
-            else:
-                trace_event(f"send {self.__class__.__name__}")
-                emit_dict = await self.before_emit(emit_dict)
-                await context.emitter.emit("element", emit_dict)
+        # Element was already sent
+        if len(self.for_ids) > 1:
+            trace_event(f"update {self.__class__.__name__}")
+            await context.emitter.emit(
+                "update_element",
+                {"id": self.id, "forIds": self.for_ids},
+            )
+        else:
+            trace_event(f"send {self.__class__.__name__}")
+            emit_dict = await self.before_emit(emit_dict)
+            await context.emitter.emit("element", emit_dict)
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)
@@ -181,7 +181,7 @@ class Avatar(Element):
         # Adding this out of to_dict since the dict will be persisted in the DB
         element["content"] = self.content
 
-        if context.emitter.emit and element:
+        if element:
             trace_event(f"send {self.__class__.__name__}")
             element = await self.before_emit(element)
             await context.emitter.emit("element", element)
