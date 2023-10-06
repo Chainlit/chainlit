@@ -10,6 +10,7 @@ import {
   IconButton,
   Menu,
   Stack,
+  Theme,
   Toolbar,
   useTheme
 } from '@mui/material';
@@ -19,6 +20,7 @@ import { RegularButton } from '@chainlit/components';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
+import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 
 import { useAuth } from 'hooks/auth';
@@ -143,8 +145,10 @@ function Nav({ hasDb, hasReadme }: NavProps) {
 }
 
 export default function Header() {
-  const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
+
+  const { user } = useAuth();
+  const matches = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
   const hasHistory = !!(user && pSettings?.dataPersistence);
 
@@ -159,7 +163,8 @@ export default function Header() {
           borderBottomColor: (theme) => theme.palette.divider
         }}
       >
-        <Stack alignItems="center" direction="row">
+        <Stack alignItems="center" direction={'row'} gap={4}>
+          {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
           <Nav hasDb={hasHistory} hasReadme={!!pSettings?.markdown} />
         </Stack>
         <Stack
