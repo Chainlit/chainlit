@@ -17,8 +17,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
-from chainlit.client.acl import is_conversation_author
-from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
+from chainlit.client.cloud import AppUser, PersistedAppUser
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -28,6 +27,8 @@ from chainlit.config import (
     load_module,
     reload_config,
 )
+from chainlit.data import chainlit_client
+from chainlit.data.acl import is_conversation_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
