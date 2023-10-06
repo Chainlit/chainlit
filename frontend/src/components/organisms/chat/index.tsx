@@ -102,7 +102,6 @@ const Chat = () => {
 
   return (
     <Box display="flex" width="100%" flexGrow={1} position="relative">
-      <TaskList tasklist={tasklist} isMobile={false} />
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
