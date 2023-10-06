@@ -1,11 +1,5 @@
-import { IMessageElement } from '../src/types/element';
-import {
-  IMessage,
-  IMessageContent,
-  INestedMessage
-} from '../src/types/message';
-
-// <Messages/>
+import { IMessageElement } from 'src/types/element';
+import { IMessage, IMessageContent, INestedMessage } from 'src/types/message';
 
 const addToParent = (
   parentId: string | undefined,
@@ -118,12 +112,7 @@ const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
-const prepareContent = ({
-  id,
-  elements,
-  content,
-  language
-}: IMessageContent) => {
+const prepareContent = ({ elements, message }: IMessageContent) => {
   const elementNames = elements.map((e) => escapeRegExp(e.name));
 
   // Sort by descending length to avoid matching substrings
@@ -133,9 +122,9 @@ const prepareContent = ({
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  let preparedContent = content ? content.trim() : '';
+  let preparedContent = message.content ? message.content.trim() : '';
   const inlinedElements = elements.filter(
-    (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
+    (e) => isForIdMatch(message.id, e?.forIds) && e.display === 'inline'
   );
   const refElements: IMessageElement[] = [];
 
@@ -144,7 +133,7 @@ const prepareContent = ({
       const element = elements.find((e) => {
         const nameMatch = e.name === match;
         const scopeMatch =
-          isGlobalMatch(e?.forIds) || isForIdMatch(id, e?.forIds);
+          isGlobalMatch(e?.forIds) || isForIdMatch(message.id, e?.forIds);
         return nameMatch && scopeMatch;
       });
       const foundElement = !!element;
@@ -168,8 +157,8 @@ const prepareContent = ({
     });
   }
 
-  if (language) {
-    preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
+  if (message.language) {
+    preparedContent = `\`\`\`${message.language}\n${preparedContent}\n\`\`\``;
   }
   return {
     preparedContent,

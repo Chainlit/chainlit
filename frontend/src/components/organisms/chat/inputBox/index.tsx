@@ -22,6 +22,7 @@ export default function InputBox({ onSubmit, onReply }: Props) {
         boxSizing: 'border-box',
         width: '100%',
         maxWidth: '60rem',
+        px: 2,
         m: 'auto',
         justifyContent: 'center'
       }}

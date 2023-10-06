@@ -103,7 +103,12 @@ function App() {
           }
         }}
       />
-      <Box display="flex" height="100vh" width="100vw">
+      <Box
+        display="flex"
+        height="100vh"
+        width="100vw"
+        sx={{ overflowX: 'hidden' }}
+      >
         <PromptPlayground />
         <ChatSettingsModal />
         <Hotkeys />

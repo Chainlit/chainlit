@@ -13,7 +13,7 @@ import TaskList from 'components/molecules/tasklist';
 import { useAuth } from 'hooks/auth';
 
 import { chatHistoryState } from 'state/chatHistory';
-import { projectSettingsState } from 'state/project';
+import { projectSettingsState, sideViewState } from 'state/project';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
@@ -22,6 +22,7 @@ import WelcomeScreen from './welcomeScreen';
 const Chat = () => {
   const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
+  const sideViewElement = useRecoilValue(sideViewState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -92,7 +93,6 @@ const Chat = () => {
 
   return (
     <Box display="flex" width="100%" height="0" flexGrow={1}>
-      <TaskList tasklist={tasklist} isMobile={false} />
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />
@@ -119,6 +119,9 @@ const Chat = () => {
           <InputBox onReply={onReply} onSubmit={onSubmit} />
         </ErrorBoundary>
       </SideView>
+      {sideViewElement ? null : (
+        <TaskList tasklist={tasklist} isMobile={false} />
+      )}
     </Box>
   );
 };

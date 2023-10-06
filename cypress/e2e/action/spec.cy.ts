@@ -13,6 +13,8 @@ describe('Action', () => {
     cy.get('.message').eq(1).should('contain', 'Executed test action!');
     cy.get("[id='test-action']").should('exist');
 
+    cy.wait(100);
+
     // Click on "removable action"
     cy.get("[id='removable-action']").should('be.visible');
     cy.get("[id='removable-action']").click();
@@ -20,10 +22,14 @@ describe('Action', () => {
     cy.get('.message').eq(2).should('contain', 'Executed removable action!');
     cy.get("[id='removable-action']").should('not.exist');
 
+    cy.wait(100);
+
     // Click on "multiple action one" in the action drawer, should remove the correct action button
     cy.get("[id='actions-drawer-button']").should('be.visible');
     cy.get("[id='actions-drawer-button']").click();
     cy.get('.message').should('have.length', 3);
+
+    cy.wait(100);
 
     cy.get("[id='multiple-action-one']").should('be.visible');
     cy.get("[id='multiple-action-one']").click();
@@ -32,14 +38,19 @@ describe('Action', () => {
       .should('contain', 'Action(id=multiple-action-one) has been removed!');
     cy.get("[id='multiple-action-one']").should('not.exist');
 
+    cy.wait(100);
+
     // Click on "multiple action two", should remove the correct action button
     cy.get('.message').should('have.length', 4);
+    cy.get("[id='actions-drawer-button']").click();
     cy.get("[id='multiple-action-two']").should('be.visible');
     cy.get("[id='multiple-action-two']").click();
     cy.get('.message')
       .eq(4)
       .should('contain', 'Action(id=multiple-action-two) has been removed!');
     cy.get("[id='multiple-action-two']").should('not.exist');
+
+    cy.wait(100);
 
     // Click on "all actions removed", should remove all buttons
     cy.get("[id='all-actions-removed']").should('be.visible');

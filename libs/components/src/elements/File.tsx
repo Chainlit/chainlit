@@ -12,11 +12,6 @@ const FileElement = ({ element }: { element: IFileElement }) => {
 
   return (
     <GreyButton
-      disableElevation
-      disableRipple
-      sx={{
-        textTransform: 'none'
-      }}
       color="primary"
       variant="contained"
       className={`${element.display}-file`}

@@ -1,6 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
-import { grey } from 'theme/palette';
 
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -25,8 +24,7 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
       sx={{
         width: '100%',
         borderRadius: 1,
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? grey[800] : grey[200],
+        backgroundColor: (theme) => theme.palette.background.paper,
         boxSizing: 'border-box'
       }}
       direction="row"
