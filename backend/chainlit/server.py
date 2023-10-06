@@ -94,7 +94,7 @@ async def lifespan(app: FastAPI):
                         # Reload the module if the module name is specified in the config
                         if config.run.module_name:
                             try:
-                                load_module(config.run.module_name)
+                                load_module(config.run.module_name, force_refresh=True)
                             except Exception as e:
                                 logger.error(f"Error reloading module: {e}")
                                 break

@@ -224,7 +224,7 @@ def init_config(log=False):
         logger.info(f"Config file already exists at {config_file}")
 
 
-def load_module(target: str):
+def load_module(target: str, force_refresh: bool = False):
     """Load the specified module."""
 
     # Get the target's directory
@@ -232,6 +232,16 @@ def load_module(target: str):
 
     # Add the target's directory to the Python path
     sys.path.insert(0, target_dir)
+
+    if force_refresh:
+        # Clear the modules related to the app from sys.modules
+        for module_name, module in list(sys.modules.items()):
+            if (
+                hasattr(module, "__file__")
+                and module.__file__
+                and module.__file__.startswith(target_dir)
+            ):
+                del sys.modules[module_name]
 
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:
