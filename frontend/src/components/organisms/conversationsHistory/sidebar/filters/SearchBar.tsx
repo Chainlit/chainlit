@@ -8,6 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 
+import { grey } from '@chainlit/components';
+
 import { conversationsFiltersState } from 'state/conversations';
 
 export default function SearchBar() {
@@ -36,7 +38,8 @@ export default function SearchBar() {
         width: '100%',
         border: 'none',
         borderRadius: 1,
-        backgroundColor: (theme) => theme.palette.background.default
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark' ? grey[850] : 'grey.100'
       }}
       InputProps={{
         sx: {

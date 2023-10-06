@@ -14,6 +14,8 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { grey } from '@chainlit/components';
+
 import {
   IConversationsFilters,
   conversationsFiltersState,
@@ -174,11 +176,11 @@ const ConversationsHistoryList = ({
           return (
             <li key={`section-${index}`}>
               <ul>
-                <ListSubheader>
+                <ListSubheader sx={{ px: 1.5 }}>
                   <Typography
                     sx={{
                       py: 1,
-                      color: 'grey.500',
+                      color: 'text.secondary',
                       fontWeight: 600,
                       fontSize: '12px',
                       backgroundColor: (theme) => theme.palette.background.paper
@@ -202,12 +204,16 @@ const ConversationsHistoryList = ({
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         borderRadius: 1,
-                        backgroundColor:
-                          theme.palette.background[
-                            isSelected ? 'default' : 'paper'
-                          ],
+                        backgroundColor: isSelected
+                          ? theme.palette.mode === 'dark'
+                            ? grey[800]
+                            : 'grey.200'
+                          : theme.palette.background.paper,
                         '&:hover': {
-                          backgroundColor: theme.palette.background.default
+                          backgroundColor:
+                            theme.palette.mode === 'dark'
+                              ? grey[800]
+                              : 'grey.200'
                         }
                       })}
                       onClick={() =>
@@ -216,13 +222,13 @@ const ConversationsHistoryList = ({
                     >
                       <Stack
                         direction="row"
+                        width="100%"
                         alignItems="center"
                         gap={1.5}
-                        maxWidth={isSelected ? '88%' : '100%'}
                       >
                         <ChatBubbleOutline
                           sx={{
-                            color: 'grey.700',
+                            color: 'inherit',
                             width: '16px',
                             height: '16px'
                           }}
@@ -239,13 +245,13 @@ const ConversationsHistoryList = ({
                         >
                           {capitalize(conversation.messages[0]?.content)}
                         </Typography>
+                        {isSelected ? (
+                          <DeleteConversationButton
+                            conversationId={conversation.id}
+                            onDelete={onDeleteConversation}
+                          />
+                        ) : null}
                       </Stack>
-                      {isSelected ? (
-                        <DeleteConversationButton
-                          conversationId={conversation.id}
-                          onDelete={onDeleteConversation}
-                        />
-                      ) : null}
                     </Stack>
                   );
                 })}

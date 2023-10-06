@@ -9,6 +9,8 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 
+import { grey } from '@chainlit/components';
+
 import { conversationsFiltersState } from 'state/conversations';
 
 export enum FEEDBACKS {
@@ -64,7 +66,8 @@ export default function FeedbackSelect() {
         onClick={(event) => setAnchorEl(event.currentTarget)}
         sx={{
           borderRadius: 1,
-          backgroundColor: (theme) => theme.palette.background.default
+          backgroundColor: (theme) =>
+            theme.palette.mode === 'dark' ? grey[850] : 'grey.100'
         }}
       >
         {renderIcon()}
