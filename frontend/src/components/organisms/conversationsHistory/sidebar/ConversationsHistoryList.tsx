@@ -1,7 +1,6 @@
 import { ChainlitAPI } from 'api/chainlitApi';
 import { capitalize, map, size, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -85,9 +84,12 @@ const groupByDate = (data: IChat[]) => {
   return groupedData;
 };
 
-const ConversationsHistoryList = () => {
+const ConversationsHistoryList = ({
+  shouldLoadMore
+}: {
+  shouldLoadMore: boolean;
+}) => {
   const navigate = useNavigate();
-  const { ref, inView } = useInView();
 
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState
@@ -115,7 +117,8 @@ const ConversationsHistoryList = () => {
 
       // Prevent conversations to be duplicated
       const allConversations = uniqBy(
-        conversations?.conversations?.concat(data),
+        // We should only concatenate conversations when we have a cursor indicating that we have loaded more items.
+        cursor ? conversations?.conversations?.concat(data) : data,
         'id'
       );
 
@@ -137,7 +140,6 @@ const ConversationsHistoryList = () => {
 
   const refetchConversations = async () => {
     setIsLoading(true);
-    setPrevPageInfo(undefined);
     fetchConversations(undefined);
   };
 
@@ -161,18 +163,13 @@ const ConversationsHistoryList = () => {
   }, [accessToken, filters]);
 
   useEffect(() => {
-    if (inView) loadMoreItems();
-  }, [inView]);
-
-  const loadMoreItems = () => {
     if (!isLoading && prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
       setIsLoading(true);
       fetchConversations(prevPageInfo.endCursor);
     }
-  };
+  }, [shouldLoadMore]);
 
   if (isRefetching || (!conversations?.groupedConversations && isLoading)) {
-    console.log('ON REFETCH LAAA');
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
         <Skeleton variant="rounded" width={100} height={10} />
@@ -308,8 +305,8 @@ const ConversationsHistoryList = () => {
             </li>
           );
         })}
-        {prevPageInfo?.hasNextPage ? (
-          <Stack alignItems={'center'} p={2} ref={ref}>
+        {shouldLoadMore && isLoading ? (
+          <Stack alignItems={'center'} p={2}>
             <CircularProgress size={30} />
           </Stack>
         ) : null}
