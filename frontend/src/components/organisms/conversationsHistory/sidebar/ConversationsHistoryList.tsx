@@ -175,7 +175,7 @@ const ConversationsHistoryList = () => {
     console.log('ON REFETCH LAAA');
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
-        <Skeleton variant="rounded" width={100} height={20} />
+        <Skeleton variant="rounded" width={100} height={10} />
         {[1, 2].map((childIndex) => (
           <Stack
             key={`conversations-skeleton-${index}-${childIndex}`}
@@ -186,7 +186,7 @@ const ConversationsHistoryList = () => {
               gap: 1.5
             }}
           >
-            <Skeleton variant="rounded" width={30} height={16} />
+            <Skeleton variant="rounded" width={30} />
             <Skeleton width={'100%'} />
           </Stack>
         ))}
@@ -218,7 +218,7 @@ const ConversationsHistoryList = () => {
     <>
       <List
         sx={{
-          width: '100%',
+          px: 1,
           height: 0,
           bgcolor: 'background.paper',
           '& ul': { padding: 0 }
@@ -310,7 +310,7 @@ const ConversationsHistoryList = () => {
         })}
         {prevPageInfo?.hasNextPage ? (
           <Stack alignItems={'center'} p={2} ref={ref}>
-            <CircularProgress />
+            <CircularProgress size={30} />
           </Stack>
         ) : null}
       </List>

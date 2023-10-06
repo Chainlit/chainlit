@@ -7,7 +7,7 @@ import WelcomeScreen from 'components/organisms/chat/welcomeScreen';
 export default function Readme() {
   return (
     <Page>
-      <Box sx={{ px: 2 }}>
+      <Box my={2} display="flex" flexGrow={1}>
         <WelcomeScreen />
       </Box>
     </Page>

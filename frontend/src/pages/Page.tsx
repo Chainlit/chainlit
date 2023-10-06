@@ -45,7 +45,7 @@ const Page = ({ children }: Props) => {
       {!isAuthenticated ? (
         <Alert severity="error">You are not part of this project.</Alert>
       ) : (
-        <Stack direction="row" height="100%" overflow="auto">
+        <Stack direction="row" height="100%" width="100%" overflow="auto">
           <ConversationsHistorySidebar />
           {children}
         </Stack>

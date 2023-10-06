@@ -16,13 +16,15 @@ const WelcomeScreen = () => {
   }
 
   return (
-    <Box p={2} overflow="auto" flexGrow={1}>
+    <Box overflow="auto" flexGrow={1}>
       <Box
         id="welcome-screen"
         sx={{
+          p: 2,
+          boxSizing: 'border-box',
           maxWidth: '60rem',
           width: '100%',
-          m: 'auto',
+          mx: 'auto',
           color: 'text.primary',
           lineHeight: '25px',
           fontSize: '1rem',

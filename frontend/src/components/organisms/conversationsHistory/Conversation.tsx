@@ -1,4 +1,6 @@
-import { Box, Skeleton, Stack } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+import { Alert, Button, Skeleton, Stack } from '@mui/material';
 
 import { IAction, nestMessages } from '@chainlit/components';
 
@@ -18,6 +20,8 @@ const Conversation = ({ id }: { id: string }) => {
     revalidateOnFocus: false,
     revalidateIfStale: false
   });
+
+  const navigate = useNavigate();
 
   if (isLoading) {
     return [1, 2, 3].map((index) => (
@@ -57,7 +61,23 @@ const Conversation = ({ id }: { id: string }) => {
   return (
     <Stack direction="row" flexGrow={1} width="100%" height={'100%'}>
       <SideView>
-        <Box my={1} />
+        <Alert
+          severity="info"
+          sx={{
+            width: '100%',
+            maxWidth: '60rem',
+            mx: 'auto',
+            my: 2
+          }}
+          action={
+            <Button color="inherit" size="small" onClick={() => navigate('/')}>
+              Go back to chat
+            </Button>
+          }
+        >
+          This conversation was created on{' '}
+          {new Intl.DateTimeFormat().format(conversation.createdAt as number)}.
+        </Alert>
         <MessageContainer
           loading={false}
           avatars={[]}
