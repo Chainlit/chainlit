@@ -10,7 +10,7 @@ import { conversationsHistoryState } from 'state/chatHistory';
 
 import Page from './Page';
 
-export default function ConversationsHistory() {
+export default function ConversationPage() {
   const { id } = useParams();
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState

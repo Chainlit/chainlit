@@ -57,7 +57,7 @@ export const ChatPromptPlayground = forwardRef(
         : 'Prompt messages';
 
     return (
-      <Stack sx={{ width: '100%', height: '100%' }}>
+      <Stack sx={{ width: '100%' }}>
         <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
           {title}
         </Typography>

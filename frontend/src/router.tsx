@@ -1,7 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 
 import AuthCallback from 'pages/AuthCallback';
-import Conversations from 'pages/Conversations';
+import Conversation from 'pages/Conversation';
 import Design from 'pages/Design';
 import Element from 'pages/Element';
 import Env from 'pages/Env';
@@ -23,8 +23,8 @@ export const router = createBrowserRouter([
     element: <Env />
   },
   {
-    path: '/conversations/:id?',
-    element: <Conversations />
+    path: '/conversation/:id?',
+    element: <Conversation />
   },
   {
     path: '/element/:id',

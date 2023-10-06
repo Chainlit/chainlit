@@ -266,7 +266,7 @@ const ConversationsHistoryList = () => {
                         }
                       })}
                       onClick={() =>
-                        navigate(`/conversations/${conversation.id}`)
+                        navigate(`/conversation/${conversation.id}`)
                       }
                     >
                       <Stack
