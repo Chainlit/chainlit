@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IMessage, IMessageElement, TFormInput } from '@chainlit/components';
+import { IMessage, IMessageElement } from '@chainlit/components';
 
 export interface IProjectSettings {
   markdown?: string;

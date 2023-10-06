@@ -1,5 +1,4 @@
-import { DefaultValue, atom, selector } from 'recoil';
-import { v4 as uuidv4 } from 'uuid';
+import { atom } from 'recoil';
 
 import { Role } from 'types/user';
 
