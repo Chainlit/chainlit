@@ -35,7 +35,7 @@ export interface IPagination {
   cursor?: string | number;
 }
 
-const BATCH_SIZE = 30;
+const BATCH_SIZE = 20;
 
 const ConversationsHistoryList = ({
   shouldLoadMore,
