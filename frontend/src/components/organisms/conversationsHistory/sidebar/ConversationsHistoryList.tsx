@@ -38,9 +38,11 @@ export interface IPagination {
 const BATCH_SIZE = 30;
 
 const ConversationsHistoryList = ({
-  shouldLoadMore
+  shouldLoadMore,
+  setShouldLoadMore
 }: {
   shouldLoadMore: boolean;
+  setShouldLoadMore: (value: boolean) => void;
 }) => {
   const navigate = useNavigate();
 
@@ -54,11 +56,16 @@ const ConversationsHistoryList = ({
   const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
   const [prevFilters, setPrevFilters] =
     useState<IConversationsFilters>(filters);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefetching, setIsRefetching] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchConversations = async (cursor?: string | number) => {
     try {
+      if (cursor) {
+        setIsLoadingMore(true);
+      } else {
+        setIsFetching(true);
+      }
       const { pageInfo, data } = await ChainlitAPI.getConversations(
         { first: BATCH_SIZE, cursor },
         filters,
@@ -83,46 +90,38 @@ const ConversationsHistoryList = ({
     } catch (error) {
       if (error instanceof Error) setError(error.message);
     } finally {
-      setIsLoading(false);
-      setIsRefetching(false);
+      setShouldLoadMore(false);
+      setIsLoadingMore(false);
+      setIsFetching(false);
     }
-  };
-
-  const refetchConversations = async () => {
-    setIsLoading(true);
-    fetchConversations(undefined);
-  };
-
-  const onDeleteConversation = () => {
-    setIsRefetching(true);
-    refetchConversations();
   };
 
   useEffect(() => {
     const filtersHasChanged =
       JSON.stringify(prevFilters) !== JSON.stringify(filters);
 
-    if (size(conversations?.groupedConversations) === 0 || filtersHasChanged) {
-      if (filtersHasChanged) {
-        setIsRefetching(true);
-        setPrevFilters(filters);
-      }
-
-      refetchConversations();
+    if (filtersHasChanged) {
+      setPrevFilters(filters);
+      fetchConversations();
     }
-  }, [accessToken, filters]);
+  }, [filters]);
 
   useEffect(() => {
-    if (!isLoading && prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
-      setIsLoading(true);
+    if (!isFetching && !conversations?.conversations?.length) {
+      fetchConversations();
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!isLoadingMore && prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
       fetchConversations(prevPageInfo.endCursor);
     }
-  }, [shouldLoadMore]);
+  }, [isLoadingMore, shouldLoadMore]);
 
-  if (isRefetching || (!conversations?.groupedConversations && isLoading)) {
+  if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
-        <Skeleton variant="rounded" width={100} height={10} />
+        <Skeleton width={100} />
         {[1, 2].map((childIndex) => (
           <Stack
             key={`conversations-skeleton-${index}-${childIndex}`}
@@ -133,7 +132,7 @@ const ConversationsHistoryList = ({
               gap: 1.5
             }}
           >
-            <Skeleton variant="rounded" width={30} />
+            <Skeleton width={30} />
             <Skeleton width={'100%'} />
           </Stack>
         ))}
@@ -149,7 +148,7 @@ const ConversationsHistoryList = ({
     );
   }
 
-  if (!conversations?.groupedConversations) {
+  if (!conversations) {
     return null;
   }
 
@@ -196,6 +195,7 @@ const ConversationsHistoryList = ({
                   return (
                     <Stack
                       key={`conversation-${conversation.id}`}
+                      id={`conversation-${conversation.id}`}
                       sx={(theme) => ({
                         cursor: 'pointer',
                         p: 1.5,
@@ -248,7 +248,7 @@ const ConversationsHistoryList = ({
                         {isSelected ? (
                           <DeleteConversationButton
                             conversationId={conversation.id}
-                            onDelete={onDeleteConversation}
+                            onDelete={fetchConversations}
                           />
                         ) : null}
                       </Stack>
@@ -259,7 +259,7 @@ const ConversationsHistoryList = ({
             </li>
           );
         })}
-        {isLoading ? (
+        {isLoadingMore ? (
           <Stack alignItems={'center'} p={2}>
             <CircularProgress size={30} />
           </Stack>

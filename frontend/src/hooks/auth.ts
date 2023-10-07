@@ -1,9 +1,10 @@
 import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
 import jwt_decode from 'jwt-decode';
 import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
+import { conversationsHistoryState } from 'state/conversations';
 import { accessTokenState, userState } from 'state/user';
 
 import { IAppUser } from 'types/user';
@@ -19,12 +20,14 @@ export const useAuth = () => {
   }>('/auth/config', fetcher);
   const isReady = !!(!isLoadingConfig && config);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+  const setConversationsHistory = useSetRecoilState(conversationsHistoryState);
   const [user, setUser] = useRecoilState(userState);
 
   const logout = () => {
     setUser(null);
     removeToken();
     setAccessToken('');
+    setConversationsHistory(undefined);
   };
 
   const saveAndSetToken = (token: string | null | undefined) => {

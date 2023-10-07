@@ -18,7 +18,7 @@ import { projectSettingsState } from 'state/project';
 import { ConversationsHistoryList } from './ConversationsHistoryList';
 import Filters from './filters';
 
-const DRAWER_WIDTH = 240;
+const DRAWER_WIDTH = 260;
 
 let _scrollTop = 0;
 
@@ -45,9 +45,9 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
   };
 
   useEffect(() => {
-    ref.current?.scrollTo({
-      top: _scrollTop
-    });
+    if (ref.current) {
+      ref.current.scrollTop = _scrollTop;
+    }
   }, []);
 
   if (!pSettings?.dataPersistence || !user) {
@@ -89,7 +89,10 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
           </IconButton>
         </Stack>
         <Filters />
-        <ConversationsHistoryList shouldLoadMore={shouldLoadMore} />
+        <ConversationsHistoryList
+          shouldLoadMore={shouldLoadMore}
+          setShouldLoadMore={setShouldLoadMore}
+        />
       </Drawer>
       <Box
         sx={{
