@@ -1,6 +1,7 @@
 import { capitalize, map, size } from 'lodash';
 import { useNavigate } from 'react-router-dom';
 
+import { Height } from '@mui/icons-material';
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -186,7 +187,10 @@ const ConversationsHistoryList = ({
           );
         })}
         <Stack alignItems={'center'}>
-          <CircularProgress size={30} sx={{ opacity: isLoadingMore ? 1 : 0 }} />
+          <CircularProgress
+            size={30}
+            sx={{ my: 1, opacity: isLoadingMore ? 1 : 0 }}
+          />
         </Stack>
       </List>
     </>
