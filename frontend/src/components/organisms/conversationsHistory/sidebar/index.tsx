@@ -144,6 +144,7 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
   return (
     <>
       <Drawer
+        className="chat-history-drawer"
         anchor="left"
         open={open}
         variant={isMobile ? 'temporary' : 'persistent'}
