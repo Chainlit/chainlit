@@ -1,6 +1,6 @@
 import { runTestServer } from '../../support/testUtils';
 
-describe('Cloud', () => {
+describe('Conversations', () => {
   before(() => {
     runTestServer(undefined, {
       CHAINLIT_API_KEY: 'fake_key',
