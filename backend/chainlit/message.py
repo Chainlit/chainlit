@@ -14,6 +14,7 @@ from chainlit.logger import logger
 from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
 from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec
+from syncer import asyncio
 
 
 class MessageBase(ABC):
@@ -43,22 +44,26 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = await self.with_conversation_id()
-        if chainlit_client and not self.persisted:
-            try:
-                persisted_id = await chainlit_client.create_message(msg_dict)
-                if persisted_id:
-                    msg_dict["id"] = persisted_id
-                    self.id = persisted_id
-                    self.persisted = True
-            except Exception as e:
-                if self.fail_on_persist_error:
-                    raise e
-                logger.error(f"Failed to persist message: {str(e)}")
+        asyncio.create_task(self._persist_create(msg_dict))
 
         if not config.features.prompt_playground:
             msg_dict.pop("prompt", None)
-
         return msg_dict
+
+    async def _persist_create(self, message: MessageDict):
+        if not chainlit_client or self.persisted:
+            return
+
+        try:
+            persisted_id = await chainlit_client.create_message(message)
+
+            if persisted_id:
+                self.id = persisted_id
+                self.persisted = True
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message creation: {str(e)}")
 
     async def update(
         self,
@@ -69,13 +74,21 @@ class MessageBase(ABC):
         trace_event("update_message")
 
         msg_dict = self.to_dict()
-
-        if chainlit_client and self.id:
-            await chainlit_client.update_message(self.id, msg_dict)
-
+        asyncio.create_task(self._persist_update(msg_dict))
         await context.emitter.update_message(msg_dict)
 
         return True
+
+    async def _persist_update(self, message: MessageDict):
+        if not chainlit_client or not self.id:
+            return
+
+        try:
+            await chainlit_client.update_message(self.id, message)
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message update: {str(e)}")
 
     async def remove(self):
         """
@@ -90,6 +103,17 @@ class MessageBase(ABC):
         await context.emitter.delete_message(self.to_dict())
 
         return True
+
+    async def _persist_remove(self):
+        if not chainlit_client or not self.id:
+            return
+
+        try:
+            await chainlit_client.delete_message(self.id)
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message deletion: {str(e)}")
 
     async def send(self):
         if self.content is None:

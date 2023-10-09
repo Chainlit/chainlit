@@ -10,8 +10,10 @@ from chainlit.client.base import ElementDict, ElementDisplay, ElementSize, Eleme
 from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.context import context
 from chainlit.data import chainlit_client
+from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
+from syncer import asyncio
 
 mime_types = {
     "text": "text/plain",
@@ -98,17 +100,24 @@ class Element:
             )
             self.url = upload_res["url"]
             self.object_key = upload_res["object_key"]
+        element_dict = await self.with_conversation_id()
 
-        if not self.persisted:
-            element_dict = await client.create_element(
-                await self.with_conversation_id()
-            )
-            self.persisted = True
-        else:
-            element_dict = await client.update_element(
-                await self.with_conversation_id()
-            )
+        asyncio.create_task(self._persist(element_dict))
+
         return element_dict
+
+    async def _persist(self, element: ElementDict):
+        if not chainlit_client:
+            return
+
+        try:
+            if self.persisted:
+                await chainlit_client.update_element(element)
+            else:
+                await chainlit_client.create_element(element)
+                self.persisted = True
+        except Exception as e:
+            logger.error(f"Failed to persist element: {str(e)}")
 
     async def before_emit(self, element: Dict) -> Dict:
         return element
