@@ -71,7 +71,7 @@ export default function Login() {
     if (user) {
       navigate('/');
     }
-  }, [config, navigate, user]);
+  }, [config, user]);
 
   return (
     <AuthLogin

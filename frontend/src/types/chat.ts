@@ -6,7 +6,7 @@ import { IMessageElement } from './element';
 import { IAppUser } from './user';
 
 export interface IChat {
-  id: number;
+  id: string;
   createdAt: number | string;
   appUser?: IAppUser;
   messages: IMessage[];

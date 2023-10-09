@@ -23,8 +23,6 @@ import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 
-import { useAuth } from 'hooks/auth';
-
 import { projectSettingsState } from 'state/project';
 
 interface INavItem {
@@ -60,11 +58,10 @@ function NavItem({ to, label }: INavItem) {
 }
 
 interface NavProps {
-  hasDb?: boolean;
   hasReadme?: boolean;
 }
 
-function Nav({ hasDb, hasReadme }: NavProps) {
+function Nav({ hasReadme }: NavProps) {
   const location = useLocation();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -79,10 +76,6 @@ function Nav({ hasDb, hasReadme }: NavProps) {
   const matches = useMediaQuery(theme.breakpoints.down('md'));
 
   const tabs = [{ to: '/', label: 'Chat' }];
-
-  if (hasDb) {
-    tabs.push({ to: '/dataset', label: 'History' });
-  }
 
   if (hasReadme) {
     tabs.push({ to: '/readme', label: 'Readme' });
@@ -146,16 +139,13 @@ function Nav({ hasDb, hasReadme }: NavProps) {
 
 export default function Header() {
   const pSettings = useRecoilValue(projectSettingsState);
-
-  const { user } = useAuth();
   const matches = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
-
-  const hasHistory = !!(user && pSettings?.dataPersistence);
 
   return (
     <AppBar elevation={0} color="transparent" position="static">
       <Toolbar
         sx={{
+          padding: (theme) => `0 ${theme.spacing(2)} !important`,
           minHeight: '60px !important',
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
@@ -163,9 +153,9 @@ export default function Header() {
           borderBottomColor: (theme) => theme.palette.divider
         }}
       >
-        <Stack alignItems="center" direction={'row'} gap={4}>
+        <Stack alignItems="center" direction={'row'} gap={3}>
           {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
-          <Nav hasDb={hasHistory} hasReadme={!!pSettings?.markdown} />
+          <Nav hasReadme={!!pSettings?.markdown} />
         </Stack>
         <Stack
           alignItems="center"

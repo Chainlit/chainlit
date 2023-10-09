@@ -18,10 +18,15 @@ export function closeHistory() {
   cy.get(`body`).click();
 }
 
-export function runTestServer(mode: ExecutionMode = undefined) {
+export function runTestServer(
+  mode: ExecutionMode = undefined,
+  env?: Record<string, string>
+) {
   const pathItems = Cypress.spec.absolute.split(sep);
   const testName = pathItems[pathItems.length - 2];
-  cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`);
+  cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`, {
+    env
+  });
   cy.visit('/');
 }
 
