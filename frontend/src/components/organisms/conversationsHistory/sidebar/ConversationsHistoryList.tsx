@@ -1,8 +1,5 @@
-import { ChainlitAPI } from 'api/chainlitApi';
-import { capitalize, map, size, uniqBy } from 'lodash';
-import { useEffect, useState } from 'react';
+import { capitalize, map, size } from 'lodash';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -16,12 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import { grey } from '@chainlit/components';
 
-import {
-  IConversationsFilters,
-  conversationsFiltersState,
-  conversationsHistoryState
-} from 'state/conversations';
-import { accessTokenState } from 'state/user';
+import { ConversationsHistory } from 'types/chatHistory';
 
 import { DeleteConversationButton } from './DeleteConversationButton';
 
@@ -35,88 +27,22 @@ export interface IPagination {
   cursor?: string | number;
 }
 
-const BATCH_SIZE = 20;
+interface ConversationsHistoryProps {
+  conversations: ConversationsHistory;
+  error?: string;
+  fetchConversations: () => void;
+  isFetching: boolean;
+  isLoadingMore: boolean;
+}
 
 const ConversationsHistoryList = ({
-  shouldLoadMore,
-  setShouldLoadMore
-}: {
-  shouldLoadMore: boolean;
-  setShouldLoadMore: (value: boolean) => void;
-}) => {
+  conversations,
+  error,
+  fetchConversations,
+  isFetching,
+  isLoadingMore
+}: ConversationsHistoryProps) => {
   const navigate = useNavigate();
-
-  const [conversations, setConversations] = useRecoilState(
-    conversationsHistoryState
-  );
-  const accessToken = useRecoilValue(accessTokenState);
-  const filters = useRecoilValue(conversationsFiltersState);
-
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
-  const [prevFilters, setPrevFilters] =
-    useState<IConversationsFilters>(filters);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-
-  const fetchConversations = async (cursor?: string | number) => {
-    try {
-      if (cursor) {
-        setIsLoadingMore(true);
-      } else {
-        setIsFetching(true);
-      }
-      const { pageInfo, data } = await ChainlitAPI.getConversations(
-        { first: BATCH_SIZE, cursor },
-        filters,
-        accessToken
-      );
-      setPrevPageInfo(pageInfo);
-      setError(undefined);
-
-      // Prevent conversations to be duplicated
-      const allConversations = uniqBy(
-        // We should only concatenate conversations when we have a cursor indicating that we have loaded more items.
-        cursor ? conversations?.conversations?.concat(data) : data,
-        'id'
-      );
-
-      if (allConversations) {
-        setConversations((prev) => ({
-          ...prev,
-          conversations: allConversations
-        }));
-      }
-    } catch (error) {
-      if (error instanceof Error) setError(error.message);
-    } finally {
-      setShouldLoadMore(false);
-      setIsLoadingMore(false);
-      setIsFetching(false);
-    }
-  };
-
-  useEffect(() => {
-    const filtersHasChanged =
-      JSON.stringify(prevFilters) !== JSON.stringify(filters);
-
-    if (filtersHasChanged) {
-      setPrevFilters(filters);
-      fetchConversations();
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    if (!isFetching && !conversations?.conversations?.length) {
-      fetchConversations();
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (!isLoadingMore && prevPageInfo?.hasNextPage && prevPageInfo.endCursor) {
-      fetchConversations(prevPageInfo.endCursor);
-    }
-  }, [isLoadingMore, shouldLoadMore]);
 
   if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
     return [1, 2, 3].map((index) => (

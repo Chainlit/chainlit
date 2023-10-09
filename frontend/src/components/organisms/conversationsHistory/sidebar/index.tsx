@@ -1,5 +1,7 @@
+import { ChainlitAPI } from 'api/chainlitApi';
+import { uniqBy } from 'lodash';
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
@@ -13,12 +15,22 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { useAuth } from 'hooks/auth';
 
+import {
+  IConversationsFilters,
+  conversationsFiltersState,
+  conversationsHistoryState
+} from 'state/conversations';
 import { projectSettingsState } from 'state/project';
+import { accessTokenState } from 'state/user';
 
-import { ConversationsHistoryList } from './ConversationsHistoryList';
+import {
+  ConversationsHistoryList,
+  IPageInfo
+} from './ConversationsHistoryList';
 import Filters from './filters';
 
 const DRAWER_WIDTH = 260;
+const BATCH_SIZE = 20;
 
 let _scrollTop = 0;
 
@@ -27,9 +39,20 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
   const isMobile = useMediaQuery('(max-width:800px)');
 
   const pSettings = useRecoilValue(projectSettingsState);
+  const [conversations, setConversations] = useRecoilState(
+    conversationsHistoryState
+  );
+  const accessToken = useRecoilValue(accessTokenState);
+  const filters = useRecoilValue(conversationsFiltersState);
 
   const [open, setOpen] = useState(true);
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
+  const [prevFilters, setPrevFilters] =
+    useState<IConversationsFilters>(filters);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,11 +67,75 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
     setShouldLoadMore(atBottom);
   };
 
+  const fetchConversations = async (cursor?: string | number) => {
+    try {
+      if (cursor) {
+        setIsLoadingMore(true);
+      } else {
+        setIsFetching(true);
+      }
+      const { pageInfo, data } = await ChainlitAPI.getConversations(
+        { first: BATCH_SIZE, cursor },
+        filters,
+        accessToken
+      );
+      setPrevPageInfo(pageInfo);
+      setError(undefined);
+
+      // Prevent conversations to be duplicated
+      const allConversations = uniqBy(
+        // We should only concatenate conversations when we have a cursor indicating that we have loaded more items.
+        cursor ? conversations?.conversations?.concat(data) : data,
+        'id'
+      );
+
+      if (allConversations) {
+        setConversations((prev) => ({
+          ...prev,
+          conversations: allConversations
+        }));
+      }
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+    } finally {
+      setShouldLoadMore(false);
+      setIsLoadingMore(false);
+      setIsFetching(false);
+    }
+  };
+
   useEffect(() => {
     if (ref.current) {
       ref.current.scrollTop = _scrollTop;
     }
   }, []);
+
+  useEffect(() => {
+    const filtersHasChanged =
+      JSON.stringify(prevFilters) !== JSON.stringify(filters);
+
+    if (filtersHasChanged) {
+      setPrevFilters(filters);
+      fetchConversations();
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    if (!isFetching && !conversations?.conversations?.length) {
+      fetchConversations();
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (
+      shouldLoadMore &&
+      !isLoadingMore &&
+      prevPageInfo?.hasNextPage &&
+      prevPageInfo.endCursor
+    ) {
+      fetchConversations(prevPageInfo.endCursor);
+    }
+  }, [isLoadingMore, shouldLoadMore]);
 
   if (!pSettings?.dataPersistence || !user) {
     return null;
@@ -89,10 +176,15 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
           </IconButton>
         </Stack>
         <Filters />
-        <ConversationsHistoryList
-          shouldLoadMore={shouldLoadMore}
-          setShouldLoadMore={setShouldLoadMore}
-        />
+        {conversations ? (
+          <ConversationsHistoryList
+            conversations={conversations}
+            error={error}
+            isFetching={isFetching}
+            isLoadingMore={isLoadingMore}
+            fetchConversations={fetchConversations}
+          />
+        ) : null}
       </Drawer>
       <Box
         sx={{
