@@ -92,6 +92,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
     <>
       {chatSettingsInputs.length > 0 && (
         <IconButton
+          id="chat-settings-open-modal"
           disabled={disabled}
           color="inherit"
           onClick={() => setChatSettingsOpen(true)}
