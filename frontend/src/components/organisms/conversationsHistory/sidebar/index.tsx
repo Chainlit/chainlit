@@ -6,11 +6,10 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import Box from '@mui/material/Box';
-import MDrawer from '@mui/material/Drawer';
+import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import styled from '@mui/material/styles/styled';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { useAuth } from 'hooks/auth';
@@ -30,19 +29,6 @@ const DRAWER_WIDTH = 260;
 const BATCH_SIZE = 20;
 
 let _scrollTop = 0;
-
-const Drawer = styled(MDrawer, {
-  shouldForwardProp: (prop) => prop !== 'isSmallScreen'
-})<{ open: boolean }>(({ open }) => ({
-  width: open ? DRAWER_WIDTH : 0,
-  '& .MuiDrawer-paper': {
-    position: 'inherit',
-    gap: 10,
-    display: 'flex',
-    padding: '0px 4px',
-    backgroundImage: 'none'
-  }
-}));
 
 const _ConversationsHistorySidebar = () => {
   const isMobile = useMediaQuery('(max-width:800px)');
@@ -155,6 +141,16 @@ const _ConversationsHistorySidebar = () => {
         PaperProps={{
           ref: ref,
           onScroll: handleScroll
+        }}
+        sx={{
+          width: open ? DRAWER_WIDTH : 0,
+          '& .MuiDrawer-paper': {
+            position: 'inherit',
+            gap: 1,
+            display: 'flex',
+            padding: '0px 4px',
+            backgroundImage: 'none'
+          }
         }}
       >
         <Stack
