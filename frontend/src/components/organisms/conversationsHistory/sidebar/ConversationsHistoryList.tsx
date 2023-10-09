@@ -185,11 +185,9 @@ const ConversationsHistoryList = ({
             </li>
           );
         })}
-        {isLoadingMore ? (
-          <Stack alignItems={'center'} p={2}>
-            <CircularProgress size={30} />
-          </Stack>
-        ) : null}
+        <Stack alignItems={'center'}>
+          <CircularProgress size={30} sx={{ opacity: isLoadingMore ? 1 : 0 }} />
+        </Stack>
       </List>
     </>
   );
