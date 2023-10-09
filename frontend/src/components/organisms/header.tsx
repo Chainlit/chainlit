@@ -153,7 +153,7 @@ export default function Header() {
           borderBottomColor: (theme) => theme.palette.divider
         }}
       >
-        <Stack alignItems="center" direction={'row'} gap={4}>
+        <Stack alignItems="center" direction={'row'} gap={3}>
           {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
           <Nav hasReadme={!!pSettings?.markdown} />
         </Stack>

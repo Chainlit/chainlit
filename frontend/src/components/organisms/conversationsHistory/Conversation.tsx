@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import { Alert, Button, Skeleton, Stack } from '@mui/material';
+import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
 import { IAction, nestMessages } from '@chainlit/components';
 
@@ -59,25 +59,34 @@ const Conversation = ({ id }: { id: string }) => {
   const actions: IAction[] = [];
 
   return (
-    <Stack direction="row" flexGrow={1} width="100%" height={'100%'}>
+    <Stack direction="row" flexGrow={1} width="100%" height="100%">
       <SideView>
-        <Alert
-          severity="info"
+        <Box
           sx={{
             width: '100%',
             maxWidth: '60rem',
             mx: 'auto',
             my: 2
           }}
-          action={
-            <Button color="inherit" size="small" onClick={() => navigate('/')}>
-              Go back to chat
-            </Button>
-          }
         >
-          This conversation was created on{' '}
-          {new Intl.DateTimeFormat().format(conversation.createdAt as number)}.
-        </Alert>
+          <Alert
+            sx={{ mx: 2 }}
+            severity="info"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => navigate('/')}
+              >
+                Go back to chat
+              </Button>
+            }
+          >
+            This conversation was created on{' '}
+            {new Intl.DateTimeFormat().format(conversation.createdAt as number)}
+            .
+          </Alert>
+        </Box>
         <MessageContainer
           loading={false}
           avatars={[]}
