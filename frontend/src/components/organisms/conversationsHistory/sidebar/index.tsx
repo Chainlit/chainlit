@@ -23,10 +23,7 @@ import {
 import { projectSettingsState } from 'state/project';
 import { accessTokenState } from 'state/user';
 
-import {
-  ConversationsHistoryList,
-  IPageInfo
-} from './ConversationsHistoryList';
+import { ConversationsHistoryList } from './ConversationsHistoryList';
 import Filters from './filters';
 
 const DRAWER_WIDTH = 260;
@@ -59,7 +56,6 @@ const _ConversationsHistorySidebar = () => {
   const [open, setOpen] = useState(true);
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [prevPageInfo, setPrevPageInfo] = useState<IPageInfo | undefined>();
   const [prevFilters, setPrevFilters] =
     useState<IConversationsFilters>(filters);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -72,6 +68,7 @@ const _ConversationsHistorySidebar = () => {
 
     const { scrollHeight, clientHeight, scrollTop } = ref.current;
     const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+
     //We save the scroll top in order to scroll to the element when the page is changing.
     _scrollTop = scrollTop;
 
@@ -90,7 +87,6 @@ const _ConversationsHistorySidebar = () => {
         filters,
         accessToken
       );
-      setPrevPageInfo(pageInfo);
       setError(undefined);
 
       // Prevent conversations to be duplicated
@@ -103,6 +99,7 @@ const _ConversationsHistorySidebar = () => {
       if (allConversations) {
         setConversations((prev) => ({
           ...prev,
+          pageInfo: pageInfo,
           conversations: allConversations
         }));
       }
@@ -138,13 +135,12 @@ const _ConversationsHistorySidebar = () => {
   }, [accessToken]);
 
   useEffect(() => {
-    if (
-      shouldLoadMore &&
-      !isLoadingMore &&
-      prevPageInfo?.hasNextPage &&
-      prevPageInfo.endCursor
-    ) {
-      fetchConversations(prevPageInfo.endCursor);
+    if (conversations?.pageInfo) {
+      const { hasNextPage, endCursor } = conversations.pageInfo;
+
+      if (shouldLoadMore && !isLoadingMore && hasNextPage && endCursor) {
+        fetchConversations(endCursor);
+      }
     }
   }, [isLoadingMore, shouldLoadMore]);
 

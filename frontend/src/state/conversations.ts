@@ -21,7 +21,8 @@ export const conversationsHistoryState = atom<ConversationsHistory | undefined>(
     default: {
       conversations: undefined,
       currentConversationId: undefined,
-      groupedConversations: undefined
+      groupedConversations: undefined,
+      pageInfo: undefined
     },
     effects: [
       ({ setSelf, onSet }: { setSelf: any; onSet: any }) => {
