@@ -102,19 +102,19 @@ class Element:
             self.object_key = upload_res["object_key"]
         element_dict = await self.with_conversation_id()
 
-        asyncio.create_task(self._persist(element_dict, client))
+        asyncio.create_task(self._persist(element_dict))
 
         return element_dict
 
-    async def _persist(self, conversation: ElementDict, client: ChainlitCloudClient):
+    async def _persist(self, element: ElementDict):
         if not chainlit_client:
             return
 
         try:
             if self.persisted:
-                await client.update_element(conversation)
+                await chainlit_client.update_element(element)
             else:
-                await client.create_element(conversation)
+                await chainlit_client.create_element(element)
                 self.persisted = True
         except Exception as e:
             logger.error(f"Failed to persist element: {str(e)}")
