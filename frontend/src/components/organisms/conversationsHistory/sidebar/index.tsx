@@ -34,11 +34,22 @@ const BATCH_SIZE = 20;
 
 let _scrollTop = 0;
 
-const ConversationsHistorySidebar = (): JSX.Element | null => {
-  const { user } = useAuth();
+const Drawer = styled(MDrawer, {
+  shouldForwardProp: (prop) => prop !== 'isSmallScreen'
+})<{ open: boolean }>(({ open }) => ({
+  width: open ? DRAWER_WIDTH : 0,
+  '& .MuiDrawer-paper': {
+    position: 'inherit',
+    gap: 10,
+    display: 'flex',
+    padding: '0px 4px',
+    backgroundImage: 'none'
+  }
+}));
+
+const _ConversationsHistorySidebar = () => {
   const isMobile = useMediaQuery('(max-width:800px)');
 
-  const pSettings = useRecoilValue(projectSettingsState);
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState
   );
@@ -137,10 +148,6 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
     }
   }, [isLoadingMore, shouldLoadMore]);
 
-  if (!pSettings?.dataPersistence || !user) {
-    return null;
-  }
-
   return (
     <>
       <Drawer
@@ -209,17 +216,15 @@ const ConversationsHistorySidebar = (): JSX.Element | null => {
   );
 };
 
-const Drawer = styled(MDrawer, {
-  shouldForwardProp: (prop) => prop !== 'isSmallScreen'
-})<{ open: boolean }>(({ open }) => ({
-  width: open ? DRAWER_WIDTH : 0,
-  '& .MuiDrawer-paper': {
-    position: 'inherit',
-    gap: 10,
-    display: 'flex',
-    padding: '0px 4px',
-    backgroundImage: 'none'
+const ConversationsHistorySidebar = () => {
+  const { user } = useAuth();
+  const pSettings = useRecoilValue(projectSettingsState);
+
+  if (!pSettings?.dataPersistence || !user) {
+    return null;
   }
-}));
+
+  return <_ConversationsHistorySidebar />;
+};
 
 export { ConversationsHistorySidebar };

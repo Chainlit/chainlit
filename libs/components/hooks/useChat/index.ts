@@ -274,7 +274,10 @@ const useChat = () => {
     [setSession, sessionId]
   );
 
-  const connect = useCallback(debounce(_connect, 1000), [_connect]);
+  const connect = useCallback(
+    debounce(_connect, 1000, { leading: true, trailing: false }),
+    [_connect]
+  );
 
   const disconnect = useCallback(() => {
     if (session?.socket) {
