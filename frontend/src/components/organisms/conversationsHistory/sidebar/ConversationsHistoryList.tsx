@@ -188,6 +188,7 @@ const ConversationsHistoryList = ({
         })}
         <Stack alignItems={'center'}>
           <CircularProgress
+            id={'chat-history-loader'}
             size={30}
             sx={{ my: 1, opacity: isLoadingMore ? 1 : 0 }}
           />

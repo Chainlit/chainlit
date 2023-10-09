@@ -107,6 +107,7 @@ describe('Cloud', () => {
 
       // Scroll chat and fetch new conversations
       cy.get('.chat-history-drawer > div').scrollTo('bottom');
+      cy.get('#chat-history-loader').should('be.visible');
       cy.contains('Foo 23');
 
       // Select conversation
