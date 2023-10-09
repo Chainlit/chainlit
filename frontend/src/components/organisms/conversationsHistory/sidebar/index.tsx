@@ -151,6 +151,7 @@ const _ConversationsHistorySidebar = () => {
   return (
     <>
       <Drawer
+        className="chat-history-drawer"
         anchor="left"
         open={open}
         variant={isMobile ? 'temporary' : 'persistent'}
