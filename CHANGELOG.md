@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [0.7.2] - 2023-10-10
+
+### Added
+- Logo is displayed in the UI header (works with custom logo)
+- Azure AD single tenant is now supported
+- `collapsed` attribute on the `Action` class
+
+### Changed
+- Chat history has been entirely reworked
+- Chat messages redesign
+- `config.ui.base_url` becomes `CHAINLIT_URL` env variable
+
+### Fixed
+- File watcher (-w) is now working with nested module imports
+- Unsupported character during OAuth authentication
+  
 ## [0.7.1] - 2023-09-29
 
 ### Added
