@@ -1,7 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
-import { GreyButton } from 'src/buttons';
 
+import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 
 import { IAction } from 'src/types/action';
@@ -17,19 +17,22 @@ const ActionButton = ({ action, margin, onClick }: ActionProps) => {
 
   return (
     <Tooltip title={action.description} placement="top">
-      <GreyButton
+      <Button
         size="small"
-        variant="contained"
+        variant="outlined"
+        sx={{
+          textTransform: 'none',
+          margin
+        }}
         id={action.id}
         onClick={() => {
           action.onClick();
           onClick?.();
         }}
         disabled={loading}
-        sx={{ margin }}
       >
         {action.label || action.name}
-      </GreyButton>
+      </Button>
     </Tooltip>
   );
 };
