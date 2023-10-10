@@ -10,7 +10,7 @@ export default function ChatProfiles() {
 
   if (
     typeof pSettings === 'undefined' ||
-    pSettings.chatProfiles.length === 0 ||
+    pSettings.chatProfiles.length <= 1 ||
     chatProfileValue
   ) {
     return null;

@@ -74,19 +74,24 @@ function App() {
   const theme = overrideTheme(makeTheme(themeVariant));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
-  const { connect, disconnect } = useChat();
+  const { connect } = useChat();
 
   useEffect(() => {
     if (
       isAuthenticated &&
       pSettings?.chatProfiles &&
-      (pSettings.chatProfiles.length === 0 || chatProfileValue)
+      (pSettings.chatProfiles.length <= 1 || chatProfileValue)
     ) {
+      // Autoselect the chat profile if there is only one
+      const chatProfile =
+        pSettings.chatProfiles.length === 1
+          ? pSettings.chatProfiles[0].name
+          : chatProfileValue;
       connect({
         wsEndpoint,
         userEnv,
         accessToken,
-        chatProfiles: chatProfileValue
+        chatProfile
       });
     }
   }, [

@@ -75,12 +75,12 @@ const useChat = () => {
       wsEndpoint,
       userEnv,
       accessToken,
-      chatProfiles
+      chatProfile
     }: {
       wsEndpoint: string;
       userEnv: Record<string, string>;
       accessToken?: string;
-      chatProfiles?: string;
+      chatProfile?: string;
     }) => {
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
@@ -88,7 +88,7 @@ const useChat = () => {
           Authorization: accessToken || '',
           'X-Chainlit-Session-Id': sessionId,
           'user-env': JSON.stringify(userEnv),
-          'X-Chainlit-Chat-Profile': chatProfiles || ''
+          'X-Chainlit-Chat-Profile': chatProfile || ''
         }
       });
       setSession((old) => {
