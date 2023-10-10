@@ -213,13 +213,15 @@ def get_user_facing_url(url: URL):
     Return the user facing URL for a given URL.
     Handles deployment with proxies (like cloud run).
     """
-    url = url.replace(query="", fragment="")
+
+    chainlit_url = os.environ.get("CHAINLIT_URL")
 
     # No config, we keep the URL as is
-    if not config.ui.base_url:
+    if not chainlit_url:
+        url = url.replace(query="", fragment="")
         return url.__str__()
 
-    config_url = URL(config.ui.base_url).replace(
+    config_url = URL(chainlit_url).replace(
         query="",
         fragment="",
     )
