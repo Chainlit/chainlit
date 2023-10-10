@@ -1,20 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 
 import { ErrorBoundary, IMessage } from '@chainlit/components';
 import { useChat } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
+import ChatProfiles from 'components/molecules/chatProfiles';
 import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
 
 import { chatHistoryState } from 'state/chatHistory';
 import { conversationsHistoryState } from 'state/conversations';
-import { projectSettingsState, sideViewState } from 'state/project';
+import {
+  chatProfile,
+  projectSettingsState,
+  sideViewState
+} from 'state/project';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
@@ -23,6 +28,7 @@ import WelcomeScreen from './welcomeScreen';
 const Chat = () => {
   const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
+  const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
   const sideViewElement = useRecoilValue(sideViewState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
@@ -124,6 +130,7 @@ const Chat = () => {
               setAutoScroll={setAutoScroll}
             />
           )}
+          {!messages.length && <ChatProfiles />}
           {!messages.length && <WelcomeScreen />}
           <InputBox onReply={onReply} onSubmit={onSubmit} />
         </ErrorBoundary>

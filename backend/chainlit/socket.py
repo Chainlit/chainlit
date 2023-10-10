@@ -91,6 +91,7 @@ async def connect(sid, environ, auth):
         user_env=user_env,
         user=user,
         token=token,
+        chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
     )
 
     trace_event("connection_successful")

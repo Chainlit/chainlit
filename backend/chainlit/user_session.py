@@ -13,6 +13,7 @@ class UserSessionDict(TypedDict):
     headers: Dict[str, str]
     user: Optional[Union["AppUser", "PersistedAppUser"]]
     root_message: Optional["Message"]
+    chat_profile: Optional[str]
 
 
 user_sessions: Dict[str, UserSessionDict] = {}
@@ -39,6 +40,7 @@ class UserSession:
         user_session["env"] = context.session.user_env
         user_session["chat_settings"] = context.session.chat_settings
         user_session["user"] = context.session.user
+        user_session["chat_profile"] = context.session.chat_profile
 
         if context.session.root_message:
             user_session["root_message"] = context.session.root_message

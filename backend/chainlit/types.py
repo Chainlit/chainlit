@@ -69,3 +69,11 @@ class GetConversationsRequest(BaseModel):
 class Theme(str, Enum):
     light = "light"
     dark = "dark"
+
+
+class ChatProfile(BaseModel):
+    """Specification for a chat profile that can be chosen by the user at the conversation start."""
+
+    icon: str
+    name: str
+    description: str

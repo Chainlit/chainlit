@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
 from chainlit.logger import logger
+from chainlit.types import ChatProfile
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -171,6 +172,7 @@ class CodeSettings:
     on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    chat_profiles: Optional[Callable[[Optional["AppUser"]], List["ChatProfile"]]] = None
 
 
 @dataclass()

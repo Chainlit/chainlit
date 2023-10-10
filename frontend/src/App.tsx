@@ -18,6 +18,7 @@ import PromptPlayground from 'components/organisms/playground';
 
 import { useAuth } from 'hooks/auth';
 
+import { chatProfile, projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
 
@@ -68,16 +69,34 @@ function overrideTheme(theme: Theme) {
 
 function App() {
   const { theme: themeVariant } = useRecoilValue(settingsState);
+  const pSettings = useRecoilValue(projectSettingsState);
+  const chatProfileValue = useRecoilValue(chatProfile);
   const theme = overrideTheme(makeTheme(themeVariant));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
-  const { connect } = useChat();
+  const { connect, disconnect } = useChat();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      connect(wsEndpoint, userEnv, accessToken);
+    if (
+      isAuthenticated &&
+      pSettings?.chatProfiles &&
+      (pSettings.chatProfiles.length === 0 || chatProfileValue)
+    ) {
+      connect({
+        wsEndpoint,
+        userEnv,
+        accessToken,
+        chatProfiles: chatProfileValue
+      });
     }
-  }, [userEnv, accessToken, isAuthenticated, connect]);
+  }, [
+    userEnv,
+    accessToken,
+    isAuthenticated,
+    connect,
+    pSettings?.chatProfiles,
+    chatProfileValue
+  ]);
 
   return (
     <ThemeProvider theme={theme}>
