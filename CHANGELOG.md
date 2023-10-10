@@ -14,6 +14,7 @@ Nothing unreleased!
 - Logo is displayed in the UI header (works with custom logo)
 - Azure AD single tenant is now supported
 - `collapsed` attribute on the `Action` class
+- Latency improvements when data persistence is enabled
 
 ### Changed
 - Chat history has been entirely reworked
