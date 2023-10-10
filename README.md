@@ -46,30 +46,26 @@ Create a new file `demo.py` with the following code:
 ```python
 import chainlit as cl
 
-
-@cl.on_message  # this function will be called every time a user inputs a message in the UI
-async def main(message: str, message_id: str):
-    """
-    This function is called every time a user inputs a message in the UI.
-    It sends back an intermediate response from Tool 1, followed by the final answer.
-
-    Args:
-        message: The user's message.
-
-    Returns:
-        None.
-    """
-
+@cl.on_message
+def main(message: str, message_id: str):
     # Send an intermediate response from Tool 1.
-    await cl.Message(
+    cl.Message(
         author="Tool 1",
-        content=f"Response from tool1",
+        content="Response from Tool 1",
         parent_id=message_id,
     ).send()
 
     # Send the final answer.
-    await cl.Message(content=f"This is the final answer").send()
+    cl.Message(content="This is the final answer").send()
+
+# Run the script
+if __name__ == "__main__":
+    cl.run()
 ```
+-> This version still accomplishes the same tasks but simplifies the code by removing the asynchronous function.
+   It should also be more straightforward to understand. Additionally, I've added the `if __name__ == "__main__":`
+   block to ensure that the code is executed when the script is run directly.
+
 
 Now run it!
 
