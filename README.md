@@ -1,12 +1,20 @@
 # Welcome to Chainlit 👋
 
-**Build Python LLM apps in minutes ⚡️**
-
-Chainlit lets you create ChatGPT-like UIs on top of any Python code in minutes! Some of the key features include intermediary steps visualisation, element management & display (images, text, carousel, etc.) as well as cloud deployment.
-
 [![](https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat)](https://discord.gg/k73SQ3FyUh)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io)](https://twitter.com/chainlit_io)
 [![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
+
+**Build a production ready Chat GPT like application in minutes ⚡️**
+
+Chainlit is an open-source async Python framework that makes it incredibly fast to build Chat GPT like applications with your **own business logic and data**.
+
+Key features:
+
+- [💬 Multi Modal chats](https://docs.chainlit.io/chat-experience/elements)
+- [💭 Chain of Thought visualisation](https://docs.chainlit.io/observability-iteration/chain-of-thought)
+- [💾 Data persistence + human feedback](https://docs.chainlit.io/chat-data/overview)
+- [🛝 In context Prompt Playground](https://docs.chainlit.io/observability-iteration/prompt-playground/overview)
+- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
 
 https://github.com/Chainlit/chainlit/assets/13104895/e347e52c-35b2-4c35-8a88-f8ac02dd198e
 
@@ -40,7 +48,7 @@ import chainlit as cl
 
 
 @cl.on_message  # this function will be called every time a user inputs a message in the UI
-async def main(message: str):
+async def main(message: str, message_id: str):
     """
     This function is called every time a user inputs a message in the UI.
     It sends back an intermediate response from Tool 1, followed by the final answer.
@@ -54,7 +62,10 @@ async def main(message: str):
 
     # Send an intermediate response from Tool 1.
     await cl.Message(
-        author="Tool 1", content=f"Response from tool1", indent=1).send()
+        author="Tool 1",
+        content=f"Response from tool1",
+        parent_id=message_id,
+    ).send()
 
     # Send the final answer.
     await cl.Message(content=f"This is the final answer").send()
@@ -68,9 +79,9 @@ $ chainlit run demo.py -w
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
 
-### 🔗 With LangChain
+### 🔗 Integrations
 
-Check out our plug-and-play [integration](https://docs.chainlit.io/integrations/langchain) with LangChain!
+Chainlit is compatible with all Python programs and libraries. That being said, it comes with pre-built integrations for [Langchain](https://docs.chainlit.io/integrations/langchain), [Llama Index](https://docs.chainlit.io/integrations/llama-index), [Haystack](https://docs.chainlit.io/integrations/haystack) and [Langflow](https://docs.chainlit.io/integrations/langflow).
 
 ### 📚 More Examples - Cookbook
 
@@ -78,13 +89,18 @@ You can find various examples of Chainlit apps [here](https://github.com/Chainli
 
 ## 🛣 Roadmap
 
-- [ ] New UI elements (spreadsheet, video, carousel...)
-- [ ] Create your own UI elements via component framework
-- [ ] DAG-based chain-of-thought interface
-- [ ] Support more LLMs in the prompt playground
-- [ ] App deployment
+- [ ] Selectable chat profiles (at the beginning of a chat)
+- [ ] One click chat sharing
+- New clients:
+  - [ ] Slack
+  - [ ] Discord
+  - [ ] Website embbed
 
-Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/ZThrUxbAYw).
+Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/k73SQ3FyUh).
+
+## 🏢 Enterprise support
+
+For entreprise grade features and self hosting, please visit this [page](https://docs.chainlit.io/cloud/persistence/enterprise) and fill the form.
 
 ## 💁 Contributing
 
@@ -92,6 +108,6 @@ As an open-source initiative in a rapidly evolving domain, we welcome contributi
 
 For detailed information on how to contribute, see [here](.github/CONTRIBUTING.md).
 
-## License
+## 📃 License
 
 Chainlit is open-source and licensed under the [Apache 2.0](LICENSE) license.
