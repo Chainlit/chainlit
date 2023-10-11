@@ -46,6 +46,7 @@ export default function ChatProfiles() {
             sx={{
               textTransform: 'none'
             }}
+            data-test={`chat-profile:${profile.name}`}
           >
             <img
               src={profile.icon}
