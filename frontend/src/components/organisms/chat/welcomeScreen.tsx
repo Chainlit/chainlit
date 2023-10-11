@@ -1,10 +1,8 @@
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useRecoilValue } from 'recoil';
-import remarkGfm from 'remark-gfm';
 
-import { Box, Link } from '@mui/material';
+import { Box } from '@mui/material';
 
-import { Code } from '@chainlit/components';
+import Markdown from 'components/molecules/markdown';
 
 import { projectSettingsState } from 'state/project';
 
@@ -35,20 +33,7 @@ const WelcomeScreen = () => {
         }}
       >
         {pSettings?.markdown ? (
-          <ReactMarkdown
-            className="markdown-body"
-            remarkPlugins={[remarkGfm]}
-            components={{
-              a: ({ children, ...props }) => (
-                <Link {...props} target="_blank">
-                  {children}
-                </Link>
-              ),
-              code: ({ ...props }) => <Code {...props} />
-            }}
-          >
-            {pSettings?.markdown}
-          </ReactMarkdown>
+          <Markdown content={pSettings?.markdown} />
         ) : null}
       </Box>
     </Box>
