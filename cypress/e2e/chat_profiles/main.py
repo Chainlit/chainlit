@@ -3,7 +3,7 @@ from typing import Optional
 import chainlit as cl
 
 
-@cl.chat_profiles
+@cl.set_chat_profiles
 async def chat_profile(current_user: cl.AppUser):
     if current_user.role != "ADMIN":
         return None

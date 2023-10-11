@@ -151,7 +151,7 @@ def on_chat_start(func: Callable) -> Callable:
 
 
 @trace
-def chat_profiles(
+def set_chat_profiles(
     func: Callable[[Optional["AppUser"]], List["ChatProfile"]]
 ) -> Callable:
     """
@@ -164,7 +164,7 @@ def chat_profiles(
         Callable[[Optional["AppUser"]], List["ChatProfile"]]: The decorated function.
     """
 
-    config.code.chat_profiles = wrap_user_function(func)
+    config.code.set_chat_profiles = wrap_user_function(func)
     return func
 
 

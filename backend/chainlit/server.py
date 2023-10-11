@@ -441,8 +441,8 @@ async def project_settings(
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     profiles = []
-    if config.code.chat_profiles:
-        chat_profiles = await config.code.chat_profiles(current_user)
+    if config.code.set_chat_profiles:
+        chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
             profiles = [dict(p) for p in chat_profiles]
     return JSONResponse(

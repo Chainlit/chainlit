@@ -172,7 +172,9 @@ class CodeSettings:
     on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    chat_profiles: Optional[Callable[[Optional["AppUser"]], List["ChatProfile"]]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["AppUser"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
