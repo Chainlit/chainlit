@@ -39,7 +39,7 @@ export default function ChatProfiles() {
             value={profile.name}
             onClick={() => setChatProfile(profile.name)}
             onMouseEnter={(e) => {
-              setChatProfileDescription(profile.description);
+              setChatProfileDescription(profile.markdown_description);
               setAnchorEl(e.currentTarget.parentElement);
             }}
             onMouseLeave={() => setAnchorEl(null)}

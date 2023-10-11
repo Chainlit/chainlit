@@ -5,7 +5,7 @@ import { IMessage, IMessageElement } from '@chainlit/components';
 export interface ChatProfile {
   icon: string;
   name: string;
-  description: string;
+  markdown_description: string;
 }
 
 export interface IProjectSettings {

@@ -11,12 +11,12 @@ async def chat_profile(current_user: cl.AppUser):
     return [
         cl.ChatProfile(
             name="GPT-3.5",
-            description="The underlying LLM model is **GPT-3.5**, a *175B parameter model* trained on 410GB of text data.",
+            markdown_description="The underlying LLM model is **GPT-3.5**, a *175B parameter model* trained on 410GB of text data.",
             icon="https://picsum.photos/200",
         ),
         cl.ChatProfile(
             name="GPT-4",
-            description="The underlying LLM model is **GPT-4**, a *1.5T parameter model* trained on 3.5TB of text data.",
+            markdown_description="The underlying LLM model is **GPT-4**, a *1.5T parameter model* trained on 3.5TB of text data.",
             icon="https://picsum.photos/250",
         ),
     ]

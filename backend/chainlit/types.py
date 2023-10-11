@@ -76,4 +76,4 @@ class ChatProfile(BaseModel):
 
     icon: str
     name: str
-    description: str
+    markdown_description: str
