@@ -2,10 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box, Stack } from '@mui/material';
+import { Alert, Box } from '@mui/material';
 
-import { ErrorBoundary, IMessage } from '@chainlit/components';
-import { useChat } from '@chainlit/components';
+import { ErrorBoundary, IMessage, useChat } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
 import ChatProfiles from 'components/molecules/chatProfiles';

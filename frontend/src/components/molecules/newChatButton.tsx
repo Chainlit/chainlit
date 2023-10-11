@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 
 import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/material';
@@ -12,13 +11,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import { AccentButton, RegularButton, useChat } from '@chainlit/components';
 
-import { chatProfile } from 'state/project';
-
 export default function NewChatButton() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { clear } = useChat();
-  const setChatProfile = useSetRecoilState(chatProfile);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -29,9 +25,6 @@ export default function NewChatButton() {
   };
 
   const handleConfirm = () => {
-    // Clear profile to enable users to change it before their next chat
-    setChatProfile(undefined);
-
     clear();
     navigate('/');
     handleClose();
