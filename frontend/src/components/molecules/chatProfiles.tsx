@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { Box, Stack } from '@mui/material';
+import { Box, Popover, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import { chatProfile, projectSettingsState } from 'state/project';
+
+import Markdown from './markdown';
 
 export default function ChatProfiles() {
   const pSettings = useRecoilValue(projectSettingsState);
   const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [chatProfileDescription, setChatProfileDescription] = useState('');
 
   if (
     typeof pSettings === 'undefined' ||
@@ -16,21 +21,28 @@ export default function ChatProfiles() {
     return null;
   }
 
+  const open = Boolean(anchorEl);
+
   return (
     <Box p={2} alignSelf="center">
-      <Stack direction="row" spacing={1}>
+      <ToggleButtonGroup
+        color="primary"
+        value={''}
+        exclusive
+        aria-label="Chat profile"
+        aria-owns={open ? 'chat-profile-description' : undefined}
+        aria-haspopup="true"
+      >
         {pSettings.chatProfiles.map((profile) => (
-          <Box
+          <ToggleButton
             key={profile.name}
-            sx={{ cursor: 'pointer' }}
-            display="flex"
-            justifyContent="center"
-            border="1px solid"
-            borderColor={'divider'}
-            p={1}
+            value={profile.name}
             onClick={() => setChatProfile(profile.name)}
-            title={profile.description}
-            data-test={`chat-profile:${profile.name}`}
+            onMouseEnter={(e) => {
+              setChatProfileDescription(profile.description);
+              setAnchorEl(e.currentTarget.parentElement);
+            }}
+            onMouseLeave={() => setAnchorEl(null)}
           >
             <img
               src={profile.icon}
@@ -40,11 +52,34 @@ export default function ChatProfiles() {
                 borderRadius: '50%',
                 marginRight: '4px'
               }}
-            />
+            />{' '}
             {profile.name}
-          </Box>
+          </ToggleButton>
         ))}
-      </Stack>
+      </ToggleButtonGroup>
+      <Popover
+        id="chat-profile-description"
+        anchorEl={anchorEl}
+        open={open}
+        sx={{
+          pointerEvents: 'none',
+          marginTop: 1
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+        onClose={() => setAnchorEl(null)}
+        disableRestoreFocus
+      >
+        <Box p={2} maxWidth="20rem">
+          <Markdown content={chatProfileDescription} />
+        </Box>
+      </Popover>
     </Box>
   );
 }
