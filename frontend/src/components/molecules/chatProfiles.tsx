@@ -43,6 +43,9 @@ export default function ChatProfiles() {
               setAnchorEl(e.currentTarget.parentElement);
             }}
             onMouseLeave={() => setAnchorEl(null)}
+            sx={{
+              textTransform: 'none'
+            }}
           >
             <img
               src={profile.icon}
