@@ -56,11 +56,6 @@ export const loadingState = atom<boolean>({
   default: false
 });
 
-export const fileSpecState = atom<FileSpec | undefined>({
-  key: 'FileSpec',
-  default: undefined
-});
-
 export const askUserState = atom<IAsk | undefined>({
   key: 'AskUser',
   default: undefined

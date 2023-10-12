@@ -50,27 +50,28 @@ const Chat = () => {
     elements,
     askUser,
     avatars,
-    loading,
-    fileSpec,
-    disabled
+    loading
   } = useChat();
 
-  const upload = useUpload({
-    disabled,
-    spec: fileSpec || { accept: ['*'], max_size_mb: 2, max_files: 1 },
-    onResolved: (payloads: IFileResponse[]) => {
-      const fileElements = payloads.map((file) => ({
-        id: uuidv4(),
-        type: 'file' as const,
-        display: 'inline' as const,
-        name: file.name,
-        mime: file.type,
-        content: file.content
-      }));
-      setAttachments((prev) => prev.concat(fileElements));
-    },
+  const fileSpec = { accept: ['*'], max_size_mb: 2, max_files: 1 };
+  const onFileUpload = (payloads: IFileResponse[]) => {
+    const fileElements = payloads.map((file) => ({
+      id: uuidv4(),
+      type: 'file' as const,
+      display: 'inline' as const,
+      name: file.name,
+      mime: file.type,
+      content: file.content
+    }));
+    setAttachments((prev) => prev.concat(fileElements));
+  };
 
-    onError: (error) => toast.error(error),
+  const onFileUploadError = (error: string) => toast.error(error);
+
+  const upload = useUpload({
+    spec: fileSpec,
+    onResolved: onFileUpload,
+    onError: onFileUploadError,
     options: { noClick: true }
   });
 
@@ -88,8 +89,8 @@ const Chat = () => {
         author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: new Date().toISOString(),
-        elements: attachments
+        createdAt: new Date().toISOString()
+        // elements: attachments
       };
 
       setChatHistory((old) => {
@@ -186,7 +187,13 @@ const Chat = () => {
             callAction={callAction}
             setAutoScroll={setAutoScroll}
           />
-          <InputBox onReply={onReply} onSubmit={onSubmit} />
+          <InputBox
+            fileSpec={fileSpec}
+            onFileUpload={onFileUpload}
+            onFileUploadError={onFileUploadError}
+            onReply={onReply}
+            onSubmit={onSubmit}
+          />
           <Logo
             style={{
               width: '200px',

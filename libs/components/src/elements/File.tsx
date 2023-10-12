@@ -26,7 +26,7 @@ const FileElement = ({
   let children;
   const mime = element.mime ? element.mime.split('/').pop()! : 'file';
 
-  if (element.mime?.includes('image')) {
+  if (element.mime?.includes('image') && !element.mime?.includes('svg')) {
     children = (
       <img
         style={{
@@ -48,7 +48,7 @@ const FileElement = ({
           gap: 1.2,
           borderRadius: 1,
           px: 1.2,
-          maxWidth: 160,
+          width: 160,
           color: (theme) =>
             theme.palette.mode === 'light'
               ? theme.palette.primary.main

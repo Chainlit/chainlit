@@ -9,5 +9,5 @@ async def start():
 
 
 @cl.on_message
-async def message(message: str):
+async def message(message: cl.Message):
     await cl.Message(content="World").send()

@@ -8,7 +8,7 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
-import { IAction, IElement, IFileResponse, IMessage } from 'src/types';
+import { IAction, IElement, IMessage } from 'src/types';
 import { nestMessages } from 'utils/message';
 
 import {
@@ -19,7 +19,6 @@ import {
   chatSettingsInputsState,
   chatSettingsValueState,
   elementState,
-  fileSpecState,
   firstUserMessageState,
   loadingState,
   messagesState,
@@ -52,7 +51,6 @@ const useChat = () => {
   const [session, setSession] = useRecoilState(sessionState);
   const [loading, setLoading] = useRecoilState(loadingState);
   const [rawMessages, setMessages] = useRecoilState(messagesState);
-  const [fileSpec, setFileSpecState] = useRecoilState(fileSpecState);
   const [askUser, setAskUser] = useRecoilState(askUserState);
   const [elements, setElements] = useRecoilState(elementState);
   const [avatars, setAvatars] = useRecoilState(avatarState);
@@ -204,11 +202,6 @@ const useChat = () => {
         setLoading(false);
       });
 
-      socket.on('enable_file_upload', (spec) => {
-        setFileSpecState(spec);
-        setLoading(false);
-      });
-
       socket.on('ask_timeout', () => {
         setAskUser(undefined);
         setLoading(false);
@@ -342,13 +335,6 @@ const useChat = () => {
     [session]
   );
 
-  const uploadFiles = useCallback(
-    (payloads: IFileResponse[]) => {
-      session?.socket.emit('file_upload', payloads);
-    },
-    [session]
-  );
-
   const messages = nestMessages(rawMessages);
   const connected = session?.socket.connected && !session?.error;
   const disabled = !connected || loading || askUser?.spec.type === 'file';
@@ -361,7 +347,6 @@ const useChat = () => {
     updateChatSettings,
     stopTask,
     callAction,
-    uploadFiles,
     replyMessage,
     connected,
     disabled,
@@ -375,7 +360,6 @@ const useChat = () => {
     chatSettingsInputs,
     chatSettingsValue,
     chatSettingsDefaultValue,
-    fileSpec,
     askUser,
     firstUserMessage
   };

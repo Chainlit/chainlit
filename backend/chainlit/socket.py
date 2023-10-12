@@ -106,9 +106,6 @@ async def connection_successful(sid):
     if context.session.restored:
         return
 
-    if config.code.on_file_upload:
-        await context.emitter.enable_file_upload(config.code.on_file_upload_config)
-
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start()
@@ -173,9 +170,8 @@ async def process_message(session: WebsocketSession, message_dict: MessageDict):
 
         await context.emitter.task_start()
         if config.code.on_message:
-            await context.emitter.process_user_message(message_dict)
-            message = Message.from_dict(message_dict)
-            await config.code.on_message(message.content.strip(), message.id)
+            message = await context.emitter.process_user_message(message_dict)
+            await config.code.on_message(message)
     except InterruptedError:
         pass
     except Exception as e:
@@ -224,12 +220,3 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
-
-
-@socket.on("file_upload")
-async def file_upload(sid, files: Any):
-    """Handle file upload from the UI."""
-    init_ws_context(sid)
-
-    if config.code.on_file_upload:
-        await config.code.on_file_upload(files)

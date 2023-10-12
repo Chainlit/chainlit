@@ -5,7 +5,7 @@ describe('Avatar', () => {
     runTestServer();
   });
 
-  it('should be able to display a nested CoT', () => {
+  it('should be able to display avatars', () => {
     cy.get('.message').should('have.length', 3);
 
     cy.get('.message').eq(0).find('.message-avatar').should('have.length', 0);

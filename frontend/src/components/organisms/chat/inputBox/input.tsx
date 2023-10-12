@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
@@ -7,16 +6,25 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { Attachments, useChat } from '@chainlit/components';
+import {
+  Attachments,
+  FileSpec,
+  IFileResponse,
+  useChat
+} from '@chainlit/components';
+
+import HistoryButton from 'components/organisms/chat/history';
 
 import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { chatSettingsOpenState } from 'state/project';
 
-import HistoryButton from '../history';
-import UploadButton from '../message/UploadButton';
+import UploadButton from './UploadButton';
 
 interface Props {
+  fileSpec: FileSpec;
+  onFileUpload: (payload: IFileResponse[]) => void;
+  onFileUploadError: (error: string) => void;
   onSubmit: (message: string) => void;
   onReply: (message: string) => void;
 }
@@ -30,9 +38,14 @@ function getLineCount(el: HTMLDivElement) {
   return lines.length;
 }
 
-const Input = ({ onSubmit, onReply }: Props) => {
+const Input = ({
+  fileSpec,
+  onFileUpload,
+  onFileUploadError,
+  onSubmit,
+  onReply
+}: Props) => {
   const [fileElements, setFileElements] = useRecoilState(attachmentsState);
-  const setAttachments = useSetRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
@@ -105,19 +118,9 @@ const Input = ({ onSubmit, onReply }: Props) => {
       )}
       <HistoryButton onClick={onHistoryClick} />
       <UploadButton
-        disabled={disabled}
-        onResolved={(payloads) => {
-          const fileElements = payloads.map((file) => ({
-            id: uuidv4(),
-            type: 'file' as const,
-            display: 'inline' as const,
-            name: file.name,
-            mime: file.type,
-            content: file.content
-          }));
-          setAttachments((prev) => prev.concat(fileElements));
-        }}
-        onError={(error) => toast.error(error)}
+        fileSpec={fileSpec}
+        onFileUploadError={onFileUploadError}
+        onFileUpload={onFileUpload}
       />
     </>
   );
@@ -201,6 +204,3 @@ const Input = ({ onSubmit, onReply }: Props) => {
 };
 
 export default Input;
-function uuidv4(): any {
-  throw new Error('Function not implemented.');
-}
