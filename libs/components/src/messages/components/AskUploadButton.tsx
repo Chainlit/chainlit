@@ -10,10 +10,17 @@ import { useUpload } from 'hooks/useUpload';
 
 import { IAsk, IFileResponse } from 'src/types/file';
 
-const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
+const AskUploadChildButton = ({
+  askUser,
+  onError
+}: {
+  askUser: IAsk;
+  onError: (error: string) => void;
+}) => {
   const upload = useUpload({
     spec: askUser.spec,
-    onResolved: (payloads: IFileResponse[]) => askUser?.callback(payloads)
+    onResolved: (payloads: IFileResponse[]) => askUser?.callback(payloads),
+    onError: (error: string) => onError(error)
   });
 
   if (!upload) return null;
@@ -52,12 +59,14 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   );
 };
 
-const AskUploadButton = () => {
+const AskUploadButton = ({ onError }: { onError: (error: string) => void }) => {
   const messageContext = useContext(MessageContext);
 
   if (messageContext.askUser?.spec.type !== 'file') return null;
 
-  return <AskUploadChildButton askUser={messageContext.askUser} />;
+  return (
+    <AskUploadChildButton onError={onError} askUser={messageContext.askUser} />
+  );
 };
 
 export { AskUploadButton };

@@ -104,7 +104,7 @@ const Message = ({
               loading={isRunning}
             />
             {!isRunning && isLast && message.waitForAnswer && (
-              <AskUploadButton />
+              <AskUploadButton onError={messageContext.onError} />
             )}
             <MessageActions message={message} actions={actions} />
           </Stack>

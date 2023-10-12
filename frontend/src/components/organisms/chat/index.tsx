@@ -50,7 +50,8 @@ const Chat = () => {
     elements,
     askUser,
     avatars,
-    loading
+    loading,
+    disabled
   } = useChat();
 
   const fileSpec = { accept: ['*'], max_size_mb: 2, max_files: 1 };
@@ -137,37 +138,38 @@ const Chat = () => {
 
   return (
     <Box
-      {...upload?.getRootProps({ className: 'dropzone' })}
+      {...(disabled ? {} : upload?.getRootProps({ className: 'dropzone' }))}
       display="flex"
       width="100%"
       flexGrow={1}
       position="relative"
     >
-      {upload ? (
-        <>
-          <input {...upload.getInputProps()} />
-          {upload?.isDragActive ? (
-            <Stack
-              sx={{
-                position: 'absolute',
-                backgroundColor: (theme) => theme.palette.primary.main,
-                color: 'white',
-                height: '100%',
-                width: '100%',
-                opacity: 0.8,
-                zIndex: 10,
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <UploadFile sx={{ height: 50, width: 50 }} />
-              <Typography fontSize={'20px'}>Drop your files here!</Typography>
-            </Stack>
-          ) : null}
-        </>
-      ) : null}
       <SideView>
+        {upload ? (
+          <>
+            <input {...upload.getInputProps()} />
+            {upload?.isDragActive ? (
+              <Stack
+                sx={{
+                  position: 'absolute',
+                  backgroundColor: (theme) => theme.palette.primary.main,
+                  color: 'white',
+                  height: '100%',
+                  width: '100%',
+                  opacity: 0.8,
+                  zIndex: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <UploadFile sx={{ height: 50, width: 50 }} />
+                <Typography fontSize={'20px'}>Drop your files here!</Typography>
+              </Stack>
+            ) : null}
+          </>
+        ) : null}
         <TaskList tasklist={tasklist} isMobile={true} />
+
         <Box my={1} />
         {error && (
           <Alert id="session-error" severity="error">

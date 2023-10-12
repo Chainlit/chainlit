@@ -13,6 +13,7 @@ const defaultMessageContext = {
   onFeedbackUpdated: undefined,
   onPlaygroundButtonClick: undefined,
   showFeedbackButtons: true,
+  onError: () => undefined,
   uiName: ''
 };
 

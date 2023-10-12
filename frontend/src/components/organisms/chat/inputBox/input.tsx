@@ -116,8 +116,9 @@ const Input = ({
           <TuneIcon />
         </IconButton>
       )}
-      <HistoryButton onClick={onHistoryClick} />
+      <HistoryButton disabled={disabled} onClick={onHistoryClick} />
       <UploadButton
+        disabled={disabled}
         fileSpec={fileSpec}
         onFileUploadError={onFileUploadError}
         onFileUpload={onFileUpload}
