@@ -8,6 +8,7 @@ describe('Chat profiles', () => {
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('.MuiAlert-message').should('not.exist');
+    cy.get('#chat-input').should('exist');
   });
 
   it('should be able to select a chat profile', () => {
