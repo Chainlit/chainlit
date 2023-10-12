@@ -114,15 +114,28 @@ export default function ChatProfiles() {
                 disableRipple
                 label={item.name}
                 value={item.name}
+                sx={{
+                  '& .chat-profile-icon': {
+                    filter:
+                      item.name !== chatProfileValue
+                        ? 'grayscale(100%)'
+                        : undefined
+                  },
+                  '&:hover': {
+                    '& .chat-profile-icon': { filter: 'grayscale(0%)' }
+                  }
+                }}
                 icon={
                   item.icon ? (
                     <img
                       src={item.icon}
+                      className="chat-profile-icon"
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '24px',
+                        height: '24px',
                         borderRadius: '50%',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        transition: 'filter 0.5s ease-in-out'
                       }}
                     />
                   ) : undefined
