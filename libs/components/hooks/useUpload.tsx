@@ -6,23 +6,16 @@ import {
   useDropzone
 } from 'react-dropzone';
 
-import { FileSpec, IFileResponse } from '../src/types/file';
+import { FileSpec, IFileResponse } from 'src/types/file';
 
 interface useUploadProps {
-  disabled?: boolean;
   onError?: (error: string) => void;
   onResolved: (payloads: IFileResponse[]) => void;
   options?: DropzoneOptions;
   spec: FileSpec;
 }
 
-const useUpload = ({
-  disabled,
-  onError,
-  onResolved,
-  options,
-  spec
-}: useUploadProps) => {
+const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
@@ -91,9 +84,7 @@ const useUpload = ({
     ...options
   });
 
-  return !disabled
-    ? { getInputProps, getRootProps, isDragActive, uploading }
-    : null;
+  return { getInputProps, getRootProps, isDragActive, uploading };
 };
 
 export { useUpload };

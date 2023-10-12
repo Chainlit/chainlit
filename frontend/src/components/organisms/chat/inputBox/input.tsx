@@ -56,6 +56,48 @@ const Input = ({
   const [isComposing, setIsComposing] = useState(false);
 
   useEffect(() => {
+    const pasteEvent = (event: ClipboardEvent) => {
+      if (event.clipboardData && event.clipboardData.items) {
+        const items = Array.from(event.clipboardData.items);
+        items.forEach((item) => {
+          if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const content = e.target?.result as ArrayBuffer;
+                if (content) {
+                  onFileUpload([
+                    {
+                      name: file.name,
+                      type: file.type,
+                      content,
+                      size: file.size
+                    }
+                  ]);
+                }
+              };
+              reader.readAsArrayBuffer(file);
+            }
+          }
+        });
+      }
+    };
+
+    if (!ref.current) {
+      return;
+    }
+
+    const input = ref.current;
+
+    input.addEventListener('paste', pasteEvent);
+
+    return () => {
+      input.removeEventListener('paste', pasteEvent);
+    };
+  }, []);
+
+  useEffect(() => {
     if (ref.current && !loading && !disabled) {
       ref.current.focus();
     }
