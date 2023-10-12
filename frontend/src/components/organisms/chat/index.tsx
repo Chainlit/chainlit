@@ -128,15 +128,17 @@ const Chat = () => {
             style={{
               width: '200px',
               height: '200px',
+              objectFit: 'contain',
               position: 'absolute',
-              top: '50%',
+              pointerEvents: 'none',
+              top: '45%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               filter: 'grayscale(100%)',
               opacity: messages.length > 0 ? 0 : 0.5,
               transition:
                 messages.length > 0
-                  ? 'opacity 1s ease-in-out'
+                  ? 'opacity 0.2s ease-in-out'
                   : 'opacity 0.2s ease-in-out'
             }}
           />

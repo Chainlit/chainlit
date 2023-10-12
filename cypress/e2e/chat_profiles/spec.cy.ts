@@ -13,33 +13,39 @@ describe('Chat profiles', () => {
   it('should be able to select a chat profile', () => {
     cy.get('[data-test="chat-profile:GPT-3.5"]').should('exist');
     cy.get('[data-test="chat-profile:GPT-4"]').should('exist');
+    cy.get('[data-test="chat-profile:GPT-5"]').should('exist');
 
-    cy.get('[data-test="chat-profile:GPT-3.5"]').click();
+    cy.get('.message')
+      .should('have.length', 1)
+      .eq(0)
+      .should(
+        'contain',
+        'starting chat with admin using the GPT-3.5 chat profile'
+      );
 
-    cy.get('.message').should(
-      'contain',
-      'starting chat with admin using the GPT-3.5 chat profile'
-    );
+    // Change chat profile
 
-    cy.get('[data-test="chat-profile:GPT-3.5"]').should('not.exist');
-    cy.get('[data-test="chat-profile:GPT-4"]').should('not.exist');
+    cy.get('[data-test="chat-profile:GPT-4"]').click();
+    cy.get('#confirm').click();
 
+    cy.get('.message')
+      .should('have.length', 1)
+      .eq(0)
+      .should(
+        'contain',
+        'starting chat with admin using the GPT-4 chat profile'
+      );
     // New conversation
 
     cy.get('#new-chat-button').click();
     cy.get('#confirm').click();
 
-    cy.get('[data-test="chat-profile:GPT-3.5"]').should('exist');
-    cy.get('[data-test="chat-profile:GPT-4"]').should('exist');
-
-    cy.get('[data-test="chat-profile:GPT-4"]').click();
-
-    cy.get('.message').should(
-      'contain',
-      'starting chat with admin using the GPT-4 chat profile'
-    );
-
-    cy.get('[data-test="chat-profile:GPT-3.5"]').should('not.exist');
-    cy.get('[data-test="chat-profile:GPT-4"]').should('not.exist');
+    cy.get('.message')
+      .should('have.length', 1)
+      .eq(0)
+      .should(
+        'contain',
+        'starting chat with admin using the GPT-4 chat profile'
+      );
   });
 });

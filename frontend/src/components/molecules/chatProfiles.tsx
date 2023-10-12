@@ -62,7 +62,7 @@ export default function ChatProfiles() {
   const popoverOpen = Boolean(anchorEl);
 
   return (
-    <Box p={2} alignSelf="center">
+    <Box py={2} alignSelf="center" maxWidth="min(60rem, 90vw)" overflow="auto">
       <InputStateHandler
         id={'chat-profile-selector'}
         sx={{
@@ -146,6 +146,7 @@ export default function ChatProfiles() {
                   setAnchorEl(event.currentTarget.parentElement);
                 }}
                 onMouseLeave={() => setAnchorEl(null)}
+                data-test={`chat-profile:${item.name}`}
               />
             ))}
           </Tabs>
@@ -155,9 +156,17 @@ export default function ChatProfiles() {
         id="chat-profile-description"
         anchorEl={anchorEl}
         open={popoverOpen}
+        PaperProps={{
+          sx: {
+            boxShadow: (theme) =>
+              theme.palette.mode === 'light'
+                ? '0px 2px 4px 0px #0000000D'
+                : '0px 10px 10px 0px #0000000D'
+          }
+        }}
         sx={{
           pointerEvents: 'none',
-          marginTop: 1
+          marginTop: 1.5
         }}
         anchorOrigin={{
           vertical: 'bottom',

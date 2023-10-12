@@ -34,15 +34,15 @@ def auth_callback(username: str, password: str) -> Optional[cl.AppUser]:
         return None
 
 
-@cl.on_message
-async def on_message(message: str):
-    await cl.Message(content=f"echo: {message}").send()
+# @cl.on_message
+# async def on_message(message: str):
+#     await cl.Message(content=f"echo: {message}").send()
 
 
-# @cl.on_chat_start
-# async def on_chat_start():
-#     app_user = cl.user_session.get("user")
-#     chat_profile = cl.user_session.get("chat_profile")
-#     await cl.Message(
-#         content=f"starting chat with {app_user.username} using the {chat_profile} chat profile"
-#     ).send()
+@cl.on_chat_start
+async def on_chat_start():
+    app_user = cl.user_session.get("user")
+    chat_profile = cl.user_session.get("chat_profile")
+    await cl.Message(
+        content=f"starting chat with {app_user.username} using the {chat_profile} chat profile"
+    ).send()
