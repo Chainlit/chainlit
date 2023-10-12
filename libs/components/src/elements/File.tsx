@@ -75,7 +75,7 @@ const FileElement = ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
-            fontWeight: 700,
+            fontWeight: 500,
             fontSize: '0.8rem',
             width: '70%'
           }}
