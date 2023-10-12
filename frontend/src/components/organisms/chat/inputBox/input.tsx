@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
 import TuneIcon from '@mui/icons-material/Tune';
-import { IconButton, TextField } from '@mui/material';
+import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useChat } from '@chainlit/components';
+import { Attachments, useChat } from '@chainlit/components';
 
+import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { chatSettingsOpenState } from 'state/project';
 
@@ -29,9 +30,11 @@ function getLineCount(el: HTMLDivElement) {
 }
 
 const Input = ({ onSubmit, onReply }: Props) => {
-  const ref = useRef<HTMLDivElement>(null);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+  const [attachments, setAttachments] = useRecoilState(attachmentsState);
+
+  const ref = useRef<HTMLDivElement>(null);
   const { connected, loading, askUser, chatSettingsInputs } = useChat();
 
   const [value, setValue] = useState('');
@@ -116,46 +119,12 @@ const Input = ({ onSubmit, onReply }: Props) => {
   );
 
   return (
-    <TextField
-      inputRef={ref}
-      id="chat-input"
-      autoFocus
-      multiline
-      variant="standard"
-      autoComplete="false"
-      placeholder="Type your message here..."
-      disabled={disabled}
-      onChange={(e) => setValue(e.target.value)}
-      onKeyDown={handleKeyDown}
-      onCompositionStart={handleCompositionStart}
-      onCompositionEnd={handleCompositionEnd}
-      value={value}
-      fullWidth
-      InputProps={{
-        disableUnderline: true,
-        startAdornment: (
-          <InputAdornment
-            sx={{ ml: 1, color: 'text.secondary' }}
-            position="start"
-          >
-            {startAdornment}
-          </InputAdornment>
-        ),
-        endAdornment: (
-          <InputAdornment
-            position="end"
-            sx={{ mr: 1, color: 'text.secondary' }}
-          >
-            {endAdornment}
-          </InputAdornment>
-        )
-      }}
+    <Stack
       sx={{
         backgroundColor: 'background.paper',
         borderRadius: 1,
         border: (theme) => `1px solid ${theme.palette.divider}`,
         boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
-
         textarea: {
           height: '34px',
           maxHeight: '30vh',
@@ -167,7 +136,57 @@ const Input = ({ onSubmit, onReply }: Props) => {
           lineHeight: '24px'
         }
       }}
-    />
+    >
+      {attachments.length > 0 ? (
+        <Box
+          sx={{
+            mt: 2,
+            ml: 2
+          }}
+        >
+          <Attachments
+            attachments={attachments}
+            setAttachments={setAttachments}
+          />
+        </Box>
+      ) : null}
+
+      <TextField
+        inputRef={ref}
+        id="chat-input"
+        autoFocus
+        multiline
+        variant="standard"
+        autoComplete="false"
+        placeholder={'Type your message here...'}
+        disabled={disabled}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        value={value}
+        fullWidth
+        InputProps={{
+          disableUnderline: true,
+          startAdornment: (
+            <InputAdornment
+              sx={{ ml: 1, color: 'text.secondary' }}
+              position="start"
+            >
+              {startAdornment}
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              sx={{ mr: 1, color: 'text.secondary' }}
+            >
+              {endAdornment}
+            </InputAdornment>
+          )
+        }}
+      />
+    </Stack>
   );
 };
 

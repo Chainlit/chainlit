@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { UploadFile } from '@mui/icons-material';
+import { Alert, Box, Stack, Typography } from '@mui/material';
 
-import { ErrorBoundary, IMessage, useChat } from '@chainlit/components';
+import {
+  ErrorBoundary,
+  IFileResponse,
+  IMessage,
+  useChat,
+  useUpload
+} from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
 import { Logo } from 'components/atoms/logo';
@@ -13,6 +21,7 @@ import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
 
+import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { conversationsHistoryState } from 'state/conversations';
 import { projectSettingsState, sideViewState } from 'state/project';
@@ -21,11 +30,13 @@ import InputBox from './inputBox';
 import MessageContainer from './message/container';
 
 const Chat = () => {
-  const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
-  const sideViewElement = useRecoilValue(sideViewState);
+  const setAttachments = useSetRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
+  const sideViewElement = useRecoilValue(sideViewState);
+
+  const { user } = useAuth();
   const [autoScroll, setAutoScroll] = useState(true);
 
   const {
@@ -39,8 +50,17 @@ const Chat = () => {
     elements,
     askUser,
     avatars,
-    loading
+    loading,
+    fileSpec
   } = useChat();
+
+  const upload = useUpload({
+    spec: fileSpec || { accept: ['image/*'], max_size_mb: 2, max_files: 1 },
+    onResolved: (payloads: IFileResponse[]) =>
+      setAttachments((prev) => prev.concat(payloads)),
+    onError: (error) => toast.error(error),
+    options: { noClick: true }
+  });
 
   useEffect(() => {
     setConversations((prev) => ({
@@ -101,7 +121,32 @@ const Chat = () => {
   const tasklist = tasklists.at(-1);
 
   return (
-    <Box display="flex" width="100%" flexGrow={1} position="relative">
+    <Box
+      {...upload?.getRootProps({ className: 'dropzone' })}
+      display="flex"
+      width="100%"
+      flexGrow={1}
+      position="relative"
+    >
+      <input {...upload?.getInputProps()} />
+      {upload?.isDragActive ? (
+        <Stack
+          sx={{
+            position: 'absolute',
+            backgroundColor: (theme) => theme.palette.primary.main,
+            color: 'white',
+            height: '100%',
+            width: '100%',
+            opacity: 0.8,
+            zIndex: 10,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <UploadFile sx={{ height: 50, width: 50 }} />
+          <Typography fontSize={'20px'}>Drop your files here!</Typography>
+        </Stack>
+      ) : null}
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
         <Box my={1} />

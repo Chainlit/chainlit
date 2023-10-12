@@ -13,7 +13,8 @@ type UploadChildProps = {
 const UploadChildButton = ({ fileSpec, uploadFiles }: UploadChildProps) => {
   const upload = useUpload({
     spec: fileSpec,
-    onResolved: (payloads: IFileResponse[]) => uploadFiles(payloads)
+    onResolved: (payloads: IFileResponse[]) => uploadFiles(payloads),
+    options: { noDrag: true }
   });
 
   if (!upload) return null;
