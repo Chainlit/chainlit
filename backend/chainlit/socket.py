@@ -47,7 +47,9 @@ def load_user_env(user_env):
 @socket.on("connect")
 async def connect(sid, environ, auth):
     if not config.code.on_chat_start and not config.code.on_message:
-        raise ConnectionRefusedError("No websocket endpoint configured")
+        raise ConnectionRefusedError(
+            "You need to configure at least an on_chat_start or an on_message callback"
+        )
 
     user = None
     token = None
