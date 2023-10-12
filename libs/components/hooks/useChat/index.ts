@@ -351,6 +351,7 @@ const useChat = () => {
 
   const messages = nestMessages(rawMessages);
   const connected = session?.socket.connected && !session?.error;
+  const disabled = !connected || loading || askUser?.spec.type === 'file';
 
   return {
     connect,
@@ -363,6 +364,7 @@ const useChat = () => {
     uploadFiles,
     replyMessage,
     connected,
+    disabled,
     error: session?.error,
     loading,
     messages,

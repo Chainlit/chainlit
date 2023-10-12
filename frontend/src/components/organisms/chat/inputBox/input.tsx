@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
@@ -30,21 +31,16 @@ function getLineCount(el: HTMLDivElement) {
 }
 
 const Input = ({ onSubmit, onReply }: Props) => {
+  const [fileElements, setFileElements] = useRecoilState(attachmentsState);
+  const setAttachments = useSetRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
-  const [fileElements, setFileElements] = useRecoilState(attachmentsState);
 
   const ref = useRef<HTMLDivElement>(null);
-  const { connected, loading, askUser, chatSettingsInputs } = useChat();
+  const { loading, askUser, chatSettingsInputs, disabled } = useChat();
 
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
-
-  const disabled =
-    !connected ||
-    loading ||
-    askUser?.spec.type === 'file' ||
-    askUser?.spec.type === 'action';
 
   useEffect(() => {
     if (ref.current && !loading && !disabled) {
@@ -108,7 +104,21 @@ const Input = ({ onSubmit, onReply }: Props) => {
         </IconButton>
       )}
       <HistoryButton onClick={onHistoryClick} />
-      <UploadButton />
+      <UploadButton
+        disabled={disabled}
+        onResolved={(payloads) => {
+          const fileElements = payloads.map((file) => ({
+            id: uuidv4(),
+            type: 'file' as const,
+            display: 'inline' as const,
+            name: file.name,
+            mime: file.type,
+            content: file.content
+          }));
+          setAttachments((prev) => prev.concat(fileElements));
+        }}
+        onError={(error) => toast.error(error)}
+      />
     </>
   );
 
@@ -191,3 +201,6 @@ const Input = ({ onSubmit, onReply }: Props) => {
 };
 
 export default Input;
+function uuidv4(): any {
+  throw new Error('Function not implemented.');
+}

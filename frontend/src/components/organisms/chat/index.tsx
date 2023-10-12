@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import { UploadFile } from '@mui/icons-material';
@@ -31,7 +31,7 @@ import MessageContainer from './message/container';
 
 const Chat = () => {
   const pSettings = useRecoilValue(projectSettingsState);
-  const setAttachments = useSetRecoilState(attachmentsState);
+  const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
   const sideViewElement = useRecoilValue(sideViewState);
@@ -51,10 +51,12 @@ const Chat = () => {
     askUser,
     avatars,
     loading,
-    fileSpec
+    fileSpec,
+    disabled
   } = useChat();
 
   const upload = useUpload({
+    disabled,
     spec: fileSpec || { accept: ['*'], max_size_mb: 2, max_files: 1 },
     onResolved: (payloads: IFileResponse[]) => {
       const fileElements = payloads.map((file) => ({
@@ -86,7 +88,8 @@ const Chat = () => {
         author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        elements: attachments
       };
 
       setChatHistory((old) => {
@@ -119,7 +122,8 @@ const Chat = () => {
         author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        elements: attachments
       };
 
       replyMessage(message);
@@ -138,24 +142,28 @@ const Chat = () => {
       flexGrow={1}
       position="relative"
     >
-      <input {...upload?.getInputProps()} />
-      {upload?.isDragActive ? (
-        <Stack
-          sx={{
-            position: 'absolute',
-            backgroundColor: (theme) => theme.palette.primary.main,
-            color: 'white',
-            height: '100%',
-            width: '100%',
-            opacity: 0.8,
-            zIndex: 10,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <UploadFile sx={{ height: 50, width: 50 }} />
-          <Typography fontSize={'20px'}>Drop your files here!</Typography>
-        </Stack>
+      {upload ? (
+        <>
+          <input {...upload.getInputProps()} />
+          {upload?.isDragActive ? (
+            <Stack
+              sx={{
+                position: 'absolute',
+                backgroundColor: (theme) => theme.palette.primary.main,
+                color: 'white',
+                height: '100%',
+                width: '100%',
+                opacity: 0.8,
+                zIndex: 10,
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <UploadFile sx={{ height: 50, width: 50 }} />
+              <Typography fontSize={'20px'}>Drop your files here!</Typography>
+            </Stack>
+          ) : null}
+        </>
       ) : null}
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />

@@ -5,44 +5,64 @@ import { Tooltip } from '@mui/material';
 import { FileSpec, IFileResponse, useChat } from '@chainlit/components';
 import { useUpload } from '@chainlit/components';
 
-type UploadChildProps = {
-  fileSpec: FileSpec;
-  uploadFiles: (files: IFileResponse[]) => void;
+type UploadButtonProps = {
+  disabled?: boolean;
+  onError: (error: string) => void;
+  onResolved: (payloads: IFileResponse[]) => void;
 };
 
-const UploadChildButton = ({ fileSpec, uploadFiles }: UploadChildProps) => {
+type UploadChildProps = UploadButtonProps & {
+  fileSpec: FileSpec;
+};
+
+const UploadChildButton = ({
+  disabled,
+  fileSpec,
+  onError,
+  onResolved
+}: UploadChildProps) => {
   const upload = useUpload({
     spec: fileSpec,
-    onResolved: (payloads: IFileResponse[]) => uploadFiles(payloads),
+    onResolved: onResolved,
+    onError: onError,
     options: { noDrag: true }
   });
-
-  if (!upload) return null;
-  const { getRootProps, getInputProps, uploading } = upload;
 
   return (
     <Tooltip title="Upload files">
       <LoadingButton
-        id={uploading ? 'upload-button-loading' : 'upload-button'}
-        loading={uploading}
+        disabled={disabled}
+        id={upload?.uploading ? 'upload-button-loading' : 'upload-button'}
+        loading={upload?.uploading}
         sx={{
           minWidth: 0,
           borderRadius: '50%'
         }}
         color="inherit"
-        {...getRootProps({ className: 'dropzone' })}
+        {...upload?.getRootProps({ className: 'dropzone' })}
       >
-        <input {...getInputProps()} />
+        <input {...upload?.getInputProps()} />
         <Add />
       </LoadingButton>
     </Tooltip>
   );
 };
 
-export default function UploadButton() {
-  const { fileSpec, uploadFiles } = useChat();
+export default function UploadButton({
+  disabled,
+  onError,
+  onResolved
+}: UploadButtonProps) {
+  const { fileSpec } = useChat();
 
   if (!fileSpec) return null;
 
-  return <UploadChildButton fileSpec={fileSpec} uploadFiles={uploadFiles} />;
+  return (
+    <UploadChildButton
+      disabled={disabled}
+      fileSpec={fileSpec}
+      onError={onError}
+      onResolved={onResolved}
+    />
+  );
 }

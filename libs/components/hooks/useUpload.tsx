@@ -9,13 +9,20 @@ import {
 import { FileSpec, IFileResponse } from '../src/types/file';
 
 interface useUploadProps {
+  disabled?: boolean;
   onError?: (error: string) => void;
   onResolved: (payloads: IFileResponse[]) => void;
   options?: DropzoneOptions;
   spec: FileSpec;
 }
 
-const useUpload = ({ onError, onResolved, spec, options }: useUploadProps) => {
+const useUpload = ({
+  disabled,
+  onError,
+  onResolved,
+  options,
+  spec
+}: useUploadProps) => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
@@ -86,7 +93,9 @@ const useUpload = ({ onError, onResolved, spec, options }: useUploadProps) => {
     ...options
   });
 
-  return { getInputProps, getRootProps, isDragActive, uploading };
+  return !disabled
+    ? { getInputProps, getRootProps, isDragActive, uploading }
+    : null;
 };
 
 export { useUpload };

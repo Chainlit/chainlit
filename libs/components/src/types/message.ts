@@ -1,4 +1,4 @@
-import { IMessageElement } from './element';
+import { IFileElement, IMessageElement } from './element';
 
 interface IBaseTemplate {
   template?: string;
@@ -24,21 +24,22 @@ export interface IPrompt extends IBaseTemplate {
 }
 
 export interface IMessage {
-  id: string;
   author: string;
   authorIsUser?: boolean;
-  waitForAnswer?: boolean;
   content?: string;
   createdAt: number | string;
+  disableHumanFeedback?: boolean;
+  elements?: IFileElement[];
   humanFeedback?: number;
   humanFeedbackComment?: string;
-  disableHumanFeedback?: boolean;
-  language?: string;
+  id: string;
   indent?: number;
-  parentId?: string;
   isError?: boolean;
+  language?: string;
+  parentId?: string;
   prompt?: IPrompt;
   streaming?: boolean;
+  waitForAnswer?: boolean;
 }
 
 export interface INestedMessage extends IMessage {
