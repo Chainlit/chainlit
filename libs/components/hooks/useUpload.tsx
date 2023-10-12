@@ -70,8 +70,6 @@ const useUpload = ({
     [spec]
   );
 
-  if (!spec.accept || !spec.max_size_mb) return null;
-
   let dzAccept: Record<string, string[]> = {};
   const accept = spec.accept;
 
@@ -89,7 +87,7 @@ const useUpload = ({
     onDrop,
     maxFiles: spec.max_files || 1,
     accept: dzAccept,
-    maxSize: spec.max_size_mb * 1000000,
+    maxSize: (spec.max_size_mb || 2) * 1000000,
     ...options
   });
 

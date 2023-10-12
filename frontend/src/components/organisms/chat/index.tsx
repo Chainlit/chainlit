@@ -54,7 +54,7 @@ const Chat = () => {
     disabled
   } = useChat();
 
-  const fileSpec = { accept: ['*'], max_size_mb: 2, max_files: 1 };
+  const fileSpec = { max_size_mb: 50 };
   const onFileUpload = (payloads: IFileResponse[]) => {
     const fileElements = payloads.map((file) => ({
       id: uuidv4(),

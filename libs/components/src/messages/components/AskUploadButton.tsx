@@ -39,7 +39,7 @@ const AskUploadChildButton = ({
       padding={2}
       {...getRootProps({ className: 'dropzone' })}
     >
-      <input {...getInputProps()} />
+      <input id="ask-button-input" {...getInputProps()} />
       <CloudUploadOutlined fontSize="large" />
       <Stack ml={2}>
         <Typography color="text.primary">Drag and drop files here</Typography>
@@ -48,7 +48,7 @@ const AskUploadChildButton = ({
         </Typography>
       </Stack>
       <LoadingButton
-        id={uploading ? 'upload-button-loading' : 'upload-button'}
+        id={uploading ? 'ask-upload-button-loading' : 'ask-upload-button'}
         loading={uploading}
         sx={{ ml: 'auto !important' }}
         variant="contained"

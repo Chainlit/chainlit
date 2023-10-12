@@ -88,7 +88,6 @@ const FileElement = ({
 
   const fileElement = (
     <Box
-      className={`${element.display}-file`}
       position="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -120,6 +119,7 @@ const FileElement = ({
   if (!onRemove) {
     return (
       <Link
+        className={`${element.display}-file`}
         download={element.name}
         href={element.url || URL.createObjectURL(new Blob([element.content!]))}
         sx={{
