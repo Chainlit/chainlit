@@ -32,7 +32,7 @@ function getLineCount(el: HTMLDivElement) {
 const Input = ({ onSubmit, onReply }: Props) => {
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
-  const [attachments, setAttachments] = useRecoilState(attachmentsState);
+  const [fileElements, setFileElements] = useRecoilState(attachmentsState);
 
   const ref = useRef<HTMLDivElement>(null);
   const { connected, loading, askUser, chatSettingsInputs } = useChat();
@@ -137,7 +137,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
         }
       }}
     >
-      {attachments.length > 0 ? (
+      {fileElements.length > 0 ? (
         <Box
           sx={{
             mt: 2,
@@ -145,8 +145,8 @@ const Input = ({ onSubmit, onReply }: Props) => {
           }}
         >
           <Attachments
-            attachments={attachments}
-            setAttachments={setAttachments}
+            fileElements={fileElements}
+            setFileElements={setFileElements}
           />
         </Box>
       ) : null}

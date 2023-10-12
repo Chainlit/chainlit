@@ -55,9 +55,19 @@ const Chat = () => {
   } = useChat();
 
   const upload = useUpload({
-    spec: fileSpec || { accept: ['image/*'], max_size_mb: 2, max_files: 1 },
-    onResolved: (payloads: IFileResponse[]) =>
-      setAttachments((prev) => prev.concat(payloads)),
+    spec: fileSpec || { accept: ['*'], max_size_mb: 2, max_files: 1 },
+    onResolved: (payloads: IFileResponse[]) => {
+      const fileElements = payloads.map((file) => ({
+        id: uuidv4(),
+        type: 'file' as const,
+        display: 'inline' as const,
+        name: file.name,
+        mime: file.type,
+        content: file.content
+      }));
+      setAttachments((prev) => prev.concat(fileElements));
+    },
+
     onError: (error) => toast.error(error),
     options: { noClick: true }
   });

@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
 
-import { IFileResponse } from '@chainlit/components';
+import { IFileElement } from '@chainlit/components';
 
-export const attachmentsState = atom<IFileResponse[]>({
+export const attachmentsState = atom<IFileElement[]>({
   key: 'Attachments',
   default: []
 });

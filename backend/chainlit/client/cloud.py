@@ -389,8 +389,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
     async def create_element(self, variables: ElementDict) -> Optional[ElementDict]:
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+        mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String, $mime: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds, mime: $mime) {
                 id,
                 type,
                 url,
@@ -399,7 +399,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                 display,
                 size,
                 language,
-                forIds
+                forIds,
+                mime
             }
         }
         """
