@@ -15,7 +15,6 @@ import {
   actionState,
   askUserState,
   avatarState,
-  chatProfile,
   chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
   chatSettingsValueState,
@@ -70,7 +69,6 @@ const useChat = () => {
   const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
   const resetSessionId = useResetRecoilState(sessionIdState);
   const setTokenCount = useSetRecoilState(tokenCountState);
-  const setChatProfile = useSetRecoilState(chatProfile);
 
   const _connect = useCallback(
     ({
