@@ -12,7 +12,6 @@ async def chat_profile(current_user: cl.AppUser):
         cl.ChatProfile(
             name="GPT-3.5",
             markdown_description="The underlying LLM model is **GPT-3.5**, a *175B parameter model* trained on 410GB of text data.",
-            icon="https://picsum.photos/200",
         ),
         cl.ChatProfile(
             name="GPT-4",

@@ -74,6 +74,6 @@ class Theme(str, Enum):
 class ChatProfile(BaseModel):
     """Specification for a chat profile that can be chosen by the user at the conversation start."""
 
-    icon: str
+    icon: Optional[str]
     name: str
     markdown_description: str

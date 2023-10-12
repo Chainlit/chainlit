@@ -293,7 +293,6 @@ const useChat = () => {
   }, [session]);
 
   const clear = useCallback(() => {
-    setChatProfile(undefined);
     session?.socket.emit('clear_session');
     session?.socket.disconnect();
     resetSessionId();

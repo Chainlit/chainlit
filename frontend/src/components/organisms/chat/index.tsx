@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
@@ -14,20 +14,14 @@ import { useAuth } from 'hooks/auth';
 
 import { chatHistoryState } from 'state/chatHistory';
 import { conversationsHistoryState } from 'state/conversations';
-import {
-  chatProfile,
-  projectSettingsState,
-  sideViewState
-} from 'state/project';
+import { projectSettingsState, sideViewState } from 'state/project';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
-import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
-  const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
   const sideViewElement = useRecoilValue(sideViewState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
@@ -116,21 +110,18 @@ const Chat = () => {
           </Alert>
         )}
         <ErrorBoundary>
-          {!!messages.length && (
-            <MessageContainer
-              avatars={avatars}
-              loading={loading}
-              askUser={askUser}
-              actions={actions}
-              elements={elements}
-              messages={messages}
-              autoScroll={autoScroll}
-              callAction={callAction}
-              setAutoScroll={setAutoScroll}
-            />
-          )}
-          {!messages.length && <ChatProfiles />}
-          {!messages.length && <WelcomeScreen />}
+          <ChatProfiles />
+          <MessageContainer
+            avatars={avatars}
+            loading={loading}
+            askUser={askUser}
+            actions={actions}
+            elements={elements}
+            messages={messages}
+            autoScroll={autoScroll}
+            callAction={callAction}
+            setAutoScroll={setAutoScroll}
+          />
           <InputBox onReply={onReply} onSubmit={onSubmit} />
         </ErrorBoundary>
       </SideView>
