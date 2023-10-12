@@ -7,6 +7,7 @@ import { Alert, Box } from '@mui/material';
 import { ErrorBoundary, IMessage, useChat } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
+import { Logo } from 'components/atoms/logo';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import TaskList from 'components/molecules/tasklist';
 
@@ -123,6 +124,22 @@ const Chat = () => {
             setAutoScroll={setAutoScroll}
           />
           <InputBox onReply={onReply} onSubmit={onSubmit} />
+          <Logo
+            style={{
+              width: '200px',
+              height: '200px',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              filter: 'grayscale(100%)',
+              opacity: messages.length > 0 ? 0 : 0.5,
+              transition:
+                messages.length > 0
+                  ? 'opacity 1s ease-in-out'
+                  : 'opacity 0.2s ease-in-out'
+            }}
+          />
         </ErrorBoundary>
       </SideView>
       {sideViewElement ? null : (
