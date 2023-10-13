@@ -4,10 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import { ErrorBoundary, IMessage } from '@chainlit/components';
-import { useChat } from '@chainlit/components';
+import { ErrorBoundary, IMessage, useChat } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
+import { Logo } from 'components/atoms/logo';
+import ChatProfiles from 'components/molecules/chatProfiles';
 import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
@@ -18,7 +19,6 @@ import { projectSettingsState, sideViewState } from 'state/project';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
-import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -111,21 +111,37 @@ const Chat = () => {
           </Alert>
         )}
         <ErrorBoundary>
-          {!!messages.length && (
-            <MessageContainer
-              avatars={avatars}
-              loading={loading}
-              askUser={askUser}
-              actions={actions}
-              elements={elements}
-              messages={messages}
-              autoScroll={autoScroll}
-              callAction={callAction}
-              setAutoScroll={setAutoScroll}
-            />
-          )}
-          {!messages.length && <WelcomeScreen />}
+          <ChatProfiles />
+          <MessageContainer
+            avatars={avatars}
+            loading={loading}
+            askUser={askUser}
+            actions={actions}
+            elements={elements}
+            messages={messages}
+            autoScroll={autoScroll}
+            callAction={callAction}
+            setAutoScroll={setAutoScroll}
+          />
           <InputBox onReply={onReply} onSubmit={onSubmit} />
+          <Logo
+            style={{
+              width: '200px',
+              height: '200px',
+              objectFit: 'contain',
+              position: 'absolute',
+              pointerEvents: 'none',
+              top: '45%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              filter: 'grayscale(100%)',
+              opacity: messages.length > 0 ? 0 : 0.5,
+              transition:
+                messages.length > 0
+                  ? 'opacity 0.2s ease-in-out'
+                  : 'opacity 0.2s ease-in-out'
+            }}
+          />
         </ErrorBoundary>
       </SideView>
       {sideViewElement ? null : (

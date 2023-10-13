@@ -13,6 +13,8 @@ from starlette.datastructures import Headers
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.client.base import AppUser
+    from chainlit.types import ChatProfile
+
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -171,6 +173,9 @@ class CodeSettings:
     on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["AppUser"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()

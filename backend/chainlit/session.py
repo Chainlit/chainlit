@@ -20,16 +20,19 @@ class BaseSession:
         user: Optional[Union["AppUser", "PersistedAppUser"]],
         # Logged-in user token
         token: Optional[str],
+        # User specific environment variables. Empty if no user environment variables are required.
         user_env: Optional[Dict[str, str]],
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
-        # User specific environment variables. Empty if no user environment variables are required.
+        # Chat profile selected before the session was created
+        chat_profile: Optional[str] = None,
     ):
         self.user = user
         self.token = token
         self.root_message = root_message
         self.has_user_message = False
         self.user_env = user_env or {}
+        self.chat_profile = chat_profile
 
         self.id = id
         self.conversation_id: Optional[str] = None
@@ -110,9 +113,16 @@ class WebsocketSession(BaseSession):
         token: Optional[str],
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
+        # Chat profile selected before the session was created
+        chat_profile: Optional[str] = None,
     ):
         super().__init__(
-            id=id, user=user, token=token, user_env=user_env, root_message=root_message
+            id=id,
+            user=user,
+            token=token,
+            user_env=user_env,
+            root_message=root_message,
+            chat_profile=chat_profile,
         )
 
         self.socket_id = socket_id

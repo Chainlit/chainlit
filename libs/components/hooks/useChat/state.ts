@@ -108,3 +108,8 @@ export const firstUserMessageState = atom<IMessage | undefined>({
   key: 'FirstUserMessage',
   default: undefined
 });
+
+export const chatProfile = atom<string | undefined>({
+  key: 'ChatProfile',
+  default: undefined
+});

@@ -2,6 +2,12 @@ import { atom } from 'recoil';
 
 import { IMessage, IMessageElement } from '@chainlit/components';
 
+export interface ChatProfile {
+  icon: string;
+  name: string;
+  markdown_description: string;
+}
+
 export interface IProjectSettings {
   markdown?: string;
   ui: {
@@ -14,10 +20,16 @@ export interface IProjectSettings {
   };
   userEnv: string[];
   dataPersistence: boolean;
+  chatProfiles: ChatProfile[];
 }
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({
   key: 'ProjectSettings',
+  default: undefined
+});
+
+export const chatProfile = atom<string | undefined>({
+  key: 'ChatProfile',
   default: undefined
 });
 

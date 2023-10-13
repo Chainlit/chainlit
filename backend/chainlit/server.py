@@ -440,12 +440,18 @@ async def project_settings(
     current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
+    profiles = []
+    if config.code.set_chat_profiles:
+        chat_profiles = await config.code.set_chat_profiles(current_user)
+        if chat_profiles:
+            profiles = [p.to_dict() for p in chat_profiles]
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
             "userEnv": config.project.user_env,
             "dataPersistence": config.data_persistence,
             "markdown": get_markdown_str(config.root),
+            "chatProfiles": profiles,
         }
     )
 

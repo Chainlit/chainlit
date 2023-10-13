@@ -71,17 +71,24 @@ const useChat = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
 
   const _connect = useCallback(
-    (
-      wsEndpoint: string,
-      userEnv: Record<string, string>,
-      accessToken?: string
-    ) => {
+    ({
+      wsEndpoint,
+      userEnv,
+      accessToken,
+      chatProfile
+    }: {
+      wsEndpoint: string;
+      userEnv: Record<string, string>;
+      accessToken?: string;
+      chatProfile?: string;
+    }) => {
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Session-Id': sessionId,
-          'user-env': JSON.stringify(userEnv)
+          'user-env': JSON.stringify(userEnv),
+          'X-Chainlit-Chat-Profile': chatProfile || ''
         }
       });
       setSession((old) => {

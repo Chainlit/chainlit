@@ -41,7 +41,7 @@ from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Messa
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import FileSpec
+from chainlit.types import ChatProfile, FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -147,6 +147,24 @@ def on_chat_start(func: Callable) -> Callable:
     """
 
     config.code.on_chat_start = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
+def set_chat_profiles(
+    func: Callable[[Optional["AppUser"]], List["ChatProfile"]]
+) -> Callable:
+    """
+    Programmatic declaration of the available chat profiles (can depend on the AppUser from the session if authentication is setup).
+
+    Args:
+        func (Callable[[Optional["AppUser"]], List["ChatProfile"]]): The function declaring the chat profiles.
+
+    Returns:
+        Callable[[Optional["AppUser"]], List["ChatProfile"]]: The decorated function.
+    """
+
+    config.code.set_chat_profiles = wrap_user_function(func)
     return func
 
 

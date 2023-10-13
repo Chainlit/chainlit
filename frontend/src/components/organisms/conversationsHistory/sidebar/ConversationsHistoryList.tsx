@@ -1,7 +1,6 @@
 import { capitalize, map, size } from 'lodash';
 import { useNavigate } from 'react-router-dom';
 
-import { Height } from '@mui/icons-material';
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
