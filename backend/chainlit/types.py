@@ -20,16 +20,26 @@ class FileSpec(DataClassJsonMixin):
 
 
 @dataclass
+class ActionSpec(DataClassJsonMixin):
+    keys: List[str]
+
+
+@dataclass
 class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file"]
+    type: Literal["text", "file", "action"]
 
 
 @dataclass
 class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user a file."""
+
+
+@dataclass
+class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
+    """Specification for asking the user an action"""
 
 
 class AskResponse(TypedDict):
@@ -44,6 +54,16 @@ class AskFileResponse:
     size: int
     type: str
     content: bytes
+
+
+class AskActionResponse(TypedDict):
+    name: str
+    value: str
+    label: str
+    description: str
+    forId: str
+    id: str
+    collapsed: bool
 
 
 class CompletionRequest(BaseModel):

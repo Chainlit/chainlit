@@ -1,9 +1,14 @@
+import { IAction } from './action';
 import { IMessage } from './message';
 
 export interface FileSpec {
   accept?: string[] | Record<string, string[]>;
   max_size_mb?: number;
   max_files?: number;
+}
+
+export interface ActionSpec {
+  keys?: string[];
 }
 
 export interface IFileResponse {
@@ -15,9 +20,10 @@ export interface IFileResponse {
 }
 
 export interface IAsk {
-  callback: (payload: IMessage | IFileResponse[]) => void;
+  callback: (payload: IMessage | IFileResponse[] | IAction) => void;
   spec: {
-    type: 'text' | 'file';
+    type: 'text' | 'file' | 'action';
     timeout: number;
-  } & FileSpec;
+  } & FileSpec &
+    ActionSpec;
 }

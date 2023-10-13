@@ -37,7 +37,13 @@ from chainlit.element import (
     Video,
 )
 from chainlit.logger import logger
-from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
+from chainlit.message import (
+    AskActionMessage,
+    AskFileMessage,
+    AskUserMessage,
+    ErrorMessage,
+    Message,
+)
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
@@ -317,6 +323,7 @@ __all__ = [
     "Message",
     "ErrorMessage",
     "AskUserMessage",
+    "AskActionMessage",
     "AskFileMessage",
     "on_chat_start",
     "on_chat_end",
