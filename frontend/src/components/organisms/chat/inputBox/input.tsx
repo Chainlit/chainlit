@@ -207,7 +207,9 @@ const Input = ({
         <Box
           sx={{
             mt: 2,
-            ml: 2
+            mx: 2,
+            overflow: 'auto',
+            padding: '2px'
           }}
         >
           <Attachments

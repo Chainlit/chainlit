@@ -2,7 +2,6 @@ import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
 import {
-  FileSpec,
   IAction,
   IAsk,
   IAvatarElement,
