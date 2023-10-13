@@ -37,7 +37,11 @@ const Input = ({ onSubmit, onReply }: Props) => {
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
 
-  const disabled = !connected || loading || askUser?.spec.type === 'file';
+  const disabled =
+    !connected ||
+    loading ||
+    askUser?.spec.type === 'file' ||
+    askUser?.spec.type === 'action';
 
   useEffect(() => {
     if (ref.current && !loading && !disabled) {

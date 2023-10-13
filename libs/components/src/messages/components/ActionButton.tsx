@@ -13,7 +13,17 @@ interface ActionProps {
 }
 
 const ActionButton = ({ action, margin, onClick }: ActionProps) => {
-  const { loading } = useContext(MessageContext);
+  const { askUser, loading } = useContext(MessageContext);
+  const isAskingAction = askUser?.spec.type === 'action';
+  const isDisabled = isAskingAction && !askUser?.spec.keys?.includes(action.id);
+  const handleClick = () => {
+    if (isAskingAction) {
+      askUser?.callback(action);
+    } else {
+      action.onClick();
+      onClick?.();
+    }
+  };
 
   return (
     <Tooltip title={action.description} placement="top">
@@ -25,11 +35,8 @@ const ActionButton = ({ action, margin, onClick }: ActionProps) => {
           margin
         }}
         id={action.id}
-        onClick={() => {
-          action.onClick();
-          onClick?.();
-        }}
-        disabled={loading}
+        onClick={handleClick}
+        disabled={loading || isDisabled}
       >
         {action.label || action.name}
       </Button>

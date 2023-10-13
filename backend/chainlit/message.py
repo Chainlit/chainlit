@@ -2,7 +2,7 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
@@ -13,7 +13,14 @@ from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
-from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec
+from chainlit.types import (
+    AskActionResponse,
+    AskActionSpec,
+    AskFileResponse,
+    AskFileSpec,
+    AskResponse,
+    AskSpec,
+)
 from syncer import asyncio
 
 
@@ -485,3 +492,76 @@ class AskFileMessage(AskMessageBase):
             return [AskFileResponse(**r) for r in res]
         else:
             return None
+
+
+class AskActionMessage(AskMessageBase):
+    """
+    Ask the user to select an action before continuing.
+    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
+    """
+
+    def __init__(
+        self,
+        content: str,
+        actions: List[Action],
+        author=config.ui.name,
+        disable_human_feedback=False,
+        timeout=90,
+        raise_on_timeout=False,
+    ):
+        self.content = content
+        self.actions = actions
+        self.author = author
+        self.disable_human_feedback = disable_human_feedback
+        self.timeout = timeout
+        self.raise_on_timeout = raise_on_timeout
+
+        super().__post_init__()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "createdAt": self.created_at,
+            "content": self.content,
+            "author": self.author,
+            "waitForAnswer": True,
+            "disableHumanFeedback": self.disable_human_feedback,
+            "timeout": self.timeout,
+            "raiseOnTimeout": self.raise_on_timeout,
+        }
+
+    async def send(self) -> Union[AskActionResponse, None]:
+        """
+        Sends the question to ask to the UI and waits for the reply
+        """
+        trace_event("send_ask_action")
+
+        if self.streaming:
+            self.streaming = False
+
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
+        msg_dict = await self._create()
+        action_keys = []
+
+        for action in self.actions:
+            action_keys.append(action.id)
+            await action.send(for_id=str(msg_dict["id"]))
+
+        spec = AskActionSpec(type="action", timeout=self.timeout, keys=action_keys)
+
+        res = cast(
+            Union[AskActionResponse, None],
+            await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout),
+        )
+
+        for action in self.actions:
+            await action.remove()
+        if res is None:
+            self.content = "Timed out: no action was taken"
+        else:
+            self.content = f'**Selected action:** {res["label"]}'
+        await self.update()
+
+        return res

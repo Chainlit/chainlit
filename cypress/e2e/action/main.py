@@ -52,3 +52,24 @@ async def main():
     message = cl.Message("Hello, this is a test message!", actions=actions)
     cl.user_session.set("to_remove", message)
     await message.send()
+
+    result = await cl.AskActionMessage(
+        content="Please, pick an action!",
+        actions=[
+            cl.Action(
+                id="first-action",
+                name="first_action",
+                value="first-action",
+                label="First action",
+            ),
+            cl.Action(
+                id="second-action",
+                name="second_action",
+                value="second-action",
+                label="Second action",
+            ),
+        ],
+    ).send()
+
+    if result != None:
+        await cl.Message(f"Thanks for pressing: {result['value']}").send()
