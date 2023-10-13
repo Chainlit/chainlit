@@ -149,7 +149,7 @@ const Chat = () => {
       <SideView>
         {upload ? (
           <>
-            <input {...upload.getInputProps()} />
+            <input id="#upload-drop-input" {...upload.getInputProps()} />
             {upload?.isDragActive ? (
               <Stack
                 sx={{

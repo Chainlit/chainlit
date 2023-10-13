@@ -41,7 +41,7 @@ const UploadButton = ({
         color="inherit"
         {...getRootProps({ className: 'dropzone' })}
       >
-        <input {...getInputProps()} />
+        <input id="upload-button-input" {...getInputProps()} />
         <Add />
       </IconButton>
     </Tooltip>

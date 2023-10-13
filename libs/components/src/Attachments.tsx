@@ -24,6 +24,7 @@ const Attachments = ({
 
   return (
     <Stack
+      id="attachments"
       sx={{
         flexDirection: 'row',
         gap: 2,
