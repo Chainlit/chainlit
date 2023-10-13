@@ -1,10 +1,10 @@
 import asyncio
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from chainlit.client.base import MessageDict
 from chainlit.data import chainlit_client
-from chainlit.element import File
+from chainlit.element import Element
 from chainlit.message import Message
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.types import AskSpec, UIMessagePayload
@@ -160,7 +160,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
         asyncio.create_task(message._create())
 
         if files:
-            file_elements = [File.from_dict(file) for file in files]
+            file_elements = [Element.from_dict(file) for file in files]
             message.elements = file_elements
 
             async def send_files():

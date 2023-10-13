@@ -158,7 +158,7 @@ const Chat = () => {
                   color: 'white',
                   height: '100%',
                   width: '100%',
-                  opacity: 0.8,
+                  opacity: 0.9,
                   zIndex: 10,
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -205,7 +205,7 @@ const Chat = () => {
               objectFit: 'contain',
               position: 'absolute',
               pointerEvents: 'none',
-              top: '45%',
+              top: '40%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               filter: 'grayscale(100%)',

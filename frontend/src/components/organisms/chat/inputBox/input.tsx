@@ -158,6 +158,7 @@ const Input = ({
 
   const startAdornment = (
     <>
+      <HistoryButton disabled={disabled} onClick={onHistoryClick} />
       {chatSettingsInputs.length > 0 && (
         <IconButton
           id="chat-settings-open-modal"
@@ -168,7 +169,6 @@ const Input = ({
           <TuneIcon />
         </IconButton>
       )}
-      <HistoryButton disabled={disabled} onClick={onHistoryClick} />
       <UploadButton
         disabled={disabled}
         fileSpec={fileSpec}

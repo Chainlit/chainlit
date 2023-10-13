@@ -74,6 +74,29 @@ class Element:
         )
         return _dict
 
+    @classmethod
+    def from_dict(self, _dict: Dict):
+        if "image" in _dict.get("mime", ""):
+            return Image(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                display=_dict.get("display", "inline"),
+                mime=_dict.get("mime"),
+            )
+        else:
+            return File(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                language=_dict.get("language"),
+                display=_dict.get("display", "inline"),
+                size=_dict.get("size"),
+                mime=_dict.get("mime"),
+            )
+
     async def with_conversation_id(self):
         _dict = self.to_dict()
         _dict["conversationId"] = await context.session.get_conversation_id()
@@ -325,18 +348,3 @@ class Video(Element):
 @dataclass
 class File(Element):
     type: ClassVar[ElementType] = "file"
-
-    @classmethod
-    def from_dict(self, _dict: Dict):
-        message = File(
-            id=_dict.get("id", str(uuid.uuid4())),
-            content=_dict.get("content"),
-            name=_dict.get("name"),
-            url=_dict.get("prourlmpt"),
-            language=_dict.get("language"),
-            display=_dict.get("display", "inline"),
-            size=_dict.get("size"),
-            mime=_dict.get("mime"),
-        )
-
-        return message
