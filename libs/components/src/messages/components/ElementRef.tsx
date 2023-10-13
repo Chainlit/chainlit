@@ -20,6 +20,7 @@ const ElementRef = ({ element }: Props) => {
     <Link
       role="link"
       className="element-link"
+      sx={{ cursor: 'pointer' }}
       onClick={() => onElementRefClick && onElementRefClick(element)}
     >
       {element.name}

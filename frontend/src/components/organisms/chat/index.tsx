@@ -134,13 +134,16 @@ const Chat = () => {
   );
 
   const tasklist = tasklists.at(-1);
-
   const enableMultiModalUpload = !disabled && pSettings?.features.multi_modal;
+
   return (
     <Box
       {...(enableMultiModalUpload
         ? upload?.getRootProps({ className: 'dropzone' })
         : {})}
+      // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
+      onBlur={undefined}
+      onFocus={undefined}
       display="flex"
       width="100%"
       flexGrow={1}
