@@ -71,9 +71,10 @@ class Theme(str, Enum):
     dark = "dark"
 
 
-class ChatProfile(BaseModel):
+@dataclass
+class ChatProfile(DataClassJsonMixin):
     """Specification for a chat profile that can be chosen by the user at the conversation start."""
 
-    icon: Optional[str]
     name: str
     markdown_description: str
+    icon: Optional[str] = None

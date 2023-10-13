@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
 from chainlit.logger import logger
-from chainlit.types import ChatProfile
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import dataclass
@@ -14,6 +13,8 @@ from starlette.datastructures import Headers
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.client.base import AppUser
+    from chainlit.types import ChatProfile
+
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))

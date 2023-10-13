@@ -444,7 +444,7 @@ async def project_settings(
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            profiles = [dict(p) for p in chat_profiles]
+            profiles = [p.to_dict() for p in chat_profiles]
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
