@@ -448,6 +448,7 @@ async def project_settings(
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
+            "features": config.features.to_dict(),
             "userEnv": config.project.user_env,
             "dataPersistence": config.data_persistence,
             "markdown": get_markdown_str(config.root),

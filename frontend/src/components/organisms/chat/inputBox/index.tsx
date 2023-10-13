@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-import { FileSpec, IFileResponse } from '@chainlit/components';
+import { FileSpec, IFileElement, IFileResponse } from '@chainlit/components';
 
 import StopButton from '../stopButton';
 import Input from './input';
@@ -10,7 +10,7 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: IFileResponse[]) => void;
   onFileUploadError: (error: string) => void;
-  onSubmit: (message: string) => void;
+  onSubmit: (message: string, files?: IFileElement[]) => void;
   onReply: (message: string) => void;
 }
 

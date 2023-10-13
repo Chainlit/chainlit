@@ -9,6 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import {
   Attachments,
   FileSpec,
+  IFileElement,
   IFileResponse,
   useChat
 } from '@chainlit/components';
@@ -25,7 +26,7 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: IFileResponse[]) => void;
   onFileUploadError: (error: string) => void;
-  onSubmit: (message: string) => void;
+  onSubmit: (message: string, files?: IFileElement[]) => void;
   onReply: (message: string) => void;
 }
 
@@ -110,10 +111,19 @@ const Input = ({
     if (askUser) {
       onReply(value);
     } else {
-      onSubmit(value);
+      onSubmit(value, fileElements);
     }
+    setFileElements([]);
     setValue('');
-  }, [value, disabled, setValue, askUser, onSubmit]);
+  }, [
+    value,
+    disabled,
+    setValue,
+    askUser,
+    fileElements,
+    setFileElements,
+    onSubmit
+  ]);
 
   const handleCompositionStart = () => {
     setIsComposing(true);

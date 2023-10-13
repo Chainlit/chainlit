@@ -8,6 +8,7 @@ import { Alert, Box, Stack, Typography } from '@mui/material';
 
 import {
   ErrorBoundary,
+  IFileElement,
   IFileResponse,
   IMessage,
   useChat,
@@ -31,7 +32,7 @@ import MessageContainer from './message/container';
 
 const Chat = () => {
   const pSettings = useRecoilValue(projectSettingsState);
-  const [attachments, setAttachments] = useRecoilState(attachmentsState);
+  const setAttachments = useSetRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
   const sideViewElement = useRecoilValue(sideViewState);
@@ -54,7 +55,7 @@ const Chat = () => {
     disabled
   } = useChat();
 
-  const fileSpec = { max_size_mb: 50 };
+  const fileSpec = { max_size_mb: 20 };
   const onFileUpload = (payloads: IFileResponse[]) => {
     const fileElements = payloads.map((file) => ({
       id: uuidv4(),
@@ -84,14 +85,13 @@ const Chat = () => {
   }, []);
 
   const onSubmit = useCallback(
-    async (msg: string) => {
+    async (msg: string, files?: IFileElement[]) => {
       const message: IMessage = {
         id: uuidv4(),
         author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
         createdAt: new Date().toISOString()
-        // elements: attachments
       };
 
       setChatHistory((old) => {
@@ -112,7 +112,7 @@ const Chat = () => {
       });
 
       setAutoScroll(true);
-      sendMessage(message);
+      sendMessage(message, files);
     },
     [user, pSettings, sendMessage]
   );
@@ -124,8 +124,7 @@ const Chat = () => {
         author: user?.username || 'User',
         authorIsUser: true,
         content: msg,
-        createdAt: new Date().toISOString(),
-        elements: attachments
+        createdAt: new Date().toISOString()
       };
 
       replyMessage(message);
@@ -136,9 +135,12 @@ const Chat = () => {
 
   const tasklist = tasklists.at(-1);
 
+  const enableMultiModalUpload = !disabled && pSettings?.features.multi_modal;
   return (
     <Box
-      {...(disabled ? {} : upload?.getRootProps({ className: 'dropzone' }))}
+      {...(enableMultiModalUpload
+        ? upload?.getRootProps({ className: 'dropzone' })
+        : {})}
       display="flex"
       width="100%"
       flexGrow={1}

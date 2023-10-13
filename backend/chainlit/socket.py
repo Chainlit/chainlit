@@ -13,6 +13,7 @@ from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
+from chainlit.types import UIMessagePayload
 from chainlit.user_session import user_sessions
 
 
@@ -163,14 +164,14 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: WebsocketSession, message_dict: MessageDict):
+async def process_message(session: WebsocketSession, payload: UIMessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
 
         await context.emitter.task_start()
         if config.code.on_message:
-            message = await context.emitter.process_user_message(message_dict)
+            message = await context.emitter.process_user_message(payload)
             await config.code.on_message(message)
     except InterruptedError:
         pass
@@ -184,12 +185,12 @@ async def process_message(session: WebsocketSession, message_dict: MessageDict):
 
 
 @socket.on("ui_message")
-async def message(sid, message):
+async def message(sid, payload: UIMessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
     session.should_stop = False
 
-    await process_message(session, message)
+    await process_message(session, payload)
 
 
 async def process_action(action: Action):

@@ -8,7 +8,7 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
-import { IAction, IElement, IMessage } from 'src/types';
+import { IAction, IElement, IFileElement, IMessage } from 'src/types';
 import { nestMessages } from 'utils/message';
 
 import {
@@ -299,9 +299,9 @@ const useChat = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IMessage) => {
+    (message: IMessage, files?: IFileElement[]) => {
       setMessages((oldMessages) => [...oldMessages, message]);
-      session?.socket.emit('ui_message', message);
+      session?.socket.emit('ui_message', { message, files });
     },
     [session]
   );

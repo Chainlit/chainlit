@@ -18,6 +18,9 @@ export interface IProjectSettings {
     default_expand_messages?: boolean;
     github?: string;
   };
+  features: {
+    multi_modal?: boolean;
+  };
   userEnv: string[];
   dataPersistence: boolean;
   chatProfiles: ChatProfile[];

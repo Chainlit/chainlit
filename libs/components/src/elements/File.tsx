@@ -49,6 +49,7 @@ const FileElement = ({
           borderRadius: 1,
           px: 1.2,
           width: 160,
+          border: (theme) => `1px solid ${theme.palette.primary.main}`,
           color: (theme) =>
             theme.palette.mode === 'light'
               ? theme.palette.primary.main

@@ -1,8 +1,12 @@
+import { useRecoilValue } from 'recoil';
+
 import Add from '@mui/icons-material/Add';
 import { IconButton, Tooltip } from '@mui/material';
 
 import { FileSpec, IFileResponse } from '@chainlit/components';
 import { useUpload } from '@chainlit/components';
+
+import { projectSettingsState } from 'state/project';
 
 type Props = {
   disabled?: boolean;
@@ -17,6 +21,8 @@ const UploadButton = ({
   onFileUpload,
   onFileUploadError
 }: Props) => {
+  const pSettings = useRecoilValue(projectSettingsState);
+
   const upload = useUpload({
     spec: fileSpec,
     onResolved: (payloads: IFileResponse[]) => onFileUpload(payloads),
@@ -24,7 +30,7 @@ const UploadButton = ({
     options: { noDrag: true }
   });
 
-  if (!upload) return null;
+  if (!upload || !pSettings?.features.multi_modal) return null;
   const { getRootProps, getInputProps, uploading } = upload;
 
   return (
