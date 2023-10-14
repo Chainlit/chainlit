@@ -201,6 +201,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                     conversationId
                     type
                     name
+                    mime
                     url
                     display
                     language
@@ -370,6 +371,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         conversationId
         type
         name
+        mime
         url
         display
         language

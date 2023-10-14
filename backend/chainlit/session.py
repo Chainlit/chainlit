@@ -50,15 +50,14 @@ class BaseSession:
         else:
             tags = ["chat"]
 
-        if not self.conversation_id:
-            async with self.lock:
+        async with self.lock:
+            if not self.conversation_id:
                 app_user_id = (
                     self.user.id if isinstance(self.user, PersistedAppUser) else None
                 )
                 self.conversation_id = await chainlit_client.create_conversation(
                     app_user_id=app_user_id, tags=tags
                 )
-
         return self.conversation_id
 
 

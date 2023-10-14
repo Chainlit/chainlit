@@ -163,11 +163,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
             file_elements = [Element.from_dict(file) for file in files]
             message.elements = file_elements
 
-            async def send_files():
+            async def send_elements():
                 for element in message.elements:
                     await element.send(for_id=message.id)
 
-            asyncio.create_task(send_files())
+            asyncio.create_task(send_elements())
 
         if not self.session.has_user_message:
             self.session.has_user_message = True
