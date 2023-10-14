@@ -28,7 +28,8 @@ const Attachments = ({
       sx={{
         flexDirection: 'row',
         gap: 2,
-        width: 'fit-content'
+        width: 'fit-content',
+        flexWrap: 'wrap'
       }}
     >
       {fileElements.map((fileElement, index) => {

@@ -208,7 +208,6 @@ const Input = ({
           sx={{
             mt: 2,
             mx: 2,
-            overflow: 'auto',
             padding: '2px'
           }}
         >
