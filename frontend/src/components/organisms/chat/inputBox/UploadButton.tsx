@@ -30,7 +30,7 @@ const UploadButton = ({
     options: { noDrag: true }
   });
 
-  if (!upload || !pSettings?.features.multi_modal) return null;
+  if (!upload || !pSettings?.features?.multi_modal) return null;
   const { getRootProps, getInputProps, uploading } = upload;
 
   return (

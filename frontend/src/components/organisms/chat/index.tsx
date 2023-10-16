@@ -133,8 +133,8 @@ const Chat = () => {
     [askUser, user, replyMessage]
   );
 
-  const tasklist = tasklists.at(-1);
-  const enableMultiModalUpload = !disabled && pSettings?.features.multi_modal;
+  const tasklist = tasklists[tasklists.length - 1];
+  const enableMultiModalUpload = !disabled && pSettings?.features?.multi_modal;
 
   return (
     <Box
