@@ -33,7 +33,7 @@ const FileElement = ({
           objectFit: 'cover',
           width: 90,
           height: '100%',
-          borderRadius: 8
+          borderRadius: '5px'
         }}
         src={element.url || URL.createObjectURL(new Blob([element.content!]))}
       />

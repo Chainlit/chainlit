@@ -78,7 +78,7 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    maxFiles: spec.max_files || 1,
+    maxFiles: spec.max_files || undefined,
     accept: dzAccept,
     maxSize: (spec.max_size_mb || 2) * 1000000,
     ...options

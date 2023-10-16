@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
-import { UploadFile } from '@mui/icons-material';
-import { Alert, Box, Stack, Typography } from '@mui/material';
+import { Alert, Box } from '@mui/material';
 
 import {
   ErrorBoundary,
@@ -16,7 +15,6 @@ import {
 } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
-import { Logo } from 'components/atoms/logo';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import TaskList from 'components/molecules/tasklist';
 
@@ -27,6 +25,7 @@ import { chatHistoryState } from 'state/chatHistory';
 import { conversationsHistoryState } from 'state/conversations';
 import { projectSettingsState, sideViewState } from 'state/project';
 
+import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
 import WelcomeScreen from './welcomeScreen';
@@ -150,30 +149,13 @@ const Chat = () => {
       flexGrow={1}
       position="relative"
     >
+      {upload ? (
+        <>
+          <input id="#upload-drop-input" {...upload.getInputProps()} />
+          {upload?.isDragActive ? <DropScreen /> : null}
+        </>
+      ) : null}
       <SideView>
-        {upload ? (
-          <>
-            <input id="#upload-drop-input" {...upload.getInputProps()} />
-            {upload?.isDragActive ? (
-              <Stack
-                sx={{
-                  position: 'absolute',
-                  backgroundColor: (theme) => theme.palette.background.paper,
-                  color: 'white',
-                  height: '100%',
-                  width: '100%',
-                  opacity: 0.9,
-                  zIndex: 10,
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <UploadFile sx={{ height: 50, width: 50 }} />
-                <Typography fontSize={'20px'}>Drop your files here!</Typography>
-              </Stack>
-            ) : null}
-          </>
-        ) : null}
         <TaskList tasklist={tasklist} isMobile={true} />
 
         <Box my={1} />
