@@ -157,16 +157,22 @@ const Chat = () => {
       ) : null}
       <SideView>
         <TaskList tasklist={tasklist} isMobile={true} />
-
-        <Box my={1} />
         {error && (
-          <Alert id="session-error" severity="error">
-            Could not reach the server.
-          </Alert>
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: '60rem',
+              mx: 'auto',
+              my: 2
+            }}
+          >
+            <Alert sx={{ mx: 2 }} id="session-error" severity="error">
+              Could not reach the server.
+            </Alert>
+          </Box>
         )}
         <ErrorBoundary>
           <ChatProfiles />
-
           {!messages.length && pSettings?.ui.show_readme_as_default ? (
             <WelcomeScreen />
           ) : (
