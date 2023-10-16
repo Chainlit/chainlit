@@ -156,6 +156,7 @@ const Chat = () => {
         </>
       ) : null}
       <SideView>
+        <Box my={1} />
         <TaskList tasklist={tasklist} isMobile={true} />
         {error && (
           <Box

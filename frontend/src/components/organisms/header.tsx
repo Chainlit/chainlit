@@ -60,10 +60,11 @@ function NavItem({ to, label }: INavItem) {
 }
 
 interface NavProps {
+  dataPersistence?: boolean;
   hasReadme?: boolean;
 }
 
-function Nav({ hasReadme }: NavProps) {
+function Nav({ dataPersistence, hasReadme }: NavProps) {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
@@ -75,7 +76,7 @@ function Nav({ hasReadme }: NavProps) {
     anchorEl = ref.current;
   }
 
-  const matches = useMediaQuery('(max-width: 66rem)');
+  const isMobile = useMediaQuery('(max-width: 66rem)');
   const tabs = [{ to: '/', label: 'Chat' }];
 
   if (hasReadme) {
@@ -83,7 +84,7 @@ function Nav({ hasReadme }: NavProps) {
   }
 
   const nav = (
-    <Stack direction={matches ? 'column' : 'row'} spacing={1}>
+    <Stack direction={isMobile ? 'column' : 'row'} spacing={1}>
       {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
@@ -95,7 +96,7 @@ function Nav({ hasReadme }: NavProps) {
     </Stack>
   );
 
-  if (matches) {
+  if (isMobile) {
     return (
       <>
         <IconButton
@@ -106,7 +107,9 @@ function Nav({ hasReadme }: NavProps) {
         >
           <MenuIcon />
         </IconButton>
-        {isAuthenticated ? <OpenChatHistoryButton mode="mobile" /> : null}
+        {isAuthenticated && dataPersistence ? (
+          <OpenChatHistoryButton mode="mobile" />
+        ) : null}
         <Menu
           autoFocus
           anchorEl={anchorEl}
@@ -157,7 +160,10 @@ export default function Header() {
       >
         <Stack alignItems="center" direction={'row'} gap={!matches ? 3 : 1}>
           {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
-          <Nav hasReadme={!!pSettings?.markdown} />
+          <Nav
+            dataPersistence={pSettings?.dataPersistence}
+            hasReadme={!!pSettings?.markdown}
+          />
         </Stack>
         <Stack
           alignItems="center"
