@@ -1,3 +1,4 @@
+import base64
 import os
 import urllib.parse
 from typing import Dict, List, Optional, Tuple
@@ -200,8 +201,24 @@ class AzureADOAuthProvider(OAuthProvider):
             ) as result:
                 user = await result.json()
 
+                try:
+                    async with session.get(
+                        "https://graph.microsoft.com/v1.0/me/photos/48x48/$value",
+                        headers={"Authorization": f"Bearer {token}"},
+                    ) as photo_result:
+                        photo_data = await photo_result.read()
+                        base64_image = base64.b64encode(photo_data)
+                        user[
+                            "image"
+                        ] = f"data:{photo_result.content_type};base64,{base64_image.decode('utf-8')}"
+                except Exception as e:
+                    # Ignore errors getting the photo
+                    pass
+
                 app_user = AppUser(
-                    username=user["userPrincipalName"], image="", provider="azure-ad"
+                    username=user["userPrincipalName"],
+                    image=user.get("image", ""),
+                    provider="azure-ad",
                 )
                 return (user, app_user)
 
