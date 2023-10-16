@@ -157,7 +157,6 @@ const Chat = () => {
       ) : null}
       <SideView>
         <Box my={1} />
-        <TaskList tasklist={tasklist} isMobile={true} />
         {error && (
           <Box
             sx={{
@@ -172,6 +171,7 @@ const Chat = () => {
             </Alert>
           </Box>
         )}
+        <TaskList tasklist={tasklist} isMobile={true} />
         <ErrorBoundary>
           <ChatProfiles />
           {!messages.length && pSettings?.ui.show_readme_as_default ? (

@@ -20,10 +20,13 @@ describe('Conversations', () => {
     cy.intercept('GET', '/project/settings', {
       statusCode: 200,
       body: {
-        ui: {},
+        ui: {
+          show_readme_as_default: true
+        },
         userEnv: [],
         dataPersistence: true,
-        markdown: 'foo'
+        markdown: 'foo',
+        chatProfiles: []
       }
     }).as('getSettings');
 
