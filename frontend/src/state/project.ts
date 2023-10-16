@@ -12,6 +12,7 @@ export interface IProjectSettings {
   markdown?: string;
   ui: {
     name: string;
+    show_readme_as_default?: boolean;
     description?: string;
     hide_cot?: boolean;
     default_collapse_content?: boolean;

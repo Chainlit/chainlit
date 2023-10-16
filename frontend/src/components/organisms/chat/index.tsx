@@ -29,6 +29,7 @@ import { projectSettingsState, sideViewState } from 'state/project';
 
 import InputBox from './inputBox';
 import MessageContainer from './message/container';
+import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const pSettings = useRecoilValue(projectSettingsState);
@@ -157,7 +158,7 @@ const Chat = () => {
               <Stack
                 sx={{
                   position: 'absolute',
-                  backgroundColor: (theme) => theme.palette.primary.main,
+                  backgroundColor: (theme) => theme.palette.background.paper,
                   color: 'white',
                   height: '100%',
                   width: '100%',
@@ -183,41 +184,28 @@ const Chat = () => {
         )}
         <ErrorBoundary>
           <ChatProfiles />
-          <MessageContainer
-            avatars={avatars}
-            loading={loading}
-            askUser={askUser}
-            actions={actions}
-            elements={elements}
-            messages={messages}
-            autoScroll={autoScroll}
-            callAction={callAction}
-            setAutoScroll={setAutoScroll}
-          />
+
+          {!messages.length && pSettings?.ui.show_readme_as_default ? (
+            <WelcomeScreen />
+          ) : (
+            <MessageContainer
+              avatars={avatars}
+              loading={loading}
+              askUser={askUser}
+              actions={actions}
+              elements={elements}
+              messages={messages}
+              autoScroll={autoScroll}
+              callAction={callAction}
+              setAutoScroll={setAutoScroll}
+            />
+          )}
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
             onFileUploadError={onFileUploadError}
             onReply={onReply}
             onSubmit={onSubmit}
-          />
-          <Logo
-            style={{
-              width: '200px',
-              height: '200px',
-              objectFit: 'contain',
-              position: 'absolute',
-              pointerEvents: 'none',
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              filter: 'grayscale(100%)',
-              opacity: messages.length > 0 ? 0 : 0.5,
-              transition:
-                messages.length > 0
-                  ? 'opacity 0.2s ease-in-out'
-                  : 'opacity 0.2s ease-in-out'
-            }}
           />
         </ErrorBoundary>
       </SideView>

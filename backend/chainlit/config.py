@@ -54,6 +54,9 @@ multi_modal = true
 # Name of the app and chatbot.
 name = "Chatbot"
 
+# Show the readme while the conversation is empty.
+show_readme_as_default = true
+
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
 
@@ -147,6 +150,7 @@ class FeaturesSettings(DataClassJsonMixin):
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
+    show_readme_as_default: bool = True
     description: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
