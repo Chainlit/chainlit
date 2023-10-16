@@ -47,6 +47,9 @@ cache = false
 # Show the prompt playground
 prompt_playground = true
 
+# Authorize users to upload files with messages
+multi_modal = true
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
@@ -138,6 +141,7 @@ class Theme(DataClassJsonMixin):
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
+    multi_modal: bool = True
 
 
 @dataclass()
@@ -170,7 +174,6 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
-    on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[

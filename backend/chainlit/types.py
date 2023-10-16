@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Dict, List, Literal, Optional, TypedDict, Union
 
-from chainlit.client.base import ConversationFilter, Pagination
+from chainlit.client.base import ConversationFilter, MessageDict, Pagination
+from chainlit.element import File
 from chainlit.prompt import Prompt
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
@@ -45,6 +46,11 @@ class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
 class AskResponse(TypedDict):
     content: str
     author: str
+
+
+class UIMessagePayload(TypedDict):
+    message: MessageDict
+    files: Optional[List[Dict]]
 
 
 @dataclass

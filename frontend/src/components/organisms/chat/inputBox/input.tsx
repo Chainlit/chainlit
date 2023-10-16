@@ -1,21 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import SendIcon from '@mui/icons-material/Telegram';
 import TuneIcon from '@mui/icons-material/Tune';
-import { IconButton, TextField } from '@mui/material';
+import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useChat } from '@chainlit/components';
+import {
+  Attachments,
+  FileSpec,
+  IFileElement,
+  IFileResponse,
+  useChat
+} from '@chainlit/components';
 
+import HistoryButton from 'components/organisms/chat/history';
+
+import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { chatSettingsOpenState } from 'state/project';
 
-import HistoryButton from '../history';
-import UploadButton from '../message/UploadButton';
+import UploadButton from './UploadButton';
 
 interface Props {
-  onSubmit: (message: string) => void;
+  fileSpec: FileSpec;
+  onFileUpload: (payload: IFileResponse[]) => void;
+  onFileUploadError: (error: string) => void;
+  onSubmit: (message: string, files?: IFileElement[]) => void;
   onReply: (message: string) => void;
 }
 
@@ -28,20 +39,64 @@ function getLineCount(el: HTMLDivElement) {
   return lines.length;
 }
 
-const Input = ({ onSubmit, onReply }: Props) => {
-  const ref = useRef<HTMLDivElement>(null);
+const Input = ({
+  fileSpec,
+  onFileUpload,
+  onFileUploadError,
+  onSubmit,
+  onReply
+}: Props) => {
+  const [fileElements, setFileElements] = useRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
-  const { connected, loading, askUser, chatSettingsInputs } = useChat();
+
+  const ref = useRef<HTMLDivElement>(null);
+  const { loading, askUser, chatSettingsInputs, disabled } = useChat();
 
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
 
-  const disabled =
-    !connected ||
-    loading ||
-    askUser?.spec.type === 'file' ||
-    askUser?.spec.type === 'action';
+  useEffect(() => {
+    const pasteEvent = (event: ClipboardEvent) => {
+      if (event.clipboardData && event.clipboardData.items) {
+        const items = Array.from(event.clipboardData.items);
+        items.forEach((item) => {
+          if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const content = e.target?.result as ArrayBuffer;
+                if (content) {
+                  onFileUpload([
+                    {
+                      name: file.name,
+                      type: file.type,
+                      content,
+                      size: file.size
+                    }
+                  ]);
+                }
+              };
+              reader.readAsArrayBuffer(file);
+            }
+          }
+        });
+      }
+    };
+
+    if (!ref.current) {
+      return;
+    }
+
+    const input = ref.current;
+
+    input.addEventListener('paste', pasteEvent);
+
+    return () => {
+      input.removeEventListener('paste', pasteEvent);
+    };
+  }, []);
 
   useEffect(() => {
     if (ref.current && !loading && !disabled) {
@@ -56,10 +111,19 @@ const Input = ({ onSubmit, onReply }: Props) => {
     if (askUser) {
       onReply(value);
     } else {
-      onSubmit(value);
+      onSubmit(value, fileElements);
     }
+    setFileElements([]);
     setValue('');
-  }, [value, disabled, setValue, askUser, onSubmit]);
+  }, [
+    value,
+    disabled,
+    setValue,
+    askUser,
+    fileElements,
+    setFileElements,
+    onSubmit
+  ]);
 
   const handleCompositionStart = () => {
     setIsComposing(true);
@@ -94,6 +158,7 @@ const Input = ({ onSubmit, onReply }: Props) => {
 
   const startAdornment = (
     <>
+      <HistoryButton disabled={disabled} onClick={onHistoryClick} />
       {chatSettingsInputs.length > 0 && (
         <IconButton
           id="chat-settings-open-modal"
@@ -104,8 +169,12 @@ const Input = ({ onSubmit, onReply }: Props) => {
           <TuneIcon />
         </IconButton>
       )}
-      <HistoryButton onClick={onHistoryClick} />
-      <UploadButton />
+      <UploadButton
+        disabled={disabled}
+        fileSpec={fileSpec}
+        onFileUploadError={onFileUploadError}
+        onFileUpload={onFileUpload}
+      />
     </>
   );
 
@@ -116,46 +185,12 @@ const Input = ({ onSubmit, onReply }: Props) => {
   );
 
   return (
-    <TextField
-      inputRef={ref}
-      id="chat-input"
-      autoFocus
-      multiline
-      variant="standard"
-      autoComplete="false"
-      placeholder="Type your message here..."
-      disabled={disabled}
-      onChange={(e) => setValue(e.target.value)}
-      onKeyDown={handleKeyDown}
-      onCompositionStart={handleCompositionStart}
-      onCompositionEnd={handleCompositionEnd}
-      value={value}
-      fullWidth
-      InputProps={{
-        disableUnderline: true,
-        startAdornment: (
-          <InputAdornment
-            sx={{ ml: 1, color: 'text.secondary' }}
-            position="start"
-          >
-            {startAdornment}
-          </InputAdornment>
-        ),
-        endAdornment: (
-          <InputAdornment
-            position="end"
-            sx={{ mr: 1, color: 'text.secondary' }}
-          >
-            {endAdornment}
-          </InputAdornment>
-        )
-      }}
+    <Stack
       sx={{
         backgroundColor: 'background.paper',
         borderRadius: 1,
         border: (theme) => `1px solid ${theme.palette.divider}`,
         boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
-
         textarea: {
           height: '34px',
           maxHeight: '30vh',
@@ -167,7 +202,58 @@ const Input = ({ onSubmit, onReply }: Props) => {
           lineHeight: '24px'
         }
       }}
-    />
+    >
+      {fileElements.length > 0 ? (
+        <Box
+          sx={{
+            mt: 2,
+            mx: 2,
+            padding: '2px'
+          }}
+        >
+          <Attachments
+            fileElements={fileElements}
+            setFileElements={setFileElements}
+          />
+        </Box>
+      ) : null}
+
+      <TextField
+        inputRef={ref}
+        id="chat-input"
+        autoFocus
+        multiline
+        variant="standard"
+        autoComplete="false"
+        placeholder={'Type your message here...'}
+        disabled={disabled}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        value={value}
+        fullWidth
+        InputProps={{
+          disableUnderline: true,
+          startAdornment: (
+            <InputAdornment
+              sx={{ ml: 1, color: 'text.secondary' }}
+              position="start"
+            >
+              {startAdornment}
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              sx={{ mr: 1, color: 'text.secondary' }}
+            >
+              {endAdornment}
+            </InputAdornment>
+          )
+        }}
+      />
+    </Stack>
   );
 };
 

@@ -1,8 +1,7 @@
 import { Socket } from 'socket.io-client';
 
-import { IMessage } from '@chainlit/components';
+import { IMessage, IMessageElement } from '@chainlit/components';
 
-import { IMessageElement } from './element';
 import { IAppUser } from './user';
 
 export interface IChat {

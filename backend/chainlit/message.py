@@ -267,10 +267,10 @@ class Message(MessageBase):
             context.session.root_message = self
 
         for action in self.actions:
-            await action.send(for_id=str(id))
+            await action.send(for_id=id)
 
         for element in self.elements:
-            await element.send(for_id=str(id))
+            await element.send(for_id=id)
 
         return id
 

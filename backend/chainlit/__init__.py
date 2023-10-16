@@ -130,7 +130,7 @@ def on_message(func: Callable) -> Callable:
     The decorated function is called every time a new message is received.
 
     Args:
-        func (Callable[[str, str], Any]): The function to be called when a new message is received. Takes the input message and the message id.
+        func (Callable[[Message], Any]): The function to be called when a new message is received. Takes a cl.Message.
 
     Returns:
         Callable[[str], Any]: The decorated on_message function.
@@ -251,37 +251,6 @@ def on_settings_update(
 
     config.code.on_settings_update = wrap_user_function(func, with_task=True)
     return func
-
-
-def on_file_upload(
-    accept: Union[List[str], Dict[str, List[str]]],
-    max_size_mb: int = 2,
-    max_files: int = 1,
-) -> Callable:
-    """
-    A decorator designed for handling spontaneously uploaded files.
-    This decorator is intended to be used with files that are uploaded on-the-fly.
-
-    Args:
-        accept (Union[List[str], Dict[str, List[str]]]): A list of accepted file extensions or a dictionary of extension lists per field.
-        type (Optional[str]): The type of upload, defaults to "file".
-        max_size_mb (Optional[int]): The maximum file size in megabytes, defaults to 2.
-        max_files (Optional[int]): The maximum number of files allowed to be uploaded, defaults to 1.
-
-    Returns:
-        Callable: The decorated function for handling spontaneous file uploads.
-    """
-
-    def decorator(func: Callable) -> Callable:
-        config.code.on_file_upload_config = FileSpec(
-            accept=accept,
-            max_size_mb=max_size_mb,
-            max_files=max_files,
-        )
-        config.code.on_file_upload = wrap_user_function(func)
-        return func
-
-    return decorator
 
 
 def sleep(duration: int):

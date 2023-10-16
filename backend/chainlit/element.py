@@ -46,6 +46,8 @@ class Element:
     for_ids: List[str] = Field(default_factory=list)
     # The language, if relevant
     language: Optional[str] = None
+    # Mime type, infered based on content if not provided
+    mime: Optional[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -66,10 +68,34 @@ class Element:
                 "size": getattr(self, "size", None),
                 "language": getattr(self, "language", None),
                 "forIds": getattr(self, "for_ids", None),
+                "mime": getattr(self, "mime", None),
                 "conversationId": None,
             }
         )
         return _dict
+
+    @classmethod
+    def from_dict(self, _dict: Dict):
+        if "image" in _dict.get("mime", ""):
+            return Image(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                display=_dict.get("display", "inline"),
+                mime=_dict.get("mime"),
+            )
+        else:
+            return File(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                language=_dict.get("language"),
+                display=_dict.get("display", "inline"),
+                size=_dict.get("size"),
+                mime=_dict.get("mime"),
+            )
 
     async def with_conversation_id(self):
         _dict = self.to_dict()
@@ -88,15 +114,11 @@ class Element:
 
     async def persist(self, client: ChainlitCloudClient) -> Optional[ElementDict]:
         if not self.url and self.content and not self.persisted:
-            # Only guess the mime type when the content is binary
-            mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.content)
-            )
             conversation_id = await context.session.get_conversation_id()
             upload_res = await client.upload_element(
-                content=self.content, mime=mime, conversation_id=conversation_id
+                content=self.content,
+                mime=self.mime or "",
+                conversation_id=conversation_id,
             )
             self.url = upload_res["url"]
             self.object_key = upload_res["object_key"]
@@ -131,6 +153,14 @@ class Element:
             await self.load()
 
         await self.preprocess_content()
+
+        if not self.mime:
+            # Only guess the mime type when the content is binary
+            self.mime = (
+                mime_types[self.type]
+                if self.type in mime_types
+                else filetype.guess_mime(self.content)
+            )
 
         if for_id and for_id not in self.for_ids:
             self.for_ids.append(for_id)

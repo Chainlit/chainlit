@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import toast from 'react-hot-toast';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { UploadFile } from '@mui/icons-material';
+import { Alert, Box, Stack, Typography } from '@mui/material';
 
-import { ErrorBoundary, IMessage, useChat } from '@chainlit/components';
+import {
+  ErrorBoundary,
+  IFileElement,
+  IFileResponse,
+  IMessage,
+  useChat,
+  useUpload
+} from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
 import { Logo } from 'components/atoms/logo';
@@ -13,6 +22,7 @@ import TaskList from 'components/molecules/tasklist';
 
 import { useAuth } from 'hooks/auth';
 
+import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
 import { conversationsHistoryState } from 'state/conversations';
 import { projectSettingsState, sideViewState } from 'state/project';
@@ -21,11 +31,13 @@ import InputBox from './inputBox';
 import MessageContainer from './message/container';
 
 const Chat = () => {
-  const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
-  const sideViewElement = useRecoilValue(sideViewState);
+  const setAttachments = useSetRecoilState(attachmentsState);
   const setChatHistory = useSetRecoilState(chatHistoryState);
   const setConversations = useSetRecoilState(conversationsHistoryState);
+  const sideViewElement = useRecoilValue(sideViewState);
+
+  const { user } = useAuth();
   const [autoScroll, setAutoScroll] = useState(true);
 
   const {
@@ -39,8 +51,31 @@ const Chat = () => {
     elements,
     askUser,
     avatars,
-    loading
+    loading,
+    disabled
   } = useChat();
+
+  const fileSpec = { max_size_mb: 20 };
+  const onFileUpload = (payloads: IFileResponse[]) => {
+    const fileElements = payloads.map((file) => ({
+      id: uuidv4(),
+      type: 'file' as const,
+      display: 'inline' as const,
+      name: file.name,
+      mime: file.type,
+      content: file.content
+    }));
+    setAttachments((prev) => prev.concat(fileElements));
+  };
+
+  const onFileUploadError = (error: string) => toast.error(error);
+
+  const upload = useUpload({
+    spec: fileSpec,
+    onResolved: onFileUpload,
+    onError: onFileUploadError,
+    options: { noClick: true }
+  });
 
   useEffect(() => {
     setConversations((prev) => ({
@@ -50,7 +85,7 @@ const Chat = () => {
   }, []);
 
   const onSubmit = useCallback(
-    async (msg: string) => {
+    async (msg: string, files?: IFileElement[]) => {
       const message: IMessage = {
         id: uuidv4(),
         author: user?.username || 'User',
@@ -77,7 +112,7 @@ const Chat = () => {
       });
 
       setAutoScroll(true);
-      sendMessage(message);
+      sendMessage(message, files);
     },
     [user, pSettings, sendMessage]
   );
@@ -99,11 +134,47 @@ const Chat = () => {
   );
 
   const tasklist = tasklists.at(-1);
+  const enableMultiModalUpload = !disabled && pSettings?.features.multi_modal;
 
   return (
-    <Box display="flex" width="100%" flexGrow={1} position="relative">
+    <Box
+      {...(enableMultiModalUpload
+        ? upload?.getRootProps({ className: 'dropzone' })
+        : {})}
+      // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
+      onBlur={undefined}
+      onFocus={undefined}
+      display="flex"
+      width="100%"
+      flexGrow={1}
+      position="relative"
+    >
       <SideView>
+        {upload ? (
+          <>
+            <input id="#upload-drop-input" {...upload.getInputProps()} />
+            {upload?.isDragActive ? (
+              <Stack
+                sx={{
+                  position: 'absolute',
+                  backgroundColor: (theme) => theme.palette.primary.main,
+                  color: 'white',
+                  height: '100%',
+                  width: '100%',
+                  opacity: 0.9,
+                  zIndex: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <UploadFile sx={{ height: 50, width: 50 }} />
+                <Typography fontSize={'20px'}>Drop your files here!</Typography>
+              </Stack>
+            ) : null}
+          </>
+        ) : null}
         <TaskList tasklist={tasklist} isMobile={true} />
+
         <Box my={1} />
         {error && (
           <Alert id="session-error" severity="error">
@@ -123,7 +194,13 @@ const Chat = () => {
             callAction={callAction}
             setAutoScroll={setAutoScroll}
           />
-          <InputBox onReply={onReply} onSubmit={onSubmit} />
+          <InputBox
+            fileSpec={fileSpec}
+            onFileUpload={onFileUpload}
+            onFileUploadError={onFileUploadError}
+            onReply={onReply}
+            onSubmit={onSubmit}
+          />
           <Logo
             style={{
               width: '200px',
@@ -131,7 +208,7 @@ const Chat = () => {
               objectFit: 'contain',
               position: 'absolute',
               pointerEvents: 'none',
-              top: '45%',
+              top: '40%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               filter: 'grayscale(100%)',
