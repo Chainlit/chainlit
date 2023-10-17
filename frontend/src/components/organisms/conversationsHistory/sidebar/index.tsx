@@ -143,7 +143,8 @@ const _ConversationsHistorySidebar = () => {
         anchor="left"
         open={settings.isChatHistoryOpen}
         variant={isMobile ? 'temporary' : 'persistent'}
-        hideBackdrop
+        hideBackdrop={!isMobile}
+        onClose={() => setChatHistoryOpen(false)}
         PaperProps={{
           ref: ref,
           onScroll: handleScroll
