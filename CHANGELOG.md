@@ -13,10 +13,13 @@ Nothing unreleased!
 ### Added
 
 - `ChatProfile` allows to configure different agents that the user can freely chose
-- Multi modal support at the input bar level. Enabled by `features.multi_modal` in the config.
+- Multi modal support at the input bar level. Enabled by `features.multi_modal` in the config
 - `cl.AskUserAction` allows to block code execution until the user clicked an action.
 - Displaying readme when chat is empty is now configurable through `ui.show_readme_as_default` in the config
--
+
+### Changed
+
+- `cl.on_message` is no longer taking a string as parameter but rather a `cl.Message`
 
 ### Fixed
 
