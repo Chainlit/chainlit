@@ -121,7 +121,7 @@ const _ConversationsHistorySidebar = () => {
   }, [filters]);
 
   useEffect(() => {
-    if (!isFetching && !conversations?.conversations?.length) {
+    if (!isFetching && !conversations?.conversations) {
       fetchConversations();
     }
   }, [accessToken]);
@@ -152,6 +152,7 @@ const _ConversationsHistorySidebar = () => {
         sx={{
           width: settings.isChatHistoryOpen ? DRAWER_WIDTH : 0,
           '& .MuiDrawer-paper': {
+            width: settings.isChatHistoryOpen ? DRAWER_WIDTH : 0,
             position: 'inherit',
             gap: 1,
             display: 'flex',
