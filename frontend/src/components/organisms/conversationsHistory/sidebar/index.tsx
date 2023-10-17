@@ -150,7 +150,7 @@ const _ConversationsHistorySidebar = () => {
           onScroll: handleScroll
         }}
         sx={{
-          width: settings.isChatHistoryOpen ? DRAWER_WIDTH : 0,
+          width: settings.isChatHistoryOpen ? 'auto' : 0,
           '& .MuiDrawer-paper': {
             width: settings.isChatHistoryOpen ? DRAWER_WIDTH : 0,
             position: 'inherit',

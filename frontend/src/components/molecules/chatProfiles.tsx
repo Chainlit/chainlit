@@ -7,7 +7,6 @@ import { Box, Popover, Tab, Tabs } from '@mui/material';
 import {
   InputStateHandler,
   grey,
-  primary,
   useChat,
   useIsDarkMode
 } from '@chainlit/components';
@@ -101,7 +100,9 @@ export default function ChatProfiles() {
               },
               '& .MuiTabs-indicator': {
                 background: (theme) =>
-                  isDarkMode ? theme.palette.divider : primary[600],
+                  isDarkMode
+                    ? theme.palette.divider
+                    : theme.palette.primary.main,
                 height: '100%',
                 borderRadius: '5px'
               }

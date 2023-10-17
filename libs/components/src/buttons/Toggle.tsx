@@ -1,7 +1,7 @@
 import { useIsDarkMode } from 'hooks';
 import React from 'react';
 import { InputStateHandler } from 'src/inputs';
-import { grey, primary } from 'theme';
+import { grey } from 'theme';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -59,7 +59,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
             },
             '& .MuiTabs-indicator': {
               background: (theme) =>
-                isDarkMode ? theme.palette.divider : primary[600],
+                isDarkMode ? theme.palette.divider : theme.palette.primary.main,
               height: '100%',
               borderRadius: '5px'
             }
