@@ -149,28 +149,36 @@ const ConversationsHistoryList = ({
                       <Stack
                         direction="row"
                         width="100%"
-                        alignItems="center"
-                        gap={1.5}
+                        justifyContent="space-between"
                       >
-                        <ChatBubbleOutline
+                        <Stack
                           sx={{
-                            color: 'inherit',
-                            width: '16px',
-                            height: '16px'
-                          }}
-                        />
-                        <Typography
-                          sx={{
-                            fontWeight: 500,
-                            fontSize: '14px',
-                            color: (theme) => theme.palette.text.primary,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
+                            alignItems: 'center',
+                            flexDirection: 'row',
+                            gap: 1.5,
+                            overflow: 'hidden'
                           }}
                         >
-                          {capitalize(conversation.messages[0]?.content)}
-                        </Typography>
+                          <ChatBubbleOutline
+                            sx={{
+                              color: 'inherit',
+                              width: '16px',
+                              height: '16px'
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              fontWeight: 500,
+                              fontSize: '14px',
+                              color: (theme) => theme.palette.text.primary,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {capitalize(conversation.messages[0]?.content)}
+                          </Typography>
+                        </Stack>
                         {isSelected ? (
                           <DeleteConversationButton
                             conversationId={conversation.id}
