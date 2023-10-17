@@ -10,7 +10,6 @@ import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
-import { IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
@@ -65,9 +64,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <IconButton disableRipple>
-              <DownIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
-            </IconButton>
+            <DownIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
           </Button>
         </Tooltip>
       ),
@@ -80,9 +77,16 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <IconButton disableRipple>
-              <UpIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
-            </IconButton>
+            <UpIcon
+              sx={{
+                width: ICON_SIZE,
+                height: ICON_SIZE,
+                color: (theme) =>
+                  theme.palette.mode === 'light'
+                    ? theme.palette.grey[600]
+                    : theme.palette.text.primary
+              }}
+            />
           </Button>
         </Tooltip>
       )
