@@ -7,20 +7,19 @@ import { IAction, nestMessages } from '@chainlit/components';
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/message/container';
 
-import { useApi } from 'hooks/useApi';
-
 import { IChat } from 'types/chat';
 
-const Conversation = ({ id }: { id: string }) => {
-  const {
-    data: conversation,
-    error,
-    isLoading
-  } = useApi<IChat>(id ? `/project/conversation/${id}` : null, {
-    revalidateOnFocus: false,
-    revalidateIfStale: false
-  });
+type ConversationProps = {
+  conversation?: IChat;
+  error?: Error;
+  isLoading?: boolean;
+};
 
+const Conversation = ({
+  conversation,
+  error,
+  isLoading
+}: ConversationProps) => {
   const navigate = useNavigate();
 
   if (isLoading) {

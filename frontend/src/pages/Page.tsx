@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -23,16 +22,15 @@ const Page = ({ children }: Props) => {
   const userEnv = useRecoilValue(userEnvState);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (pSettings?.userEnv) {
-      for (const key of pSettings.userEnv || []) {
-        if (!userEnv[key]) navigate('/env');
-      }
+  if (pSettings?.userEnv) {
+    for (const key of pSettings.userEnv || []) {
+      if (!userEnv[key]) navigate('/env');
     }
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [pSettings, isAuthenticated, userEnv]);
+  }
+
+  if (!isAuthenticated) {
+    navigate('/login');
+  }
 
   return (
     <Box

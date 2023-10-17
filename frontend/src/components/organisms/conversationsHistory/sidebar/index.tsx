@@ -1,5 +1,6 @@
 import { ChainlitAPI } from 'api/chainlitApi';
 import { uniqBy } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -47,6 +48,7 @@ const _ConversationsHistorySidebar = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
+  const filtersHasChanged = !isEqual(prevFilters, filters);
 
   const handleScroll = () => {
     if (!ref.current) return;
@@ -97,6 +99,23 @@ const _ConversationsHistorySidebar = () => {
     }
   };
 
+  if (accessToken && !isFetching && !conversations?.conversations) {
+    fetchConversations();
+  }
+
+  if (conversations?.pageInfo) {
+    const { hasNextPage, endCursor } = conversations.pageInfo;
+
+    if (shouldLoadMore && !isLoadingMore && hasNextPage && endCursor) {
+      fetchConversations(endCursor);
+    }
+  }
+
+  if (filtersHasChanged) {
+    setPrevFilters(filters);
+    fetchConversations();
+  }
+
   const setChatHistoryOpen = (open: boolean) =>
     setSettings((prev) => ({ ...prev, isChatHistoryOpen: open }));
 
@@ -109,32 +128,6 @@ const _ConversationsHistorySidebar = () => {
       setChatHistoryOpen(false);
     }
   }, []);
-
-  useEffect(() => {
-    const filtersHasChanged =
-      JSON.stringify(prevFilters) !== JSON.stringify(filters);
-
-    if (filtersHasChanged) {
-      setPrevFilters(filters);
-      fetchConversations();
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    if (!isFetching && !conversations?.conversations) {
-      fetchConversations();
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (conversations?.pageInfo) {
-      const { hasNextPage, endCursor } = conversations.pageInfo;
-
-      if (shouldLoadMore && !isLoadingMore && hasNextPage && endCursor) {
-        fetchConversations(endCursor);
-      }
-    }
-  }, [isLoadingMore, shouldLoadMore]);
 
   return (
     <>

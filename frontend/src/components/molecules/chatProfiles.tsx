@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import size from 'lodash/size';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -44,15 +45,9 @@ export default function ChatProfiles() {
     handleClose();
   };
 
-  useEffect(() => {
-    if (
-      !chatProfileValue &&
-      pSettings?.chatProfiles &&
-      pSettings.chatProfiles.length > 0
-    ) {
-      setChatProfile(pSettings.chatProfiles[0].name);
-    }
-  }, [pSettings?.chatProfiles, chatProfileValue]);
+  if (!chatProfileValue && size(pSettings?.chatProfiles) > 0) {
+    setChatProfile(pSettings?.chatProfiles[0].name);
+  }
 
   if (typeof pSettings === 'undefined' || pSettings.chatProfiles.length <= 1) {
     return null;
