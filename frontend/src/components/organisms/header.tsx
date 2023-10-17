@@ -10,9 +10,7 @@ import {
   IconButton,
   Menu,
   Stack,
-  Theme,
-  Toolbar,
-  useTheme
+  Toolbar
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -23,7 +21,11 @@ import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 
+import { useAuth } from 'hooks/auth';
+
 import { projectSettingsState } from 'state/project';
+
+import OpenChatHistoryButton from './conversationsHistory/sidebar/OpenChatHistoryButton';
 
 interface INavItem {
   to: string;
@@ -58,12 +60,13 @@ function NavItem({ to, label }: INavItem) {
 }
 
 interface NavProps {
+  dataPersistence?: boolean;
   hasReadme?: boolean;
 }
 
-function Nav({ hasReadme }: NavProps) {
+function Nav({ dataPersistence, hasReadme }: NavProps) {
   const location = useLocation();
-  const theme = useTheme();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
 
@@ -73,8 +76,7 @@ function Nav({ hasReadme }: NavProps) {
     anchorEl = ref.current;
   }
 
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
-
+  const isMobile = useMediaQuery('(max-width: 66rem)');
   const tabs = [{ to: '/', label: 'Chat' }];
 
   if (hasReadme) {
@@ -82,7 +84,7 @@ function Nav({ hasReadme }: NavProps) {
   }
 
   const nav = (
-    <Stack direction={matches ? 'column' : 'row'} spacing={1}>
+    <Stack direction={isMobile ? 'column' : 'row'} spacing={1}>
       {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
@@ -94,7 +96,7 @@ function Nav({ hasReadme }: NavProps) {
     </Stack>
   );
 
-  if (matches) {
+  if (isMobile) {
     return (
       <>
         <IconButton
@@ -105,6 +107,9 @@ function Nav({ hasReadme }: NavProps) {
         >
           <MenuIcon />
         </IconButton>
+        {isAuthenticated && dataPersistence ? (
+          <OpenChatHistoryButton mode="mobile" />
+        ) : null}
         <Menu
           autoFocus
           anchorEl={anchorEl}
@@ -139,7 +144,7 @@ function Nav({ hasReadme }: NavProps) {
 
 export default function Header() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const matches = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+  const matches = useMediaQuery('(max-width: 66rem)');
 
   return (
     <AppBar elevation={0} color="transparent" position="static">
@@ -153,9 +158,12 @@ export default function Header() {
           borderBottomColor: (theme) => theme.palette.divider
         }}
       >
-        <Stack alignItems="center" direction={'row'} gap={3}>
+        <Stack alignItems="center" direction={'row'} gap={!matches ? 3 : 1}>
           {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
-          <Nav hasReadme={!!pSettings?.markdown} />
+          <Nav
+            dataPersistence={pSettings?.dataPersistence}
+            hasReadme={!!pSettings?.markdown}
+          />
         </Stack>
         <Stack
           alignItems="center"

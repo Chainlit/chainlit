@@ -15,6 +15,7 @@ export const defaultSettingsState = {
   defaultCollapseContent: true,
   expandAll: false,
   hideCot: false,
+  isChatHistoryOpen: true,
   theme
 };
 
@@ -24,6 +25,7 @@ export const settingsState = atom<{
   expandAll: boolean;
   hideCot: boolean;
   theme: ThemeVariant;
+  isChatHistoryOpen: boolean;
 }>({
   key: 'AppSettings',
   default: defaultSettingsState

@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
-import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -20,6 +18,7 @@ import {
   conversationsHistoryState
 } from 'state/conversations';
 import { projectSettingsState } from 'state/project';
+import { settingsState } from 'state/settings';
 import { accessTokenState } from 'state/user';
 
 import { ConversationsHistoryList } from './ConversationsHistoryList';
@@ -31,15 +30,15 @@ const BATCH_SIZE = 20;
 let _scrollTop = 0;
 
 const _ConversationsHistorySidebar = () => {
-  const isMobile = useMediaQuery('(max-width:800px)');
+  const isMobile = useMediaQuery('(max-width:66rem)');
 
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState
   );
   const accessToken = useRecoilValue(accessTokenState);
   const filters = useRecoilValue(conversationsFiltersState);
+  const [settings, setSettings] = useRecoilState(settingsState);
 
-  const [open, setOpen] = useState(true);
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [prevFilters, setPrevFilters] =
@@ -98,9 +97,16 @@ const _ConversationsHistorySidebar = () => {
     }
   };
 
+  const setChatHistoryOpen = (open: boolean) =>
+    setSettings((prev) => ({ ...prev, isChatHistoryOpen: open }));
+
   useEffect(() => {
     if (ref.current) {
       ref.current.scrollTop = _scrollTop;
+    }
+
+    if (isMobile) {
+      setChatHistoryOpen(false);
     }
   }, []);
 
@@ -135,7 +141,7 @@ const _ConversationsHistorySidebar = () => {
       <Drawer
         className="chat-history-drawer"
         anchor="left"
-        open={open}
+        open={settings.isChatHistoryOpen}
         variant={isMobile ? 'temporary' : 'persistent'}
         hideBackdrop
         PaperProps={{
@@ -143,7 +149,7 @@ const _ConversationsHistorySidebar = () => {
           onScroll: handleScroll
         }}
         sx={{
-          width: open ? DRAWER_WIDTH : 0,
+          width: settings.isChatHistoryOpen ? DRAWER_WIDTH : 0,
           '& .MuiDrawer-paper': {
             position: 'inherit',
             gap: 1,
@@ -171,8 +177,8 @@ const _ConversationsHistorySidebar = () => {
           >
             Chat History
           </Typography>
-          <IconButton edge="end" onClick={() => setOpen(false)}>
-            <KeyboardDoubleArrowLeftIcon sx={{ color: 'grey.500' }} />
+          <IconButton edge="end" onClick={() => setChatHistoryOpen(false)}>
+            <KeyboardDoubleArrowLeftIcon sx={{ color: 'text.primary' }} />
           </IconButton>
         </Stack>
         <Filters />
@@ -186,25 +192,6 @@ const _ConversationsHistorySidebar = () => {
           />
         ) : null}
       </Drawer>
-      <Box
-        sx={{
-          position: 'absolute',
-          mt: 1,
-          ml: 1,
-          zIndex: !open ? 1 : -1,
-          opacity: !open ? 1 : 0
-        }}
-      >
-        <IconButton
-          sx={{
-            borderRadius: 1,
-            backgroundColor: (theme) => theme.palette.background.paper
-          }}
-          onClick={() => setOpen(true)}
-        >
-          <KeyboardDoubleArrowRightIcon />
-        </IconButton>
-      </Box>
     </>
   );
 };
