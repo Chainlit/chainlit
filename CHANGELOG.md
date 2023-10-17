@@ -8,33 +8,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [0.7.3] - 2023-10-17
+
+### Added
+
+- `ChatProfile` allows to configure different agents that the user can freely chose
+- Multi modal support at the input bar level. Enabled by `features.multi_modal` in the config.
+- `cl.AskUserAction` allows to block code execution until the user clicked an action.
+- Displaying readme when chat is empty is now configurable through `ui.show_readme_as_default` in the config
+-
+
+### Fixed
+
+- Chat history is now correctly displayed on mobile
+- Azure AD OAuth authentication should now correctly display the user profile picture
+
+### Removed
+
+- `@cl.on_file_upload` is replaced by true multi modal support at the input bar level
+
 ## [0.7.2] - 2023-10-10
 
 ### Added
+
 - Logo is displayed in the UI header (works with custom logo)
 - Azure AD single tenant is now supported
 - `collapsed` attribute on the `Action` class
 - Latency improvements when data persistence is enabled
 
 ### Changed
+
 - Chat history has been entirely reworked
 - Chat messages redesign
 - `config.ui.base_url` becomes `CHAINLIT_URL` env variable
 
 ### Fixed
+
 - File watcher (-w) is now working with nested module imports
 - Unsupported character during OAuth authentication
-  
+
 ## [0.7.1] - 2023-09-29
 
 ### Added
+
 - Pydantic v2 support
 - Okta auth provider
 - Auth0 auth provider
 - Prompt playground support for mix of template/formatted prompts
 - `@cl.on_chat_end` decorator
 - Textual comments to user feedback
+
 ### Fixed
+
 - Langchain errors are now correctly indented
 - Langchain nested chains prompts are now correctly displayed
 - Langchain error TypeError: 'NoneType' object is not a mapping.
