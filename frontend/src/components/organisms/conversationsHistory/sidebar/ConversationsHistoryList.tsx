@@ -80,7 +80,7 @@ const ConversationsHistoryList = ({
 
   if (size(conversations?.groupedConversations) === 0) {
     return (
-      <Alert variant="outlined" sx={{ mx: 1.5 }} severity="info">
+      <Alert variant="standard" sx={{ mx: 1.5 }} severity="info">
         Empty...
       </Alert>
     );
