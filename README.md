@@ -27,7 +27,7 @@ Please see [here](https://docs.chainlit.io) for full documentation on:
 
 - Getting started (installation, simple examples)
 - Examples
-- Reference (full API docs)
+- Reference ([full API docs](https://docs.chainlit.io/api-reference/on-chat-start))
 
 ## 🚀 Quickstart
 
