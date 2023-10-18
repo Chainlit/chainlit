@@ -1,6 +1,21 @@
+import { useCallback } from 'react';
+import { useSetRecoilState } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
+
 import { Box } from '@mui/material';
 
-import { FileSpec, IFileElement, IFileResponse } from '@chainlit/components';
+import {
+  FileSpec,
+  IFileElement,
+  IFileResponse,
+  IMessage,
+  useChat
+} from '@chainlit/components';
+
+import { useAuth } from 'hooks/auth';
+
+import { chatHistoryState } from 'state/chatHistory';
+import { IProjectSettings } from 'state/project';
 
 import StopButton from '../stopButton';
 import Input from './input';
@@ -10,18 +25,73 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: IFileResponse[]) => void;
   onFileUploadError: (error: string) => void;
-  onSubmit: (message: string, files?: IFileElement[]) => void;
-  onReply: (message: string) => void;
+  setAutoScroll: (autoScroll: boolean) => void;
+  projectSettings?: IProjectSettings;
 }
 
-export default function InputBox({
+const InputBox = ({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  onSubmit,
-  onReply
-}: Props) {
+  setAutoScroll,
+  projectSettings
+}: Props) => {
+  const setChatHistory = useSetRecoilState(chatHistoryState);
+
+  const { user } = useAuth();
+  const { sendMessage, replyMessage, askUser } = useChat();
   // const tokenCount = useRecoilValue(tokenCountState);
+
+  const onSubmit = useCallback(
+    async (msg: string, files?: IFileElement[]) => {
+      const message: IMessage = {
+        id: uuidv4(),
+        author: user?.username || 'User',
+        authorIsUser: true,
+        content: msg,
+        createdAt: new Date().toISOString()
+      };
+
+      setChatHistory((old) => {
+        const MAX_SIZE = 50;
+        const messages = [...(old.messages || [])];
+        messages.push({
+          content: msg,
+          createdAt: new Date().getTime()
+        });
+
+        return {
+          ...old,
+          messages:
+            messages.length > MAX_SIZE
+              ? messages.slice(messages.length - MAX_SIZE)
+              : messages
+        };
+      });
+
+      setAutoScroll(true);
+      sendMessage(message, files);
+    },
+    [user, projectSettings, sendMessage]
+  );
+
+  const onReply = useCallback(
+    async (msg: string) => {
+      const message = {
+        id: uuidv4(),
+        author: user?.username || 'User',
+        authorIsUser: true,
+        content: msg,
+        createdAt: new Date().toISOString()
+      };
+
+      replyMessage(message);
+      setAutoScroll(true);
+    },
+    [askUser, user, replyMessage]
+  );
+
+  console.count('Input re-render');
 
   return (
     <Box
@@ -62,4 +132,6 @@ export default function InputBox({
       <WaterMark />
     </Box>
   );
-}
+};
+
+export default InputBox;

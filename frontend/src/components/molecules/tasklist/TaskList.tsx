@@ -1,6 +1,6 @@
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
-import { ITasklistElement } from '@chainlit/components';
+import { useChat } from '@chainlit/components';
 import { grey } from '@chainlit/components/theme';
 
 import { ITaskList, Task } from './Task';
@@ -46,19 +46,16 @@ const taskListContainerStyles = (theme: Theme) => ({
       : '0px 4px 20px 0px rgba(0, 0, 0, 0.05)'
 });
 
-export default function TaskList({
-  tasklist: rawTasklist,
-  isMobile
-}: {
-  tasklist?: ITasklistElement;
-  isMobile: boolean;
-}) {
+const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const theme = useTheme();
+  const { tasklists } = useChat();
+
   let content: ITaskList | null = null;
+  const tasklist = tasklists[tasklists.length - 1];
 
   try {
-    if (rawTasklist?.content) {
-      content = JSON.parse(rawTasklist.content);
+    if (tasklist?.content) {
+      content = JSON.parse(tasklist.content);
     }
   } catch (e) {
     console.error(e);
@@ -147,4 +144,6 @@ export default function TaskList({
       </Box>
     </Box>
   );
-}
+};
+
+export { TaskList };
