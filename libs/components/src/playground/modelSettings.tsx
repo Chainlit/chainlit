@@ -1,6 +1,7 @@
 import { PlaygroundContext } from 'contexts/PlaygroundContext';
 import { useFormik } from 'formik';
-import { cloneDeep, merge } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import merge from 'lodash/merge';
 import { useContext, useEffect } from 'react';
 import { FormInput, SelectInput, TFormInput } from 'src/inputs';
 import { getProviders } from 'src/playground/helpers/provider';

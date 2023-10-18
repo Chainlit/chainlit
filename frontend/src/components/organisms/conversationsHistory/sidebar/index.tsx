@@ -1,6 +1,6 @@
 import { ChainlitAPI } from 'api/chainlitApi';
-import { uniqBy } from 'lodash';
 import isEqual from 'lodash/isEqual';
+import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 

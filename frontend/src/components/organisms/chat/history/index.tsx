@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 

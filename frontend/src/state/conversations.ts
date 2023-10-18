@@ -1,5 +1,5 @@
 import { groupByDate } from 'helpers/groupeByDate';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { atom } from 'recoil';
 
 import { ConversationsHistory } from 'types/chatHistory';

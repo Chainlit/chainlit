@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { useCallback } from 'react';
 import {
   useRecoilState,

@@ -1,4 +1,6 @@
-import { capitalize, map, size } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import map from 'lodash/map';
+import size from 'lodash/size';
 import { useNavigate } from 'react-router-dom';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
