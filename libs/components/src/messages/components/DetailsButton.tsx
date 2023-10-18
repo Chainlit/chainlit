@@ -26,9 +26,8 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
     : undefined;
 
   const isRunningEmptyStep = loading && !message.content;
-  const isRunningUserMessage = loading && message.authorIsUser;
 
-  const show = nested || isRunningEmptyStep || isRunningUserMessage;
+  const show = tool || isRunningEmptyStep;
 
   if (!show || messageContext.hideCot) {
     return null;
