@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
@@ -18,18 +18,17 @@ type Props = {
 
 const Page = ({ children }: Props) => {
   const { isAuthenticated } = useAuth();
-  const pSettings = useRecoilValue(projectSettingsState);
+  const projectSettings = useRecoilValue(projectSettingsState);
   const userEnv = useRecoilValue(userEnvState);
-  const navigate = useNavigate();
 
-  if (pSettings?.userEnv) {
-    for (const key of pSettings.userEnv || []) {
-      if (!userEnv[key]) navigate('/env');
+  if (projectSettings?.userEnv) {
+    for (const key of projectSettings.userEnv || []) {
+      if (!userEnv[key]) return <Navigate to="/env" />;
     }
   }
 
   if (!isAuthenticated) {
-    navigate('/login');
+    return <Navigate to="/login" />;
   }
 
   return (

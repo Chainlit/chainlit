@@ -1,11 +1,11 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
 import { IAction, nestMessages } from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
-import MessageContainer from 'components/organisms/chat/message/container';
+import MessageContainer from 'components/organisms/chat/Messages/container';
 
 import { IChat } from 'types/chat';
 
@@ -20,8 +20,6 @@ const Conversation = ({
   error,
   isLoading
 }: ConversationProps) => {
-  const navigate = useNavigate();
-
   if (isLoading) {
     return [1, 2, 3].map((index) => (
       <Stack
@@ -72,11 +70,7 @@ const Conversation = ({
             sx={{ mx: 2 }}
             severity="info"
             action={
-              <Button
-                color="inherit"
-                size="small"
-                onClick={() => navigate('/')}
-              >
+              <Button component={Link} color="inherit" size="small" to="/">
                 Go back to chat
               </Button>
             }

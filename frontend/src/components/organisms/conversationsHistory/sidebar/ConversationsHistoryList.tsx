@@ -1,7 +1,7 @@
 import capitalize from 'lodash/capitalize';
 import map from 'lodash/map';
 import size from 'lodash/size';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -44,8 +44,6 @@ const ConversationsHistoryList = ({
   isFetching,
   isLoadingMore
 }: ConversationsHistoryProps) => {
-  const navigate = useNavigate();
-
   if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
@@ -122,9 +120,11 @@ const ConversationsHistoryList = ({
 
                   return (
                     <Stack
+                      component={Link}
                       key={`conversation-${conversation.id}`}
                       id={`conversation-${conversation.id}`}
                       sx={(theme) => ({
+                        textDecoration: 'none',
                         cursor: 'pointer',
                         p: 1.5,
                         mb: 0.5,
@@ -144,9 +144,7 @@ const ConversationsHistoryList = ({
                               : 'grey.200'
                         }
                       })}
-                      onClick={() =>
-                        navigate(`/conversation/${conversation.id}`)
-                      }
+                      to={`/conversation/${conversation.id}`}
                     >
                       <Stack
                         direction="row"
@@ -158,12 +156,12 @@ const ConversationsHistoryList = ({
                             alignItems: 'center',
                             flexDirection: 'row',
                             gap: 1.5,
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            color: (theme) => theme.palette.text.primary
                           }}
                         >
                           <ChatBubbleOutline
                             sx={{
-                              color: 'inherit',
                               width: '16px',
                               height: '16px'
                             }}
@@ -172,7 +170,6 @@ const ConversationsHistoryList = ({
                             sx={{
                               fontWeight: 500,
                               fontSize: '14px',
-                              color: (theme) => theme.palette.text.primary,
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis'

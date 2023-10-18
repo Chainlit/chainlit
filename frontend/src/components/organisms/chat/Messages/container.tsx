@@ -106,7 +106,7 @@ const MessageContainer = ({
       path += `?conversation=${element.conversationId}`;
     }
 
-    navigate(element.display === 'page' ? path : '#');
+    return navigate(element.display === 'page' ? path : '#');
   };
 
   const messageActions = actions.map((action) => ({

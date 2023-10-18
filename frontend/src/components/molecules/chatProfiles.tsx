@@ -1,6 +1,6 @@
 import size from 'lodash/size';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { redirect } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
@@ -18,7 +18,6 @@ import Markdown from './markdown';
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
-  const navigate = useNavigate();
   const pSettings = useRecoilValue(projectSettingsState);
   const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -41,7 +40,7 @@ export default function ChatProfiles() {
     setChatProfile(newChatProfile);
     setNewChatProfile(null);
     clear();
-    navigate('/');
+    redirect('/');
     handleClose();
   };
 

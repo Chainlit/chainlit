@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { redirect } from 'react-router-dom';
 
 import { useAuth } from 'hooks/auth';
 import { useQuery } from 'hooks/query';
@@ -7,7 +7,6 @@ import { useQuery } from 'hooks/query';
 export default function AuthCallback() {
   const query = useQuery();
   const { user, setAccessToken } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = query.get('access_token');
@@ -16,7 +15,7 @@ export default function AuthCallback() {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      redirect('/');
     }
   }, [user]);
 

@@ -16,6 +16,7 @@ import { userEnvState } from 'state/user';
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
   const pSettings = useRecoilValue(projectSettingsState);
+
   const navigate = useNavigate();
 
   const requiredKeys = pSettings?.userEnv || [];
@@ -37,7 +38,7 @@ export default function Env() {
       localStorage.setItem('userEnv', JSON.stringify(values));
       setUserEnv(values);
       toast.success('Saved successfully');
-      navigate('/');
+      return navigate('/');
     }
   });
 
