@@ -5,7 +5,7 @@ import { Alert, Box, Stack } from '@mui/material';
 
 import { ConversationsHistorySidebar } from 'components/organisms/conversationsHistory/sidebar';
 import OpenChatHistoryButton from 'components/organisms/conversationsHistory/sidebar/OpenChatHistoryButton';
-import Header from 'components/organisms/header';
+import { Header } from 'components/organisms/header';
 
 import { useAuth } from 'hooks/auth';
 
@@ -39,7 +39,7 @@ const Page = ({ children }: Props) => {
         width: '100%'
       }}
     >
-      <Header />
+      <Header projectSettings={projectSettings} />
       {!isAuthenticated ? (
         <Alert severity="error">You are not part of this project.</Alert>
       ) : (

@@ -8,7 +8,7 @@ import { Alert, Box, Button, Typography } from '@mui/material';
 
 import { TextInput } from '@chainlit/components';
 
-import TopBar from 'components/organisms/header';
+import { Header } from 'components/organisms/header';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
@@ -73,7 +73,7 @@ export default function Env() {
         flexGrow: 1
       }}
     >
-      <TopBar />
+      <Header />
       <Box
         id="env"
         display="flex"
