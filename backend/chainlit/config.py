@@ -76,6 +76,9 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Allows user to use speech to text
+# speech_to_text = true
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
@@ -158,6 +161,7 @@ class UISettings(DataClassJsonMixin):
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
+    speech_to_text: bool = True
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
 

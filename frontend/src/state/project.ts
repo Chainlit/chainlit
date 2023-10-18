@@ -18,6 +18,7 @@ export interface IProjectSettings {
     default_collapse_content?: boolean;
     default_expand_messages?: boolean;
     github?: string;
+    speech_to_text?: boolean;
   };
   features: {
     multi_modal?: boolean;
