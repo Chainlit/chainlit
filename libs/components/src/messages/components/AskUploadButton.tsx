@@ -1,6 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
-import { grey } from 'theme/palette';
 
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -11,10 +10,17 @@ import { useUpload } from 'hooks/useUpload';
 
 import { IAsk, IFileResponse } from 'src/types/file';
 
-const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
+const AskUploadChildButton = ({
+  askUser,
+  onError
+}: {
+  askUser: IAsk;
+  onError: (error: string) => void;
+}) => {
   const upload = useUpload({
     spec: askUser.spec,
-    onResolved: (payloads: IFileResponse[]) => askUser?.callback(payloads)
+    onResolved: (payloads: IFileResponse[]) => askUser?.callback(payloads),
+    onError: (error: string) => onError(error)
   });
 
   if (!upload) return null;
@@ -25,8 +31,7 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
       sx={{
         width: '100%',
         borderRadius: 1,
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? grey[800] : grey[200],
+        backgroundColor: (theme) => theme.palette.background.paper,
         boxSizing: 'border-box'
       }}
       direction="row"
@@ -34,7 +39,7 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
       padding={2}
       {...getRootProps({ className: 'dropzone' })}
     >
-      <input {...getInputProps()} />
+      <input id="ask-button-input" {...getInputProps()} />
       <CloudUploadOutlined fontSize="large" />
       <Stack ml={2}>
         <Typography color="text.primary">Drag and drop files here</Typography>
@@ -43,7 +48,7 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
         </Typography>
       </Stack>
       <LoadingButton
-        id={uploading ? 'upload-button-loading' : 'upload-button'}
+        id={uploading ? 'ask-upload-button-loading' : 'ask-upload-button'}
         loading={uploading}
         sx={{ ml: 'auto !important' }}
         variant="contained"
@@ -54,12 +59,14 @@ const AskUploadChildButton = ({ askUser }: { askUser: IAsk }) => {
   );
 };
 
-const AskUploadButton = () => {
+const AskUploadButton = ({ onError }: { onError: (error: string) => void }) => {
   const messageContext = useContext(MessageContext);
 
   if (messageContext.askUser?.spec.type !== 'file') return null;
 
-  return <AskUploadChildButton askUser={messageContext.askUser} />;
+  return (
+    <AskUploadChildButton onError={onError} askUser={messageContext.askUser} />
+  );
 };
 
 export { AskUploadButton };

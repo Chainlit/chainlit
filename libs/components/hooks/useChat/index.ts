@@ -8,7 +8,7 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
-import { IAction, IElement, IFileResponse, IMessage } from 'src/types';
+import { IAction, IElement, IFileElement, IMessage } from 'src/types';
 import { nestMessages } from 'utils/message';
 
 import {
@@ -19,7 +19,6 @@ import {
   chatSettingsInputsState,
   chatSettingsValueState,
   elementState,
-  fileSpecState,
   firstUserMessageState,
   loadingState,
   messagesState,
@@ -52,7 +51,6 @@ const useChat = () => {
   const [session, setSession] = useRecoilState(sessionState);
   const [loading, setLoading] = useRecoilState(loadingState);
   const [rawMessages, setMessages] = useRecoilState(messagesState);
-  const [fileSpec, setFileSpecState] = useRecoilState(fileSpecState);
   const [askUser, setAskUser] = useRecoilState(askUserState);
   const [elements, setElements] = useRecoilState(elementState);
   const [avatars, setAvatars] = useRecoilState(avatarState);
@@ -71,17 +69,24 @@ const useChat = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
 
   const _connect = useCallback(
-    (
-      wsEndpoint: string,
-      userEnv: Record<string, string>,
-      accessToken?: string
-    ) => {
+    ({
+      wsEndpoint,
+      userEnv,
+      accessToken,
+      chatProfile
+    }: {
+      wsEndpoint: string;
+      userEnv: Record<string, string>;
+      accessToken?: string;
+      chatProfile?: string;
+    }) => {
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Session-Id': sessionId,
-          'user-env': JSON.stringify(userEnv)
+          'user-env': JSON.stringify(userEnv),
+          'X-Chainlit-Chat-Profile': chatProfile || ''
         }
       });
       setSession((old) => {
@@ -197,11 +202,6 @@ const useChat = () => {
         setLoading(false);
       });
 
-      socket.on('enable_file_upload', (spec) => {
-        setFileSpecState(spec);
-        setLoading(false);
-      });
-
       socket.on('ask_timeout', () => {
         setAskUser(undefined);
         setLoading(false);
@@ -299,9 +299,9 @@ const useChat = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IMessage) => {
+    (message: IMessage, files?: IFileElement[]) => {
       setMessages((oldMessages) => [...oldMessages, message]);
-      session?.socket.emit('ui_message', message);
+      session?.socket.emit('ui_message', { message, files });
     },
     [session]
   );
@@ -335,15 +335,13 @@ const useChat = () => {
     [session]
   );
 
-  const uploadFiles = useCallback(
-    (payloads: IFileResponse[]) => {
-      session?.socket.emit('file_upload', payloads);
-    },
-    [session]
-  );
-
   const messages = nestMessages(rawMessages);
   const connected = session?.socket.connected && !session?.error;
+  const disabled =
+    !connected ||
+    loading ||
+    askUser?.spec.type === 'file' ||
+    askUser?.spec.type === 'action';
 
   return {
     connect,
@@ -353,9 +351,9 @@ const useChat = () => {
     updateChatSettings,
     stopTask,
     callAction,
-    uploadFiles,
     replyMessage,
     connected,
+    disabled,
     error: session?.error,
     loading,
     messages,
@@ -366,7 +364,6 @@ const useChat = () => {
     chatSettingsInputs,
     chatSettingsValue,
     chatSettingsDefaultValue,
-    fileSpec,
     askUser,
     firstUserMessage
   };

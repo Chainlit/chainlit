@@ -36,8 +36,7 @@ const Header = ({ status }: { status: string }) => {
 
 const taskListContainerStyles = (theme: Theme) => ({
   background: theme.palette.background.paper,
-  borderRadius: '4px',
-  border: `1px solid ${theme.palette.divider}`,
+  borderLeft: `1px solid ${theme.palette.divider}`,
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
@@ -119,7 +118,6 @@ export default function TaskList({
       component="aside"
       sx={{
         color: theme.palette.text.primary,
-        padding: theme.spacing(2),
         width: '380px',
         flexShrink: '0',
         display: {

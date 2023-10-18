@@ -1,9 +1,11 @@
 import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
-import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import jwt_decode from 'jwt-decode';
+import { useEffect } from 'react';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
-import { accessTokenState } from 'state/user';
+import { conversationsHistoryState } from 'state/conversations';
+import { accessTokenState, userState } from 'state/user';
 
 import { IAppUser } from 'types/user';
 
@@ -18,12 +20,14 @@ export const useAuth = () => {
   }>('/auth/config', fetcher);
   const isReady = !!(!isLoadingConfig && config);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
-  const [user, setUser] = useState<IAppUser | null>(null);
+  const setConversationsHistory = useSetRecoilState(conversationsHistoryState);
+  const [user, setUser] = useRecoilState(userState);
 
   const logout = () => {
+    setUser(null);
     removeToken();
     setAccessToken('');
-    setUser(null);
+    setConversationsHistory(undefined);
   };
 
   const saveAndSetToken = (token: string | null | undefined) => {
@@ -32,12 +36,16 @@ export const useAuth = () => {
       return;
     }
     try {
-      const { exp, ...AppUser } = JSON.parse(atob(token.split('.')[1]));
+      const { exp, ...AppUser } = jwt_decode(token) as any;
       setToken(token);
       setAccessToken(`Bearer ${token}`);
       setUser(AppUser as IAppUser);
     } catch (e) {
-      console.error('Invalid token, clearing token from local storage');
+      console.error(
+        'Invalid token, clearing token from local storage',
+        'error:',
+        e
+      );
       logout();
     }
   };
@@ -48,7 +56,7 @@ export const useAuth = () => {
       saveAndSetToken(getToken());
       return;
     }
-  }, [accessToken]);
+  }, []);
 
   const isAuthenticated = !!accessToken;
 

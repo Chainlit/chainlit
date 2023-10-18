@@ -1,5 +1,5 @@
 import { api } from 'api';
-import useSWR from 'swr';
+import useSWR, { SWRConfiguration } from 'swr';
 
 import { useAuth } from './auth';
 
@@ -9,12 +9,13 @@ const fetcher = async (endpoint: string, token?: string) => {
   return res?.json();
 };
 
-function useApi<T>(endpoint: string | null) {
+function useApi<T>(endpoint: string | null, options?: SWRConfiguration) {
   const { accessToken } = useAuth();
 
   return useSWR<T>(
     endpoint ? [endpoint, accessToken] : null,
-    ([url, token]: [url: string, token: string]) => fetcher(url, token)
+    ([url, token]: [url: string, token: string]) => fetcher(url, token),
+    options
   );
 }
 

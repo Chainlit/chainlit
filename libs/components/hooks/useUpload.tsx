@@ -6,15 +6,16 @@ import {
   useDropzone
 } from 'react-dropzone';
 
-import { FileSpec, IFileResponse } from '../src/types/file';
+import { FileSpec, IFileResponse } from 'src/types/file';
 
 interface useUploadProps {
-  onResolved: (payloads: IFileResponse[]) => void;
   onError?: (error: string) => void;
+  onResolved: (payloads: IFileResponse[]) => void;
+  options?: DropzoneOptions;
   spec: FileSpec;
 }
 
-const useUpload = ({ onResolved, spec, onError }: useUploadProps) => {
+const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
@@ -62,8 +63,6 @@ const useUpload = ({ onResolved, spec, onError }: useUploadProps) => {
     [spec]
   );
 
-  if (!spec.accept || !spec.max_size_mb) return null;
-
   let dzAccept: Record<string, string[]> = {};
   const accept = spec.accept;
 
@@ -77,14 +76,15 @@ const useUpload = ({ onResolved, spec, onError }: useUploadProps) => {
     dzAccept = accept;
   }
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    maxFiles: spec.max_files || 1,
+    maxFiles: spec.max_files || undefined,
     accept: dzAccept,
-    maxSize: spec.max_size_mb * 1000000
+    maxSize: (spec.max_size_mb || 2) * 1000000,
+    ...options
   });
 
-  return { getRootProps, getInputProps, uploading };
+  return { getInputProps, getRootProps, isDragActive, uploading };
 };
 
 export { useUpload };

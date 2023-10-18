@@ -62,6 +62,7 @@ export interface IVideoElement extends TMessageElement<'video'> {
 
 export interface IFileElement extends TMessageElement<'file'> {
   type: 'file';
+  mime?: string;
   content?: ArrayBuffer;
 }
 

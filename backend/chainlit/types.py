@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Dict, List, Literal, Optional, TypedDict, Union
 
-from chainlit.client.base import ConversationFilter, Pagination
+from chainlit.client.base import ConversationFilter, MessageDict, Pagination
+from chainlit.element import File
 from chainlit.prompt import Prompt
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
@@ -20,11 +21,16 @@ class FileSpec(DataClassJsonMixin):
 
 
 @dataclass
+class ActionSpec(DataClassJsonMixin):
+    keys: List[str]
+
+
+@dataclass
 class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file"]
+    type: Literal["text", "file", "action"]
 
 
 @dataclass
@@ -32,9 +38,19 @@ class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user a file."""
 
 
+@dataclass
+class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
+    """Specification for asking the user an action"""
+
+
 class AskResponse(TypedDict):
     content: str
     author: str
+
+
+class UIMessagePayload(TypedDict):
+    message: MessageDict
+    files: Optional[List[Dict]]
 
 
 @dataclass
@@ -44,6 +60,16 @@ class AskFileResponse:
     size: int
     type: str
     content: bytes
+
+
+class AskActionResponse(TypedDict):
+    name: str
+    value: str
+    label: str
+    description: str
+    forId: str
+    id: str
+    collapsed: bool
 
 
 class CompletionRequest(BaseModel):
@@ -69,3 +95,12 @@ class GetConversationsRequest(BaseModel):
 class Theme(str, Enum):
     light = "light"
     dark = "dark"
+
+
+@dataclass
+class ChatProfile(DataClassJsonMixin):
+    """Specification for a chat profile that can be chosen by the user at the conversation start."""
+
+    name: str
+    markdown_description: str
+    icon: Optional[str] = None

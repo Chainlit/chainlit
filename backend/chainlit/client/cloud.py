@@ -1,9 +1,7 @@
-import os
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
-from chainlit.config import config
 from chainlit.logger import logger
 
 from .base import (
@@ -203,6 +201,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                     conversationId
                     type
                     name
+                    mime
                     url
                     display
                     language
@@ -372,6 +371,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         conversationId
         type
         name
+        mime
         url
         display
         language
@@ -391,8 +391,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
     async def create_element(self, variables: ElementDict) -> Optional[ElementDict]:
         mutation = """
-        mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String) {
-            createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds) {
+        mutation ($conversationId: ID!, $type: String!, $name: String!, $display: String!, $forIds: [String!]!, $url: String, $objectKey: String, $size: String, $language: String, $mime: String) {
+            createElement(conversationId: $conversationId, type: $type, url: $url, objectKey: $objectKey, name: $name, display: $display, size: $size, language: $language, forIds: $forIds, mime: $mime) {
                 id,
                 type,
                 url,
@@ -401,7 +401,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                 display,
                 size,
                 language,
-                forIds
+                forIds,
+                mime
             }
         }
         """
@@ -477,12 +478,3 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
 
                 url = f'{upload_details["url"]}/{object_key}'
                 return {"object_key": object_key, "url": signed_url}
-
-
-chainlit_client = None  # type: Optional[ChainlitCloudClient]
-
-if config.data_persistence:
-    chainlit_client = ChainlitCloudClient(
-        api_key=os.environ.get("CHAINLIT_API_KEY", ""),
-        chainlit_server=config.chainlit_server,
-    )

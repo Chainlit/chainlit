@@ -2,18 +2,26 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
 from chainlit.client.base import MessageDict
-from chainlit.client.cloud import chainlit_client
 from chainlit.config import config
 from chainlit.context import context
+from chainlit.data import chainlit_client
 from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
-from chainlit.types import AskFileResponse, AskFileSpec, AskResponse, AskSpec
+from chainlit.types import (
+    AskActionResponse,
+    AskActionSpec,
+    AskFileResponse,
+    AskFileSpec,
+    AskResponse,
+    AskSpec,
+)
+from syncer import asyncio
 
 
 class MessageBase(ABC):
@@ -43,22 +51,26 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = await self.with_conversation_id()
-        if chainlit_client and not self.persisted:
-            try:
-                persisted_id = await chainlit_client.create_message(msg_dict)
-                if persisted_id:
-                    msg_dict["id"] = persisted_id
-                    self.id = persisted_id
-                    self.persisted = True
-            except Exception as e:
-                if self.fail_on_persist_error:
-                    raise e
-                logger.error(f"Failed to persist message: {str(e)}")
+        asyncio.create_task(self._persist_create(msg_dict))
 
         if not config.features.prompt_playground:
             msg_dict.pop("prompt", None)
-
         return msg_dict
+
+    async def _persist_create(self, message: MessageDict):
+        if not chainlit_client or self.persisted:
+            return
+
+        try:
+            persisted_id = await chainlit_client.create_message(message)
+
+            if persisted_id:
+                self.id = persisted_id
+                self.persisted = True
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message creation: {str(e)}")
 
     async def update(
         self,
@@ -69,13 +81,21 @@ class MessageBase(ABC):
         trace_event("update_message")
 
         msg_dict = self.to_dict()
-
-        if chainlit_client and self.id:
-            await chainlit_client.update_message(self.id, msg_dict)
-
+        asyncio.create_task(self._persist_update(msg_dict))
         await context.emitter.update_message(msg_dict)
 
         return True
+
+    async def _persist_update(self, message: MessageDict):
+        if not chainlit_client or not self.id:
+            return
+
+        try:
+            await chainlit_client.update_message(self.id, message)
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message update: {str(e)}")
 
     async def remove(self):
         """
@@ -90,6 +110,17 @@ class MessageBase(ABC):
         await context.emitter.delete_message(self.to_dict())
 
         return True
+
+    async def _persist_remove(self):
+        if not chainlit_client or not self.id:
+            return
+
+        try:
+            await chainlit_client.delete_message(self.id)
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message deletion: {str(e)}")
 
     async def send(self):
         if self.content is None:
@@ -236,10 +267,10 @@ class Message(MessageBase):
             context.session.root_message = self
 
         for action in self.actions:
-            await action.send(for_id=str(id))
+            await action.send(for_id=id)
 
         for element in self.elements:
-            await element.send(for_id=str(id))
+            await element.send(for_id=id)
 
         return id
 
@@ -461,3 +492,76 @@ class AskFileMessage(AskMessageBase):
             return [AskFileResponse(**r) for r in res]
         else:
             return None
+
+
+class AskActionMessage(AskMessageBase):
+    """
+    Ask the user to select an action before continuing.
+    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
+    """
+
+    def __init__(
+        self,
+        content: str,
+        actions: List[Action],
+        author=config.ui.name,
+        disable_human_feedback=False,
+        timeout=90,
+        raise_on_timeout=False,
+    ):
+        self.content = content
+        self.actions = actions
+        self.author = author
+        self.disable_human_feedback = disable_human_feedback
+        self.timeout = timeout
+        self.raise_on_timeout = raise_on_timeout
+
+        super().__post_init__()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "createdAt": self.created_at,
+            "content": self.content,
+            "author": self.author,
+            "waitForAnswer": True,
+            "disableHumanFeedback": self.disable_human_feedback,
+            "timeout": self.timeout,
+            "raiseOnTimeout": self.raise_on_timeout,
+        }
+
+    async def send(self) -> Union[AskActionResponse, None]:
+        """
+        Sends the question to ask to the UI and waits for the reply
+        """
+        trace_event("send_ask_action")
+
+        if self.streaming:
+            self.streaming = False
+
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
+        msg_dict = await self._create()
+        action_keys = []
+
+        for action in self.actions:
+            action_keys.append(action.id)
+            await action.send(for_id=str(msg_dict["id"]))
+
+        spec = AskActionSpec(type="action", timeout=self.timeout, keys=action_keys)
+
+        res = cast(
+            Union[AskActionResponse, None],
+            await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout),
+        )
+
+        for action in self.actions:
+            await action.remove()
+        if res is None:
+            self.content = "Timed out: no action was taken"
+        else:
+            self.content = f'**Selected action:** {res["label"]}'
+        await self.update()
+
+        return res

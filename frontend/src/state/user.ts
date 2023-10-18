@@ -1,7 +1,6 @@
-import { DefaultValue, atom, selector } from 'recoil';
-import { v4 as uuidv4 } from 'uuid';
+import { atom } from 'recoil';
 
-import { Role } from 'types/user';
+import { IAppUser, Role } from 'types/user';
 
 export const accessTokenState = atom<string | undefined>({
   key: 'AccessToken',
@@ -18,4 +17,9 @@ const localUserEnv = localStorage.getItem('userEnv');
 export const userEnvState = atom<Record<string, string>>({
   key: 'UserEnv',
   default: localUserEnv ? JSON.parse(localUserEnv) : {}
+});
+
+export const userState = atom<IAppUser | null>({
+  key: 'User',
+  default: null
 });

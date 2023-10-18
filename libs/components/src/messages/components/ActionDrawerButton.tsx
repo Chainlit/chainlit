@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { MoreVert } from '@mui/icons-material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
@@ -17,15 +17,14 @@ const ActionDrawerButton = ({ actions }: { actions: IAction[] }) => {
 
   return (
     <>
-      <Tooltip title="Actions">
+      <Tooltip title="More Actions">
         <IconButton
-          size="small"
           id="actions-drawer-button"
           onClick={(event: React.MouseEvent<HTMLElement>) =>
             setAnchorEl(event.currentTarget)
           }
         >
-          <MoreVert sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+          <MoreVertIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -47,7 +46,12 @@ const ActionDrawerButton = ({ actions }: { actions: IAction[] }) => {
       >
         <Stack direction="column" paddingX={2} gap={1}>
           {actions.map((action) => (
-            <ActionButton key={action.id} action={action} margin={0} />
+            <ActionButton
+              key={action.id}
+              onClick={() => setAnchorEl(null)}
+              action={action}
+              margin={0}
+            />
           ))}
         </Stack>
       </Menu>

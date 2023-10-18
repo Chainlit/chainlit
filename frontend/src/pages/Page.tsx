@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 
+import { ConversationsHistorySidebar } from 'components/organisms/conversationsHistory/sidebar';
+import OpenChatHistoryButton from 'components/organisms/conversationsHistory/sidebar/OpenChatHistoryButton';
 import Header from 'components/organisms/header';
 
 import { useAuth } from 'hooks/auth';
@@ -44,7 +46,11 @@ const Page = ({ children }: Props) => {
       {!isAuthenticated ? (
         <Alert severity="error">You are not part of this project.</Alert>
       ) : (
-        children
+        <Stack direction="row" height="100%" width="100%" overflow="auto">
+          <ConversationsHistorySidebar />
+          <OpenChatHistoryButton mode={'desktop'} />
+          {children}
+        </Stack>
       )}
     </Box>
   );

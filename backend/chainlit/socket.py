@@ -4,14 +4,16 @@ from typing import Any, Dict
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
-from chainlit.client.cloud import MessageDict, chainlit_client
+from chainlit.client.cloud import MessageDict
 from chainlit.config import config
 from chainlit.context import init_ws_context
+from chainlit.data import chainlit_client
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
+from chainlit.types import UIMessagePayload
 from chainlit.user_session import user_sessions
 
 
@@ -46,7 +48,9 @@ def load_user_env(user_env):
 @socket.on("connect")
 async def connect(sid, environ, auth):
     if not config.code.on_chat_start and not config.code.on_message:
-        raise ConnectionRefusedError("No websocket endpoint configured")
+        raise ConnectionRefusedError(
+            "You need to configure at least an on_chat_start or an on_message callback"
+        )
 
     user = None
     token = None
@@ -90,6 +94,7 @@ async def connect(sid, environ, auth):
         user_env=user_env,
         user=user,
         token=token,
+        chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
     )
 
     trace_event("connection_successful")
@@ -101,9 +106,6 @@ async def connection_successful(sid):
     context = init_ws_context(sid)
     if context.session.restored:
         return
-
-    if config.code.on_file_upload:
-        await context.emitter.enable_file_upload(config.code.on_file_upload_config)
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
@@ -162,16 +164,15 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: WebsocketSession, message_dict: MessageDict):
+async def process_message(session: WebsocketSession, payload: UIMessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
 
         await context.emitter.task_start()
         if config.code.on_message:
-            await context.emitter.process_user_message(message_dict)
-            message = Message.from_dict(message_dict)
-            await config.code.on_message(message.content.strip(), message.id)
+            message = await context.emitter.process_user_message(payload)
+            await config.code.on_message(message)
     except InterruptedError:
         pass
     except Exception as e:
@@ -184,12 +185,12 @@ async def process_message(session: WebsocketSession, message_dict: MessageDict):
 
 
 @socket.on("ui_message")
-async def message(sid, message):
+async def message(sid, payload: UIMessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
     session.should_stop = False
 
-    await process_message(session, message)
+    await process_message(session, payload)
 
 
 async def process_action(action: Action):
@@ -220,12 +221,3 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
-
-
-@socket.on("file_upload")
-async def file_upload(sid, files: Any):
-    """Handle file upload from the UI."""
-    init_ws_context(sid)
-
-    if config.code.on_file_upload:
-        await config.code.on_file_upload(files)

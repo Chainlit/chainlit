@@ -157,7 +157,6 @@ const MainDrawer = styled(Box, {
   display: 'flex',
   flexDirection: 'column',
   boxSizing: 'border-box',
-  padding: '0 16px',
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing[open ? 'easeOut' : 'sharp'],
     duration:
@@ -175,15 +174,8 @@ const Drawer = styled(MDrawer, {
     position: 'inherit',
     width,
     maxWidth: isSmallScreen ? '80%' : '100%',
-    backgroundColor:
-      theme.palette.mode === 'dark'
-        ? theme.palette.grey[800]
-        : theme.palette.grey[100],
-    borderLeft: `1px solid ${
-      theme.palette.mode === 'dark'
-        ? theme.palette.grey[800]
-        : theme.palette.grey[200]
-    }`,
+    backgroundColor: theme.palette.background.paper,
+    borderLeft: `1px solid ${theme.palette.divider}`,
     flexDirection: 'column',
     borderRadius: 0,
     color: theme.palette.text.primary,

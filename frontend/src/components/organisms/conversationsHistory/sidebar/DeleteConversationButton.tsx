@@ -4,7 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
 
-import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import { DeleteOutline } from '@mui/icons-material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -17,14 +17,11 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { accessTokenState } from 'state/user';
 
 interface Props {
-  conversationId: number;
+  conversationId: string;
   onDelete: () => void;
 }
 
-export default function DeleteConversationButton({
-  conversationId,
-  onDelete
-}: Props) {
+const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
   const [open, setOpen] = useState(false);
   const accessToken = useRecoilValue(accessTokenState);
 
@@ -57,13 +54,8 @@ export default function DeleteConversationButton({
 
   return (
     <div>
-      <IconButton
-        className="delete-conversation-button"
-        size="small"
-        color="error"
-        onClick={handleClickOpen}
-      >
-        <DeleteOutline />
+      <IconButton size="small" onClick={handleClickOpen} sx={{ p: '2px' }}>
+        <DeleteOutline sx={{ width: 16, height: 16 }} />
       </IconButton>
       {open && (
         <Dialog
@@ -103,4 +95,6 @@ export default function DeleteConversationButton({
       )}
     </div>
   );
-}
+};
+
+export { DeleteConversationButton };

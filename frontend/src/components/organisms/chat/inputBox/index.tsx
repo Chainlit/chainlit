@@ -1,15 +1,26 @@
 import { Box } from '@mui/material';
 
+import { FileSpec, IFileElement, IFileResponse } from '@chainlit/components';
+
 import StopButton from '../stopButton';
 import Input from './input';
 import WaterMark from './waterMark';
 
 interface Props {
-  onSubmit: (message: string) => void;
+  fileSpec: FileSpec;
+  onFileUpload: (payload: IFileResponse[]) => void;
+  onFileUploadError: (error: string) => void;
+  onSubmit: (message: string, files?: IFileElement[]) => void;
   onReply: (message: string) => void;
 }
 
-export default function InputBox({ onSubmit, onReply }: Props) {
+export default function InputBox({
+  fileSpec,
+  onFileUpload,
+  onFileUploadError,
+  onSubmit,
+  onReply
+}: Props) {
   // const tokenCount = useRecoilValue(tokenCountState);
 
   return (
@@ -22,13 +33,20 @@ export default function InputBox({ onSubmit, onReply }: Props) {
         boxSizing: 'border-box',
         width: '100%',
         maxWidth: '60rem',
+        px: 2,
         m: 'auto',
         justifyContent: 'center'
       }}
     >
       <StopButton />
       <Box>
-        <Input onSubmit={onSubmit} onReply={onReply} />
+        <Input
+          fileSpec={fileSpec}
+          onFileUpload={onFileUpload}
+          onFileUploadError={onFileUploadError}
+          onSubmit={onSubmit}
+          onReply={onReply}
+        />
         {/* {tokenCount > 0 && ( */}
         {/* <Stack flexDirection="row" alignItems="center">
           <Typography

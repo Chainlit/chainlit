@@ -141,7 +141,8 @@ const MessageContainer = ({
         uiName: projectSettings?.ui?.name || '',
         onPlaygroundButtonClick,
         onFeedbackUpdated,
-        onElementRefClick
+        onElementRefClick,
+        onError: (error) => toast.error(error)
       }}
     />
   );

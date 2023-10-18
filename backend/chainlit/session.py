@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.types import AskResponse
 
-from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
+from chainlit.client.cloud import AppUser, PersistedAppUser
+from chainlit.data import chainlit_client
 
 
 class BaseSession:
@@ -19,16 +20,19 @@ class BaseSession:
         user: Optional[Union["AppUser", "PersistedAppUser"]],
         # Logged-in user token
         token: Optional[str],
+        # User specific environment variables. Empty if no user environment variables are required.
         user_env: Optional[Dict[str, str]],
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
-        # User specific environment variables. Empty if no user environment variables are required.
+        # Chat profile selected before the session was created
+        chat_profile: Optional[str] = None,
     ):
         self.user = user
         self.token = token
         self.root_message = root_message
         self.has_user_message = False
         self.user_env = user_env or {}
+        self.chat_profile = chat_profile
 
         self.id = id
         self.conversation_id: Optional[str] = None
@@ -46,15 +50,14 @@ class BaseSession:
         else:
             tags = ["chat"]
 
-        if not self.conversation_id:
-            async with self.lock:
+        async with self.lock:
+            if not self.conversation_id:
                 app_user_id = (
                     self.user.id if isinstance(self.user, PersistedAppUser) else None
                 )
                 self.conversation_id = await chainlit_client.create_conversation(
                     app_user_id=app_user_id, tags=tags
                 )
-
         return self.conversation_id
 
 
@@ -109,9 +112,16 @@ class WebsocketSession(BaseSession):
         token: Optional[str],
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
+        # Chat profile selected before the session was created
+        chat_profile: Optional[str] = None,
     ):
         super().__init__(
-            id=id, user=user, token=token, user_env=user_env, root_message=root_message
+            id=id,
+            user=user,
+            token=token,
+            user_env=user_env,
+            root_message=root_message,
+            chat_profile=chat_profile,
         )
 
         self.socket_id = socket_id

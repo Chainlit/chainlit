@@ -9,7 +9,6 @@ import logging
 from functools import wraps
 from socket import gethostname
 
-import uptrace
 from chainlit.config import config
 from chainlit.version import __version__
 
@@ -54,6 +53,7 @@ class ChainlitTelemetry:
         return Resource.create(attrs)
 
     def configure_tracer(self):
+        import uptrace
         from opentelemetry.exporter.otlp.proto.grpc.exporter import (
             logger as exporter_logger,
         )

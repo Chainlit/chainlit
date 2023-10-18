@@ -7,10 +7,13 @@ from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 import aiofiles
 import filetype
 from chainlit.client.base import ElementDict, ElementDisplay, ElementSize, ElementType
-from chainlit.client.cloud import ChainlitCloudClient, chainlit_client
+from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.context import context
+from chainlit.data import chainlit_client
+from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
+from syncer import asyncio
 
 mime_types = {
     "text": "text/plain",
@@ -43,6 +46,8 @@ class Element:
     for_ids: List[str] = Field(default_factory=list)
     # The language, if relevant
     language: Optional[str] = None
+    # Mime type, infered based on content if not provided
+    mime: Optional[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -63,10 +68,34 @@ class Element:
                 "size": getattr(self, "size", None),
                 "language": getattr(self, "language", None),
                 "forIds": getattr(self, "for_ids", None),
+                "mime": getattr(self, "mime", None),
                 "conversationId": None,
             }
         )
         return _dict
+
+    @classmethod
+    def from_dict(self, _dict: Dict):
+        if "image" in _dict.get("mime", ""):
+            return Image(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                display=_dict.get("display", "inline"),
+                mime=_dict.get("mime"),
+            )
+        else:
+            return File(
+                id=_dict.get("id", str(uuid.uuid4())),
+                content=_dict.get("content"),
+                name=_dict.get("name"),
+                url=_dict.get("url"),
+                language=_dict.get("language"),
+                display=_dict.get("display", "inline"),
+                size=_dict.get("size"),
+                mime=_dict.get("mime"),
+            )
 
     async def with_conversation_id(self):
         _dict = self.to_dict()
@@ -85,29 +114,32 @@ class Element:
 
     async def persist(self, client: ChainlitCloudClient) -> Optional[ElementDict]:
         if not self.url and self.content and not self.persisted:
-            # Only guess the mime type when the content is binary
-            mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.content)
-            )
             conversation_id = await context.session.get_conversation_id()
             upload_res = await client.upload_element(
-                content=self.content, mime=mime, conversation_id=conversation_id
+                content=self.content,
+                mime=self.mime or "",
+                conversation_id=conversation_id,
             )
             self.url = upload_res["url"]
             self.object_key = upload_res["object_key"]
+        element_dict = await self.with_conversation_id()
 
-        if not self.persisted:
-            element_dict = await client.create_element(
-                await self.with_conversation_id()
-            )
-            self.persisted = True
-        else:
-            element_dict = await client.update_element(
-                await self.with_conversation_id()
-            )
+        asyncio.create_task(self._persist(element_dict))
+
         return element_dict
+
+    async def _persist(self, element: ElementDict):
+        if not chainlit_client:
+            return
+
+        try:
+            if self.persisted:
+                await chainlit_client.update_element(element)
+            else:
+                await chainlit_client.create_element(element)
+                self.persisted = True
+        except Exception as e:
+            logger.error(f"Failed to persist element: {str(e)}")
 
     async def before_emit(self, element: Dict) -> Dict:
         return element
@@ -121,6 +153,14 @@ class Element:
             await self.load()
 
         await self.preprocess_content()
+
+        if not self.mime:
+            # Only guess the mime type when the content is binary
+            self.mime = (
+                mime_types[self.type]
+                if self.type in mime_types
+                else filetype.guess_mime(self.content)
+            )
 
         if for_id and for_id not in self.for_ids:
             self.for_ids.append(for_id)

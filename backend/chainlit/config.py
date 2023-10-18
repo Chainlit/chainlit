@@ -13,6 +13,8 @@ from starlette.datastructures import Headers
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.client.base import AppUser
+    from chainlit.types import ChatProfile
+
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -45,9 +47,15 @@ cache = false
 # Show the prompt playground
 prompt_playground = true
 
+# Authorize users to upload files with messages
+multi_modal = true
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
+
+# Show the readme while the conversation is empty.
+show_readme_as_default = true
 
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
@@ -67,9 +75,6 @@ hide_cot = false
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
-
-# If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
-# base_url = "https://mydomain.com"
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -139,11 +144,13 @@ class Theme(DataClassJsonMixin):
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
+    multi_modal: bool = True
 
 
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
+    show_readme_as_default: bool = True
     description: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
@@ -153,9 +160,6 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
-    # If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
-    # Example: https://mydomain.com
-    base_url: Optional[str] = None
 
 
 @dataclass()
@@ -174,9 +178,11 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
-    on_file_upload: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["AppUser"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
@@ -224,7 +230,7 @@ def init_config(log=False):
         logger.info(f"Config file already exists at {config_file}")
 
 
-def load_module(target: str):
+def load_module(target: str, force_refresh: bool = False):
     """Load the specified module."""
 
     # Get the target's directory
@@ -232,6 +238,16 @@ def load_module(target: str):
 
     # Add the target's directory to the Python path
     sys.path.insert(0, target_dir)
+
+    if force_refresh:
+        # Clear the modules related to the app from sys.modules
+        for module_name, module in list(sys.modules.items()):
+            if (
+                hasattr(module, "__file__")
+                and module.__file__
+                and module.__file__.startswith(target_dir)
+            ):
+                del sys.modules[module_name]
 
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:

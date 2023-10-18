@@ -17,8 +17,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
-from chainlit.client.acl import is_conversation_author
-from chainlit.client.cloud import AppUser, PersistedAppUser, chainlit_client
+from chainlit.client.cloud import AppUser, PersistedAppUser
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -28,6 +27,8 @@ from chainlit.config import (
     load_module,
     reload_config,
 )
+from chainlit.data import chainlit_client
+from chainlit.data.acl import is_conversation_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
@@ -94,7 +95,7 @@ async def lifespan(app: FastAPI):
                         # Reload the module if the module name is specified in the config
                         if config.run.module_name:
                             try:
-                                load_module(config.run.module_name)
+                                load_module(config.run.module_name, force_refresh=True)
                             except Exception as e:
                                 logger.error(f"Error reloading module: {e}")
                                 break
@@ -212,13 +213,15 @@ def get_user_facing_url(url: URL):
     Return the user facing URL for a given URL.
     Handles deployment with proxies (like cloud run).
     """
-    url = url.replace(query="", fragment="")
+
+    chainlit_url = os.environ.get("CHAINLIT_URL")
 
     # No config, we keep the URL as is
-    if not config.ui.base_url:
+    if not chainlit_url:
+        url = url.replace(query="", fragment="")
         return url.__str__()
 
-    config_url = URL(config.ui.base_url).replace(
+    config_url = URL(chainlit_url).replace(
         query="",
         fragment="",
     )
@@ -437,12 +440,19 @@ async def project_settings(
     current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
+    profiles = []
+    if config.code.set_chat_profiles:
+        chat_profiles = await config.code.set_chat_profiles(current_user)
+        if chat_profiles:
+            profiles = [p.to_dict() for p in chat_profiles]
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
+            "features": config.features.to_dict(),
             "userEnv": config.project.user_env,
             "dataPersistence": config.data_persistence,
             "markdown": get_markdown_str(config.root),
+            "chatProfiles": profiles,
         }
     )
 

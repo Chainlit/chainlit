@@ -20,6 +20,7 @@ interface IMessageContext {
     onSuccess: () => void,
     feedbackComment?: string
   ) => void;
+  onError: (error: string) => void;
 }
 
 export type { IMessageContext };

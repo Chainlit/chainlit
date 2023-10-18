@@ -21,6 +21,7 @@ import { chatHistoryState } from 'state/chatHistory';
 import { MessageHistory } from 'types/chatHistory';
 
 interface Props {
+  disabled?: boolean;
   onClick: (content: string) => void;
 }
 
@@ -62,7 +63,7 @@ function buildHistory(historyMessages: MessageHistory[]) {
   return history;
 }
 
-export default function HistoryButton({ onClick }: Props) {
+export default function HistoryButton({ disabled, onClick }: Props) {
   const [chatHistory, setChatHistory] = useRecoilState(chatHistoryState);
 
   const ref = useRef<any>();
@@ -239,6 +240,7 @@ export default function HistoryButton({ onClick }: Props) {
       <Tooltip title="Show history">
         <IconButton
           color="inherit"
+          disabled={disabled}
           onClick={() => toggleChatHistoryMenu(!chatHistory.open)}
           ref={ref}
         >

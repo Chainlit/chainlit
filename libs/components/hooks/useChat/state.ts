@@ -2,7 +2,6 @@ import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
 import {
-  FileSpec,
   IAction,
   IAsk,
   IAvatarElement,
@@ -54,11 +53,6 @@ export const tokenCountState = atom<number>({
 export const loadingState = atom<boolean>({
   key: 'Loading',
   default: false
-});
-
-export const fileSpecState = atom<FileSpec | undefined>({
-  key: 'FileSpec',
-  default: undefined
 });
 
 export const askUserState = atom<IAsk | undefined>({

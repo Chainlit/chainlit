@@ -1,7 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
-import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 
 import { IAction } from 'src/types/action';
@@ -9,23 +9,37 @@ import { IAction } from 'src/types/action';
 interface ActionProps {
   action: IAction;
   margin: number | string;
+  onClick?: () => void;
 }
 
-const ActionButton = ({ action, margin }: ActionProps) => {
-  const { loading } = useContext(MessageContext);
+const ActionButton = ({ action, margin, onClick }: ActionProps) => {
+  const { askUser, loading } = useContext(MessageContext);
+  const isAskingAction = askUser?.spec.type === 'action';
+  const isDisabled = isAskingAction && !askUser?.spec.keys?.includes(action.id);
+  const handleClick = () => {
+    if (isAskingAction) {
+      askUser?.callback(action);
+    } else {
+      action.onClick();
+      onClick?.();
+    }
+  };
 
   return (
     <Tooltip title={action.description} placement="top">
-      <LoadingButton
+      <Button
         size="small"
         variant="outlined"
+        sx={{
+          textTransform: 'none',
+          margin
+        }}
         id={action.id}
-        onClick={action.onClick}
-        disabled={loading}
-        sx={{ margin }}
+        onClick={handleClick}
+        disabled={loading || isDisabled}
       >
         {action.label || action.name}
-      </LoadingButton>
+      </Button>
     </Tooltip>
   );
 };

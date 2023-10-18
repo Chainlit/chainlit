@@ -1,42 +1,45 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
 
 import { Box } from '@mui/material';
 
-import { IAction, nestMessages } from '@chainlit/components';
+import { Conversation } from 'components/organisms/conversationsHistory/Conversation';
 
-import SideView from 'components/atoms/element/sideView';
-import MessageContainer from 'components/organisms/chat/message/container';
+import { conversationsHistoryState } from 'state/conversations';
 
-import { useApi } from 'hooks/useApi';
+import Page from './Page';
 
-import { IChat } from 'types/chat';
-
-export default function Conversation() {
+export default function ConversationPage() {
   const { id } = useParams();
-
-  const { data: conversation, error } = useApi<IChat>(
-    id ? `/project/conversation/${id}` : null
+  const [conversations, setConversations] = useRecoilState(
+    conversationsHistoryState
   );
 
-  if (!conversation || error) {
-    return null;
-  }
-
-  const elements = conversation.elements;
-  const actions: IAction[] = [];
+  useEffect(() => {
+    if (conversations?.currentConversationId !== id) {
+      setConversations((prev) => {
+        return { ...prev, currentConversationId: id };
+      });
+    }
+  }, [id]);
 
   return (
-    <Box display="flex" flexGrow={1} width="100%">
-      <SideView>
-        <Box my={1} />
-        <MessageContainer
-          loading={false}
-          avatars={[]}
-          actions={actions}
-          elements={elements}
-          messages={nestMessages(conversation.messages)}
-        />
-      </SideView>
-    </Box>
+    <Page>
+      <Box
+        sx={{
+          overflow: 'auto',
+          display: 'flex',
+          flexGrow: 1,
+          gap: 2
+        }}
+      >
+        {id ? (
+          <Box sx={{ width: '100%' }}>
+            <Conversation id={id} />
+          </Box>
+        ) : null}
+      </Box>
+    </Page>
   );
 }

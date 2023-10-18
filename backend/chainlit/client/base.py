@@ -78,6 +78,7 @@ class ElementDict(TypedDict):
     size: Optional[ElementSize]
     language: Optional[str]
     forIds: Optional[List[str]]
+    mime: Optional[str]
 
 
 class ConversationDict(TypedDict):
@@ -107,13 +108,13 @@ class PaginatedResponse(DataClassJsonMixin, Generic[T]):
 
 class Pagination(BaseModel):
     first: int
-    cursor: Optional[str]
+    cursor: Optional[str] = None
 
 
 class ConversationFilter(BaseModel):
-    feedback: Optional[Literal[-1, 0, 1]]
-    username: Optional[str]
-    search: Optional[str]
+    feedback: Optional[Literal[-1, 0, 1]] = None
+    username: Optional[str] = None
+    search: Optional[str] = None
 
 
 class ChainlitGraphQLClient:

@@ -10,8 +10,7 @@ import {
   IconButton,
   Menu,
   Stack,
-  Toolbar,
-  useTheme
+  Toolbar
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -19,11 +18,14 @@ import { RegularButton } from '@chainlit/components';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
+import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 
 import { useAuth } from 'hooks/auth';
 
 import { projectSettingsState } from 'state/project';
+
+import OpenChatHistoryButton from './conversationsHistory/sidebar/OpenChatHistoryButton';
 
 interface INavItem {
   to: string;
@@ -58,13 +60,13 @@ function NavItem({ to, label }: INavItem) {
 }
 
 interface NavProps {
-  hasDb?: boolean;
+  dataPersistence?: boolean;
   hasReadme?: boolean;
 }
 
-function Nav({ hasDb, hasReadme }: NavProps) {
+function Nav({ dataPersistence, hasReadme }: NavProps) {
   const location = useLocation();
-  const theme = useTheme();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
 
@@ -74,20 +76,15 @@ function Nav({ hasDb, hasReadme }: NavProps) {
     anchorEl = ref.current;
   }
 
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
-
+  const isMobile = useMediaQuery('(max-width: 66rem)');
   const tabs = [{ to: '/', label: 'Chat' }];
-
-  if (hasDb) {
-    tabs.push({ to: '/dataset', label: 'History' });
-  }
 
   if (hasReadme) {
     tabs.push({ to: '/readme', label: 'Readme' });
   }
 
   const nav = (
-    <Stack direction={matches ? 'column' : 'row'} spacing={1}>
+    <Stack direction={isMobile ? 'column' : 'row'} spacing={1}>
       {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
@@ -99,7 +96,7 @@ function Nav({ hasDb, hasReadme }: NavProps) {
     </Stack>
   );
 
-  if (matches) {
+  if (isMobile) {
     return (
       <>
         <IconButton
@@ -110,6 +107,9 @@ function Nav({ hasDb, hasReadme }: NavProps) {
         >
           <MenuIcon />
         </IconButton>
+        {isAuthenticated && dataPersistence ? (
+          <OpenChatHistoryButton mode="mobile" />
+        ) : null}
         <Menu
           autoFocus
           anchorEl={anchorEl}
@@ -143,15 +143,14 @@ function Nav({ hasDb, hasReadme }: NavProps) {
 }
 
 export default function Header() {
-  const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
-
-  const hasHistory = !!(user && pSettings?.dataPersistence);
+  const matches = useMediaQuery('(max-width: 66rem)');
 
   return (
     <AppBar elevation={0} color="transparent" position="static">
       <Toolbar
         sx={{
+          padding: (theme) => `0 ${theme.spacing(2)} !important`,
           minHeight: '60px !important',
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
@@ -159,8 +158,12 @@ export default function Header() {
           borderBottomColor: (theme) => theme.palette.divider
         }}
       >
-        <Stack alignItems="center" direction="row">
-          <Nav hasDb={hasHistory} hasReadme={!!pSettings?.markdown} />
+        <Stack alignItems="center" direction={'row'} gap={!matches ? 3 : 1}>
+          {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
+          <Nav
+            dataPersistence={pSettings?.dataPersistence}
+            hasReadme={!!pSettings?.markdown}
+          />
         </Stack>
         <Stack
           alignItems="center"

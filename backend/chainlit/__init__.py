@@ -37,11 +37,17 @@ from chainlit.element import (
     Video,
 )
 from chainlit.logger import logger
-from chainlit.message import AskFileMessage, AskUserMessage, ErrorMessage, Message
+from chainlit.message import (
+    AskActionMessage,
+    AskFileMessage,
+    AskUserMessage,
+    ErrorMessage,
+    Message,
+)
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import FileSpec
+from chainlit.types import ChatProfile, FileSpec
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -124,7 +130,7 @@ def on_message(func: Callable) -> Callable:
     The decorated function is called every time a new message is received.
 
     Args:
-        func (Callable[[str, str], Any]): The function to be called when a new message is received. Takes the input message and the message id.
+        func (Callable[[Message], Any]): The function to be called when a new message is received. Takes a cl.Message.
 
     Returns:
         Callable[[str], Any]: The decorated on_message function.
@@ -147,6 +153,24 @@ def on_chat_start(func: Callable) -> Callable:
     """
 
     config.code.on_chat_start = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
+def set_chat_profiles(
+    func: Callable[[Optional["AppUser"]], List["ChatProfile"]]
+) -> Callable:
+    """
+    Programmatic declaration of the available chat profiles (can depend on the AppUser from the session if authentication is setup).
+
+    Args:
+        func (Callable[[Optional["AppUser"]], List["ChatProfile"]]): The function declaring the chat profiles.
+
+    Returns:
+        Callable[[Optional["AppUser"]], List["ChatProfile"]]: The decorated function.
+    """
+
+    config.code.set_chat_profiles = wrap_user_function(func)
     return func
 
 
@@ -229,37 +253,6 @@ def on_settings_update(
     return func
 
 
-def on_file_upload(
-    accept: Union[List[str], Dict[str, List[str]]],
-    max_size_mb: int = 2,
-    max_files: int = 1,
-) -> Callable:
-    """
-    A decorator designed for handling spontaneously uploaded files.
-    This decorator is intended to be used with files that are uploaded on-the-fly.
-
-    Args:
-        accept (Union[List[str], Dict[str, List[str]]]): A list of accepted file extensions or a dictionary of extension lists per field.
-        type (Optional[str]): The type of upload, defaults to "file".
-        max_size_mb (Optional[int]): The maximum file size in megabytes, defaults to 2.
-        max_files (Optional[int]): The maximum number of files allowed to be uploaded, defaults to 1.
-
-    Returns:
-        Callable: The decorated function for handling spontaneous file uploads.
-    """
-
-    def decorator(func: Callable) -> Callable:
-        config.code.on_file_upload_config = FileSpec(
-            accept=accept,
-            max_size_mb=max_size_mb,
-            max_files=max_files,
-        )
-        config.code.on_file_upload = wrap_user_function(func)
-        return func
-
-    return decorator
-
-
 def sleep(duration: int):
     """
     Sleep for a given duration.
@@ -299,6 +292,7 @@ __all__ = [
     "Message",
     "ErrorMessage",
     "AskUserMessage",
+    "AskActionMessage",
     "AskFileMessage",
     "on_chat_start",
     "on_chat_end",

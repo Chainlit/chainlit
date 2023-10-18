@@ -18,6 +18,13 @@ async def on_action(action: cl.Action):
     await action.remove()
 
 
+@cl.action_callback("all actions removed")
+async def on_action(_: cl.Action):
+    await cl.Message(content=f"All actions have been removed!").send()
+    to_remove = cl.user_session.get("to_remove")  # type: cl.Message
+    await to_remove.remove_actions()
+
+
 @cl.on_chat_start
 async def main():
     actions = [
@@ -43,10 +50,26 @@ async def main():
         cl.Action(id="all-actions-removed", name="all actions removed", value="test"),
     ]
     message = cl.Message("Hello, this is a test message!", actions=actions)
-
-    @cl.action_callback("all actions removed")
-    async def on_action(_: cl.Action):
-        await cl.Message(content=f"All actions have been removed!").send()
-        await message.remove_actions()
-
+    cl.user_session.set("to_remove", message)
     await message.send()
+
+    result = await cl.AskActionMessage(
+        content="Please, pick an action!",
+        actions=[
+            cl.Action(
+                id="first-action",
+                name="first_action",
+                value="first-action",
+                label="First action",
+            ),
+            cl.Action(
+                id="second-action",
+                name="second_action",
+                value="second-action",
+                label="Second action",
+            ),
+        ],
+    ).send()
+
+    if result != None:
+        await cl.Message(f"Thanks for pressing: {result['value']}").send()
