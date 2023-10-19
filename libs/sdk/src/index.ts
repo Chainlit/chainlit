@@ -21,7 +21,8 @@ export type Provider =
   | 'google'
   | 'azure-ad'
   | 'okta'
-  | 'auth0';
+  | 'auth0'
+  | 'descope';
 
 export interface IAppUser {
   username: string;
