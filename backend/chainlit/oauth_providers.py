@@ -233,16 +233,27 @@ class OktaOAuthProvider(OAuthProvider):
     # Avoid trailing slash in domain if supplied
     domain = f"https://{os.environ.get('OAUTH_OKTA_DOMAIN', '').rstrip('/')}"
 
-    authorize_url = f"{domain}/oauth2/default/v1/authorize"
-
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_OKTA_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_OKTA_CLIENT_SECRET")
+        self.authorization_server_id = os.environ.get(
+            "OAUTH_OKTA_AUTHORIZATION_SERVER_ID", ""
+        )
+        self.authorize_url = (
+            f"{self.domain}/oauth2{self.get_authorization_server_path()}/v1/authorize"
+        )
         self.authorize_params = {
             "response_type": "code",
             "scope": "openid profile email",
             "response_mode": "query",
         }
+
+    def get_authorization_server_path(self):
+        if not self.authorization_server_id:
+            return "/default"
+        if self.authorization_server_id == "false":
+            return ""
+        return f"/{self.authorization_server_id}"
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -256,7 +267,7 @@ class OktaOAuthProvider(OAuthProvider):
             trust_env=True, raise_for_status=True
         ) as session:
             async with session.post(
-                f"{self.domain}/oauth2/default/v1/token",
+                f"{self.domain}/oauth2{self.get_authorization_server_path()}/v1/token",
                 data=payload,
             ) as result:
                 json = await result.json()
@@ -273,7 +284,7 @@ class OktaOAuthProvider(OAuthProvider):
             trust_env=True, raise_for_status=True
         ) as session:
             async with session.get(
-                f"{self.domain}/oauth2/default/v1/userinfo",
+                f"{self.domain}/oauth2{self.get_authorization_server_path()}/v1/userinfo",
                 headers={"Authorization": f"Bearer {token}"},
             ) as result:
                 user = await result.json()
