@@ -16,7 +16,7 @@ import {
   FileSpec,
   IFileElement,
   IFileResponse,
-  useChat
+  useChatData
 } from '@chainlit/components';
 
 import HistoryButton from 'components/organisms/chat/history';
@@ -56,7 +56,7 @@ const Input = ({
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
   const ref = useRef<HTMLDivElement>(null);
-  const { loading, askUser, chatSettingsInputs, disabled } = useChat();
+  const { loading, askUser, chatSettingsInputs, disabled } = useChatData();
 
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);

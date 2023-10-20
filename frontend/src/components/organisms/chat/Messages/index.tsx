@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useChat } from '@chainlit/components';
+import { useChatData, useChatInteract } from '@chainlit/components';
 
 import { IProjectSettings } from 'state/project';
 
@@ -18,8 +18,9 @@ const Messages = ({
   projectSettings,
   setAutoScroll
 }: MessagesProps): JSX.Element => {
-  const { callAction, messages, actions, elements, askUser, avatars, loading } =
-    useChat();
+  const { messages, elements, askUser, avatars, loading, actions } =
+    useChatData();
+  const { callAction } = useChatInteract();
 
   return !messages.length && projectSettings?.ui.show_readme_as_default ? (
     <WelcomeScreen markdown={projectSettings?.markdown} />

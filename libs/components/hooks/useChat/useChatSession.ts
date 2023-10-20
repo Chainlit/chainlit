@@ -1,4 +1,5 @@
 import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
 import { useCallback } from 'react';
 import {
   useRecoilState,
@@ -8,14 +9,12 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
-import { IAction, IElement, IFileElement, IMessage } from 'src/types';
-import { nestMessages } from 'utils/message';
+import { IAction, IElement, IMessage } from 'src/types';
 
 import {
   actionState,
   askUserState,
   avatarState,
-  chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
   chatSettingsValueState,
   elementState,
@@ -27,45 +26,23 @@ import {
   tasklistState,
   tokenCountState
 } from './state';
+import { IMessageUpdate, IToken } from './useChatData';
 
-export interface IMessageUpdate extends IMessage {
-  newId?: string;
-}
-
-export interface IToken {
-  id: number | string;
-  token: string;
-  isSequence: boolean;
-}
-
-const compareMessageIds = (a: IMessage, b: IMessage) => {
-  if (a.id && b.id) return a.id === b.id;
-  return false;
-};
-
-const useChat = () => {
+const useChatSession = () => {
   const sessionId = useRecoilValue(sessionIdState);
-  const [firstUserMessage, setFirstUserMessage] = useRecoilState(
-    firstUserMessageState
-  );
+
   const [session, setSession] = useRecoilState(sessionState);
-  const [loading, setLoading] = useRecoilState(loadingState);
-  const [rawMessages, setMessages] = useRecoilState(messagesState);
-  const [askUser, setAskUser] = useRecoilState(askUserState);
-  const [elements, setElements] = useRecoilState(elementState);
-  const [avatars, setAvatars] = useRecoilState(avatarState);
-  const [tasklists, setTasklists] = useRecoilState(tasklistState);
-  const [actions, setActions] = useRecoilState(actionState);
-  const [chatSettingsInputs, setChatSettingsInputs] = useRecoilState(
-    chatSettingsInputsState
-  );
-  const chatSettingsValue = useRecoilValue(chatSettingsValueState);
-  const chatSettingsDefaultValue = useRecoilValue(
-    chatSettingsDefaultValueSelector
-  );
+
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
-  const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
-  const resetSessionId = useResetRecoilState(sessionIdState);
+  const setFirstUserMessage = useSetRecoilState(firstUserMessageState);
+  const setLoading = useSetRecoilState(loadingState);
+  const setMessages = useSetRecoilState(messagesState);
+  const setAskUser = useSetRecoilState(askUserState);
+  const setElements = useSetRecoilState(elementState);
+  const setAvatars = useSetRecoilState(avatarState);
+  const setTasklists = useSetRecoilState(tasklistState);
+  const setActions = useSetRecoilState(actionState);
+  const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
 
   const _connect = useCallback(
@@ -121,9 +98,7 @@ const useChat = () => {
 
       socket.on('new_message', (message: IMessage) => {
         setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) =>
-            compareMessageIds(m, message)
-          );
+          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
           if (index === -1) {
             return [...oldMessages, message];
           } else {
@@ -142,9 +117,7 @@ const useChat = () => {
 
       socket.on('update_message', (message: IMessageUpdate) => {
         setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) =>
-            compareMessageIds(m, message)
-          );
+          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
           if (index === -1) return oldMessages;
           if (message.newId) {
             message.id = message.newId;
@@ -161,9 +134,7 @@ const useChat = () => {
 
       socket.on('delete_message', (message: IMessage) => {
         setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) =>
-            compareMessageIds(m, message)
-          );
+          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
 
           if (index === -1) return oldMessages;
           return [
@@ -262,10 +233,12 @@ const useChat = () => {
       });
 
       socket.on('action', (action: IAction) => {
+        console.count('IL PASSE ICI');
         setActions((old) => [...old, action]);
       });
 
       socket.on('remove_action', (action: IAction) => {
+        console.count('REMOVE IL PASSE ICI');
         setActions((old) => {
           const index = old.findIndex((a) => a.id === action.id);
           if (index === -1) return old;
@@ -289,90 +262,7 @@ const useChat = () => {
     }
   }, [session]);
 
-  const clear = useCallback(() => {
-    session?.socket.emit('clear_session');
-    session?.socket.disconnect();
-    resetSessionId();
-    setFirstUserMessage(undefined);
-    setMessages([]);
-    setElements([]);
-    setAvatars([]);
-    setTasklists([]);
-    setActions([]);
-    setTokenCount(0);
-    resetChatSettings();
-    resetChatSettingsValue();
-  }, [session]);
-
-  const sendMessage = useCallback(
-    (message: IMessage, files?: IFileElement[]) => {
-      setMessages((oldMessages) => [...oldMessages, message]);
-      session?.socket.emit('ui_message', { message, files });
-    },
-    [session]
-  );
-
-  const replyMessage = useCallback(
-    (message: IMessage) => {
-      if (askUser) {
-        setMessages((oldMessages) => [...oldMessages, message]);
-        askUser.callback(message);
-      }
-    },
-    [askUser, session]
-  );
-
-  const updateChatSettings = useCallback(
-    (values: object) => {
-      session?.socket.emit('chat_settings_change', values);
-    },
-    [session]
-  );
-
-  const stopTask = useCallback(() => {
-    setLoading(false);
-    session?.socket.emit('stop');
-  }, [session]);
-
-  const callAction = useCallback(
-    (action: IAction) => {
-      session?.socket.emit('action_call', action);
-    },
-    [session]
-  );
-
-  const messages = nestMessages(rawMessages);
-  const connected = session?.socket.connected && !session?.error;
-  const disabled =
-    !connected ||
-    loading ||
-    askUser?.spec.type === 'file' ||
-    askUser?.spec.type === 'action';
-
-  return {
-    connect,
-    clear,
-    disconnect,
-    sendMessage,
-    updateChatSettings,
-    stopTask,
-    callAction,
-    replyMessage,
-    connected,
-    disabled,
-    error: session?.error,
-    loading,
-    messages,
-    actions,
-    elements,
-    tasklists,
-    avatars,
-    chatSettingsInputs,
-    chatSettingsValue,
-    chatSettingsDefaultValue,
-    askUser,
-    firstUserMessage
-  };
+  return { connect, disconnect };
 };
 
-export { useChat };
+export { useChatSession };

@@ -4,13 +4,13 @@ import { redirect } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/material';
 
-import { AccentButton, useChat } from '@chainlit/components';
+import { AccentButton, useChatInteract } from '@chainlit/components';
 
 import NewChatDialog from './newChatDialog';
 
 export default function NewChatButton() {
   const [open, setOpen] = useState(false);
-  const { clear } = useChat();
+  const { clear } = useChatInteract();
 
   const handleClickOpen = () => {
     setOpen(true);

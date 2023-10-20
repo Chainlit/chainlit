@@ -9,7 +9,8 @@ import {
   IFileElement,
   IFileResponse,
   IMessage,
-  useChat
+  useChatData,
+  useChatInteract
 } from '@chainlit/components';
 
 import { useAuth } from 'hooks/auth';
@@ -39,7 +40,8 @@ const InputBox = ({
   const setChatHistory = useSetRecoilState(chatHistoryState);
 
   const { user } = useAuth();
-  const { sendMessage, replyMessage, askUser } = useChat();
+  const { sendMessage, replyMessage } = useChatInteract();
+  const { askUser } = useChatData();
   // const tokenCount = useRecoilValue(tokenCountState);
 
   const onSubmit = useCallback(
@@ -90,8 +92,6 @@ const InputBox = ({
     },
     [askUser, user, replyMessage]
   );
-
-  console.count('Input re-render');
 
   return (
     <Box

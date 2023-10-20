@@ -15,18 +15,17 @@ import {
   FormInput,
   RegularButton,
   TFormInputValue,
-  useChat
+  useChatData,
+  useChatInteract
 } from '@chainlit/components';
 
 import { chatSettingsOpenState } from 'state/project';
 
 export default function ChatSettingsModal() {
-  const {
-    updateChatSettings,
-    chatSettingsValue,
-    chatSettingsInputs,
-    chatSettingsDefaultValue
-  } = useChat();
+  const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
+    useChatData();
+
+  const { updateChatSettings } = useChatInteract();
   const [chatSettingsOpen, setChatSettingsOpen] = useRecoilState(
     chatSettingsOpenState
   );

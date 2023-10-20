@@ -8,7 +8,7 @@ import { Alert, Box } from '@mui/material';
 import {
   ErrorBoundary,
   IFileResponse,
-  useChat,
+  useChatData,
   useUpload
 } from '@chainlit/components';
 
@@ -32,7 +32,7 @@ const Chat = () => {
 
   const [autoScroll, setAutoScroll] = useState(true);
 
-  const { error, disabled } = useChat();
+  const { error, disabled } = useChatData();
 
   const fileSpec = { max_size_mb: 20 };
   const onFileUpload = (payloads: IFileResponse[]) => {

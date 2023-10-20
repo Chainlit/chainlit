@@ -1,6 +1,6 @@
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
-import { useChat } from '@chainlit/components';
+import { useChatData } from '@chainlit/components';
 import { grey } from '@chainlit/components/theme';
 
 import { ITaskList, Task } from './Task';
@@ -48,7 +48,7 @@ const taskListContainerStyles = (theme: Theme) => ({
 
 const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const theme = useTheme();
-  const { tasklists } = useChat();
+  const { tasklists } = useChatData();
 
   let content: ITaskList | null = null;
   const tasklist = tasklists[tasklists.length - 1];

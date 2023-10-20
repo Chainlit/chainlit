@@ -8,7 +8,7 @@ import { Box, Popover, Tab, Tabs } from '@mui/material';
 import {
   InputStateHandler,
   grey,
-  useChat,
+  useChatInteract,
   useIsDarkMode
 } from '@chainlit/components';
 
@@ -22,7 +22,7 @@ export default function ChatProfiles() {
   const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [chatProfileDescription, setChatProfileDescription] = useState('');
-  const { clear } = useChat();
+  const { clear } = useChatInteract();
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const isDarkMode = useIsDarkMode();
