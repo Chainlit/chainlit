@@ -145,7 +145,7 @@ class ChatOpenAIProvider(BaseProvider):
 
         async def create_event_stream():
             async for stream_resp in response:
-                if 'choices' in stream_resp and len(stream_resp.choices) > 0:
+                if hasattr(stream_resp, 'choices') and len(stream_resp.choices) > 0:
                     token = stream_resp.choices[0]["delta"].get("content", "")
                     yield token
                 else:
