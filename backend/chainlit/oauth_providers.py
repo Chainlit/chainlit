@@ -389,9 +389,7 @@ class DescopeOAuthProvider(OAuthProvider):
                 user = await result.json()
 
                 app_user = AppUser(
-                    username=user.get("name"),
-                    image=user.get("picture", ""),
-                    provider="descope",
+                    username=user.get("email"), image="", provider="descope"
                 )
                 return (user, app_user)
 
