@@ -22,7 +22,10 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
           {...props}
           children={String(children).replace(/\n$/, '')}
           style={dracula}
-          customStyle={{ paddingRight: '2.5em' }}
+          customStyle={{
+            paddingRight: '2.5em',
+            minHeight: '20px'
+          }}
           wrapLongLines
           language={match[1]}
           PreTag="div"
@@ -50,6 +53,7 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
             borderRadius: '4px',
             padding: (theme) => theme.spacing(1),
             paddingRight: '2.5em',
+            minHeight: '20px',
             overflowX: 'auto'
           }}
         >

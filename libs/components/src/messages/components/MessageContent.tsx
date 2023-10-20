@@ -75,8 +75,7 @@ const MessageContent = memo(
                   <TableContainer
                     sx={{
                       width: 'fit-content',
-                      minWidth: '300px',
-                      margin: 1
+                      minWidth: '300px'
                     }}
                     elevation={0}
                     component={Paper}
