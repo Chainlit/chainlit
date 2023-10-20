@@ -6,6 +6,11 @@ async def main():
     msg1 = cl.Message(content="Message 1")
     await msg1.send()
 
+    msg1_child1 = cl.Message(content="Child 1", parent_id=msg1.id)
+    await msg1_child1.send()
+    await cl.sleep(1)
+    await msg1_child1.remove()
+
     msg2 = cl.Message(content="Message 2")
     await msg2.send()
 

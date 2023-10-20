@@ -1,6 +1,5 @@
 import { useRecoilValue } from 'recoil';
 import { IMessage } from 'src/types';
-import { nestMessages } from 'utils/message';
 
 import {
   actionState,
@@ -12,7 +11,7 @@ import {
   elementState,
   firstUserMessageState,
   loadingState,
-  messagesState,
+  nestedMessagesState,
   sessionState,
   tasklistState
 } from './state';
@@ -30,7 +29,7 @@ export interface IToken {
 const useChatData = () => {
   const firstUserMessage = useRecoilValue(firstUserMessageState);
   const loading = useRecoilValue(loadingState);
-  const rawMessages = useRecoilValue(messagesState);
+  const messages = useRecoilValue(nestedMessagesState);
   const elements = useRecoilValue(elementState);
   const avatars = useRecoilValue(avatarState);
   const tasklists = useRecoilValue(tasklistState);
@@ -43,7 +42,6 @@ const useChatData = () => {
     chatSettingsDefaultValueSelector
   );
 
-  const messages = nestMessages(rawMessages);
   const connected = session?.socket.connected && !session?.error;
   const disabled =
     !connected ||

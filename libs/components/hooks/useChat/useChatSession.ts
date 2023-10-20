@@ -10,6 +10,12 @@ import {
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
 import { IAction, IElement, IMessage } from 'src/types';
+import {
+  addNestedMessage,
+  deleteMessageById,
+  updateMessageById,
+  updateMessageContentById
+} from 'utils/message';
 
 import {
   actionState,
@@ -21,6 +27,7 @@ import {
   firstUserMessageState,
   loadingState,
   messagesState,
+  nestedMessagesState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -37,6 +44,7 @@ const useChatSession = () => {
   const setFirstUserMessage = useSetRecoilState(firstUserMessageState);
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
+  const setNestedMessages = useSetRecoilState(nestedMessagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setAvatars = useSetRecoilState(avatarState);
@@ -109,6 +117,10 @@ const useChatSession = () => {
             ];
           }
         });
+
+        setNestedMessages((oldNestedMessages) =>
+          addNestedMessage(oldNestedMessages, message)
+        );
       });
 
       socket.on('init_conversation', (message: IMessage) => {
@@ -116,20 +128,9 @@ const useChatSession = () => {
       });
 
       socket.on('update_message', (message: IMessageUpdate) => {
-        setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
-          if (index === -1) return oldMessages;
-          if (message.newId) {
-            message.id = message.newId;
-            delete message.newId;
-          }
-
-          return [
-            ...oldMessages.slice(0, index),
-            message,
-            ...oldMessages.slice(index + 1)
-          ];
-        });
+        setNestedMessages((oldNestedMessages) =>
+          updateMessageById(oldNestedMessages, message.id, message)
+        );
       });
 
       socket.on('delete_message', (message: IMessage) => {
@@ -142,6 +143,10 @@ const useChatSession = () => {
             ...oldMessages.slice(index + 1)
           ];
         });
+
+        setNestedMessages((oldNestedMessages) =>
+          deleteMessageById(oldNestedMessages, message.id)
+        );
       });
 
       socket.on('stream_start', (message: IMessage) => {
@@ -152,6 +157,10 @@ const useChatSession = () => {
           }
           return oldMessages;
         });
+
+        setNestedMessages((oldNestedMessages) =>
+          addNestedMessage(oldNestedMessages, message)
+        );
       });
 
       socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
@@ -171,11 +180,19 @@ const useChatSession = () => {
             ...oldMessages.slice(index + 1)
           ];
         });
+
+        setNestedMessages((oldNestedMessages) =>
+          updateMessageContentById(oldNestedMessages, id, token, isSequence)
+        );
       });
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback });
-        setMessages((oldMessages) => [...oldMessages, msg]);
+        setMessages((oldMessages) => [...oldMessages, { ...msg }]);
+        setNestedMessages((oldNestedMessages) =>
+          addNestedMessage(oldNestedMessages, msg)
+        );
+
         setLoading(false);
       });
 
@@ -233,12 +250,10 @@ const useChatSession = () => {
       });
 
       socket.on('action', (action: IAction) => {
-        console.count('IL PASSE ICI');
         setActions((old) => [...old, action]);
       });
 
       socket.on('remove_action', (action: IAction) => {
-        console.count('REMOVE IL PASSE ICI');
         setActions((old) => {
           const index = old.findIndex((a) => a.id === action.id);
           if (index === -1) return old;
