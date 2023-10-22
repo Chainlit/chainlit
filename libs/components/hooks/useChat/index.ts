@@ -174,7 +174,13 @@ const useChat = () => {
       });
 
       socket.on('stream_start', (message: IMessage) => {
-        setMessages((oldMessages) => [...oldMessages, message]);
+        setMessages((oldMessages) => {
+          const index = oldMessages.findIndex((m) => m.id === message.id);
+          if (index === -1) {
+            return [...oldMessages, message];
+          }
+          return oldMessages;
+        });
       });
 
       socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
