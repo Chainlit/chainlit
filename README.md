@@ -16,8 +16,7 @@ Key features:
 - [🛝 In context Prompt Playground](https://docs.chainlit.io/observability-iteration/prompt-playground/overview)
 - [👤 Authentication](https://docs.chainlit.io/authentication/overview)
 
-
-https://github.com/Chainlit/chainlit/assets/13104895/cbcb8078-ab4d-4e4c-8e4e-7aaa51ca1fd0
+https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 
 ## Installation
 
