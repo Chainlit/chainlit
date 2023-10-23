@@ -63,7 +63,7 @@ const Input = ({
   const [isRecording, setIsRecording] = useState(false);
   const { transcript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [pSettings] = useRecoilState(projectSettingsState);
   const showTextToSpeech =
     (pSettings?.features.speech_to_text === undefined
@@ -125,6 +125,20 @@ const Input = ({
     }
     setLastTranscript(transcript);
   }, [transcript]);
+
+  useEffect(() => {
+    if (isRecording) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      setTimer(
+        setTimeout(() => {
+          setIsRecording(false);
+          SpeechRecognition.stopListening();
+        }, 2000) // stop after 3 seconds of silence
+      );
+    }
+  }, [transcript, isRecording]);
 
   const submit = useCallback(() => {
     if (value === '' || disabled) {
@@ -194,6 +208,8 @@ const Input = ({
       {showTextToSpeech &&
         (isRecording ? (
           <IconButton
+            disabled={disabled}
+            color="inherit"
             onClick={() => {
               setIsRecording(false);
               SpeechRecognition.stopListening();
@@ -203,6 +219,8 @@ const Input = ({
           </IconButton>
         ) : (
           <IconButton
+            disabled={disabled}
+            color="inherit"
             onClick={() => {
               setIsRecording(true);
               SpeechRecognition.startListening({
