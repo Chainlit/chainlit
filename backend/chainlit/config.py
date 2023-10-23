@@ -50,6 +50,9 @@ prompt_playground = true
 # Authorize users to upload files with messages
 multi_modal = true
 
+# Allows user to use speech to text
+# speech_to_text = true
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
@@ -75,9 +78,6 @@ hide_cot = false
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
-
-# Allows user to use speech to text
-# speech_to_text = true
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -148,6 +148,7 @@ class Theme(DataClassJsonMixin):
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
     multi_modal: bool = True
+    speech_to_text: bool = True
 
 
 @dataclass()
@@ -161,7 +162,6 @@ class UISettings(DataClassJsonMixin):
     default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
-    speech_to_text: bool = True
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
 
