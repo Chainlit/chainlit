@@ -9,9 +9,7 @@ import {
   chatSettingsInputsState,
   chatSettingsValueState,
   elementState,
-  firstUserMessageState,
   loadingState,
-  nestedMessagesState,
   sessionState,
   tasklistState
 } from './state';
@@ -27,9 +25,7 @@ export interface IToken {
 }
 
 const useChatData = () => {
-  const firstUserMessage = useRecoilValue(firstUserMessageState);
   const loading = useRecoilValue(loadingState);
-  const messages = useRecoilValue(nestedMessagesState);
   const elements = useRecoilValue(elementState);
   const avatars = useRecoilValue(avatarState);
   const tasklists = useRecoilValue(tasklistState);
@@ -50,20 +46,18 @@ const useChatData = () => {
     askUser?.spec.type === 'action';
 
   return {
-    connected,
-    disabled,
-    error: session?.error,
-    loading,
-    messages,
     actions,
-    elements,
-    tasklists,
+    askUser,
     avatars,
+    chatSettingsDefaultValue,
     chatSettingsInputs,
     chatSettingsValue,
-    chatSettingsDefaultValue,
-    askUser,
-    firstUserMessage
+    connected,
+    disabled,
+    elements,
+    error: session?.error,
+    loading,
+    tasklists
   };
 };
 
