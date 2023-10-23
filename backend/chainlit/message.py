@@ -266,11 +266,12 @@ class Message(MessageBase):
         if not self.parent_id:
             context.session.root_message = self
 
-        for action in self.actions:
-            await action.send(for_id=id)
+        # Create tasks for all actions and elements
+        tasks = [action.send(for_id=id) for action in self.actions]
+        tasks.extend(element.send(for_id=id) for element in self.elements)
 
-        for element in self.elements:
-            await element.send(for_id=id)
+        # Run all tasks concurrently
+        await asyncio.gather(*tasks)
 
         return id
 
