@@ -66,9 +66,9 @@ const Input = ({
 
   const [pSettings] = useRecoilState(projectSettingsState);
   const showTextToSpeech =
-    (pSettings?.ui.speech_to_text === undefined
+    (pSettings?.features.speech_to_text === undefined
       ? true
-      : pSettings?.ui.speech_to_text) && browserSupportsSpeechRecognition;
+      : pSettings?.features.speech_to_text) && browserSupportsSpeechRecognition;
   const [lastTranscript, setLastTranscript] = useState('');
 
   useEffect(() => {
