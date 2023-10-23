@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,11 +31,11 @@ const Chat = () => {
   const sideViewElement = useRecoilValue(sideViewState);
 
   const [autoScroll, setAutoScroll] = useState(true);
-
   const { error, disabled } = useChatData();
 
-  const fileSpec = { max_size_mb: 20 };
-  const onFileUpload = (payloads: IFileResponse[]) => {
+  const fileSpec = useMemo(() => ({ max_size_mb: 20 }), []);
+
+  const onFileUpload = useCallback((payloads: IFileResponse[]) => {
     const fileElements = payloads.map((file) => ({
       id: uuidv4(),
       type: 'file' as const,
@@ -45,9 +45,12 @@ const Chat = () => {
       content: file.content
     }));
     setAttachments((prev) => prev.concat(fileElements));
-  };
+  }, []);
 
-  const onFileUploadError = (error: string) => toast.error(error);
+  const onFileUploadError = useCallback(
+    () => (error: string) => toast.error(error),
+    []
+  );
 
   const upload = useUpload({
     spec: fileSpec,
