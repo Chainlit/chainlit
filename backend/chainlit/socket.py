@@ -168,10 +168,10 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
-
         await context.emitter.task_start()
+        message = await context.emitter.process_user_message(payload)
+
         if config.code.on_message:
-            message = await context.emitter.process_user_message(payload)
             await config.code.on_message(message)
     except InterruptedError:
         pass
