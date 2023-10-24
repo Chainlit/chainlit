@@ -1,9 +1,9 @@
 import { useRecoilValue } from 'recoil';
 
-import { firstUserMessageState, nestedMessagesState } from './state';
+import { firstUserMessageState, messagesState } from './state';
 
 const useChatMessages = () => {
-  const messages = useRecoilValue(nestedMessagesState);
+  const messages = useRecoilValue(messagesState);
   const firstUserMessage = useRecoilValue(firstUserMessageState);
 
   return {

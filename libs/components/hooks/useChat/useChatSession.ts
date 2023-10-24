@@ -1,5 +1,4 @@
 import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
 import { useCallback } from 'react';
 import {
   useRecoilState,
@@ -11,7 +10,7 @@ import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
 import { IAction, IElement, IMessage } from 'src/types';
 import {
-  addNestedMessage,
+  addMessage,
   deleteMessageById,
   updateMessageById,
   updateMessageContentById
@@ -27,7 +26,6 @@ import {
   firstUserMessageState,
   loadingState,
   messagesState,
-  nestedMessagesState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -44,7 +42,6 @@ const useChatSession = () => {
   const setFirstUserMessage = useSetRecoilState(firstUserMessageState);
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
-  const setNestedMessages = useSetRecoilState(nestedMessagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setElements = useSetRecoilState(elementState);
   const setAvatars = useSetRecoilState(avatarState);
@@ -105,22 +102,7 @@ const useChatSession = () => {
       });
 
       socket.on('new_message', (message: IMessage) => {
-        setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
-          if (index === -1) {
-            return [...oldMessages, message];
-          } else {
-            return [
-              ...oldMessages.slice(0, index),
-              message,
-              ...oldMessages.slice(index + 1)
-            ];
-          }
-        });
-
-        setNestedMessages((oldNestedMessages) =>
-          addNestedMessage(oldNestedMessages, message)
-        );
+        setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
       socket.on('init_conversation', (message: IMessage) => {
@@ -128,70 +110,30 @@ const useChatSession = () => {
       });
 
       socket.on('update_message', (message: IMessageUpdate) => {
-        setNestedMessages((oldNestedMessages) =>
-          updateMessageById(oldNestedMessages, message.id, message)
+        setMessages((oldMessages) =>
+          updateMessageById(oldMessages, message.id, message)
         );
       });
 
       socket.on('delete_message', (message: IMessage) => {
-        setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) => isEqual(m.id, message.id));
-
-          if (index === -1) return oldMessages;
-          return [
-            ...oldMessages.slice(0, index),
-            ...oldMessages.slice(index + 1)
-          ];
-        });
-
-        setNestedMessages((oldNestedMessages) =>
-          deleteMessageById(oldNestedMessages, message.id)
+        setMessages((oldMessages) =>
+          deleteMessageById(oldMessages, message.id)
         );
       });
 
       socket.on('stream_start', (message: IMessage) => {
-        setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) => m.id === message.id);
-          if (index === -1) {
-            return [...oldMessages, message];
-          }
-          return oldMessages;
-        });
-
-        setNestedMessages((oldNestedMessages) =>
-          addNestedMessage(oldNestedMessages, message)
-        );
+        setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
       socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
-        setMessages((oldMessages) => {
-          const index = oldMessages.findIndex((m) => m.id === id);
-          if (index === -1) return oldMessages;
-          const oldMessage = oldMessages[index];
-          const newMessage = { ...oldMessage };
-          if (isSequence) {
-            newMessage.content = token;
-          } else {
-            newMessage.content += token;
-          }
-          return [
-            ...oldMessages.slice(0, index),
-            newMessage,
-            ...oldMessages.slice(index + 1)
-          ];
-        });
-
-        setNestedMessages((oldNestedMessages) =>
-          updateMessageContentById(oldNestedMessages, id, token, isSequence)
+        setMessages((oldMessages) =>
+          updateMessageContentById(oldMessages, id, token, isSequence)
         );
       });
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback });
-        setMessages((oldMessages) => [...oldMessages, { ...msg }]);
-        setNestedMessages((oldNestedMessages) =>
-          addNestedMessage(oldNestedMessages, msg)
-        );
+        setMessages((oldMessages) => addMessage(oldMessages, msg));
 
         setLoading(false);
       });

@@ -13,12 +13,12 @@ import { MessageContent } from './components/MessageContent';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { INestedMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 import { Messages } from './Messages';
 
 interface Props {
-  message: INestedMessage;
+  message: IMessage;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;

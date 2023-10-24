@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { INestedMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';
@@ -15,7 +15,7 @@ interface Props {
   autoScroll?: boolean;
   context: IMessageContext;
   elements: IMessageElement[];
-  messages: INestedMessage[];
+  messages: IMessage[];
   setAutoScroll?: (autoScroll: boolean) => void;
 }
 

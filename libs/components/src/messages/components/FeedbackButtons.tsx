@@ -17,7 +17,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { nestedMessagesState } from 'hooks/useChat/state';
+import { messagesState } from 'hooks/useChat/state';
 
 import { IMessage } from 'src/types/message';
 
@@ -35,7 +35,7 @@ const FeedbackButtons = ({ message }: Props) => {
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
-  const setNestedMessages = useSetRecoilState(nestedMessagesState);
+  const setMessages = useSetRecoilState(messagesState);
 
   const handleFeedbackChanged = (feedback: number, comment?: string) => {
     onFeedbackUpdated &&
@@ -43,7 +43,7 @@ const FeedbackButtons = ({ message }: Props) => {
         message.id,
         feedback,
         () =>
-          setNestedMessages((prev) =>
+          setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
               humanFeedback: feedback,

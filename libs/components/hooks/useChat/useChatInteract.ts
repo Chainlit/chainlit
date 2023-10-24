@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import { IAction, IFileElement, IMessage } from 'src/types';
-import { addNestedMessage } from 'utils/message';
+import { addMessage } from 'utils/message';
 
 import {
   actionState,
@@ -13,7 +13,6 @@ import {
   firstUserMessageState,
   loadingState,
   messagesState,
-  nestedMessagesState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -31,7 +30,6 @@ const useChatInteract = () => {
   const setFirstUserMessage = useSetRecoilState(firstUserMessageState);
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
-  const setNestedMessages = useSetRecoilState(nestedMessagesState);
   const setElements = useSetRecoilState(elementState);
   const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
@@ -44,7 +42,6 @@ const useChatInteract = () => {
     resetSessionId();
     setFirstUserMessage(undefined);
     setMessages([]);
-    setNestedMessages([]);
     setElements([]);
     setAvatars([]);
     setTasklists([]);
@@ -56,10 +53,7 @@ const useChatInteract = () => {
 
   const sendMessage = useCallback(
     (message: IMessage, files?: IFileElement[]) => {
-      setMessages((oldMessages) => [...oldMessages, { ...message }]);
-      setNestedMessages((oldNestedMessages) =>
-        addNestedMessage(oldNestedMessages, message)
-      );
+      setMessages((oldMessages) => addMessage(oldMessages, message));
 
       session?.socket.emit('ui_message', { message, files });
     },
@@ -69,10 +63,7 @@ const useChatInteract = () => {
   const replyMessage = useCallback(
     (message: IMessage) => {
       if (askUser) {
-        setMessages((oldMessages) => [...oldMessages, { ...message }]);
-        setNestedMessages((oldNestedMessages) =>
-          addNestedMessage(oldNestedMessages, message)
-        );
+        setMessages((oldMessages) => addMessage(oldMessages, message));
         askUser.callback(message);
       }
     },

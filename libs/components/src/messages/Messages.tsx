@@ -4,12 +4,12 @@ import { isLastMessage } from 'utils/message';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { INestedMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 import { Message } from './Message';
 
 interface Props {
-  messages: INestedMessage[];
+  messages: IMessage[];
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;

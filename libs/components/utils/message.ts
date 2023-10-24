@@ -1,13 +1,13 @@
 import isEqual from 'lodash/isEqual';
 
 import { IMessageElement } from 'src/types/element';
-import { IMessage, IMessageContent, INestedMessage } from 'src/types/message';
+import { IMessage, IMessageContent } from 'src/types/message';
 
 const addToParent = (
   parentId: string | undefined,
-  child: INestedMessage,
-  nestedMessages: INestedMessage[],
-  lookup: Record<string, INestedMessage>
+  child: IMessage,
+  nestedMessages: IMessage[],
+  lookup: Record<string, IMessage>
 ): void => {
   if (parentId) {
     const parent = lookup[parentId];
@@ -20,12 +20,12 @@ const addToParent = (
 };
 
 // Nest messages based on parent id
-const nestMessages = (messages: IMessage[]): INestedMessage[] => {
-  const nestedMessages: INestedMessage[] = [];
-  const lookup: Record<string, INestedMessage> = {};
+const nestMessages = (messages: IMessage[]): IMessage[] => {
+  const nestedMessages: IMessage[] = [];
+  const lookup: Record<string, IMessage> = {};
 
   for (const message of messages) {
-    const nestedMessage: INestedMessage = { ...message };
+    const nestedMessage: IMessage = { ...message };
     if (message.id) lookup[message.id] = nestedMessage;
   }
 
@@ -44,12 +44,12 @@ const nestMessages = (messages: IMessage[]): INestedMessage[] => {
 };
 
 // Nest messages based on deprecated indent parameter
-const legacyNestMessages = (messages: INestedMessage[]): INestedMessage[] => {
-  const nestedMessages: INestedMessage[] = [];
-  const parentStack: INestedMessage[] = [];
+const legacyNestMessages = (messages: IMessage[]): IMessage[] => {
+  const nestedMessages: IMessage[] = [];
+  const parentStack: IMessage[] = [];
 
   for (const message of messages) {
-    const nestedMessage: INestedMessage = { ...message };
+    const nestedMessage: IMessage = { ...message };
     const messageIndent = message.indent || 0;
 
     if (messageIndent && !message.authorIsUser && !message.waitForAnswer) {
@@ -76,7 +76,7 @@ const legacyNestMessages = (messages: INestedMessage[]): INestedMessage[] => {
   return nestedMessages;
 };
 
-const isLastMessage = (messages: INestedMessage[], index: number) => {
+const isLastMessage = (messages: IMessage[], index: number) => {
   if (messages.length - 1 === index) {
     return true;
   }
@@ -171,27 +171,24 @@ const prepareContent = ({ elements, message }: IMessageContent) => {
 
 // Nested messages utils
 
-const addNestedMessage = (
-  nestedMessages: INestedMessage[],
-  message: IMessage
-): INestedMessage[] => {
-  if (hasMessageById(nestedMessages, message.id)) {
-    return updateMessageById(nestedMessages, message.id, message);
+const addMessage = (messages: IMessage[], message: IMessage): IMessage[] => {
+  if (hasMessageById(messages, message.id)) {
+    return updateMessageById(messages, message.id, message);
   } else if (message.parentId) {
-    return addMessageToParent(nestedMessages, message.parentId, message);
+    return addMessageToParent(messages, message.parentId, message);
   } else if (message.indent && message.indent > 0) {
-    return addIndentMessage(nestedMessages, message.indent, message);
+    return addIndentMessage(messages, message.indent, message);
   } else {
-    return [...nestedMessages, message];
+    return [...messages, message];
   }
 };
 
 const addIndentMessage = (
-  messages: INestedMessage[],
+  messages: IMessage[],
   indent: number,
   newMessage: IMessage,
   currentIndentation: number = 0
-): INestedMessage[] => {
+): IMessage[] => {
   const nextMessages = [...messages];
 
   if (nextMessages.length === 0) {
@@ -221,10 +218,10 @@ const addIndentMessage = (
 };
 
 const addMessageToParent = (
-  messages: INestedMessage[],
+  messages: IMessage[],
   parentId: string,
   newMessage: IMessage
-): INestedMessage[] => {
+): IMessage[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -248,7 +245,7 @@ const addMessageToParent = (
   return nextMessages;
 };
 
-const hasMessageById = (messages: INestedMessage[], messageId: string) => {
+const hasMessageById = (messages: IMessage[], messageId: string) => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
       return true;
@@ -260,10 +257,10 @@ const hasMessageById = (messages: INestedMessage[], messageId: string) => {
 };
 
 const updateMessageById = (
-  messages: INestedMessage[],
+  messages: IMessage[],
   messageId: string,
   updatedMessage: IMessage
-): INestedMessage[] => {
+): IMessage[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -284,7 +281,7 @@ const updateMessageById = (
   return nextMessages;
 };
 
-const deleteMessageById = (messages: INestedMessage[], messageId: string) => {
+const deleteMessageById = (messages: IMessage[], messageId: string) => {
   let nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -305,11 +302,11 @@ const deleteMessageById = (messages: INestedMessage[], messageId: string) => {
 };
 
 const updateMessageContentById = (
-  messages: INestedMessage[],
+  messages: IMessage[],
   messageId: number | string,
   updatedContent: string,
   isSequence: boolean
-): INestedMessage[] => {
+): IMessage[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -339,7 +336,7 @@ const updateMessageContentById = (
 
 export {
   addMessageToParent,
-  addNestedMessage,
+  addMessage,
   deleteMessageById,
   hasMessageById,
   isLastMessage,

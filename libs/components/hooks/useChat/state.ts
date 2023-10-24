@@ -7,7 +7,6 @@ import {
   IAvatarElement,
   IMessage,
   IMessageElement,
-  INestedMessage,
   ITasklistElement
 } from 'src/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,12 +41,6 @@ export const actionState = atom<IAction[]>({
 
 export const messagesState = atom<IMessage[]>({
   key: 'Messages',
-  dangerouslyAllowMutability: true,
-  default: []
-});
-
-export const nestedMessagesState = atom<INestedMessage[]>({
-  key: 'NestedMessages',
   dangerouslyAllowMutability: true,
   default: []
 });
