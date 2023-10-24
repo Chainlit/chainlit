@@ -89,11 +89,6 @@ const MessageContainer = memo(
             }
           );
 
-          const globalMessage = messages.find((m) => m.id === messageId);
-          if (globalMessage) {
-            globalMessage.humanFeedback = feedback;
-            globalMessage.humanFeedbackComment = feedbackComment;
-          }
           onSuccess();
         } catch (err) {
           console.log(err);

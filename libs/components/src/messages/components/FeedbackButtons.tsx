@@ -1,9 +1,11 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 import { useMemo } from 'react';
+import { useSetRecoilState } from 'recoil';
 import Dialog from 'src/Dialog';
 import { AccentButton } from 'src/buttons/AccentButton';
 import { TextInput } from 'src/inputs';
+import { updateMessageById } from 'utils/message';
 
 import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
@@ -15,6 +17,8 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
+import { nestedMessagesState } from 'hooks/useChat/state';
+
 import { IMessage } from 'src/types/message';
 
 const ICON_SIZE = '16px';
@@ -25,22 +29,27 @@ interface Props {
 
 const FeedbackButtons = ({ message }: Props) => {
   const { onFeedbackUpdated } = useContext(MessageContext);
-  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
-  const [comment, setComment] = useState(message.humanFeedbackComment);
+  const feedback = message.humanFeedback || 0;
+  const comment = message.humanFeedbackComment;
   const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
+  const setNestedMessages = useSetRecoilState(nestedMessagesState);
 
   const handleFeedbackChanged = (feedback: number, comment?: string) => {
     onFeedbackUpdated &&
       onFeedbackUpdated(
         message.id,
         feedback,
-        () => {
-          setFeedback(feedback);
-          setComment(comment);
-        },
+        () =>
+          setNestedMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              humanFeedback: feedback,
+              humanFeedbackComment: comment
+            })
+          ),
         comment
       );
   };
