@@ -14,7 +14,7 @@ async def main(message: cl.Message):
     await tool2_msg.send()
 
     await cl.Message(
-        content="Response from tool 2", author="Tool 1", parent_id=message.id
+        content="Response from tool 3", author="Tool 3", parent_id=message.id
     ).send()
 
     await cl.Message(
