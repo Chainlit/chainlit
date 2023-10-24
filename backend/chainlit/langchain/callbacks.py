@@ -91,12 +91,12 @@ def convert_role(role: str):
         return "user"
     elif role in ["system", "SystemMessage", "SystemMessagePromptTemplate"]:
         return "system"
-    elif role in ["ai", "AIMessage", "AIMessagePromptTemplate"]:
+    elif role in ["ai", "AIMessage", "AIMessageChunk", "AIMessagePromptTemplate"]:
         return "assistant"
     elif role in ["function", "FunctionMessage", "FunctionMessagePromptTemplate"]:
         return "function"
     else:
-        raise ValueError(f"Unsupported role {role}")
+        return "assistant"
 
 
 def convert_message(message: BaseMessage, template: Optional[str] = None):

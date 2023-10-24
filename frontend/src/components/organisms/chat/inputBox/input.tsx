@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import SpeechRecognition, {
+  useSpeechRecognition
+} from 'react-speech-recognition';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
+import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SendIcon from '@mui/icons-material/Telegram';
 import TuneIcon from '@mui/icons-material/Tune';
 import { Box, IconButton, Stack, TextField } from '@mui/material';
@@ -18,7 +23,7 @@ import HistoryButton from 'components/organisms/chat/history';
 
 import { attachmentsState } from 'state/chat';
 import { chatHistoryState } from 'state/chatHistory';
-import { chatSettingsOpenState } from 'state/project';
+import { chatSettingsOpenState, projectSettingsState } from 'state/project';
 
 import UploadButton from './UploadButton';
 
@@ -55,6 +60,16 @@ const Input = ({
 
   const [value, setValue] = useState('');
   const [isComposing, setIsComposing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const { transcript, browserSupportsSpeechRecognition } =
+    useSpeechRecognition();
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [pSettings] = useRecoilState(projectSettingsState);
+  const showTextToSpeech =
+    (pSettings?.features.speech_to_text === undefined
+      ? true
+      : pSettings?.features.speech_to_text) && browserSupportsSpeechRecognition;
+  const [lastTranscript, setLastTranscript] = useState('');
 
   useEffect(() => {
     const pasteEvent = (event: ClipboardEvent) => {
@@ -103,6 +118,27 @@ const Input = ({
       ref.current.focus();
     }
   }, [loading, disabled]);
+
+  useEffect(() => {
+    if (lastTranscript.length < transcript.length) {
+      setValue((text) => text + transcript.slice(lastTranscript.length));
+    }
+    setLastTranscript(transcript);
+  }, [transcript]);
+
+  useEffect(() => {
+    if (isRecording) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      setTimer(
+        setTimeout(() => {
+          setIsRecording(false);
+          SpeechRecognition.stopListening();
+        }, 2000) // stop after 3 seconds of silence
+      );
+    }
+  }, [transcript, isRecording]);
 
   const submit = useCallback(() => {
     if (value === '' || disabled) {
@@ -169,6 +205,32 @@ const Input = ({
           <TuneIcon />
         </IconButton>
       )}
+      {showTextToSpeech &&
+        (isRecording ? (
+          <IconButton
+            disabled={disabled}
+            color="inherit"
+            onClick={() => {
+              setIsRecording(false);
+              SpeechRecognition.stopListening();
+            }}
+          >
+            <StopCircleIcon />
+          </IconButton>
+        ) : (
+          <IconButton
+            disabled={disabled}
+            color="inherit"
+            onClick={() => {
+              setIsRecording(true);
+              SpeechRecognition.startListening({
+                continuous: true
+              });
+            }}
+          >
+            <KeyboardVoiceIcon />
+          </IconButton>
+        ))}
       <UploadButton
         disabled={disabled}
         fileSpec={fileSpec}

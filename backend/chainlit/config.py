@@ -50,6 +50,9 @@ prompt_playground = true
 # Authorize users to upload files with messages
 multi_modal = true
 
+# Allows user to use speech to text
+# speech_to_text = true
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
@@ -145,6 +148,7 @@ class Theme(DataClassJsonMixin):
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
     multi_modal: bool = True
+    speech_to_text: bool = True
 
 
 @dataclass()
