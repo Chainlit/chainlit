@@ -179,8 +179,44 @@ const addNestedMessage = (
     return updateMessageById(nestedMessages, message.id, message);
   } else if (message.parentId) {
     return addMessageToParent(nestedMessages, message.parentId, message);
+  } else if (message.indent && message.indent > 0) {
+    return addIndentMessage(nestedMessages, message.indent, message);
   } else {
     return [...nestedMessages, message];
+  }
+};
+
+const addIndentMessage = (
+  messages: INestedMessage[],
+  indent: number,
+  newMessage: IMessage,
+  currentIndentation: number = 0
+): INestedMessage[] => {
+  const nextMessages = [...messages];
+
+  if (nextMessages.length === 0) {
+    return [...nextMessages, newMessage];
+  } else {
+    const index = nextMessages.length - 1;
+    const msg = nextMessages[index];
+    msg.subMessages = msg.subMessages || [];
+
+    if (currentIndentation + 1 === indent) {
+      msg.subMessages = [...msg.subMessages, newMessage];
+      nextMessages[index] = { ...msg };
+
+      return nextMessages;
+    } else {
+      msg.subMessages = addIndentMessage(
+        msg.subMessages,
+        indent,
+        newMessage,
+        currentIndentation + 1
+      );
+
+      nextMessages[index] = { ...msg };
+      return nextMessages;
+    }
   }
 };
 
@@ -188,7 +224,7 @@ const addMessageToParent = (
   messages: INestedMessage[],
   parentId: string,
   newMessage: IMessage
-) => {
+): INestedMessage[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
