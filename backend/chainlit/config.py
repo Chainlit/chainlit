@@ -51,7 +51,10 @@ prompt_playground = true
 multi_modal = true
 
 # Allows user to use speech to text
-# speech_to_text = true
+[features.speech_to_text]
+    enabled = false
+    # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
+    # language = "en-US"
 
 [UI]
 # Name of the app and chatbot.
@@ -144,11 +147,17 @@ class Theme(DataClassJsonMixin):
     dark: Optional[Palette] = None
 
 
+@dataclass
+class SpeechToTextFeature:
+    enabled: Optional[bool] = None
+    language: Optional[str] = None
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
     multi_modal: bool = True
-    speech_to_text: bool = True
+    speech_to_text: Optional[SpeechToTextFeature] = None
 
 
 @dataclass()

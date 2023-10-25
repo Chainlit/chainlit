@@ -55,7 +55,6 @@ const Input = memo(
     const { loading, askUser, chatSettingsInputs, disabled } = useChatData();
     const { transcript, browserSupportsSpeechRecognition } =
       useSpeechRecognition();
-
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -63,9 +62,7 @@ const Input = memo(
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
     const showTextToSpeech =
-      (pSettings?.features.speech_to_text === undefined
-        ? true
-        : pSettings?.features.speech_to_text) &&
+      pSettings?.features.speech_to_text?.enabled &&
       browserSupportsSpeechRecognition;
 
     useEffect(() => {
@@ -213,7 +210,8 @@ const Input = memo(
               onClick={() => {
                 setIsRecording(true);
                 SpeechRecognition.startListening({
-                  continuous: true
+                  continuous: true,
+                  language: pSettings?.features.speech_to_text?.language
                 });
               }}
             >
@@ -228,7 +226,6 @@ const Input = memo(
         />
       </>
     );
-
     const endAdornment = (
       <IconButton disabled={disabled} color="inherit" onClick={() => submit()}>
         <SendIcon />
