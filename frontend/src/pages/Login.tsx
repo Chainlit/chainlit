@@ -12,8 +12,9 @@ import { useQuery } from 'hooks/query';
 export default function Login() {
   const query = useQuery();
   const { config, setAccessToken, user } = useAuth();
-  const navigate = useNavigate();
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleHeaderAuth = async () => {
     const res = await fetch(httpEndpoint + '/auth/header', {

@@ -1,20 +1,23 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 import { useMemo } from 'react';
+import { useSetRecoilState } from 'recoil';
 import Dialog from 'src/Dialog';
 import { AccentButton } from 'src/buttons/AccentButton';
 import { TextInput } from 'src/inputs';
+import { updateMessageById } from 'utils/message';
 
 import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
-import { IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+
+import { messagesState } from 'hooks/useChat/state';
 
 import { IMessage } from 'src/types/message';
 
@@ -26,12 +29,17 @@ interface Props {
 
 const FeedbackButtons = ({ message }: Props) => {
   const { onFeedbackUpdated } = useContext(MessageContext);
-  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
-  const [comment, setComment] = useState(message.humanFeedbackComment);
-  const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
-  const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
+
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
+
+  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
+  const [comment, setComment] = useState(message.humanFeedbackComment);
+
+  const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
+  const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
+
+  const setMessages = useSetRecoilState(messagesState);
 
   const handleFeedbackChanged = (feedback: number, comment?: string) => {
     onFeedbackUpdated &&
@@ -41,6 +49,13 @@ const FeedbackButtons = ({ message }: Props) => {
         () => {
           setFeedback(feedback);
           setComment(comment);
+          setMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              humanFeedback: feedback,
+              humanFeedbackComment: comment
+            })
+          );
         },
         comment
       );
@@ -55,6 +70,15 @@ const FeedbackButtons = ({ message }: Props) => {
   };
 
   const buttons = useMemo(() => {
+    const iconSx = {
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      color: (theme) =>
+        theme.palette.mode === 'light'
+          ? theme.palette.grey[600]
+          : theme.palette.text.primary
+    };
+
     const baseButtons = [
       () => (
         <Tooltip title="Negative feedback">
@@ -65,9 +89,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <IconButton disableRipple>
-              <DownIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
-            </IconButton>
+            <DownIcon sx={iconSx} />
           </Button>
         </Tooltip>
       ),
@@ -80,9 +102,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <IconButton disableRipple>
-              <UpIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
-            </IconButton>
+            <UpIcon sx={iconSx} />
           </Button>
         </Tooltip>
       )
@@ -99,7 +119,7 @@ const FeedbackButtons = ({ message }: Props) => {
             className="feedback-comment-edit"
             size="small"
           >
-            <StickyNote2Outlined sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+            <StickyNote2Outlined sx={iconSx} />
           </Button>
         </Tooltip>
       ));

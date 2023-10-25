@@ -7,7 +7,8 @@ import {
   SelectionState
 } from 'draft-js';
 import { OrderedSet } from 'immutable';
-import { isEqual, merge } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import merge from 'lodash/merge';
 import { useContext, useRef, useState } from 'react';
 import EditorWrapper from 'src/playground/editor/EditorWrapper';
 import {

@@ -18,10 +18,11 @@ export const useAuth = () => {
     headerAuth: boolean;
     oauthProviders: string[];
   }>('/auth/config', fetcher);
-  const isReady = !!(!isLoadingConfig && config);
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setConversationsHistory = useSetRecoilState(conversationsHistoryState);
   const [user, setUser] = useRecoilState(userState);
+
+  const isReady = !!(!isLoadingConfig && config);
 
   const logout = () => {
     setUser(null);

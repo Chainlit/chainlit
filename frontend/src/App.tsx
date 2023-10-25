@@ -8,7 +8,7 @@ import { router } from 'router';
 import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
-import { useChat } from '@chainlit/components';
+import { useChatSession } from '@chainlit/components';
 import { makeTheme } from '@chainlit/components/theme';
 
 import Hotkeys from 'components/Hotkeys';
@@ -74,7 +74,7 @@ function App() {
   const theme = overrideTheme(makeTheme(themeVariant));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
-  const { connect } = useChat();
+  const { connect } = useChatSession();
 
   useEffect(() => {
     if (

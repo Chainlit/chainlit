@@ -1,5 +1,5 @@
 import { PlaygroundContext } from 'contexts/PlaygroundContext';
-import { map } from 'lodash';
+import map from 'lodash/map';
 import { useContext } from 'react';
 import { SelectInput } from 'src/inputs/selects/SelectInput';
 

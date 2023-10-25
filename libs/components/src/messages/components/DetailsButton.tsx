@@ -6,10 +6,10 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { INestedMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 interface Props {
-  message: INestedMessage;
+  message: IMessage;
   opened: boolean;
   loading?: boolean;
   onClick: () => void;

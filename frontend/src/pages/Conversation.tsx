@@ -6,12 +6,24 @@ import { Box } from '@mui/material';
 
 import { Conversation } from 'components/organisms/conversationsHistory/Conversation';
 
+import { useApi } from 'hooks/useApi';
+
 import { conversationsHistoryState } from 'state/conversations';
+
+import { IChat } from 'types/chat';
 
 import Page from './Page';
 
 export default function ConversationPage() {
   const { id } = useParams();
+  const { data, error, isLoading } = useApi<IChat>(
+    id ? `/project/conversation/${id}` : null,
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false
+    }
+  );
+
   const [conversations, setConversations] = useRecoilState(
     conversationsHistoryState
   );
@@ -34,11 +46,13 @@ export default function ConversationPage() {
           gap: 2
         }}
       >
-        {id ? (
-          <Box sx={{ width: '100%' }}>
-            <Conversation id={id} />
-          </Box>
-        ) : null}
+        <Box sx={{ width: '100%' }}>
+          <Conversation
+            conversation={data}
+            error={error}
+            isLoading={isLoading}
+          />
+        </Box>
       </Box>
     </Page>
   );

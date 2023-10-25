@@ -40,9 +40,6 @@ export interface IMessage {
   prompt?: IPrompt;
   streaming?: boolean;
   waitForAnswer?: boolean;
-}
-
-export interface INestedMessage extends IMessage {
   subMessages?: IMessage[];
 }
 

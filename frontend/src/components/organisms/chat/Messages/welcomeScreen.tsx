@@ -1,17 +1,11 @@
-import { useRecoilValue } from 'recoil';
+import { memo } from 'react';
 
 import { Box } from '@mui/material';
 
 import Markdown from 'components/molecules/markdown';
 
-import { projectSettingsState } from 'state/project';
-
-const WelcomeScreen = () => {
-  const pSettings = useRecoilValue(projectSettingsState);
-
-  if (!pSettings?.markdown) {
-    return <Box flexGrow={1} />;
-  }
+const WelcomeScreen = memo(({ markdown }: { markdown?: string }) => {
+  if (!markdown) return <Box flexGrow={1} />;
 
   return (
     <Box overflow="auto" flexGrow={1}>
@@ -32,12 +26,10 @@ const WelcomeScreen = () => {
           flexDirection: 'column'
         }}
       >
-        {pSettings?.markdown ? (
-          <Markdown content={pSettings?.markdown} />
-        ) : null}
+        <Markdown content={markdown} />
       </Box>
     </Box>
   );
-};
+});
 
 export default WelcomeScreen;

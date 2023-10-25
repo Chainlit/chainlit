@@ -3,7 +3,11 @@ import { useParams } from 'react-router-dom';
 
 import Page from 'pages/Page';
 
-import { ElementView, IMessageElement, useChat } from '@chainlit/components';
+import {
+  ElementView,
+  IMessageElement,
+  useChatData
+} from '@chainlit/components';
 
 import { useQuery } from 'hooks/query';
 import { useApi } from 'hooks/useApi';
@@ -11,7 +15,7 @@ import { useApi } from 'hooks/useApi';
 export default function Element() {
   const { id } = useParams();
   const query = useQuery();
-  const { elements } = useChat();
+  const { elements } = useChatData();
 
   const [element, setElement] = useState<IMessageElement | null>(null);
 
