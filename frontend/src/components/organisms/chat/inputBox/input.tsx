@@ -66,9 +66,10 @@ const Input = ({
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [pSettings] = useRecoilState(projectSettingsState);
   const showTextToSpeech =
-    (pSettings?.features.speech_to_text === undefined
+    (pSettings?.features.speech_to_text?.enabled === undefined
       ? true
-      : pSettings?.features.speech_to_text) && browserSupportsSpeechRecognition;
+      : pSettings?.features.speech_to_text?.enabled) &&
+    browserSupportsSpeechRecognition;
   const [lastTranscript, setLastTranscript] = useState('');
 
   useEffect(() => {
@@ -224,7 +225,8 @@ const Input = ({
             onClick={() => {
               setIsRecording(true);
               SpeechRecognition.startListening({
-                continuous: true
+                continuous: true,
+                language: pSettings?.features.speech_to_text?.language
               });
             }}
           >

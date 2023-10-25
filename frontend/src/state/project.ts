@@ -21,7 +21,10 @@ export interface IProjectSettings {
   };
   features: {
     multi_modal?: boolean;
-    speech_to_text?: boolean;
+    speech_to_text?: {
+      enabled?: boolean;
+      language?: string;
+    };
   };
   userEnv: string[];
   dataPersistence: boolean;
