@@ -29,12 +29,16 @@ interface Props {
 
 const FeedbackButtons = ({ message }: Props) => {
   const { onFeedbackUpdated } = useContext(MessageContext);
-  const feedback = message.humanFeedback || 0;
-  const comment = message.humanFeedbackComment;
-  const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
-  const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
+
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
+
+  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
+  const [comment, setComment] = useState(message.humanFeedbackComment);
+
+  const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
+  const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
+
   const setMessages = useSetRecoilState(messagesState);
 
   const handleFeedbackChanged = (feedback: number, comment?: string) => {
@@ -42,14 +46,17 @@ const FeedbackButtons = ({ message }: Props) => {
       onFeedbackUpdated(
         message.id,
         feedback,
-        () =>
+        () => {
+          setFeedback(feedback);
+          setComment(comment);
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
               humanFeedback: feedback,
               humanFeedbackComment: comment
             })
-          ),
+          );
+        },
         comment
       );
   };
@@ -63,6 +70,15 @@ const FeedbackButtons = ({ message }: Props) => {
   };
 
   const buttons = useMemo(() => {
+    const iconSx = {
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      color: (theme) =>
+        theme.palette.mode === 'light'
+          ? theme.palette.grey[600]
+          : theme.palette.text.primary
+    };
+
     const baseButtons = [
       () => (
         <Tooltip title="Negative feedback">
@@ -73,7 +89,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <DownIcon sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+            <DownIcon sx={iconSx} />
           </Button>
         </Tooltip>
       ),
@@ -86,16 +102,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             size="small"
           >
-            <UpIcon
-              sx={{
-                width: ICON_SIZE,
-                height: ICON_SIZE,
-                color: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? theme.palette.grey[600]
-                    : theme.palette.text.primary
-              }}
-            />
+            <UpIcon sx={iconSx} />
           </Button>
         </Tooltip>
       )
@@ -112,7 +119,7 @@ const FeedbackButtons = ({ message }: Props) => {
             className="feedback-comment-edit"
             size="small"
           >
-            <StickyNote2Outlined sx={{ width: ICON_SIZE, height: ICON_SIZE }} />
+            <StickyNote2Outlined sx={iconSx} />
           </Button>
         </Tooltip>
       ));
