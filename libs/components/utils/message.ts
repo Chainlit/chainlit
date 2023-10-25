@@ -3,76 +3,13 @@ import isEqual from 'lodash/isEqual';
 import { IMessageElement } from 'src/types/element';
 import { IMessage, IMessageContent } from 'src/types/message';
 
-const addToParent = (
-  parentId: string | undefined,
-  child: IMessage,
-  nestedMessages: IMessage[],
-  lookup: Record<string, IMessage>
-): void => {
-  if (parentId) {
-    const parent = lookup[parentId];
-    if (!parent) return;
-    if (!parent.subMessages) parent.subMessages = [];
-    parent.subMessages.push(child);
-  } else {
-    nestedMessages.push(child);
-  }
-};
-
-// Nest messages based on parent id
 const nestMessages = (messages: IMessage[]): IMessage[] => {
-  const nestedMessages: IMessage[] = [];
-  const lookup: Record<string, IMessage> = {};
+  let nestedMessages: IMessage[] = [];
 
   for (const message of messages) {
-    const nestedMessage: IMessage = { ...message };
-    if (message.id) lookup[message.id] = nestedMessage;
+    nestedMessages = addMessage(nestedMessages, message);
   }
 
-  for (const message of messages) {
-    if (!message.id) {
-      nestedMessages.push({ ...message });
-      continue;
-    }
-
-    const nestedMessage = lookup[message.id];
-    if (!nestedMessage) continue;
-
-    addToParent(message.parentId, nestedMessage, nestedMessages, lookup);
-  }
-  return legacyNestMessages(nestedMessages);
-};
-
-// Nest messages based on deprecated indent parameter
-const legacyNestMessages = (messages: IMessage[]): IMessage[] => {
-  const nestedMessages: IMessage[] = [];
-  const parentStack: IMessage[] = [];
-
-  for (const message of messages) {
-    const nestedMessage: IMessage = { ...message };
-    const messageIndent = message.indent || 0;
-
-    if (messageIndent && !message.authorIsUser && !message.waitForAnswer) {
-      while (
-        parentStack.length > 0 &&
-        (parentStack[parentStack.length - 1].indent || 0) >= messageIndent
-      ) {
-        parentStack.pop();
-      }
-
-      const currentParent = parentStack[parentStack.length - 1];
-
-      if (currentParent) {
-        if (!currentParent.subMessages) {
-          currentParent.subMessages = [];
-        }
-        currentParent.subMessages.push(nestedMessage);
-      }
-    } else {
-      nestedMessages.push(nestedMessage);
-    }
-    parentStack.push(nestedMessage);
-  }
   return nestedMessages;
 };
 
@@ -340,7 +277,6 @@ export {
   deleteMessageById,
   hasMessageById,
   isLastMessage,
-  legacyNestMessages,
   nestMessages,
   prepareContent,
   updateMessageById,
