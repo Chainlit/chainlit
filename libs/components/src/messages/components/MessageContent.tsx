@@ -36,83 +36,81 @@ const MessageContent = memo(
 
     if (!preparedContent) return null;
 
-    const renderContent = () => (
-      <Stack direction="row">
-        <Typography
-          sx={{
-            width: '100%',
-            minHeight: '20px',
-            fontSize: '1rem',
-            lineHeight: '1.5rem',
-            fontFamily: 'Inter',
-            fontWeight: message.authorIsUser ? 500 : 300
-          }}
-          component="div"
-        >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            className="markdown-body"
-            components={{
-              a({ children, ...props }) {
-                const name = children[0] as string;
-                const element = refElements.find((e) => e.name === name);
+    const markdownContent = (
+      <Typography
+        sx={{
+          width: '100%',
+          minHeight: '20px',
+          fontSize: '1rem',
+          lineHeight: '1.5rem',
+          fontFamily: 'Inter',
+          fontWeight: message.authorIsUser ? 500 : 300
+        }}
+        component="div"
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          className="markdown-body"
+          components={{
+            a({ children, ...props }) {
+              const name = children[0] as string;
+              const element = refElements.find((e) => e.name === name);
 
-                if (element) {
-                  return <ElementRef element={element} />;
-                } else {
-                  return (
-                    <Link {...props} target="_blank">
-                      {children}
-                    </Link>
-                  );
-                }
-              },
-              code({ ...props }) {
-                return <Code {...props} />;
-              },
-              table({ children, ...props }) {
+              if (element) {
+                return <ElementRef element={element} />;
+              } else {
                 return (
-                  <TableContainer
-                    sx={{
-                      width: 'fit-content',
-                      minWidth: '300px'
-                    }}
-                    elevation={0}
-                    component={Paper}
-                  >
-                    <Table {...props}>{children}</Table>
-                  </TableContainer>
-                );
-              },
-              thead({ children, ...props }) {
-                return <TableHead {...props}>{children}</TableHead>;
-              },
-              tr({ children, ...props }) {
-                return <TableRow {...props}>{children}</TableRow>;
-              },
-              th({ children, ...props }) {
-                return (
-                  <TableCell {...props} align="right" sx={{ padding: 1 }}>
+                  <Link {...props} target="_blank">
                     {children}
-                  </TableCell>
+                  </Link>
                 );
-              },
-              td({ children, ...props }) {
-                return (
-                  <TableCell {...props} align="right" sx={{ padding: 1 }}>
-                    {children}
-                  </TableCell>
-                );
-              },
-              tbody({ children, ...props }) {
-                return <TableBody {...props}>{children}</TableBody>;
               }
-            }}
-          >
-            {preparedContent}
-          </ReactMarkdown>
-        </Typography>
-      </Stack>
+            },
+            code({ ...props }) {
+              return <Code {...props} />;
+            },
+            table({ children, ...props }) {
+              return (
+                <TableContainer
+                  sx={{
+                    width: 'fit-content',
+                    minWidth: '300px'
+                  }}
+                  elevation={0}
+                  component={Paper}
+                >
+                  <Table {...props}>{children}</Table>
+                </TableContainer>
+              );
+            },
+            thead({ children, ...props }) {
+              return <TableHead {...props}>{children}</TableHead>;
+            },
+            tr({ children, ...props }) {
+              return <TableRow {...props}>{children}</TableRow>;
+            },
+            th({ children, ...props }) {
+              return (
+                <TableCell {...props} align="right" sx={{ padding: 1 }}>
+                  {children}
+                </TableCell>
+              );
+            },
+            td({ children, ...props }) {
+              return (
+                <TableCell {...props} align="right" sx={{ padding: 1 }}>
+                  {children}
+                </TableCell>
+              );
+            },
+            tbody({ children, ...props }) {
+              return <TableBody {...props}>{children}</TableBody>;
+            }
+          }}
+        >
+          {preparedContent}
+        </ReactMarkdown>
+      </Typography>
     );
 
     const lineCount = preparedContent.split('\n').length;
@@ -130,10 +128,10 @@ const MessageContent = memo(
                 exportToFile(preparedContent, `${message.id}.txt`)
               }
             >
-              {renderContent()}
+              {markdownContent}
             </Collapse>
           ) : (
-            renderContent()
+            markdownContent
           )}
           <InlinedElements elements={inlinedElements} />
         </Box>
