@@ -62,9 +62,7 @@ const Input = memo(
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
     const showTextToSpeech =
-      (pSettings?.features.speech_to_text?.enabled === undefined
-        ? true
-        : pSettings?.features.speech_to_text?.enabled) &&
+      pSettings?.features.speech_to_text?.enabled &&
       browserSupportsSpeechRecognition;
 
     useEffect(() => {

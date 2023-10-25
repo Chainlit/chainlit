@@ -54,7 +54,7 @@ multi_modal = true
 [features.speech_to_text]
     enabled = false
     # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
-    # language = en-US 
+    # language = "en-US"
 
 [UI]
 # Name of the app and chatbot.
