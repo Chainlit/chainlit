@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import size from 'lodash/size';
+import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
@@ -7,7 +7,7 @@ import { Box, Popover, Tab, Tabs } from '@mui/material';
 import {
   InputStateHandler,
   grey,
-  useChat,
+  useChatInteract,
   useIsDarkMode
 } from '@chainlit/components';
 
@@ -17,12 +17,11 @@ import Markdown from './markdown';
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
-  const navigate = useNavigate();
   const pSettings = useRecoilValue(projectSettingsState);
   const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [chatProfileDescription, setChatProfileDescription] = useState('');
-  const { clear } = useChat();
+  const { clear } = useChatInteract();
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const isDarkMode = useIsDarkMode();
@@ -40,19 +39,12 @@ export default function ChatProfiles() {
     setChatProfile(newChatProfile);
     setNewChatProfile(null);
     clear();
-    navigate('/');
     handleClose();
   };
 
-  useEffect(() => {
-    if (
-      !chatProfileValue &&
-      pSettings?.chatProfiles &&
-      pSettings.chatProfiles.length > 0
-    ) {
-      setChatProfile(pSettings.chatProfiles[0].name);
-    }
-  }, [pSettings?.chatProfiles, chatProfileValue]);
+  if (!chatProfileValue && size(pSettings?.chatProfiles) > 0) {
+    setChatProfile(pSettings?.chatProfiles[0].name);
+  }
 
   if (typeof pSettings === 'undefined' || pSettings.chatProfiles.length <= 1) {
     return null;

@@ -27,19 +27,21 @@ const ActionButton = ({ action, margin, onClick }: ActionProps) => {
 
   return (
     <Tooltip title={action.description} placement="top">
-      <Button
-        size="small"
-        variant="outlined"
-        sx={{
-          textTransform: 'none',
-          margin
-        }}
-        id={action.id}
-        onClick={handleClick}
-        disabled={loading || isDisabled}
-      >
-        {action.label || action.name}
-      </Button>
+      <span>
+        <Button
+          size="small"
+          variant="outlined"
+          sx={{
+            textTransform: 'none',
+            margin
+          }}
+          id={action.id}
+          onClick={handleClick}
+          disabled={loading || isDisabled}
+        >
+          {action.label || action.name}
+        </Button>
+      </span>
     </Tooltip>
   );
 };

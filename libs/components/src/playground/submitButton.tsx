@@ -1,5 +1,5 @@
 import { PlaygroundContext } from 'contexts/PlaygroundContext';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { useContext, useState } from 'react';
 import { AccentButton, RegularButton } from 'src/buttons';
 import { getProviders } from 'src/playground/helpers/provider';

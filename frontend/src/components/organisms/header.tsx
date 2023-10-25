@@ -1,6 +1,5 @@
-import { useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import {
@@ -23,7 +22,7 @@ import NewChatButton from 'components/molecules/newChatButton';
 
 import { useAuth } from 'hooks/auth';
 
-import { projectSettingsState } from 'state/project';
+import { IProjectSettings } from 'state/project';
 
 import OpenChatHistoryButton from './conversationsHistory/sidebar/OpenChatHistoryButton';
 
@@ -62,9 +61,10 @@ function NavItem({ to, label }: INavItem) {
 interface NavProps {
   dataPersistence?: boolean;
   hasReadme?: boolean;
+  matches?: boolean;
 }
 
-function Nav({ dataPersistence, hasReadme }: NavProps) {
+const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
@@ -76,7 +76,6 @@ function Nav({ dataPersistence, hasReadme }: NavProps) {
     anchorEl = ref.current;
   }
 
-  const isMobile = useMediaQuery('(max-width: 66rem)');
   const tabs = [{ to: '/', label: 'Chat' }];
 
   if (hasReadme) {
@@ -84,7 +83,7 @@ function Nav({ dataPersistence, hasReadme }: NavProps) {
   }
 
   const nav = (
-    <Stack direction={isMobile ? 'column' : 'row'} spacing={1}>
+    <Stack direction={matches ? 'column' : 'row'} spacing={1}>
       {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
@@ -96,7 +95,7 @@ function Nav({ dataPersistence, hasReadme }: NavProps) {
     </Stack>
   );
 
-  if (isMobile) {
+  if (matches) {
     return (
       <>
         <IconButton
@@ -140,44 +139,48 @@ function Nav({ dataPersistence, hasReadme }: NavProps) {
   } else {
     return nav;
   }
-}
+};
 
-export default function Header() {
-  const pSettings = useRecoilValue(projectSettingsState);
-  const matches = useMediaQuery('(max-width: 66rem)');
+const Header = memo(
+  ({ projectSettings }: { projectSettings?: IProjectSettings }) => {
+    const matches = useMediaQuery('(max-width: 66rem)');
 
-  return (
-    <AppBar elevation={0} color="transparent" position="static">
-      <Toolbar
-        sx={{
-          padding: (theme) => `0 ${theme.spacing(2)} !important`,
-          minHeight: '60px !important',
-          borderBottomWidth: '1px',
-          borderBottomStyle: 'solid',
-          background: (theme) => theme.palette.background.paper,
-          borderBottomColor: (theme) => theme.palette.divider
-        }}
-      >
-        <Stack alignItems="center" direction={'row'} gap={!matches ? 3 : 1}>
-          {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
-          <Nav
-            dataPersistence={pSettings?.dataPersistence}
-            hasReadme={!!pSettings?.markdown}
-          />
-        </Stack>
-        <Stack
-          alignItems="center"
-          sx={{ ml: 'auto' }}
-          direction="row"
-          spacing={1}
-          color="text.primary"
+    return (
+      <AppBar elevation={0} color="transparent" position="static">
+        <Toolbar
+          sx={{
+            padding: (theme) => `0 ${theme.spacing(2)} !important`,
+            minHeight: '60px !important',
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid',
+            background: (theme) => theme.palette.background.paper,
+            borderBottomColor: (theme) => theme.palette.divider
+          }}
         >
-          <NewChatButton />
-          <Box ml={1} />
-          <GithubButton href={pSettings?.ui?.github} />
-          <UserButton />
-        </Stack>
-      </Toolbar>
-    </AppBar>
-  );
-}
+          <Stack alignItems="center" direction={'row'} gap={!matches ? 3 : 1}>
+            {!matches ? <Logo style={{ maxHeight: '25px' }} /> : null}
+            <Nav
+              matches={matches}
+              dataPersistence={projectSettings?.dataPersistence}
+              hasReadme={!!projectSettings?.markdown}
+            />
+          </Stack>
+          <Stack
+            alignItems="center"
+            sx={{ ml: 'auto' }}
+            direction="row"
+            spacing={1}
+            color="text.primary"
+          >
+            <NewChatButton />
+            <Box ml={1} />
+            <GithubButton href={projectSettings?.ui?.github} />
+            <UserButton />
+          </Stack>
+        </Toolbar>
+      </AppBar>
+    );
+  }
+);
+
+export { Header };

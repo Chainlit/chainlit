@@ -186,15 +186,15 @@ class ChainlitEmitter(BaseChainlitEmitter):
             # Send the prompt to the UI
             res = await self.ask_user(
                 {"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout
-            )
+            )  # type: Optional["MessageDict"]
 
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
 
-            if chainlit_client and res:
+            if res:
                 # If cloud is enabled, store the response in the database/S3
                 if spec.type == "text":
-                    await self.process_user_message(res)
+                    await self.process_user_message({"message": res, "files": None})
                 elif spec.type == "file":
                     # TODO: upload file to S3
                     pass

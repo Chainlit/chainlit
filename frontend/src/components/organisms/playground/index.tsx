@@ -1,34 +1,18 @@
 import { ChainlitAPI } from 'api/chainlitApi';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import {
-  IPlayground,
   IPlaygroundContext,
   IPrompt,
   PromptPlayground
 } from '@chainlit/components';
 
-import { useApi } from 'hooks/useApi';
+import { useLLMProviders } from 'hooks/useLLMProviders';
 
 import { modeState, playgroundState, variableState } from 'state/playground';
 import { accessTokenState, userEnvState } from 'state/user';
-
-function LLMProviders() {
-  const { data, error } = useApi<IPlayground>('/project/llm-providers');
-  const setPlayground = useSetRecoilState(playgroundState);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(`Failed to fetch providers: ${error}`);
-    }
-    if (!data) return;
-    setPlayground((old) => ({ ...old, providers: data.providers }));
-  }, [data, error]);
-
-  return null;
-}
 
 export default function PlaygroundWrapper() {
   const accessToken = useRecoilValue(accessTokenState);
@@ -36,6 +20,11 @@ export default function PlaygroundWrapper() {
   const [variableName, setVariableName] = useRecoilState(variableState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
   const [promptMode, setPromptMode] = useRecoilState(modeState);
+
+  const shoulFetchProviders =
+    playground?.prompt && !playground?.providers?.length;
+
+  useLLMProviders(shoulFetchProviders);
 
   const onNotification: IPlaygroundContext['onNotification'] = useCallback(
     (type, content) => {
@@ -70,11 +59,8 @@ export default function PlaygroundWrapper() {
     [accessToken]
   );
 
-  const fetchProviders = playground?.prompt && !playground?.providers?.length;
-
   return (
     <>
-      {fetchProviders ? <LLMProviders /> : null}
       <PromptPlayground
         context={{
           setVariableName,

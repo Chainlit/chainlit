@@ -1,12 +1,11 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
 
 import { ConversationsHistorySidebar } from 'components/organisms/conversationsHistory/sidebar';
 import OpenChatHistoryButton from 'components/organisms/conversationsHistory/sidebar/OpenChatHistoryButton';
-import Header from 'components/organisms/header';
+import { Header } from 'components/organisms/header';
 
 import { useAuth } from 'hooks/auth';
 
@@ -19,20 +18,18 @@ type Props = {
 
 const Page = ({ children }: Props) => {
   const { isAuthenticated } = useAuth();
-  const pSettings = useRecoilValue(projectSettingsState);
+  const projectSettings = useRecoilValue(projectSettingsState);
   const userEnv = useRecoilValue(userEnvState);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (pSettings?.userEnv) {
-      for (const key of pSettings.userEnv || []) {
-        if (!userEnv[key]) navigate('/env');
-      }
+  if (projectSettings?.userEnv) {
+    for (const key of projectSettings.userEnv || []) {
+      if (!userEnv[key]) return <Navigate to="/env" />;
     }
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [pSettings, isAuthenticated, userEnv]);
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <Box
@@ -42,7 +39,7 @@ const Page = ({ children }: Props) => {
         width: '100%'
       }}
     >
-      <Header />
+      <Header projectSettings={projectSettings} />
       {!isAuthenticated ? (
         <Alert severity="error">You are not part of this project.</Alert>
       ) : (

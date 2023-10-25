@@ -35,15 +35,17 @@ const UploadButton = ({
 
   return (
     <Tooltip title="Upload files">
-      <IconButton
-        id={uploading ? 'upload-button-loading' : 'upload-button'}
-        disabled={uploading || disabled}
-        color="inherit"
-        {...getRootProps({ className: 'dropzone' })}
-      >
+      <span>
         <input id="upload-button-input" {...getInputProps()} />
-        <Add />
-      </IconButton>
+        <IconButton
+          id={uploading ? 'upload-button-loading' : 'upload-button'}
+          disabled={uploading || disabled}
+          color="inherit"
+          {...getRootProps({ className: 'dropzone' })}
+        >
+          <Add />
+        </IconButton>
+      </span>
     </Tooltip>
   );
 };

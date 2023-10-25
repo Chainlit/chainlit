@@ -1,6 +1,6 @@
 import { keyframes } from '@emotion/react';
 import { MessageContext } from 'contexts/MessageContext';
-import { useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -13,12 +13,12 @@ import { MessageContent } from './components/MessageContent';
 
 import { IAction } from 'src/types/action';
 import { IMessageElement } from 'src/types/element';
-import { INestedMessage } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 import { Messages } from './Messages';
 
 interface Props {
-  message: INestedMessage;
+  message: IMessage;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -28,100 +28,107 @@ interface Props {
   isLast?: boolean;
 }
 
-const Message = ({
-  message,
-  elements,
-  actions,
-  indent,
-  showAvatar,
-  showBorder,
-  isRunning,
-  isLast
-}: Props) => {
-  const messageContext = useContext(MessageContext);
-  const [showDetails, setShowDetails] = useState(messageContext.expandAll);
+const Message = memo(
+  ({
+    message,
+    elements,
+    actions,
+    indent,
+    showAvatar,
+    showBorder,
+    isRunning,
+    isLast
+  }: Props) => {
+    const {
+      expandAll,
+      hideCot,
+      highlightedMessage,
+      defaultCollapseContent,
+      onError
+    } = useContext(MessageContext);
 
-  useEffect(() => {
-    setShowDetails(messageContext.expandAll);
-  }, [messageContext.expandAll]);
+    const [showDetails, setShowDetails] = useState(expandAll);
 
-  if (messageContext.hideCot && indent) {
-    return null;
-  }
+    useEffect(() => {
+      setShowDetails(expandAll);
+    }, [expandAll]);
 
-  return (
-    <Box
-      sx={{
-        color: 'text.primary',
-        backgroundColor: (theme) =>
-          message.authorIsUser
-            ? 'transparent'
-            : theme.palette.mode === 'dark'
-            ? theme.palette.grey[800]
-            : theme.palette.grey[100]
-      }}
-      className="message"
-    >
+    if (hideCot && indent) {
+      return null;
+    }
+
+    return (
       <Box
         sx={{
-          boxSizing: 'border-box',
-          mx: 'auto',
-          maxWidth: '60rem',
-          px: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative'
+          color: 'text.primary',
+          backgroundColor: (theme) =>
+            message.authorIsUser
+              ? 'transparent'
+              : theme.palette.mode === 'dark'
+              ? theme.palette.grey[800]
+              : theme.palette.grey[100]
         }}
+        className="message"
       >
-        <Stack
-          id={`message-${message.id}`}
-          direction="row"
-          ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
+        <Box
           sx={{
-            py: 2,
-            borderBottom: (theme) =>
-              showBorder ? `1px solid ${theme.palette.divider}` : 'none',
-            animation:
-              message.id && messageContext.highlightedMessage === message.id
-                ? `3s ease-in-out 0.1s ${flash}`
-                : 'none',
-            overflowX: 'auto'
+            boxSizing: 'border-box',
+            mx: 'auto',
+            maxWidth: '60rem',
+            px: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative'
           }}
         >
-          <Author message={message} show={showAvatar} />
-          <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
-            <MessageContent
-              elements={elements}
-              message={message}
-              preserveSize={
-                !!message.streaming || !messageContext.defaultCollapseContent
-              }
-            />
-            <DetailsButton
-              message={message}
-              opened={showDetails}
-              onClick={() => setShowDetails(!showDetails)}
-              loading={isRunning}
-            />
-            {!isRunning && isLast && message.waitForAnswer && (
-              <AskUploadButton onError={messageContext.onError} />
-            )}
-            <MessageActions message={message} actions={actions} />
+          <Stack
+            id={`message-${message.id}`}
+            direction="row"
+            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
+            sx={{
+              py: 2,
+              borderBottom: (theme) =>
+                showBorder ? `1px solid ${theme.palette.divider}` : 'none',
+              animation:
+                message.id && highlightedMessage === message.id
+                  ? `3s ease-in-out 0.1s ${flash}`
+                  : 'none',
+              overflowX: 'auto'
+            }}
+          >
+            <Author message={message} show={showAvatar} />
+            <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
+              <MessageContent
+                elements={elements}
+                message={message}
+                preserveSize={!!message.streaming || !defaultCollapseContent}
+              />
+              <DetailsButton
+                message={message}
+                opened={showDetails}
+                onClick={() => setShowDetails(!showDetails)}
+                loading={isRunning}
+              />
+              {!isRunning && isLast && message.waitForAnswer && (
+                <AskUploadButton onError={onError} />
+              )}
+              <MessageActions message={message} actions={actions} />
+            </Stack>
           </Stack>
-        </Stack>
+        </Box>
+        {message.subMessages && showDetails && (
+          <Messages
+            messages={message.subMessages}
+            actions={actions}
+            elements={elements}
+            indent={indent + 1}
+            isRunning={isRunning}
+          />
+        )}
       </Box>
-      {message.subMessages && showDetails && (
-        <Messages
-          messages={message.subMessages}
-          actions={actions}
-          elements={elements}
-          indent={indent + 1}
-          isRunning={isRunning}
-        />
-      )}
-    </Box>
-  );
-};
+    );
+  }
+);
 
 // Uses yellow[500] with 50% opacity
 const flash = keyframes`

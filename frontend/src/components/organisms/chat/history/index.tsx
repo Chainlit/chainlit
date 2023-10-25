@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment*/
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
@@ -238,14 +238,19 @@ export default function HistoryButton({ disabled, onClick }: Props) {
     <div>
       {menu}
       <Tooltip title="Show history">
-        <IconButton
-          color="inherit"
-          disabled={disabled}
-          onClick={() => toggleChatHistoryMenu(!chatHistory.open)}
-          ref={ref}
-        >
-          <KeyboardDoubleArrowUpIcon />
-        </IconButton>
+        {
+          // In MUI, a warning is triggered if we pass a disabled button. To avoid this warning, we should wrap the button in a <span></span> element when it can be disabled.
+        }
+        <span>
+          <IconButton
+            color="inherit"
+            disabled={disabled}
+            onClick={() => toggleChatHistoryMenu(!chatHistory.open)}
+            ref={ref}
+          >
+            <KeyboardDoubleArrowUpIcon />
+          </IconButton>
+        </span>
       </Tooltip>
     </div>
   );

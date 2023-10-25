@@ -12,7 +12,7 @@ const fetcher = async (endpoint: string, token?: string) => {
 function useApi<T>(endpoint: string | null, options?: SWRConfiguration) {
   const { accessToken } = useAuth();
 
-  return useSWR<T>(
+  return useSWR<T, Error>(
     endpoint ? [endpoint, accessToken] : null,
     ([url, token]: [url: string, token: string]) => fetcher(url, token),
     options
