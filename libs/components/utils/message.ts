@@ -29,8 +29,6 @@ const isLastMessage = (messages: IMessage[], index: number) => {
   return true;
 };
 
-// <MessageContent/>
-
 const isForIdMatch = (
   id: string | number | undefined,
   forIds: string[] | undefined
@@ -186,8 +184,10 @@ const hasMessageById = (messages: IMessage[], messageId: string) => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
       return true;
-    } else if (message.subMessages) {
-      return hasMessageById(message.subMessages, messageId);
+    } else if (message.subMessages && message.subMessages.length > 0) {
+      if (hasMessageById(message.subMessages, messageId)) {
+        return true;
+      }
     }
   }
   return false;
