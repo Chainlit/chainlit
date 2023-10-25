@@ -1,6 +1,5 @@
 import size from 'lodash/size';
 import { useState } from 'react';
-import { redirect } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
@@ -40,7 +39,6 @@ export default function ChatProfiles() {
     setChatProfile(newChatProfile);
     setNewChatProfile(null);
     clear();
-    redirect('/');
     handleClose();
   };
 

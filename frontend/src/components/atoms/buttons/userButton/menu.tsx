@@ -1,4 +1,4 @@
-import { Link, redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import KeyIcon from '@mui/icons-material/Key';
@@ -74,7 +74,6 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       key="logout"
       onClick={() => {
         logout();
-        redirect('/');
         handleClose();
       }}
     >
