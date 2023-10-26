@@ -25,7 +25,7 @@ ElementSize = Literal["small", "medium", "large"]
 
 Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
 Provider = Literal[
-    "credentials", "header", "github", "google", "azure-ad", "okta", "auth0"
+    "credentials", "header", "github", "google", "azure-ad", "okta", "auth0", "descope"
 ]
 
 

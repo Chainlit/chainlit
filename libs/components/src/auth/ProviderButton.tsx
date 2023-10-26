@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 
 import { Auth0 } from './Auth0';
 import { Okta } from './Okta';
+import { Descope } from './Descope';
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -20,6 +21,8 @@ function getProviderName(provider: string) {
       return 'GitHub';
     case 'okta':
       return 'Okta';
+    case 'descope':
+      return 'Descope';
     default:
       return capitalizeFirstLetter(provider);
   }
@@ -37,6 +40,8 @@ function renderProviderIcon(provider: string) {
       return <Okta />;
     case 'auth0':
       return <Auth0 />;
+    case 'descope':
+      return <Descope />;
     default:
       return null;
   }
