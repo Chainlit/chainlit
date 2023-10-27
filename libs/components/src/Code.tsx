@@ -71,7 +71,13 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
   };
 
   return (
-    <code style={{ position: 'relative' }}>
+    <Box
+      sx={{
+        display: inline ? 'inline' : 'block',
+        position: 'relative',
+        maxWidth: '90%'
+      }}
+    >
       {!inline ? (
         <ClipboardCopy
           value={children[0] as string}
@@ -80,7 +86,7 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
         />
       ) : null}
       {renderCode()}
-    </code>
+    </Box>
   );
 };
 

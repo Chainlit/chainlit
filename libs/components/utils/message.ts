@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual';
 
 import { IMessageElement } from 'src/types/element';
-import { IMessage, IMessageContent } from 'src/types/message';
+import { IMessage } from 'src/types/message';
 
 const nestMessages = (messages: IMessage[]): IMessage[] => {
   let nestedMessages: IMessage[] = [];
@@ -49,7 +49,17 @@ const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
-const prepareContent = ({ elements, message }: IMessageContent) => {
+const prepareContent = ({
+  elements,
+  content,
+  id,
+  language
+}: {
+  elements: IMessageElement[];
+  content?: string;
+  id: string;
+  language?: string;
+}) => {
   const elementNames = elements.map((e) => escapeRegExp(e.name));
 
   // Sort by descending length to avoid matching substrings
@@ -59,9 +69,9 @@ const prepareContent = ({ elements, message }: IMessageContent) => {
     ? new RegExp(`(${elementNames.join('|')})`, 'g')
     : undefined;
 
-  let preparedContent = message.content ? message.content.trim() : '';
+  let preparedContent = content ? content.trim() : '';
   const inlinedElements = elements.filter(
-    (e) => isForIdMatch(message.id, e?.forIds) && e.display === 'inline'
+    (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
   );
   const refElements: IMessageElement[] = [];
 
@@ -70,7 +80,7 @@ const prepareContent = ({ elements, message }: IMessageContent) => {
       const element = elements.find((e) => {
         const nameMatch = e.name === match;
         const scopeMatch =
-          isGlobalMatch(e?.forIds) || isForIdMatch(message.id, e?.forIds);
+          isGlobalMatch(e?.forIds) || isForIdMatch(id, e?.forIds);
         return nameMatch && scopeMatch;
       });
       const foundElement = !!element;
@@ -94,8 +104,8 @@ const prepareContent = ({ elements, message }: IMessageContent) => {
     });
   }
 
-  if (message.language) {
-    preparedContent = `\`\`\`${message.language}\n${preparedContent}\n\`\`\``;
+  if (language) {
+    preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
   }
   return {
     preparedContent,
@@ -204,7 +214,7 @@ const updateMessageById = (
     const msg = nextMessages[index];
 
     if (isEqual(msg.id, messageId)) {
-      nextMessages[index] = { ...updatedMessage };
+      nextMessages[index] = { subMessages: msg.subMessages, ...updatedMessage };
     } else if (hasMessageById(nextMessages, messageId) && msg.subMessages) {
       msg.subMessages = updateMessageById(
         msg.subMessages,
