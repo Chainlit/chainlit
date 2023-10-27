@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [0.7.400] - 2023-10-27
+
+### Added
+
+- Support for Langchain Expression Language. https://docs.chainlit.io/integrations/langchain
+- UI rendering optimization to guarantee high framerate
+- Chainlit Cloud latency optimization
+- Speech recognition to type messages. https://docs.chainlit.io/backend/config/features
+- Descope OAuth provider
+
+### Changed
+
+- `LangchainCallbackHandler` is now displaying inputs and outputs of intermediate steps.
+
+### Fixed
+
+- AskUserMessage now work properly with data persistence
+- You can now use a custom okta authorization server for authentication
+
 ## [0.7.3] - 2023-10-17
 
 ### Added
