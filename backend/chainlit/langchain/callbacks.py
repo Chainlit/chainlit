@@ -318,8 +318,8 @@ class PromptHelper:
 
     def _build_llm_settings(
         self,
+        serialized: Dict,
         invocation_params: Optional[Dict] = None,
-        serialized: Dict = {},
     ):
         # invocation_params = run.extra.get("invocation_params")
         if invocation_params is None:
@@ -446,7 +446,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         parent_id = str(run.parent_run_id) if run.parent_run_id else root_message_id
         if run.run_type in ["chain", "prompt"]:
             # Prompt templates are contained in chains or prompts (lcel)
-            self._build_prompt(run.serialized, run.inputs)
+            self._build_prompt(run.serialized or {}, run.inputs)
 
         if run.run_type == "llm":
             msg = Message(
@@ -488,9 +488,9 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
 
         if run.run_type == "llm":
             provider, llm_settings = self._build_llm_settings(
-                run.extra.get("invocation_params"), run.serialized
+                (run.serialized or {}), (run.extra or {}).get("invocation_params")
             )
-            generations = run.outputs.get("generations", [])
+            generations = (run.outputs or {}).get("generations", [])
             completion = generations[0][0]["text"]
             generation_type = generations[0][0]["type"]
 
@@ -517,7 +517,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             # Add the response of the chain/tool
             self._run_sync(
                 Message(
-                    content=run.outputs,
+                    content=run.outputs or {},
                     language="json",
                     author=run.name,
                     parent_id=parent_id,
@@ -527,7 +527,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             self._run_sync(
                 Message(
                     id=run.id,
-                    content=run.outputs,
+                    content=run.outputs or {},
                     language="json",
                     author=run.name,
                     parent_id=parent_id,
