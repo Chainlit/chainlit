@@ -37,8 +37,8 @@ const ClipboardCopy = ({ value, theme }: ClipboardCopyProps): JSX.Element => {
         sx={{
           color: getColor(),
           position: 'absolute',
-          right: 4,
-          top: 4
+          right: 0,
+          top: 0
         }}
         onClick={() => {
           copy(value)

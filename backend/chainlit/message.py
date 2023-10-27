@@ -189,19 +189,23 @@ class Message(MessageBase):
         elements: Optional[List[ElementBased]] = None,
         disable_human_feedback: Optional[bool] = False,
         author_is_user: Optional[bool] = False,
+        id: Optional[uuid.UUID] = None,
     ):
         self.language = language
 
         if isinstance(content, dict):
-            self.content = json.dumps(content, indent=4)
-            self.language = "json"
+            try:
+                self.content = json.dumps(content, indent=4)
+                self.language = "json"
+            except TypeError:
+                self.content = str(content)
         elif isinstance(content, str):
             self.content = content
         else:
-            logger.warn(
-                f"Unsupported type {type(content)} for message content. Attempting to stringify it"
-            )
             self.content = str(content)
+
+        if id:
+            self.id = str(id)
 
         self.author = author
         self.author_is_user = author_is_user

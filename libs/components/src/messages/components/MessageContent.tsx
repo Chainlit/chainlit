@@ -30,8 +30,10 @@ const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of character
 const MessageContent = memo(
   ({ message, elements, preserveSize }: IMessageContent) => {
     const { preparedContent, inlinedElements, refElements } = prepareContent({
-      message,
-      elements
+      elements,
+      id: message.id,
+      content: message.content,
+      language: message.language
     });
 
     if (!preparedContent) return null;
