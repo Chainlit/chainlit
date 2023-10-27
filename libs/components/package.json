@@ -1,7 +1,7 @@
 {
   "name": "@chainlit/components",
   "description": "Reusable components of the Chainlit UI.",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "scripts": {
     "build": "tsup src/index.ts --clean --format esm,cjs --dts --external react --legacy-output --minify --sourcemap --treeshake",
     "build:watch": "tsup src/index.ts --watch --clean --format esm,cjs --dts --external react --legacy-output --minify --sourcemap --treeshake",
