@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IAppUser, Role } from 'types/user';
+import { IAppUser, Role } from '@chainlit/components';
 
 export const accessTokenState = atom<string | undefined>({
   key: 'AccessToken',

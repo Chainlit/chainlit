@@ -18,7 +18,7 @@ import PromptPlayground from 'components/organisms/playground';
 
 import { useAuth } from 'hooks/auth';
 
-import { chatProfile, projectSettingsState } from 'state/project';
+import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
 
@@ -70,38 +70,37 @@ function overrideTheme(theme: Theme) {
 function App() {
   const { theme: themeVariant } = useRecoilValue(settingsState);
   const pSettings = useRecoilValue(projectSettingsState);
-  const chatProfileValue = useRecoilValue(chatProfile);
   const theme = overrideTheme(makeTheme(themeVariant));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
-  const { connect } = useChatSession();
+  const { connect, chatProfile, setChatProfile } = useChatSession();
+
+  const pSettingsLoaded = !!pSettings;
+
+  const chatProfileOk = pSettingsLoaded
+    ? pSettings.chatProfiles.length
+      ? !!chatProfile
+      : true
+    : false;
 
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      pSettings?.chatProfiles &&
-      (pSettings.chatProfiles.length <= 1 || chatProfileValue)
-    ) {
-      // Autoselect the chat profile if there is only one
-      const chatProfile =
-        pSettings.chatProfiles.length === 1
-          ? pSettings.chatProfiles[0].name
-          : chatProfileValue;
+    if (!isAuthenticated) {
+      return;
+    } else if (!chatProfileOk) {
+      return;
+    } else {
       connect({
         wsEndpoint,
         userEnv,
-        accessToken,
-        chatProfile
+        accessToken
       });
     }
-  }, [
-    userEnv,
-    accessToken,
-    isAuthenticated,
-    connect,
-    pSettings?.chatProfiles,
-    chatProfileValue
-  ]);
+  }, [userEnv, accessToken, isAuthenticated, connect, chatProfileOk]);
+
+  if (pSettingsLoaded && pSettings.chatProfiles.length && !chatProfile) {
+    // Autoselect the chat profile if there is only one
+    setChatProfile(pSettings.chatProfiles[0].name);
+  }
 
   return (
     <ThemeProvider theme={theme}>

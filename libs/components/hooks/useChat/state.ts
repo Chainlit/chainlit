@@ -16,6 +16,16 @@ export interface ISession {
   error?: boolean;
 }
 
+export const conversationIdToResumeState = atom<string | undefined>({
+  key: 'ConversationIdToResume',
+  default: undefined
+});
+
+export const chatProfileState = atom<string | undefined>({
+  key: 'ChatProfile',
+  default: undefined
+});
+
 const sessionIdAtom = atom<string>({
   key: 'SessionId',
   default: uuidv4()

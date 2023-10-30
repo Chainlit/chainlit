@@ -180,6 +180,7 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                 id
                 createdAt
                 tags
+                metadata
                 messages {
                     id
                     isError
@@ -218,6 +219,22 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         self.check_for_errors(res, raise_error=True)
 
         return res["data"]["conversation"]
+
+    async def update_conversation_metadata(self, conversation_id: str, metadata: Dict):
+        mutation = """mutation ($conversationId: ID!, $metadata: Json!) {
+                    updateConversationMetadata(conversationId: $conversationId, metadata: $metadata) {
+                            id
+                    }
+                }"""
+        variables = {
+            "conversationId": conversation_id,
+            "metadata": metadata,
+        }
+
+        res = await self.mutation(mutation, variables)
+        self.check_for_errors(res, raise_error=True)
+
+        return True
 
     async def get_conversations(
         self, pagination: Pagination, filter: ConversationFilter

@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
+import { IAppUser } from '@chainlit/components';
+
 import { conversationsHistoryState } from 'state/conversations';
 import { accessTokenState, userState } from 'state/user';
-
-import { IAppUser } from 'types/user';
 
 import { fetcher } from './useApi';
 

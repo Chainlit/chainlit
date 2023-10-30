@@ -9,6 +9,7 @@ import {
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  conversationIdToResumeState,
   elementState,
   firstUserMessageState,
   loadingState,
@@ -35,10 +36,12 @@ const useChatInteract = () => {
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
+  const setIdToResume = useSetRecoilState(conversationIdToResumeState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
     session?.socket.disconnect();
+    setIdToResume(undefined);
     resetSessionId();
     setFirstUserMessage(undefined);
     setMessages([]);
@@ -95,6 +98,7 @@ const useChatInteract = () => {
     replyMessage,
     sendMessage,
     stopTask,
+    setIdToResume,
     updateChatSettings
   };
 };

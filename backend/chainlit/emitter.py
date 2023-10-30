@@ -2,8 +2,7 @@ import asyncio
 import uuid
 from typing import Any, Dict, Optional
 
-from chainlit.client.base import MessageDict
-from chainlit.data import chainlit_client
+from chainlit.client.base import ConversationDict, MessageDict
 from chainlit.element import Element
 from chainlit.message import Message
 from chainlit.session import BaseSession, WebsocketSession
@@ -29,6 +28,10 @@ class BaseChainlitEmitter:
 
     async def ask_user(self):
         """Stub method to get the 'ask_user' property from the session."""
+        pass
+
+    async def resume_conversation(self, conv_dict: ConversationDict):
+        """Stub method to resume a conversation."""
         pass
 
     async def send_message(self, msg_dict: dict):
@@ -119,6 +122,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def ask_user(self):
         """Get the 'ask_user' property from the session."""
         return self._get_session_property("ask_user")
+
+    def resume_conversation(self, conv_dict: ConversationDict):
+        """Send a conversation to the UI to resume it"""
+        return self.emit("resume_conversation", conv_dict)
 
     def send_message(self, msg_dict: Dict):
         """Send a message to the UI."""

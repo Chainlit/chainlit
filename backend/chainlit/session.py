@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 if TYPE_CHECKING:
@@ -7,6 +8,18 @@ if TYPE_CHECKING:
 
 from chainlit.client.cloud import AppUser, PersistedAppUser
 from chainlit.data import chainlit_client
+
+
+class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
+    def default(self, obj):
+        try:
+            return super(JSONEncoderIgnoreNonSerializable, self).default(obj)
+        except TypeError:
+            return None
+
+
+def clean_metadata(metadata: Dict):
+    return json.loads(json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable))
 
 
 class BaseSession:
@@ -26,6 +39,8 @@ class BaseSession:
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Conversation id to resume
+        conversation_id: Optional[str] = None,
     ):
         self.user = user
         self.token = token
@@ -35,7 +50,7 @@ class BaseSession:
         self.chat_profile = chat_profile
 
         self.id = id
-        self.conversation_id: Optional[str] = None
+        self.conversation_id = conversation_id
 
         self.chat_settings: Dict[str, Any] = {}
 
@@ -59,6 +74,15 @@ class BaseSession:
                     app_user_id=app_user_id, tags=tags
                 )
         return self.conversation_id
+
+    def to_persistable(self) -> Dict:
+        from chainlit.user_session import user_sessions
+
+        user_session = user_sessions.get(self.id) or {}  # type: Dict
+        user_session["chat_settings"] = self.chat_settings
+        user_session["chat_profile"] = self.chat_profile
+        metadata = clean_metadata(user_session)
+        return metadata
 
 
 class HTTPSession(BaseSession):
@@ -114,6 +138,8 @@ class WebsocketSession(BaseSession):
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Conversation id to resume
+        conversation_id: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -122,6 +148,7 @@ class WebsocketSession(BaseSession):
             user_env=user_env,
             root_message=root_message,
             chat_profile=chat_profile,
+            conversation_id=conversation_id,
         )
 
         self.socket_id = socket_id
