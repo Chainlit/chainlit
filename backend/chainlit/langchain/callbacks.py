@@ -183,6 +183,9 @@ class PromptHelper:
         template_format = kwargs.get("template_format")
         stringified_inputs = {k: str(v) for (k, v) in inputs.items()}
 
+        if not template:
+            return
+
         self.prompt_sequence.append(
             Prompt(
                 template=template,
@@ -257,6 +260,9 @@ class PromptHelper:
             return template_messages
 
         template_messages = build_template_messages()
+
+        if not template_messages:
+            return
 
         stringified_inputs = {k: str(v) for (k, v) in inputs.items()}
         self.prompt_sequence.append(
@@ -552,7 +558,6 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             )
             generations = (run.outputs or {}).get("generations", [])
             completion = generations[0][0]["text"]
-            generation_type = generations[0][0]["type"]
 
             current_prompt = (
                 self.prompt_sequence.pop() if self.prompt_sequence else None
@@ -563,6 +568,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                 current_prompt.settings = llm_settings
                 current_prompt.completion = completion
             else:
+                generation_type = generations[0][0].get("type", "")
                 current_prompt = self._build_default_prompt(
                     run, generation_type, provider, llm_settings, completion
                 )
