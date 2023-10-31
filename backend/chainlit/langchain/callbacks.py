@@ -350,8 +350,8 @@ class PromptHelper:
         return provider, settings
 
 
-DEFAULT_TO_IGNORE = ["RunnableSequence", "RunnableParallel"]
-DEFAULT_TO_KEEP = ["llm"]
+DEFAULT_TO_IGNORE = ["RunnableSequence", "RunnableParallel", "<lambda>"]
+DEFAULT_TO_KEEP = ["retriever", "llm", "agent", "chain", "tool"]
 
 
 class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
@@ -416,7 +416,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         if not current_parent_id:
             return self.root_parent_id
 
-        if current_parent_id not in current_parent_id:
+        if current_parent_id not in self.parent_id_map:
             return current_parent_id
 
         while current_parent_id in self.parent_id_map:
@@ -424,15 +424,27 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
 
         return current_parent_id
 
-    def _should_ignore_run(self, run: Run, parent_id: Optional[str] = None):
-        ignore = run.name in self.to_ignore or parent_id in self.ignored_runs
+    def _should_ignore_run(self, run: Run):
+        parent_id = self._get_run_parent_id(run)
+
+        ignore_by_name = run.name in self.to_ignore
+        ignore_by_parent = parent_id in self.ignored_runs
+
+        ignore = ignore_by_name or ignore_by_parent
 
         if ignore:
             if parent_id:
+                # Add the parent id of the ignored run in the mapping
+                # so we can re-attach a kept child to the right parent id
                 self.parent_id_map[str(run.id)] = parent_id
+            # Tag the run as ignored
             self.ignored_runs.add(str(run.id))
 
-        return ignore
+        # If the ignore cause is the parent being ignored, check if we should nonetheless keep the child
+        if ignore_by_parent and not ignore_by_name and run.run_type in self.to_keep:
+            return False, self._get_non_ignored_parent_id(str(run.id))
+        else:
+            return ignore, parent_id
 
     def on_chat_model_start(
         self,
@@ -506,14 +518,10 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             # Prompt templates are contained in chains or prompts (lcel)
             self._build_prompt(run.serialized or {}, run.inputs)
 
-        parent_id = self._get_run_parent_id(run)
-        ignore = self._should_ignore_run(run, parent_id)
+        ignore, parent_id = self._should_ignore_run(run)
 
         if ignore:
-            if run.run_type in self.to_keep:
-                parent_id = self._get_non_ignored_parent_id(str(run.id))
-            else:
-                return
+            return
 
         if run.run_type == "llm":
             msg = Message(
@@ -539,14 +547,10 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         """Process a run upon update."""
         context_var.set(self.context)
 
-        parent_id = self._get_run_parent_id(run)
-        ignore = self._should_ignore_run(run, parent_id)
+        ignore, parent_id = self._should_ignore_run(run)
 
         if ignore:
-            if run.run_type in self.to_keep:
-                parent_id = self._get_non_ignored_parent_id(str(run.id))
-            else:
-                return
+            return
 
         if run.run_type in ["chain"]:
             if self.prompt_sequence:
