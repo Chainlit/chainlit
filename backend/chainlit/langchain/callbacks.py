@@ -446,6 +446,9 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         else:
             return ignore, parent_id
 
+    def _is_annotable(self, run: Run):
+        return run.run_type in ["retriever", "llm"]
+
     def on_chat_model_start(
         self,
         serialized: Dict[str, Any],
@@ -523,12 +526,15 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         if ignore:
             return
 
+        disable_human_feedback = not self._is_annotable(run)
+
         if run.run_type == "llm":
             msg = Message(
                 id=run.id,
                 content="",
                 author=run.name,
                 parent_id=parent_id,
+                disable_human_feedback=disable_human_feedback,
             )
             self.llm_stream_message[str(run.id)] = msg
             self._run_sync(msg.send())
@@ -540,6 +546,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                 content="",
                 author=run.name,
                 parent_id=parent_id,
+                disable_human_feedback=disable_human_feedback,
             ).send()
         )
 
@@ -551,6 +558,8 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
 
         if ignore:
             return
+
+        disable_human_feedback = not self._is_annotable(run)
 
         if run.run_type in ["chain"]:
             if self.prompt_sequence:
@@ -597,6 +606,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                     content=content,
                     author=run.name,
                     parent_id=parent_id,
+                    disable_human_feedback=disable_human_feedback,
                 ).send()
             )
         else:
@@ -606,6 +616,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                     content=content,
                     author=run.name,
                     parent_id=parent_id,
+                    disable_human_feedback=disable_human_feedback,
                 ).update()
             )
 
