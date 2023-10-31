@@ -6,6 +6,7 @@ import { InlinedAudioList } from './InlinedAudioList';
 import { InlinedFileList } from './InlinedFileList';
 import { InlinedImageList } from './InlinedImageList';
 import { InlinedPDFList } from './InlinedPDFList';
+import { InlinedPlotlyList } from './InlinedPlotlyList';
 import { InlinedTextList } from './InlinedTextList';
 import { InlinedVideoList } from './InlinedVideoList';
 
@@ -59,6 +60,9 @@ const InlinedElements = ({ elements }: Props) => {
       ) : null}
       {elementsByType.file?.length ? (
         <InlinedFileList items={elementsByType.file} />
+      ) : null}
+      {elementsByType.plotly?.length ? (
+        <InlinedPlotlyList items={elementsByType.plotly} />
       ) : null}
     </Stack>
   );
