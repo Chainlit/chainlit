@@ -449,6 +449,18 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
     def _is_annotable(self, run: Run):
         return run.run_type in ["retriever", "llm"]
 
+    def _get_completion(self, generation: Dict):
+        if message := generation.get("message"):
+            kwargs = message.get("kwargs", {})
+            if function_call := kwargs.get("additional_kwargs", {}).get(
+                "function_call"
+            ):
+                return json.dumps(function_call), "json"
+            else:
+                return kwargs.get("content", ""), None
+        else:
+            return generation.get("text", "")
+
     def on_chat_model_start(
         self,
         serialized: Dict[str, Any],
@@ -514,7 +526,6 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
 
     def _start_trace(self, run: Run) -> None:
         super()._start_trace(run)
-
         context_var.set(self.context)
 
         if run.run_type in ["chain", "prompt"]:
@@ -570,7 +581,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                 (run.serialized or {}), (run.extra or {}).get("invocation_params")
             )
             generations = (run.outputs or {}).get("generations", [])
-            completion = generations[0][0]["text"]
+            completion, language = self._get_completion(generations[0][0])
 
             current_prompt = (
                 self.prompt_sequence.pop() if self.prompt_sequence else None
@@ -585,9 +596,11 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                 current_prompt = self._build_default_prompt(
                     run, generation_type, provider, llm_settings, completion
                 )
+
             msg = self.llm_stream_message.get(str(run.id), None)
             if msg:
                 msg.content = completion
+                msg.language = language
                 msg.prompt = current_prompt
                 self._run_sync(msg.update())
             return
@@ -600,15 +613,16 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             return
 
         if run.run_type in ["agent", "chain", "tool"]:
-            # Add the response of the chain/tool
-            self._run_sync(
-                Message(
-                    content=content,
-                    author=run.name,
-                    parent_id=parent_id,
-                    disable_human_feedback=disable_human_feedback,
-                ).send()
-            )
+            pass
+            # # Add the response of the chain/tool
+            # self._run_sync(
+            #     Message(
+            #         content=content,
+            #         author=run.name,
+            #         parent_id=parent_id,
+            #         disable_human_feedback=disable_human_feedback,
+            #     ).send()
+            # )
         else:
             self._run_sync(
                 Message(
