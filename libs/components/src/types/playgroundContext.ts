@@ -7,6 +7,10 @@ interface IPlaygroundContext {
   setVariableName: (
     name?: string | ((name?: string) => string | undefined)
   ) => void;
+  functionIndex?: number;
+  setFunctionIndex: (
+    index?: number | ((index?: number) => number | undefined)
+  ) => void;
   promptMode: PromptMode;
   setPromptMode: (
     mode: PromptMode | ((mode: PromptMode) => PromptMode)

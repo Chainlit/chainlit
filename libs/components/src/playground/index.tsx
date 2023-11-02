@@ -19,6 +19,7 @@ import { IPlaygroundContext } from 'src/types/playgroundContext';
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';
 import ChatPromptPlayground from './chat';
+import FunctionModal from './editor/functionModal';
 import VariableModal from './editor/variableModal';
 import PlaygroundHeader from './header';
 import ModelSettings from './modelSettings';
@@ -108,6 +109,7 @@ function _PromptPlayground() {
                 height: '100%'
               }}
             >
+              <FunctionModal />
               <VariableModal />
               <BasicPromptPlayground
                 restoredTime={restoredTime}

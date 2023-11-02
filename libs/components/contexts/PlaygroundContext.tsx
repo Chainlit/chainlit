@@ -4,6 +4,7 @@ import { IPlaygroundContext } from 'src/types/playgroundContext';
 
 const defaultPlaygroundContext: IPlaygroundContext = {
   setVariableName: () => undefined,
+  setFunctionIndex: () => undefined,
   setPromptMode: () => undefined,
   setPlayground: () => undefined,
   onNotification: () => undefined,
