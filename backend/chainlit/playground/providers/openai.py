@@ -134,13 +134,16 @@ class ChatOpenAIProvider(BaseProvider):
 
             llm_settings["stop"] = stop
 
-        llm_settings["stream"] = False if request.prompt.functions else True
+        if request.prompt.functions:
+            llm_settings["functions"] = request.prompt.functions
+            llm_settings["stream"] = False
+        else:
+            llm_settings["stream"] = True
 
         with handle_openai_error():
             response = await openai.ChatCompletion.acreate(
                 **env_settings,
                 messages=messages,
-                functions=request.prompt.functions,
                 **llm_settings,
             )
 
