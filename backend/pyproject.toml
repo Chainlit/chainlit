@@ -36,7 +36,6 @@ python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
 uptrace = "^1.18.0"
 watchfiles="^0.20.0"
-prisma="^0.10.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
@@ -80,7 +79,6 @@ module = [
     "matplotlib.*",  # remove when 3.8.0 is out, it should export types
     "plotly.*",
     "nest_asyncio",
-    "prisma.*",
     "python_graphql_client",
     "socketio.*",
     "uptrace",
