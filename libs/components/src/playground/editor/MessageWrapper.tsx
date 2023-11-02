@@ -145,9 +145,9 @@ const MessageWrapper = ({
         {roleSelect}
         <Box flex={8}>{children}</Box>
         {index !== undefined ? (
-          <Box>
-            <IconButton onClick={onRemove}>
-              <RemoveCircleOutlineOutlined />
+          <Box color="text.secondary">
+            <IconButton color="inherit" onClick={onRemove}>
+              <RemoveCircleOutlineOutlined fontSize="small" />
             </IconButton>
           </Box>
         ) : null}

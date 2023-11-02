@@ -86,7 +86,7 @@ export const ChatPromptPlayground = forwardRef(
               ))}
             </Stack>
           ) : null}
-          <Box color="text.primary" pl={2} py={2}>
+          <Box color="text.secondary" pl={2} py={2}>
             <Button
               onClick={() => {
                 setPlayground((old) => ({
