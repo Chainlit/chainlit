@@ -1,6 +1,8 @@
-import Plot from 'react-plotly.js';
+import { Suspense, lazy } from 'react';
 
 import { IPlotlyElement } from 'src/types/element';
+
+const Plot = lazy(() => import('react-plotly.js'));
 
 interface Props {
   element: IPlotlyElement;
@@ -13,15 +15,17 @@ const PlotlyElement = ({ element }: Props) => {
   const state = JSON.parse(element.content);
 
   return (
-    <Plot
-      className={`${element.display}-plotly`}
-      data={state.data}
-      layout={state.layout}
-      frames={state.frames}
-      config={state.config}
-      style={{ width: '100%', height: '100%' }}
-      useResizeHandler={true}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <Plot
+        className={`${element.display}-plotly`}
+        data={state.data}
+        layout={state.layout}
+        frames={state.frames}
+        config={state.config}
+        style={{ width: '100%', height: '100%' }}
+        useResizeHandler={true}
+      />
+    </Suspense>
   );
 };
 
