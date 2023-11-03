@@ -75,7 +75,7 @@ class Select(InputWidget):
     initial: Optional[str] = None
     initial_index: Optional[int] = None
     initial_value: Optional[str] = None
-    values: List[str] = Field(default_factory=lambda: list)
+    values: List[str] = Field(default_factory=lambda: [])
     items: Dict[str, str] = Field(default_factory=lambda: defaultdict(dict))
 
     def __post_init__(
@@ -85,6 +85,8 @@ class Select(InputWidget):
 
         if not self.values and not self.items:
             raise ValueError("Must provide values or items to create a Select")
+
+        print(self.values, self.items)
 
         if self.values and self.items:
             raise ValueError(
@@ -165,8 +167,8 @@ class Tags(InputWidget):
     """Useful to create an input for an array of strings."""
 
     type: InputWidgetType = "tags"
-    initial: List[str] = Field(default_factory=lambda: list)
-    values: List[str] = Field(default_factory=lambda: list)
+    initial: List[str] = Field(default_factory=lambda: [])
+    values: List[str] = Field(default_factory=lambda: [])
 
     def to_dict(self) -> Dict[str, Any]:
         return {
