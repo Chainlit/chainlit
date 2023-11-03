@@ -72,7 +72,6 @@ const useChatSession = () => {
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
-      console.log('YOLO', chatProfile);
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {

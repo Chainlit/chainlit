@@ -137,7 +137,7 @@ async def connection_successful(sid):
 
     if context.session.restored:
         return
-    elif config.code.on_chat_resume:
+    elif context.session.conversation_id and config.code.on_chat_resume:
         conversation = await resume_conversation(context.session)
         if conversation:
             context.session.has_user_message = True
@@ -151,15 +151,6 @@ async def connection_successful(sid):
 @socket.on("clear_session")
 async def clean_session(sid):
     if session := WebsocketSession.get(sid):
-        if config.code.on_chat_end:
-            init_ws_context(session)
-            """Call the on_chat_end function provided by the developer."""
-            await config.code.on_chat_end()
-
-        if session.conversation_id and session.has_user_message:
-            await persist_user_session(
-                session.conversation_id, session.to_persistable()
-            )
         # Clean up the user session
         if session.id in user_sessions:
             user_sessions.pop(session.id)
