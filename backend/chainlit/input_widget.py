@@ -86,8 +86,6 @@ class Select(InputWidget):
         if not self.values and not self.items:
             raise ValueError("Must provide values or items to create a Select")
 
-        print(self.values, self.items)
-
         if self.values and self.items:
             raise ValueError(
                 "You can only provide either values or items to create a Select"
