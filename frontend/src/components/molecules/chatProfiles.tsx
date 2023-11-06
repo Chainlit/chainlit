@@ -1,6 +1,6 @@
 import size from 'lodash/size';
 import { useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
 
@@ -8,17 +8,18 @@ import {
   InputStateHandler,
   grey,
   useChatInteract,
+  useChatSession,
   useIsDarkMode
 } from '@chainlit/components';
 
-import { chatProfile, projectSettingsState } from 'state/project';
+import { projectSettingsState } from 'state/project';
 
 import Markdown from './markdown';
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
   const pSettings = useRecoilValue(projectSettingsState);
-  const [chatProfileValue, setChatProfile] = useRecoilState(chatProfile);
+  const { chatProfile, setChatProfile } = useChatSession();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [chatProfileDescription, setChatProfileDescription] = useState('');
   const { clear } = useChatInteract();
@@ -42,7 +43,7 @@ export default function ChatProfiles() {
     handleClose();
   };
 
-  if (!chatProfileValue && size(pSettings?.chatProfiles) > 0) {
+  if (!chatProfile && size(pSettings?.chatProfiles) > 0) {
     setChatProfile(pSettings?.chatProfiles[0].name);
   }
 
@@ -64,7 +65,7 @@ export default function ChatProfiles() {
           }}
         >
           <Tabs
-            value={chatProfileValue || ''}
+            value={chatProfile || ''}
             onChange={(event: React.SyntheticEvent, newValue: string) => {
               setNewChatProfile(newValue);
               setOpenDialog(true);
@@ -106,9 +107,7 @@ export default function ChatProfiles() {
                 sx={{
                   '& .chat-profile-icon': {
                     filter:
-                      item.name !== chatProfileValue
-                        ? 'grayscale(100%)'
-                        : undefined
+                      item.name !== chatProfile ? 'grayscale(100%)' : undefined
                   },
                   '&:hover': {
                     '& .chat-profile-icon': { filter: 'grayscale(0%)' }

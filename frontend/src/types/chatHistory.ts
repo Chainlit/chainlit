@@ -1,6 +1,6 @@
-import { IPageInfo } from 'components/organisms/conversationsHistory/sidebar/ConversationsHistoryList';
+import { IConversation } from '@chainlit/components';
 
-import { IChat } from './chat';
+import { IPageInfo } from 'components/organisms/conversationsHistory/sidebar/ConversationsHistoryList';
 
 export type MessageHistory = {
   content: string;
@@ -8,8 +8,8 @@ export type MessageHistory = {
 };
 
 export type ConversationsHistory = {
-  conversations?: IChat[];
+  conversations?: IConversation[];
   currentConversationId?: string;
-  groupedConversations?: { [key: string]: IChat[] };
+  groupedConversations?: { [key: string]: IConversation[] };
   pageInfo?: IPageInfo;
 };

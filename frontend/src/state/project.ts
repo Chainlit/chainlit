@@ -28,16 +28,12 @@ export interface IProjectSettings {
   };
   userEnv: string[];
   dataPersistence: boolean;
+  conversationResumable: boolean;
   chatProfiles: ChatProfile[];
 }
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({
   key: 'ProjectSettings',
-  default: undefined
-});
-
-export const chatProfile = atom<string | undefined>({
-  key: 'ChatProfile',
   default: undefined
 });
 

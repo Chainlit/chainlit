@@ -2,15 +2,18 @@ import { Link } from 'react-router-dom';
 
 import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
-import { IAction, nestMessages } from '@chainlit/components';
+import {
+  IAction,
+  IConversation,
+  IMessageElement,
+  nestMessages
+} from '@chainlit/components';
 
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
-import { IChat } from 'types/chat';
-
 type ConversationProps = {
-  conversation?: IChat;
+  conversation?: IConversation;
   error?: Error;
   isLoading?: boolean;
 };
@@ -84,7 +87,7 @@ const Conversation = ({
           loading={false}
           avatars={[]}
           actions={actions}
-          elements={elements}
+          elements={elements as IMessageElement[]}
           messages={nestMessages(conversation.messages)}
         />
       </SideView>

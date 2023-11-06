@@ -1,7 +1,7 @@
-import { IChat } from 'types/chat';
+import { IConversation } from '@chainlit/components';
 
-export const groupByDate = (data: IChat[]) => {
-  const groupedData: { [key: string]: IChat[] } = {};
+export const groupByDate = (data: IConversation[]) => {
+  const groupedData: { [key: string]: IConversation[] } = {};
 
   const today = new Date();
   const yesterday = new Date();

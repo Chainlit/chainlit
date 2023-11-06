@@ -6,17 +6,7 @@ if TYPE_CHECKING:
 
 from chainlit.context import context
 
-
-class UserSessionDict(TypedDict):
-    id: str
-    env: Dict[str, str]
-    headers: Dict[str, str]
-    user: Optional[Union["AppUser", "PersistedAppUser"]]
-    root_message: Optional["Message"]
-    chat_profile: Optional[str]
-
-
-user_sessions: Dict[str, UserSessionDict] = {}
+user_sessions: Dict[str, Dict] = {}
 
 
 class UserSession:

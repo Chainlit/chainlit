@@ -1,4 +1,4 @@
-import { IPrompt } from '@chainlit/components';
+import { IConversation, IPrompt } from '@chainlit/components';
 
 import {
   IPageInfo,
@@ -6,8 +6,6 @@ import {
 } from 'components/organisms/conversationsHistory/sidebar/ConversationsHistoryList';
 
 import { IConversationsFilters } from 'state/conversations';
-
-import { IChat } from 'types/chat';
 
 import { api } from '.';
 
@@ -76,7 +74,7 @@ const ChainlitAPI = {
     accessToken?: string
   ): Promise<{
     pageInfo: IPageInfo;
-    data: IChat[];
+    data: IConversation[];
   }> => {
     const res = await api.post(
       `/project/conversations`,

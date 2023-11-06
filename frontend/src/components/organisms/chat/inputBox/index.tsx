@@ -97,12 +97,11 @@ const InputBox = memo(
         display="flex"
         flexDirection="column"
         gap={1}
-        py={2}
+        p={2}
         sx={{
           boxSizing: 'border-box',
           width: '100%',
           maxWidth: '60rem',
-          px: 2,
           m: 'auto',
           justifyContent: 'center'
         }}

@@ -21,7 +21,7 @@ import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
-from chainlit.client.base import AppUser, PersistedAppUser
+from chainlit.client.base import AppUser, ConversationDict, PersistedAppUser
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -154,6 +154,22 @@ def on_chat_start(func: Callable) -> Callable:
     """
 
     config.code.on_chat_start = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
+def on_chat_resume(func: Callable[[ConversationDict], Any]) -> Callable:
+    """
+    Hook to react to resume websocket connection event.
+
+    Args:
+        func (Callable[], Any]): The connection hook to execute.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_chat_resume = wrap_user_function(func, with_task=True)
     return func
 
 
@@ -298,6 +314,7 @@ __all__ = [
     "AskFileMessage",
     "on_chat_start",
     "on_chat_end",
+    "on_chat_resume",
     "on_stop",
     "action_callback",
     "author_rename",

@@ -8,7 +8,15 @@ import {
 } from 'recoil';
 import io from 'socket.io-client';
 import { TFormInput } from 'src/inputs';
-import { IAction, IElement, IMessage } from 'src/types';
+import {
+  IAction,
+  IAvatarElement,
+  IConversation,
+  IElement,
+  IMessage,
+  IMessageElement,
+  ITasklistElement
+} from 'src/types';
 import {
   addMessage,
   deleteMessageById,
@@ -20,8 +28,10 @@ import {
   actionState,
   askUserState,
   avatarState,
+  chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  conversationIdToResumeState,
   elementState,
   firstUserMessageState,
   loadingState,
@@ -49,24 +59,25 @@ const useChatSession = () => {
   const setActions = useSetRecoilState(actionState);
   const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
+  const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
+  const idToResume = useRecoilValue(conversationIdToResumeState);
 
   const _connect = useCallback(
     ({
       wsEndpoint,
       userEnv,
-      accessToken,
-      chatProfile
+      accessToken
     }: {
       wsEndpoint: string;
       userEnv: Record<string, string>;
       accessToken?: string;
-      chatProfile?: string;
     }) => {
       const socket = io(wsEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Session-Id': sessionId,
+          'X-Chainlit-Conversation-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
           'X-Chainlit-Chat-Profile': chatProfile || ''
         }
@@ -99,6 +110,32 @@ const useChatSession = () => {
       socket.on('reload', () => {
         socket.emit('clear_session');
         window.location.reload();
+      });
+
+      socket.on('resume_conversation', (conversation: IConversation) => {
+        let messages: IMessage[] = [];
+        for (const message of conversation.messages) {
+          messages = addMessage(messages, message);
+        }
+        if (conversation.metadata?.chat_profile) {
+          setChatProfile(conversation.metadata?.chat_profile);
+        }
+        setMessages(messages);
+        setAvatars(
+          (conversation.elements as IAvatarElement[]).filter(
+            (e) => e.type === 'avatar'
+          )
+        );
+        setTasklists(
+          (conversation.elements as ITasklistElement[]).filter(
+            (e) => e.type === 'tasklist'
+          )
+        );
+        setElements(
+          (conversation.elements as IMessageElement[]).filter(
+            (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
+          )
+        );
       });
 
       socket.on('new_message', (message: IMessage) => {
@@ -207,7 +244,7 @@ const useChatSession = () => {
         setTokenCount((old) => old + count);
       });
     },
-    [setSession, sessionId]
+    [setSession, sessionId, chatProfile]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);
@@ -219,7 +256,7 @@ const useChatSession = () => {
     }
   }, [session]);
 
-  return { connect, disconnect };
+  return { connect, disconnect, chatProfile, setChatProfile };
 };
 
 export { useChatSession };

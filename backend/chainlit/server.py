@@ -451,6 +451,7 @@ async def project_settings(
             "features": config.features.to_dict(),
             "userEnv": config.project.user_env,
             "dataPersistence": config.data_persistence,
+            "conversationResumable": bool(config.code.on_chat_resume),
             "markdown": get_markdown_str(config.root),
             "chatProfiles": profiles,
         }
