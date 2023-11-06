@@ -35,8 +35,6 @@ describe('Conversations', () => {
         id: String(start + i),
         createdAt: Date.now(),
         tags: ['chat'],
-        elementCount: 0,
-        messageCount: 3,
         appUser: { username: 'admin' },
         messages: [{ content: `foo ${start + i}` }]
       }));

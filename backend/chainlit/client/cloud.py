@@ -246,8 +246,6 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
             id
             createdAt
             tags
-            elementCount
-            messageCount
             appUser {
                 username
             }

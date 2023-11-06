@@ -84,8 +84,6 @@ class ElementDict(TypedDict):
 class ConversationDict(TypedDict):
     id: Optional[str]
     createdAt: Optional[int]
-    elementCount: Optional[int]
-    messageCount: Optional[int]
     appUser: Optional[AppUser]
     messages: List[MessageDict]
     elements: Optional[List[ElementDict]]
