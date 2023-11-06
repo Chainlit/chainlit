@@ -20,10 +20,6 @@ interface Props {
 export default function BasicPromptPlayground({ prompt, restoredTime }: Props) {
   const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
-  if (prompt.messages) {
-    return null;
-  }
-
   const onTemplateChange = (nextState: EditorState) => {
     const template = nextState.getCurrentContent().getPlainText();
     setPlayground((old) => ({

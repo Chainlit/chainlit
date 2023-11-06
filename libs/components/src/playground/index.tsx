@@ -1,5 +1,5 @@
 import { PlaygroundContext } from 'contexts/PlaygroundContext';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from 'src/ErrorBoundary';
 import { useToggle } from 'usehooks-ts';
 
@@ -60,16 +60,19 @@ function _PromptPlayground() {
 
   const prompt = playground?.prompt;
 
-  if (!prompt) {
-    return null;
-  }
+  const isChat = !!playground?.originalPrompt?.messages?.length;
 
   const hasTemplate = prompt?.messages
     ? !!prompt.messages.find((m) => typeof m.template === 'string')
     : typeof prompt?.template === 'string';
 
-  if (!hasTemplate && promptMode === 'Template') {
-    setPromptMode('Formatted');
+  useEffect(() => {
+    if (prompt && !hasTemplate && promptMode === 'Template') {
+      setPromptMode('Formatted');
+    }
+  }, [prompt, promptMode, setPromptMode]);
+
+  if (!prompt) {
     return null;
   }
 
@@ -109,17 +112,20 @@ function _PromptPlayground() {
               }}
             >
               <VariableModal />
-              <BasicPromptPlayground
-                restoredTime={restoredTime}
-                hasTemplate={hasTemplate}
-                prompt={prompt}
-              />
-              <ChatPromptPlayground
-                ref={chatPromptScrollRef}
-                restoredTime={restoredTime}
-                hasTemplate={hasTemplate}
-                prompt={prompt}
-              />
+              {isChat ? (
+                <ChatPromptPlayground
+                  ref={chatPromptScrollRef}
+                  restoredTime={restoredTime}
+                  hasTemplate={hasTemplate}
+                  prompt={prompt}
+                />
+              ) : (
+                <BasicPromptPlayground
+                  restoredTime={restoredTime}
+                  hasTemplate={hasTemplate}
+                  prompt={prompt}
+                />
+              )}
             </Stack>
           </Stack>
           <ModelSettings

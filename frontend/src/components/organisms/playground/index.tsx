@@ -60,19 +60,17 @@ export default function PlaygroundWrapper() {
   );
 
   return (
-    <>
-      <PromptPlayground
-        context={{
-          setVariableName,
-          variableName,
-          setPlayground,
-          playground,
-          onNotification,
-          createCompletion,
-          promptMode,
-          setPromptMode
-        }}
-      />
-    </>
+    <PromptPlayground
+      context={{
+        setVariableName,
+        variableName,
+        setPlayground,
+        playground,
+        onNotification,
+        createCompletion,
+        promptMode,
+        setPromptMode
+      }}
+    />
   );
 }
