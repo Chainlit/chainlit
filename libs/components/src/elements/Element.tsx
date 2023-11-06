@@ -4,6 +4,7 @@ import { AudioElement } from './Audio';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { PDFElement } from './PDF';
+import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
 import { VideoElement } from './Video';
 
@@ -25,6 +26,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <AudioElement element={element} />;
     case 'video':
       return <VideoElement element={element} />;
+    case 'plotly':
+      return <PlotlyElement element={element} />;
     default:
       return null;
   }

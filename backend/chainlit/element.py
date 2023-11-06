@@ -18,6 +18,7 @@ from syncer import asyncio
 mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
+    "plotly": "application/json",
 }
 
 
@@ -348,3 +349,31 @@ class Video(Element):
 @dataclass
 class File(Element):
     type: ClassVar[ElementType] = "file"
+
+
+@dataclass
+class Plotly(Element):
+    """Useful to send a plotly to the UI."""
+
+    type: ClassVar[ElementType] = "plotly"
+
+    size: ElementSize = "medium"
+    # The type is set to Any because the figure is not serializable
+    # and its actual type is checked in __post_init__.
+    figure: Any = None
+    content: str = ""
+
+    def __post_init__(self) -> None:
+        from plotly import graph_objects as go
+        from plotly import io as pio
+
+        if not isinstance(self.figure, go.Figure):
+            raise TypeError("figure must be a plotly.graph_objects.Figure")
+
+        self.figure.layout.autosize = True
+        self.figure.layout.width = None
+        self.figure.layout.height = None
+        self.content = pio.to_json(self.figure, validate=True)
+        self.mime = "application/json"
+
+        super().__post_init__()
