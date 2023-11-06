@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
 
-import Add from '@mui/icons-material/Add';
+import AttachFile from '@mui/icons-material/AttachFile';
 import { IconButton, Tooltip } from '@mui/material';
 
 import { FileSpec, IFileResponse } from '@chainlit/components';
@@ -43,7 +43,7 @@ const UploadButton = ({
           color="inherit"
           {...getRootProps({ className: 'dropzone' })}
         >
-          <Add />
+          <AttachFile />
         </IconButton>
       </span>
     </Tooltip>
