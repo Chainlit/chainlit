@@ -1,4 +1,7 @@
 import { Suspense, lazy } from 'react';
+import { ErrorBoundary } from 'src/ErrorBoundary';
+
+import { useApi } from 'hooks/index';
 
 import { IPlotlyElement } from 'src/types/element';
 
@@ -8,11 +11,26 @@ interface Props {
   element: IPlotlyElement;
 }
 
-const PlotlyElement = ({ element }: Props) => {
-  if (!element.content) {
+const _PlotlyElement = ({ element }: Props) => {
+  const { data, error, isLoading } = useApi(
+    !element.content && element.url ? element.url : null
+  );
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  } else if (error) {
+    return <div>An error occured</div>;
+  }
+
+  let state;
+
+  if (data) {
+    state = data;
+  } else if (element.content) {
+    state = JSON.parse(element.content);
+  } else {
     return null;
   }
-  const state = JSON.parse(element.content);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -26,6 +44,14 @@ const PlotlyElement = ({ element }: Props) => {
         useResizeHandler={true}
       />
     </Suspense>
+  );
+};
+
+const PlotlyElement = ({ element }: Props) => {
+  return (
+    <ErrorBoundary prefix="Failed to load chart.">
+      <_PlotlyElement element={element} />
+    </ErrorBoundary>
   );
 };
 
