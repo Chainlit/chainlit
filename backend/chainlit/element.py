@@ -330,7 +330,9 @@ class TaskList(Element):
             {
                 "status": self.status,
                 "tasks": tasks,
-            }
+            },
+            indent=4,
+            ensure_ascii=False,
         )
 
 

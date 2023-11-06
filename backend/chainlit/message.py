@@ -195,7 +195,7 @@ class Message(MessageBase):
 
         if isinstance(content, dict):
             try:
-                self.content = json.dumps(content, indent=4)
+                self.content = json.dumps(content, indent=4, ensure_ascii=False)
                 self.language = "json"
             except TypeError:
                 self.content = str(content)

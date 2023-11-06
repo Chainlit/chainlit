@@ -19,7 +19,9 @@ class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
 
 
 def clean_metadata(metadata: Dict):
-    return json.loads(json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable))
+    return json.loads(
+        json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
+    )
 
 
 class BaseSession:

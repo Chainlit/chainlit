@@ -1,10 +1,10 @@
 import asyncio
-import json
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from chainlit.context import context_var
 from chainlit.message import Message
+from chainlit.playground.providers.openai import stringify_function_call
 from chainlit.prompt import Prompt, PromptMessage
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
@@ -116,7 +116,7 @@ class PromptHelper:
         kwargs = message.get("kwargs", {})
         function_call = kwargs.get("additional_kwargs", {}).get("function_call")
         if function_call:
-            content = json.dumps(function_call, indent=4)
+            content = stringify_function_call(function_call)
         else:
             content = kwargs.get("content", "")
         return PromptMessage(
@@ -139,7 +139,7 @@ class PromptHelper:
             )
         function_call = message.additional_kwargs.get("function_call")
         if function_call:
-            content = json.dumps(function_call, indent=4)
+            content = stringify_function_call(function_call)
         else:
             content = message.content
         return PromptMessage(
@@ -455,7 +455,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             if function_call := kwargs.get("additional_kwargs", {}).get(
                 "function_call"
             ):
-                return json.dumps(function_call), "json"
+                return stringify_function_call(function_call), "json"
             else:
                 return kwargs.get("content", ""), None
         else:

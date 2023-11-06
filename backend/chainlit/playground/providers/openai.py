@@ -1,10 +1,19 @@
 import json
 from contextlib import contextmanager
+from typing import Dict
 
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
+
+
+def stringify_function_call(function_call: Dict):
+    _function_call = function_call.copy()
+    if "arguments" in _function_call and isinstance(_function_call["arguments"], str):
+        _function_call["arguments"] = json.loads(_function_call["arguments"])
+    return json.dumps(_function_call, indent=4, ensure_ascii=False)
+
 
 openai_common_inputs = [
     Slider(
@@ -162,10 +171,12 @@ class ChatOpenAIProvider(BaseProvider):
         else:
 
             async def create_event_stream():
-                function_call = json.dumps(
-                    response.choices[0]["message"]["function_call"]
-                )
-                yield function_call
+                message = response.choices[0]["message"]
+                function_call = message.get("function_call")
+                if function_call:
+                    yield stringify_function_call(function_call)
+                else:
+                    yield message.get("content", "")
 
         return StreamingResponse(create_event_stream())
 
