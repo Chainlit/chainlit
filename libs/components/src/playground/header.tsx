@@ -6,6 +6,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 
+import FunctionInput from './functionInput';
 import PromptModeToggle from './modeToggle';
 import VariableInput from './variableInput';
 
@@ -24,9 +25,10 @@ export default function PlaygroundHeader({
 }: Props) {
   return (
     <Stack direction="row" alignItems="center">
-      <Stack direction="row" alignItems="center" gap={1}>
+      <Stack direction="row" alignItems="center" gap={2}>
         <PromptModeToggle hasTemplate={hasTemplate} />
         <VariableInput />
+        <FunctionInput />
       </Stack>
       <Stack sx={{ ml: 'auto' }} direction="row" alignItems="center" gap={1}>
         <AccentButton
