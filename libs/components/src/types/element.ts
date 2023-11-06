@@ -6,7 +6,8 @@ export type IElement =
   | ITasklistElement
   | IAudioElement
   | IVideoElement
-  | IFileElement;
+  | IFileElement
+  | IPlotlyElement;
 
 export type IMessageElement =
   | IImageElement
@@ -14,7 +15,8 @@ export type IMessageElement =
   | IPdfElement
   | IAudioElement
   | IVideoElement
-  | IFileElement;
+  | IFileElement
+  | IPlotlyElement;
 
 export type ElementType = IElement['type'];
 export type IElementSize = 'small' | 'medium' | 'large';
@@ -64,6 +66,10 @@ export interface IFileElement extends TMessageElement<'file'> {
   type: 'file';
   mime?: string;
   content?: ArrayBuffer;
+}
+
+export interface IPlotlyElement extends TMessageElement<'plotly'> {
+  content?: string;
 }
 
 export interface ITasklistElement extends TElement<'tasklist'> {

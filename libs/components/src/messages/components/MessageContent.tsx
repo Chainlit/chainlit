@@ -122,7 +122,7 @@ const MessageContent = memo(
 
     return (
       <Stack width="100%" direction="row">
-        <Box>
+        <Box width="100%">
           {collapse ? (
             <Collapse
               defaultExpandAll={preserveSize}

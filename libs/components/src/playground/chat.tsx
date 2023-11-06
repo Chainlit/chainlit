@@ -3,7 +3,9 @@ import { EditorState } from 'draft-js';
 import { Fragment, forwardRef, useContext } from 'react';
 import { grey } from 'theme';
 
+import AddCircleOutlined from '@mui/icons-material/AddCircleOutlined';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -23,10 +25,6 @@ export const ChatPromptPlayground = forwardRef(
     const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
     const messages = prompt.messages;
-
-    if (!messages) {
-      return null;
-    }
 
     const onChange = (index: number, nextState: EditorState) => {
       const text = nextState.getCurrentContent().getPlainText();
@@ -73,7 +71,7 @@ export const ChatPromptPlayground = forwardRef(
             gap: 1
           }}
         >
-          {messages.length > 0 ? (
+          {messages?.length ? (
             <Stack>
               {messages.map((message, index) => (
                 <Fragment key={`prompt-message-${index}`}>
@@ -88,6 +86,32 @@ export const ChatPromptPlayground = forwardRef(
               ))}
             </Stack>
           ) : null}
+          <Box color="text.secondary" pl={2} py={2}>
+            <Button
+              onClick={() => {
+                setPlayground((old) => ({
+                  ...old,
+                  prompt: {
+                    ...old!.prompt!,
+                    messages: [
+                      ...old!.prompt!.messages!,
+                      {
+                        role: 'assistant',
+                        template: '',
+                        formatted: '',
+                        template_format: old!.prompt!.template_format
+                      }
+                    ]
+                  }
+                }));
+              }}
+              color="inherit"
+              sx={{ fontWeight: 700, textTransform: 'capitalize' }}
+              startIcon={<AddCircleOutlined />}
+            >
+              Add Message
+            </Button>
+          </Box>
           <Completion completion={prompt.completion} chatMode />
         </Box>
       </Stack>

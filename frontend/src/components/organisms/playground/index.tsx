@@ -66,7 +66,6 @@ export default function PlaygroundWrapper() {
   );
 
   return (
-    <>
       <PromptPlayground
         context={{
           setFunctionIndex,
@@ -81,6 +80,5 @@ export default function PlaygroundWrapper() {
           setPromptMode
         }}
       />
-    </>
   );
 }
