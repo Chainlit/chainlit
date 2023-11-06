@@ -58,7 +58,7 @@ const SettingsForm = ({
           settings: formik.values
         }
       }));
-    }, 500); // 500ms is the delay
+    }, 500);
 
     return () => {
       clearTimeout(debounceTimeout);

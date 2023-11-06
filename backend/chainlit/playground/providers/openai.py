@@ -1,3 +1,4 @@
+import json
 from contextlib import contextmanager
 
 from chainlit.input_widget import Select, Slider, Tags
@@ -113,7 +114,6 @@ class ChatOpenAIProvider(BaseProvider):
         import openai
 
         env_settings = self.validate_env(request=request)
-
         deployment_id = self.get_var(request, "OPENAI_API_DEPLOYMENT_ID")
 
         if deployment_id:
@@ -134,7 +134,11 @@ class ChatOpenAIProvider(BaseProvider):
 
             llm_settings["stop"] = stop
 
-        llm_settings["stream"] = True
+        if request.prompt.functions:
+            llm_settings["functions"] = request.prompt.functions
+            llm_settings["stream"] = False
+        else:
+            llm_settings["stream"] = True
 
         with handle_openai_error():
             response = await openai.ChatCompletion.acreate(
@@ -143,13 +147,25 @@ class ChatOpenAIProvider(BaseProvider):
                 **llm_settings,
             )
 
-        async def create_event_stream():
-            async for stream_resp in response:
-                if hasattr(stream_resp, 'choices') and len(stream_resp.choices) > 0:
-                    token = stream_resp.choices[0]["delta"].get("content", "")
-                    yield token
-                else:
-                    continue
+        if llm_settings["stream"]:
+
+            async def create_event_stream():
+                async for stream_resp in response:
+                    if hasattr(stream_resp, "choices") and len(stream_resp.choices) > 0:
+                        delta = stream_resp.choices[0]["delta"]
+                        token = delta.get("content", "")
+                        if token:
+                            yield token
+                    else:
+                        continue
+
+        else:
+
+            async def create_event_stream():
+                function_call = json.dumps(
+                    response.choices[0]["message"]["function_call"]
+                )
+                yield function_call
 
         return StreamingResponse(create_event_stream())
 

@@ -107,7 +107,7 @@ const Message = memo(
                 message={message}
                 opened={showDetails}
                 onClick={() => setShowDetails(!showDetails)}
-                loading={isRunning}
+                loading={isRunning && isLast}
               />
               {!isRunning && isLast && message.waitForAnswer && (
                 <AskUploadButton onError={onError} />

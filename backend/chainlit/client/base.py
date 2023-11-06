@@ -18,7 +18,7 @@ from pydantic.dataclasses import dataclass
 from python_graphql_client import GraphqlClient
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file"
+    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -85,8 +85,6 @@ class ConversationDict(TypedDict):
     id: Optional[str]
     metadata: Optional[Dict]
     createdAt: Optional[int]
-    elementCount: Optional[int]
-    messageCount: Optional[int]
     appUser: Optional[AppUser]
     messages: List[MessageDict]
     elements: Optional[List[ElementDict]]

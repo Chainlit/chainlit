@@ -35,7 +35,8 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   // Don't count empty steps
   const stepCount = nestedCount
-    ? message.subMessages!.filter((m) => !!m.content).length
+    ? message.subMessages!.filter((m) => !!m.content || m.subMessages?.length)
+        .length
     : 0;
 
   const text = loading

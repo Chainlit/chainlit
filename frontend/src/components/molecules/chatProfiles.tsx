@@ -54,13 +54,8 @@ export default function ChatProfiles() {
   const popoverOpen = Boolean(anchorEl);
 
   return (
-    <Box py={2} alignSelf="center" maxWidth="min(60rem, 90vw)" overflow="auto">
-      <InputStateHandler
-        id={'chat-profile-selector'}
-        sx={{
-          width: 'fit-content'
-        }}
-      >
+    <Box py={2} alignSelf="center" maxWidth="min(60rem, 90vw)">
+      <InputStateHandler id={'chat-profile-selector'}>
         <Box
           sx={{
             border: (theme) => `1px solid ${theme.palette.divider}`,
@@ -75,6 +70,7 @@ export default function ChatProfiles() {
               setNewChatProfile(newValue);
               setOpenDialog(true);
             }}
+            variant="scrollable"
             sx={{
               minHeight: '40px !important',
 

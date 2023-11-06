@@ -12,6 +12,11 @@ export const variableState = atom<string | undefined>({
   default: undefined
 });
 
+export const functionState = atom<number | undefined>({
+  key: 'PlaygroundFunction',
+  default: undefined
+});
+
 export const modeState = atom<PromptMode>({
   key: 'PlaygroundMode',
   default: 'Template'

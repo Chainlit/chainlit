@@ -1,4 +1,5 @@
 import { IFileElement, IMessageElement } from './element';
+import { IFunction } from './playground';
 
 interface IBaseTemplate {
   template?: string;
@@ -20,6 +21,7 @@ export interface IPrompt extends IBaseTemplate {
   inputs?: Record<string, string>;
   completion?: string;
   settings?: ILLMSettings;
+  functions?: IFunction[];
   messages?: IPromptMessage[];
 }
 

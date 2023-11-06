@@ -9,6 +9,7 @@ import {
   IAction,
   IAsk,
   IAvatarElement,
+  IFunction,
   IMessage,
   IMessageElement
 } from '@chainlit/components';
@@ -58,8 +59,22 @@ const MessageContainer = memo(
       (message: IMessage) => {
         setPlayground((old) => ({
           ...old,
-          prompt: message.prompt,
+          prompt: message.prompt
+            ? {
+                ...message.prompt,
+                functions:
+                  (message.prompt.settings
+                    ?.functions as unknown as IFunction[]) || []
+              }
+            : undefined,
           originalPrompt: message.prompt
+            ? {
+                ...message.prompt,
+                functions:
+                  (message.prompt.settings
+                    ?.functions as unknown as IFunction[]) || []
+              }
+            : undefined
         }));
       },
       [setPlayground]

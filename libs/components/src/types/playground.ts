@@ -23,6 +23,15 @@ export interface ILLMProviderSettings {
   };
 }
 
+export interface IFunction {
+  name: string;
+  description: string;
+  parameters: {
+    required: string[];
+    properties: Record<string, { title: string; type: string }>;
+  };
+}
+
 export type PromptMode = 'Template' | 'Formatted';
 
 export interface IPlayground {

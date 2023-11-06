@@ -70,8 +70,6 @@ export interface IElement {
 export interface IConversation {
   id?: string;
   createdAt?: number;
-  elementCount?: number;
-  messageCount?: number;
   appUser?: IAppUser;
   messages: IMessage[];
   elements?: IElement[];
@@ -339,8 +337,6 @@ export class ChainlitCloudClient extends ChainlitGraphQLClient {
                     node {
                         id
                         createdAt
-                        elementCount
-                        messageCount
                         appUser {
                             username
                         }

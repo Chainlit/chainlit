@@ -11,13 +11,19 @@ import {
 
 import { useLLMProviders } from 'hooks/useLLMProviders';
 
-import { modeState, playgroundState, variableState } from 'state/playground';
+import {
+  functionState,
+  modeState,
+  playgroundState,
+  variableState
+} from 'state/playground';
 import { accessTokenState, userEnvState } from 'state/user';
 
 export default function PlaygroundWrapper() {
   const accessToken = useRecoilValue(accessTokenState);
   const userEnv = useRecoilValue(userEnvState);
   const [variableName, setVariableName] = useRecoilState(variableState);
+  const [functionIndex, setFunctionIndex] = useRecoilState(functionState);
   const [playground, setPlayground] = useRecoilState(playgroundState);
   const [promptMode, setPromptMode] = useRecoilState(modeState);
 
@@ -60,9 +66,10 @@ export default function PlaygroundWrapper() {
   );
 
   return (
-    <>
       <PromptPlayground
         context={{
+          setFunctionIndex,
+          functionIndex,
           setVariableName,
           variableName,
           setPlayground,
@@ -73,6 +80,5 @@ export default function PlaygroundWrapper() {
           setPromptMode
         }}
       />
-    </>
   );
 }

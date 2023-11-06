@@ -37,3 +37,4 @@ class Prompt(BaseTemplate):
     completion: Optional[str] = None
     settings: Optional[Dict[str, Any]] = None
     messages: Optional[List[PromptMessage]] = None
+    functions: Optional[List[Dict]] = None

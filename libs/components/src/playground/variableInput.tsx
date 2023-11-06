@@ -17,7 +17,7 @@ const VariableInput = (): JSX.Element | null => {
       items={variables}
       id="variable-select"
       value={variableName || ''}
-      label="Select a variable"
+      label="Edit a variable"
       onChange={(e) => setVariableName(e.target.value)}
       sx={{ maxWidth: '270px' }}
     />
