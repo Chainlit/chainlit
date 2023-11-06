@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [0.7.500] - 2023-12-06
+
+### Added
+
+- `cl.on_chat_resume` decorator to enable users to continue a conversation.
+- Support for OpenAI functions in the Prompt Playground
+- Ability to add/remove messages in the Prompt Playground
+- Plotly element to display interactive charts
+
+### Fixed
+
+- Langchain intermediate steps display are now much more readable
+- Chat history loading latency has been enhanced
+- UTF-8 characters are now correctly displayed in json code blocks
+- Select widget `items` attribute is now working properly
+- Chat profiles widget is no longer scrolling horizontally
+
 ## [0.7.400] - 2023-10-27
 
 ### Added
