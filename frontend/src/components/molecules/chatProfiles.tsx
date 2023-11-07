@@ -54,7 +54,7 @@ export default function ChatProfiles() {
   const popoverOpen = Boolean(anchorEl);
 
   return (
-    <Box py={2} alignSelf="center" maxWidth="min(60rem, 90vw)">
+    <Box pt={1} pb={2} alignSelf="center" maxWidth="min(60rem, 90vw)">
       <InputStateHandler id={'chat-profile-selector'}>
         <Box
           sx={{
