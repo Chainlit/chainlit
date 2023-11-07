@@ -29,6 +29,11 @@ Provider = Literal[
 ]
 
 
+class AppUserDict(TypedDict):
+    id: str
+    username: str
+
+
 # Used when logging-in a user
 @dataclass
 class AppUser(DataClassJsonMixin):
@@ -85,7 +90,7 @@ class ConversationDict(TypedDict):
     id: Optional[str]
     metadata: Optional[Dict]
     createdAt: Optional[int]
-    appUser: Optional[AppUser]
+    appUser: Optional[AppUserDict]
     messages: List[MessageDict]
     elements: Optional[List[ElementDict]]
 

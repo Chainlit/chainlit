@@ -30,21 +30,26 @@ def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
 async def persist_user_session(conversation_id: str, metadata: Dict):
     if not chainlit_client:
         return
-    # TODO: check that user is author
+
     await chainlit_client.update_conversation_metadata(
         conversation_id=conversation_id, metadata=metadata
     )
 
 
 async def resume_conversation(session: WebsocketSession):
-    if not chainlit_client or not session.conversation_id:
+    if not chainlit_client or not session.user or not session.conversation_id:
         return
-    # TODO: check that user is author
+
     conversation = await chainlit_client.get_conversation(
         conversation_id=session.conversation_id
     )
 
-    if conversation:
+    author = (
+        conversation["appUser"].get("username") if conversation["appUser"] else None
+    )
+    user_is_author = author == session.user.username
+
+    if conversation and user_is_author:
         metadata = conversation["metadata"] or {}
         user_sessions[session.id] = metadata
         if chat_profile := metadata.get("chat_profile"):
@@ -136,13 +141,16 @@ async def connection_successful(sid):
 
     if context.session.restored:
         return
-    elif context.session.conversation_id and config.code.on_chat_resume:
+
+    if context.session.conversation_id and config.code.on_chat_resume:
         conversation = await resume_conversation(context.session)
         if conversation:
             context.session.has_user_message = True
             await config.code.on_chat_resume(conversation)
             await context.emitter.resume_conversation(conversation)
-    elif config.code.on_chat_start:
+            return
+
+    if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
         await config.code.on_chat_start()
 

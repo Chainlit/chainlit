@@ -468,7 +468,7 @@ async def update_feedback(
 ):
     """Update the human feedback for a particular message."""
 
-    # todo check that message belong to a user's conversation
+    # TODO: check that message belong to a user's conversation
 
     if not chainlit_client:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")

@@ -181,6 +181,10 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
                 createdAt
                 tags
                 metadata
+                appUser {
+                    id
+                    username
+                }
                 messages {
                     id
                     isError
