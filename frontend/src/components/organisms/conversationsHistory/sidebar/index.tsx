@@ -99,7 +99,7 @@ const _ConversationsHistorySidebar = () => {
     }
   };
 
-  if (accessToken && !isFetching && !conversations?.conversations) {
+  if (accessToken && !isFetching && !conversations?.conversations && !error) {
     fetchConversations();
   }
 
