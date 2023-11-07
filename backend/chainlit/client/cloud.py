@@ -167,11 +167,11 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         }
         res = await self.query(query, variables)
         self.check_for_errors(res, raise_error=True)
-        app_user = res.get("data", {}).get("conversation", {}).get("appUser")
-        if app_user:
-            return app_user.get("username")
-        else:
-            return None
+        data = res.get("data")
+        conversation = data.get("conversation") if data else None
+        return (
+            conversation["appUser"].get("username") if conversation["appUser"] else None
+        )
 
     async def get_conversation(self, conversation_id: str) -> ConversationDict:
         query = """
