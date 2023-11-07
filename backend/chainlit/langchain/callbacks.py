@@ -612,7 +612,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
         else:
             return
 
-        if run.run_type in ["agent", "chain", "tool"]:
+        if run.run_type in ["agent", "chain"]:
             pass
             # # Add the response of the chain/tool
             # self._run_sync(
