@@ -32,6 +32,11 @@ export interface IFunction {
   };
 }
 
+export interface ITool {
+  type: string;
+  function: IFunction;
+}
+
 export type PromptMode = 'Template' | 'Formatted';
 
 export interface IPlayground {

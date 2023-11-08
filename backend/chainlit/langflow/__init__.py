@@ -7,7 +7,7 @@ if not check_module_version("langflow", "0.1.4"):
 
 from typing import Dict, Optional, Union
 
-import aiohttp
+import httpx
 from chainlit.telemetry import trace_event
 
 
@@ -16,15 +16,12 @@ async def load_flow(schema: Union[Dict, str], tweaks: Optional[Dict] = None):
 
     trace_event("load_langflow")
 
-    if type(schema) == str:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                schema,
-            ) as r:
-                if not r.ok:
-                    reason = await r.text()
-                    raise ValueError(f"Error: {reason}")
-                schema = await r.json()
+    if isinstance(schema, str):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(schema)
+            if response.status_code != 200:
+                raise ValueError(f"Error: {response.text}")
+            schema = response.json()
 
     flow = load_flow_from_json(flow=schema, tweaks=tweaks)
 
