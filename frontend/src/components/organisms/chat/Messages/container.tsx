@@ -11,7 +11,8 @@ import {
   IAvatarElement,
   IFunction,
   IMessage,
-  IMessageElement
+  IMessageElement,
+  ITool
 } from '@chainlit/components';
 
 import { playgroundState } from 'state/playground';
@@ -57,25 +58,36 @@ const MessageContainer = memo(
 
     const onPlaygroundButtonClick = useCallback(
       (message: IMessage) => {
-        setPlayground((old) => ({
-          ...old,
-          prompt: message.prompt
-            ? {
-                ...message.prompt,
-                functions:
-                  (message.prompt.settings
-                    ?.functions as unknown as IFunction[]) || []
-              }
-            : undefined,
-          originalPrompt: message.prompt
-            ? {
-                ...message.prompt,
-                functions:
-                  (message.prompt.settings
-                    ?.functions as unknown as IFunction[]) || []
-              }
-            : undefined
-        }));
+        setPlayground((old) => {
+          let functions =
+            (message.prompt?.settings?.functions as unknown as IFunction[]) ||
+            [];
+          const tools =
+            (message.prompt?.settings?.tools as unknown as ITool[]) || [];
+          if (tools.length) {
+            functions = [
+              ...functions,
+              ...tools
+                .filter((t) => t.type === 'function')
+                .map((t) => t.function)
+            ];
+          }
+          return {
+            ...old,
+            prompt: message.prompt
+              ? {
+                  ...message.prompt,
+                  functions
+                }
+              : undefined,
+            originalPrompt: message.prompt
+              ? {
+                  ...message.prompt,
+                  functions
+                }
+              : undefined
+          };
+        });
       },
       [setPlayground]
     );

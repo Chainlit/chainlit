@@ -91,7 +91,7 @@ const SelectInput = ({
           id: id,
           name: name || id,
           sx: {
-            color: grey[600],
+            color: 'text.primary',
             fontSize: '14px',
             fontWeight: 400,
             px: '16px',

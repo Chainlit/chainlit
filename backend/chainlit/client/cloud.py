@@ -1,7 +1,7 @@
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
-import aiohttp
+import httpx
 from chainlit.logger import logger
 
 from .base import (
@@ -459,41 +459,37 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         if conversation_id:
             body["conversationId"] = conversation_id
 
-        path = f"/api/upload/file"
+        path = "/api/upload/file"
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
                 f"{self.chainlit_server}{path}",
                 json=body,
                 headers=self.headers,
-            ) as r:
-                if not r.ok:
-                    reason = await r.text()
-                    logger.error(f"Failed to sign upload url: {reason}")
-                    return {"object_key": None, "url": None}
-                json_res = await r.json()
+            )
+            if response.status_code != 200:
+                reason = response.text
+                logger.error(f"Failed to sign upload url: {reason}")
+                return {"object_key": None, "url": None}
+            json_res = response.json()
 
         upload_details = json_res["post"]
         object_key = upload_details["fields"]["key"]
         signed_url = json_res["signedUrl"]
 
-        form_data = aiohttp.FormData()
+        # Prepare form data
+        form_data = upload_details["fields"].copy()
+        form_data["file"] = (id, content, "multipart/form-data")
 
-        # Add fields to the form_data
-        for field_name, field_value in upload_details["fields"].items():
-            form_data.add_field(field_name, field_value)
-
-        # Add file to the form_data
-        form_data.add_field("file", content, content_type="multipart/form-data")
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with httpx.AsyncClient() as client:
+            upload_response = await client.post(
                 upload_details["url"],
-                data=form_data,
-            ) as upload_response:
-                if not upload_response.ok:
-                    reason = await upload_response.text()
-                    logger.error(f"Failed to upload file: {reason}")
-                    return {"object_key": None, "url": None}
-
+                files=form_data,
+            )
+            try:
+                upload_response.raise_for_status()
                 url = f'{upload_details["url"]}/{object_key}'
                 return {"object_key": object_key, "url": signed_url}
+            except Exception as e:
+                logger.error(f"Failed to upload file: {str(e)}")
+                return {"object_key": None, "url": None}
