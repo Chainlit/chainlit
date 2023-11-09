@@ -158,7 +158,8 @@ class ChatOpenAIProvider(BaseProvider):
 
             async def create_event_stream():
                 async for part in response:
-                    if token := part.choices[0].delta.content or "":
+                    if part.choices and part.choices[0].delta.content:
+                        token = part.choices[0].delta.content
                         yield token
                     else:
                         continue
@@ -212,7 +213,8 @@ class OpenAIProvider(BaseProvider):
 
         async def create_event_stream():
             async for part in response:
-                if token := part.choices[0].text or "":
+                if part.choices and part.choices[0].text:
+                    token = part.choices[0].text
                     yield token
                 else:
                     continue
@@ -263,7 +265,8 @@ class AzureOpenAIProvider(BaseProvider):
 
         async def create_event_stream():
             async for part in response:
-                if token := part.choices[0].text or "":
+                if part.choices and part.choices[0].text:
+                    token = part.choices[0].text
                     yield token
                 else:
                     continue
@@ -324,7 +327,8 @@ class AzureChatOpenAIProvider(BaseProvider):
 
             async def create_event_stream():
                 async for part in response:
-                    if token := part.choices[0].delta.content or "":
+                    if part.choices and part.choices[0].delta.content:
+                        token = part.choices[0].delta.content
                         yield token
                     else:
                         continue
