@@ -114,7 +114,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
 
             if formatted_messages:
                 messages = [
-                    PromptMessage(role=m.role.value, formatted=m.content)
+                    PromptMessage(role=m.role.value, formatted=m.content)  # type: ignore[arg-type]
                     for m in formatted_messages
                 ]
             else:

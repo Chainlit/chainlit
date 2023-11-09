@@ -6,6 +6,7 @@ import { Box, Popover, Tab, Tabs } from '@mui/material';
 
 import {
   InputStateHandler,
+  Markdown,
   grey,
   useChatInteract,
   useChatSession,
@@ -14,7 +15,6 @@ import {
 
 import { projectSettingsState } from 'state/project';
 
-import Markdown from './markdown';
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
@@ -168,7 +168,7 @@ export default function ChatProfiles() {
         disableRestoreFocus
       >
         <Box p={2} maxWidth="20rem">
-          <Markdown content={chatProfileDescription} />
+          <Markdown>{chatProfileDescription}</Markdown>
         </Box>
       </Popover>
       <NewChatDialog

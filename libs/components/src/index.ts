@@ -11,6 +11,7 @@ export * from 'hooks/index';
 export { Attachments } from './Attachments';
 export { ClipboardCopy } from './ClipboardCopy';
 export { Code } from './Code';
+export { Markdown } from './Markdown';
 export { Collapse } from './Collapse';
 export { ErrorBoundary } from './ErrorBoundary';
 export { nestMessages } from 'utils/message';

@@ -6,14 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased!
+### Added
+
+- Latex support (only supporting $$ notation)
+
+### Fixed
+
+- Now properly displaying empty messages with inlined elements
 
 ## [0.7.600rc0] - 2023-11-08
 
 ### Changed
 
 - Replaced aiohttp with httpx
-- Prompt Playground has been updated to work with the new openai release (v1). Including tools.
+- Prompt Playground has been updated to work with the new openai release (v1). Including tools
 
 ## [0.7.500] - 2023-11-07
 

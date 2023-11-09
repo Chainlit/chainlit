@@ -1,4 +1,3 @@
-import { CodeProps } from 'react-markdown/lib/ast-to-react';
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { grey } from 'theme/palette';
@@ -9,18 +8,19 @@ import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { ClipboardCopy } from './ClipboardCopy';
 
-const Code = ({ inline, children, ...props }: CodeProps) => {
+const Code = ({ children, ...props }: any) => {
   const isDarkMode = useIsDarkMode();
-
-  const match = /language-(\w+)/.exec(props.className || '');
-  const showSyntaxHighlighter = !inline && match;
+  const codeChildren = props.node?.children?.[0];
+  const className = codeChildren?.properties?.className?.[0];
+  const match = /language-(\w+)/.exec(className || '');
+  const code = codeChildren?.children?.[0]?.value;
 
   const renderCode = () => {
-    if (showSyntaxHighlighter) {
+    if (match && code) {
       return (
         <SyntaxHighlighter
           {...props}
-          children={String(children).replace(/\n$/, '')}
+          children={code}
           style={dracula}
           customStyle={{
             paddingRight: '2.5em',
@@ -30,20 +30,6 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
           language={match[1]}
           PreTag="div"
         />
-      );
-    } else if (inline) {
-      return (
-        <code
-          {...props}
-          style={{
-            background: isDarkMode ? grey[900] : grey[200],
-            borderRadius: '4px',
-            padding: '0.2em 0.4em',
-            overflowX: 'auto'
-          }}
-        >
-          {children}
-        </code>
       );
     } else {
       return (
@@ -73,18 +59,15 @@ const Code = ({ inline, children, ...props }: CodeProps) => {
   return (
     <Box
       sx={{
-        display: inline ? 'inline' : 'block',
         position: 'relative',
         maxWidth: '90%'
       }}
     >
-      {!inline ? (
-        <ClipboardCopy
-          value={children[0] as string}
-          // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
-          theme={showSyntaxHighlighter ? 'dark' : undefined}
-        />
-      ) : null}
+      <ClipboardCopy
+        value={children[0] as string}
+        // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
+        theme={match ? 'dark' : undefined}
+      />
       {renderCode()}
     </Box>
   );

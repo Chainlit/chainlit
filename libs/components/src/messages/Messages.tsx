@@ -25,13 +25,21 @@ const Messages = memo(
 
     const filtered = messages.filter((m, i) => {
       const hasContent = !!m.content;
+      const hasInlinedElement = elements.find(
+        (el) => el.display === 'inline' && (el.forIds || []).indexOf(m.id) > -1
+      );
       const hasChildren = !!m.subMessages?.length;
       const isLast = i === messages.length - 1;
       const messageRunning =
         isRunning === undefined
           ? messageContext.loading && isLast
           : isRunning && isLast;
-      return hasContent || hasChildren || (!hasContent && messageRunning);
+      return (
+        hasContent ||
+        hasInlinedElement ||
+        hasChildren ||
+        (!hasContent && messageRunning)
+      );
     });
 
     return (

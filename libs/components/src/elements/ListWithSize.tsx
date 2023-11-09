@@ -30,8 +30,7 @@ const ListWithSize = <T extends IImageElement | IVideoElement>({
         // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
         transform: 'translateZ(0)',
         width: '100%',
-        maxWidth: 600,
-        maxHeight: 400
+        maxWidth: 600
       }}
       variant="quilted"
       cols={4}
