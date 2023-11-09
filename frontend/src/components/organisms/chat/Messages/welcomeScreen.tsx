@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { Box } from '@mui/material';
 
-import Markdown from 'components/molecules/markdown';
+import { Markdown } from '@chainlit/components';
 
 const WelcomeScreen = memo(({ markdown }: { markdown?: string }) => {
   if (!markdown) return <Box flexGrow={1} />;
@@ -26,7 +26,7 @@ const WelcomeScreen = memo(({ markdown }: { markdown?: string }) => {
           flexDirection: 'column'
         }}
       >
-        <Markdown content={markdown} />
+        <Markdown>{markdown}</Markdown>
       </Box>
     </Box>
   );

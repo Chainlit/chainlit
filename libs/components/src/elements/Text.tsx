@@ -1,8 +1,4 @@
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Code } from 'src/Code';
-
-import Link from '@mui/material/Link';
+import { Markdown } from 'src/Markdown';
 
 import { useApi } from 'hooks/index';
 
@@ -30,22 +26,7 @@ const TextElement = ({ element }: Props) => {
     content = `\`\`\`${element.language}\n${content}\n\`\`\``;
   }
 
-  return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      className="markdown-body"
-      components={{
-        a: ({ children, ...props }) => (
-          <Link {...props} target="_blank">
-            {children}
-          </Link>
-        ),
-        code: ({ ...props }) => <Code {...props} />
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  );
+  return <Markdown>{content}</Markdown>;
 };
 
 export { TextElement };
