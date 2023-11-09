@@ -32,7 +32,7 @@ function Markdown({ refElements, children }: Props) {
       className="markdown-body"
       components={{
         a({ children, ...props }) {
-          const name = children?.[0] as string;
+          const name = children as string;
           const element = refElements?.find((e) => e.name === name);
 
           if (element) {
