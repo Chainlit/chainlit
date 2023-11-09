@@ -64,7 +64,7 @@ const Code = ({ children, ...props }: any) => {
       }}
     >
       <ClipboardCopy
-        value={children[0] as string}
+        value={code}
         // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
         theme={match ? 'dark' : undefined}
       />
