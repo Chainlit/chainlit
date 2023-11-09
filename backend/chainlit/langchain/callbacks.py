@@ -459,7 +459,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             else:
                 return kwargs.get("content", ""), None
         else:
-            return generation.get("text", "")
+            return generation.get("text", ""), None
 
     def on_chat_model_start(
         self,
@@ -582,7 +582,6 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             )
             generations = (run.outputs or {}).get("generations", [])
             completion, language = self._get_completion(generations[0][0])
-
             current_prompt = (
                 self.prompt_sequence.pop() if self.prompt_sequence else None
             )
