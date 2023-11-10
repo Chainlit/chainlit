@@ -602,6 +602,12 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
                 msg.language = language
                 msg.prompt = current_prompt
                 self._run_sync(msg.update())
+
+            if self.final_stream and self.has_streamed_final_answer:
+                self.final_stream.content = completion
+                self.final_stream.language = language
+                self.final_stream.prompt = current_prompt
+                self._run_sync(self.final_stream.send())
             return
 
         outputs = run.outputs or {}
