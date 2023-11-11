@@ -29,7 +29,6 @@ interface Props {
 
 const FeedbackButtons = ({ message }: Props) => {
   const { onFeedbackUpdated } = useContext(MessageContext);
-
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
 
@@ -69,6 +68,8 @@ const FeedbackButtons = ({ message }: Props) => {
     }
   };
 
+  const disabled = !!message.streaming;
+
   const buttons = useMemo(() => {
     const iconSx = {
       width: ICON_SIZE,
@@ -82,28 +83,34 @@ const FeedbackButtons = ({ message }: Props) => {
     const baseButtons = [
       () => (
         <Tooltip title="Negative feedback">
-          <Button
-            className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
-            onClick={() => {
-              handleFeedbackClick(-1);
-            }}
-            size="small"
-          >
-            <DownIcon sx={iconSx} />
-          </Button>
+          <span>
+            <Button
+              disabled={disabled}
+              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
+              onClick={() => {
+                handleFeedbackClick(-1);
+              }}
+              size="small"
+            >
+              <DownIcon sx={iconSx} />
+            </Button>
+          </span>
         </Tooltip>
       ),
       () => (
         <Tooltip title="Positive feedback">
-          <Button
-            className={`positive-feedback-${feedback === 1 ? 'on' : 'off'}`}
-            onClick={() => {
-              handleFeedbackClick(1);
-            }}
-            size="small"
-          >
-            <UpIcon sx={iconSx} />
-          </Button>
+          <span>
+            <Button
+              disabled={disabled}
+              className={`positive-feedback-${feedback === 1 ? 'on' : 'off'}`}
+              onClick={() => {
+                handleFeedbackClick(1);
+              }}
+              size="small"
+            >
+              <UpIcon sx={iconSx} />
+            </Button>
+          </span>
         </Tooltip>
       )
     ];
@@ -111,22 +118,25 @@ const FeedbackButtons = ({ message }: Props) => {
     if (comment) {
       baseButtons.push(() => (
         <Tooltip title="Feedback comment">
-          <Button
-            onClick={() => {
-              setShowFeedbackDialog(feedback);
-              setCommentInput(comment);
-            }}
-            className="feedback-comment-edit"
-            size="small"
-          >
-            <StickyNote2Outlined sx={iconSx} />
-          </Button>
+          <span>
+            <Button
+              disabled={disabled}
+              onClick={() => {
+                setShowFeedbackDialog(feedback);
+                setCommentInput(comment);
+              }}
+              className="feedback-comment-edit"
+              size="small"
+            >
+              <StickyNote2Outlined sx={iconSx} />
+            </Button>
+          </span>
         </Tooltip>
       ));
     }
 
     return baseButtons;
-  }, [feedback, comment]);
+  }, [feedback, comment, disabled]);
 
   return (
     <>

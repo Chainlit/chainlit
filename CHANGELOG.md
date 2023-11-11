@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Now properly displaying empty messages with inlined elements
+- Too many values to unpack error in langchain callback
+- Final streamed answer is not annotable with human feedback
 
 ## [0.7.600rc0] - 2023-11-08
 
