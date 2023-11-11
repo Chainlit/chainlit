@@ -79,7 +79,8 @@ class MessageBase(ABC):
         Update a message already sent to the UI.
         """
         trace_event("update_message")
-
+        if self.streaming:
+            self.streaming = False
         msg_dict = self.to_dict()
         asyncio.create_task(self._persist_update(msg_dict))
         await context.emitter.update_message(msg_dict)
@@ -129,10 +130,10 @@ class MessageBase(ABC):
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
 
-        msg_dict = await self._create()
-
         if self.streaming:
             self.streaming = False
+
+        msg_dict = await self._create()
 
         await context.emitter.send_message(msg_dict)
 
