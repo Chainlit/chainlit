@@ -83,6 +83,7 @@ const FeedbackButtons = ({ message }: Props) => {
       () => (
         <Tooltip title="Negative feedback">
           <Button
+            disabled={message.streaming}
             className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
             onClick={() => {
               handleFeedbackClick(-1);
@@ -96,6 +97,7 @@ const FeedbackButtons = ({ message }: Props) => {
       () => (
         <Tooltip title="Positive feedback">
           <Button
+            disabled={message.streaming}
             className={`positive-feedback-${feedback === 1 ? 'on' : 'off'}`}
             onClick={() => {
               handleFeedbackClick(1);
@@ -112,6 +114,7 @@ const FeedbackButtons = ({ message }: Props) => {
       baseButtons.push(() => (
         <Tooltip title="Feedback comment">
           <Button
+            disabled={message.streaming}
             onClick={() => {
               setShowFeedbackDialog(feedback);
               setCommentInput(comment);
