@@ -158,10 +158,16 @@ class AzureADOAuthProvider(OAuthProvider):
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_AZURE_AD_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_AZURE_AD_CLIENT_SECRET")
+
+        scope = ["https://graph.microsoft.com/User.Read"]
+        if os.environ.get("OAUTH_AZURE_AD_SCOPE"):
+            scope.append(os.environ.get("OAUTH_AZURE_AD_SCOPE"))
+        scope = " ".join(scope)
+
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read",
+            "scope": scope,
             "response_mode": "query",
         }
 

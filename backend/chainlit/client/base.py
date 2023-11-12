@@ -41,6 +41,7 @@ class AppUser(DataClassJsonMixin):
     role: Role = "USER"
     tags: List[str] = Field(default_factory=list)
     image: Optional[str] = None
+    token: Optional[str] = None
     provider: Optional[Provider] = None
 
 
