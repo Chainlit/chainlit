@@ -34,7 +34,7 @@ const UploadButton = ({
   const { getRootProps, getInputProps, uploading } = upload;
 
   return (
-    <Tooltip title="Upload files">
+    <Tooltip title="Attach files">
       <span>
         <input id="upload-button-input" {...getInputProps()} />
         <IconButton
