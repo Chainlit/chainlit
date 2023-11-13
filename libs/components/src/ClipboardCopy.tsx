@@ -12,7 +12,6 @@ interface ClipboardCopyProps {
   value: string;
   theme?: 'dark' | 'light';
   size?: IconProps['fontSize'];
-  absolute?: boolean;
 }
 
 const ClipboardCopy = ({
