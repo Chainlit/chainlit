@@ -147,7 +147,9 @@ class ChainlitGraphQLClient:
     def check_for_errors(self, response: Dict[str, Any], raise_error: bool = False):
         if "errors" in response:
             if raise_error:
-                raise Exception(response["errors"][0])
+                raise Exception(
+                    f"{response['errors'][0]['message']}. Path: {str(response['errors'][0]['path'])}"
+                )
             logger.error(response["errors"][0])
             return True
         return False
