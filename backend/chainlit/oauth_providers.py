@@ -299,13 +299,18 @@ class Auth0OAuthProvider(OAuthProvider):
         self.client_secret = os.environ.get("OAUTH_AUTH0_CLIENT_SECRET")
         # Ensure that the domain does not have a trailing slash
         self.domain = f"https://{os.environ.get('OAUTH_AUTH0_DOMAIN', '').rstrip('/')}"
+        self.original_domain = (
+            f"https://{os.environ.get('OAUTH_AUTH0_ORIGINAL_DOMAIN').rstrip('/')}"
+            if os.environ.get("OAUTH_AUTH0_ORIGINAL_DOMAIN")
+            else self.domain
+        )
 
         self.authorize_url = f"{self.domain}/authorize"
 
         self.authorize_params = {
             "response_type": "code",
             "scope": "openid profile email",
-            "audience": f"{self.domain}/userinfo",
+            "audience": f"{self.original_domain}/userinfo",
         }
 
     async def get_token(self, code: str, url: str):
@@ -333,7 +338,7 @@ class Auth0OAuthProvider(OAuthProvider):
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{self.domain}/userinfo",
+                f"{self.original_domain}/userinfo",
                 headers={"Authorization": f"Bearer {token}"},
             )
             response.raise_for_status()
