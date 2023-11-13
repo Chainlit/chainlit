@@ -3,10 +3,12 @@ import { useEffect, useRef } from 'react';
 import { grey } from 'theme/palette';
 
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import 'highlight.js/styles/atom-one-dark.css';
+import 'highlight.js/styles/monokai-sublime.css';
 
 import { ClipboardCopy } from './ClipboardCopy';
 
@@ -27,7 +29,12 @@ const CodeSnippet = ({ language, children }) => {
     <pre style={{ margin: 0 }}>
       <code
         ref={codeRef}
-        style={{ borderRadius: '4px' }}
+        style={{
+          borderBottomLeftRadius: '4px',
+          borderBottomRightRadius: '4px',
+          fontFamily: 'monospace',
+          fontSize: '14px'
+        }}
         className={`language-${language}`}
       >
         {children}
@@ -74,15 +81,24 @@ const Code = ({ children, ...props }: any) => {
   return (
     <Box
       sx={{
-        position: 'relative',
-        maxWidth: '95%'
+        position: 'relative'
       }}
     >
-      <ClipboardCopy
-        value={code}
-        // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
-        theme={match ? 'dark' : undefined}
-      />
+      <Stack
+        px={2}
+        py={1}
+        direction="row"
+        sx={{
+          borderTopLeftRadius: '4px',
+          borderTopRightRadius: '4px',
+          background: isDarkMode ? grey[900] : grey[200],
+          borderBottom: `1px solid ${grey[950]}`
+        }}
+      >
+        <Typography variant="caption">{match?.[1] || 'Raw code'}</Typography>
+        <ClipboardCopy value={code} size="small" />
+      </Stack>
+
       {highlightedCode}
       {nonHighlightedCode}
     </Box>
