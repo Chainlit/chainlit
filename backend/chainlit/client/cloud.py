@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import httpx
 from chainlit.logger import logger
@@ -478,8 +478,13 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         signed_url = json_res["signedUrl"]
 
         # Prepare form data
-        form_data = upload_details["fields"].copy()
-        form_data["file"] = (id, content, "multipart/form-data")
+        form_data = {}  # type: Dict[str, Tuple[Union[str, None], Any]]
+        for field_name, field_value in upload_details["fields"].items():
+            form_data[field_name] = (None, field_value)
+
+        # Add file to the form_data
+        # Note: The content_type parameter is not needed here, as the correct MIME type should be set in the 'Content-Type' field from upload_details
+        form_data["file"] = (id, content)
 
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(

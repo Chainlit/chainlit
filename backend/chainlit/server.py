@@ -473,11 +473,15 @@ async def update_feedback(
     if not chainlit_client:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    await chainlit_client.set_human_feedback(
-        message_id=update.messageId,
-        feedback=update.feedback,
-        feedbackComment=update.feedbackComment,
-    )
+    try:
+        await chainlit_client.set_human_feedback(
+            message_id=update.messageId,
+            feedback=update.feedback,
+            feedbackComment=update.feedbackComment,
+        )
+    except Exception as e:
+        raise HTTPException(detail=str(e), status_code=401)
+
     return JSONResponse(content={"success": True})
 
 
