@@ -28,7 +28,7 @@ const Messages = memo(
       const hasInlinedElement = elements.find(
         (el) => el.display === 'inline' && (el.forIds || []).indexOf(m.id) > -1
       );
-      const hasChildren = !!m.subMessages?.length;
+      const hasChildren = !!m.subMessages?.length && !messageContext.hideCot;
       const isLast = i === messages.length - 1;
       const messageRunning =
         isRunning === undefined

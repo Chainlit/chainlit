@@ -105,7 +105,11 @@ const prepareContent = ({
   }
 
   if (language) {
-    preparedContent = `\`\`\`${language}\n${preparedContent}\n\`\`\``;
+    const prefix = `\`\`\`${language}`;
+    const suffix = '```';
+    if (!preparedContent.startsWith('```')) {
+      preparedContent = `${prefix}\n${preparedContent}\n${suffix}`;
+    }
   }
   return {
     preparedContent,

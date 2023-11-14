@@ -2,6 +2,7 @@ import { grey } from 'theme/palette';
 import { useCopyToClipboard, useToggle } from 'usehooks-ts';
 
 import CopyAll from '@mui/icons-material/CopyAll';
+import { IconProps } from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -10,9 +11,14 @@ import { useIsDarkMode } from 'hooks/useIsDarkMode';
 interface ClipboardCopyProps {
   value: string;
   theme?: 'dark' | 'light';
+  size?: IconProps['fontSize'];
 }
 
-const ClipboardCopy = ({ value, theme }: ClipboardCopyProps): JSX.Element => {
+const ClipboardCopy = ({
+  value,
+  size,
+  theme
+}: ClipboardCopyProps): JSX.Element => {
   const [showTooltip, toggleTooltip] = useToggle();
   const isDarkMode = useIsDarkMode();
   const [_, copy] = useCopyToClipboard();
@@ -48,7 +54,7 @@ const ClipboardCopy = ({ value, theme }: ClipboardCopyProps): JSX.Element => {
             );
         }}
       >
-        <CopyAll />
+        <CopyAll fontSize={size} />
       </IconButton>
     </Tooltip>
   );

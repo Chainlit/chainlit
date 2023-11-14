@@ -56,7 +56,9 @@ export default function EditorWrapper({
           sxChildren
         )}
       >
-        {clipboardValue ? <ClipboardCopy value={clipboardValue} /> : null}
+        {clipboardValue ? (
+          <ClipboardCopy value={clipboardValue} size="small" />
+        ) : null}
         {children}
       </Box>
     </Stack>

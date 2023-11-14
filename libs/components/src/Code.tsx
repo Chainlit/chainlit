@@ -1,12 +1,47 @@
-import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import hljs from 'highlight.js';
+import { useEffect, useRef } from 'react';
 import { grey } from 'theme/palette';
 
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
+import 'highlight.js/styles/monokai-sublime.css';
+
 import { ClipboardCopy } from './ClipboardCopy';
+
+const CodeSnippet = ({ language, children }) => {
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+      const highlighted =
+        codeRef.current.getAttribute('data-highlighted') === 'yes';
+      if (!highlighted) {
+        hljs.highlightElement(codeRef.current);
+      }
+    }
+  }, []);
+
+  return (
+    <pre style={{ margin: 0 }}>
+      <code
+        ref={codeRef}
+        style={{
+          borderBottomLeftRadius: '4px',
+          borderBottomRightRadius: '4px',
+          fontFamily: 'monospace',
+          fontSize: '14px'
+        }}
+        className={`language-${language}`}
+      >
+        {children}
+      </code>
+    </pre>
+  );
+};
 
 const Code = ({ children, ...props }: any) => {
   const isDarkMode = useIsDarkMode();
@@ -15,60 +50,57 @@ const Code = ({ children, ...props }: any) => {
   const match = /language-(\w+)/.exec(className || '');
   const code = codeChildren?.children?.[0]?.value;
 
-  const renderCode = () => {
-    if (match && code) {
-      return (
-        <SyntaxHighlighter
-          {...props}
-          children={code}
-          style={dracula}
-          customStyle={{
-            paddingRight: '2.5em',
-            minHeight: '20px'
-          }}
-          wrapLongLines
-          language={match[1]}
-          PreTag="div"
-        />
-      );
-    } else {
-      return (
-        <Box
-          sx={{
-            background: isDarkMode ? grey[900] : grey[200],
-            borderRadius: '4px',
-            padding: (theme) => theme.spacing(1),
-            paddingRight: '2.5em',
-            minHeight: '20px',
-            overflowX: 'auto'
-          }}
-        >
-          <code
-            {...props}
-            style={{
-              whiteSpace: 'pre-wrap'
-            }}
-          >
-            {children}
-          </code>
-        </Box>
-      );
-    }
-  };
+  const showSyntaxHighlighter = match && code;
+
+  const highlightedCode = showSyntaxHighlighter ? (
+    <CodeSnippet language={match[1]}>{code}</CodeSnippet>
+  ) : null;
+
+  const nonHighlightedCode = showSyntaxHighlighter ? null : (
+    <Box
+      sx={{
+        background: isDarkMode ? grey[900] : grey[200],
+        borderRadius: '4px',
+        padding: (theme) => theme.spacing(1),
+        paddingRight: '2.5em',
+        minHeight: '20px',
+        overflowX: 'auto'
+      }}
+    >
+      <code
+        {...props}
+        style={{
+          whiteSpace: 'pre-wrap'
+        }}
+      >
+        {children}
+      </code>
+    </Box>
+  );
 
   return (
     <Box
       sx={{
-        position: 'relative',
-        maxWidth: '90%'
+        position: 'relative'
       }}
     >
-      <ClipboardCopy
-        value={code}
-        // If 'showSyntaxHighlighter' is true, force dark theme, otherwise, let the default mode.
-        theme={match ? 'dark' : undefined}
-      />
-      {renderCode()}
+      <Stack
+        px={2}
+        py={1}
+        direction="row"
+        sx={{
+          borderTopLeftRadius: '4px',
+          borderTopRightRadius: '4px',
+          background: isDarkMode ? grey[900] : grey[200],
+          borderBottom: `1px solid ${grey[950]}`
+        }}
+      >
+        <Typography variant="caption">{match?.[1] || 'Raw code'}</Typography>
+        <ClipboardCopy value={code} size="small" />
+      </Stack>
+
+      {highlightedCode}
+      {nonHighlightedCode}
     </Box>
   );
 };
