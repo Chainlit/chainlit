@@ -81,7 +81,14 @@ $ chainlit run demo.py -w
 
 ### 🔗 Integrations
 
-Chainlit is compatible with all Python programs and libraries. That being said, it comes with pre-built integrations for [Langchain](https://docs.chainlit.io/integrations/langchain), [Llama Index](https://docs.chainlit.io/integrations/llama-index), [Haystack](https://docs.chainlit.io/integrations/haystack) and [Langflow](https://docs.chainlit.io/integrations/langflow).
+Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:
+
+- [Langchain](https://docs.chainlit.io/integrations/langchain)
+- [Autogen](https://github.com/Chainlit/cookbook/tree/main/pyautogen)
+- [OpenAI Assistant](https://github.com/Chainlit/cookbook/tree/main/openai-assistant)
+- [Llama Index](https://docs.chainlit.io/integrations/llama-index)
+- [Haystack](https://docs.chainlit.io/integrations/haystack)
+- [Langflow](https://docs.chainlit.io/integrations/langflow)
 
 ### 📚 More Examples - Cookbook
 
@@ -89,7 +96,7 @@ You can find various examples of Chainlit apps [here](https://github.com/Chainli
 
 ## 🛣 Roadmap
 
-- [ ] Selectable chat profiles (at the beginning of a chat)
+- [x] Selectable chat profiles (at the beginning of a chat)
 - [ ] One click chat sharing
 - New clients:
   - [ ] Slack
