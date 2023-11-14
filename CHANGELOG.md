@@ -6,22 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing is unreleased!
+
+## [0.7.602] - 2023-11-14
+
 ### Added
 
 - Latex support (only supporting $$ notation)
+- Go back button on element page
 
 ### Fixed
 
+- Code blocks should no longer flicker or display `[object object]`.
 - Now properly displaying empty messages with inlined elements
-- Too many values to unpack error in langchain callback
-- Final streamed answer is not annotable with human feedback
-
-## [0.7.600rc0] - 2023-11-08
+- Fixed `Too many values to unpack error` in langchain callback
+- Langchain final streamed answer is now annotable with human feedback
+- AzureOpenAI should now work properly in the Prompt Playground
 
 ### Changed
 
+- Code blocks display has been enhanced
 - Replaced aiohttp with httpx
 - Prompt Playground has been updated to work with the new openai release (v1). Including tools
+- Auth0 oauth provider has a new configurable env variable `OAUTH_AUTH0_ORIGINAL_DOMAIN`
 
 ## [0.7.500] - 2023-11-07
 
