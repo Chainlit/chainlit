@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Page from 'pages/Page';
 
@@ -18,6 +18,7 @@ export default function Element() {
   const { elements } = useChatData();
 
   const [element, setElement] = useState<IMessageElement | null>(null);
+  const navigate = useNavigate();
 
   const conversationId = query.get('conversation');
 
@@ -45,7 +46,7 @@ export default function Element() {
 
   return (
     <Page>
-      <ElementView element={element} />
+      <ElementView element={element} onGoBack={() => navigate('/')} />
     </Page>
   );
 }
