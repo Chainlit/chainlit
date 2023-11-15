@@ -22,11 +22,15 @@ const Collapse = ({
 }: CollapseProps): JSX.Element => {
   const [expandAll, toggleExpandAll] = useToggle(defaultExpandAll);
 
-  const content = expandAll ? (
-    children
-  ) : (
-    <Box height={100} position="relative">
-      <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+  const content = (
+    <Box height={expandAll ? 'auto' : 100} position="relative">
+      <Box
+        position={expandAll ? 'relative' : 'absolute'}
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+      >
         {children}
       </Box>
     </Box>
@@ -44,7 +48,7 @@ const Collapse = ({
           </IconButton>
         </Tooltip>
         <Tooltip title="Download">
-          <IconButton onClick={onDownload}>
+          <IconButton onClick={onDownload} edge="end">
             <DownloadOutlined />
           </IconButton>
         </Tooltip>

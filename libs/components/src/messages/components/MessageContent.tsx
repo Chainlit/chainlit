@@ -59,7 +59,7 @@ const MessageContent = memo(
 
     return (
       <Stack width="100%" direction="row">
-        <Box width="100%">
+        <Box width="100%" sx={{ overflowX: 'auto', minWidth: '100px' }}>
           {preparedContent ? content : null}
           <InlinedElements elements={inlinedElements} />
         </Box>
