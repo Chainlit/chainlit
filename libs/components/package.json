@@ -1,7 +1,7 @@
 {
   "name": "@chainlit/components",
   "description": "Reusable components of the Chainlit UI.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "build": "tsup src/index.ts --clean --format esm,cjs --dts --external react --legacy-output --minify --sourcemap --treeshake",
     "build:watch": "tsup src/index.ts --watch --clean --format esm,cjs --dts --external react --legacy-output --minify --sourcemap --treeshake",
@@ -70,7 +70,7 @@
     "plotly.js": "^2.27.0",
     "react-dropzone": "^14.2.3",
     "react-file-icon": "^1.3.0",
-    "react-markdown": "^9.0.0",
+    "react-markdown": "^9.0.1",
     "react-password-checklist": "^1.5.0",
     "react-plotly.js": "^2.6.0",
     "react-resizable": "^3.0.5",

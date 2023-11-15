@@ -97,7 +97,13 @@ const Message = memo(
             }}
           >
             <Author message={message} show={showAvatar} />
-            <Stack alignItems="flex-start" width={0} flexGrow={1} spacing={1}>
+            <Stack
+              alignItems="flex-start"
+              width={0}
+              flexGrow={1}
+              spacing={1}
+              minWidth={150}
+            >
               <MessageContent
                 elements={elements}
                 message={message}
