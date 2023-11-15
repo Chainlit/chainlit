@@ -13,7 +13,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { grey } from '@chainlit/components';
+import { grey } from '@chainlit/react-components';
 
 import { ConversationsHistory } from 'types/chatHistory';
 

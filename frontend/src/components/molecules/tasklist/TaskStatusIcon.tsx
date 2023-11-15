@@ -1,6 +1,6 @@
 import { Box, CircularProgress, SvgIcon } from '@mui/material';
 
-import { green, grey, primary, white } from '@chainlit/components/theme';
+import { green, grey, primary, white } from '@chainlit/react-components/theme';
 
 import type { ITask } from './Task';
 

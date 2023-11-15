@@ -3,11 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import Page from 'pages/Page';
 
-import {
-  ElementView,
-  IMessageElement,
-  useChatData
-} from '@chainlit/components';
+import { IMessageElement, useChatData } from '@chainlit/react-client';
+import { ElementView } from '@chainlit/react-components';
 
 import { useQuery } from 'hooks/query';
 import { useApi } from 'hooks/useApi';

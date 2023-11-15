@@ -2,7 +2,7 @@ import {
   useChatData,
   useChatInteract,
   useChatMessages
-} from '@chainlit/components';
+} from '@chainlit/react-client';
 
 import { IProjectSettings } from 'state/project';
 

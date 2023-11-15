@@ -4,7 +4,7 @@ import { useRecoilState } from 'recoil';
 
 import { Box } from '@mui/material';
 
-import { IConversation } from '@chainlit/components';
+import { IConversation } from '@chainlit/react-client';
 
 import { Conversation } from 'components/organisms/conversationsHistory/Conversation';
 

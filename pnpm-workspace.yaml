@@ -1,3 +1,4 @@
 packages:
   - 'frontend/'
-  - 'libs/components/'
+  - 'libs/react-components/'
+  - 'libs/react-client/'

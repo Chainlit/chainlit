@@ -2,7 +2,7 @@ import { httpEndpoint } from 'api';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AuthLogin } from '@chainlit/components';
+import { AuthLogin } from '@chainlit/react-components';
 
 import { Logo } from 'components/atoms/logo';
 

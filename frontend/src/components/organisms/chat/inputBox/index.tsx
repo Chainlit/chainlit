@@ -10,7 +10,7 @@ import {
   IFileResponse,
   IMessage,
   useChatInteract
-} from '@chainlit/components';
+} from '@chainlit/react-client';
 
 import { useAuth } from 'hooks/auth';
 

@@ -1,9 +1,9 @@
-name: Tests @chainlit/components
+name: Tests @chainlit/react-components
 
 # on:
 #   push:
 #     paths:
-#       - 'libs/components'
+#       - 'libs/react-components'
 
 on: [workflow_call]
 
@@ -26,8 +26,8 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build components
-        run: pnpm run build:components
+        run: pnpm run build:react-components
       - name: Lint components
-        run: pnpm run lint:components
+        run: pnpm run lint:react-components
       - name: Run tests
-        run: pnpm test:components
+        run: pnpm test:react-components

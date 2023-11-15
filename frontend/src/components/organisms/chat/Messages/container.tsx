@@ -5,15 +5,17 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import {
-  MessageContainer as CMessageContainer,
   IAction,
   IAsk,
   IAvatarElement,
   IFunction,
   IMessage,
   IMessageElement,
-  ITool
-} from '@chainlit/components';
+  ITool,
+  messagesState,
+  updateMessageById
+} from '@chainlit/react-client';
+import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
 
 import { playgroundState } from 'state/playground';
 import { highlightMessage, sideViewState } from 'state/project';
@@ -49,6 +51,7 @@ const MessageContainer = memo(
     const appSettings = useRecoilValue(settingsState);
     const projectSettings = useRecoilValue(projectSettingsState);
     const setPlayground = useSetRecoilState(playgroundState);
+    const setMessages = useSetRecoilState(messagesState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
 
@@ -94,7 +97,7 @@ const MessageContainer = memo(
 
     const onFeedbackUpdated = useCallback(
       async (
-        messageId: string,
+        message: IMessage,
         feedback: number,
         onSuccess: () => void,
         feedbackComment?: string
@@ -102,7 +105,7 @@ const MessageContainer = memo(
         try {
           await toast.promise(
             ChainlitAPI.setHumanFeedback(
-              messageId!,
+              message.id,
               feedback,
               feedbackComment,
               accessToken
@@ -115,7 +118,13 @@ const MessageContainer = memo(
               }
             }
           );
-
+          setMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              humanFeedback: feedback,
+              humanFeedbackComment: feedbackComment
+            })
+          );
           onSuccess();
         } catch (err) {
           console.log(err);

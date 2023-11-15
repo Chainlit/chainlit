@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import useSWRImmutable from 'swr/immutable';
 
-import { IAppUser } from '@chainlit/components';
+import { IAppUser } from '@chainlit/react-client';
 
 import { conversationsHistoryState } from 'state/conversations';
 import { accessTokenState, userState } from 'state/user';

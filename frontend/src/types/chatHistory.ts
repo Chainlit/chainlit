@@ -1,4 +1,4 @@
-import { IConversation } from '@chainlit/components';
+import { IConversation } from '@chainlit/react-client';
 
 import { IPageInfo } from 'components/organisms/conversationsHistory/sidebar/ConversationsHistoryList';
 

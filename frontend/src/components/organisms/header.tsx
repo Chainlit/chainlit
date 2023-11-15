@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { RegularButton } from '@chainlit/components';
+import { RegularButton } from '@chainlit/react-components';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';

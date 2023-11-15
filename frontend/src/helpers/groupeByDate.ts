@@ -1,4 +1,4 @@
-import { IConversation } from '@chainlit/components';
+import { IConversation } from '@chainlit/react-client';
 
 export const groupByDate = (data: IConversation[]) => {
   const groupedData: { [key: string]: IConversation[] } = {};

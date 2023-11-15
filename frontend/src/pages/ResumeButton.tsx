@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Button } from '@mui/material';
 
-import { useChatInteract } from '@chainlit/components';
+import { useChatInteract } from '@chainlit/react-client';
 
 import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 

@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IPlayground, PromptMode } from '@chainlit/components';
+import { IPlayground, PromptMode } from '@chainlit/react-components';
 
 export const playgroundState = atom<IPlayground | undefined>({
   key: 'Playground',

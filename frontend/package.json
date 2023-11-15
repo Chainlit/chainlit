@@ -12,7 +12,8 @@
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error"
   },
   "dependencies": {
-    "@chainlit/components": "workspace:^",
+    "@chainlit/react-components": "workspace:^",
+    "@chainlit/react-client": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.9",
@@ -27,7 +28,7 @@
     "react-hotkeys-hook": "^4.4.1",
     "react-router-dom": "^6.15.0",
     "react-speech-recognition": "^3.10.0",
-    "recoil": "^0.7.6",
+    "recoil": "^0.7.7",
     "regenerator-runtime": "^0.14.0",
     "socket.io-client": "^4.7.2",
     "swr": "^2.2.2",

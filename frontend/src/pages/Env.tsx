@@ -6,7 +6,7 @@ import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';
 
-import { TextInput } from '@chainlit/components';
+import { TextInput } from '@chainlit/react-components';
 
 import { Header } from 'components/organisms/header';
 

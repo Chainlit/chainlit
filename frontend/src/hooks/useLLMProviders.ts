@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 
-import { IPlayground } from '@chainlit/components';
+import { IPlayground } from '@chainlit/react-components';
 
 import { useApi } from 'hooks/useApi';
 

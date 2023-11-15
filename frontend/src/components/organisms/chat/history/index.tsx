@@ -14,7 +14,7 @@ import {
   Typography
 } from '@mui/material';
 
-import { grey } from '@chainlit/components/theme';
+import { grey } from '@chainlit/react-components/theme';
 
 import { chatHistoryState } from 'state/chatHistory';
 

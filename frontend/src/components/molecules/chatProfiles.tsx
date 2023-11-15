@@ -4,14 +4,13 @@ import { useRecoilValue } from 'recoil';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
 
+import { useChatInteract, useChatSession } from '@chainlit/react-client';
 import {
   InputStateHandler,
   Markdown,
   grey,
-  useChatInteract,
-  useChatSession,
   useIsDarkMode
-} from '@chainlit/components';
+} from '@chainlit/react-components';
 
 import { projectSettingsState } from 'state/project';
 

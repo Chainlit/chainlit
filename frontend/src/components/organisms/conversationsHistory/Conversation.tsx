@@ -7,7 +7,7 @@ import {
   IConversation,
   IMessageElement,
   nestMessages
-} from '@chainlit/components';
+} from '@chainlit/react-client';
 
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/Messages/container';

@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/material';
 
-import { AccentButton, useChatInteract } from '@chainlit/components';
+import { useChatInteract } from '@chainlit/react-client';
+import { AccentButton } from '@chainlit/react-components';
 
 import NewChatDialog from './newChatDialog';
 

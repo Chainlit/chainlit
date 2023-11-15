@@ -5,12 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import {
-  ErrorBoundary,
-  IFileResponse,
-  useChatData,
-  useUpload
-} from '@chainlit/components';
+import { IFileResponse, useChatData } from '@chainlit/react-client';
+import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import SideView from 'components/atoms/element/sideView';
 import ChatProfiles from 'components/molecules/chatProfiles';

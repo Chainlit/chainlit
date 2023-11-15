@@ -3,11 +3,11 @@ import { useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
+import { IPrompt } from '@chainlit/react-client';
 import {
   IPlaygroundContext,
-  IPrompt,
   PromptPlayground
-} from '@chainlit/components';
+} from '@chainlit/react-components';
 
 import { useLLMProviders } from 'hooks/useLLMProviders';
 
@@ -66,19 +66,19 @@ export default function PlaygroundWrapper() {
   );
 
   return (
-      <PromptPlayground
-        context={{
-          setFunctionIndex,
-          functionIndex,
-          setVariableName,
-          variableName,
-          setPlayground,
-          playground,
-          onNotification,
-          createCompletion,
-          promptMode,
-          setPromptMode
-        }}
-      />
+    <PromptPlayground
+      context={{
+        setFunctionIndex,
+        functionIndex,
+        setVariableName,
+        variableName,
+        setPlayground,
+        playground,
+        onNotification,
+        createCompletion,
+        promptMode,
+        setPromptMode
+      }}
+    />
   );
 }

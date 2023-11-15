@@ -3,8 +3,8 @@ import { useRecoilValue } from 'recoil';
 import AttachFile from '@mui/icons-material/AttachFile';
 import { IconButton, Tooltip } from '@mui/material';
 
-import { FileSpec, IFileResponse } from '@chainlit/components';
-import { useUpload } from '@chainlit/components';
+import { FileSpec, IFileResponse } from '@chainlit/react-client';
+import { useUpload } from '@chainlit/react-components';
 
 import { projectSettingsState } from 'state/project';
 

@@ -8,8 +8,8 @@ import { router } from 'router';
 import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
-import { useChatSession } from '@chainlit/components';
-import { makeTheme } from '@chainlit/components/theme';
+import { useChatSession } from '@chainlit/react-client';
+import { makeTheme } from '@chainlit/react-components/theme';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';

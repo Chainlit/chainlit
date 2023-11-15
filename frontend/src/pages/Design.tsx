@@ -5,9 +5,13 @@ import { useRecoilState } from 'recoil';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 
-import { FormInput, InputLabel, Toggle } from '@chainlit/components';
-import { useIsDarkMode } from '@chainlit/components';
-import { green, grey, primary } from '@chainlit/components/theme';
+import {
+  FormInput,
+  InputLabel,
+  Toggle,
+  useIsDarkMode
+} from '@chainlit/react-components';
+import { green, grey, primary } from '@chainlit/react-components/theme';
 
 import { settingsState } from 'state/settings';
 

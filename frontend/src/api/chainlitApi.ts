@@ -1,4 +1,4 @@
-import { IConversation, IPrompt } from '@chainlit/components';
+import { IConversation, IPrompt } from '@chainlit/react-client';
 
 import {
   IPageInfo,
