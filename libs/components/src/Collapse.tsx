@@ -22,10 +22,20 @@ const Collapse = ({
 }: CollapseProps): JSX.Element => {
   const [expandAll, toggleExpandAll] = useToggle(defaultExpandAll);
 
+  const content = expandAll ? (
+    children
+  ) : (
+    <Box height={100} position="relative">
+      <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+        {children}
+      </Box>
+    </Box>
+  );
+
   return (
     <Box>
       <MCollapse in={expandAll} collapsedSize={100} timeout={0}>
-        {children}
+        {content}
       </MCollapse>
       <Stack direction="row" justifyContent="end">
         <Tooltip title={expandAll ? 'Collapse' : 'Expand'}>
