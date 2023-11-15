@@ -28,7 +28,7 @@
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
     "buildUi": "cd libs/react-client && pnpm run build && cd ../react-components && pnpm run build && cd ../../frontend && pnpm run build",
-    "build:components": "cd libs/react-components && pnpm build",
+    "build:react-components": "cd libs/react-components && pnpm build",
     "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
   }
 }
