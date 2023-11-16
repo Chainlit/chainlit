@@ -10,14 +10,13 @@ import {
   DialogTitle
 } from '@mui/material';
 
+import { useChatData, useChatInteract } from '@chainlit/react-client';
 import {
   AccentButton,
   FormInput,
   RegularButton,
-  TFormInputValue,
-  useChatData,
-  useChatInteract
-} from '@chainlit/components';
+  TFormInputValue
+} from '@chainlit/react-components';
 
 import { chatSettingsOpenState } from 'state/project';
 
@@ -71,7 +70,7 @@ export default function ChatSettingsModal() {
             gap: '15px'
           }}
         >
-          {chatSettingsInputs.map((input) => (
+          {chatSettingsInputs.map((input: any) => (
             <FormInput
               key={input.id}
               element={{

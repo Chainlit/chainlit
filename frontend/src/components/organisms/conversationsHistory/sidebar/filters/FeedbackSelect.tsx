@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 
-import { grey } from '@chainlit/components';
+import { grey } from '@chainlit/react-components';
 
 import { conversationsFiltersState } from 'state/conversations';
 

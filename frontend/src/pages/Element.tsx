@@ -1,16 +1,13 @@
+import { apiClient } from 'api';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Page from 'pages/Page';
 
-import {
-  ElementView,
-  IMessageElement,
-  useChatData
-} from '@chainlit/components';
+import { IMessageElement, useApi, useChatData } from '@chainlit/react-client';
+import { ElementView } from '@chainlit/react-components';
 
 import { useQuery } from 'hooks/query';
-import { useApi } from 'hooks/useApi';
 
 export default function Element() {
   const { id } = useParams();
@@ -23,6 +20,7 @@ export default function Element() {
   const conversationId = query.get('conversation');
 
   const { data, error } = useApi<IMessageElement>(
+    apiClient,
     id && conversationId
       ? `/project/conversation/${conversationId}/element/${id}`
       : null

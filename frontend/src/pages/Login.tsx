@@ -1,33 +1,28 @@
-import { httpEndpoint } from 'api';
+import { apiClient } from 'api';
+import { useAuth } from 'api/auth';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AuthLogin } from '@chainlit/components';
+import { AuthLogin } from '@chainlit/react-components';
 
 import { Logo } from 'components/atoms/logo';
 
-import { useAuth } from 'hooks/auth';
 import { useQuery } from 'hooks/query';
 
 export default function Login() {
   const query = useQuery();
-  const { config, setAccessToken, user } = useAuth();
+  const { data: config, setAccessToken, user } = useAuth();
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
   const handleHeaderAuth = async () => {
-    const res = await fetch(httpEndpoint + '/auth/header', {
-      method: 'post'
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      setError(json.detail);
-    } else if (json?.access_token) {
+    try {
+      const json = await apiClient.headerAuth();
       setAccessToken(json.access_token);
       navigate('/');
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 
@@ -40,18 +35,12 @@ export default function Login() {
     formData.append('username', email);
     formData.append('password', password);
 
-    const res = await fetch(httpEndpoint + '/login', {
-      method: 'post',
-      body: formData
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      setError(json.detail);
-    } else if (json?.access_token) {
+    try {
+      const json = await apiClient.passwordAuth(formData);
       setAccessToken(json.access_token);
       navigate(callbackUrl);
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 
@@ -82,7 +71,7 @@ export default function Login() {
       providers={config?.oauthProviders || []}
       onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
       onOAuthSignIn={async (provider: string) => {
-        window.location.href = httpEndpoint + '/auth/oauth/' + provider;
+        window.location.href = apiClient.getOAuthEndpoint(provider);
       }}
       renderLogo={<Logo style={{ maxWidth: '60%', maxHeight: '90px' }} />}
     />

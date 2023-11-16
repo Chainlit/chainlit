@@ -1,16 +1,17 @@
+import { apiClient } from 'api';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
 import { Box } from '@mui/material';
 
-import { IConversation } from '@chainlit/components';
+import {
+  IConversation,
+  conversationsHistoryState,
+  useApi
+} from '@chainlit/react-client';
 
 import { Conversation } from 'components/organisms/conversationsHistory/Conversation';
-
-import { useApi } from 'hooks/useApi';
-
-import { conversationsHistoryState } from 'state/conversations';
 
 import Page from './Page';
 import ResumeButton from './ResumeButton';
@@ -18,6 +19,7 @@ import ResumeButton from './ResumeButton';
 export default function ConversationPage() {
   const { id } = useParams();
   const { data, error, isLoading } = useApi<IConversation>(
+    apiClient,
     id ? `/project/conversation/${id}` : null,
     {
       revalidateOnFocus: false,

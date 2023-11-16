@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { Box } from '@mui/material';
 
-import { Markdown } from '@chainlit/components';
+import { Markdown } from '@chainlit/react-components';
 
 const WelcomeScreen = memo(({ markdown }: { markdown?: string }) => {
   if (!markdown) return <Box flexGrow={1} />;

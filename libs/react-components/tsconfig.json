@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    // THIS MUST BE AT ROOT, if you set baseurl in sub-package it breaks intellisense jump to
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    "importHelpers": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "downlevelIteration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "system",
+    "moduleResolution": "node",
+    "noEmitOnError": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "strictNullChecks": true,
+    "target": "es5",
+    "types": ["node", "react"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "paths": {
+      "client-types/*": ["../react-client/dist"],
+      "src/*": ["./src/*"],
+      "theme/*": ["./theme/*"],
+      "hooks/*": ["./hooks/*"],
+      "utils/*": ["./utils/*"],
+      "contexts/*": ["./contexts/*"]
+    }
+  },
+  "exclude": ["**/test", "**/dist", "**/types", "**/__tests__"],
+  "include": ["src", "theme", "hooks", "utils", "contexts", "tests"],
+  "types": ["@testing-library/jest-dom", "node"]
+}

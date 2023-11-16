@@ -1,15 +1,16 @@
+import { apiClient } from 'api';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
 
-import { IPlayground } from '@chainlit/components';
-
-import { useApi } from 'hooks/useApi';
+import { useApi } from '@chainlit/react-client';
+import { IPlayground } from '@chainlit/react-components';
 
 import { playgroundState } from 'state/playground';
 
 const useLLMProviders = (shouldFetch?: boolean) => {
   const { data, error } = useApi<IPlayground>(
+    apiClient,
     shouldFetch ? '/project/llm-providers' : null
   );
   const setPlayground = useSetRecoilState(playgroundState);

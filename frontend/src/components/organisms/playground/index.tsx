@@ -1,13 +1,13 @@
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
 import { useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
+import { IPrompt, accessTokenState } from '@chainlit/react-client';
 import {
   IPlaygroundContext,
-  IPrompt,
   PromptPlayground
-} from '@chainlit/components';
+} from '@chainlit/react-components';
 
 import { useLLMProviders } from 'hooks/useLLMProviders';
 
@@ -17,7 +17,7 @@ import {
   playgroundState,
   variableState
 } from 'state/playground';
-import { accessTokenState, userEnvState } from 'state/user';
+import { userEnvState } from 'state/user';
 
 export default function PlaygroundWrapper() {
   const accessToken = useRecoilValue(accessTokenState);
@@ -54,7 +54,7 @@ export default function PlaygroundWrapper() {
       controller: AbortController,
       cb: (done: boolean, token: string) => void
     ) => {
-      return ChainlitAPI.getCompletion(
+      return apiClient.getCompletion(
         prompt,
         userEnv,
         controller,
@@ -66,19 +66,19 @@ export default function PlaygroundWrapper() {
   );
 
   return (
-      <PromptPlayground
-        context={{
-          setFunctionIndex,
-          functionIndex,
-          setVariableName,
-          variableName,
-          setPlayground,
-          playground,
-          onNotification,
-          createCompletion,
-          promptMode,
-          setPromptMode
-        }}
-      />
+    <PromptPlayground
+      context={{
+        setFunctionIndex,
+        functionIndex,
+        setVariableName,
+        variableName,
+        setPlayground,
+        playground,
+        onNotification,
+        createCompletion,
+        promptMode,
+        setPromptMode
+      }}
+    />
   );
 }

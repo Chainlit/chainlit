@@ -1,4 +1,5 @@
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
+import { useAuth } from 'api/auth';
 import isEqual from 'lodash/isEqual';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
@@ -11,16 +12,15 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { useAuth } from 'hooks/auth';
-
 import {
   IConversationsFilters,
-  conversationsFiltersState,
+  accessTokenState,
   conversationsHistoryState
-} from 'state/conversations';
+} from '@chainlit/react-client';
+
+import { conversationsFiltersState } from 'state/conversations';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
-import { accessTokenState } from 'state/user';
 
 import { ConversationsHistoryList } from './ConversationsHistoryList';
 import Filters from './filters';
@@ -69,7 +69,7 @@ const _ConversationsHistorySidebar = () => {
       } else {
         setIsFetching(true);
       }
-      const { pageInfo, data } = await ChainlitAPI.getConversations(
+      const { pageInfo, data } = await apiClient.getConversations(
         { first: BATCH_SIZE, cursor },
         filters,
         accessToken

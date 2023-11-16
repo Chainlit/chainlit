@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { MessageHistory } from 'types/chatHistory';
+import { MessageHistory } from '@chainlit/react-client';
 
 const KEY = 'chat_history';
 

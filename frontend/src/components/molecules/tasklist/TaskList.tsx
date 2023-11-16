@@ -1,7 +1,7 @@
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
-import { useChatData } from '@chainlit/components';
-import { grey } from '@chainlit/components/theme';
+import { useChatData } from '@chainlit/react-client';
+import { grey } from '@chainlit/react-components/theme';
 
 import { ITaskList, Task } from './Task';
 

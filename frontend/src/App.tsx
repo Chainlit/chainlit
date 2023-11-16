@@ -1,4 +1,5 @@
 import { wsEndpoint } from 'api';
+import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
@@ -8,15 +9,13 @@ import { router } from 'router';
 import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
-import { useChatSession } from '@chainlit/components';
-import { makeTheme } from '@chainlit/components/theme';
+import { useChatSession } from '@chainlit/react-client';
+import { makeTheme } from '@chainlit/react-components/theme';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
 import PromptPlayground from 'components/organisms/playground';
-
-import { useAuth } from 'hooks/auth';
 
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';

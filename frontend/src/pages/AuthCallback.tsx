@@ -1,7 +1,7 @@
+import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from 'hooks/auth';
 import { useQuery } from 'hooks/query';
 
 export default function AuthCallback() {

@@ -1,25 +1,27 @@
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
 import { memo, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import {
-  MessageContainer as CMessageContainer,
   IAction,
   IAsk,
   IAvatarElement,
   IFunction,
   IMessage,
   IMessageElement,
-  ITool
-} from '@chainlit/components';
+  ITool,
+  accessTokenState,
+  messagesState,
+  updateMessageById
+} from '@chainlit/react-client';
+import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
 
 import { playgroundState } from 'state/playground';
 import { highlightMessage, sideViewState } from 'state/project';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
-import { accessTokenState } from 'state/user';
 
 interface Props {
   loading: boolean;
@@ -49,6 +51,7 @@ const MessageContainer = memo(
     const appSettings = useRecoilValue(settingsState);
     const projectSettings = useRecoilValue(projectSettingsState);
     const setPlayground = useSetRecoilState(playgroundState);
+    const setMessages = useSetRecoilState(messagesState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
 
@@ -94,15 +97,15 @@ const MessageContainer = memo(
 
     const onFeedbackUpdated = useCallback(
       async (
-        messageId: string,
+        message: IMessage,
         feedback: number,
         onSuccess: () => void,
         feedbackComment?: string
       ) => {
         try {
           await toast.promise(
-            ChainlitAPI.setHumanFeedback(
-              messageId!,
+            apiClient.setHumanFeedback(
+              message.id,
               feedback,
               feedbackComment,
               accessToken
@@ -115,7 +118,13 @@ const MessageContainer = memo(
               }
             }
           );
-
+          setMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              humanFeedback: feedback,
+              humanFeedbackComment: feedbackComment
+            })
+          );
           onSuccess();
         } catch (err) {
           console.log(err);

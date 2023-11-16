@@ -13,24 +13,13 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { grey } from '@chainlit/components';
-
-import { ConversationsHistory } from 'types/chatHistory';
+import { ConversationsHistory } from '@chainlit/react-client';
+import { grey } from '@chainlit/react-components';
 
 import { DeleteConversationButton } from './DeleteConversationButton';
 
-export interface IPageInfo {
-  hasNextPage: boolean;
-  endCursor?: string;
-}
-
-export interface IPagination {
-  first: number;
-  cursor?: string | number;
-}
-
 interface ConversationsHistoryProps {
-  conversations: ConversationsHistory;
+  conversations?: ConversationsHistory;
   error?: string;
   fetchConversations: () => void;
   isFetching: boolean;

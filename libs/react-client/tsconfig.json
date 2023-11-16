@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    // THIS MUST BE AT ROOT, if you set baseurl in sub-package it breaks intellisense jump to
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    "importHelpers": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "downlevelIteration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "system",
+    "moduleResolution": "node",
+    "noEmitOnError": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "strictNullChecks": true,
+    "target": "es5",
+    "types": ["node", "react"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "paths": {
+      "src/*": ["./src/*"]
+    }
+  },
+  "exclude": ["**/test", "**/dist", "**/__tests__"],
+  "include": ["src/**/*"],
+  "types": ["@testing-library/jest-dom", "node"]
+}

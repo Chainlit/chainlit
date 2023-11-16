@@ -1,4 +1,4 @@
-import { httpEndpoint } from 'api';
+import { apiClient } from 'api';
 import { useRecoilValue } from 'recoil';
 
 import { settingsState } from 'state/settings';
@@ -12,6 +12,6 @@ export const Logo = ({ style }: Props) => {
   const { theme } = useRecoilValue(settingsState);
 
   return (
-    <img src={`${httpEndpoint}/logo?theme=${theme}`} alt="logo" style={style} />
+    <img src={apiClient.getLogoEndpoint(theme)} alt="logo" style={style} />
   );
 };

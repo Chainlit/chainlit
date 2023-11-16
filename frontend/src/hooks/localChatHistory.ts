@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { MessageHistory } from 'types/chatHistory';
+import { MessageHistory } from '@chainlit/react-client';
 
 const KEY = 'chatHistory';
 const MAX_SIZE = 50;

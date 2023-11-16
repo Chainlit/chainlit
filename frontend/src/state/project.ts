@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IMessage, IMessageElement } from '@chainlit/components';
+import { IMessage, IMessageElement } from '@chainlit/react-client';
 
 export interface ChatProfile {
   icon: string;

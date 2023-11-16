@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -6,8 +7,6 @@ import { Alert, Box, Stack } from '@mui/material';
 import { ConversationsHistorySidebar } from 'components/organisms/conversationsHistory/sidebar';
 import OpenChatHistoryButton from 'components/organisms/conversationsHistory/sidebar/OpenChatHistoryButton';
 import { Header } from 'components/organisms/header';
-
-import { useAuth } from 'hooks/auth';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';

@@ -1,5 +1,4 @@
-import { ClientError } from 'api';
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
@@ -14,7 +13,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { accessTokenState } from 'state/user';
+import { ClientError, accessTokenState } from '@chainlit/react-client';
 
 interface Props {
   conversationId: string;
@@ -35,7 +34,7 @@ const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
 
   const handleConfirm = async () => {
     await toast.promise(
-      ChainlitAPI.deleteConversation(conversationId, accessToken),
+      apiClient.deleteConversation(conversationId, accessToken),
       {
         loading: 'Deleting conversation...',
         success: 'Conversation deleted!',

@@ -1,7 +1,8 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box } from '@mui/material';
 
-import { GreyButton, useChatData, useChatInteract } from '@chainlit/components';
+import { useChatData, useChatInteract } from '@chainlit/react-client';
+import { GreyButton } from '@chainlit/react-components';
 
 export default function StopButton() {
   const { loading } = useChatData();

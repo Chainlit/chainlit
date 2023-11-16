@@ -1,6 +1,6 @@
 import { useRecoilState } from 'recoil';
 
-import { ElementSideView } from '@chainlit/components';
+import { ElementSideView } from '@chainlit/react-components';
 
 import { sideViewState } from 'state/project';
 

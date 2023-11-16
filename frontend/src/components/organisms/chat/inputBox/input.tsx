@@ -8,12 +8,12 @@ import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import {
-  Attachments,
   FileSpec,
   IFileElement,
   IFileResponse,
   useChatData
-} from '@chainlit/components';
+} from '@chainlit/react-client';
+import { Attachments } from '@chainlit/react-components';
 
 import HistoryButton from 'components/organisms/chat/history';
 
