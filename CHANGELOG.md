@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [0.7.603] - 2023-11-15
+
+### Fixed
+
+- Markdown links special characters are no longer encoded
+- Collapsed messages no longer make the chat scroll
+- Stringified Python objects are now displayed in a Python code block
+
 ## [0.7.602] - 2023-11-14
 
 ### Added
