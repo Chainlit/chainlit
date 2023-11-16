@@ -90,6 +90,19 @@ Chainlit is compatible with all Python programs and libraries. That being said, 
 - [Haystack](https://docs.chainlit.io/integrations/haystack)
 - [Langflow](https://docs.chainlit.io/integrations/langflow)
 
+## 🎨 Custom Frontend
+
+Chainlit allows you to create a custom frontend for your application, offering you the flexibility to design a unique user experience. By integrating your frontend with Chainlit's backend, you can harness the full power of Chainlit's features, including:
+
+- Abstractions for easier development
+- Monitoring and observability
+- Seamless integrations with various tools
+- Robust authentication mechanisms
+- Support for multi-user environments
+- Efficient data streaming capabilities
+
+To build and connect your own frontend, check out our [Custom Frontend Cookbook](https://github.com/Chainlit/cookbook/tree/main/custom-frontend).
+
 ### 📚 More Examples - Cookbook
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
@@ -99,6 +112,7 @@ You can find various examples of Chainlit apps [here](https://github.com/Chainli
 - [x] Selectable chat profiles (at the beginning of a chat)
 - [ ] One click chat sharing
 - New clients:
+  - [x] Custom React app
   - [ ] Slack
   - [ ] Discord
   - [ ] Website embbed
