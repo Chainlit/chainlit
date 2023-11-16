@@ -103,7 +103,7 @@ Chainlit allows you to create a custom frontend for your application, offering y
 
 To build and connect your own frontend, check out our [Custom Frontend Cookbook](https://github.com/Chainlit/cookbook/tree/main/custom-frontend).
 
-### 📚 More Examples - Cookbook
+## 📚 More Examples - Cookbook
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
