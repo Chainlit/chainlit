@@ -9,7 +9,7 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { IPrompt } from '@chainlit/react-client';
+import type { IPrompt } from 'client-types/';
 
 import Completion from './editor/completion';
 import PromptMessage from './editor/promptMessage';

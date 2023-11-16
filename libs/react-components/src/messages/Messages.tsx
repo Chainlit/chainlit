@@ -1,12 +1,8 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
+import { isLastMessage } from 'utils/message';
 
-import {
-  IAction,
-  IMessage,
-  IMessageElement,
-  isLastMessage
-} from '@chainlit/react-client';
+import type { IAction, IMessage, IMessageElement } from 'client-types/';
 
 import { Message } from './Message';
 

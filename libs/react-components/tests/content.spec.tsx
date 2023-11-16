@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import { expect, it } from 'vitest';
 
-import { ITextElement } from '@chainlit/react-client';
-
 import { MessageContent } from 'src/messages/components/MessageContent';
+
+import type { ITextElement } from 'client-types/';
 
 it('renders the message content', () => {
   const { getByText } = render(

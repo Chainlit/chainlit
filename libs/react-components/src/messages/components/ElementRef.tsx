@@ -3,7 +3,7 @@ import { useContext } from 'react';
 
 import Link from '@mui/material/Link';
 
-import { IMessageElement } from '@chainlit/react-client';
+import type { IMessageElement } from 'client-types/';
 
 interface Props {
   element: IMessageElement;

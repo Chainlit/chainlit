@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 
-import { IPdfElement } from '@chainlit/react-client';
+import type { IPdfElement } from 'client-types/';
 
 import { PDFElement } from './PDF';
 

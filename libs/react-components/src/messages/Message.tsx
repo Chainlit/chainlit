@@ -5,13 +5,13 @@ import { memo, useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import { IAction, IMessage, IMessageElement } from '@chainlit/react-client';
-
 import { AskUploadButton } from './components/AskUploadButton';
 import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
 import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
 import { MessageContent } from './components/MessageContent';
+
+import type { IAction, IMessage, IMessageElement } from 'client-types/';
 
 import { Messages } from './Messages';
 

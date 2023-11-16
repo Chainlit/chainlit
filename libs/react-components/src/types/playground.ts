@@ -1,6 +1,6 @@
 import { TFormInput } from 'src/inputs';
 
-import { IPrompt } from '@chainlit/react-client';
+import type { IPrompt } from 'client-types/';
 
 export interface ILLMProvider {
   id: string;

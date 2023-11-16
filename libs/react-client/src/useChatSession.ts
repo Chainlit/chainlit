@@ -40,7 +40,7 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
-import { IMessageUpdate, IToken } from './useChatData';
+import type { IMessageUpdate, IToken } from './useChatData';
 
 const useChatSession = () => {
   const sessionId = useRecoilValue(sessionIdState);

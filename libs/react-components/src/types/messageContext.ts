@@ -1,9 +1,9 @@
-import {
+import type {
   IAsk,
   IAvatarElement,
   IMessage,
   IMessageElement
-} from '@chainlit/react-client';
+} from 'client-types/';
 
 interface IMessageContext {
   askUser?: IAsk;

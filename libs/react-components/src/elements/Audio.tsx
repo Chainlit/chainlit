@@ -3,7 +3,7 @@ import { grey } from 'theme/palette';
 import Box from '@mui/material/Box';
 import useTheme from '@mui/material/styles/useTheme';
 
-import { IAudioElement } from '@chainlit/react-client';
+import type { IAudioElement } from 'client-types/';
 
 const AudioElement = ({ element }: { element: IAudioElement }) => {
   const theme = useTheme();

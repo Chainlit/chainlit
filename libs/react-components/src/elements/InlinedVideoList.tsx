@@ -1,4 +1,4 @@
-import { IVideoElement } from '@chainlit/react-client';
+import type { IVideoElement } from 'client-types/';
 
 import { ListWithSize } from './ListWithSize';
 import { VideoElement } from './Video';

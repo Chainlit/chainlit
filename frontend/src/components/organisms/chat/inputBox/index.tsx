@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { memo, useCallback } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,8 +12,6 @@ import {
   IMessage,
   useChatInteract
 } from '@chainlit/react-client';
-
-import { useAuth } from 'hooks/auth';
 
 import { chatHistoryState } from 'state/chatHistory';
 import { IProjectSettings } from 'state/project';

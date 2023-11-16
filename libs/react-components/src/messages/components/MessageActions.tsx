@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import { IAction, IMessage } from '@chainlit/react-client';
+import type { IAction, IMessage } from 'client-types/';
 
 import { ActionButton } from './ActionButton';
 import { ActionDrawerButton } from './ActionDrawerButton';

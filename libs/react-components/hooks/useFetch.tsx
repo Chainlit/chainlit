@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR, { SWRResponse } from 'swr';
 
 const fetcher = async (url: string): Promise<any> => {
   const response = await fetch(url);
@@ -17,7 +17,7 @@ const fetcher = async (url: string): Promise<any> => {
   }
 };
 
-const useApi = (endpoint: string | null) => {
-  return useSWR(endpoint, fetcher);
+const useFetch = (endpoint: string | null): SWRResponse<any, Error> => {
+  return useSWR<any, Error>(endpoint, fetcher);
 };
-export { useApi };
+export { useFetch };

@@ -2,7 +2,7 @@ import React from 'react';
 
 import Stack from '@mui/material/Stack';
 
-import { IFileElement } from '@chainlit/react-client';
+import type { IFileElement } from 'client-types/';
 
 import { FileElement } from './elements';
 

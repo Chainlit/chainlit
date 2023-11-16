@@ -6,7 +6,7 @@ import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IAction } from '@chainlit/react-client';
+import type { IAction } from 'client-types/';
 
 import { ActionButton } from './ActionButton';
 

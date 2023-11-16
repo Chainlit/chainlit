@@ -16,8 +16,7 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { ILLMSettings } from '@chainlit/react-client';
-
+import type { ILLMSettings } from 'client-types/';
 import { ILLMProvider } from 'src/types/playground';
 
 type Schema = {

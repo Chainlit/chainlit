@@ -14,7 +14,7 @@ import {
 } from 'src/playground/helpers/format';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import { IPrompt } from '@chainlit/react-client';
+import type { IPrompt } from 'client-types/';
 
 import Variable from './variable';
 

@@ -6,9 +6,9 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { IAsk, IFileResponse } from '@chainlit/react-client';
-
 import { useUpload } from 'hooks/useUpload';
+
+import type { IAsk, IFileResponse } from 'client-types/';
 
 const AskUploadChildButton = ({
   askUser,

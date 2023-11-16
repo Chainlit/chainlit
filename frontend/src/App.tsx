@@ -1,4 +1,5 @@
 import { wsEndpoint } from 'api';
+import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
@@ -15,8 +16,6 @@ import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
 import PromptPlayground from 'components/organisms/playground';
-
-import { useAuth } from 'hooks/auth';
 
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';

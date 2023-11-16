@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { memo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -19,8 +20,6 @@ import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
-
-import { useAuth } from 'hooks/auth';
 
 import { IProjectSettings } from 'state/project';
 

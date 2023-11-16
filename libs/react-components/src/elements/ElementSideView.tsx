@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import styled from '@mui/material/styles/styled';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { IMessageElement } from '@chainlit/react-client';
+import type { IMessageElement } from 'client-types/';
 
 import 'react-resizable/css/styles.css';
 

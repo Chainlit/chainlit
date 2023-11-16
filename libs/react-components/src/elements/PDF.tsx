@@ -1,4 +1,4 @@
-import { IPdfElement } from '@chainlit/react-client';
+import type { IPdfElement } from 'client-types/';
 
 interface Props {
   element: IPdfElement;

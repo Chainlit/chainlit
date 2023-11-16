@@ -1,7 +1,7 @@
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 
-import { IImageElement, IVideoElement } from '@chainlit/react-client';
+import type { IImageElement, IVideoElement } from 'client-types/';
 
 const sizeToUnit = (element: IImageElement | IVideoElement) => {
   switch (element.size) {

@@ -1,4 +1,4 @@
-import { IImageElement } from '@chainlit/react-client';
+import type { IImageElement } from 'client-types/';
 
 import { FrameElement } from './Frame';
 

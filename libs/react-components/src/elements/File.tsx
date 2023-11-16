@@ -8,7 +8,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { IFileElement } from '@chainlit/react-client';
+import type { IFileElement } from 'client-types/';
 
 const FileElement = ({
   element,

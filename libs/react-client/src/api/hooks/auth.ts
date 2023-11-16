@@ -1,28 +1,29 @@
-import { getToken, removeToken, setToken } from 'helpers/localStorageToken';
 import jwt_decode from 'jwt-decode';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import useSWRImmutable from 'swr/immutable';
+import {
+  accessTokenState,
+  conversationsHistoryState,
+  userState
+} from 'src/state';
+import { IAppUser } from 'src/types';
+import { getToken, removeToken, setToken } from 'src/utils/token';
 
-import { IAppUser } from '@chainlit/react-client';
+import { ChainlitAPI } from '..';
+import { useApi } from './api';
 
-import { conversationsHistoryState } from 'state/conversations';
-import { accessTokenState, userState } from 'state/user';
-
-import { fetcher } from './useApi';
-
-export const useAuth = () => {
-  const { data: config, isLoading: isLoadingConfig } = useSWRImmutable<{
+export const useAuth = (apiClient: ChainlitAPI) => {
+  const { data, isLoading } = useApi<{
     requireLogin: boolean;
     passwordAuth: boolean;
     headerAuth: boolean;
     oauthProviders: string[];
-  }>('/auth/config', fetcher);
+  }>(apiClient, '/auth/config');
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setConversationsHistory = useSetRecoilState(conversationsHistoryState);
   const [user, setUser] = useRecoilState(userState);
 
-  const isReady = !!(!isLoadingConfig && config);
+  const isReady = !!(!isLoading && data);
 
   const logout = () => {
     setUser(null);
@@ -61,9 +62,9 @@ export const useAuth = () => {
 
   const isAuthenticated = !!accessToken;
 
-  if (config && !config.requireLogin) {
+  if (data && !data.requireLogin) {
     return {
-      config,
+      data,
       user: null,
       role: 'ANONYMOUS',
       isReady,
@@ -75,7 +76,7 @@ export const useAuth = () => {
   }
 
   return {
-    config,
+    data,
     user: user,
     role: user?.role,
     isAuthenticated,

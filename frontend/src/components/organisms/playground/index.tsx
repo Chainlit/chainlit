@@ -1,9 +1,9 @@
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
 import { useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { IPrompt } from '@chainlit/react-client';
+import { IPrompt, accessTokenState } from '@chainlit/react-client';
 import {
   IPlaygroundContext,
   PromptPlayground
@@ -17,7 +17,7 @@ import {
   playgroundState,
   variableState
 } from 'state/playground';
-import { accessTokenState, userEnvState } from 'state/user';
+import { userEnvState } from 'state/user';
 
 export default function PlaygroundWrapper() {
   const accessToken = useRecoilValue(accessTokenState);
@@ -54,7 +54,7 @@ export default function PlaygroundWrapper() {
       controller: AbortController,
       cb: (done: boolean, token: string) => void
     ) => {
-      return ChainlitAPI.getCompletion(
+      return apiClient.getCompletion(
         prompt,
         userEnv,
         controller,

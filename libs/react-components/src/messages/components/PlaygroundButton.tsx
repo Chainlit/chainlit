@@ -5,7 +5,7 @@ import BugReport from '@mui/icons-material/BugReport';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IMessage } from '@chainlit/react-client';
+import type { IMessage } from 'client-types/';
 
 interface Props {
   message: IMessage;

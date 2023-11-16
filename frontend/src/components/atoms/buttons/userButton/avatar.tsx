@@ -1,6 +1,6 @@
-import { Avatar, Box } from '@mui/material';
+import { useAuth } from 'api/auth';
 
-import { useAuth } from 'hooks/auth';
+import { Avatar, Box } from '@mui/material';
 
 export default function UserAvatar() {
   const { user } = useAuth();

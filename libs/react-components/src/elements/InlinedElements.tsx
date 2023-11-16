@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 
-import { ElementType, IMessageElement } from '@chainlit/react-client';
+import type { ElementType, IMessageElement } from 'client-types/';
 
 import { InlinedAudioList } from './InlinedAudioList';
 import { InlinedFileList } from './InlinedFileList';

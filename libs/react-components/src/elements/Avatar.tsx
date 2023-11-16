@@ -1,7 +1,7 @@
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IAvatarElement } from '@chainlit/react-client';
+import type { IAvatarElement } from 'client-types/';
 
 interface Props {
   element: IAvatarElement;

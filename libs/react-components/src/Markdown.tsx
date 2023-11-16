@@ -14,9 +14,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import { IMessageElement } from '@chainlit/react-client';
-
 import { ElementRef } from 'src/messages/components/ElementRef';
+
+import type { IMessageElement } from 'client-types/';
 
 import { InlineCode } from './InlineCode';
 

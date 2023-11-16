@@ -1,6 +1,6 @@
-import { IConversation } from '@chainlit/react-client';
+import { IConversation } from 'src/types';
 
-import { IPageInfo } from 'components/organisms/conversationsHistory/sidebar/ConversationsHistoryList';
+import { IPageInfo } from '..';
 
 export type MessageHistory = {
   content: string;

@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IAction } from '@chainlit/react-client';
+import type { IAction } from 'client-types/';
 
 interface ActionProps {
   action: IAction;

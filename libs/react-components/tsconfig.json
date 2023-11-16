@@ -29,6 +29,7 @@
     "types": ["node", "react"],
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
+      "client-types/*": ["../react-client/dist"],
       "src/*": ["./src/*"],
       "theme/*": ["./theme/*"],
       "hooks/*": ["./hooks/*"],

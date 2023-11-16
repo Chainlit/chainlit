@@ -9,7 +9,7 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { IPromptMessage, PromptMessageRole } from '@chainlit/react-client';
+import type { IPromptMessage, PromptMessageRole } from 'client-types/';
 
 const roles = ['Assistant', 'System', 'User'];
 

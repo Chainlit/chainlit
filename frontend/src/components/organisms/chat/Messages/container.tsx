@@ -1,4 +1,4 @@
-import { ChainlitAPI } from 'api/chainlitApi';
+import { apiClient } from 'api';
 import { memo, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import {
   IMessage,
   IMessageElement,
   ITool,
+  accessTokenState,
   messagesState,
   updateMessageById
 } from '@chainlit/react-client';
@@ -21,7 +22,6 @@ import { playgroundState } from 'state/playground';
 import { highlightMessage, sideViewState } from 'state/project';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
-import { accessTokenState } from 'state/user';
 
 interface Props {
   loading: boolean;
@@ -104,7 +104,7 @@ const MessageContainer = memo(
       ) => {
         try {
           await toast.promise(
-            ChainlitAPI.setHumanFeedback(
+            apiClient.setHumanFeedback(
               message.id,
               feedback,
               feedbackComment,

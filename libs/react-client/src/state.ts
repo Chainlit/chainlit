@@ -1,15 +1,20 @@
+import isEqual from 'lodash/isEqual';
 import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  ConversationsHistory,
   IAction,
+  IAppUser,
   IAsk,
   IAvatarElement,
   IMessage,
   IMessageElement,
-  ITasklistElement
+  ITasklistElement,
+  Role
 } from './types';
+import { groupByDate } from './utils/group';
 
 export interface ISession {
   socket: Socket;
@@ -112,3 +117,54 @@ export const firstUserMessageState = atom<IMessage | undefined>({
   key: 'FirstUserMessage',
   default: undefined
 });
+
+export const accessTokenState = atom<string | undefined>({
+  key: 'AccessToken',
+  default: undefined
+});
+
+export const roleState = atom<Role>({
+  key: 'Role',
+  default: undefined
+});
+
+export const userState = atom<IAppUser | null>({
+  key: 'User',
+  default: null
+});
+
+export const conversationsHistoryState = atom<ConversationsHistory | undefined>(
+  {
+    key: 'ConversationsHistory',
+    default: {
+      conversations: undefined,
+      currentConversationId: undefined,
+      groupedConversations: undefined,
+      pageInfo: undefined
+    },
+    effects: [
+      ({ setSelf, onSet }: { setSelf: any; onSet: any }) => {
+        onSet(
+          (
+            newValue: ConversationsHistory | undefined,
+            oldValue: ConversationsHistory | undefined
+          ) => {
+            let groupedConversations = newValue?.groupedConversations;
+
+            if (
+              newValue?.conversations &&
+              !isEqual(newValue.conversations, oldValue?.groupedConversations)
+            ) {
+              groupedConversations = groupByDate(newValue.conversations);
+            }
+
+            setSelf({
+              ...newValue,
+              groupedConversations
+            });
+          }
+        );
+      }
+    ]
+  }
+);

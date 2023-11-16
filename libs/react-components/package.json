@@ -61,7 +61,6 @@
     "uuid": "^9.0.0"
   },
   "dependencies": {
-    "@chainlit/react-client": "workspace:^",
     "draft-js": "^0.11.7",
     "formik": "^2.4.3",
     "highlight.js": "^11.9.0",

@@ -32,7 +32,7 @@
       "src/*": ["./src/*"]
     }
   },
-  "exclude": ["**/test", "**/dist", "**/types", "**/__tests__"],
-  "include": ["./src"],
+  "exclude": ["**/test", "**/dist", "**/__tests__"],
+  "include": ["src/**/*"],
   "types": ["@testing-library/jest-dom", "node"]
 }

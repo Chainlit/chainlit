@@ -1,9 +1,9 @@
 import { Suspense, lazy } from 'react';
 import { ErrorBoundary } from 'src/ErrorBoundary';
 
-import { IPlotlyElement } from '@chainlit/react-client';
+import { useFetch } from 'hooks/useFetch';
 
-import { useApi } from 'hooks/index';
+import type { IPlotlyElement } from 'client-types/';
 
 const Plot = lazy(() => import('react-plotly.js'));
 
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const _PlotlyElement = ({ element }: Props) => {
-  const { data, error, isLoading } = useApi(
+  const { data, error, isLoading } = useFetch(
     !element.content && element.url ? element.url : null
   );
 

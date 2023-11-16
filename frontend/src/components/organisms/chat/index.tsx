@@ -5,7 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import { IFileResponse, useChatData } from '@chainlit/react-client';
+import {
+  IFileResponse,
+  conversationsHistoryState,
+  useChatData
+} from '@chainlit/react-client';
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import SideView from 'components/atoms/element/sideView';
@@ -13,7 +17,6 @@ import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { attachmentsState } from 'state/chat';
-import { conversationsHistoryState } from 'state/conversations';
 import { projectSettingsState, sideViewState } from 'state/project';
 
 import Messages from './Messages';

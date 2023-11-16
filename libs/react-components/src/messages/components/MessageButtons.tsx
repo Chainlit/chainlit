@@ -3,7 +3,7 @@ import { useContext } from 'react';
 
 import Stack from '@mui/material/Stack';
 
-import { IMessage } from '@chainlit/react-client';
+import type { IMessage } from 'client-types/';
 
 import { FeedbackButtons } from './FeedbackButtons';
 import { PlaygroundButton } from './PlaygroundButton';

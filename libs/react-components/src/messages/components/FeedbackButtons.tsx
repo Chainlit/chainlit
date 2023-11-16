@@ -15,7 +15,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { IMessage } from '@chainlit/react-client';
+import type { IMessage } from 'client-types/';
 
 const ICON_SIZE = '16px';
 

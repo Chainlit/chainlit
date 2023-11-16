@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 
-import { IPrompt } from '@chainlit/react-client';
+import type { IPrompt } from 'client-types/';
 
 import Completion from './editor/completion';
 import FormattedEditor from './editor/formatted';

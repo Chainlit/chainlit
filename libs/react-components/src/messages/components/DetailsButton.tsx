@@ -6,7 +6,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { IMessage } from '@chainlit/react-client';
+import type { IMessage } from 'client-types/';
 
 interface Props {
   message: IMessage;

@@ -1,5 +1,4 @@
-import { IPrompt } from '@chainlit/react-client';
-
+import type { IPrompt } from 'client-types/';
 import { IPlayground, PromptMode } from 'src/types/playground';
 
 interface IPlaygroundContext {

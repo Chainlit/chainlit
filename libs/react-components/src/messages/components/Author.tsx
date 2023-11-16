@@ -6,9 +6,9 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
-import { IMessage } from '@chainlit/react-client';
-
 import { useColorForName } from 'hooks/useColors';
+
+import type { IMessage } from 'client-types/';
 
 import { MessageTime } from './MessageTime';
 

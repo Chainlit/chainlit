@@ -19,9 +19,9 @@ import {
 } from 'src/playground/helpers/format';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import { IPrompt } from '@chainlit/react-client';
-
 import { useColors } from 'hooks/useColors';
+
+import type { IPrompt } from 'client-types/';
 
 import 'draft-js/dist/Draft.css';
 

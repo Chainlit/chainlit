@@ -3,8 +3,7 @@ import { EditorState } from 'draft-js';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
-import { IPrompt, IPromptMessage } from '@chainlit/react-client';
-
+import type { IPrompt, IPromptMessage } from 'client-types/';
 import { PromptMode } from 'src/types/playground';
 
 import MessageWrapper from './MessageWrapper';

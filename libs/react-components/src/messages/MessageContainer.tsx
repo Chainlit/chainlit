@@ -3,8 +3,7 @@ import { memo, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 
-import { IAction, IMessage, IMessageElement } from '@chainlit/react-client';
-
+import type { IAction, IMessage, IMessageElement } from 'client-types/';
 import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';
