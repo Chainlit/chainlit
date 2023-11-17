@@ -402,7 +402,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             self.to_keep = to_keep
 
     def _run_sync(self, co):
-        asyncio.run_coroutine_threadsafe(co, loop=self.context.loop)
+        self.context.loop.create_task(co)
 
     def _persist_run(self, run: Run) -> None:
         pass
