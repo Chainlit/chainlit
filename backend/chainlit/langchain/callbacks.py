@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
@@ -402,6 +401,7 @@ class LangchainTracer(BaseTracer, PromptHelper, FinalStreamHelper):
             self.to_keep = to_keep
 
     def _run_sync(self, co):
+        context_var.set(self.context)
         self.context.loop.create_task(co)
 
     def _persist_run(self, run: Run) -> None:
