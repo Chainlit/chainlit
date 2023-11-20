@@ -14,11 +14,11 @@ def init_lc_cache():
         except ImportError:
             return
         from langchain.cache import SQLiteCache
+        from langchain.globals import set_llm_cache
 
         if config.project.lc_cache_path is not None:
-            langchain.llm_cache = SQLiteCache(
-                database_path=config.project.lc_cache_path
-            )
+            set_llm_cache(SQLiteCache(database_path=config.project.lc_cache_path))
+
             if not os.path.exists(config.project.lc_cache_path):
                 logger.info(
                     f"LangChain cache created at: {config.project.lc_cache_path}"
