@@ -51,7 +51,7 @@ async def resume_conversation(session: WebsocketSession):
 
     if conversation and user_is_author:
         metadata = conversation["metadata"] or {}
-        user_sessions[session.id] = metadata
+        user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
         if chat_settings := metadata.get("chat_settings"):
