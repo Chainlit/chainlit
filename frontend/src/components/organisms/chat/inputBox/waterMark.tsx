@@ -11,7 +11,7 @@ export default function WaterMark() {
   const { theme } = useRecoilValue(settingsState);
   const src = theme === 'light' ? LogoLight : LogoDark;
   return (
-    <Stack mx="auto">
+    <Stack mx="auto" className="watermark">
       <a
         href="https://github.com/Chainlit/chainlit"
         target="_blank"

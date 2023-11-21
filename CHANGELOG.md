@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [0.7.604] - 2023-11-15
+
+### Fixed
+
+- `on_chat_resume` now works properly with non json serializable objects
+- `LangchainCallbackHandler` no longer send tokens to the wrong user under high concurrency
+- Langchain cache should work when `cache` is to `true` in `config.toml`
+
 ## [0.7.603] - 2023-11-15
 
 ### Fixed
