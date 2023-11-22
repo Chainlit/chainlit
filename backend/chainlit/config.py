@@ -260,6 +260,7 @@ def load_module(target: str, force_refresh: bool = False):
                 hasattr(module, "__file__")
                 and module.__file__
                 and module.__file__.startswith(target_dir)
+                and module_name in sys.modules
             ):
                 del sys.modules[module_name]
 
