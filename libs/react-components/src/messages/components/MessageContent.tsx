@@ -17,7 +17,7 @@ const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you wa
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
 
 const MessageContent = memo(
-  ({ message, elements, preserveSize }: IMessageContent) => {
+  ({ message, elements, preserveSize, allowHtml }: IMessageContent) => {
     const { preparedContent, inlinedElements, refElements } = prepareContent({
       elements,
       id: message.id,
@@ -37,7 +37,9 @@ const MessageContent = memo(
         }}
         component="div"
       >
-        <Markdown refElements={refElements}>{preparedContent}</Markdown>
+        <Markdown allowHtml={allowHtml} refElements={refElements}>
+          {preparedContent}
+        </Markdown>
       </Typography>
     );
 

@@ -73,6 +73,7 @@
     "react-plotly.js": "^2.6.0",
     "react-resizable": "^3.0.5",
     "rehype-katex": "^7.0.0",
+    "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
     "swr": "^2.2.2",

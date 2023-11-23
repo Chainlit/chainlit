@@ -47,6 +47,9 @@ cache = false
 # Show the prompt playground
 prompt_playground = true
 
+# Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
+unsafe_allow_html = false
+
 # Authorize users to upload files with messages
 multi_modal = true
 
@@ -157,6 +160,7 @@ class SpeechToTextFeature:
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
     multi_modal: bool = True
+    unsafe_allow_html: bool = False
     speech_to_text: Optional[SpeechToTextFeature] = None
 
 

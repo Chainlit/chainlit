@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { Code } from 'src/Code';
@@ -21,15 +23,24 @@ import type { IMessageElement } from 'client-types/';
 import { InlineCode } from './InlineCode';
 
 interface Props {
+  allowHtml?: boolean;
   refElements?: IMessageElement[];
   children: string;
 }
 
-function Markdown({ refElements, children }: Props) {
+function Markdown({ refElements, allowHtml, children }: Props) {
+  const rehypePlugins = useMemo(() => {
+    let rehypePlugins = [rehypeKatex];
+    if (allowHtml) {
+      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
+    }
+    return rehypePlugins;
+  }, [allowHtml]);
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm as any, remarkMath]}
-      rehypePlugins={[rehypeKatex]}
+      rehypePlugins={rehypePlugins}
       className="markdown-body"
       components={{
         a({ children, ...props }) {

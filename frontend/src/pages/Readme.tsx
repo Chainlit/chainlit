@@ -14,7 +14,10 @@ export default function Readme() {
   return (
     <Page>
       <Box my={2} display="flex" flexGrow={1}>
-        <WelcomeScreen markdown={projectSettings?.markdown} />
+        <WelcomeScreen
+          markdown={projectSettings?.markdown}
+          allowHtml={projectSettings?.features?.unsafe_allow_html}
+        />
       </Box>
     </Page>
   );

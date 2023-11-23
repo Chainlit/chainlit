@@ -15,6 +15,7 @@ interface IMessageContext {
   loading: boolean;
   showFeedbackButtons: boolean;
   uiName: string;
+  allowHtml?: boolean;
   onPlaygroundButtonClick?: (message: IMessage) => void;
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
