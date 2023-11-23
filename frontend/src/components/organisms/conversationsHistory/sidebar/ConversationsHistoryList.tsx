@@ -1,7 +1,7 @@
 import capitalize from 'lodash/capitalize';
 import map from 'lodash/map';
 import size from 'lodash/size';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -13,7 +13,11 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { ConversationsHistory, useChatSession } from '@chainlit/react-client';
+import {
+  ConversationsHistory,
+  useChatInteract,
+  useChatSession
+} from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components';
 
 import { DeleteConversationButton } from './DeleteConversationButton';
@@ -34,6 +38,8 @@ const ConversationsHistoryList = ({
   isLoadingMore
 }: ConversationsHistoryProps) => {
   const { idToResume } = useChatSession();
+  const { clear } = useChatInteract();
+  const navigate = useNavigate();
 
   if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
@@ -76,6 +82,16 @@ const ConversationsHistoryList = ({
       </Alert>
     );
   }
+
+  const handleDeleteConversation = (conversationId: string) => {
+    if (conversationId === idToResume) {
+      clear();
+    }
+    if (conversationId === conversations.currentConversationId) {
+      navigate('/');
+    }
+    fetchConversations();
+  };
 
   return (
     <>
@@ -177,7 +193,9 @@ const ConversationsHistoryList = ({
                         {isSelected ? (
                           <DeleteConversationButton
                             conversationId={conversation.id}
-                            onDelete={fetchConversations}
+                            onDelete={() =>
+                              handleDeleteConversation(conversation.id)
+                            }
                           />
                         ) : null}
                       </Stack>
