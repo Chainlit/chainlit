@@ -1,7 +1,8 @@
 import {
   useChatData,
   useChatInteract,
-  useChatMessages
+  useChatMessages,
+  useChatSession
 } from '@chainlit/react-client';
 
 import { IProjectSettings } from 'state/project';
@@ -23,8 +24,11 @@ const Messages = ({
   const { elements, askUser, avatars, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
+  const { idToResume } = useChatSession();
 
-  return !messages.length && projectSettings?.ui.show_readme_as_default ? (
+  return !idToResume &&
+    !messages.length &&
+    projectSettings?.ui.show_readme_as_default ? (
     <WelcomeScreen markdown={projectSettings?.markdown} />
   ) : (
     <MessageContainer
