@@ -13,7 +13,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { ConversationsHistory } from '@chainlit/react-client';
+import { ConversationsHistory, useChatSession } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components';
 
 import { DeleteConversationButton } from './DeleteConversationButton';
@@ -33,6 +33,8 @@ const ConversationsHistoryList = ({
   isFetching,
   isLoadingMore
 }: ConversationsHistoryProps) => {
+  const { idToResume } = useChatSession();
+
   if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
       <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
@@ -104,7 +106,12 @@ const ConversationsHistoryList = ({
                   </Typography>
                 </ListSubheader>
                 {map(items, (conversation) => {
+                  const isResumed =
+                    idToResume === conversation.id &&
+                    !conversations.currentConversationId;
+
                   const isSelected =
+                    isResumed ||
                     conversations.currentConversationId === conversation.id;
 
                   return (
@@ -133,7 +140,7 @@ const ConversationsHistoryList = ({
                               : 'grey.200'
                         }
                       })}
-                      to={`/conversation/${conversation.id}`}
+                      to={isResumed ? '' : `/conversation/${conversation.id}`}
                     >
                       <Stack
                         direction="row"
