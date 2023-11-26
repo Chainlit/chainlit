@@ -158,6 +158,9 @@ async def connection_successful(sid):
 @socket.on("clear_session")
 async def clean_session(sid):
     if session := WebsocketSession.get(sid):
+        if config.code.on_chat_end:
+            init_ws_context(session)
+            await config.code.on_chat_end()
         # Clean up the user session
         if session.id in user_sessions:
             user_sessions.pop(session.id)
@@ -169,9 +172,9 @@ async def clean_session(sid):
 @socket.on("disconnect")
 async def disconnect(sid):
     session = WebsocketSession.get(sid)
+
     if config.code.on_chat_end and session:
         init_ws_context(session)
-        """Call the on_chat_end function provided by the developer."""
         await config.code.on_chat_end()
 
     if session and session.conversation_id:
