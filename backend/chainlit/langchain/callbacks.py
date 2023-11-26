@@ -241,9 +241,12 @@ class PromptHelper:
                 if "placeholder" in class_name.lower():
                     variable_name = lc_message.get(
                         "variable_name"
+                    ) or message_kwargs.get(
+                        "variable_name"
                     )  # type: Optional[str]
                     variable = inputs.get(variable_name, [])
                     placeholder_size = len(variable)
+
                     if placeholder_size:
                         template_messages += [
                             PromptMessage(placeholder_size=placeholder_size)
