@@ -261,7 +261,7 @@ def load_module(target: str, force_refresh: bool = False):
                 and module.__file__
                 and module.__file__.startswith(target_dir)
             ):
-                del sys.modules[module_name]
+                sys.modules.pop(module_name, None)
 
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:
