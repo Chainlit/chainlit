@@ -32,6 +32,7 @@ const Messages = ({
     <WelcomeScreen
       markdown={projectSettings?.markdown}
       allowHtml={projectSettings?.features?.unsafe_allow_html}
+      latex={projectSettings?.features?.latex}
     />
   ) : (
     <MessageContainer

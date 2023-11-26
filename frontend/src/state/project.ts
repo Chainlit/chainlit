@@ -22,6 +22,7 @@ export interface IProjectSettings {
   features: {
     multi_modal?: boolean;
     unsafe_allow_html?: boolean;
+    latex?: boolean;
     speech_to_text?: {
       enabled?: boolean;
       language?: string;

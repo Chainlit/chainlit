@@ -43,6 +43,7 @@ const Message = memo(
       highlightedMessage,
       defaultCollapseContent,
       allowHtml,
+      latex,
       onError
     } = useContext(MessageContext);
 
@@ -108,6 +109,7 @@ const Message = memo(
                 message={message}
                 preserveSize={!!message.streaming || !defaultCollapseContent}
                 allowHtml={allowHtml}
+                latex={latex}
               />
               <DetailsButton
                 message={message}

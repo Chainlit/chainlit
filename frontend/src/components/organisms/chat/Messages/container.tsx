@@ -176,6 +176,7 @@ const MessageContainer = memo(
       return {
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
+        latex: projectSettings?.features?.latex,
         avatars,
         defaultCollapseContent: appSettings.defaultCollapseContent,
         expandAll: appSettings.expandAll,

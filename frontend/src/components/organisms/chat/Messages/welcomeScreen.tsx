@@ -5,7 +5,14 @@ import { Box } from '@mui/material';
 import { Markdown } from '@chainlit/react-components';
 
 const WelcomeScreen = memo(
-  ({ markdown, allowHtml }: { markdown?: string; allowHtml?: boolean }) => {
+  ({
+    markdown,
+    allowHtml
+  }: {
+    markdown?: string;
+    allowHtml?: boolean;
+    latex?: boolean;
+  }) => {
     if (!markdown) return <Box flexGrow={1} />;
 
     return (

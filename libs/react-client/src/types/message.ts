@@ -1,4 +1,4 @@
-import { IFileElement, IMessageElement } from './element';
+import { IFileElement } from './element';
 
 interface IBaseTemplate {
   template?: string;
@@ -56,10 +56,4 @@ export interface IMessage {
   streaming?: boolean;
   waitForAnswer?: boolean;
   subMessages?: IMessage[];
-}
-
-export interface IMessageContent {
-  elements: IMessageElement[];
-  message: IMessage;
-  preserveSize?: boolean;
 }
