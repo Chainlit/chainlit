@@ -33,7 +33,6 @@ export default function AppWrapper() {
 
   useEffect(() => {
     if (!data) return;
-
     setProjectSettings(data);
     setAppSettings((prev) => ({
       ...prev,

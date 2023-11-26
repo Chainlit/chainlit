@@ -9,15 +9,23 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import type { IMessageContent } from 'client-types/';
+import type { IMessage, IMessageElement } from 'client-types/';
 
 import { MessageButtons } from './MessageButtons';
 
 const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
 
+export interface Props {
+  elements: IMessageElement[];
+  message: IMessage;
+  preserveSize?: boolean;
+  allowHtml?: boolean;
+  latex?: boolean;
+}
+
 const MessageContent = memo(
-  ({ message, elements, preserveSize }: IMessageContent) => {
+  ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
     const { preparedContent, inlinedElements, refElements } = prepareContent({
       elements,
       id: message.id,
@@ -37,7 +45,9 @@ const MessageContent = memo(
         }}
         component="div"
       >
-        <Markdown refElements={refElements}>{preparedContent}</Markdown>
+        <Markdown allowHtml={allowHtml} latex={latex} refElements={refElements}>
+          {preparedContent}
+        </Markdown>
       </Typography>
     );
 

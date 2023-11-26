@@ -29,7 +29,11 @@ const Messages = ({
   return !idToResume &&
     !messages.length &&
     projectSettings?.ui.show_readme_as_default ? (
-    <WelcomeScreen markdown={projectSettings?.markdown} />
+    <WelcomeScreen
+      markdown={projectSettings?.markdown}
+      allowHtml={projectSettings?.features?.unsafe_allow_html}
+      latex={projectSettings?.features?.latex}
+    />
   ) : (
     <MessageContainer
       avatars={avatars}

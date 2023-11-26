@@ -50,6 +50,9 @@ export default function ChatProfiles() {
     return null;
   }
 
+  const allowHtml = pSettings?.features?.unsafe_allow_html;
+  const latex = pSettings?.features?.latex;
+
   const popoverOpen = Boolean(anchorEl);
 
   return (
@@ -167,7 +170,9 @@ export default function ChatProfiles() {
         disableRestoreFocus
       >
         <Box p={2} maxWidth="20rem">
-          <Markdown>{chatProfileDescription}</Markdown>
+          <Markdown allowHtml={allowHtml} latex={latex}>
+            {chatProfileDescription}
+          </Markdown>
         </Box>
       </Popover>
       <NewChatDialog

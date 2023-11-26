@@ -175,6 +175,8 @@ const MessageContainer = memo(
     const memoizedContext = useMemo(() => {
       return {
         askUser,
+        allowHtml: projectSettings?.features?.unsafe_allow_html,
+        latex: projectSettings?.features?.latex,
         avatars,
         defaultCollapseContent: appSettings.defaultCollapseContent,
         expandAll: appSettings.expandAll,
@@ -198,6 +200,7 @@ const MessageContainer = memo(
       highlightedMessage,
       loading,
       projectSettings?.ui?.name,
+      projectSettings?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
       onFeedbackUpdated,

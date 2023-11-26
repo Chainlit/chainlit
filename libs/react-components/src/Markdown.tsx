@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { Code } from 'src/Code';
@@ -21,15 +24,37 @@ import type { IMessageElement } from 'client-types/';
 import { InlineCode } from './InlineCode';
 
 interface Props {
+  allowHtml?: boolean;
+  latex?: boolean;
   refElements?: IMessageElement[];
   children: string;
 }
 
-function Markdown({ refElements, children }: Props) {
+function Markdown({ refElements, allowHtml, latex, children }: Props) {
+  const rehypePlugins = useMemo(() => {
+    let rehypePlugins: PluggableList = [];
+    if (allowHtml) {
+      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
+    }
+    if (latex) {
+      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
+    }
+    return rehypePlugins;
+  }, [allowHtml, latex]);
+
+  const remarkPlugins = useMemo(() => {
+    let remarkPlugins: PluggableList = [remarkGfm as any];
+
+    if (latex) {
+      remarkPlugins = [remarkMath as any, ...remarkPlugins];
+    }
+    return remarkPlugins;
+  }, [latex]);
+
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm as any, remarkMath]}
-      rehypePlugins={[rehypeKatex]}
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
       className="markdown-body"
       components={{
         a({ children, ...props }) {
