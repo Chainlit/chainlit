@@ -169,6 +169,8 @@ class ChainlitCloudClient(ChainlitGraphQLClient):
         self.check_for_errors(res, raise_error=True)
         data = res.get("data")
         conversation = data.get("conversation") if data else None
+        if not conversation:
+            return None
         return (
             conversation["appUser"].get("username") if conversation["appUser"] else None
         )
