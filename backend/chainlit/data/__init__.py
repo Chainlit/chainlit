@@ -150,6 +150,7 @@ def get_data_layer():
     global _data_layer
     if _data_layer is None:
         if os.environ.get("CHAINLIT_API_KEY"):
+            # TODO: Implement default data layer
             _data_layer = BaseDataLayer()
 
     return _data_layer

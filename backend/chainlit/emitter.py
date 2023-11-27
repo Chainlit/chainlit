@@ -1,12 +1,12 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List, cast
 
-from chainlit.element import Element
+from chainlit.element import Element, File
 from chainlit.message import Message, MessageDict
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
-from chainlit.types import AskSpec, ThreadDict, UIMessagePayload
+from chainlit.types import AskSpec, ThreadDict, UIMessagePayload, AskFileResponseDict
 from socketio.exceptions import TimeoutError
 from chainlit.data import get_data_layer
 
@@ -201,18 +201,29 @@ class ChainlitEmitter(BaseChainlitEmitter):
             # Send the prompt to the UI
             res = await self.ask_user(
                 {"msg": msg_dict, "spec": spec.to_dict()}, spec.timeout
-            )  # type: Optional["MessageDict"]
+            )  # type: Optional[Union["MessageDict", List["AskFileResponseDict"]]]
 
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
 
             if res:
-                # If cloud is enabled, store the response in the database/S3
+                message_dict_res = cast(MessageDict, res)
                 if spec.type == "text":
-                    await self.process_user_message({"message": res, "files": None})
+                    await self.process_user_message(
+                        {"message": message_dict_res, "files": None}
+                    )
                 elif spec.type == "file":
-                    # TODO: upload file to S3
-                    pass
+                    file_response_list_res = cast(List[AskFileResponseDict], res)
+                    if get_data_layer():
+                        coros = [
+                            File(
+                                content=file["content"],
+                                mime=file["type"],
+                                for_id=msg_dict["id"],
+                            )._upload_and_persist()
+                            for file in file_response_list_res
+                        ]
+                        await asyncio.gather(*coros)
 
             await self.clear_ask()
             return res

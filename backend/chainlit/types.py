@@ -102,6 +102,14 @@ class UIMessagePayload(TypedDict):
     files: Optional[List[Dict]]
 
 
+class AskFileResponseDict(TypedDict):
+    name: str
+    path: str
+    size: int
+    type: str
+    content: bytes
+
+
 @dataclass
 class AskFileResponse:
     name: str
