@@ -8,6 +8,7 @@ from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
 from chainlit.types import AskSpec, ThreadDict, UIMessagePayload
 from socketio.exceptions import TimeoutError
+from chainlit.data import get_data_layer
 
 
 class BaseChainlitEmitter:
@@ -153,9 +154,14 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         return self.emit("clear_ask", {})
 
-    def init_thread(self, message: MessageDict):
+    async def init_thread(self, message: MessageDict):
         """Signal the UI that a new thread (with a user message) exists"""
-        # TODO: persist update thread metadata name with message + flush queue
+        if data_layer := get_data_layer():
+            await data_layer.update_thread(
+                self.session.thread_id, {"name": message["content"]}
+            )
+            await self.session.flush_method_queue()
+
         return self.emit("init_thread", message)
 
     async def process_user_message(self, payload: UIMessagePayload):

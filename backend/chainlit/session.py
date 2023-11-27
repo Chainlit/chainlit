@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
@@ -144,6 +144,8 @@ class WebsocketSession(BaseSession):
         self.should_stop = False
         self.restored = False
 
+        self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
+
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
 
@@ -158,6 +160,12 @@ class WebsocketSession(BaseSession):
         """Delete the session."""
         ws_sessions_sid.pop(self.socket_id, None)
         ws_sessions_id.pop(self.id, None)
+
+    async def flush_method_queue(self):
+        for method_name, queue in self.thread_queues.items():
+            while queue:
+                method, args, kwargs = queue.popleft()
+                await method(*args, **kwargs)
 
     @classmethod
     def get(cls, socket_id: str):

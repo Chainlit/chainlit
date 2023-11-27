@@ -191,12 +191,12 @@ class Message(MessageBase):
                 self.language = "json"
             except TypeError:
                 self.content = str(content)
-                self.language = "python"
+                self.language = "text"
         elif isinstance(content, str):
             self.content = content
         else:
             self.content = str(content)
-            self.language = "python"
+            self.language = "text"
 
         if id:
             self.id = str(id)
