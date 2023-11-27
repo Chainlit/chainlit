@@ -451,7 +451,7 @@ async def project_settings(
             "ui": config.ui.to_dict(),
             "features": config.features.to_dict(),
             "userEnv": config.project.user_env,
-            "dataPersistence": config.data_persistence,
+            "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": get_markdown_str(config.root),
             "chatProfiles": profiles,

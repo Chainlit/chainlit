@@ -229,8 +229,6 @@ class ChainlitConfig:
     root = APP_ROOT
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
-    # Whether or not a chainlit api key has been provided
-    data_persistence: bool
     # The url of the deployed app. Only set if the app is deployed.
     chainlit_prod_url = chainlit_prod_url
 
@@ -341,11 +339,9 @@ def load_config():
     settings = load_settings()
 
     chainlit_server = os.environ.get("CHAINLIT_SERVER", "https://cloud.chainlit.io")
-    data_persistence = "CHAINLIT_API_KEY" in os.environ
 
     config = ChainlitConfig(
         chainlit_server=chainlit_server,
-        data_persistence=data_persistence,
         chainlit_prod_url=chainlit_prod_url,
         run=RunSettings(),
         **settings,

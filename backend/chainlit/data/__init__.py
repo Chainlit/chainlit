@@ -142,13 +142,14 @@ class BaseDataLayer:
     async def update_thread(
         self, thread_id: str, metadata: Optional[Dict], tags: Optional[List[str]]
     ):
+        # TODO: Do not override metadata and tags, flag to replace?
         pass
 
 
 def get_data_layer():
     global _data_layer
     if _data_layer is None:
-        if config.data_persistence:
+        if os.environ.get("CHAINLIT_API_KEY"):
             _data_layer = BaseDataLayer()
 
     return _data_layer
