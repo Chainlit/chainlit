@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from chainlit.user import AppUser, PersistedAppUser
     from chainlit.element import ElementDict
     from chainlit.message import MessageDict
+    from chainlit.step import StepDict
 
 _data_layer = None
 
@@ -66,6 +67,15 @@ class BaseDataLayer:
         pass
 
     async def delete_message(self, message_id: str):
+        pass
+
+    async def create_step(self, step_dict: "StepDict"):
+        pass
+
+    async def update_step(self, step_dict: "StepDict"):
+        pass
+
+    async def delete_step(self, step_id: str):
         pass
 
     async def get_thread_author(self, thread_id: str) -> str:
