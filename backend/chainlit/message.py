@@ -1,17 +1,16 @@
+import asyncio
 import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, TypedDict, Union, cast
 
 from chainlit.action import Action
-from chainlit.client.base import MessageDict
 from chainlit.config import config
 from chainlit.context import context
-from chainlit.data import chainlit_client
+from chainlit.data import get_persister
 from chainlit.element import ElementBased
 from chainlit.logger import logger
-from chainlit.prompt import Prompt
 from chainlit.telemetry import trace_event
 from chainlit.types import (
     AskActionResponse,
@@ -21,56 +20,45 @@ from chainlit.types import (
     AskResponse,
     AskSpec,
 )
-from syncer import asyncio
+
+
+class MessageDict(TypedDict):
+    type: Literal["message"]
+    threadId: Optional[str]
+    id: str
+    createdAt: Optional[str]
+    content: str
+    author: str
+    language: Optional[str]
+    authorIsUser: Optional[bool]
+    waitForAnswer: Optional[bool]
+    isError: Optional[bool]
+    humanFeedback: Optional[int]
+    disableHumanFeedback: Optional[bool]
 
 
 class MessageBase(ABC):
     id: str
+    thread_id: str
     author: str
     content: str = ""
     streaming = False
-    created_at: Union[int, str, None] = None
+    created_at: Union[str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
+        self.thread_id = context.session.thread_id
+
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
         if not self.created_at:
             self.created_at = datetime.now(timezone.utc).isoformat()
 
     @abstractmethod
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> MessageDict:
         pass
-
-    async def with_conversation_id(self):
-        _dict = self.to_dict()
-        _dict["conversationId"] = await context.session.get_conversation_id()
-        return _dict
-
-    async def _create(self):
-        msg_dict = await self.with_conversation_id()
-        asyncio.create_task(self._persist_create(msg_dict))
-
-        if not config.features.prompt_playground:
-            msg_dict.pop("prompt", None)
-        return msg_dict
-
-    async def _persist_create(self, message: MessageDict):
-        if not chainlit_client or self.persisted:
-            return
-
-        try:
-            persisted_id = await chainlit_client.create_message(message)
-
-            if persisted_id:
-                self.id = persisted_id
-                self.persisted = True
-        except Exception as e:
-            if self.fail_on_persist_error:
-                raise e
-            logger.error(f"Failed to persist message creation: {str(e)}")
 
     async def update(
         self,
@@ -79,49 +67,59 @@ class MessageBase(ABC):
         Update a message already sent to the UI.
         """
         trace_event("update_message")
+
         if self.streaming:
             self.streaming = False
+
         msg_dict = self.to_dict()
-        asyncio.create_task(self._persist_update(msg_dict))
+
+        if persister := get_persister() and not self.persisted:
+            try:
+                # TODO: persister is not implemented yet
+                self.persisted = True
+            except Exception as e:
+                if self.fail_on_persist_error:
+                    raise e
+                logger.error(f"Failed to persist message update: {str(e)}")
+
         await context.emitter.update_message(msg_dict)
 
         return True
 
-    async def _persist_update(self, message: MessageDict):
-        if not chainlit_client or not self.id:
-            return
-
-        try:
-            await chainlit_client.update_message(self.id, message)
-        except Exception as e:
-            if self.fail_on_persist_error:
-                raise e
-            logger.error(f"Failed to persist message update: {str(e)}")
-
     async def remove(self):
         """
         Remove a message already sent to the UI.
-        This will not automatically remove potential nested messages and could lead to undesirable side effects in the UI.
         """
         trace_event("remove_message")
 
-        if chainlit_client and self.id:
-            await chainlit_client.delete_message(self.id)
+        msg_dict = self.to_dict()
 
-        await context.emitter.delete_message(self.to_dict())
+        if persister := get_persister() and not self.persisted:
+            try:
+                # TODO: persister is not implemented yet
+                self.persisted = True
+            except Exception as e:
+                if self.fail_on_persist_error:
+                    raise e
+                logger.error(f"Failed to persist message deletion: {str(e)}")
+
+        await context.emitter.delete_message(msg_dict)
 
         return True
 
-    async def _persist_remove(self):
-        if not chainlit_client or not self.id:
-            return
+    async def _create(self):
+        msg_dict = self.to_dict()
 
-        try:
-            await chainlit_client.delete_message(self.id)
-        except Exception as e:
-            if self.fail_on_persist_error:
-                raise e
-            logger.error(f"Failed to persist message deletion: {str(e)}")
+        if persister := get_persister() and not self.persisted:
+            try:
+                # TODO: persister is not implemented yet
+                self.persisted = True
+            except Exception as e:
+                if self.fail_on_persist_error:
+                    raise e
+                logger.error(f"Failed to persist message creation: {str(e)}")
+
+        return msg_dict
 
     async def send(self):
         if self.content is None:
@@ -164,15 +162,11 @@ class MessageBase(ABC):
 class Message(MessageBase):
     """
     Send a message to the UI
-    If a project ID is configured, the message will be persisted in the cloud.
 
     Args:
         content (Union[str, Dict]): The content of the message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        prompt (Prompt, optional): The prompt used to generate the message. If provided, enables the prompt playground for this message.
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
-        parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
-        indent (int, optional): If positive, the message will be nested in the UI. (deprecated, use parent_id instead)
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
         disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
@@ -182,15 +176,13 @@ class Message(MessageBase):
         self,
         content: Union[str, Dict],
         author: str = config.ui.name,
-        prompt: Optional[Prompt] = None,
         language: Optional[str] = None,
-        parent_id: Optional[str] = None,
-        indent: int = 0,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
         disable_human_feedback: Optional[bool] = False,
         author_is_user: Optional[bool] = False,
-        id: Optional[uuid.UUID] = None,
+        id: Optional[str] = None,
+        created_at: Union[str, None] = None,
     ):
         self.language = language
 
@@ -210,11 +202,11 @@ class Message(MessageBase):
         if id:
             self.id = str(id)
 
+        if created_at:
+            self.created_at = created_at
+
         self.author = author
         self.author_is_user = author_is_user
-        self.prompt = prompt
-        self.parent_id = parent_id
-        self.indent = indent
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
         self.disable_human_feedback = disable_human_feedback
@@ -224,41 +216,30 @@ class Message(MessageBase):
     @classmethod
     def from_dict(self, _dict: MessageDict):
         message = Message(
+            id=_dict["id"],
+            created_at=_dict["createdAt"],
             content=_dict["content"],
             author=_dict.get("author", config.ui.name),
-            prompt=_dict.get("prompt"),
             language=_dict.get("language"),
-            parent_id=_dict.get("parentId"),
-            indent=_dict.get("indent") or 0,
             disable_human_feedback=_dict.get("disableHumanFeedback"),
             author_is_user=_dict.get("authorIsUser"),
         )
-
-        if _id := _dict.get("id"):
-            message.id = _id
-        if created_at := _dict.get("createdAt"):
-            message.created_at = created_at
 
         return message
 
     def to_dict(self):
         _dict = {
+            "type": "message",
+            "id": self.id,
+            "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "authorIsUser": self.author_is_user,
             "language": self.language,
-            "parentId": self.parent_id,
-            "indent": self.indent,
             "streaming": self.streaming,
             "disableHumanFeedback": self.disable_human_feedback,
         }
-
-        if self.prompt:
-            _dict["prompt"] = self.prompt.to_dict()
-
-        if self.id:
-            _dict["id"] = self.id
 
         return _dict
 
@@ -268,19 +249,18 @@ class Message(MessageBase):
         Return the ID of the message.
         """
         trace_event("send_message")
-        id = await super().send()
+        await super().send()
 
-        if not self.parent_id:
-            context.session.root_message = self
+        context.session.root_message = self
 
         # Create tasks for all actions and elements
-        tasks = [action.send(for_id=id) for action in self.actions]
-        tasks.extend(element.send(for_id=id) for element in self.elements)
+        tasks = [action.send(for_id=self.id) for action in self.actions]
+        tasks.extend(element.send(for_id=self.id) for element in self.elements)
 
         # Run all tasks concurrently
         await asyncio.gather(*tasks)
 
-        return id
+        return self.id
 
     async def update(self):
         """
@@ -292,13 +272,8 @@ class Message(MessageBase):
 
         actions_to_update = [action for action in self.actions if action.forId is None]
 
-        elements_to_update = [el for el in self.elements if self.id not in el.for_ids]
-
         for action in actions_to_update:
             await action.send(for_id=self.id)
-
-        for element in elements_to_update:
-            await element.send(for_id=self.id)
 
         return True
 
@@ -323,27 +298,28 @@ class ErrorMessage(MessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        parent_id: Optional[str] = None,
-        indent: int = 0,
         fail_on_persist_error: bool = False,
     ):
         self.content = content
         self.author = author
-        self.parent_id = parent_id
-        self.indent = indent
         self.fail_on_persist_error = fail_on_persist_error
 
         super().__post_init__()
 
-    def to_dict(self):
+    def to_dict(self) -> MessageDict:
         return {
+            "type": "message",
             "id": self.id,
+            "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
-            "parentId": self.parent_id,
-            "indent": self.indent,
             "isError": True,
+            "authorIsUser": False,
+            "disableHumanFeedback": True,
+            "humanFeedback": None,
+            "language": None,
+            "waitForAnswer": False,
         }
 
     async def send(self):
@@ -392,14 +368,21 @@ class AskUserMessage(AskMessageBase):
 
         super().__post_init__()
 
-    def to_dict(self):
+    def to_dict(self) -> MessageDict:
         return {
+            "type": "message",
             "id": self.id,
+            "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
             "disableHumanFeedback": self.disable_human_feedback,
+            "isError": False,
+            "authorIsUser": False,
+            "humanFeedback": None,
+            "language": None,
+            "waitForAnswer": False,
         }
 
     async def send(self) -> Union[AskResponse, None]:
@@ -408,11 +391,11 @@ class AskUserMessage(AskMessageBase):
         """
         trace_event("send_ask_user")
 
-        if self.streaming:
-            self.streaming = False
-
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
+
+        if self.streaming:
+            self.streaming = False
 
         msg_dict = await self._create()
 
@@ -462,14 +445,21 @@ class AskFileMessage(AskMessageBase):
 
         super().__post_init__()
 
-    def to_dict(self):
+    def to_dict(self) -> MessageDict:
         return {
+            "type": "message",
             "id": self.id,
+            "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
             "disableHumanFeedback": self.disable_human_feedback,
+            "isError": False,
+            "authorIsUser": False,
+            "humanFeedback": None,
+            "language": None,
+            "waitForAnswer": False,
         }
 
     async def send(self) -> Union[List[AskFileResponse], None]:
@@ -528,7 +518,9 @@ class AskActionMessage(AskMessageBase):
 
     def to_dict(self):
         return {
+            "type": "message",
             "id": self.id,
+            "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
@@ -551,6 +543,7 @@ class AskActionMessage(AskMessageBase):
             self.author = await config.code.author_rename(self.author)
 
         msg_dict = await self._create()
+
         action_keys = []
 
         for action in self.actions:

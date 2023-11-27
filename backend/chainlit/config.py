@@ -12,8 +12,8 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.client.base import AppUser, ConversationDict
-    from chainlit.types import ChatProfile
+    from chainlit.types import ChatProfile, ThreadDict
+    from chainlit.user import AppUser
 
 
 BACKEND_ROOT = os.path.dirname(__file__)
@@ -198,7 +198,7 @@ class CodeSettings:
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
-    on_chat_resume: Optional[Callable[["ConversationDict"], Any]] = None
+    on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None

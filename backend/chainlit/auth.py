@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
-from chainlit.client.cloud import AppUser
 from chainlit.config import config
-from chainlit.data import chainlit_client
+from chainlit.data import get_persister
 from chainlit.oauth_providers import get_configured_oauth_providers
+from chainlit.user import AppUser
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
@@ -71,9 +71,11 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    if chainlit_client:
+    if persister := get_persister():
         try:
-            persisted_app_user = await chainlit_client.get_app_user(app_user.username)
+            # TODO: persister is not implemented yet
+            persisted_app_user = None
+            # persisted_app_user = await chainlit_client.get_app_user(app_user.username)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
         if persisted_app_user == None:

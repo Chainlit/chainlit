@@ -1,12 +1,9 @@
 from typing import Union
 
-from fastapi.responses import StreamingResponse
-
 from chainlit.playground.provider import BaseProvider
-from chainlit.prompt import PromptMessage
 from chainlit.sync import make_async
-
-from chainlit import input_widget
+from chainlit_client import GenerationMessage
+from fastapi.responses import StreamingResponse
 
 
 class LangchainGenericProvider(BaseProvider):
@@ -31,7 +28,7 @@ class LangchainGenericProvider(BaseProvider):
         )
         self.llm = llm
 
-    def prompt_message_to_langchain_message(self, message: PromptMessage):
+    def prompt_message_to_langchain_message(self, message: GenerationMessage):
         from langchain.schema.messages import (
             AIMessage,
             FunctionMessage,
@@ -57,7 +54,7 @@ class LangchainGenericProvider(BaseProvider):
         message = super().format_message(message, prompt)
         return self.prompt_message_to_langchain_message(message)
 
-    def message_to_string(self, message: PromptMessage) -> str:
+    def message_to_string(self, message: GenerationMessage) -> str:
         return message.to_string()
 
     async def create_completion(self, request):
@@ -65,7 +62,7 @@ class LangchainGenericProvider(BaseProvider):
 
         await super().create_completion(request)
 
-        messages = self.create_prompt(request)
+        messages = self.create_generation(request)
 
         stream = make_async(self.llm.stream)
 

@@ -4,7 +4,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
-from chainlit.client.base import AppUser
+from chainlit.user import AppUser
 from fastapi import HTTPException
 
 

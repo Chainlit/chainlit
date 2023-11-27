@@ -17,7 +17,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
-from chainlit.client.cloud import AppUser, PersistedAppUser
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -27,19 +26,20 @@ from chainlit.config import (
     load_module,
     reload_config,
 )
-from chainlit.data import chainlit_client
-from chainlit.data.acl import is_conversation_author
+from chainlit.data import get_persister
+from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
-    CompletionRequest,
-    DeleteConversationRequest,
-    GetConversationsRequest,
+    DeleteThreadRequest,
+    GenerationRequest,
+    GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
 )
+from chainlit.user import AppUser, PersistedAppUser
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -254,8 +254,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="credentialssignin",
         )
     access_token = create_jwt(app_user)
-    if chainlit_client:
-        await chainlit_client.create_app_user(app_user=app_user)
+    if persister := get_persister():
+        # TODO: persister not implemented yet
+        # await chainlit_client.create_app_user(app_user=app_user)
+        pass
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -279,8 +281,10 @@ async def header_auth(request: Request):
         )
 
     access_token = create_jwt(app_user)
-    if chainlit_client:
-        await chainlit_client.create_app_user(app_user=app_user)
+    if persister := get_persister():
+        # TODO: persister not implemented yet
+        # await chainlit_client.create_app_user(app_user=app_user)
+        pass
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -382,8 +386,11 @@ async def oauth_callback(
         )
 
     access_token = create_jwt(app_user)
-    if chainlit_client:
-        await chainlit_client.create_app_user(app_user=app_user)
+
+    if persister := get_persister():
+        # TODO: persister not implemented yet
+        # await chainlit_client.create_app_user(app_user=app_user)
+        pass
 
     params = urllib.parse.urlencode(
         {
@@ -399,9 +406,9 @@ async def oauth_callback(
     return response
 
 
-@app.post("/completion")
-async def completion(
-    request: CompletionRequest,
+@app.post("/generation")
+async def generation(
+    request: GenerationRequest,
     current_user: Annotated[
         Union[AppUser, PersistedAppUser], Depends(get_current_user)
     ],
@@ -411,11 +418,11 @@ async def completion(
     providers = get_llm_providers()
 
     try:
-        provider = [p for p in providers if p.id == request.prompt.provider][0]
+        provider = [p for p in providers if p.id == request.generation.provider][0]
     except IndexError:
         raise HTTPException(
             status_code=404,
-            detail=f"LLM provider '{request.prompt.provider}' not found",
+            detail=f"LLM provider '{request.generation.provider}' not found",
         )
 
     trace_event("pp_create_completion")
@@ -451,14 +458,14 @@ async def project_settings(
             "features": config.features.to_dict(),
             "userEnv": config.project.user_env,
             "dataPersistence": config.data_persistence,
-            "conversationResumable": bool(config.code.on_chat_resume),
+            "threadResumable": bool(config.code.on_chat_resume),
             "markdown": get_markdown_str(config.root),
             "chatProfiles": profiles,
         }
     )
 
 
-@app.put("/message/feedback")
+@app.put("/feedback")
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
@@ -468,100 +475,114 @@ async def update_feedback(
 ):
     """Update the human feedback for a particular message."""
 
-    # TODO: check that message belong to a user's conversation
-
-    if not chainlit_client:
+    persister = get_persister()
+    if not persister:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     try:
-        await chainlit_client.set_human_feedback(
-            message_id=update.messageId,
-            feedback=update.feedback,
-            feedbackComment=update.feedbackComment,
-        )
+        # TODO: persister is not implemented yet
+        # await chainlit_client.set_human_feedback(
+        #     message_id=update.messageId,
+        #     feedback=update.feedback,
+        #     feedbackComment=update.feedbackComment,
+        # )
+        pass
+
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=401)
 
     return JSONResponse(content={"success": True})
 
 
-@app.post("/project/conversations")
-async def get_user_conversations(
+@app.post("/project/threads")
+async def get_user_threads(
     request: Request,
-    payload: GetConversationsRequest,
+    payload: GetThreadsRequest,
     current_user: Annotated[
         Union[AppUser, PersistedAppUser], Depends(get_current_user)
     ],
 ):
-    """Get the conversations page by page."""
-    # Only show the current user conversations
+    """Get the threads page by page."""
+    # Only show the current user threads
 
-    if not chainlit_client:
+    persister = get_persister()
+
+    if not persister:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     payload.filter.username = current_user.username
-    res = await chainlit_client.get_conversations(payload.pagination, payload.filter)
-    return JSONResponse(content=res.to_dict())
+
+    # TODO: persister is not implemented yet
+    # res = await chainlit_client.get_conversations(payload.pagination, payload.filter)
+    # return JSONResponse(content=res.to_dict())
 
 
-@app.get("/project/conversation/{conversation_id}")
-async def get_conversation(
+@app.get("/project/thread/{thread_id}")
+async def get_thread(
     request: Request,
-    conversation_id: str,
+    thread_id: str,
     current_user: Annotated[
         Union[AppUser, PersistedAppUser], Depends(get_current_user)
     ],
 ):
-    """Get a specific conversation."""
+    """Get a specific thread."""
+    persister = get_persister()
 
-    if not chainlit_client:
+    if not persister:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    await is_conversation_author(current_user.username, conversation_id)
+    # TODO: persister is not implemented yet
+    # await is_thread_author(current_user.username, conversation_id)
 
-    res = await chainlit_client.get_conversation(conversation_id)
-    return JSONResponse(content=res)
+    # res = await chainlit_client.get_conversation(conversation_id)
+    # return JSONResponse(content=res)
 
 
-@app.get("/project/conversation/{conversation_id}/element/{element_id}")
-async def get_conversation_element(
+@app.get("/project/thread/{thread_id}/element/{element_id}")
+async def get_thread_element(
     request: Request,
-    conversation_id: str,
+    thread_id: str,
     element_id: str,
     current_user: Annotated[
         Union[AppUser, PersistedAppUser], Depends(get_current_user)
     ],
 ):
-    """Get a specific conversation element."""
+    """Get a specific thread element."""
+    persister = get_persister()
 
-    if not chainlit_client:
+    if not persister:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    await is_conversation_author(current_user.username, conversation_id)
+    # TODO: persister is not implemented yet
+    # await is_thread_author(current_user.username, conversation_id)
 
-    res = await chainlit_client.get_element(conversation_id, element_id)
-    return JSONResponse(content=res)
+    # res = await chainlit_client.get_element(conversation_id, element_id)
+    # return JSONResponse(content=res)
 
 
-@app.delete("/project/conversation")
-async def delete_conversation(
+@app.delete("/project/thread")
+async def delete_thread(
     request: Request,
-    payload: DeleteConversationRequest,
+    payload: DeleteThreadRequest,
     current_user: Annotated[
         Union[AppUser, PersistedAppUser], Depends(get_current_user)
     ],
 ):
-    """Delete a conversation."""
+    """Delete a thread."""
 
-    if not chainlit_client:
+    persister = get_persister()
+
+    if not persister:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    conversation_id = payload.conversationId
+    thread_id = payload.threadId
 
-    await is_conversation_author(current_user.username, conversation_id)
+    # TODO: persister is not implemented yet
 
-    await chainlit_client.delete_conversation(conversation_id)
-    return JSONResponse(content={"success": True})
+    # await is_thread_author(current_user.username, conversation_id)
+
+    # await chainlit_client.delete_conversation(conversation_id)
+    # return JSONResponse(content={"success": True})
 
 
 @app.get("/files/{filename:path}")

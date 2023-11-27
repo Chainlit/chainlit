@@ -1,13 +1,16 @@
 import os
 from typing import Optional
 
-from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.config import config
 
-chainlit_client = None  # type: Optional[ChainlitCloudClient]
+_persister = None
 
-if config.data_persistence:
-    chainlit_client = ChainlitCloudClient(
-        api_key=os.environ.get("CHAINLIT_API_KEY", ""),
-        chainlit_server=config.chainlit_server,
-    )
+
+def get_persister():
+    global _persister
+    if _persister is None:
+        if config.data_persistence:
+            pass
+        else:
+            pass
+    return _persister

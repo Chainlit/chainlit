@@ -2,14 +2,23 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import aiofiles
 import filetype
-from chainlit.client.base import ElementDict, ElementDisplay, ElementSize, ElementType
-from chainlit.client.cloud import ChainlitCloudClient
 from chainlit.context import context
-from chainlit.data import chainlit_client
+from chainlit.data import get_persister
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
@@ -20,6 +29,26 @@ mime_types = {
     "tasklist": "application/json",
     "plotly": "application/json",
 }
+
+ElementType = Literal[
+    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+]
+ElementDisplay = Literal["inline", "side", "page"]
+ElementSize = Literal["small", "medium", "large"]
+
+
+class ElementDict(TypedDict):
+    id: str
+    threadId: Optional[str]
+    type: ElementType
+    url: str
+    objectKey: Optional[str]
+    name: str
+    display: ElementDisplay
+    size: Optional[ElementSize]
+    language: Optional[str]
+    forId: Optional[str]
+    mime: Optional[str]
 
 
 @dataclass
@@ -44,7 +73,7 @@ class Element:
     # Controls element size
     size: Optional[ElementSize] = None
     # The ID of the message this element is associated with.
-    for_ids: List[str] = Field(default_factory=list)
+    for_id: Optional[str] = None
     # The language, if relevant
     language: Optional[str] = None
     # Mime type, infered based on content if not provided
@@ -54,6 +83,8 @@ class Element:
         trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
 
+        self.thread_id = context.session.thread_id
+
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
 
@@ -61,6 +92,7 @@ class Element:
         _dict = ElementDict(
             {
                 "id": self.id,
+                "threadId": self.thread_id,
                 "type": self.type,
                 "url": self.url or "",
                 "name": self.name or "",
@@ -68,9 +100,8 @@ class Element:
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
                 "language": getattr(self, "language", None),
-                "forIds": getattr(self, "for_ids", None),
+                "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
-                "conversationId": None,
             }
         )
         return _dict
@@ -98,11 +129,6 @@ class Element:
                 mime=_dict.get("mime"),
             )
 
-    async def with_conversation_id(self):
-        _dict = self.to_dict()
-        _dict["conversationId"] = await context.session.get_conversation_id()
-        return _dict
-
     async def preprocess_content(self):
         pass
 
@@ -113,43 +139,57 @@ class Element:
         else:
             raise ValueError("Must provide path or content to load element")
 
-    async def persist(self, client: ChainlitCloudClient) -> Optional[ElementDict]:
-        if not self.url and self.content and not self.persisted:
-            conversation_id = await context.session.get_conversation_id()
-            upload_res = await client.upload_element(
-                content=self.content,
-                mime=self.mime or "",
-                conversation_id=conversation_id,
-            )
-            self.url = upload_res["url"]
-            self.object_key = upload_res["object_key"]
-        element_dict = await self.with_conversation_id()
+    async def _upload_and_persist(self) -> Optional[ElementDict]:
+        if (
+            persister := get_persister()
+            and not self.url
+            and self.content
+            and not self.persisted
+        ):
+            pass
+            # TODO: persister is not implemented yet
+            # upload_res = await client.upload_element(
+            #     content=self.content,
+            #     mime=self.mime or "",
+            #     conversation_id=conversation_id,
+            # )
+            # self.url = upload_res["url"]
+            # self.object_key = upload_res["object_key"]
+        element_dict = self.to_dict()
 
         asyncio.create_task(self._persist(element_dict))
 
         return element_dict
 
     async def _persist(self, element: ElementDict):
-        if not chainlit_client:
-            return
-
-        try:
-            if self.persisted:
-                await chainlit_client.update_element(element)
-            else:
-                await chainlit_client.create_element(element)
-                self.persisted = True
-        except Exception as e:
-            logger.error(f"Failed to persist element: {str(e)}")
+        if persister := get_persister():
+            try:
+                if self.persisted:
+                    # TODO: persister is not implemented yet
+                    # await chainlit_client.update_element(element)
+                    pass
+                else:
+                    # TODO: persister is not implemented yet
+                    # await chainlit_client.create_element(element)
+                    self.persisted = True
+            except Exception as e:
+                logger.error(f"Failed to persist element: {str(e)}")
 
     async def before_emit(self, element: Dict) -> Dict:
         return element
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
+        if persister := get_persister() and self.persisted:
+            # TODO: persister is not implemented yet
+            # await chainlit_client.update_element(element)
+            pass
         await context.emitter.emit("remove_element", {"id": self.id})
 
-    async def send(self, for_id: Optional[str] = None):
+    async def send(self, for_id: str):
+        if self.persisted:
+            return
+
         if not self.content and not self.url and self.path:
             await self.load()
 
@@ -163,34 +203,22 @@ class Element:
                 else filetype.guess_mime(self.content)
             )
 
-        if for_id and for_id not in self.for_ids:
-            self.for_ids.append(for_id)
+        self.for_id = for_id
 
-        # We have a client, persist the element
-        if chainlit_client:
-            element_dict = await self.persist(chainlit_client)
-            if element_dict:
-                self.id = element_dict["id"]
+        await self._upload_and_persist()
 
-        elif not self.url and not self.content:
+        if not self.url and not self.content:
             raise ValueError("Must provide url or content to send element")
 
         emit_dict = cast(Dict, self.to_dict())
 
         # Adding this out of to_dict since the dict will be persisted in the DB
-        emit_dict["content"] = self.content
+        if self.content:
+            emit_dict["content"] = self.content
 
-        # Element was already sent
-        if len(self.for_ids) > 1:
-            trace_event(f"update {self.__class__.__name__}")
-            await context.emitter.emit(
-                "update_element",
-                {"id": self.id, "forIds": self.for_ids},
-            )
-        else:
-            trace_event(f"send {self.__class__.__name__}")
-            emit_dict = await self.before_emit(emit_dict)
-            await context.emitter.emit("element", emit_dict)
+        trace_event(f"send {self.__class__.__name__}")
+        emit_dict = await self.before_emit(emit_dict)
+        await context.emitter.emit("element", emit_dict)
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)

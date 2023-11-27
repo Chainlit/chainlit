@@ -1,9 +1,22 @@
 from enum import Enum
-from typing import Dict, List, Literal, Optional, TypedDict, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
-from chainlit.client.base import ConversationFilter, MessageDict, Pagination
-from chainlit.element import File
-from chainlit.prompt import Prompt
+if TYPE_CHECKING:
+    from chainlit.message import MessageDict
+    from chainlit.element import ElementDict
+    from chainlit.user import AppUserDict
+
+from chainlit_client import ChatGeneration, CompletionGeneration
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -11,6 +24,41 @@ from pydantic.dataclasses import dataclass
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
 ]
+
+
+class ThreadDict(TypedDict):
+    id: Optional[str]
+    metadata: Optional[Dict]
+    createdAt: Optional[str]
+    user: Optional[AppUserDict]
+    messages: List[MessageDict]
+    elements: Optional[List[ElementDict]]
+
+
+@dataclass
+class PageInfo:
+    hasNextPage: bool
+    endCursor: Optional[str]
+
+
+T = TypeVar("T")
+
+
+@dataclass
+class PaginatedResponse(DataClassJsonMixin, Generic[T]):
+    pageInfo: PageInfo
+    data: List[T]
+
+
+class Pagination(BaseModel):
+    first: int
+    cursor: Optional[str] = None
+
+
+class ThreadFilter(BaseModel):
+    feedback: Optional[Literal[-1, 0, 1]] = None
+    username: Optional[str] = None
+    search: Optional[str] = None
 
 
 @dataclass
@@ -49,7 +97,7 @@ class AskResponse(TypedDict):
 
 
 class UIMessagePayload(TypedDict):
-    message: MessageDict
+    message: "MessageDict"
     files: Optional[List[Dict]]
 
 
@@ -72,9 +120,19 @@ class AskActionResponse(TypedDict):
     collapsed: bool
 
 
-class CompletionRequest(BaseModel):
-    prompt: Prompt
+class GenerationRequest(BaseModel):
+    chatGeneration: Optional[ChatGeneration] = None
+    completionGeneration: Optional[CompletionGeneration] = None
     userEnv: Dict[str, str]
+
+    @property
+    def generation(self):
+        if self.chatGeneration:
+            return self.chatGeneration
+        return self.completionGeneration
+
+    def is_chat(self):
+        return self.chatGeneration is not None
 
 
 class UpdateFeedbackRequest(BaseModel):
@@ -83,13 +141,13 @@ class UpdateFeedbackRequest(BaseModel):
     feedbackComment: Optional[str] = None
 
 
-class DeleteConversationRequest(BaseModel):
-    conversationId: str
+class DeleteThreadRequest(BaseModel):
+    threadId: str
 
 
-class GetConversationsRequest(BaseModel):
+class GetThreadsRequest(BaseModel):
     pagination: Pagination
-    filter: ConversationFilter
+    filter: ThreadFilter
 
 
 class Theme(str, Enum):
@@ -99,7 +157,7 @@ class Theme(str, Enum):
 
 @dataclass
 class ChatProfile(DataClassJsonMixin):
-    """Specification for a chat profile that can be chosen by the user at the conversation start."""
+    """Specification for a chat profile that can be chosen by the user at the thread start."""
 
     name: str
     markdown_description: str

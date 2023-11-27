@@ -1,13 +1,11 @@
-import asyncio
 import json
+import uuid
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.types import AskResponse
-
-from chainlit.client.cloud import AppUser, PersistedAppUser
-from chainlit.data import chainlit_client
+    from chainlit.user import AppUser, PersistedAppUser
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
@@ -31,6 +29,8 @@ class BaseSession:
         self,
         # Id of the session
         id: str,
+        # Thread id
+        thread_id: Optional[str],
         # Logged-in user informations
         user: Optional[Union["AppUser", "PersistedAppUser"]],
         # Logged-in user token
@@ -41,9 +41,8 @@ class BaseSession:
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
-        # Conversation id to resume
-        conversation_id: Optional[str] = None,
     ):
+        self.thread_id = thread_id or str(uuid.uuid4())
         self.user = user
         self.token = token
         self.root_message = root_message
@@ -52,30 +51,8 @@ class BaseSession:
         self.chat_profile = chat_profile
 
         self.id = id
-        self.conversation_id = conversation_id
 
         self.chat_settings: Dict[str, Any] = {}
-
-        self.lock = asyncio.Lock()
-
-    async def get_conversation_id(self) -> Optional[str]:
-        if not chainlit_client:
-            return None
-
-        if isinstance(self, HTTPSession):
-            tags = ["api"]
-        else:
-            tags = ["chat"]
-
-        async with self.lock:
-            if not self.conversation_id:
-                app_user_id = (
-                    self.user.id if isinstance(self.user, PersistedAppUser) else None
-                )
-                self.conversation_id = await chainlit_client.create_conversation(
-                    app_user_id=app_user_id, tags=tags
-                )
-        return self.conversation_id
 
     def to_persistable(self) -> Dict:
         from chainlit.user_session import user_sessions
@@ -94,17 +71,24 @@ class HTTPSession(BaseSession):
         self,
         # Id of the session
         id: str,
+        # Thread id
+        thread_id: Optional[str] = None,
         # Logged-in user informations
-        user: Optional[Union["AppUser", "PersistedAppUser"]],
+        user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
         # Logged-in user token
-        token: Optional[str],
-        user_env: Optional[Dict[str, str]],
+        token: Optional[str] = None,
+        user_env: Optional[Dict[str, str]] = None,
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
         # User specific environment variables. Empty if no user environment variables are required.
     ):
         super().__init__(
-            id=id, user=user, token=token, user_env=user_env, root_message=root_message
+            id=id,
+            thread_id=thread_id,
+            user=user,
+            token=token,
+            user_env=user_env,
+            root_message=root_message,
         )
 
 
@@ -132,25 +116,25 @@ class WebsocketSession(BaseSession):
         ask_user: Callable[[Any, Optional[int]], Union["AskResponse", None]],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
+        # Thread id
+        thread_id: Optional[str] = None,
         # Logged-in user informations
-        user: Optional[Union["AppUser", "PersistedAppUser"]],
+        user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
         # Logged-in user token
-        token: Optional[str],
+        token: Optional[str] = None,
         # Last message at the root of the chat
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
-        # Conversation id to resume
-        conversation_id: Optional[str] = None,
     ):
         super().__init__(
             id=id,
+            thread_id=thread_id,
             user=user,
             token=token,
             user_env=user_env,
             root_message=root_message,
             chat_profile=chat_profile,
-            conversation_id=conversation_id,
         )
 
         self.socket_id = socket_id

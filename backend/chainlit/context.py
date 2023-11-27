@@ -7,9 +7,8 @@ from chainlit.session import HTTPSession, WebsocketSession
 from lazify import LazyProxy
 
 if TYPE_CHECKING:
-    from chainlit.client.cloud import AppUser, PersistedAppUser
     from chainlit.emitter import BaseChainlitEmitter
-    from chainlit.message import Message
+    from chainlit.user import AppUser, PersistedAppUser
 
 
 class ChainlitContextException(Exception):

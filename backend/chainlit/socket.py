@@ -1,12 +1,13 @@
 import asyncio
 import json
+import uuid
 from typing import Any, Dict
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.config import config
 from chainlit.context import init_ws_context
-from chainlit.data import chainlit_client
+from chainlit.data import get_persister
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
@@ -27,39 +28,41 @@ def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
     return False
 
 
-async def persist_user_session(conversation_id: str, metadata: Dict):
-    if not chainlit_client:
+async def persist_user_session(thread_id: str, metadata: Dict):
+    if persister := get_persister():
+        # TODO: persister is not implemented yet
+        pass
+        # await chainlit_client.update_conversation_metadata(
+        #     conversation_id=conversation_id, metadata=metadata
+        # )
+
+
+async def resume_thread(session: WebsocketSession):
+    persister = get_persister()
+    if not persister or not session.user or not session.thread_id:
         return
 
-    await chainlit_client.update_conversation_metadata(
-        conversation_id=conversation_id, metadata=metadata
-    )
+    # TODO: persister is not implemented yet
+    # conversation = await chainlit_client.get_conversation(
+    #     conversation_id=session.conversation_id
+    # )
 
+    # author = (
+    #     conversation["appUser"].get("username") if conversation["appUser"] else None
+    # )
+    # user_is_author = author == session.user.username
 
-async def resume_conversation(session: WebsocketSession):
-    if not chainlit_client or not session.user or not session.conversation_id:
-        return
+    # if conversation and user_is_author:
+    #     metadata = conversation["metadata"] or {}
+    #     user_sessions[session.id] = metadata.copy()
+    #     if chat_profile := metadata.get("chat_profile"):
+    #         session.chat_profile = chat_profile
+    #     if chat_settings := metadata.get("chat_settings"):
+    #         session.chat_settings = chat_settings
 
-    conversation = await chainlit_client.get_conversation(
-        conversation_id=session.conversation_id
-    )
+    #     trace_event("conversation_resumed")
 
-    author = (
-        conversation["appUser"].get("username") if conversation["appUser"] else None
-    )
-    user_is_author = author == session.user.username
-
-    if conversation and user_is_author:
-        metadata = conversation["metadata"] or {}
-        user_sessions[session.id] = metadata.copy()
-        if chat_profile := metadata.get("chat_profile"):
-            session.chat_profile = chat_profile
-        if chat_settings := metadata.get("chat_settings"):
-            session.chat_settings = chat_settings
-
-        trace_event("conversation_resumed")
-
-        return conversation
+    #     return conversation
 
 
 def load_user_env(user_env):
@@ -128,7 +131,7 @@ async def connect(sid, environ, auth):
         user=user,
         token=token,
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
-        conversation_id=environ.get("HTTP_X_CHAINLIT_CONVERSATION_ID"),
+        thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
 
     trace_event("connection_successful")
@@ -142,12 +145,12 @@ async def connection_successful(sid):
     if context.session.restored:
         return
 
-    if context.session.conversation_id and config.code.on_chat_resume:
-        conversation = await resume_conversation(context.session)
-        if conversation:
+    if context.session.thread_id and config.code.on_chat_resume:
+        thread = await resume_thread(context.session)
+        if thread:
             context.session.has_user_message = True
-            await config.code.on_chat_resume(conversation)
-            await context.emitter.resume_conversation(conversation)
+            await config.code.on_chat_resume(thread)
+            await context.emitter.resume_thread(thread)
             return
 
     if config.code.on_chat_start:
@@ -177,8 +180,8 @@ async def disconnect(sid):
         init_ws_context(session)
         await config.code.on_chat_end()
 
-    if session and session.conversation_id:
-        await persist_user_session(session.conversation_id, session.to_persistable())
+    if session and session.thread_id:
+        await persist_user_session(session.thread_id, session.to_persistable())
 
     async def disconnect_on_timeout(sid):
         await asyncio.sleep(config.project.session_timeout)

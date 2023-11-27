@@ -21,7 +21,6 @@ import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
-from chainlit.client.base import AppUser, ConversationDict, PersistedAppUser
 from chainlit.config import config
 from chainlit.element import (
     Audio,
@@ -48,7 +47,8 @@ from chainlit.message import (
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import ChatProfile, FileSpec
+from chainlit.types import ChatProfile, ThreadDict
+from chainlit.user import AppUser, PersistedAppUser
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
@@ -158,7 +158,7 @@ def on_chat_start(func: Callable) -> Callable:
 
 
 @trace
-def on_chat_resume(func: Callable[[ConversationDict], Any]) -> Callable:
+def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     """
     Hook to react to resume websocket connection event.
 
