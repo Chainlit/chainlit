@@ -18,7 +18,7 @@ from typing import (
 import aiofiles
 import filetype
 from chainlit.context import context
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from pydantic.dataclasses import Field, dataclass
@@ -140,21 +140,15 @@ class Element:
             raise ValueError("Must provide path or content to load element")
 
     async def _upload_and_persist(self) -> Optional[ElementDict]:
-        if (
-            persister := get_persister()
-            and not self.url
-            and self.content
-            and not self.persisted
-        ):
-            pass
-            # TODO: persister is not implemented yet
-            # upload_res = await client.upload_element(
-            #     content=self.content,
-            #     mime=self.mime or "",
-            #     conversation_id=conversation_id,
-            # )
-            # self.url = upload_res["url"]
-            # self.object_key = upload_res["object_key"]
+        data_layer = get_data_layer()
+        if data_layer and not self.url and self.content and not self.persisted:
+            upload_res = await data_layer.upload_element(
+                thread_id=context.session.thread_id,
+                content=self.content,
+                mime=self.mime or "",
+            )
+            self.url = upload_res["url"]
+            self.object_key = upload_res["object_key"]
         element_dict = self.to_dict()
 
         asyncio.create_task(self._persist(element_dict))
@@ -162,15 +156,10 @@ class Element:
         return element_dict
 
     async def _persist(self, element: ElementDict):
-        if persister := get_persister():
+        if data_layer := get_data_layer():
             try:
-                if self.persisted:
-                    # TODO: persister is not implemented yet
-                    # await chainlit_client.update_element(element)
-                    pass
-                else:
-                    # TODO: persister is not implemented yet
-                    # await chainlit_client.create_element(element)
+                if not self.persisted:
+                    await data_layer.create_element(element)
                     self.persisted = True
             except Exception as e:
                 logger.error(f"Failed to persist element: {str(e)}")
@@ -180,10 +169,9 @@ class Element:
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
-        if persister := get_persister() and self.persisted:
-            # TODO: persister is not implemented yet
-            # await chainlit_client.update_element(element)
-            pass
+        data_layer = get_data_layer()
+        if data_layer and self.persisted:
+            await data_layer.delete_element(self.id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):

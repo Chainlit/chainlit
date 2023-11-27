@@ -8,7 +8,7 @@ from typing import Dict, List, Literal, Optional, TypedDict, Union, cast
 from chainlit.action import Action
 from chainlit.config import config
 from chainlit.context import context
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
@@ -73,10 +73,10 @@ class MessageBase(ABC):
 
         msg_dict = self.to_dict()
 
-        if persister := get_persister() and not self.persisted:
+        data_layer = get_data_layer()
+        if data_layer and not self.persisted:
             try:
-                # TODO: persister is not implemented yet
-                self.persisted = True
+                asyncio.create_task(data_layer.update_message(msg_dict))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -93,11 +93,10 @@ class MessageBase(ABC):
         trace_event("remove_message")
 
         msg_dict = self.to_dict()
-
-        if persister := get_persister() and not self.persisted:
+        data_layer = get_data_layer()
+        if data_layer and not self.persisted:
             try:
-                # TODO: persister is not implemented yet
-                self.persisted = True
+                asyncio.create_task(data_layer.delete_message(msg_dict["id"]))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -109,10 +108,10 @@ class MessageBase(ABC):
 
     async def _create(self):
         msg_dict = self.to_dict()
-
-        if persister := get_persister() and not self.persisted:
+        data_layer = get_data_layer()
+        if data_layer and not self.persisted:
             try:
-                # TODO: persister is not implemented yet
+                asyncio.create_task(data_layer.create_message(msg_dict))
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:

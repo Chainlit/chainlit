@@ -155,7 +155,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     def init_thread(self, message: MessageDict):
         """Signal the UI that a new thread (with a user message) exists"""
-
+        # TODO: persist update thread metadata name with message + flush queue
         return self.emit("init_thread", message)
 
     async def process_user_message(self, payload: UIMessagePayload):
@@ -168,6 +168,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         asyncio.create_task(message._create())
 
+        if not self.session.has_user_message:
+            self.session.has_user_message = True
+            await self.init_thread(await message.to_dict())
+
         if files:
             file_elements = [Element.from_dict(file) for file in files]
             message.elements = file_elements
@@ -177,10 +181,6 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     await element.send(for_id=message.id)
 
             asyncio.create_task(send_elements())
-
-        if not self.session.has_user_message:
-            self.session.has_user_message = True
-            await self.init_thread(await message.to_dict())
 
         self.session.root_message = message
 

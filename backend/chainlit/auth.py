@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 import jwt
 from chainlit.config import config
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.user import AppUser
 from fastapi import Depends, HTTPException
@@ -71,11 +71,9 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    if persister := get_persister():
+    if data_layer := get_data_layer():
         try:
-            # TODO: persister is not implemented yet
-            persisted_app_user = None
-            # persisted_app_user = await chainlit_client.get_app_user(app_user.username)
+            persisted_app_user = await data_layer.get_user(app_user.username)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
         if persisted_app_user == None:

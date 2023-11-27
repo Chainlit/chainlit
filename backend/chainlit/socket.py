@@ -7,7 +7,7 @@ from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.config import config
 from chainlit.context import init_ws_context
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
@@ -29,40 +29,31 @@ def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
 
 
 async def persist_user_session(thread_id: str, metadata: Dict):
-    if persister := get_persister():
-        # TODO: persister is not implemented yet
-        pass
-        # await chainlit_client.update_conversation_metadata(
-        #     conversation_id=conversation_id, metadata=metadata
-        # )
+    if data_layer := get_data_layer():
+        await data_layer.update_thread(thread_id == thread_id, metadata=metadata)
 
 
 async def resume_thread(session: WebsocketSession):
-    persister = get_persister()
-    if not persister or not session.user or not session.thread_id:
+    data_layer = get_data_layer()
+    if not data_layer or not session.user or not session.thread_id:
         return
 
-    # TODO: persister is not implemented yet
-    # conversation = await chainlit_client.get_conversation(
-    #     conversation_id=session.conversation_id
-    # )
+    thread = await data_layer.get_thread(thread_id=session.thread_id)
 
-    # author = (
-    #     conversation["appUser"].get("username") if conversation["appUser"] else None
-    # )
-    # user_is_author = author == session.user.username
+    author = thread["user"].get("username") if thread["user"] else None
+    user_is_author = author == session.user.username
 
-    # if conversation and user_is_author:
-    #     metadata = conversation["metadata"] or {}
-    #     user_sessions[session.id] = metadata.copy()
-    #     if chat_profile := metadata.get("chat_profile"):
-    #         session.chat_profile = chat_profile
-    #     if chat_settings := metadata.get("chat_settings"):
-    #         session.chat_settings = chat_settings
+    if thread and user_is_author:
+        metadata = thread["metadata"] or {}
+        user_sessions[session.id] = metadata.copy()
+        if chat_profile := metadata.get("chat_profile"):
+            session.chat_profile = chat_profile
+        if chat_settings := metadata.get("chat_settings"):
+            session.chat_settings = chat_settings
 
-    #     trace_event("conversation_resumed")
+        trace_event("thread_resumed")
 
-    #     return conversation
+        return thread
 
 
 def load_user_env(user_env):

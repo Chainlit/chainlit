@@ -1,10 +1,11 @@
 import uuid
+import json
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
 from chainlit.context import context
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
@@ -40,8 +41,6 @@ class Step:
     persisted: bool
 
     thread_id: str
-    input: Optional[Union[str, Dict]]
-    output: Optional[Union[str, Dict]]
     created_at: Union[str, None]
     start: Union[str, None]
     end: Union[str, None]
@@ -59,6 +58,8 @@ class Step:
         disable_human_feedback: bool = True,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
+        self._input = None
+        self._output = None
         self.thread_id = context.session.thread_id
         self.name = name
         self.type = type
@@ -72,6 +73,37 @@ class Step:
         self.streaming = False
         self.persisted = False
         self.fail_on_persist_error = False
+
+    def _process_content(self, content):
+        if isinstance(content, dict):
+            try:
+                processed_content = json.dumps(content, indent=4, ensure_ascii=False)
+                self.language = "json"
+            except TypeError:
+                processed_content = str(content)
+                self.language = "python"
+        elif isinstance(content, str):
+            processed_content = content
+        else:
+            processed_content = str(content)
+            self.language = "python"
+        return processed_content
+
+    @property
+    def input(self):
+        return self._input
+
+    @input.setter
+    def input(self, content: Union[Dict, str]):
+        self._input = self._process_content(content)
+
+    @property
+    def output(self):
+        return self._output
+
+    @output.setter
+    def output(self, content: Union[Dict, str]):
+        self._output = self._process_content(content)
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {
@@ -106,7 +138,7 @@ class Step:
 
         step_dict = self.to_dict()
 
-        if persister := get_persister() and not self.persisted:
+        if data_layer := get_data_layer() and not self.persisted:
             try:
                 # asyncio.create_task(persister(msg_dict))
                 self.persisted = True
@@ -127,7 +159,7 @@ class Step:
 
         step_dict = self.to_dict()
 
-        if persister := get_persister() and not self.persisted:
+        if data_layer := get_data_layer() and not self.persisted:
             try:
                 # asyncio.create_task(persister(msg_dict))
                 self.persisted = True
@@ -149,7 +181,7 @@ class Step:
 
         step_dict = self.to_dict()
 
-        if persister := get_persister() and not self.persisted:
+        if data_layer := get_data_layer() and not self.persisted:
             try:
                 # asyncio.create_task(persister(msg_dict))
                 self.persisted = True

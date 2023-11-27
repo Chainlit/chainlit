@@ -26,7 +26,7 @@ from chainlit.config import (
     load_module,
     reload_config,
 )
-from chainlit.data import get_persister
+from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
@@ -254,10 +254,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="credentialssignin",
         )
     access_token = create_jwt(app_user)
-    if persister := get_persister():
-        # TODO: persister not implemented yet
-        # await chainlit_client.create_app_user(app_user=app_user)
-        pass
+    if data_layer := get_data_layer():
+        await data_layer.create_user(app_user)
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -281,10 +279,8 @@ async def header_auth(request: Request):
         )
 
     access_token = create_jwt(app_user)
-    if persister := get_persister():
-        # TODO: persister not implemented yet
-        # await chainlit_client.create_app_user(app_user=app_user)
-        pass
+    if data_layer := get_data_layer():
+        await data_layer.create_user(app_user)
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -387,10 +383,8 @@ async def oauth_callback(
 
     access_token = create_jwt(app_user)
 
-    if persister := get_persister():
-        # TODO: persister not implemented yet
-        # await chainlit_client.create_app_user(app_user=app_user)
-        pass
+    if data_layer := get_data_layer():
+        await data_layer.create_user(app_user)
 
     params = urllib.parse.urlencode(
         {
@@ -475,19 +469,17 @@ async def update_feedback(
 ):
     """Update the human feedback for a particular message."""
 
-    persister = get_persister()
-    if not persister:
+    data_layer = get_data_layer()
+    if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     try:
-        # TODO: persister is not implemented yet
-        # await chainlit_client.set_human_feedback(
-        #     message_id=update.messageId,
-        #     feedback=update.feedback,
-        #     feedbackComment=update.feedbackComment,
-        # )
-        pass
-
+        # TODO: feedback id is not implemented yet
+        await data_layer.upsert_feedback(
+            message_id=update.messageId,
+            feedback=update.feedback,
+            feedbackComment=update.feedbackComment,
+        )
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=401)
 
@@ -505,16 +497,15 @@ async def get_user_threads(
     """Get the threads page by page."""
     # Only show the current user threads
 
-    persister = get_persister()
+    data_layer = get_data_layer()
 
-    if not persister:
+    if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     payload.filter.username = current_user.username
 
-    # TODO: persister is not implemented yet
-    # res = await chainlit_client.get_conversations(payload.pagination, payload.filter)
-    # return JSONResponse(content=res.to_dict())
+    res = await data_layer.list_threads(payload.pagination, payload.filter)
+    return JSONResponse(content=res.to_dict())
 
 
 @app.get("/project/thread/{thread_id}")
@@ -526,16 +517,15 @@ async def get_thread(
     ],
 ):
     """Get a specific thread."""
-    persister = get_persister()
+    data_layer = get_data_layer()
 
-    if not persister:
+    if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    # TODO: persister is not implemented yet
-    # await is_thread_author(current_user.username, conversation_id)
+    await is_thread_author(current_user.username, thread_id)
 
-    # res = await chainlit_client.get_conversation(conversation_id)
-    # return JSONResponse(content=res)
+    res = await data_layer.get_thread(thread_id)
+    return JSONResponse(content=res)
 
 
 @app.get("/project/thread/{thread_id}/element/{element_id}")
@@ -548,16 +538,15 @@ async def get_thread_element(
     ],
 ):
     """Get a specific thread element."""
-    persister = get_persister()
+    data_layer = get_data_layer()
 
-    if not persister:
+    if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    # TODO: persister is not implemented yet
-    # await is_thread_author(current_user.username, conversation_id)
+    await is_thread_author(current_user.username, thread_id)
 
-    # res = await chainlit_client.get_element(conversation_id, element_id)
-    # return JSONResponse(content=res)
+    res = await data_layer.get_element(thread_id, element_id)
+    return JSONResponse(content=res)
 
 
 @app.delete("/project/thread")
@@ -570,19 +559,17 @@ async def delete_thread(
 ):
     """Delete a thread."""
 
-    persister = get_persister()
+    data_layer = get_data_layer()
 
-    if not persister:
+    if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     thread_id = payload.threadId
 
-    # TODO: persister is not implemented yet
+    await is_thread_author(current_user.username, thread_id)
 
-    # await is_thread_author(current_user.username, conversation_id)
-
-    # await chainlit_client.delete_conversation(conversation_id)
-    # return JSONResponse(content={"success": True})
+    await data_layer.delete_thread(thread_id)
+    return JSONResponse(content={"success": True})
 
 
 @app.get("/files/{filename:path}")
