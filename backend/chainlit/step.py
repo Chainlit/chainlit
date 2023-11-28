@@ -1,8 +1,10 @@
 import uuid
+import inspect
 import json
 import asyncio
+from functools import wraps
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, TypedDict, Union
+from typing import Dict, List, Optional, TypedDict, Union, Callable
 
 from chainlit.config import config
 from chainlit.context import context
@@ -21,6 +23,7 @@ class StepDict(TypedDict):
     parentId: Optional[str]
     disableHumanFeedback: bool
     streaming: bool
+    metadata: Dict
     input: Optional[Union[str, Dict]]
     output: Optional[Union[str, Dict]]
     createdAt: Union[str, None]
@@ -28,6 +31,78 @@ class StepDict(TypedDict):
     end: Union[str, None]
     generation: Optional[Dict]
     language: Optional[str]
+
+
+def step(
+    original_function: Optional[Callable] = None,
+    *,
+    name: Optional[str] = "",
+    type: StepType = "UNDEFINED",
+    id: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    thread_id: Optional[str] = None,
+    disable_human_feedback: bool = True,
+):
+    """Step decorator for async and sync functions."""
+    if not original_function:
+        return Step(name, type, id, parent_id, disable_human_feedback)
+
+    func = original_function
+
+    if not name:
+        name = func.__name__
+
+    # Handle async decorator
+    if inspect.iscoroutinefunction(func):
+
+        @wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            async with Step(
+                type=type,
+                name=name,
+                id=id,
+                parent_id=parent_id,
+                thread_id=thread_id,
+                disable_human_feedback=disable_human_feedback,
+            ) as step:
+                try:
+                    step.input = json.dumps({"args": args, "kwargs": kwargs})
+                except:
+                    pass
+                result = await func(*args, **kwargs)
+                try:
+                    if step.output is None:
+                        step.output = json.dumps(result)
+                except:
+                    pass
+                return result
+
+        return async_wrapper
+    else:
+        # Handle sync decorator
+        @wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            with Step(
+                type=type,
+                name=name,
+                id=id,
+                parent_id=parent_id,
+                thread_id=thread_id,
+                disable_human_feedback=disable_human_feedback,
+            ) as step:
+                try:
+                    step.input = json.dumps({"args": args, "kwargs": kwargs})
+                except:
+                    pass
+                result = func(*args, **kwargs)
+                try:
+                    if step.output is None:
+                        step.output = json.dumps(result)
+                except:
+                    pass
+                return result
+
+        return sync_wrapper
 
 
 class Step:
@@ -41,6 +116,7 @@ class Step:
     streaming: bool
     persisted: bool
 
+    metadata: Dict
     thread_id: str
     created_at: Union[str, None]
     start: Union[str, None]
@@ -52,8 +128,8 @@ class Step:
 
     def __init__(
         self,
-        name: str,
-        type: str,
+        name: Optional[str] = None,
+        type: StepType = "UNDEFINED",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         disable_human_feedback: bool = True,
@@ -62,14 +138,14 @@ class Step:
         self._input = None
         self._output = None
         self.thread_id = context.session.thread_id
-        self.name = name
+        self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
         self.parent_id = parent_id
         self.disable_human_feedback = disable_human_feedback
+        self.metadata = {}
 
         self.created_at = datetime.now(timezone.utc).isoformat()
-        self.start = self.created_at
 
         self.streaming = False
         self.persisted = False
@@ -115,6 +191,7 @@ class Step:
             "parentId": self.parent_id,
             "disableHumanFeedback": self.disable_human_feedback,
             "streaming": self.streaming,
+            "metadata": self.metadata,
             "input": self.input,
             "output": self.output,
             "createdAt": self.created_at,
@@ -217,3 +294,46 @@ class Step:
         await context.emitter.send_token(
             id=self.id, token=token, is_sequence=is_sequence
         )
+
+    # Handle parameter less decorator
+    def __call__(self, func):
+        return step(
+            original_function=func,
+            type=self.type,
+            name=self.name,
+            id=self.id,
+            parent_id=self.parent_id,
+            thread_id=self.thread_id,
+            disable_human_feedback=self.disable_human_feedback,
+        )
+
+    # Handle Context Manager Protocol
+    async def __aenter__(self):
+        self.start = datetime.now(timezone.utc).isoformat()
+        if not self.parent_id:
+            if active_steps := context.session.active_steps:
+                parent_step = active_steps[-1]
+                self.parent_id = parent_step.id
+                active_steps.append(self)
+        await self.send()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self.end = datetime.now(timezone.utc).isoformat()
+        context.session.active_steps.pop()
+        await self.update()
+
+    def __enter__(self):
+        self.start = datetime.now(timezone.utc).isoformat()
+        if not self.parent_id:
+            if active_steps := context.session.active_steps:
+                parent_step = active_steps[-1]
+                self.parent_id = parent_step.id
+                active_steps.append(self)
+        asyncio.create_task(self.send())
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.end = datetime.now(timezone.utc).isoformat()
+        context.session.active_steps.pop()
+        asyncio.create_task(self.update())

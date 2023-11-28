@@ -1,11 +1,12 @@
 import json
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Union, List
 
 if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.types import AskResponse
     from chainlit.user import AppUser, PersistedAppUser
+    from chainlit.step import Step
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
@@ -24,6 +25,8 @@ def clean_metadata(metadata: Dict):
 
 class BaseSession:
     """Base object."""
+
+    active_steps: List["Step"]
 
     def __init__(
         self,
@@ -49,6 +52,7 @@ class BaseSession:
         self.has_user_message = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
+        self.active_steps = []
 
         self.id = id
 
