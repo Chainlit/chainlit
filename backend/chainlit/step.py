@@ -12,17 +12,19 @@ from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
+from chainlit.types import FeedbackDict
+
 from chainlit_client import BaseGeneration, StepType
 
 
-class StepDict(TypedDict):
+class StepDict(TypedDict, total=False):
     name: str
     type: StepType
     id: str
     threadId: str
     parentId: Optional[str]
     error: Optional[str]
-    disableHumanFeedback: bool
+    disableFeedback: bool
     streaming: bool
     metadata: Dict
     input: Optional[Union[str, Dict]]
@@ -32,6 +34,7 @@ class StepDict(TypedDict):
     end: Union[str, None]
     generation: Optional[Dict]
     language: Optional[str]
+    feedback: Optional[FeedbackDict]
 
 
 def step(
@@ -42,11 +45,11 @@ def step(
     id: Optional[str] = None,
     parent_id: Optional[str] = None,
     thread_id: Optional[str] = None,
-    disable_human_feedback: bool = True,
+    disable_feedback: bool = True,
 ):
     """Step decorator for async and sync functions."""
     if not original_function:
-        return Step(name, type, id, parent_id, disable_human_feedback)
+        return Step(name, type, id, parent_id, disable_feedback)
 
     func = original_function
 
@@ -64,7 +67,7 @@ def step(
                 id=id,
                 parent_id=parent_id,
                 thread_id=thread_id,
-                disable_human_feedback=disable_human_feedback,
+                disable_feedback=disable_feedback,
             ) as step:
                 try:
                     step.input = json.dumps({"args": args, "kwargs": kwargs})
@@ -89,7 +92,7 @@ def step(
                 id=id,
                 parent_id=parent_id,
                 thread_id=thread_id,
-                disable_human_feedback=disable_human_feedback,
+                disable_feedback=disable_feedback,
             ) as step:
                 try:
                     step.input = json.dumps({"args": args, "kwargs": kwargs})
@@ -112,7 +115,7 @@ class Step:
     type: StepType
     id: str
     parent_id: Optional[str]
-    disable_human_feedback: bool
+    disable_feedback: bool
 
     streaming: bool
     persisted: bool
@@ -134,7 +137,7 @@ class Step:
         type: StepType = "UNDEFINED",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
-        disable_human_feedback: bool = True,
+        disable_feedback: bool = True,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         self._input = None
@@ -144,7 +147,7 @@ class Step:
         self.type = type
         self.id = id or str(uuid.uuid4())
         self.parent_id = parent_id
-        self.disable_human_feedback = disable_human_feedback
+        self.disable_feedback = disable_feedback
         self.metadata = {}
 
         self.created_at = datetime.now(timezone.utc).isoformat()
@@ -191,7 +194,7 @@ class Step:
             "id": self.id,
             "threadId": self.thread_id,
             "parentId": self.parent_id,
-            "disableHumanFeedback": self.disable_human_feedback,
+            "disableFeedback": self.disable_feedback,
             "streaming": self.streaming,
             "metadata": self.metadata,
             "input": self.input,
@@ -313,7 +316,7 @@ class Step:
             id=self.id,
             parent_id=self.parent_id,
             thread_id=self.thread_id,
-            disable_human_feedback=self.disable_human_feedback,
+            disable_feedback=self.disable_feedback,
         )
 
     # Handle Context Manager Protocol

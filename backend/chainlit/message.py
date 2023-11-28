@@ -19,10 +19,11 @@ from chainlit.types import (
     AskFileSpec,
     AskResponse,
     AskSpec,
+    FeedbackDict,
 )
 
 
-class MessageDict(TypedDict):
+class MessageDict(TypedDict, total=False):
     type: Literal["message"]
     threadId: Optional[str]
     id: str
@@ -33,8 +34,8 @@ class MessageDict(TypedDict):
     authorIsUser: Optional[bool]
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
-    humanFeedback: Optional[int]
-    disableHumanFeedback: Optional[bool]
+    feedback: Optional[FeedbackDict]
+    disableFeedback: Optional[bool]
 
 
 class MessageBase(ABC):
@@ -168,7 +169,7 @@ class Message(MessageBase):
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
-        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
+        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
     """
 
     def __init__(
@@ -178,7 +179,7 @@ class Message(MessageBase):
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
-        disable_human_feedback: Optional[bool] = False,
+        disable_feedback: Optional[bool] = False,
         author_is_user: Optional[bool] = False,
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
@@ -208,7 +209,7 @@ class Message(MessageBase):
         self.author_is_user = author_is_user
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
-        self.disable_human_feedback = disable_human_feedback
+        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -220,7 +221,7 @@ class Message(MessageBase):
             content=_dict["content"],
             author=_dict.get("author", config.ui.name),
             language=_dict.get("language"),
-            disable_human_feedback=_dict.get("disableHumanFeedback"),
+            disable_feedback=_dict.get("disableFeedback"),
             author_is_user=_dict.get("authorIsUser"),
         )
 
@@ -237,7 +238,7 @@ class Message(MessageBase):
             "authorIsUser": self.author_is_user,
             "language": self.language,
             "streaming": self.streaming,
-            "disableHumanFeedback": self.disable_human_feedback,
+            "disableFeedback": self.disable_feedback,
         }
 
         return _dict
@@ -321,8 +322,7 @@ class ErrorMessage(MessageBase):
             "author": self.author,
             "isError": True,
             "authorIsUser": False,
-            "disableHumanFeedback": True,
-            "humanFeedback": None,
+            "disableFeedback": True,
             "language": None,
             "waitForAnswer": False,
         }
@@ -352,7 +352,7 @@ class AskUserMessage(AskMessageBase):
     Args:
         content (str): The content of the prompt.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
+        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -361,14 +361,14 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        disable_human_feedback: bool = False,
+        disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
         self.content = content
         self.author = author
         self.timeout = timeout
-        self.disable_human_feedback = disable_human_feedback
+        self.disable_feedback = disable_feedback
         self.raise_on_timeout = raise_on_timeout
 
         super().__post_init__()
@@ -382,10 +382,9 @@ class AskUserMessage(AskMessageBase):
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
-            "disableHumanFeedback": self.disable_human_feedback,
+            "disableFeedback": self.disable_feedback,
             "isError": False,
             "authorIsUser": False,
-            "humanFeedback": None,
             "language": None,
             "waitForAnswer": False,
         }
@@ -423,7 +422,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        disable_human_feedback (bool, optional): Hide the feedback buttons for this specific message
+        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -435,7 +434,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
-        disable_human_feedback: bool = False,
+        disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -446,7 +445,7 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
-        self.disable_human_feedback = disable_human_feedback
+        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -459,10 +458,9 @@ class AskFileMessage(AskMessageBase):
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
-            "disableHumanFeedback": self.disable_human_feedback,
+            "disableFeedback": self.disable_feedback,
             "isError": False,
             "authorIsUser": False,
-            "humanFeedback": None,
             "language": None,
             "waitForAnswer": False,
         }
@@ -508,14 +506,14 @@ class AskActionMessage(AskMessageBase):
         content: str,
         actions: List[Action],
         author=config.ui.name,
-        disable_human_feedback=False,
+        disable_feedback=False,
         timeout=90,
         raise_on_timeout=False,
     ):
         self.content = content
         self.actions = actions
         self.author = author
-        self.disable_human_feedback = disable_human_feedback
+        self.disable_feedback = disable_feedback
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
 
@@ -530,7 +528,7 @@ class AskActionMessage(AskMessageBase):
             "content": self.content,
             "author": self.author,
             "waitForAnswer": True,
-            "disableHumanFeedback": self.disable_human_feedback,
+            "disableFeedback": self.disable_feedback,
             "timeout": self.timeout,
             "raiseOnTimeout": self.raise_on_timeout,
         }

@@ -560,14 +560,14 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         elif run.run_type == "embedding":
             step_type = "EMBEDDING"
 
-        disable_human_feedback = not self._is_annotable(run)
+        disable_feedback = not self._is_annotable(run)
 
         step = Step(
             id=str(run.id),
             name=run.name,
             type=step_type,
             parent_id=parent_id,
-            disable_human_feedback=disable_human_feedback,
+            disable_feedback=disable_feedback,
         )
         step.start = run.start_time.isoformat()
         step.input = run.inputs

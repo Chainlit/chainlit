@@ -171,3 +171,19 @@ class ChatProfile(DataClassJsonMixin):
     name: str
     markdown_description: str
     icon: Optional[str] = None
+
+
+FeedbackStrategy = Literal["BINARY"]
+
+
+class FeedbackDict(TypedDict):
+    value: str
+    strategy: FeedbackStrategy
+    comment: Optional[str]
+
+
+@dataclass
+class Feedback:
+    value: str
+    strategy: FeedbackStrategy = "BINARY"
+    comment: Optional[str] = None

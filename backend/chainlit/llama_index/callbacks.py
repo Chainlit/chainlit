@@ -79,7 +79,7 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
             type=step_type,
             parent_id=self._get_parent_id(parent_id),
             id=event_id,
-            disable_human_feedback=False,
+            disable_feedback=False,
         )
         self.steps[event_id] = step
         step.start = datetime.now(timezone.utc).isoformat()
