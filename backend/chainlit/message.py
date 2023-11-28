@@ -269,10 +269,16 @@ class Message(MessageBase):
         trace_event("send_message")
         await super().update()
 
-        actions_to_update = [action for action in self.actions if action.forId is None]
+        # Update tasks for all actions and elements
+        tasks = [
+            action.send(for_id=self.id)
+            for action in self.actions
+            if action.forId is None
+        ]
+        tasks.extend(element.send(for_id=self.id) for element in self.elements)
 
-        for action in actions_to_update:
-            await action.send(for_id=self.id)
+        # Run all tasks concurrently
+        await asyncio.gather(*tasks)
 
         return True
 

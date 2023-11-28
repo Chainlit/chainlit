@@ -225,6 +225,9 @@ class Step:
                     raise e
                 logger.error(f"Failed to persist step update: {str(e)}")
 
+        tasks = [el.send(for_id=self.id) for el in self.elements]
+        await asyncio.gather(*tasks)
+
         await context.emitter.update_message(step_dict)
 
         return True
@@ -269,6 +272,9 @@ class Step:
                 if self.fail_on_persist_error:
                     raise e
                 logger.error(f"Failed to persist step creation: {str(e)}")
+
+        tasks = [el.send(for_id=self.id) for el in self.elements]
+        await asyncio.gather(*tasks)
 
         await context.emitter.send_message(step_dict)
 
