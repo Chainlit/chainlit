@@ -36,6 +36,16 @@ def cli():
 def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+
+    ws_per_message_deflate_env = os.environ.get(
+        "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
+    )
+    ws_per_message_deflate = ws_per_message_deflate_env.lower() in [
+        "true",
+        "1",
+        "yes",
+    ]  # Convert to boolean
+
     config.run.host = host
     config.run.port = port
 
@@ -64,6 +74,7 @@ def run_chainlit(target: str):
             port=port,
             log_level=log_level,
             ws_max_size=max_message_size,
+            ws_per_message_deflate=ws_per_message_deflate,
         )
         server = uvicorn.Server(config)
         await server.serve()

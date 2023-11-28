@@ -8,6 +8,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [0.7.700] - 2023-11-28
+
+### Added
+
+- Support for custom HTML in message content is now an opt in feature in the config
+- Uvicorn `ws_per_message_deflate` config param is now configurable like `UVICORN_WS_PER_MESSAGE_DEFLATE=false`
+
+### Changed
+
+- Latex support is no longer enabled by default and is now a feature in the config
+
+### Fixed
+
+- Fixed LCEL memory message order in the prompt playground
+- Fixed a key error when using the file watcher (-w)
+- Fixed several user experience issues with `on_chat_resume`
+- `on_chat_end` is now always called when a chat ends
+
 ## [0.7.604] - 2023-11-15
 
 ### Fixed
