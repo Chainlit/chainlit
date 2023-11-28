@@ -146,12 +146,14 @@ async def connection_successful(sid):
         conversation = await resume_conversation(context.session)
         if conversation:
             context.session.has_user_message = True
+            await context.emitter.clear_ask()
             await config.code.on_chat_resume(conversation)
             await context.emitter.resume_conversation(conversation)
             return
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
+        await context.emitter.clear_ask()
         await config.code.on_chat_start()
 
 

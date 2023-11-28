@@ -25,6 +25,7 @@ Nothing is unreleased!
 - Fixed a key error when using the file watcher (-w)
 - Fixed several user experience issues with `on_chat_resume`
 - `on_chat_end` is now always called when a chat ends
+- Switching chat profiles correctly clears previous AskMessages
 
 ## [0.7.604] - 2023-11-15
 
