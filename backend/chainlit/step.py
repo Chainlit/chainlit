@@ -21,6 +21,7 @@ class StepDict(TypedDict):
     id: str
     threadId: str
     parentId: Optional[str]
+    error: Optional[str]
     disableHumanFeedback: bool
     streaming: bool
     metadata: Dict
@@ -116,6 +117,7 @@ class Step:
     streaming: bool
     persisted: bool
 
+    error: Optional[str]
     metadata: Dict
     thread_id: str
     created_at: Union[str, None]
@@ -193,6 +195,7 @@ class Step:
             "streaming": self.streaming,
             "metadata": self.metadata,
             "input": self.input,
+            "error": self.error,
             "output": self.output,
             "createdAt": self.created_at,
             "start": self.start,
