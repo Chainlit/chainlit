@@ -18,6 +18,7 @@ from chainlit.types import (
     PaginatedResponse,
     ThreadFilter,
     ThreadDict,
+    Feedback,
 )
 
 from chainlit.session import WebsocketSession
@@ -73,10 +74,7 @@ class BaseDataLayer:
     @queue_until_user_message()
     async def upsert_feedback(
         self,
-        message_id: str,
-        feedback: int,
-        feedbackComment: Optional[str],
-        feedback_id: Optional[str],
+        feedback: Feedback,
     ):
         pass
 

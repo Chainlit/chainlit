@@ -474,12 +474,7 @@ async def update_feedback(
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     try:
-        # TODO: feedback id is not implemented yet
-        await data_layer.upsert_feedback(
-            message_id=update.messageId,
-            feedback=update.feedback,
-            feedbackComment=update.feedbackComment,
-        )
+        await data_layer.upsert_feedback(feedback=update.feedback)
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=401)
 

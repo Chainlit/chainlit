@@ -144,12 +144,6 @@ class GenerationRequest(BaseModel):
         return self.chatGeneration is not None
 
 
-class UpdateFeedbackRequest(BaseModel):
-    messageId: str
-    feedback: Literal[-1, 0, 1]
-    feedbackComment: Optional[str] = None
-
-
 class DeleteThreadRequest(BaseModel):
     threadId: str
 
@@ -184,6 +178,12 @@ class FeedbackDict(TypedDict):
 
 @dataclass
 class Feedback:
-    value: str
+    forId: str
+    value: Literal[-1, 0, 1]
     strategy: FeedbackStrategy = "BINARY"
+    id: Optional[str] = None
     comment: Optional[str] = None
+
+
+class UpdateFeedbackRequest(BaseModel):
+    feedback: Feedback
