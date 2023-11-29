@@ -14,7 +14,7 @@ import {
 } from 'src/playground/helpers/format';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import type { IPrompt } from 'client-types/';
+import type { IGeneration } from 'client-types/';
 
 import Variable from './variable';
 
@@ -45,7 +45,7 @@ const findVariable = (
 };
 
 interface Props {
-  prompt: IPrompt;
+  generation: IGeneration;
   template: string;
   onChange(nextState: EditorState): void;
   showTitle?: boolean;
@@ -53,7 +53,7 @@ interface Props {
 }
 
 export default function TemplateEditor({
-  prompt,
+  generation,
   template,
   onChange,
   showTitle = true,
@@ -68,10 +68,10 @@ export default function TemplateEditor({
       strategy: (contentBlock, callback) => {
         findVariable(
           buildTemplatePlaceholdersRegexp(
-            prompt.inputs || {},
-            prompt.template_format
+            generation.inputs || {},
+            generation.templateFormat
           ),
-          prompt.template_format,
+          generation.templateFormat,
           contentBlock,
           callback
         );

@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import type { IMessage, IMessageElement } from 'client-types/';
+import type { IMessageElement, StepOrMessage } from 'client-types/';
 
 import { MessageButtons } from './MessageButtons';
 
@@ -18,7 +18,7 @@ const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of character
 
 export interface Props {
   elements: IMessageElement[];
-  message: IMessage;
+  message: StepOrMessage;
   preserveSize?: boolean;
   allowHtml?: boolean;
   latex?: boolean;
@@ -26,10 +26,17 @@ export interface Props {
 
 const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
+    const content =
+      'content' in message
+        ? message.content
+        : 'output' in message
+        ? message.output
+        : '';
+    const isUser = 'role' in message && message.role === 'user';
     const { preparedContent, inlinedElements, refElements } = prepareContent({
       elements,
       id: message.id,
-      content: message.content,
+      content: content,
       language: message.language
     });
 
@@ -41,7 +48,7 @@ const MessageContent = memo(
           fontSize: '1rem',
           lineHeight: '1.5rem',
           fontFamily: 'Inter',
-          fontWeight: message.authorIsUser ? 500 : 300
+          fontWeight: isUser ? 500 : 300
         }}
         component="div"
       >
@@ -56,7 +63,7 @@ const MessageContent = memo(
       lineCount > COLLAPSE_MIN_LINES ||
       preparedContent.length > COLLAPSE_MIN_LENGTH;
 
-    const content = collapse ? (
+    const messageContent = collapse ? (
       <Collapse
         defaultExpandAll={preserveSize}
         onDownload={() => exportToFile(preparedContent, `${message.id}.txt`)}
@@ -70,7 +77,7 @@ const MessageContent = memo(
     return (
       <Stack width="100%" direction="row">
         <Box width="100%" sx={{ minWidth: '100px' }}>
-          {preparedContent ? content : null}
+          {preparedContent ? messageContent : null}
           <InlinedElements elements={inlinedElements} />
         </Box>
         <MessageButtons message={message} />

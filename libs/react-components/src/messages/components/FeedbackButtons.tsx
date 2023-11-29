@@ -15,12 +15,12 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import type { IMessage } from 'client-types/';
+import type { StepOrMessage } from 'client-types/';
 
 const ICON_SIZE = '16px';
 
 interface Props {
-  message: IMessage;
+  message: StepOrMessage;
 }
 
 const FeedbackButtons = ({ message }: Props) => {
@@ -28,8 +28,8 @@ const FeedbackButtons = ({ message }: Props) => {
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
 
-  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
-  const [comment, setComment] = useState(message.humanFeedbackComment);
+  const [feedback, setFeedback] = useState(message.feedback?.value || 0);
+  const [comment, setComment] = useState(message.feedback?.comment);
 
   const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
@@ -38,12 +38,15 @@ const FeedbackButtons = ({ message }: Props) => {
     onFeedbackUpdated &&
       onFeedbackUpdated(
         message,
-        feedback,
         () => {
           setFeedback(feedback);
           setComment(comment);
         },
-        comment
+        {
+          ...(message.feedback || { strategy: 'BINARY' }),
+          value: feedback,
+          comment
+        }
       );
   };
 

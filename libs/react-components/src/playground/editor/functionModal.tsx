@@ -21,19 +21,19 @@ const FunctionModal = (): JSX.Element | null => {
 
   const theme = useTheme();
   const hasIndex = functionIndex !== undefined;
-  const functions = playground?.prompt?.functions || [];
+  const functions = playground?.generation?.functions || [];
   const fn = hasIndex ? functions[functionIndex] : undefined;
 
   const updateFunction = (name: string, description: string) => {
     if (functionIndex !== undefined && fn) {
       const nextFn = { ...fn, name, description };
       setPlayground((old) => {
-        if (!old?.prompt) return old;
+        if (!old?.generation) return old;
 
         return {
           ...old,
-          prompt: {
-            ...old.prompt,
+          generation: {
+            ...old.generation,
             functions: [
               ...functions.slice(0, functionIndex),
               nextFn,

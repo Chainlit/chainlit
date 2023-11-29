@@ -25,7 +25,7 @@ interface TElement<T> {
   id: string;
   type: T;
   threadId?: string;
-  forId?: string;
+  forId: string;
   url?: string;
 }
 

@@ -22,16 +22,17 @@ from chainlit.types import (
     FeedbackDict,
 )
 
+MessageRole = Literal["user", "assistant", "system"]
+
 
 class MessageDict(TypedDict, total=False):
-    type: Literal["message"]
     threadId: Optional[str]
     id: str
     createdAt: Optional[str]
     content: str
     author: str
     language: Optional[str]
-    authorIsUser: Optional[bool]
+    role: MessageRole
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     feedback: Optional[FeedbackDict]
@@ -180,7 +181,7 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
         disable_feedback: Optional[bool] = False,
-        author_is_user: Optional[bool] = False,
+        role: Optional[MessageRole] = "assistant",
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -206,7 +207,7 @@ class Message(MessageBase):
             self.created_at = created_at
 
         self.author = author
-        self.author_is_user = author_is_user
+        self.role = role
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
         self.disable_feedback = disable_feedback
@@ -222,20 +223,19 @@ class Message(MessageBase):
             author=_dict.get("author", config.ui.name),
             language=_dict.get("language"),
             disable_feedback=_dict.get("disableFeedback"),
-            author_is_user=_dict.get("authorIsUser"),
+            role=_dict.get("role"),
         )
 
         return message
 
     def to_dict(self):
         _dict = {
-            "type": "message",
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
-            "authorIsUser": self.author_is_user,
+            "role": self.role,
             "language": self.language,
             "streaming": self.streaming,
             "disableFeedback": self.disable_feedback,
@@ -314,14 +314,13 @@ class ErrorMessage(MessageBase):
 
     def to_dict(self) -> MessageDict:
         return {
-            "type": "message",
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
             "content": self.content,
             "author": self.author,
             "isError": True,
-            "authorIsUser": False,
+            "role": "system",
             "disableFeedback": True,
             "language": None,
             "waitForAnswer": False,
@@ -361,6 +360,7 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
+        role: MessageRole = "assistant",
         disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
@@ -368,6 +368,7 @@ class AskUserMessage(AskMessageBase):
         self.content = content
         self.author = author
         self.timeout = timeout
+        self.role = role
         self.disable_feedback = disable_feedback
         self.raise_on_timeout = raise_on_timeout
 
@@ -375,7 +376,6 @@ class AskUserMessage(AskMessageBase):
 
     def to_dict(self) -> MessageDict:
         return {
-            "type": "message",
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
@@ -384,7 +384,7 @@ class AskUserMessage(AskMessageBase):
             "waitForAnswer": True,
             "disableFeedback": self.disable_feedback,
             "isError": False,
-            "authorIsUser": False,
+            "role": self.role,
             "language": None,
             "waitForAnswer": False,
         }
@@ -434,6 +434,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
+        role: MessageRole = "assistant",
         disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,
@@ -442,6 +443,7 @@ class AskFileMessage(AskMessageBase):
         self.max_size_mb = max_size_mb
         self.max_files = max_files
         self.accept = accept
+        self.role = role
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
@@ -451,7 +453,6 @@ class AskFileMessage(AskMessageBase):
 
     def to_dict(self) -> MessageDict:
         return {
-            "type": "message",
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
@@ -460,7 +461,7 @@ class AskFileMessage(AskMessageBase):
             "waitForAnswer": True,
             "disableFeedback": self.disable_feedback,
             "isError": False,
-            "authorIsUser": False,
+            "role": self.role,
             "language": None,
             "waitForAnswer": False,
         }
@@ -521,7 +522,6 @@ class AskActionMessage(AskMessageBase):
 
     def to_dict(self):
         return {
-            "type": "message",
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,

@@ -53,8 +53,8 @@ const SettingsForm = ({
     const debounceTimeout = setTimeout(() => {
       setPlayground((old) => ({
         ...old,
-        prompt: {
-          ...old!.prompt!,
+        generation: {
+          ...old!.generation!,
           settings: formik.values
         }
       }));
@@ -136,9 +136,9 @@ const ModelSettings = () => {
   }
 
   const buildProviderTooltip = () => {
-    if (provider.is_chat && !playground.prompt?.messages) {
+    if (provider.is_chat && playground.generation?.type !== 'CHAT') {
       return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
-    } else if (!provider.is_chat && playground.prompt?.messages) {
+    } else if (!provider.is_chat && playground.generation?.type === 'CHAT') {
       return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
     } else {
       return undefined;
@@ -147,16 +147,16 @@ const ModelSettings = () => {
 
   const providerWarning = !providerFound ? (
     <Alert severity="warning">
-      {playground.prompt?.provider
-        ? `${playground?.prompt?.provider} provider is not found, using
+      {playground.generation?.provider
+        ? `${playground?.generation?.provider} provider is not found, using
       ${provider.name} instead.`
         : `Provider not specified, using ${provider.name} instead.`}
     </Alert>
   ) : null;
 
   const settings: ILLMSettings = {};
-  const currentSettings = playground?.prompt?.settings || {};
-  const origSettings = playground?.originalPrompt?.settings || {};
+  const currentSettings = playground?.generation?.settings || {};
+  const origSettings = playground?.originalGeneration?.settings || {};
 
   const isSettingCompatible = (
     value: string | number | boolean | string[],

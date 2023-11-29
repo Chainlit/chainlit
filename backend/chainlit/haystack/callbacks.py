@@ -109,6 +109,7 @@ class HaystackAgentCallbackHandler:
     def on_tool_error(self, exception: Exception, tool: Tool, **kwargs: Any) -> None:
         # Tool error, send error message
         error_step = self.stack.pop()
-        error_step.error = str(exception)
+        error_step.is_error = True
+        error_step.output = str(exception)
         error_step.end = datetime.now(timezone.utc).isoformat()
         run_sync(error_step.update())

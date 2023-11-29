@@ -42,10 +42,10 @@ function _PromptPlayground() {
   const showToggleDrawerButton = isSmallScreen && !!playground?.providers;
 
   const restore = () => {
-    if (playground?.prompt) {
+    if (playground?.generation) {
       setPlayground((old?: IPlayground) => ({
         ...old,
-        prompt: old?.originalPrompt
+        generation: old?.originalGeneration
       }));
       setRestoredTime((old) => old + 1);
     }
@@ -54,32 +54,32 @@ function _PromptPlayground() {
   const handleClose = () => {
     setPlayground((old) => ({
       ...old,
-      prompt: undefined,
-      originalPrompt: undefined
+      generation: undefined,
+      originalGeneration: undefined
     }));
   };
 
-  const prompt = playground?.prompt;
+  const generation = playground?.generation;
 
-  const isChat = !!playground?.originalPrompt?.messages?.length;
+  const isChat = generation?.type === 'CHAT';
 
-  const hasTemplate = prompt?.messages
-    ? !!prompt.messages.find((m) => typeof m.template === 'string')
-    : typeof prompt?.template === 'string';
+  const hasTemplate = isChat
+    ? !!generation?.messages?.find((m) => typeof m.template === 'string')
+    : typeof generation?.template === 'string';
 
   useEffect(() => {
-    if (prompt && !hasTemplate && promptMode === 'Template') {
+    if (generation && !hasTemplate && promptMode === 'Template') {
       setPromptMode('Formatted');
     }
-  }, [prompt, promptMode, setPromptMode]);
+  }, [generation, promptMode, setPromptMode]);
 
-  if (!prompt) {
+  if (!generation) {
     return null;
   }
 
   return (
     <Dialog
-      open={!!prompt}
+      open={!!generation}
       fullScreen
       PaperProps={{
         style: {
@@ -119,13 +119,13 @@ function _PromptPlayground() {
                   ref={chatPromptScrollRef}
                   restoredTime={restoredTime}
                   hasTemplate={hasTemplate}
-                  prompt={prompt}
+                  generation={generation}
                 />
               ) : (
                 <BasicPromptPlayground
                   restoredTime={restoredTime}
                   hasTemplate={hasTemplate}
-                  prompt={prompt}
+                  generation={generation}
                 />
               )}
             </Stack>

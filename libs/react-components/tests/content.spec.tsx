@@ -9,7 +9,7 @@ it('renders the message content', () => {
   const { getByText } = render(
     <MessageContent
       message={{
-        authorIsUser: false,
+        role: 'system',
         content: 'Hello World',
         id: 'test',
         author: 'User',
@@ -25,7 +25,7 @@ it('highlights multiple sources correctly (no substring matching)', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        authorIsUser: false,
+        role: 'system',
         content: `Hello world source_121, source_1, source_12`,
         id: 'test2',
         author: 'Test',
@@ -36,18 +36,21 @@ it('highlights multiple sources correctly (no substring matching)', () => {
           name: 'source_1',
           type: 'text',
           display: 'side',
-          content: 'source_1'
+          content: 'source_1',
+          forId: 'test2'
         } as ITextElement,
         {
           name: 'source_12',
           display: 'side',
           type: 'text',
+          forId: 'test2',
           content: 'hi'
         } as ITextElement,
         {
           name: 'source_121',
           display: 'side',
           type: 'text',
+          forId: 'test2',
           content: 'hi'
         } as ITextElement
       ]}
@@ -62,7 +65,7 @@ it('highlights sources containing regex characters correctly', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        authorIsUser: false,
+        role: 'system',
         content: `Hello world: Document[1], source(12), page{12}`,
         id: 'test2',
         author: 'Test',
@@ -73,19 +76,22 @@ it('highlights sources containing regex characters correctly', () => {
           name: 'Document[1]',
           display: 'side',
           type: 'text',
-          content: 'hi'
+          content: 'hi',
+          forId: 'test2'
         } as ITextElement,
         {
           name: 'source(12)',
           display: 'side',
           type: 'text',
-          content: 'hi'
+          content: 'hi',
+          forId: 'test2'
         } as ITextElement,
         {
           name: 'page{12}',
           display: 'side',
           type: 'text',
-          content: 'hi'
+          content: 'hi',
+          forId: 'test2'
         } as ITextElement
       ]}
     />
@@ -99,7 +105,7 @@ it('preserves the box size when collapsing', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        authorIsUser: false,
+        role: 'system',
         content: 'hello'.repeat(650),
         id: 'test2',
         author: 'Test',

@@ -21,7 +21,7 @@ import { useIsFirstRender } from 'usehooks-ts';
 
 import { useColors } from 'hooks/useColors';
 
-import type { IPrompt } from 'client-types/';
+import type { IGeneration } from 'client-types/';
 
 import 'draft-js/dist/Draft.css';
 
@@ -34,7 +34,7 @@ export interface IVariable {
 interface Props {
   template?: string;
   formatted?: string;
-  prompt: IPrompt;
+  generation: IGeneration;
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
   showTitle?: boolean;
@@ -268,7 +268,7 @@ function getEntityAtSelection(editorState: EditorState) {
 export default function FormattedEditor({
   template,
   formatted,
-  prompt,
+  generation,
   readOnly,
   onChange,
   showTitle = false,
@@ -284,9 +284,9 @@ export default function FormattedEditor({
   const customStyleMap = useCustomStyleMap();
   const isFirstRender = useIsFirstRender();
 
-  if (isFirstRender || !isEqual(prompt.inputs, prevInputs)) {
+  if (isFirstRender || !isEqual(generation.inputs, prevInputs)) {
     if (typeof template === 'string') {
-      const inputs = prompt.inputs || {};
+      const inputs = generation.inputs || {};
 
       const variableNames = Object.keys(inputs);
       const variables: IVariable[] = [];
@@ -313,7 +313,7 @@ export default function FormattedEditor({
       const nextState = formatTemplate(
         state,
         sortedVariables,
-        prompt.template_format
+        generation.templateFormat
       );
 
       setState(nextState);
@@ -323,7 +323,7 @@ export default function FormattedEditor({
       );
       setState(nextState);
     }
-    setPrevInputs(prompt.inputs);
+    setPrevInputs(generation.inputs);
   }
 
   const handleOnEditorChange = (nextState: EditorState) => {

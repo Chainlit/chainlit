@@ -1,10 +1,10 @@
-import { StepOrMessage } from '.';
+import { MessageRole, StepOrMessage } from '.';
 import { IFileElement } from './element';
 import { IFeedback } from './feedback';
 
 export interface IMessage {
   author: string;
-  authorIsUser?: boolean;
+  role: MessageRole;
   content?: string;
   createdAt: number | string;
   disableFeedback?: boolean;

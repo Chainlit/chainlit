@@ -30,13 +30,13 @@ export interface IBaseGeneration {
   completion?: string;
   settings?: ILLMSettings;
   functions?: IFunction[];
+  templateFormat: string;
 }
 
 export interface ICompletionGeneration extends IBaseGeneration {
   type: 'COMPLETION';
   template?: string;
   formatted?: string;
-  template_format: string;
 }
 
 export interface IChatGeneration extends IBaseGeneration {

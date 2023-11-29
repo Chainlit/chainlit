@@ -638,7 +638,8 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         context_var.set(self.context)
 
         if current_step := self.steps.get(str(run_id), None):
-            current_step.error = str(error)
+            current_step.is_error = True
+            current_step.output = str(error)
             current_step.end = datetime.now(timezone.utc).isoformat()
             self._run_sync(current_step.update())
 

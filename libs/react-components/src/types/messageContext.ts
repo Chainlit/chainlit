@@ -1,8 +1,10 @@
 import type {
   IAsk,
   IAvatarElement,
-  IMessage,
-  IMessageElement
+  IFeedback,
+  IMessageElement,
+  IStep,
+  StepOrMessage
 } from 'client-types/';
 
 interface IMessageContext {
@@ -17,13 +19,12 @@ interface IMessageContext {
   uiName: string;
   allowHtml?: boolean;
   latex?: boolean;
-  onPlaygroundButtonClick?: (message: IMessage) => void;
+  onPlaygroundButtonClick?: (step: IStep) => void;
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
-    message: IMessage,
-    feedback: number,
+    message: StepOrMessage,
     onSuccess: () => void,
-    feedbackComment?: string
+    feedback: IFeedback
   ) => void;
   onError: (error: string) => void;
 }

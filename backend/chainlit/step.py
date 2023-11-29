@@ -22,7 +22,7 @@ class StepDict(TypedDict, total=False):
     id: str
     threadId: str
     parentId: Optional[str]
-    error: Optional[str]
+    isError: Optional[bool]
     disableFeedback: bool
     streaming: bool
     metadata: Dict
@@ -119,7 +119,7 @@ class Step:
     streaming: bool
     persisted: bool
 
-    error: Optional[str]
+    is_error: Optional[bool]
     metadata: Dict
     thread_id: str
     created_at: Union[str, None]
@@ -148,6 +148,7 @@ class Step:
         self.parent_id = parent_id
         self.disable_feedback = disable_feedback
         self.metadata = {}
+        self.is_error = False
 
         self.created_at = datetime.now(timezone.utc).isoformat()
 
@@ -197,7 +198,7 @@ class Step:
             "streaming": self.streaming,
             "metadata": self.metadata,
             "input": self.input,
-            "error": self.error,
+            "isError": self.is_error,
             "output": self.output,
             "createdAt": self.created_at,
             "start": self.start,

@@ -11,13 +11,18 @@ describe('Message', () => {
     message: {
       id: '1',
       content: 'Hello',
-      authorIsUser: true,
-      subMessages: [
+      role: 'user',
+      steps: [
         {
           id: '2',
-          content: 'bar',
-          author: 'bar',
-          createdAt: '12/12/2002'
+          threadId: '1',
+          input: '',
+          type: 'LLM',
+          output: 'bar',
+          name: 'bar',
+          createdAt: '12/12/2002',
+          start: '12/12/2002',
+          end: '12/12/2002'
         }
       ],
       waitForAnswer: false,

@@ -4,6 +4,7 @@ import { IStep } from './step';
 export * from './action';
 export * from './element';
 export * from './file';
+export * from './feedback';
 export * from './message';
 export * from './step';
 export * from './user';

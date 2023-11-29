@@ -11,12 +11,12 @@ import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
 import { MessageContent } from './components/MessageContent';
 
-import type { IAction, IMessage, IMessageElement } from 'client-types/';
+import type { IAction, IMessageElement, StepOrMessage } from 'client-types/';
 
 import { Messages } from './Messages';
 
 interface Props {
-  message: IMessage;
+  message: StepOrMessage;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -57,18 +57,23 @@ const Message = memo(
       return null;
     }
 
+    const isUser = 'role' in message && message.role === 'user';
+    const isAsk = 'waitForAnswer' in message && message.waitForAnswer;
+    const isMessage = 'content' in message;
+    const className = isMessage ? 'message' : 'step';
+
     return (
       <Box
         sx={{
           color: 'text.primary',
           backgroundColor: (theme) =>
-            message.authorIsUser
+            isUser
               ? 'transparent'
               : theme.palette.mode === 'dark'
               ? theme.palette.grey[800]
               : theme.palette.grey[100]
         }}
-        className="message"
+        className={className}
       >
         <Box
           sx={{
@@ -82,7 +87,7 @@ const Message = memo(
           }}
         >
           <Stack
-            id={`message-${message.id}`}
+            id={`${className}-${message.id}`}
             direction="row"
             ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
             sx={{
@@ -117,16 +122,18 @@ const Message = memo(
                 onClick={() => setShowDetails(!showDetails)}
                 loading={isRunning && isLast}
               />
-              {!isRunning && isLast && message.waitForAnswer && (
+              {!isRunning && isLast && isAsk && (
                 <AskUploadButton onError={onError} />
               )}
-              <MessageActions message={message} actions={actions} />
+              {isMessage ? (
+                <MessageActions message={message} actions={actions} />
+              ) : null}
             </Stack>
           </Stack>
         </Box>
-        {message.subMessages && showDetails && (
+        {message.steps && showDetails && (
           <Messages
-            messages={message.subMessages}
+            messages={message.steps}
             actions={actions}
             elements={elements}
             indent={indent + 1}

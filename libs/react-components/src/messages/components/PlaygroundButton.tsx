@@ -5,13 +5,13 @@ import BugReport from '@mui/icons-material/BugReport';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
-import type { IMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 interface Props {
-  message: IMessage;
+  step: IStep;
 }
 
-const PlaygroundButton = ({ message }: Props) => {
+const PlaygroundButton = ({ step }: Props) => {
   const { onPlaygroundButtonClick } = useContext(MessageContext);
 
   return (
@@ -20,7 +20,7 @@ const PlaygroundButton = ({ message }: Props) => {
         size="small"
         className="playground-button"
         onClick={() => {
-          onPlaygroundButtonClick && onPlaygroundButtonClick(message);
+          onPlaygroundButtonClick && onPlaygroundButtonClick(step);
         }}
       >
         <BugReport sx={{ width: '16px', height: '16px' }} />

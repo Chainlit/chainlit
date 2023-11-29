@@ -1,4 +1,4 @@
-import type { IPrompt } from 'client-types/';
+import type { IGeneration } from 'client-types/';
 import { IPlayground, PromptMode } from 'src/types/playground';
 
 interface IPlaygroundContext {
@@ -22,7 +22,7 @@ interface IPlaygroundContext {
   playground?: IPlayground;
   onNotification: (type: 'success' | 'error', content: string) => void;
   createCompletion?: (
-    prompt: IPrompt,
+    generation: IGeneration,
     controller: AbortController,
     cb: (done: boolean, token: string) => void
   ) => Promise<unknown>;
