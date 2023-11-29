@@ -32,10 +32,10 @@ class ThreadDict(TypedDict):
     tags: Optional[List[str]]
     metadata: Optional[Dict]
     createdAt: Optional[str]
-    user: Optional[UserDict]
-    messages: List[MessageDict]
-    steps: List[StepDict]
-    elements: Optional[List[ElementDict]]
+    user: Optional["UserDict"]
+    messages: List["MessageDict"]
+    steps: List["StepDict"]
+    elements: Optional[List["ElementDict"]]
 
 
 @dataclass
