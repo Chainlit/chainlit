@@ -41,7 +41,7 @@ async def resume_thread(session: WebsocketSession):
     thread = await data_layer.get_thread(thread_id=session.thread_id)
 
     author = thread["user"].get("username") if thread["user"] else None
-    user_is_author = author == session.user.username
+    user_is_author = author == session.user.identifier
 
     if thread and user_is_author:
         metadata = thread["metadata"] or {}

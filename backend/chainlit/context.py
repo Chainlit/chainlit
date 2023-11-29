@@ -8,7 +8,7 @@ from lazify import LazyProxy
 
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
-    from chainlit.user import AppUser, PersistedAppUser
+    from chainlit.user import PersistedUser, User
 
 
 class ChainlitContextException(Exception):
@@ -46,7 +46,7 @@ def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitCon
 
 
 def init_http_context(
-    user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
+    user: Optional[Union["User", "PersistedUser"]] = None,
     auth_token: Optional[str] = None,
     user_env: Optional[Dict[str, str]] = None,
 ) -> ChainlitContext:

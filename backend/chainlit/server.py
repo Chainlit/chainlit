@@ -39,7 +39,7 @@ from chainlit.types import (
     Theme,
     UpdateFeedbackRequest,
 )
-from chainlit.user import AppUser, PersistedAppUser
+from chainlit.user import PersistedUser, User
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -403,9 +403,7 @@ async def oauth_callback(
 @app.post("/generation")
 async def generation(
     request: GenerationRequest,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Handle a completion request from the prompt playground."""
 
@@ -427,7 +425,7 @@ async def generation(
 
 @app.get("/project/llm-providers")
 async def get_providers(
-    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)]
 ):
     """List the providers."""
     trace_event("pp_get_llm_providers")
@@ -438,7 +436,7 @@ async def get_providers(
 
 @app.get("/project/settings")
 async def project_settings(
-    current_user: Annotated[Union[AppUser, PersistedAppUser], Depends(get_current_user)]
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)]
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
     profiles = []
@@ -463,9 +461,7 @@ async def project_settings(
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Update the human feedback for a particular message."""
 
@@ -485,9 +481,7 @@ async def update_feedback(
 async def get_user_threads(
     request: Request,
     payload: GetThreadsRequest,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get the threads page by page."""
     # Only show the current user threads
@@ -497,7 +491,7 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    payload.filter.username = current_user.username
+    payload.filter.user_identifier = current_user.identifier
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())
@@ -507,9 +501,7 @@ async def get_user_threads(
 async def get_thread(
     request: Request,
     thread_id: str,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get a specific thread."""
     data_layer = get_data_layer()
@@ -517,7 +509,7 @@ async def get_thread(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    await is_thread_author(current_user.username, thread_id)
+    await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_thread(thread_id)
     return JSONResponse(content=res)
@@ -528,9 +520,7 @@ async def get_thread_element(
     request: Request,
     thread_id: str,
     element_id: str,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get a specific thread element."""
     data_layer = get_data_layer()
@@ -538,7 +528,7 @@ async def get_thread_element(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    await is_thread_author(current_user.username, thread_id)
+    await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_element(thread_id, element_id)
     return JSONResponse(content=res)
@@ -548,9 +538,7 @@ async def get_thread_element(
 async def delete_thread(
     request: Request,
     payload: DeleteThreadRequest,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Delete a thread."""
 
@@ -561,7 +549,7 @@ async def delete_thread(
 
     thread_id = payload.threadId
 
-    await is_thread_author(current_user.username, thread_id)
+    await is_thread_author(current_user.identifier, thread_id)
 
     await data_layer.delete_thread(thread_id)
     return JSONResponse(content={"success": True})
@@ -570,9 +558,7 @@ async def delete_thread(
 @app.get("/files/{filename:path}")
 async def serve_file(
     filename: str,
-    current_user: Annotated[
-        Union[AppUser, PersistedAppUser], Depends(get_current_user)
-    ],
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()

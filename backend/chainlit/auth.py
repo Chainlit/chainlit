@@ -6,7 +6,7 @@ import jwt
 from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.oauth_providers import get_configured_oauth_providers
-from chainlit.user import AppUser
+from chainlit.user import User
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
@@ -47,7 +47,7 @@ def get_configuration():
     }
 
 
-def create_jwt(data: AppUser) -> str:
+def create_jwt(data: User) -> str:
     to_encode = data.to_dict()  # type: Dict[str, Any]
     to_encode.update(
         {
@@ -67,13 +67,13 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
             options={"verify_signature": True},
         )
         del dict["exp"]
-        app_user = AppUser(**dict)
+        app_user = User(**dict)
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
     if data_layer := get_data_layer():
         try:
-            persisted_app_user = await data_layer.get_user(app_user.username)
+            persisted_app_user = await data_layer.get_user(app_user.identifier)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
         if persisted_app_user == None:

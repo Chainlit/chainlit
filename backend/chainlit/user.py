@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, TypedDict
+from typing import Dict, Literal, TypedDict
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
@@ -9,27 +9,25 @@ Provider = Literal[
 ]
 
 
-class AppUserDict(TypedDict):
+class UserDict(TypedDict):
     id: str
-    username: str
+    identifier: str
+    metadata: Dict
 
 
 # Used when logging-in a user
 @dataclass
-class AppUser(DataClassJsonMixin):
-    username: str
-    role: Role = "USER"
-    tags: List[str] = Field(default_factory=list)
-    image: Optional[str] = None
-    provider: Optional[Provider] = None
+class User(DataClassJsonMixin):
+    identifier: str
+    metadata: Dict = Field(default_factory=dict)
 
 
 @dataclass
-class PersistedAppUserFields:
+class PersistedUserFields:
     id: str
     createdAt: int
 
 
 @dataclass
-class PersistedAppUser(AppUser, PersistedAppUserFields):
+class PersistedUser(User, PersistedUserFields):
     pass

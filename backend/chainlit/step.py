@@ -1,10 +1,10 @@
-import uuid
+import asyncio
 import inspect
 import json
-import asyncio
-from functools import wraps
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, TypedDict, Union, Callable
+from functools import wraps
+from typing import Callable, Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
 from chainlit.context import context
@@ -13,7 +13,6 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-
 from chainlit_client import BaseGeneration, StepType
 
 
@@ -328,6 +327,7 @@ class Step:
                 parent_step = active_steps[-1]
                 self.parent_id = parent_step.id
             else:
+                # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
         active_steps.append(self)
         await self.send()
@@ -346,6 +346,7 @@ class Step:
                 parent_step = active_steps[-1]
                 self.parent_id = parent_step.id
             else:
+                # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
         active_steps.append(self)
         asyncio.create_task(self.send())

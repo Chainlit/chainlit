@@ -1,34 +1,25 @@
-import os
-from typing import (
-    Optional,
-    Union,
-    Dict,
-    List,
-    TypedDict,
-    TYPE_CHECKING,
-)
 import functools
+import os
 from collections import deque
+from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict, Union
+
 from chainlit.config import config
 from chainlit.context import context
-
+from chainlit.session import WebsocketSession
 from chainlit.types import (
-    Pagination,
+    Feedback,
     PageInfo,
     PaginatedResponse,
-    ThreadFilter,
+    Pagination,
     ThreadDict,
-    Feedback,
+    ThreadFilter,
 )
 
-from chainlit.session import WebsocketSession
-
-
 if TYPE_CHECKING:
-    from chainlit.user import AppUser, PersistedAppUser
     from chainlit.element import ElementDict
     from chainlit.message import MessageDict
     from chainlit.step import StepDict
+    from chainlit.user import PersistedUser, User
 
 _data_layer = None
 
@@ -65,10 +56,10 @@ def queue_until_user_message():
 class BaseDataLayer:
     """Base class for data persistence."""
 
-    async def get_user(self, identifier: str) -> Optional["PersistedAppUser"]:
+    async def get_user(self, identifier: str) -> Optional["PersistedUser"]:
         return None
 
-    async def create_user(self, user: "AppUser") -> Optional["PersistedAppUser"]:
+    async def create_user(self, user: "User") -> Optional["PersistedUser"]:
         pass
 
     @queue_until_user_message()

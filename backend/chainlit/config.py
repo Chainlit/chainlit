@@ -13,7 +13,7 @@ from starlette.datastructures import Headers
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.types import ChatProfile, ThreadDict
-    from chainlit.user import AppUser
+    from chainlit.user import User
 
 
 BACKEND_ROOT = os.path.dirname(__file__)
@@ -190,10 +190,10 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[Callable[[str, str], Optional["AppUser"]]] = None
-    header_auth_callback: Optional[Callable[[Headers], Optional["AppUser"]]] = None
+    password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
+    header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
     oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "AppUser"], Optional["AppUser"]]
+        Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
@@ -203,7 +203,7 @@ class CodeSettings:
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
-        Callable[[Optional["AppUser"]], List["ChatProfile"]]
+        Callable[[Optional["User"]], List["ChatProfile"]]
     ] = None
 
 

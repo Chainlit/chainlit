@@ -1,12 +1,12 @@
 import json
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Union, List
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     from chainlit.message import Message
-    from chainlit.types import AskResponse
-    from chainlit.user import AppUser, PersistedAppUser
     from chainlit.step import Step
+    from chainlit.types import AskResponse
+    from chainlit.user import PersistedUser, User
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
@@ -35,7 +35,7 @@ class BaseSession:
         # Thread id
         thread_id: Optional[str],
         # Logged-in user informations
-        user: Optional[Union["AppUser", "PersistedAppUser"]],
+        user: Optional[Union["User", "PersistedUser"]],
         # Logged-in user token
         token: Optional[str],
         # User specific environment variables. Empty if no user environment variables are required.
@@ -78,7 +78,7 @@ class HTTPSession(BaseSession):
         # Thread id
         thread_id: Optional[str] = None,
         # Logged-in user informations
-        user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
+        user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
         user_env: Optional[Dict[str, str]] = None,
@@ -123,7 +123,7 @@ class WebsocketSession(BaseSession):
         # Thread id
         thread_id: Optional[str] = None,
         # Logged-in user informations
-        user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
+        user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
         # Last message at the root of the chat
