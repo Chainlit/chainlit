@@ -1,14 +1,14 @@
 import asyncio
 import uuid
-from typing import Any, Dict, Optional, Union, List, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
+from chainlit.data import get_data_layer
 from chainlit.element import Element, File
 from chainlit.message import Message, MessageDict
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
-from chainlit.types import AskSpec, ThreadDict, UIMessagePayload, AskFileResponseDict
+from chainlit.types import AskFileResponseDict, AskSpec, ThreadDict, UIMessagePayload
 from socketio.exceptions import TimeoutError
-from chainlit.data import get_data_layer
 
 
 class BaseChainlitEmitter:
@@ -162,7 +162,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
             )
             await self.session.flush_method_queue()
 
-        return self.emit("init_thread", message)
+        await self.emit("init_thread", message)
 
     async def process_user_message(self, payload: UIMessagePayload):
         message_dict = payload["message"]
@@ -176,7 +176,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         if not self.session.has_user_message:
             self.session.has_user_message = True
-            await self.init_thread(await message.to_dict())
+            await self.init_thread(message.to_dict())
 
         if files:
             file_elements = [Element.from_dict(file) for file in files]

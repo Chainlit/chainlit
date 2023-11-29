@@ -605,9 +605,12 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     run, generation_type, provider, llm_settings, completion
                 )
 
+            # TODO: get token count + llama index
+
             if current_step:
                 current_step.output = completion
                 current_step.language = language
+                current_step.end = datetime.now(timezone.utc).isoformat()
                 current_step.generation = current_generation
                 self._run_sync(current_step.update())
 

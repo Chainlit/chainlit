@@ -79,13 +79,13 @@ const MessageContainer = memo(
           }
           return {
             ...old,
-            prompt: generation
+            generation: generation
               ? {
                   ...generation,
                   functions
                 }
               : undefined,
-            originalPrompt: generation
+            originalGeneration: generation
               ? {
                   ...generation,
                   functions

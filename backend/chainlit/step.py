@@ -48,7 +48,13 @@ def step(
 ):
     """Step decorator for async and sync functions."""
     if not original_function:
-        return Step(name, type, id, parent_id, disable_feedback)
+        return Step(
+            name=name,
+            type=type,
+            id=id,
+            parent_id=parent_id,
+            disable_feedback=disable_feedback,
+        )
 
     func = original_function
 
@@ -136,6 +142,7 @@ class Step:
         type: StepType = "UNDEFINED",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
+        elements: Optional[List[Element]] = None,
         disable_feedback: bool = True,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
@@ -150,25 +157,34 @@ class Step:
         self.metadata = {}
         self.is_error = False
 
+        self.language = None
+        self.generation = None
+        self.elements = elements or []
+
         self.created_at = datetime.now(timezone.utc).isoformat()
+        self.start = None
+        self.end = None
 
         self.streaming = False
         self.persisted = False
         self.fail_on_persist_error = False
 
-    def _process_content(self, content):
+    def _process_content(self, content, set_language=False):
         if isinstance(content, dict):
             try:
                 processed_content = json.dumps(content, indent=4, ensure_ascii=False)
-                self.language = "json"
+                if set_language:
+                    self.language = "json"
             except TypeError:
                 processed_content = str(content)
-                self.language = "text"
+                if set_language:
+                    self.language = "text"
         elif isinstance(content, str):
             processed_content = content
         else:
             processed_content = str(content)
-            self.language = "text"
+            if set_language:
+                self.language = "text"
         return processed_content
 
     @property
@@ -177,7 +193,7 @@ class Step:
 
     @input.setter
     def input(self, content: Union[Dict, str]):
-        self._input = self._process_content(content)
+        self._input = self._process_content(content, set_language=False)
 
     @property
     def output(self):
@@ -185,7 +201,7 @@ class Step:
 
     @output.setter
     def output(self, content: Union[Dict, str]):
-        self._output = self._process_content(content)
+        self._output = self._process_content(content, set_language=True)
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {
@@ -206,7 +222,6 @@ class Step:
             "language": self.language,
             "generation": self.generation.to_dict() if self.generation else None,
         }
-
         return _dict
 
     async def update(
@@ -223,7 +238,7 @@ class Step:
         step_dict = self.to_dict()
         data_layer = get_data_layer()
 
-        if data_layer and not self.persisted:
+        if data_layer:
             try:
                 asyncio.create_task(data_layer.update_step(step_dict))
             except Exception as e:
@@ -247,7 +262,7 @@ class Step:
         step_dict = self.to_dict()
         data_layer = get_data_layer()
 
-        if data_layer and not self.persisted:
+        if data_layer:
             try:
                 asyncio.create_task(data_layer.delete_step(self.id))
             except Exception as e:

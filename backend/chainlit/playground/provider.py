@@ -47,7 +47,7 @@ class BaseProvider:
     def create_generation(self, request: GenerationRequest):
         if request.chatGeneration and request.chatGeneration.messages:
             messages = [
-                self.format_message(m, inputs=request.chatGeneration.inputs)
+                self.format_message(m, request.chatGeneration.inputs)
                 for m in request.chatGeneration.messages
             ]
         else:
@@ -65,7 +65,7 @@ class BaseProvider:
                         GenerationMessage(
                             template=request.completionGeneration.template,
                             formatted=request.completionGeneration.formatted,
-                            role="USER",
+                            role="user",
                         ),
                         inputs=request.completionGeneration.inputs,
                     )

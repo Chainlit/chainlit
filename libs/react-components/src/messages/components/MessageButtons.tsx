@@ -15,7 +15,7 @@ interface Props {
 const MessageButtons = ({ message }: Props) => {
   const { showFeedbackButtons: showFbButtons } = useContext(MessageContext);
 
-  const showPlaygroundButton = 'generation' in message;
+  const showPlaygroundButton = 'generation' in message && !!message.generation;
   const isUser = 'role' in message && message.role === 'user';
   const isAsk = 'waitForAnswer' in message && message.waitForAnswer;
   const hasContent =

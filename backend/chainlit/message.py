@@ -3,7 +3,7 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Dict, List, Literal, Optional, TypedDict, Union, cast
+from typing import Dict, List, Optional, TypedDict, Union, cast
 
 from chainlit.action import Action
 from chainlit.config import config
@@ -21,8 +21,7 @@ from chainlit.types import (
     AskSpec,
     FeedbackDict,
 )
-
-MessageRole = Literal["user", "assistant", "system"]
+from chainlit_client import MessageRole
 
 
 class MessageDict(TypedDict, total=False):

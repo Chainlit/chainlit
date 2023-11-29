@@ -9,6 +9,7 @@ from fastapi.responses import StreamingResponse
 class LangchainGenericProvider(BaseProvider):
     from langchain.chat_models.base import BaseChatModel
     from langchain.llms.base import LLM
+    from langchain.schema import BaseMessage
 
     llm: Union[LLM, BaseChatModel]
 
@@ -43,7 +44,7 @@ class LangchainGenericProvider(BaseProvider):
             return AIMessage(content=content)
         elif message.role == "system":
             return SystemMessage(content=content)
-        elif message.role == "function":
+        elif message.role == "tool":
             return FunctionMessage(
                 content=content, name=message.name if message.name else "function"
             )
@@ -54,8 +55,8 @@ class LangchainGenericProvider(BaseProvider):
         message = super().format_message(message, prompt)
         return self.prompt_message_to_langchain_message(message)
 
-    def message_to_string(self, message: GenerationMessage) -> str:
-        return message.to_string()
+    def message_to_string(self, message: BaseMessage) -> str:  # type: ignore[override]
+        return message.content
 
     async def create_completion(self, request):
         from langchain.schema.messages import BaseMessageChunk

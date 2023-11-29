@@ -1,4 +1,4 @@
-export type MessageRole = 'system' | 'assistant' | 'user' | 'function';
+export type MessageRole = 'system' | 'assistant' | 'user' | 'tool';
 export type ILLMSettings = Record<string, string | string[] | number | boolean>;
 
 export interface IGenerationMessage {
