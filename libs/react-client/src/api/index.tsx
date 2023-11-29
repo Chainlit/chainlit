@@ -1,11 +1,12 @@
-import { IConversation, IPrompt } from 'src/types';
+import { IGeneration, IThread } from 'src/types';
 import { removeToken } from 'src/utils/token';
+
+import { IFeedback } from 'src/types/feedback';
 
 export * from './hooks/auth';
 export * from './hooks/api';
 
-export interface IConversationsFilters {
-  authorEmail?: string;
+export interface IThreadFilters {
   search?: string;
   feedback?: number;
 }
@@ -147,16 +148,22 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async getCompletion(
-    prompt: IPrompt,
+  async getGeneration(
+    generation: IGeneration,
     userEnv = {},
     controller: AbortController,
     accessToken?: string,
     tokenCb?: (done: boolean, token: string) => void
   ) {
+    const payload = { userEnv };
+    if (generation.type === 'CHAT') {
+      payload['chatGeneration'] = generation;
+    } else {
+      payload['completionGeneration'] = generation;
+    }
     const response = await this.post(
-      `/completion`,
-      { prompt, userEnv },
+      `/generation`,
+      payload,
       accessToken,
       controller.signal
     );
@@ -192,29 +199,20 @@ export class ChainlitAPI extends APIBase {
     return stream;
   }
 
-  async setHumanFeedback(
-    messageId: string,
-    feedback: number,
-    feedbackComment?: string,
-    accessToken?: string
-  ) {
-    await this.put(
-      `/message/feedback`,
-      { messageId, feedback, feedbackComment },
-      accessToken
-    );
+  async setFeedback(feedback: IFeedback, accessToken?: string) {
+    await this.put(`/feedback`, feedback, accessToken);
   }
 
-  async getConversations(
+  async listThreads(
     pagination: IPagination,
-    filter: IConversationsFilters,
+    filter: IThreadFilters,
     accessToken?: string
   ): Promise<{
     pageInfo: IPageInfo;
-    data: IConversation[];
+    data: IThread[];
   }> {
     const res = await this.post(
-      `/project/conversations`,
+      `/project/threads`,
       { pagination, filter },
       accessToken
     );
@@ -222,12 +220,8 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async deleteConversation(conversationId: string, accessToken?: string) {
-    const res = await this.delete(
-      `/project/conversation`,
-      { conversationId },
-      accessToken
-    );
+  async deleteThread(threadId: string, accessToken?: string) {
+    const res = await this.delete(`/project/thread`, { threadId }, accessToken);
 
     return res.json();
   }

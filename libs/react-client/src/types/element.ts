@@ -24,8 +24,8 @@ export type IElementSize = 'small' | 'medium' | 'large';
 interface TElement<T> {
   id: string;
   type: T;
-  conversationId?: string;
-  forIds?: string[];
+  threadId?: string;
+  forId?: string;
   url?: string;
 }
 

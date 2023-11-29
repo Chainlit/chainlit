@@ -1,12 +1,14 @@
 import { IElement } from './element';
 import { IMessage } from './message';
-import { IAppUser } from './user';
+import { IStep } from './step';
+import { IUser } from './user';
 
-export interface IConversation {
+export interface IThread {
   id: string;
   createdAt: number | string;
-  appUser?: IAppUser;
+  user?: IUser;
   metadata?: Record<string, any>;
   messages: IMessage[];
+  steps: IStep[];
   elements: IElement[];
 }

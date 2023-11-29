@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from chainlit.message import MessageDict
     from chainlit.element import ElementDict
     from chainlit.user import UserDict
+    from chainlit.step import StepDict
 
 from chainlit_client import ChatGeneration, CompletionGeneration
 from dataclasses_json import DataClassJsonMixin
@@ -33,6 +34,7 @@ class ThreadDict(TypedDict):
     createdAt: Optional[str]
     user: Optional[UserDict]
     messages: List[MessageDict]
+    steps: List[StepDict]
     elements: Optional[List[ElementDict]]
 
 
@@ -58,7 +60,7 @@ class Pagination(BaseModel):
 
 class ThreadFilter(BaseModel):
     feedback: Optional[Literal[-1, 0, 1]] = None
-    user_identifier: Optional[str] = None
+    userIdentifier: Optional[str] = None
     search: Optional[str] = None
 
 
@@ -171,7 +173,7 @@ FeedbackStrategy = Literal["BINARY"]
 
 
 class FeedbackDict(TypedDict):
-    value: str
+    value: Literal[-1, 0, 1]
     strategy: FeedbackStrategy
     comment: Optional[str]
 

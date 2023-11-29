@@ -491,7 +491,7 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    payload.filter.user_identifier = current_user.identifier
+    payload.filter.userIdentifier = current_user.identifier
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())

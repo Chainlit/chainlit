@@ -1,0 +1,47 @@
+export type MessageRole = 'system' | 'assistant' | 'user' | 'function';
+export type ILLMSettings = Record<string, string | string[] | number | boolean>;
+
+export interface IGenerationMessage {
+  template?: string;
+  formatted?: string;
+  template_format: string;
+  role: MessageRole;
+  name?: string;
+}
+
+export interface IFunction {
+  name: string;
+  description: string;
+  parameters: {
+    required: string[];
+    properties: Record<string, { title: string; type: string }>;
+  };
+}
+
+export interface ITool {
+  type: string;
+  function: IFunction;
+}
+
+export interface IBaseGeneration {
+  provider: string;
+  id?: string;
+  inputs?: Record<string, string>;
+  completion?: string;
+  settings?: ILLMSettings;
+  functions?: IFunction[];
+}
+
+export interface ICompletionGeneration extends IBaseGeneration {
+  type: 'COMPLETION';
+  template?: string;
+  formatted?: string;
+  template_format: string;
+}
+
+export interface IChatGeneration extends IBaseGeneration {
+  type: 'CHAT';
+  messages?: IGenerationMessage[];
+}
+
+export type IGeneration = ICompletionGeneration | IChatGeneration;

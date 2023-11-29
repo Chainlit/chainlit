@@ -14,7 +14,6 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
-  conversationIdToResumeState,
   elementState,
   firstUserMessageState,
   loadingState,
@@ -22,16 +21,18 @@ import {
   sessionIdState,
   sessionState,
   tasklistState,
+  threadIdToResumeState,
   tokenCountState
 } from 'src/state';
 import {
   IAction,
   IAvatarElement,
-  IConversation,
   IElement,
   IMessage,
   IMessageElement,
-  ITasklistElement
+  ITasklistElement,
+  IThread,
+  StepOrMessage
 } from 'src/types';
 import {
   addMessage,
@@ -40,7 +41,7 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
-import type { IMessageUpdate, IToken } from './useChatData';
+import type { IToken } from './useChatData';
 
 const useChatSession = () => {
   const sessionId = useRecoilValue(sessionIdState);
@@ -59,7 +60,7 @@ const useChatSession = () => {
   const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
-  const idToResume = useRecoilValue(conversationIdToResumeState);
+  const idToResume = useRecoilValue(threadIdToResumeState);
 
   const _connect = useCallback(
     ({
@@ -76,7 +77,7 @@ const useChatSession = () => {
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Session-Id': sessionId,
-          'X-Chainlit-Conversation-Id': idToResume || '',
+          'X-Chainlit-Thread-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
           'X-Chainlit-Chat-Profile': chatProfile || ''
         }
@@ -111,53 +112,56 @@ const useChatSession = () => {
         window.location.reload();
       });
 
-      socket.on('resume_conversation', (conversation: IConversation) => {
-        let messages: IMessage[] = [];
-        for (const message of conversation.messages) {
+      socket.on('resume_thread', (thread: IThread) => {
+        let messages: StepOrMessage[] = [];
+        for (const message of thread.messages) {
           messages = addMessage(messages, message);
         }
-        if (conversation.metadata?.chat_profile) {
-          setChatProfile(conversation.metadata?.chat_profile);
+        for (const step of thread.steps) {
+          messages = addMessage(messages, step);
+        }
+        if (thread.metadata?.chat_profile) {
+          setChatProfile(thread.metadata?.chat_profile);
         }
         setMessages(messages);
         setAvatars(
-          (conversation.elements as IAvatarElement[]).filter(
+          (thread.elements as IAvatarElement[]).filter(
             (e) => e.type === 'avatar'
           )
         );
         setTasklists(
-          (conversation.elements as ITasklistElement[]).filter(
+          (thread.elements as ITasklistElement[]).filter(
             (e) => e.type === 'tasklist'
           )
         );
         setElements(
-          (conversation.elements as IMessageElement[]).filter(
+          (thread.elements as IMessageElement[]).filter(
             (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
           )
         );
       });
 
-      socket.on('new_message', (message: IMessage) => {
+      socket.on('new_message', (message: StepOrMessage) => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('init_conversation', (message: IMessage) => {
+      socket.on('init_thread', (message: IMessage) => {
         setFirstUserMessage(message);
       });
 
-      socket.on('update_message', (message: IMessageUpdate) => {
+      socket.on('update_message', (message: StepOrMessage) => {
         setMessages((oldMessages) =>
           updateMessageById(oldMessages, message.id, message)
         );
       });
 
-      socket.on('delete_message', (message: IMessage) => {
+      socket.on('delete_message', (message: StepOrMessage) => {
         setMessages((oldMessages) =>
           deleteMessageById(oldMessages, message.id)
         );
       });
 
-      socket.on('stream_start', (message: IMessage) => {
+      socket.on('stream_start', (message: StepOrMessage) => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
@@ -197,23 +201,6 @@ const useChatSession = () => {
           setElements((old) => [...old, element]);
         }
       });
-
-      socket.on(
-        'update_element',
-        (update: { id: string; forIds: string[] }) => {
-          setElements((old) => {
-            const index = old.findIndex((e) => e.id === update.id);
-            if (index === -1) return old;
-            const element = old[index];
-            const newElement = { ...element, forIds: update.forIds };
-            return [
-              ...old.slice(0, index),
-              newElement,
-              ...old.slice(index + 1)
-            ];
-          });
-        }
-      );
 
       socket.on('remove_element', (remove: { id: string }) => {
         setElements((old) => {

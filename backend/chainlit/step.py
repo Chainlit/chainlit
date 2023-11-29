@@ -26,8 +26,8 @@ class StepDict(TypedDict, total=False):
     disableFeedback: bool
     streaming: bool
     metadata: Dict
-    input: Optional[Union[str, Dict]]
-    output: Optional[Union[str, Dict]]
+    input: str
+    output: str
     createdAt: Union[str, None]
     start: Union[str, None]
     end: Union[str, None]
@@ -139,8 +139,8 @@ class Step:
         disable_feedback: bool = True,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
-        self._input = None
-        self._output = None
+        self._input = ""
+        self._output = ""
         self.thread_id = context.session.thread_id
         self.name = name or ""
         self.type = type

@@ -6,7 +6,6 @@ import {
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
-  conversationIdToResumeState,
   elementState,
   firstUserMessageState,
   loadingState,
@@ -14,6 +13,7 @@ import {
   sessionIdState,
   sessionState,
   tasklistState,
+  threadIdToResumeState,
   tokenCountState
 } from 'src/state';
 import { IAction, IFileElement, IMessage } from 'src/types';
@@ -35,7 +35,7 @@ const useChatInteract = () => {
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
-  const setIdToResume = useSetRecoilState(conversationIdToResumeState);
+  const setIdToResume = useSetRecoilState(threadIdToResumeState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
