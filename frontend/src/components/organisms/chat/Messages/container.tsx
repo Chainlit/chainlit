@@ -8,10 +8,11 @@ import {
   IAction,
   IAsk,
   IAvatarElement,
+  IFeedback,
   IFunction,
-  IMessage,
   IMessageElement,
   ITool,
+  StepOrMessage,
   accessTokenState,
   messagesState,
   updateMessageById
@@ -28,7 +29,7 @@ interface Props {
   actions: IAction[];
   elements: IMessageElement[];
   avatars: IAvatarElement[];
-  messages: IMessage[];
+  messages: StepOrMessage[];
   askUser?: IAsk;
   autoScroll?: boolean;
   callAction?: (action: IAction) => void;
@@ -60,13 +61,14 @@ const MessageContainer = memo(
     const navigate = useNavigate();
 
     const onPlaygroundButtonClick = useCallback(
-      (message: IMessage) => {
+      (message: StepOrMessage) => {
         setPlayground((old) => {
+          const generation =
+            'generation' in message ? message.generation : undefined;
           let functions =
-            (message.prompt?.settings?.functions as unknown as IFunction[]) ||
-            [];
+            (generation?.settings?.functions as unknown as IFunction[]) || [];
           const tools =
-            (message.prompt?.settings?.tools as unknown as ITool[]) || [];
+            (generation?.settings?.tools as unknown as ITool[]) || [];
           if (tools.length) {
             functions = [
               ...functions,
@@ -77,15 +79,15 @@ const MessageContainer = memo(
           }
           return {
             ...old,
-            prompt: message.prompt
+            prompt: generation
               ? {
-                  ...message.prompt,
+                  ...generation,
                   functions
                 }
               : undefined,
-            originalPrompt: message.prompt
+            originalPrompt: generation
               ? {
-                  ...message.prompt,
+                  ...generation,
                   functions
                 }
               : undefined
@@ -97,32 +99,22 @@ const MessageContainer = memo(
 
     const onFeedbackUpdated = useCallback(
       async (
-        message: IMessage,
-        feedback: number,
+        message: StepOrMessage,
         onSuccess: () => void,
-        feedbackComment?: string
+        feedback: IFeedback
       ) => {
         try {
-          await toast.promise(
-            apiClient.setHumanFeedback(
-              message.id,
-              feedback,
-              feedbackComment,
-              accessToken
-            ),
-            {
-              loading: 'Updating...',
-              success: 'Feedback updated!',
-              error: (err) => {
-                return <span>{err.message}</span>;
-              }
+          await toast.promise(apiClient.setFeedback(feedback, accessToken), {
+            loading: 'Updating...',
+            success: 'Feedback updated!',
+            error: (err) => {
+              return <span>{err.message}</span>;
             }
-          );
+          });
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
-              humanFeedback: feedback,
-              humanFeedbackComment: feedbackComment
+              feedback: feedback
             })
           );
           onSuccess();
@@ -142,8 +134,8 @@ const MessageContainer = memo(
           return;
         }
 
-        if (element.conversationId) {
-          path += `?conversation=${element.conversationId}`;
+        if (element.threadId) {
+          path += `?thread=${element.threadId}`;
         }
 
         return navigate(element.display === 'page' ? path : '#');

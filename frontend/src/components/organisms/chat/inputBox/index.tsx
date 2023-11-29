@@ -13,8 +13,8 @@ import {
   useChatInteract
 } from '@chainlit/react-client';
 
-import { chatHistoryState } from 'state/chatHistory';
 import { IProjectSettings } from 'state/project';
+import { inputHistoryState } from 'state/userInputHistory';
 
 import StopButton from '../stopButton';
 import Input from './input';
@@ -36,7 +36,7 @@ const InputBox = memo(
     setAutoScroll,
     projectSettings
   }: Props) => {
-    const setChatHistory = useSetRecoilState(chatHistoryState);
+    const setInputHistory = useSetRecoilState(inputHistoryState);
 
     const { user } = useAuth();
     const { sendMessage, replyMessage } = useChatInteract();
@@ -46,26 +46,26 @@ const InputBox = memo(
       async (msg: string, files?: IFileElement[]) => {
         const message: IMessage = {
           id: uuidv4(),
-          author: user?.username || 'User',
-          authorIsUser: true,
+          author: user?.identifier || 'User',
+          role: 'user',
           content: msg,
           createdAt: new Date().toISOString()
         };
 
-        setChatHistory((old) => {
+        setInputHistory((old) => {
           const MAX_SIZE = 50;
-          const messages = [...(old.messages || [])];
-          messages.push({
+          const inputs = [...(old.inputs || [])];
+          inputs.push({
             content: msg,
             createdAt: new Date().getTime()
           });
 
           return {
             ...old,
-            messages:
-              messages.length > MAX_SIZE
-                ? messages.slice(messages.length - MAX_SIZE)
-                : messages
+            inputs:
+              inputs.length > MAX_SIZE
+                ? inputs.slice(inputs.length - MAX_SIZE)
+                : inputs
           };
         });
 
@@ -77,10 +77,10 @@ const InputBox = memo(
 
     const onReply = useCallback(
       async (msg: string) => {
-        const message = {
+        const message: IMessage = {
           id: uuidv4(),
-          author: user?.username || 'User',
-          authorIsUser: true,
+          author: user?.identifier || 'User',
+          role: 'user',
           content: msg,
           createdAt: new Date().toISOString()
         };

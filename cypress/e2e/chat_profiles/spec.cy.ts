@@ -37,7 +37,6 @@ describe('Chat profiles', () => {
         'contain',
         'starting chat with admin using the GPT-4 chat profile'
       );
-    // New conversation
 
     cy.get('#new-chat-button').click();
     cy.get('#confirm').click();

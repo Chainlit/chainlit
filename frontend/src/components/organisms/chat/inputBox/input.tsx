@@ -18,8 +18,8 @@ import { Attachments } from '@chainlit/react-components';
 import HistoryButton from 'components/organisms/chat/history';
 
 import { attachmentsState } from 'state/chat';
-import { chatHistoryState } from 'state/chatHistory';
 import { chatSettingsOpenState, projectSettingsState } from 'state/project';
+import { inputHistoryState } from 'state/userInputHistory';
 
 import UploadButton from './UploadButton';
 import SpeechButton from './speechButton';
@@ -45,7 +45,7 @@ const Input = memo(
   ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
     const [fileElements, setFileElements] = useRecoilState(attachmentsState);
     const [pSettings] = useRecoilState(projectSettingsState);
-    const setChatHistory = useSetRecoilState(chatHistoryState);
+    const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
     const ref = useRef<HTMLDivElement>(null);
@@ -135,11 +135,11 @@ const Input = memo(
         } else if (e.key === 'ArrowUp') {
           const lineCount = getLineCount(e.currentTarget as HTMLDivElement);
           if (lineCount <= 1) {
-            setChatHistory((old) => ({ ...old, open: true }));
+            setInputHistory((old) => ({ ...old, open: true }));
           }
         }
       },
-      [submit, setChatHistory, isComposing]
+      [submit, setInputHistory, isComposing]
     );
 
     const onHistoryClick = useCallback((content: string) => {

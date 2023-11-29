@@ -10,10 +10,10 @@ import TextField from '@mui/material/TextField';
 
 import { grey } from '@chainlit/react-components';
 
-import { conversationsFiltersState } from 'state/conversations';
+import { threadsFiltersState } from 'state/threads';
 
 export default function SearchBar() {
-  const [filters, setFilters] = useRecoilState(conversationsFiltersState);
+  const [filters, setFilters] = useRecoilState(threadsFiltersState);
 
   const handleChange = (value: string) => {
     value = value.trim();

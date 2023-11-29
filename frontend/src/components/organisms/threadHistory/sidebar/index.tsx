@@ -13,16 +13,16 @@ import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import {
-  IConversationsFilters,
+  IThreadFilters,
   accessTokenState,
-  conversationsHistoryState
+  threadHistoryState
 } from '@chainlit/react-client';
 
-import { conversationsFiltersState } from 'state/conversations';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
+import { threadsFiltersState } from 'state/threads';
 
-import { ConversationsHistoryList } from './ConversationsHistoryList';
+import { ThreadList } from './ThreadList';
 import Filters from './filters';
 
 const DRAWER_WIDTH = 260;
@@ -30,20 +30,17 @@ const BATCH_SIZE = 20;
 
 let _scrollTop = 0;
 
-const _ConversationsHistorySidebar = () => {
+const _ThreadHistorySideBar = () => {
   const isMobile = useMediaQuery('(max-width:66rem)');
 
-  const [conversations, setConversations] = useRecoilState(
-    conversationsHistoryState
-  );
+  const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
   const accessToken = useRecoilValue(accessTokenState);
-  const filters = useRecoilValue(conversationsFiltersState);
+  const filters = useRecoilValue(threadsFiltersState);
   const [settings, setSettings] = useRecoilState(settingsState);
 
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [prevFilters, setPrevFilters] =
-    useState<IConversationsFilters>(filters);
+  const [prevFilters, setPrevFilters] = useState<IThreadFilters>(filters);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -62,32 +59,32 @@ const _ConversationsHistorySidebar = () => {
     setShouldLoadMore(atBottom);
   };
 
-  const fetchConversations = async (cursor?: string | number) => {
+  const fetchThreads = async (cursor?: string | number) => {
     try {
       if (cursor) {
         setIsLoadingMore(true);
       } else {
         setIsFetching(true);
       }
-      const { pageInfo, data } = await apiClient.getConversations(
+      const { pageInfo, data } = await apiClient.listThreads(
         { first: BATCH_SIZE, cursor },
         filters,
         accessToken
       );
       setError(undefined);
 
-      // Prevent conversations to be duplicated
-      const allConversations = uniqBy(
-        // We should only concatenate conversations when we have a cursor indicating that we have loaded more items.
-        cursor ? conversations?.conversations?.concat(data) : data,
+      // Prevent threads to be duplicated
+      const allThreads = uniqBy(
+        // We should only concatenate threads when we have a cursor indicating that we have loaded more items.
+        cursor ? threadHistory?.threads?.concat(data) : data,
         'id'
       );
 
-      if (allConversations) {
-        setConversations((prev) => ({
+      if (allThreads) {
+        setThreadHistory((prev) => ({
           ...prev,
           pageInfo: pageInfo,
-          conversations: allConversations
+          threads: allThreads
         }));
       }
     } catch (error) {
@@ -99,21 +96,21 @@ const _ConversationsHistorySidebar = () => {
     }
   };
 
-  if (accessToken && !isFetching && !conversations?.conversations && !error) {
-    fetchConversations();
+  if (accessToken && !isFetching && !threadHistory?.threads && !error) {
+    fetchThreads();
   }
 
-  if (conversations?.pageInfo) {
-    const { hasNextPage, endCursor } = conversations.pageInfo;
+  if (threadHistory?.pageInfo) {
+    const { hasNextPage, endCursor } = threadHistory.pageInfo;
 
     if (shouldLoadMore && !isLoadingMore && hasNextPage && endCursor) {
-      fetchConversations(endCursor);
+      fetchThreads(endCursor);
     }
   }
 
   if (filtersHasChanged) {
     setPrevFilters(filters);
-    fetchConversations();
+    fetchThreads();
   }
 
   const setChatHistoryOpen = (open: boolean) =>
@@ -177,13 +174,13 @@ const _ConversationsHistorySidebar = () => {
           </IconButton>
         </Stack>
         <Filters />
-        {conversations ? (
-          <ConversationsHistoryList
-            conversations={conversations}
+        {threadHistory ? (
+          <ThreadList
+            threadHistory={threadHistory}
             error={error}
             isFetching={isFetching}
             isLoadingMore={isLoadingMore}
-            fetchConversations={fetchConversations}
+            fetchThreads={fetchThreads}
           />
         ) : null}
       </Drawer>
@@ -191,7 +188,7 @@ const _ConversationsHistorySidebar = () => {
   );
 };
 
-const ConversationsHistorySidebar = () => {
+const ThreadHistorySideBar = () => {
   const { user } = useAuth();
   const pSettings = useRecoilValue(projectSettingsState);
 
@@ -199,7 +196,7 @@ const ConversationsHistorySidebar = () => {
     return null;
   }
 
-  return <_ConversationsHistorySidebar />;
+  return <_ThreadHistorySideBar />;
 };
 
-export { ConversationsHistorySidebar };
+export { ThreadHistorySideBar };

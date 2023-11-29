@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
 
-import { MessageHistory } from '@chainlit/react-client';
+import { UserInput } from '@chainlit/react-client';
 
-const KEY = 'chat_history';
+const KEY = 'input_history';
 
 const localStorageEffect =
   (key: string) =>
@@ -12,7 +12,7 @@ const localStorageEffect =
       setSelf(JSON.parse(savedValue));
     }
 
-    onSet((newValue: MessageHistory, _: any, isReset: boolean) => {
+    onSet((newValue: UserInput, _: any, isReset: boolean) => {
       if (isReset) {
         localStorage.removeItem(key);
       } else {
@@ -21,14 +21,14 @@ const localStorageEffect =
     });
   };
 
-export const chatHistoryState = atom<{
+export const inputHistoryState = atom<{
   open: boolean;
-  messages: MessageHistory[];
+  inputs: UserInput[];
 }>({
-  key: 'ChatHistory',
+  key: 'UserInputHistory',
   default: {
     open: false,
-    messages: []
+    inputs: []
   },
   effects: [localStorageEffect(KEY)]
 });

@@ -4,29 +4,25 @@ import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
 import {
   IAction,
-  IConversation,
   IMessageElement,
+  IThread,
   nestMessages
 } from '@chainlit/react-client';
 
 import SideView from 'components/atoms/element/sideView';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
-type ConversationProps = {
-  conversation?: IConversation;
+type Props = {
+  thread?: IThread;
   error?: Error;
   isLoading?: boolean;
 };
 
-const Conversation = ({
-  conversation,
-  error,
-  isLoading
-}: ConversationProps) => {
+const Thread = ({ thread, error, isLoading }: Props) => {
   if (isLoading) {
     return [1, 2, 3].map((index) => (
       <Stack
-        key={`conversation-skeleton-${index}`}
+        key={`thread-skeleton-${index}`}
         sx={{
           px: 2,
           gap: 4,
@@ -51,11 +47,11 @@ const Conversation = ({
     ));
   }
 
-  if (!conversation || error) {
+  if (!thread || error) {
     return null;
   }
 
-  const elements = conversation.elements;
+  const elements = thread.elements;
   const actions: IAction[] = [];
 
   return (
@@ -78,9 +74,8 @@ const Conversation = ({
               </Button>
             }
           >
-            This conversation was created on{' '}
-            {new Intl.DateTimeFormat().format(conversation.createdAt as number)}
-            .
+            This chat was created on{' '}
+            {new Intl.DateTimeFormat().format(thread.createdAt as number)}.
           </Alert>
         </Box>
         <MessageContainer
@@ -88,11 +83,11 @@ const Conversation = ({
           avatars={[]}
           actions={actions}
           elements={elements as IMessageElement[]}
-          messages={nestMessages(conversation.messages)}
+          messages={nestMessages(thread.messages)}
         />
       </SideView>
     </Stack>
   );
 };
 
-export { Conversation };
+export { Thread };

@@ -30,7 +30,7 @@ export interface IProjectSettings {
   };
   userEnv: string[];
   dataPersistence: boolean;
-  conversationResumable: boolean;
+  threadResumable: boolean;
   chatProfiles: ChatProfile[];
 }
 

@@ -140,7 +140,7 @@ This hook provides methods to interact with the chat, such as sending messages, 
 - `replyMessage`: Replies to a message.
 - `sendMessage`: Sends a message.
 - `stopTask`: Stops the current task.
-- `setIdToResume`: Sets the ID to resume a conversation.
+- `setIdToResume`: Sets the ID to resume a thread.
 - `updateChatSettings`: Updates the chat settings.
 
 #### Example

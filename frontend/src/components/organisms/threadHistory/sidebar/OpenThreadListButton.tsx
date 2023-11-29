@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 
 import { settingsState } from 'state/settings';
 
-const OpenChatHistoryButton = ({ mode }: { mode: 'mobile' | 'desktop' }) => {
+const OpenThreadListButton = ({ mode }: { mode: 'mobile' | 'desktop' }) => {
   const [settings, setSettings] = useRecoilState(settingsState);
   const isDesktop = mode === 'desktop';
 
@@ -45,4 +45,4 @@ const OpenChatHistoryButton = ({ mode }: { mode: 'mobile' | 'desktop' }) => {
   ) : null;
 };
 
-export default OpenChatHistoryButton;
+export default OpenThreadListButton;

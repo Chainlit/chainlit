@@ -11,22 +11,22 @@ import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 import { projectSettingsState } from 'state/project';
 
 interface Props {
-  conversationId?: string;
+  threadId?: string;
 }
 
-export default function ResumeButton({ conversationId }: Props) {
+export default function ResumeButton({ threadId }: Props) {
   const navigate = useNavigate();
   const pSettings = useRecoilValue(projectSettingsState);
   const { clear, setIdToResume } = useChatInteract();
 
-  if (!conversationId || !pSettings?.conversationResumable) {
+  if (!threadId || !pSettings?.threadResumable) {
     return;
   }
 
   const onClick = () => {
     clear();
-    setIdToResume(conversationId!);
-    toast.success('Conversation resumed!');
+    setIdToResume(threadId!);
+    toast.success('Chat resumed!');
     navigate('/');
   };
 
@@ -45,7 +45,7 @@ export default function ResumeButton({ conversationId }: Props) {
       }}
     >
       <Button onClick={onClick} variant="contained">
-        Resume conversation
+        Resume chat
       </Button>
       <WaterMark />
     </Box>

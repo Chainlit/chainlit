@@ -11,7 +11,7 @@ import Stack from '@mui/material/Stack';
 
 import { grey } from '@chainlit/react-components';
 
-import { conversationsFiltersState } from 'state/conversations';
+import { threadsFiltersState } from 'state/threads';
 
 export enum FEEDBACKS {
   ALL = 0,
@@ -20,7 +20,7 @@ export enum FEEDBACKS {
 }
 
 export default function FeedbackSelect() {
-  const [filters, setFilters] = useRecoilState(conversationsFiltersState);
+  const [filters, setFilters] = useRecoilState(threadsFiltersState);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleChange = (feedback: number) => {

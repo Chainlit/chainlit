@@ -14,40 +14,40 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import {
-  ConversationsHistory,
+  ThreadHistory,
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components';
 
-import { DeleteConversationButton } from './DeleteConversationButton';
+import { DeleteThreadButton } from './DeleteThreadButton';
 
-interface ConversationsHistoryProps {
-  conversations?: ConversationsHistory;
+interface Props {
+  threadHistory?: ThreadHistory;
   error?: string;
-  fetchConversations: () => void;
+  fetchThreads: () => void;
   isFetching: boolean;
   isLoadingMore: boolean;
 }
 
-const ConversationsHistoryList = ({
-  conversations,
+const ThreadList = ({
+  threadHistory,
   error,
-  fetchConversations,
+  fetchThreads,
   isFetching,
   isLoadingMore
-}: ConversationsHistoryProps) => {
+}: Props) => {
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
   const navigate = useNavigate();
 
-  if (isFetching || (!conversations?.groupedConversations && isLoadingMore)) {
+  if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
-      <Box key={`conversations-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
+      <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
         <Skeleton width={100} />
         {[1, 2].map((childIndex) => (
           <Stack
-            key={`conversations-skeleton-${index}-${childIndex}`}
+            key={`threads-skeleton-${index}-${childIndex}`}
             sx={{
               py: 2,
               flexDirection: 'row',
@@ -71,11 +71,11 @@ const ConversationsHistoryList = ({
     );
   }
 
-  if (!conversations) {
+  if (!threadHistory) {
     return null;
   }
 
-  if (size(conversations?.groupedConversations) === 0) {
+  if (size(threadHistory?.timeGroupedThreads) === 0) {
     return (
       <Alert variant="standard" sx={{ mx: 1.5 }} severity="info">
         Empty...
@@ -83,14 +83,14 @@ const ConversationsHistoryList = ({
     );
   }
 
-  const handleDeleteConversation = (conversationId: string) => {
-    if (conversationId === idToResume) {
+  const handleDeleteThread = (threadId: string) => {
+    if (threadId === idToResume) {
       clear();
     }
-    if (conversationId === conversations.currentConversationId) {
+    if (threadId === threadHistory.currentThreadId) {
       navigate('/');
     }
-    fetchConversations();
+    fetchThreads();
   };
 
   return (
@@ -104,7 +104,7 @@ const ConversationsHistoryList = ({
         }}
         subheader={<li />}
       >
-        {map(conversations.groupedConversations, (items, index) => {
+        {map(threadHistory.timeGroupedThreads, (items, index) => {
           return (
             <li key={`section-${index}`}>
               <ul>
@@ -121,20 +121,18 @@ const ConversationsHistoryList = ({
                     {index}
                   </Typography>
                 </ListSubheader>
-                {map(items, (conversation) => {
+                {map(items, (thread) => {
                   const isResumed =
-                    idToResume === conversation.id &&
-                    !conversations.currentConversationId;
+                    idToResume === thread.id && !threadHistory.currentThreadId;
 
                   const isSelected =
-                    isResumed ||
-                    conversations.currentConversationId === conversation.id;
+                    isResumed || threadHistory.currentThreadId === thread.id;
 
                   return (
                     <Stack
                       component={Link}
-                      key={`conversation-${conversation.id}`}
-                      id={`conversation-${conversation.id}`}
+                      key={`thread-${thread.id}`}
+                      id={`thread-${thread.id}`}
                       sx={(theme) => ({
                         textDecoration: 'none',
                         cursor: 'pointer',
@@ -156,7 +154,7 @@ const ConversationsHistoryList = ({
                               : 'grey.200'
                         }
                       })}
-                      to={isResumed ? '' : `/conversation/${conversation.id}`}
+                      to={isResumed ? '' : `/thread/${thread.id}`}
                     >
                       <Stack
                         direction="row"
@@ -187,15 +185,13 @@ const ConversationsHistoryList = ({
                               textOverflow: 'ellipsis'
                             }}
                           >
-                            {capitalize(conversation.messages[0]?.content)}
+                            {capitalize(thread.metadata?.name || 'Unknown')}
                           </Typography>
                         </Stack>
                         {isSelected ? (
-                          <DeleteConversationButton
-                            conversationId={conversation.id}
-                            onDelete={() =>
-                              handleDeleteConversation(conversation.id)
-                            }
+                          <DeleteThreadButton
+                            threadId={thread.id}
+                            onDelete={() => handleDeleteThread(thread.id)}
                           />
                         ) : null}
                       </Stack>
@@ -218,4 +214,4 @@ const ConversationsHistoryList = ({
   );
 };
 
-export { ConversationsHistoryList };
+export { ThreadList };

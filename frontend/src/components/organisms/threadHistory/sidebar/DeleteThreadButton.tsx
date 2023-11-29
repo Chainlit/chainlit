@@ -16,11 +16,11 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { ClientError, accessTokenState } from '@chainlit/react-client';
 
 interface Props {
-  conversationId: string;
+  threadId: string;
   onDelete: () => void;
 }
 
-const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
+const DeleteThreadButton = ({ threadId, onDelete }: Props) => {
   const [open, setOpen] = useState(false);
   const accessToken = useRecoilValue(accessTokenState);
 
@@ -33,20 +33,17 @@ const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
   };
 
   const handleConfirm = async () => {
-    await toast.promise(
-      apiClient.deleteConversation(conversationId, accessToken),
-      {
-        loading: 'Deleting conversation...',
-        success: 'Conversation deleted!',
-        error: (err) => {
-          if (err instanceof ClientError) {
-            return <span>{err.message}</span>;
-          } else {
-            return <span></span>;
-          }
+    await toast.promise(apiClient.deleteThread(threadId, accessToken), {
+      loading: 'Deleting thread...',
+      success: 'Thread deleted!',
+      error: (err) => {
+        if (err instanceof ClientError) {
+          return <span>{err.message}</span>;
+        } else {
+          return <span></span>;
         }
       }
-    );
+    });
     onDelete();
     handleClose();
   };
@@ -68,13 +65,10 @@ const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
             }
           }}
         >
-          <DialogTitle id="alert-dialog-title">
-            {'Delete conversation?'}
-          </DialogTitle>
+          <DialogTitle id="alert-dialog-title">{'Delete Thread?'}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              This will delete the conversation as well as it's messages and
-              elements.
+              This will delete the thread as well as it's messages and elements.
             </DialogContentText>
           </DialogContent>
           <DialogActions sx={{ color: 'text.secondary', p: 2 }}>
@@ -96,4 +90,4 @@ const DeleteConversationButton = ({ conversationId, onDelete }: Props) => {
   );
 };
 
-export { DeleteConversationButton };
+export { DeleteThreadButton };

@@ -7,7 +7,7 @@ import { Alert, Box } from '@mui/material';
 
 import {
   IFileResponse,
-  conversationsHistoryState,
+  threadHistoryState,
   useChatData
 } from '@chainlit/react-client';
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
@@ -26,7 +26,7 @@ import InputBox from './inputBox';
 const Chat = () => {
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
-  const setConversations = useSetRecoilState(conversationsHistoryState);
+  const setThreads = useSetRecoilState(threadHistoryState);
   const sideViewElement = useRecoilValue(sideViewState);
 
   const [autoScroll, setAutoScroll] = useState(true);
@@ -41,7 +41,8 @@ const Chat = () => {
       display: 'inline' as const,
       name: file.name,
       mime: file.type,
-      content: file.content
+      content: file.content,
+      forId: ''
     }));
     setAttachments((prev) => prev.concat(fileElements));
   }, []);
@@ -59,9 +60,9 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    setConversations((prev) => ({
+    setThreads((prev) => ({
       ...prev,
-      currentConversationId: undefined
+      currentThreadId: undefined
     }));
   }, []);
 

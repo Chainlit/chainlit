@@ -17,26 +17,24 @@ export default function Element() {
   const [element, setElement] = useState<IMessageElement | null>(null);
   const navigate = useNavigate();
 
-  const conversationId = query.get('conversation');
+  const threadId = query.get('thread');
 
   const { data, error } = useApi<IMessageElement>(
     apiClient,
-    id && conversationId
-      ? `/project/conversation/${conversationId}/element/${id}`
-      : null
+    id && threadId ? `/project/thread/${threadId}/element/${id}` : null
   );
 
   useEffect(() => {
     if (data) {
       setElement(data);
-    } else if (id && !conversationId && !element) {
+    } else if (id && !threadId && !element) {
       const foundElement = elements.find((element) => element.id === id);
 
       if (foundElement) {
         setElement(foundElement);
       }
     }
-  }, [data, element, elements, id, conversationId]);
+  }, [data, element, elements, id, threadId]);
 
   if (!element || error) {
     return null;

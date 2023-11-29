@@ -225,7 +225,7 @@ def author_rename(func: Callable[[str], str]) -> Callable[[str], str]:
 @trace
 def on_stop(func: Callable) -> Callable:
     """
-    Hook to react to the user stopping a conversation.
+    Hook to react to the user stopping a thread.
 
     Args:
         func (Callable[[], Any]): The stop hook to execute.
