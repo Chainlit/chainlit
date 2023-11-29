@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from chainlit.config import config
 from chainlit.telemetry import trace_event
@@ -20,9 +20,11 @@ class BaseProvider:
     is_chat: bool
 
     # Format the message based on the template provided
-    def format_message(self, message: GenerationMessage, generation: ChatGeneration):
+    def format_message(self, message: GenerationMessage, inputs: Optional[Dict]):
         if message.template:
-            message.formatted = self._format_template(message.template, generation)
+            message.formatted = self._format_template(
+                message.template, inputs, message.template_format
+            )
         return message
 
     # Convert the message to string format
@@ -34,18 +36,18 @@ class BaseProvider:
         return joiner.join([self.message_to_string(m) for m in messages])
 
     # Format the template based on the prompt inputs
-    def _format_template(self, template: str, generation: BaseGeneration):
-        if generation.template_format == "f-string":
-            return template.format(**(generation.inputs or {}))
-        raise HTTPException(
-            status_code=422, detail=f"Unsupported format {generation.template_format}"
-        )
+    def _format_template(
+        self, template: str, inputs: Optional[Dict], format: str = "f-string"
+    ):
+        if format == "f-string":
+            return template.format(**(inputs or {}))
+        raise HTTPException(status_code=422, detail=f"Unsupported format {format}")
 
     # Create a prompt based on the request
     def create_generation(self, request: GenerationRequest):
         if request.chatGeneration and request.chatGeneration.messages:
             messages = [
-                self.format_message(m, generation=request.chatGeneration)
+                self.format_message(m, inputs=request.chatGeneration.inputs)
                 for m in request.chatGeneration.messages
             ]
         else:
@@ -63,9 +65,9 @@ class BaseProvider:
                         GenerationMessage(
                             template=request.completionGeneration.template,
                             formatted=request.completionGeneration.formatted,
-                            role="user",
+                            role="USER",
                         ),
-                        generation=request.completionGeneration,
+                        inputs=request.completionGeneration.inputs,
                     )
                 ]
             else:
@@ -77,7 +79,8 @@ class BaseProvider:
                 if request.completionGeneration.template:
                     return self._format_template(
                         request.completionGeneration.template,
-                        generation=request.completionGeneration,
+                        request.completionGeneration.inputs,
+                        request.completionGeneration.template_format,
                     )
                 elif request.completionGeneration.formatted:
                     return request.completionGeneration.formatted

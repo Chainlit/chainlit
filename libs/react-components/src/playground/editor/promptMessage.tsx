@@ -28,7 +28,8 @@ export default function PromptMessage({
   const theme = useTheme();
 
   const templateProps = {
-    generation,
+    inputs: generation.inputs,
+    format: message.templateFormat,
     sxEditorChildren: {
       padding: theme.spacing(2),
       backgroundColor: '',

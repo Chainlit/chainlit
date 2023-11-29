@@ -1,17 +1,12 @@
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
-from datetime import datetime, timezone
 
-from chainlit_client import (
-    GenerationMessage,
-    ChatGeneration,
-    CompletionGeneration,
-)
 from chainlit.context import context_var
 from chainlit.message import Message
-from chainlit.step import Step, StepType
 from chainlit.playground.providers.openai import stringify_function_call
-
+from chainlit.step import Step, StepType
+from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema.messages import BaseMessage
@@ -116,7 +111,7 @@ class GenerationHelper:
         self,
         message: Dict,
         template: Optional[str] = None,
-        template_format: Optional[str] = None,
+        template_format: str = "f-string",
     ):
         class_name = message["id"][-1]
         kwargs = message.get("kwargs", {})
@@ -137,7 +132,7 @@ class GenerationHelper:
         self,
         message: Union[Dict, BaseMessage],
         template: Optional[str] = None,
-        template_format: Optional[str] = None,
+        template_format: str = "f-string",
     ):
         if isinstance(message, dict):
             return self._convert_message_dict(
@@ -262,7 +257,6 @@ class GenerationHelper:
                     template_messages += [
                         GenerationMessage(
                             template=template,
-                            template_format=template_format,
                             role=self._convert_message_role(class_name),
                         )
                     ]

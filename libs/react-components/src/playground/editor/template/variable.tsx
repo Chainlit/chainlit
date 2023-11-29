@@ -28,9 +28,7 @@ export default function Variable({
   useEffect(() => {
     if (generation?.inputs && decoratedText) {
       const index = Object.keys(generation.inputs).findIndex(
-        (name) =>
-          buildVariablePlaceholder(name, generation.templateFormat) ===
-          decoratedText
+        (name) => buildVariablePlaceholder(name, 'f-string') === decoratedText
       );
       if (index > -1) {
         setVariableIndex(index);

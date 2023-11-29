@@ -101,7 +101,7 @@ export const ChatPromptPlayground = forwardRef(
                         role: 'assistant',
                         template: '',
                         formatted: '',
-                        template_format: old!.generation!.templateFormat
+                        templateFormat: 'f-string'
                       }
                     ]
                   }

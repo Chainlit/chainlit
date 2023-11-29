@@ -50,7 +50,8 @@ export default function BasicPromptPlayground({
       <TemplateEditor
         showTitle={true}
         template={generation.template || generation.formatted || ''}
-        generation={generation}
+        inputs={generation.inputs}
+        format={generation.templateFormat}
         onChange={onTemplateChange}
       />
     );
@@ -62,7 +63,8 @@ export default function BasicPromptPlayground({
         <FormattedEditor
           showTitle={true}
           template={generation.template}
-          generation={generation}
+          inputs={generation.inputs}
+          format={generation.templateFormat}
           readOnly
         />
       );
@@ -71,7 +73,8 @@ export default function BasicPromptPlayground({
         <FormattedEditor
           showTitle={true}
           formatted={generation.formatted}
-          generation={generation}
+          inputs={generation.inputs}
+          format={generation.templateFormat}
           readOnly={false}
           onChange={onFormattedChange}
         />

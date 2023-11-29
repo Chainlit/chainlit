@@ -45,7 +45,8 @@ const findVariable = (
 };
 
 interface Props {
-  generation: IGeneration;
+  inputs: IGeneration['inputs'];
+  format: string;
   template: string;
   onChange(nextState: EditorState): void;
   showTitle?: boolean;
@@ -53,7 +54,8 @@ interface Props {
 }
 
 export default function TemplateEditor({
-  generation,
+  inputs,
+  format,
   template,
   onChange,
   showTitle = true,
@@ -67,11 +69,8 @@ export default function TemplateEditor({
     const variableDecorator: DraftDecorator = {
       strategy: (contentBlock, callback) => {
         findVariable(
-          buildTemplatePlaceholdersRegexp(
-            generation.inputs || {},
-            generation.templateFormat
-          ),
-          generation.templateFormat,
+          buildTemplatePlaceholdersRegexp(inputs || {}, format),
+          format,
           contentBlock,
           callback
         );

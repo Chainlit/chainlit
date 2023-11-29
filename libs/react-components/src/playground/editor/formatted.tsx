@@ -34,7 +34,8 @@ export interface IVariable {
 interface Props {
   template?: string;
   formatted?: string;
-  generation: IGeneration;
+  format: string;
+  inputs: IGeneration['inputs'];
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
   showTitle?: boolean;
@@ -268,7 +269,8 @@ function getEntityAtSelection(editorState: EditorState) {
 export default function FormattedEditor({
   template,
   formatted,
-  generation,
+  inputs,
+  format,
   readOnly,
   onChange,
   showTitle = false,
@@ -284,9 +286,9 @@ export default function FormattedEditor({
   const customStyleMap = useCustomStyleMap();
   const isFirstRender = useIsFirstRender();
 
-  if (isFirstRender || !isEqual(generation.inputs, prevInputs)) {
+  if (isFirstRender || !isEqual(inputs, prevInputs)) {
     if (typeof template === 'string') {
-      const inputs = generation.inputs || {};
+      inputs = inputs || {};
 
       const variableNames = Object.keys(inputs);
       const variables: IVariable[] = [];
@@ -310,11 +312,7 @@ export default function FormattedEditor({
       const state = EditorState.createWithContent(
         ContentState.createFromText(template)
       );
-      const nextState = formatTemplate(
-        state,
-        sortedVariables,
-        generation.templateFormat
-      );
+      const nextState = formatTemplate(state, sortedVariables, format);
 
       setState(nextState);
     } else if (typeof formatted === 'string') {
@@ -323,7 +321,7 @@ export default function FormattedEditor({
       );
       setState(nextState);
     }
-    setPrevInputs(generation.inputs);
+    setPrevInputs(inputs);
   }
 
   const handleOnEditorChange = (nextState: EditorState) => {
