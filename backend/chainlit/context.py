@@ -21,6 +21,11 @@ class ChainlitContext:
     emitter: "BaseChainlitEmitter"
     session: Union["HTTPSession", "WebsocketSession"]
 
+    @property
+    def current_step(self):
+        if self.session.active_steps:
+            return self.session.active_steps[-1]
+
     def __init__(self, session: Union["HTTPSession", "WebsocketSession"]):
         from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
 

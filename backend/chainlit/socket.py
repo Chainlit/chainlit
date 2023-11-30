@@ -166,9 +166,9 @@ async def clean_session(sid):
 @socket.on("disconnect")
 async def disconnect(sid):
     session = WebsocketSession.get(sid)
+    init_ws_context(session)
 
     if config.code.on_chat_end and session:
-        init_ws_context(session)
         await config.code.on_chat_end()
 
     if session and session.thread_id:

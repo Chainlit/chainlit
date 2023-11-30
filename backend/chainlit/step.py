@@ -337,15 +337,13 @@ class Step:
     # Handle Context Manager Protocol
     async def __aenter__(self):
         self.start = datetime.now(timezone.utc).isoformat()
-        active_steps = context.session.active_steps
         if not self.parent_id:
-            if active_steps:
-                parent_step = active_steps[-1]
-                self.parent_id = parent_step.id
+            if current_step := context.current_step:
+                self.parent_id = current_step.id
             else:
                 # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
-        active_steps.append(self)
+        context.session.active_steps.append(self)
         await self.send()
         return self
 
@@ -356,15 +354,13 @@ class Step:
 
     def __enter__(self):
         self.start = datetime.now(timezone.utc).isoformat()
-        active_steps = context.session.active_steps
         if not self.parent_id:
-            if active_steps:
-                parent_step = active_steps[-1]
-                self.parent_id = parent_step.id
+            if current_step := context.current_step:
+                self.parent_id = current_step.id
             else:
                 # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
-        active_steps.append(self)
+        context.session.active_steps.append(self)
         asyncio.create_task(self.send())
         return self
 

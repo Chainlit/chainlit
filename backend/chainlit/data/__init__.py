@@ -129,7 +129,10 @@ class BaseDataLayer:
 
     @queue_until_user_message()
     async def update_thread(
-        self, thread_id: str, metadata: Optional[Dict], tags: Optional[List[str]]
+        self,
+        thread_id: str,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
     ):
         # TODO: Do not override metadata and tags, flag to replace?
         pass

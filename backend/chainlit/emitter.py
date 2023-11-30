@@ -158,7 +158,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Signal the UI that a new thread (with a user message) exists"""
         if data_layer := get_data_layer():
             await data_layer.update_thread(
-                self.session.thread_id, {"name": message["content"]}
+                thread_id=self.session.thread_id, metadata={"name": message["content"]}
             )
             await self.session.flush_method_queue()
 

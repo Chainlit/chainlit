@@ -4,6 +4,7 @@ import { ErrorBoundary } from 'src/ErrorBoundary';
 import { useToggle } from 'usehooks-ts';
 
 import RestoreIcon from '@mui/icons-material/Restore';
+import { Chip } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -139,6 +140,9 @@ function _PromptPlayground() {
       </DialogContent>
 
       <ActionBar>
+        {generation.tokenCount ? (
+          <Chip label={`${generation.tokenCount} tokens`} />
+        ) : null}
         <Tooltip title="Restore original">
           <IconButton onClick={restore}>
             <RestoreIcon />

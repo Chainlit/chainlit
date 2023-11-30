@@ -1,12 +1,12 @@
 import asyncio
-from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
-from chainlit_client import GenerationMessage, ChatGeneration, CompletionGeneration
 from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.step import Step, StepType
-from llama_index.callbacks.base import BaseCallbackHandler
+from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
+from llama_index.callbacks import TokenCountingHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.llms.base import ChatMessage, ChatResponse, CompletionResponse
 
@@ -20,7 +20,7 @@ DEFAULT_IGNORE = [
 ]
 
 
-class LlamaIndexCallbackHandler(BaseCallbackHandler):
+class LlamaIndexCallbackHandler(TokenCountingHandler):
     """Base callback handler that can be used to track event starts and ends."""
 
     steps: Dict[str, Step]
@@ -31,13 +31,16 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
         event_ends_to_ignore: List[CBEventType] = DEFAULT_IGNORE,
     ) -> None:
         """Initialize the base callback handler."""
+        super().__init__(
+            event_starts_to_ignore=event_starts_to_ignore,
+            event_ends_to_ignore=event_ends_to_ignore,
+        )
         self.context = context_var.get()
-        self.event_starts_to_ignore = tuple(event_starts_to_ignore)
-        self.event_ends_to_ignore = tuple(event_ends_to_ignore)
+
         self.steps = {}
 
     def _get_parent_id(self, event_parent_id: Optional[str] = None) -> Optional[str]:
-        if event_parent_id:
+        if event_parent_id and event_parent_id in self.steps:
             return event_parent_id
         if root_message := self.context.session.root_message:
             return root_message.id
@@ -141,11 +144,17 @@ class LlamaIndexCallbackHandler(BaseCallbackHandler):
             step.output = content
             step.end = datetime.now(timezone.utc).isoformat()
 
+            token_count = self.total_llm_token_count
+
             if messages:
-                step.generation = ChatGeneration(messages=messages, completion=content)
+                step.generation = ChatGeneration(
+                    messages=messages, completion=content, token_count=token_count
+                )
             elif formatted_prompt:
                 step.generation = CompletionGeneration(
-                    formatted=formatted_prompt, completion=content
+                    formatted=formatted_prompt,
+                    completion=content,
+                    token_count=token_count,
                 )
 
             asyncio.run(step.update())

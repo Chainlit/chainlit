@@ -30,6 +30,7 @@ export interface IBaseGeneration {
   completion?: string;
   settings?: ILLMSettings;
   functions?: IFunction[];
+  tokenCount?: number;
 }
 
 export interface ICompletionGeneration extends IBaseGeneration {

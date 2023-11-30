@@ -9,7 +9,7 @@ from chainlit.step import Step, StepType
 from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
-from langchain.schema.messages import BaseMessage
+from langchain.schema import BaseMessage
 from langchain.schema.output import ChatGenerationChunk, GenerationChunk
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -421,33 +421,37 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             return self.root_parent_id
 
         if current_parent_id not in self.parent_id_map:
-            return current_parent_id
+            return None
 
         while current_parent_id in self.parent_id_map:
-            current_parent_id = self.parent_id_map[current_parent_id]
+            # If the parent id is in the ignored runs, we need to get the parent id of the ignored run
+            if current_parent_id in self.ignored_runs:
+                current_parent_id = self.parent_id_map[current_parent_id]
+            else:
+                return current_parent_id
 
-        return current_parent_id
+        return self.root_parent_id
 
     def _should_ignore_run(self, run: Run):
         parent_id = self._get_run_parent_id(run)
+
+        if parent_id:
+            # Add the parent id of the ignored run in the mapping
+            # so we can re-attach a kept child to the right parent id
+            self.parent_id_map[str(run.id)] = parent_id
 
         ignore_by_name = run.name in self.to_ignore
         ignore_by_parent = parent_id in self.ignored_runs
 
         ignore = ignore_by_name or ignore_by_parent
 
-        if ignore:
-            if parent_id:
-                # Add the parent id of the ignored run in the mapping
-                # so we can re-attach a kept child to the right parent id
-                self.parent_id_map[str(run.id)] = parent_id
-            # Tag the run as ignored
-            self.ignored_runs.add(str(run.id))
-
         # If the ignore cause is the parent being ignored, check if we should nonetheless keep the child
         if ignore_by_parent and not ignore_by_name and run.run_type in self.to_keep:
-            return False, self._get_non_ignored_parent_id(str(run.id))
+            return False, self._get_non_ignored_parent_id(parent_id)
         else:
+            if ignore:
+                # Tag the run as ignored
+                self.ignored_runs.add(str(run.id))
             return ignore, parent_id
 
     def _is_annotable(self, run: Run):
@@ -590,6 +594,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 (run.serialized or {}), (run.extra or {}).get("invocation_params")
             )
             generations = (run.outputs or {}).get("generations", [])
+            llm_output = (run.outputs or {}).get("llm_output")
             completion, language = self._get_completion(generations[0][0])
             current_generation = (
                 self.generation_sequence.pop() if self.generation_sequence else None
@@ -605,7 +610,9 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     run, generation_type, provider, llm_settings, completion
                 )
 
-            # TODO: get token count + llama index
+            if llm_output and current_generation:
+                token_count = llm_output.get("token_usage", {}).get("total_tokens")
+                current_generation.token_count = token_count
 
             if current_step:
                 current_step.output = completion
@@ -618,6 +625,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 self.final_stream.content = completion
                 self.final_stream.language = language
                 self._run_sync(self.final_stream.send())
+
             return
 
         outputs = run.outputs or {}
