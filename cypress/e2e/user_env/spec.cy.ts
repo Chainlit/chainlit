@@ -16,7 +16,7 @@ describe('User Env', () => {
 
     submitMessage('Hello');
 
-    cy.get('.message').should('have.length', 2);
-    cy.get('.message').eq(1).should('contain', keyValue);
+    cy.get('.step').should('have.length', 2);
+    cy.get('.step').eq(1).should('contain', keyValue);
   });
 });

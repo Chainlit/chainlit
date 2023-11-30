@@ -16,7 +16,7 @@ describe('Upload file', () => {
     // cy.get("#ask-upload-button-loading").should("exist");
     // cy.get("#ask-upload-button-loading").should("not.exist");
 
-    cy.get('.message')
+    cy.get('.step')
       .eq(1)
       .should(
         'contain',
@@ -29,13 +29,13 @@ describe('Upload file', () => {
     cy.fixture('hello.cpp', 'utf-8').as('cppFile');
     cy.get('#ask-button-input').selectFile('@cppFile', { force: true });
 
-    cy.get('.message').should('have.length', 3);
+    cy.get('.step').should('have.length', 3);
 
     // Upload a python file
     cy.fixture('hello.py', 'utf-8').as('pyFile');
     cy.get('#ask-button-input').selectFile('@pyFile', { force: true });
 
-    cy.get('.message')
+    cy.get('.step')
       .should('have.length', 4)
       .eq(3)
       .should('contain', 'Python file hello.py uploaded, it contains');

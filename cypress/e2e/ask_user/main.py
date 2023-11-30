@@ -6,5 +6,5 @@ async def main():
     res = await cl.AskUserMessage(content="What is your name?", timeout=10).send()
     if res:
         await cl.Message(
-            content=f"Your name is: {res['content']}",
+            content=f"Your name is: {res['output']}",
         ).send()

@@ -1,13 +1,13 @@
-import { runTestServer } from "../../support/testUtils";
+import { runTestServer } from '../../support/testUtils';
 
-describe("Update Message", () => {
+describe('Update Message', () => {
   before(() => {
     runTestServer();
   });
 
-  it("should be able to update a message", () => {
-    cy.get(".message").should("have.length", 1);
-    cy.get(".message").eq(0).should("contain", "Hello");
-    cy.get(".message").eq(0).should("contain", "Hello again!");
+  it('should be able to update a message', () => {
+    cy.get('.step').should('have.length', 1);
+    cy.get('.step').eq(0).should('contain', 'Hello');
+    cy.get('.step').eq(0).should('contain', 'Hello again!');
   });
 });

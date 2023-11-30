@@ -6,8 +6,8 @@ describe('file', () => {
   });
 
   it('should be able to display a file element', () => {
-    cy.get('.message').should('have.length', 1);
-    cy.get('.message').eq(0).find('.inline-file').should('have.length', 4);
+    cy.get('.step').should('have.length', 1);
+    cy.get('.step').eq(0).find('.inline-file').should('have.length', 4);
 
     cy.get('.inline-file').should(($files) => {
       const downloads = $files

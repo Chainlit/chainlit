@@ -45,75 +45,69 @@ def step(
     type: StepType = "UNDEFINED",
     id: Optional[str] = None,
     parent_id: Optional[str] = None,
-    thread_id: Optional[str] = None,
     disable_feedback: bool = True,
 ):
     """Step decorator for async and sync functions."""
-    if not original_function:
-        return Step(
-            name=name,
-            type=type,
-            id=id,
-            parent_id=parent_id,
-            disable_feedback=disable_feedback,
-        )
+
+    def wrapper(func: Callable):
+        nonlocal name
+        if not name:
+            name = func.__name__
+
+        # Handle async decorator
+
+        if inspect.iscoroutinefunction(func):
+
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                async with Step(
+                    type=type,
+                    name=name,
+                    id=id,
+                    parent_id=parent_id,
+                    disable_feedback=disable_feedback,
+                ) as step:
+                    try:
+                        step.input = {"args": args, "kwargs": kwargs}
+                    except:
+                        pass
+                    result = await func(*args, **kwargs)
+                    try:
+                        step.output = result
+                    except:
+                        pass
+                    return result
+
+            return async_wrapper
+        else:
+            # Handle sync decorator
+            @wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                with Step(
+                    type=type,
+                    name=name,
+                    id=id,
+                    parent_id=parent_id,
+                    disable_feedback=disable_feedback,
+                ) as step:
+                    try:
+                        step.input = {"args": args, "kwargs": kwargs}
+                    except:
+                        pass
+                    result = func(*args, **kwargs)
+                    try:
+                        step.output = result
+                    except:
+                        pass
+                    return result
+
+            return sync_wrapper
 
     func = original_function
-
-    if not name:
-        name = func.__name__
-
-    # Handle async decorator
-    if inspect.iscoroutinefunction(func):
-
-        @wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            async with Step(
-                type=type,
-                name=name,
-                id=id,
-                parent_id=parent_id,
-                thread_id=thread_id,
-                disable_feedback=disable_feedback,
-            ) as step:
-                try:
-                    step.input = json.dumps({"args": args, "kwargs": kwargs})
-                except:
-                    pass
-                result = await func(*args, **kwargs)
-                try:
-                    if step.output is None:
-                        step.output = json.dumps(result)
-                except:
-                    pass
-                return result
-
-        return async_wrapper
+    if not func:
+        return wrapper
     else:
-        # Handle sync decorator
-        @wraps(func)
-        def sync_wrapper(*args, **kwargs):
-            with Step(
-                type=type,
-                name=name,
-                id=id,
-                parent_id=parent_id,
-                thread_id=thread_id,
-                disable_feedback=disable_feedback,
-            ) as step:
-                try:
-                    step.input = json.dumps({"args": args, "kwargs": kwargs})
-                except:
-                    pass
-                result = func(*args, **kwargs)
-                try:
-                    if step.output is None:
-                        step.output = json.dumps(result)
-                except:
-                    pass
-                return result
-
-        return sync_wrapper
+        return wrapper(func)
 
 
 class Step:
@@ -172,6 +166,8 @@ class Step:
         self.fail_on_persist_error = False
 
     def _process_content(self, content, set_language=False):
+        if content is None:
+            return ""
         if isinstance(content, dict):
             try:
                 processed_content = json.dumps(content, indent=4, ensure_ascii=False)
@@ -277,8 +273,11 @@ class Step:
         return True
 
     async def send(self):
+        if self.persisted:
+            return
+
         if config.code.author_rename:
-            self.author = await config.code.author_rename(self.author)
+            self.name = await config.code.author_rename(self.name)
 
         if self.streaming:
             self.streaming = False
@@ -287,7 +286,7 @@ class Step:
 
         data_layer = get_data_layer()
 
-        if data_layer and not self.persisted:
+        if data_layer:
             try:
                 asyncio.create_task(data_layer.create_step(step_dict))
                 self.persisted = True
@@ -343,7 +342,6 @@ class Step:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             else:
-                # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
         context.session.active_steps.append(self)
         await self.send()
@@ -360,9 +358,9 @@ class Step:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             else:
-                # TODO do we use the root message as default parent?
                 self.parent_id = context.session.root_message.id
         context.session.active_steps.append(self)
+
         asyncio.create_task(self.send())
         return self
 

@@ -17,7 +17,7 @@ describe('Chat profiles', () => {
     cy.get('[data-test="chat-profile:GPT-4"]').should('exist');
     cy.get('[data-test="chat-profile:GPT-5"]').should('exist');
 
-    cy.get('.message')
+    cy.get('.step')
       .should('have.length', 1)
       .eq(0)
       .should(
@@ -30,7 +30,7 @@ describe('Chat profiles', () => {
     cy.get('[data-test="chat-profile:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.get('.message')
+    cy.get('.step')
       .should('have.length', 1)
       .eq(0)
       .should(
@@ -41,7 +41,7 @@ describe('Chat profiles', () => {
     cy.get('#new-chat-button').click();
     cy.get('#confirm').click();
 
-    cy.get('.message')
+    cy.get('.step')
       .should('have.length', 1)
       .eq(0)
       .should(

@@ -244,18 +244,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
         )
 
-    app_user = await config.code.password_auth_callback(
+    user = await config.code.password_auth_callback(
         form_data.username, form_data.password
     )
 
-    if not app_user:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="credentialssignin",
         )
-    access_token = create_jwt(app_user)
+    access_token = create_jwt(user)
     if data_layer := get_data_layer():
-        await data_layer.create_user(app_user)
+        await data_layer.create_user(user)
     return {
         "access_token": access_token,
         "token_type": "bearer",

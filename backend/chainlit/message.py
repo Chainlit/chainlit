@@ -303,6 +303,7 @@ class ErrorMessage(MessageBase):
         self.content = content
         self.author = author
         self.type = "SYSTEM_MESSAGE"
+        self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
 
         super().__post_init__()

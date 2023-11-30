@@ -93,8 +93,8 @@ class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
 
 
 class AskResponse(TypedDict):
-    content: str
-    author: str
+    output: str
+    name: str
 
 
 class UIMessagePayload(TypedDict):

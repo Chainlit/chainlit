@@ -17,6 +17,6 @@ describe('Chain of Thought', () => {
     cy.get('#tool-1-done').should('exist');
     cy.get('#tool-2-done').should('exist');
 
-    cy.get('.message').should('have.length', 5);
+    cy.get('.step').should('have.length', 5);
   });
 });

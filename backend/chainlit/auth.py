@@ -67,21 +67,20 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
             options={"verify_signature": True},
         )
         del dict["exp"]
-        app_user = User(**dict)
+        user = User(**dict)
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
-
     if data_layer := get_data_layer():
         try:
-            persisted_app_user = await data_layer.get_user(app_user.identifier)
+            persisted_user = await data_layer.get_user(user.identifier)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
-        if persisted_app_user == None:
+        if persisted_user == None:
             raise HTTPException(status_code=401, detail="User does not exist")
 
-        return persisted_app_user
+        return persisted_user
     else:
-        return app_user
+        return user
 
 
 async def get_current_user(token: str = Depends(reuseable_oauth)):

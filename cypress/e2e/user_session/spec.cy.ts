@@ -16,24 +16,24 @@ describe('User Session', () => {
   it('should be able to store data related per user session', () => {
     submitMessage('Hello 1');
 
-    cy.get('.message').should('have.length', 2);
-    cy.get('.message').eq(1).should('contain', 'Prev message: None');
+    cy.get('.step').should('have.length', 2);
+    cy.get('.step').eq(1).should('contain', 'Prev message: None');
 
     submitMessage('Hello 2');
 
-    cy.get('.message').should('have.length', 4);
-    cy.get('.message').eq(3).should('contain', 'Prev message: Hello 1');
+    cy.get('.step').should('have.length', 4);
+    cy.get('.step').eq(3).should('contain', 'Prev message: Hello 1');
 
     newSession();
 
     submitMessage('Hello 3');
 
-    cy.get('.message').should('have.length', 2);
-    cy.get('.message').eq(1).should('contain', 'Prev message: None');
+    cy.get('.step').should('have.length', 2);
+    cy.get('.step').eq(1).should('contain', 'Prev message: None');
 
     submitMessage('Hello 4');
 
-    cy.get('.message').should('have.length', 4);
-    cy.get('.message').eq(3).should('contain', 'Prev message: Hello 3');
+    cy.get('.step').should('have.length', 4);
+    cy.get('.step').eq(3).should('contain', 'Prev message: Hello 3');
   });
 });

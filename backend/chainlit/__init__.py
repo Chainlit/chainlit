@@ -45,6 +45,7 @@ from chainlit.message import (
     Message,
 )
 from chainlit.oauth_providers import get_configured_oauth_providers
+from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, ThreadDict
@@ -312,6 +313,8 @@ __all__ = [
     "AskUserMessage",
     "AskActionMessage",
     "AskFileMessage",
+    "Step",
+    "step",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",

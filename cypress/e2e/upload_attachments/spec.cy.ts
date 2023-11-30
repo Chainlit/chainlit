@@ -7,17 +7,17 @@ describe('Upload attachments', () => {
 
   const shouldHaveInlineAttachments = () => {
     submitMessage('Message with attachments');
-    cy.get('.message').should('have.length', 5);
-    cy.get('.message')
+    cy.get('.step').should('have.length', 5);
+    cy.get('.step')
       .eq(1)
       .should('contain', 'Content: Message with attachments');
-    cy.get('.message')
+    cy.get('.step')
       .eq(2)
       .should('contain', 'Received element 0: state_of_the_union.txt');
-    cy.get('.message').eq(3).should('contain', 'Received element 1: hello.cpp');
-    cy.get('.message').eq(4).should('contain', 'Received element 2: hello.py');
+    cy.get('.step').eq(3).should('contain', 'Received element 1: hello.cpp');
+    cy.get('.step').eq(4).should('contain', 'Received element 2: hello.py');
 
-    cy.get('.message').eq(0).find('.inline-file').should('have.length', 3);
+    cy.get('.step').eq(0).find('.inline-file').should('have.length', 3);
     cy.get('.inline-file')
       .eq(0)
       .should('have.attr', 'download', 'state_of_the_union.txt');

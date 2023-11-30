@@ -33,8 +33,8 @@ describe('Customize chat settings', () => {
 
     cy.contains('Confirm').click();
 
-    cy.get('.message').should('have.length', 1);
-    cy.get('.message').eq(0).should('contain', 'Settings updated!');
+    cy.get('.step').should('have.length', 1);
+    cy.get('.step').eq(0).should('contain', 'Settings updated!');
 
     // Check if inputs are updated
     cy.get('#chat-settings-open-modal').click();
