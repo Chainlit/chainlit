@@ -16,7 +16,7 @@ import {
   threadIdToResumeState,
   tokenCountState
 } from 'src/state';
-import { IAction, IFileElement, IMessage } from 'src/types';
+import { IAction, IFileElement, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
 
 const useChatInteract = () => {
@@ -54,7 +54,7 @@ const useChatInteract = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IMessage, files?: IFileElement[]) => {
+    (message: IStep, files?: IFileElement[]) => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
       session?.socket.emit('ui_message', { message, files });
@@ -63,7 +63,7 @@ const useChatInteract = () => {
   );
 
   const replyMessage = useCallback(
-    (message: IMessage) => {
+    (message: IStep) => {
       if (askUser) {
         setMessages((oldMessages) => addMessage(oldMessages, message));
         askUser.callback(message);

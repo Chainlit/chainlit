@@ -1,5 +1,5 @@
 import { IAction } from './action';
-import { IMessage } from './message';
+import { IStep } from './step';
 
 export interface FileSpec {
   accept?: string[] | Record<string, string[]>;
@@ -20,7 +20,7 @@ export interface IFileResponse {
 }
 
 export interface IAsk {
-  callback: (payload: IMessage | IFileResponse[] | IAction) => void;
+  callback: (payload: IStep | IFileResponse[] | IAction) => void;
   spec: {
     type: 'text' | 'file' | 'action';
     timeout: number;

@@ -2,12 +2,12 @@ import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 import { isLastMessage } from 'utils/message';
 
-import type { IAction, IMessageElement, StepOrMessage } from 'client-types/';
+import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import { Message } from './Message';
 
 interface Props {
-  messages: StepOrMessage[];
+  messages: IStep[];
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -22,9 +22,7 @@ const Messages = memo(
     let previousAuthor = '';
 
     const filtered = messages.filter((m, i) => {
-      const content =
-        'content' in m ? m.content : 'output' in m ? m.output : '';
-
+      const content = m.output;
       const hasContent = !!content;
       const hasInlinedElement = elements.find(
         (el) => el.display === 'inline' && el.forId === m.id
@@ -46,7 +44,7 @@ const Messages = memo(
     return (
       <>
         {filtered.map((m, i) => {
-          const author = 'author' in m ? m.author : 'name' in m ? m.name : '';
+          const author = m.name;
           const isLast = isLastMessage(filtered, i);
           let messageRunning =
             isRunning === undefined ? messageContext.loading : isRunning;

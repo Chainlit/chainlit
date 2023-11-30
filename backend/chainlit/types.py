@@ -12,7 +12,6 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from chainlit.message import MessageDict
     from chainlit.element import ElementDict
     from chainlit.user import UserDict
     from chainlit.step import StepDict
@@ -33,7 +32,6 @@ class ThreadDict(TypedDict):
     metadata: Optional[Dict]
     createdAt: Optional[str]
     user: Optional["UserDict"]
-    messages: List["MessageDict"]
     steps: List["StepDict"]
     elements: Optional[List["ElementDict"]]
 
@@ -100,7 +98,7 @@ class AskResponse(TypedDict):
 
 
 class UIMessagePayload(TypedDict):
-    message: "MessageDict"
+    message: "StepDict"
     files: Optional[List[Dict]]
 
 

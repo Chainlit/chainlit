@@ -13,18 +13,19 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from chainlit_client import BaseGeneration, StepType
+from chainlit_client import BaseGeneration, MessageType, StepType
 
 
 class StepDict(TypedDict, total=False):
     name: str
-    type: StepType
+    type: Union[StepType, MessageType]
     id: str
     threadId: str
     parentId: Optional[str]
-    isError: Optional[bool]
     disableFeedback: bool
     streaming: bool
+    waitForAnswer: Optional[bool]
+    isError: Optional[bool]
     metadata: Dict
     input: str
     output: str
@@ -33,6 +34,7 @@ class StepDict(TypedDict, total=False):
     end: Union[str, None]
     generation: Optional[Dict]
     language: Optional[str]
+    indent: Optional[int]
     feedback: Optional[FeedbackDict]
 
 
@@ -249,7 +251,7 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        await context.emitter.update_message(step_dict)
+        await context.emitter.update_step(step_dict)
 
         return True
 
@@ -270,7 +272,7 @@ class Step:
                     raise e
                 logger.error(f"Failed to persist step deletion: {str(e)}")
 
-        await context.emitter.delete_message(step_dict)
+        await context.emitter.delete_step(step_dict)
 
         return True
 
@@ -297,7 +299,7 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        await context.emitter.send_message(step_dict)
+        await context.emitter.send_step(step_dict)
 
         return self.id
 
@@ -309,8 +311,8 @@ class Step:
 
         if not self.streaming:
             self.streaming = True
-            msg_dict = self.to_dict()
-            await context.emitter.stream_start(msg_dict)
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
 
         if is_sequence:
             self.output = token

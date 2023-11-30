@@ -9,7 +9,7 @@ import {
   FileSpec,
   IFileElement,
   IFileResponse,
-  IMessage,
+  IStep,
   useChatInteract
 } from '@chainlit/react-client';
 
@@ -44,11 +44,12 @@ const InputBox = memo(
 
     const onSubmit = useCallback(
       async (msg: string, files?: IFileElement[]) => {
-        const message: IMessage = {
+        const message: IStep = {
+          threadId: '',
           id: uuidv4(),
-          author: user?.identifier || 'User',
-          role: 'user',
-          content: msg,
+          name: user?.identifier || 'User',
+          type: 'USER_MESSAGE',
+          output: msg,
           createdAt: new Date().toISOString()
         };
 
@@ -77,11 +78,12 @@ const InputBox = memo(
 
     const onReply = useCallback(
       async (msg: string) => {
-        const message: IMessage = {
+        const message: IStep = {
+          threadId: '',
           id: uuidv4(),
-          author: user?.identifier || 'User',
-          role: 'user',
-          content: msg,
+          name: user?.identifier || 'User',
+          type: 'USER_MESSAGE',
+          output: msg,
           createdAt: new Date().toISOString()
         };
 

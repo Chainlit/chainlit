@@ -1,8 +1,10 @@
-import { StepOrMessage } from '.';
 import { IFeedback } from './feedback';
 import { IGeneration } from './generation';
 
 type StepType =
+  | 'ASSISTANT_MESSAGE'
+  | 'USER_MESSAGE'
+  | 'SYSTEM_MESSAGE'
   | 'RUN'
   | 'TOOL'
   | 'LLM'
@@ -18,15 +20,18 @@ export interface IStep {
   threadId: string;
   parentId?: string;
   isError?: boolean;
-  input: string;
+  waitForAnswer?: boolean;
+  input?: string;
   output: string;
   createdAt: number | string;
-  start: number | string;
-  end: number | string;
+  start?: number | string;
+  end?: number | string;
   disableFeedback?: boolean;
   feedback?: IFeedback;
   language?: string;
   streaming?: boolean;
   generation?: IGeneration;
-  steps?: StepOrMessage[];
+  steps?: IStep[];
+  //legacy
+  indent?: number;
 }

@@ -11,8 +11,8 @@ import {
   IFeedback,
   IFunction,
   IMessageElement,
+  IStep,
   ITool,
-  StepOrMessage,
   accessTokenState,
   messagesState,
   updateMessageById
@@ -29,7 +29,7 @@ interface Props {
   actions: IAction[];
   elements: IMessageElement[];
   avatars: IAvatarElement[];
-  messages: StepOrMessage[];
+  messages: IStep[];
   askUser?: IAsk;
   autoScroll?: boolean;
   callAction?: (action: IAction) => void;
@@ -61,10 +61,9 @@ const MessageContainer = memo(
     const navigate = useNavigate();
 
     const onPlaygroundButtonClick = useCallback(
-      (message: StepOrMessage) => {
+      (message: IStep) => {
         setPlayground((old) => {
-          const generation =
-            'generation' in message ? message.generation : undefined;
+          const generation = message.generation;
           let functions =
             (generation?.settings?.functions as unknown as IFunction[]) || [];
           const tools =
@@ -98,11 +97,7 @@ const MessageContainer = memo(
     );
 
     const onFeedbackUpdated = useCallback(
-      async (
-        message: StepOrMessage,
-        onSuccess: () => void,
-        feedback: IFeedback
-      ) => {
+      async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
         try {
           await toast.promise(apiClient.setFeedback(feedback, accessToken), {
             loading: 'Updating...',

@@ -9,10 +9,11 @@ it('renders the message content', () => {
   const { getByText } = render(
     <MessageContent
       message={{
-        role: 'system',
-        content: 'Hello World',
+        threadId: 'test',
+        type: 'SYSTEM_MESSAGE',
+        output: 'Hello World',
         id: 'test',
-        author: 'User',
+        name: 'User',
         createdAt: 0
       }}
       elements={[]}
@@ -25,10 +26,11 @@ it('highlights multiple sources correctly (no substring matching)', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        role: 'system',
-        content: `Hello world source_121, source_1, source_12`,
+        threadId: 'test',
+        type: 'SYSTEM_MESSAGE',
+        output: `Hello world source_121, source_1, source_12`,
         id: 'test2',
-        author: 'Test',
+        name: 'Test',
         createdAt: 0
       }}
       elements={[
@@ -65,10 +67,11 @@ it('highlights sources containing regex characters correctly', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        role: 'system',
-        content: `Hello world: Document[1], source(12), page{12}`,
+        threadId: 'test',
+        type: 'SYSTEM_MESSAGE',
+        output: `Hello world: Document[1], source(12), page{12}`,
         id: 'test2',
-        author: 'Test',
+        name: 'Test',
         createdAt: 0
       }}
       elements={[
@@ -105,10 +108,11 @@ it('preserves the box size when collapsing', () => {
   const { getByRole } = render(
     <MessageContent
       message={{
-        role: 'system',
-        content: 'hello'.repeat(650),
+        threadId: 'test',
+        type: 'SYSTEM_MESSAGE',
+        output: 'hello'.repeat(650),
         id: 'test2',
-        author: 'Test',
+        name: 'Test',
         createdAt: 0
       }}
       elements={[

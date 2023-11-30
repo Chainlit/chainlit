@@ -8,12 +8,12 @@ import Typography from '@mui/material/Typography';
 
 import { useColorForName } from 'hooks/useColors';
 
-import type { StepOrMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 import { MessageTime } from './MessageTime';
 
 interface Props {
-  message: StepOrMessage;
+  message: IStep;
   show?: boolean;
 }
 
@@ -23,10 +23,8 @@ const Author = ({ message, show }: Props) => {
   const context = useContext(MessageContext);
   const getColorForName = useColorForName(context.uiName);
 
-  const author = 'author' in message ? message.author : message.name;
-  const isUser = 'role' in message ? message.role === 'user' : false;
-  const indent = 'indent' in message ? message.indent : undefined;
-  const parentId = 'parentId' in message ? message.parentId : undefined;
+  const author = message.name;
+  const isUser = message.type === 'USER_MESSAGE';
 
   const avatarEl = context.avatars.find((e) => e.name === author);
 
@@ -60,7 +58,7 @@ const Author = ({ message, show }: Props) => {
         {display}
         <MessageTime timestamp={message.createdAt} />
       </Box>
-      {(!!indent || parentId) && (
+      {(!!message.indent || message.parentId) && (
         <Box
           width="2px"
           borderRadius="13px"

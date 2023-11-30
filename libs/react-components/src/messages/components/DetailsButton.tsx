@@ -6,21 +6,14 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import type { StepOrMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 interface Props {
-  message: StepOrMessage;
+  message: IStep;
   opened: boolean;
   loading?: boolean;
   onClick: () => void;
 }
-
-const getContent = (message: StepOrMessage) =>
-  'content' in message
-    ? message.content
-    : 'output' in message
-    ? message.output
-    : '';
 
 const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
   const messageContext = useContext(MessageContext);
@@ -30,15 +23,9 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   const lastStep = nested ? message.steps![nestedCount - 1] : undefined;
 
-  const tool = lastStep
-    ? 'author' in lastStep
-      ? lastStep.author
-      : 'name' in lastStep
-      ? lastStep.name
-      : undefined
-    : undefined;
+  const tool = lastStep ? lastStep.name : undefined;
 
-  const content = getContent(message);
+  const content = message.output;
 
   const isRunningEmptyStep = loading && !content;
 
@@ -51,7 +38,7 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   // Don't count empty steps
   const stepCount = nestedCount
-    ? message.steps!.filter((m) => !!getContent(m) || m.steps?.length).length
+    ? message.steps!.filter((m) => !!m.output || m.steps?.length).length
     : 0;
 
   const text = loading

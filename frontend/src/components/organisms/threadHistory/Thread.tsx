@@ -83,7 +83,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           avatars={[]}
           actions={actions}
           elements={elements as IMessageElement[]}
-          messages={nestMessages(thread.messages)}
+          messages={nestMessages(thread.steps)}
         />
       </SideView>
     </Stack>

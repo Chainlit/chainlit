@@ -1,11 +1,16 @@
-export type MessageRole = 'system' | 'assistant' | 'user' | 'tool';
+export type GenerationMessageRole =
+  | 'system'
+  | 'assistant'
+  | 'user'
+  | 'function'
+  | 'tool';
 export type ILLMSettings = Record<string, string | string[] | number | boolean>;
 
 export interface IGenerationMessage {
   template?: string;
   formatted?: string;
   templateFormat: string;
-  role: MessageRole;
+  role: GenerationMessageRole;
   name?: string;
 }
 

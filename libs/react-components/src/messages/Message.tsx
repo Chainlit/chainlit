@@ -11,12 +11,12 @@ import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
 import { MessageContent } from './components/MessageContent';
 
-import type { IAction, IMessageElement, StepOrMessage } from 'client-types/';
+import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import { Messages } from './Messages';
 
 interface Props {
-  message: StepOrMessage;
+  message: IStep;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -57,10 +57,8 @@ const Message = memo(
       return null;
     }
 
-    const isUser = 'role' in message && message.role === 'user';
-    const isAsk = 'waitForAnswer' in message && message.waitForAnswer;
-    const isMessage = 'content' in message;
-    const className = isMessage ? 'message' : 'step';
+    const isUser = message.type === 'USER_MESSAGE';
+    const isAsk = message.waitForAnswer;
 
     return (
       <Box
@@ -73,7 +71,7 @@ const Message = memo(
               ? theme.palette.grey[800]
               : theme.palette.grey[100]
         }}
-        className={className}
+        className="step"
       >
         <Box
           sx={{
@@ -87,7 +85,7 @@ const Message = memo(
           }}
         >
           <Stack
-            id={`${className}-${message.id}`}
+            id={`step-${message.id}`}
             direction="row"
             ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
             sx={{
@@ -125,7 +123,7 @@ const Message = memo(
               {!isRunning && isLast && isAsk && (
                 <AskUploadButton onError={onError} />
               )}
-              {isMessage ? (
+              {actions?.length ? (
                 <MessageActions message={message} actions={actions} />
               ) : null}
             </Stack>

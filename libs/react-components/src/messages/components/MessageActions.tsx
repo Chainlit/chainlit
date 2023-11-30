@@ -1,13 +1,13 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import type { IAction, IMessage } from 'client-types/';
+import type { IAction, IStep } from 'client-types/';
 
 import { ActionButton } from './ActionButton';
 import { ActionDrawerButton } from './ActionDrawerButton';
 
 interface Props {
-  message: IMessage;
+  message: IStep;
   actions: IAction[];
 }
 

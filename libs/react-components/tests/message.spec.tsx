@@ -9,9 +9,10 @@ import { ThemeProvider, createTheme } from '@mui/material';
 describe('Message', () => {
   const defaultProps: ComponentProps<typeof Message> = {
     message: {
+      threadId: '1',
       id: '1',
-      content: 'Hello',
-      role: 'user',
+      output: 'Hello',
+      type: 'USER_MESSAGE',
       steps: [
         {
           id: '2',
@@ -26,7 +27,7 @@ describe('Message', () => {
         }
       ],
       waitForAnswer: false,
-      author: 'foo',
+      name: 'foo',
       createdAt: '12/12/2002'
     },
     elements: [],
@@ -78,7 +79,7 @@ describe('Message', () => {
           {...defaultProps}
           message={{
             ...defaultProps.message,
-            content: 'hello '.repeat(650),
+            output: 'hello '.repeat(650),
             streaming: true
           }}
         />
@@ -99,7 +100,7 @@ describe('Message', () => {
             {...defaultProps}
             message={{
               ...defaultProps.message,
-              content: 'hello '.repeat(650)
+              output: 'hello '.repeat(650)
             }}
           />
         </MessageContext.Provider>

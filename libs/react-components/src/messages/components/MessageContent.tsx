@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import type { IMessageElement, StepOrMessage } from 'client-types/';
+import type { IMessageElement, IStep } from 'client-types/';
 
 import { MessageButtons } from './MessageButtons';
 
@@ -18,7 +18,7 @@ const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of character
 
 export interface Props {
   elements: IMessageElement[];
-  message: StepOrMessage;
+  message: IStep;
   preserveSize?: boolean;
   allowHtml?: boolean;
   latex?: boolean;
@@ -26,17 +26,11 @@ export interface Props {
 
 const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
-    const content =
-      'content' in message
-        ? message.content
-        : 'output' in message
-        ? message.output
-        : '';
     const isUser = 'role' in message && message.role === 'user';
     const { preparedContent, inlinedElements, refElements } = prepareContent({
       elements,
       id: message.id,
-      content: content,
+      content: message.output,
       language: message.language
     });
 

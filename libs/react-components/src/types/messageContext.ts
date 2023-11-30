@@ -3,8 +3,7 @@ import type {
   IAvatarElement,
   IFeedback,
   IMessageElement,
-  IStep,
-  StepOrMessage
+  IStep
 } from 'client-types/';
 
 interface IMessageContext {
@@ -22,7 +21,7 @@ interface IMessageContext {
   onPlaygroundButtonClick?: (step: IStep) => void;
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
-    message: StepOrMessage,
+    message: IStep,
     onSuccess: () => void,
     feedback: IFeedback
   ) => void;

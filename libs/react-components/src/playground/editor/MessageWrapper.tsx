@@ -10,9 +10,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import type {
+  GenerationMessageRole,
   IChatGeneration,
-  IGenerationMessage,
-  MessageRole
+  IGenerationMessage
 } from 'client-types/';
 
 const roles = ['Assistant', 'System', 'User'];
@@ -38,7 +38,7 @@ const MessageWrapper = ({
   const { setPlayground } = useContext(PlaygroundContext);
 
   const onRoleSelected = (event: SelectChangeEvent) => {
-    const role = event.target.value as MessageRole;
+    const role = event.target.value as GenerationMessageRole;
 
     if (role) {
       setPlayground((old) => ({

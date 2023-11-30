@@ -1,4 +1,4 @@
-import type { IMessageElement, StepOrMessage } from 'client-types/';
+import type { IMessageElement, IStep } from 'client-types/';
 
 const isForIdMatch = (id: string | number | undefined, forId: string) => {
   if (!forId || !id) {
@@ -81,7 +81,7 @@ export const prepareContent = ({
   };
 };
 
-export const isLastMessage = (messages: StepOrMessage[], index: number) => {
+export const isLastMessage = (messages: IStep[], index: number) => {
   if (messages.length - 1 === index) {
     return true;
   }

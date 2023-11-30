@@ -7,11 +7,10 @@ import {
   IAction,
   IAsk,
   IAvatarElement,
-  IMessage,
   IMessageElement,
+  IStep,
   ITasklistElement,
   IUser,
-  StepOrMessage,
   ThreadHistory
 } from './types';
 import { groupByDate } from './utils/group';
@@ -54,7 +53,7 @@ export const actionState = atom<IAction[]>({
   default: []
 });
 
-export const messagesState = atom<StepOrMessage[]>({
+export const messagesState = atom<IStep[]>({
   key: 'Messages',
   dangerouslyAllowMutability: true,
   default: []
@@ -113,7 +112,7 @@ export const tasklistState = atom<ITasklistElement[]>({
   default: []
 });
 
-export const firstUserMessageState = atom<IMessage | undefined>({
+export const firstUserMessageState = atom<IStep | undefined>({
   key: 'FirstUserMessage',
   default: undefined
 });

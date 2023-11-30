@@ -15,12 +15,12 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import type { StepOrMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 const ICON_SIZE = '16px';
 
 interface Props {
-  message: StepOrMessage;
+  message: IStep;
 }
 
 const FeedbackButtons = ({ message }: Props) => {
@@ -72,7 +72,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     const baseButtons = [
       () => (
-        <Tooltip title="Negative feedback">
+        <Tooltip title="Not helpful">
           <span>
             <Button
               disabled={disabled}
@@ -88,7 +88,7 @@ const FeedbackButtons = ({ message }: Props) => {
         </Tooltip>
       ),
       () => (
-        <Tooltip title="Positive feedback">
+        <Tooltip title="Helpful">
           <span>
             <Button
               disabled={disabled}
@@ -107,7 +107,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     if (comment) {
       baseButtons.push(() => (
-        <Tooltip title="Feedback comment">
+        <Tooltip title="Feedback">
           <span>
             <Button
               disabled={disabled}

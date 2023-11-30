@@ -28,11 +28,10 @@ import {
   IAction,
   IAvatarElement,
   IElement,
-  IMessage,
   IMessageElement,
+  IStep,
   ITasklistElement,
-  IThread,
-  StepOrMessage
+  IThread
 } from 'src/types';
 import {
   addMessage,
@@ -113,10 +112,7 @@ const useChatSession = () => {
       });
 
       socket.on('resume_thread', (thread: IThread) => {
-        let messages: StepOrMessage[] = [];
-        for (const message of thread.messages) {
-          messages = addMessage(messages, message);
-        }
+        let messages: IStep[] = [];
         for (const step of thread.steps) {
           messages = addMessage(messages, step);
         }
@@ -141,27 +137,27 @@ const useChatSession = () => {
         );
       });
 
-      socket.on('new_message', (message: StepOrMessage) => {
+      socket.on('new_message', (message: IStep) => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('init_thread', (message: IMessage) => {
+      socket.on('init_thread', (message: IStep) => {
         setFirstUserMessage(message);
       });
 
-      socket.on('update_message', (message: StepOrMessage) => {
+      socket.on('update_message', (message: IStep) => {
         setMessages((oldMessages) =>
           updateMessageById(oldMessages, message.id, message)
         );
       });
 
-      socket.on('delete_message', (message: StepOrMessage) => {
+      socket.on('delete_message', (message: IStep) => {
         setMessages((oldMessages) =>
           deleteMessageById(oldMessages, message.id)
         );
       });
 
-      socket.on('stream_start', (message: StepOrMessage) => {
+      socket.on('stream_start', (message: IStep) => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 

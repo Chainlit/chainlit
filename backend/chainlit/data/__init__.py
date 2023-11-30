@@ -17,7 +17,6 @@ from chainlit.types import (
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
-    from chainlit.message import MessageDict
     from chainlit.step import StepDict
     from chainlit.user import PersistedUser, User
 
@@ -85,18 +84,6 @@ class BaseDataLayer:
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str):
-        pass
-
-    @queue_until_user_message()
-    async def create_message(self, message_dict: "MessageDict"):
-        pass
-
-    @queue_until_user_message()
-    async def update_message(self, message_dict: "MessageDict"):
-        pass
-
-    @queue_until_user_message()
-    async def delete_message(self, message_id: str):
         pass
 
     @queue_until_user_message()

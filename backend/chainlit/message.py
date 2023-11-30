@@ -1,9 +1,9 @@
 import asyncio
 import json
 import uuid
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, TypedDict, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
 from chainlit.config import config
@@ -19,23 +19,11 @@ from chainlit.types import (
     AskFileSpec,
     AskResponse,
     AskSpec,
-    FeedbackDict,
 )
-from chainlit_client import MessageRole
+from chainlit_client import MessageType
 
-
-class MessageDict(TypedDict, total=False):
-    threadId: Optional[str]
-    id: str
-    createdAt: Optional[str]
-    content: str
-    author: str
-    language: Optional[str]
-    role: MessageRole
-    waitForAnswer: Optional[bool]
-    isError: Optional[bool]
-    feedback: Optional[FeedbackDict]
-    disableFeedback: Optional[bool]
+if TYPE_CHECKING:
+    from chainlit.step import StepDict
 
 
 class MessageBase(ABC):
@@ -43,10 +31,16 @@ class MessageBase(ABC):
     thread_id: str
     author: str
     content: str = ""
+    type: MessageType = "ASSISTANT_MESSAGE"
+    disable_feedback = False
     streaming = False
     created_at: Union[str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
+    is_error = False
+    language: Optional[str] = None
+    wait_for_answer = False
+    indent: Optional[int] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -57,9 +51,39 @@ class MessageBase(ABC):
         if not self.created_at:
             self.created_at = datetime.now(timezone.utc).isoformat()
 
-    @abstractmethod
-    def to_dict(self) -> MessageDict:
-        pass
+    @classmethod
+    def from_dict(self, _dict: "StepDict"):
+        type = _dict.get("type", "ASSISTANT_MESSAGE")
+        message = Message(
+            id=_dict["id"],
+            created_at=_dict["createdAt"],
+            content=_dict["output"],
+            author=_dict.get("name", config.ui.name),
+            type=type,  # type: ignore
+            disable_feedback=_dict.get("disableFeedback", False),
+            language=_dict.get("language"),
+        )
+
+        return message
+
+    def to_dict(self) -> "StepDict":
+        _dict: "StepDict" = {
+            "id": self.id,
+            "threadId": self.thread_id,
+            "createdAt": self.created_at,
+            "output": self.content,
+            "name": self.author,
+            "type": self.type,
+            "createdAt": self.created_at,
+            "language": self.language,
+            "streaming": self.streaming,
+            "disableFeedback": self.disable_feedback,
+            "isError": self.is_error,
+            "waitForAnswer": self.wait_for_answer,
+            "indent": self.indent,
+        }
+
+        return _dict
 
     async def update(
         self,
@@ -72,18 +96,18 @@ class MessageBase(ABC):
         if self.streaming:
             self.streaming = False
 
-        msg_dict = self.to_dict()
+        step_dict = self.to_dict()
 
         data_layer = get_data_layer()
         if data_layer and not self.persisted:
             try:
-                asyncio.create_task(data_layer.update_message(msg_dict))
+                asyncio.create_task(data_layer.update_step(step_dict))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
                 logger.error(f"Failed to persist message update: {str(e)}")
 
-        await context.emitter.update_message(msg_dict)
+        await context.emitter.update_step(step_dict)
 
         return True
 
@@ -93,33 +117,33 @@ class MessageBase(ABC):
         """
         trace_event("remove_message")
 
-        msg_dict = self.to_dict()
+        step_dict = self.to_dict()
         data_layer = get_data_layer()
         if data_layer and not self.persisted:
             try:
-                asyncio.create_task(data_layer.delete_message(msg_dict["id"]))
+                asyncio.create_task(data_layer.delete_step(step_dict["id"]))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
                 logger.error(f"Failed to persist message deletion: {str(e)}")
 
-        await context.emitter.delete_message(msg_dict)
+        await context.emitter.delete_step(step_dict)
 
         return True
 
     async def _create(self):
-        msg_dict = self.to_dict()
+        step_dict = self.to_dict()
         data_layer = get_data_layer()
         if data_layer and not self.persisted:
             try:
-                asyncio.create_task(data_layer.create_message(msg_dict))
+                asyncio.create_task(data_layer.create_message(step_dict))
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
                 logger.error(f"Failed to persist message creation: {str(e)}")
 
-        return msg_dict
+        return step_dict
 
     async def send(self):
         if self.content is None:
@@ -131,9 +155,9 @@ class MessageBase(ABC):
         if self.streaming:
             self.streaming = False
 
-        msg_dict = await self._create()
+        step_dict = await self._create()
 
-        await context.emitter.send_message(msg_dict)
+        await context.emitter.send_step(step_dict)
 
         return self.id
 
@@ -145,8 +169,8 @@ class MessageBase(ABC):
 
         if not self.streaming:
             self.streaming = True
-            msg_dict = self.to_dict()
-            await context.emitter.stream_start(msg_dict)
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
 
         if is_sequence:
             self.content = token
@@ -179,8 +203,8 @@ class Message(MessageBase):
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
-        disable_feedback: Optional[bool] = False,
-        role: Optional[MessageRole] = "assistant",
+        disable_feedback: bool = False,
+        type: MessageType = "ASSISTANT_MESSAGE",
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -206,41 +230,12 @@ class Message(MessageBase):
             self.created_at = created_at
 
         self.author = author
-        self.role = role
+        self.type = type
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
         self.disable_feedback = disable_feedback
 
         super().__post_init__()
-
-    @classmethod
-    def from_dict(self, _dict: MessageDict):
-        message = Message(
-            id=_dict["id"],
-            created_at=_dict["createdAt"],
-            content=_dict["content"],
-            author=_dict.get("author", config.ui.name),
-            language=_dict.get("language"),
-            disable_feedback=_dict.get("disableFeedback"),
-            role=_dict.get("role"),
-        )
-
-        return message
-
-    def to_dict(self):
-        _dict = {
-            "id": self.id,
-            "threadId": self.thread_id,
-            "createdAt": self.created_at,
-            "content": self.content,
-            "author": self.author,
-            "role": self.role,
-            "language": self.language,
-            "streaming": self.streaming,
-            "disableFeedback": self.disable_feedback,
-        }
-
-        return _dict
 
     async def send(self) -> str:
         """
@@ -307,23 +302,10 @@ class ErrorMessage(MessageBase):
     ):
         self.content = content
         self.author = author
+        self.type = "SYSTEM_MESSAGE"
         self.fail_on_persist_error = fail_on_persist_error
 
         super().__post_init__()
-
-    def to_dict(self) -> MessageDict:
-        return {
-            "id": self.id,
-            "threadId": self.thread_id,
-            "createdAt": self.created_at,
-            "content": self.content,
-            "author": self.author,
-            "isError": True,
-            "role": "system",
-            "disableFeedback": True,
-            "language": None,
-            "waitForAnswer": False,
-        }
 
     async def send(self):
         """
@@ -359,7 +341,7 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        role: MessageRole = "assistant",
+        type: MessageType = "ASSISTANT_MESSAGE",
         disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
@@ -367,26 +349,11 @@ class AskUserMessage(AskMessageBase):
         self.content = content
         self.author = author
         self.timeout = timeout
-        self.role = role
+        self.type = type
         self.disable_feedback = disable_feedback
         self.raise_on_timeout = raise_on_timeout
 
         super().__post_init__()
-
-    def to_dict(self) -> MessageDict:
-        return {
-            "id": self.id,
-            "threadId": self.thread_id,
-            "createdAt": self.created_at,
-            "content": self.content,
-            "author": self.author,
-            "waitForAnswer": True,
-            "disableFeedback": self.disable_feedback,
-            "isError": False,
-            "role": self.role,
-            "language": None,
-            "waitForAnswer": False,
-        }
 
     async def send(self) -> Union[AskResponse, None]:
         """
@@ -400,11 +367,17 @@ class AskUserMessage(AskMessageBase):
         if self.streaming:
             self.streaming = False
 
-        msg_dict = await self._create()
+        self.wait_for_answer = True
+
+        step_dict = await self._create()
 
         spec = AskSpec(type="text", timeout=self.timeout)
 
-        res = await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await context.emitter.send_ask_user(
+            step_dict, spec, self.raise_on_timeout
+        )
+
+        self.wait_for_answer = False
 
         return res
 
@@ -433,7 +406,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
-        role: MessageRole = "assistant",
+        type: MessageType = "ASSISTANT_MESSAGE",
         disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,
@@ -442,28 +415,13 @@ class AskFileMessage(AskMessageBase):
         self.max_size_mb = max_size_mb
         self.max_files = max_files
         self.accept = accept
-        self.role = role
+        self.type = type
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
         self.disable_feedback = disable_feedback
 
         super().__post_init__()
-
-    def to_dict(self) -> MessageDict:
-        return {
-            "id": self.id,
-            "threadId": self.thread_id,
-            "createdAt": self.created_at,
-            "content": self.content,
-            "author": self.author,
-            "waitForAnswer": True,
-            "disableFeedback": self.disable_feedback,
-            "isError": False,
-            "role": self.role,
-            "language": None,
-            "waitForAnswer": False,
-        }
 
     async def send(self) -> Union[List[AskFileResponse], None]:
         """
@@ -477,7 +435,9 @@ class AskFileMessage(AskMessageBase):
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
 
-        msg_dict = await self._create()
+        self.wait_for_answer = True
+
+        step_dict = await self._create()
 
         spec = AskFileSpec(
             type="file",
@@ -487,7 +447,11 @@ class AskFileMessage(AskMessageBase):
             timeout=self.timeout,
         )
 
-        res = await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout)
+        res = await context.emitter.send_ask_user(
+            step_dict, spec, self.raise_on_timeout
+        )
+
+        self.wait_for_answer = False
 
         if res:
             return [AskFileResponse(**r) for r in res]
@@ -519,19 +483,6 @@ class AskActionMessage(AskMessageBase):
 
         super().__post_init__()
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "threadId": self.thread_id,
-            "createdAt": self.created_at,
-            "content": self.content,
-            "author": self.author,
-            "waitForAnswer": True,
-            "disableFeedback": self.disable_feedback,
-            "timeout": self.timeout,
-            "raiseOnTimeout": self.raise_on_timeout,
-        }
-
     async def send(self) -> Union[AskActionResponse, None]:
         """
         Sends the question to ask to the UI and waits for the reply
@@ -544,19 +495,21 @@ class AskActionMessage(AskMessageBase):
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
 
-        msg_dict = await self._create()
+        self.wait_for_answer = True
+
+        step_dict = await self._create()
 
         action_keys = []
 
         for action in self.actions:
             action_keys.append(action.id)
-            await action.send(for_id=str(msg_dict["id"]))
+            await action.send(for_id=str(step_dict["id"]))
 
         spec = AskActionSpec(type="action", timeout=self.timeout, keys=action_keys)
 
         res = cast(
             Union[AskActionResponse, None],
-            await context.emitter.send_ask_user(msg_dict, spec, self.raise_on_timeout),
+            await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
         for action in self.actions:
@@ -565,6 +518,9 @@ class AskActionMessage(AskMessageBase):
             self.content = "Timed out: no action was taken"
         else:
             self.content = f'**Selected action:** {res["label"]}'
+
+        self.wait_for_answer = False
+
         await self.update()
 
         return res

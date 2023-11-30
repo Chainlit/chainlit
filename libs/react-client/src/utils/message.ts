@@ -1,9 +1,9 @@
 import isEqual from 'lodash/isEqual';
 
-import { StepOrMessage } from '..';
+import { IStep } from '..';
 
-const nestMessages = (messages: StepOrMessage[]): StepOrMessage[] => {
-  let nestedMessages: StepOrMessage[] = [];
+const nestMessages = (messages: IStep[]): IStep[] => {
+  let nestedMessages: IStep[] = [];
 
   for (const message of messages) {
     nestedMessages = addMessage(nestedMessages, message);
@@ -12,7 +12,7 @@ const nestMessages = (messages: StepOrMessage[]): StepOrMessage[] => {
   return nestedMessages;
 };
 
-const isLastMessage = (messages: StepOrMessage[], index: number) => {
+const isLastMessage = (messages: IStep[], index: number) => {
   if (messages.length - 1 === index) {
     return true;
   }
@@ -30,10 +30,7 @@ const isLastMessage = (messages: StepOrMessage[], index: number) => {
 
 // Nested messages utils
 
-const addMessage = (
-  messages: StepOrMessage[],
-  message: StepOrMessage
-): StepOrMessage[] => {
+const addMessage = (messages: IStep[], message: IStep): IStep[] => {
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
   } else if ('parentId' in message && message.parentId) {
@@ -46,11 +43,11 @@ const addMessage = (
 };
 
 const addIndentMessage = (
-  messages: StepOrMessage[],
+  messages: IStep[],
   indent: number,
-  newMessage: StepOrMessage,
+  newMessage: IStep,
   currentIndentation: number = 0
-): StepOrMessage[] => {
+): IStep[] => {
   const nextMessages = [...messages];
 
   if (nextMessages.length === 0) {
@@ -80,10 +77,10 @@ const addIndentMessage = (
 };
 
 const addMessageToParent = (
-  messages: StepOrMessage[],
+  messages: IStep[],
   parentId: string,
-  newMessage: StepOrMessage
-): StepOrMessage[] => {
+  newMessage: IStep
+): IStep[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -101,7 +98,7 @@ const addMessageToParent = (
   return nextMessages;
 };
 
-const hasMessageById = (messages: StepOrMessage[], messageId: string) => {
+const hasMessageById = (messages: IStep[], messageId: string) => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
       return true;
@@ -115,10 +112,10 @@ const hasMessageById = (messages: StepOrMessage[], messageId: string) => {
 };
 
 const updateMessageById = (
-  messages: StepOrMessage[],
+  messages: IStep[],
   messageId: string,
-  updatedMessage: StepOrMessage
-): StepOrMessage[] => {
+  updatedMessage: IStep
+): IStep[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -135,7 +132,7 @@ const updateMessageById = (
   return nextMessages;
 };
 
-const deleteMessageById = (messages: StepOrMessage[], messageId: string) => {
+const deleteMessageById = (messages: IStep[], messageId: string) => {
   let nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
@@ -156,11 +153,11 @@ const deleteMessageById = (messages: StepOrMessage[], messageId: string) => {
 };
 
 const updateMessageContentById = (
-  messages: StepOrMessage[],
+  messages: IStep[],
   messageId: number | string,
   updatedContent: string,
   isSequence: boolean
-): StepOrMessage[] => {
+): IStep[] => {
   const nextMessages = [...messages];
 
   for (let index = 0; index < nextMessages.length; index++) {
