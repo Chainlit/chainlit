@@ -34,10 +34,10 @@ export const useAuth = (apiClient: ChainlitAPI) => {
       return;
     }
     try {
-      const { exp, ...AppUser } = jwt_decode(token) as any;
+      const { exp, ...User } = jwt_decode(token) as any;
       setToken(token);
       setAccessToken(`Bearer ${token}`);
-      setUser(AppUser as IUser);
+      setUser(User as IUser);
     } catch (e) {
       console.error(
         'Invalid token, clearing token from local storage',

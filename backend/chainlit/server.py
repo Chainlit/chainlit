@@ -270,17 +270,17 @@ async def header_auth(request: Request):
             detail="No header_auth_callback defined",
         )
 
-    app_user = await config.code.header_auth_callback(request.headers)
+    user = await config.code.header_auth_callback(request.headers)
 
-    if not app_user:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized",
         )
 
-    access_token = create_jwt(app_user)
+    access_token = create_jwt(user)
     if data_layer := get_data_layer():
-        await data_layer.create_user(app_user)
+        await data_layer.create_user(user)
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -369,22 +369,22 @@ async def oauth_callback(
     url = get_user_facing_url(request.url)
     token = await provider.get_token(code, url)
 
-    (raw_user_data, default_app_user) = await provider.get_user_info(token)
+    (raw_user_data, default_user) = await provider.get_user_info(token)
 
-    app_user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_app_user
+    user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_user
     )
 
-    if not app_user:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized",
         )
 
-    access_token = create_jwt(app_user)
+    access_token = create_jwt(user)
 
     if data_layer := get_data_layer():
-        await data_layer.create_user(app_user)
+        await data_layer.create_user(user)
 
     params = urllib.parse.urlencode(
         {
