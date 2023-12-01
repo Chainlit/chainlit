@@ -1,11 +1,11 @@
 import { runTestServer, submitMessage } from '../../support/testUtils';
 
-describe('Delete Message', () => {
+describe('Remove Step', () => {
   before(() => {
     runTestServer();
   });
 
-  it('should be able to delete a message', () => {
+  it('should be able to remove a step', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).should('contain', 'Message 1');
 

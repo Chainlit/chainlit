@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from starlette.datastructures import Headers
 
@@ -22,6 +22,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
+from chainlit.context import context
 from chainlit.element import (
     Audio,
     Avatar,
@@ -53,6 +54,7 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
+from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
 
 if env_found:
     logger.info("Loaded .env file")
@@ -315,6 +317,9 @@ __all__ = [
     "AskFileMessage",
     "Step",
     "step",
+    "ChatGeneration",
+    "CompletionGeneration",
+    "GenerationMessage",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",
@@ -328,6 +333,7 @@ __all__ = [
     "run_sync",
     "make_async",
     "cache",
+    "context",
     "LangchainCallbackHandler",
     "AsyncLangchainCallbackHandler",
     "LlamaIndexCallbackHandler",

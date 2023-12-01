@@ -119,7 +119,7 @@ class MessageBase(ABC):
 
         step_dict = self.to_dict()
         data_layer = get_data_layer()
-        if data_layer and not self.persisted:
+        if data_layer:
             try:
                 asyncio.create_task(data_layer.delete_step(step_dict["id"]))
             except Exception as e:

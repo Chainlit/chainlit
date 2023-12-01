@@ -334,6 +334,35 @@ class TaskList(Element):
     async def update(self):
         await self.send()
 
+    async def send(self):
+        if not self.content and not self.url and self.path:
+            await self.load()
+
+        await self.preprocess_content()
+
+        if not self.mime:
+            # Only guess the mime type when the content is binary
+            self.mime = (
+                mime_types[self.type]
+                if self.type in mime_types
+                else filetype.guess_mime(self.content)
+            )
+
+        await self._upload_and_persist()
+
+        if not self.url and not self.content:
+            raise ValueError("Must provide url or content to send element")
+
+        emit_dict = cast(Dict, self.to_dict())
+
+        # Adding this out of to_dict since the dict will be persisted in the DB
+        if self.content:
+            emit_dict["content"] = self.content
+
+        trace_event(f"send {self.__class__.__name__}")
+        emit_dict = await self.before_emit(emit_dict)
+        await context.emitter.emit("element", emit_dict)
+
     async def preprocess_content(self):
         # serialize enum
         tasks = [

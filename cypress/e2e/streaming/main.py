@@ -10,13 +10,27 @@ async def main():
     msg = cl.Message(content="")
     for token in token_list:
         await msg.stream_token(token)
-        await cl.sleep(0.5)
+        await cl.sleep(0.2)
 
     await msg.send()
 
     msg = cl.Message(content="")
     for seq in sequence_list:
         await msg.stream_token(token=seq, is_sequence=True)
-        await cl.sleep(0.5)
+        await cl.sleep(0.2)
 
     await msg.send()
+
+    step = cl.Step()
+    for token in token_list:
+        await step.stream_token(token)
+        await cl.sleep(0.2)
+
+    await step.send()
+
+    step = cl.Step()
+    for seq in sequence_list:
+        await step.stream_token(token=seq, is_sequence=True)
+        await cl.sleep(0.2)
+
+    await step.send()

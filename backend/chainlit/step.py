@@ -134,7 +134,7 @@ class Step:
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: Optional[str] = config.ui.name,
         type: StepType = "UNDEFINED",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
@@ -247,6 +247,9 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
+        if not config.features.prompt_playground and "generation" in step_dict:
+            step_dict.pop("generation", None)
+
         await context.emitter.update_step(step_dict)
 
         return True
@@ -298,6 +301,9 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
+        if not config.features.prompt_playground and "generation" in step_dict:
+            step_dict.pop("generation", None)
+
         await context.emitter.send_step(step_dict)
 
         return self.id
@@ -341,7 +347,7 @@ class Step:
         if not self.parent_id:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
-            else:
+            elif context.session.root_message:
                 self.parent_id = context.session.root_message.id
         context.session.active_steps.append(self)
         await self.send()
@@ -357,7 +363,7 @@ class Step:
         if not self.parent_id:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
-            else:
+            elif context.session.root_message:
                 self.parent_id = context.session.root_message.id
         context.session.active_steps.append(self)
 

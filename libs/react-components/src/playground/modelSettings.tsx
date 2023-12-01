@@ -68,7 +68,7 @@ const SettingsForm = ({
   const onSelectedProviderChange = (event: SelectChangeEvent) => {
     setPlayground((old) =>
       merge(cloneDeep(old), {
-        prompt: {
+        generation: {
           provider: event.target.value
         }
       })
@@ -137,9 +137,9 @@ const ModelSettings = () => {
 
   const buildProviderTooltip = () => {
     if (provider.is_chat && playground.generation?.type !== 'CHAT') {
-      return `${provider.name} is message-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
+      return `${provider.name} is chat-based. This prompt will be wrapped in a message before being sent to ${provider.name}.`;
     } else if (!provider.is_chat && playground.generation?.type === 'CHAT') {
-      return `${provider.name} is prompt-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
+      return `${provider.name} is completion-based. The messages will converted to a single prompt before being sent to ${provider.name}.`;
     } else {
       return undefined;
     }

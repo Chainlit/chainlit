@@ -1,7 +1,6 @@
 from provider import ChatTestLLM, TestLLM
 
 import chainlit as cl
-from chainlit.prompt import Prompt, PromptMessage
 
 template = """Hello, this is a template.
 This is a simple variable {variable1}
@@ -25,45 +24,38 @@ completion = "This is the original completion"
 
 @cl.on_chat_start
 async def start():
-    await cl.Message(
-        content="This is a message with a basic prompt",
-        prompt=Prompt(
-            provider=TestLLM.id,
-            completion=completion,
-            template=template,
-            inputs=inputs,
-        ),
-    ).send()
+    async with cl.Step() as step:
+        step.generation = cl.CompletionGeneration(
+            provider=TestLLM.id, template=template, inputs=inputs, completion=completion
+        )
+        step.output = "This is a message with a basic prompt"
 
-    await cl.Message(
-        content="This is a message with only a formatted basic prompt",
-        prompt=Prompt(provider=TestLLM.id, completion=completion, formatted=formatted),
-    ).send()
+    async with cl.Step() as step:
+        step.generation = cl.CompletionGeneration(
+            provider=TestLLM.id, completion=completion, formatted=formatted
+        )
+        step.output = "This is a message with only a formatted basic prompt"
 
-    await cl.Message(
-        content="This is a message with a chat prompt",
-        prompt=Prompt(
+    async with cl.Step() as step:
+        step.generation = cl.ChatGeneration(
             provider=ChatTestLLM.id,
             completion=completion,
-            template=template,
             inputs=inputs,
             messages=[
-                PromptMessage(template=template, role="system"),
-                PromptMessage(template=template, role="system"),
+                cl.GenerationMessage(template=template, role="system"),
+                cl.GenerationMessage(template=template, role="system"),
             ],
-        ),
-    ).send()
+        )
+        step.output = "This is a message with a chat prompt"
 
-    await cl.Message(
-        content="This is a message with only a formatted chat prompt",
-        prompt=Prompt(
+    async with cl.Step() as step:
+        step.generation = cl.ChatGeneration(
             provider=ChatTestLLM.id,
             completion=completion,
-            template=template,
             inputs=inputs,
             messages=[
-                PromptMessage(formatted=formatted, role="system"),
-                PromptMessage(formatted=formatted, role="system"),
+                cl.GenerationMessage(formatted=formatted, role="system"),
+                cl.GenerationMessage(formatted=formatted, role="system"),
             ],
-        ),
-    ).send()
+        )
+        step.output = "This is a message with only a formatted chat prompt"

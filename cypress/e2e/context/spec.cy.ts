@@ -1,6 +1,6 @@
 import { runTestServer } from '../../support/testUtils';
 
-describe('Emitter should be reachable from all contexts', () => {
+describe('Context should be reachable', () => {
   before(() => {
     runTestServer();
   });
