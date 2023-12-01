@@ -1,6 +1,6 @@
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
+import { toast } from 'sonner';
 
 import { Box, Button } from '@mui/material';
 

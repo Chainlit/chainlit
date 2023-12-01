@@ -59,7 +59,7 @@ const useChatInteract = () => {
 
       session?.socket.emit('ui_message', { message, files });
     },
-    [session]
+    [session?.socket]
   );
 
   const replyMessage = useCallback(
@@ -69,26 +69,37 @@ const useChatInteract = () => {
         askUser.callback(message);
       }
     },
-    [askUser, session]
+    [askUser]
   );
 
   const updateChatSettings = useCallback(
     (values: object) => {
       session?.socket.emit('chat_settings_change', values);
     },
-    [session]
+    [session?.socket]
   );
 
   const stopTask = useCallback(() => {
     setLoading(false);
     session?.socket.emit('stop');
-  }, [session]);
+  }, [session?.socket]);
 
   const callAction = useCallback(
     (action: IAction) => {
-      session?.socket.emit('action_call', action);
+      const socket = session?.socket;
+      if (!socket) return;
+
+      const promise = new Promise<{ id: string; response?: string }>(
+        (resolve) => {
+          socket.once('action_response', resolve);
+        }
+      );
+
+      socket.emit('action_call', action);
+
+      return promise;
     },
-    [session]
+    [session?.socket]
   );
 
   return {

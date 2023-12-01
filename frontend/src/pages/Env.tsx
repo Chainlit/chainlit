@@ -1,7 +1,7 @@
 import { useFormik } from 'formik';
-import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { toast } from 'sonner';
 import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';

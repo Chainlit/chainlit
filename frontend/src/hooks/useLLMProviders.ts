@@ -1,7 +1,7 @@
 import { apiClient } from 'api';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { useSetRecoilState } from 'recoil';
+import { toast } from 'sonner';
 
 import { useApi } from '@chainlit/react-client';
 import { IPlayground } from '@chainlit/react-components';

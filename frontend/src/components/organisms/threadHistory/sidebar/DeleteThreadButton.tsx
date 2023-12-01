@@ -1,7 +1,7 @@
 import { apiClient } from 'api';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { useRecoilValue } from 'recoil';
+import { toast } from 'sonner';
 
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -33,9 +33,12 @@ const DeleteThreadButton = ({ threadId, onDelete }: Props) => {
   };
 
   const handleConfirm = async () => {
-    await toast.promise(apiClient.deleteThread(threadId, accessToken), {
-      loading: 'Deleting thread...',
-      success: 'Thread deleted!',
+    toast.promise(apiClient.deleteThread(threadId, accessToken), {
+      loading: 'Deleting thread',
+      success: () => {
+        onDelete();
+        return 'Thread deleted!';
+      },
       error: (err) => {
         if (err instanceof ClientError) {
           return <span>{err.message}</span>;
@@ -44,7 +47,6 @@ const DeleteThreadButton = ({ threadId, onDelete }: Props) => {
         }
       }
     });
-    onDelete();
     handleClose();
   };
 

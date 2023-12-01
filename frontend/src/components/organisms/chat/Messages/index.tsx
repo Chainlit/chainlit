@@ -1,4 +1,7 @@
+import { toast } from 'sonner';
+
 import {
+  IAction,
   useChatData,
   useChatInteract,
   useChatMessages,
@@ -26,6 +29,22 @@ const Messages = ({
   const { callAction } = useChatInteract();
   const { idToResume } = useChatSession();
 
+  const callActionWithToast = (action: IAction) => {
+    const promise = callAction(action);
+    if (promise) {
+      toast.promise(promise, {
+        loading: `Running ${action.name}`,
+        success: (res) => {
+          if (res.response) {
+            return res.response;
+          } else {
+            return `${action.name} executed successfully`;
+          }
+        }
+      });
+    }
+  };
+
   return !idToResume &&
     !messages.length &&
     projectSettings?.ui.show_readme_as_default ? (
@@ -43,7 +62,7 @@ const Messages = ({
       elements={elements}
       messages={messages}
       autoScroll={autoScroll}
-      callAction={callAction}
+      callAction={callActionWithToast}
       setAutoScroll={setAutoScroll}
     />
   );

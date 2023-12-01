@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';

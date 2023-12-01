@@ -1,8 +1,8 @@
 import { apiClient } from 'api';
 import { memo, useCallback, useMemo } from 'react';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { toast } from 'sonner';
 
 import {
   IAction,
@@ -99,20 +99,22 @@ const MessageContainer = memo(
     const onFeedbackUpdated = useCallback(
       async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
         try {
-          await toast.promise(apiClient.setFeedback(feedback, accessToken), {
-            loading: 'Updating...',
-            success: 'Feedback updated!',
+          toast.promise(apiClient.setFeedback(feedback, accessToken), {
+            loading: 'Updating',
+            success: () => {
+              setMessages((prev) =>
+                updateMessageById(prev, message.id, {
+                  ...message,
+                  feedback: feedback
+                })
+              );
+              onSuccess();
+              return 'Feedback updated!';
+            },
             error: (err) => {
               return <span>{err.message}</span>;
             }
           });
-          setMessages((prev) =>
-            updateMessageById(prev, message.id, {
-              ...message,
-              feedback: feedback
-            })
-          );
-          onSuccess();
         } catch (err) {
           console.log(err);
         }

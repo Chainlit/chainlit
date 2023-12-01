@@ -233,7 +233,8 @@ async def message(sid, payload: UIMessagePayload):
 async def process_action(action: Action):
     callback = config.code.action_callbacks.get(action.name)
     if callback:
-        await callback(action)
+        res = await callback(action)
+        return res
     else:
         logger.warning("No callback found for action %s", action.name)
 
@@ -241,11 +242,23 @@ async def process_action(action: Action):
 @socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
-    init_ws_context(sid)
+    context = init_ws_context(sid)
 
     action = Action(**action)
 
-    await process_action(action)
+    try:
+        res = await process_action(action)
+        await context.emitter.send_action_response(
+            id=action.id, response=res if isinstance(res, str) else None
+        )
+
+    except InterruptedError:
+        pass
+    except Exception as e:
+        logger.exception(e)
+        await context.emitter.send_action_response(
+            id=action.id, response="An error occured"
+        )
 
 
 @socket.on("chat_settings_change")

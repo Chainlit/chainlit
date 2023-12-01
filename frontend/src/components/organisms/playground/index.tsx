@@ -1,7 +1,7 @@
 import { apiClient } from 'api';
 import { useCallback } from 'react';
-import { toast } from 'react-hot-toast';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { toast } from 'sonner';
 
 import { IGeneration, accessTokenState } from '@chainlit/react-client';
 import {
