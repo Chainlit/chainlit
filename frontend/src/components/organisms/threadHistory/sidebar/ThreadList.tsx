@@ -40,7 +40,6 @@ const ThreadList = ({
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
   const navigate = useNavigate();
-
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
       <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>

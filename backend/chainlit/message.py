@@ -136,7 +136,7 @@ class MessageBase(ABC):
         data_layer = get_data_layer()
         if data_layer and not self.persisted:
             try:
-                asyncio.create_task(data_layer.create_message(step_dict))
+                asyncio.create_task(data_layer.create_step(step_dict))
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:

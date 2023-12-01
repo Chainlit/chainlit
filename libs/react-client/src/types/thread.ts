@@ -8,5 +8,5 @@ export interface IThread {
   user?: IUser;
   metadata?: Record<string, any>;
   steps: IStep[];
-  elements: IElement[];
+  elements?: IElement[];
 }

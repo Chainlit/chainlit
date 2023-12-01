@@ -67,6 +67,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
         >
           <Alert
             sx={{ mx: 2 }}
+            id="thread-info"
             severity="info"
             action={
               <Button component={Link} color="inherit" size="small" to="/">
@@ -75,14 +76,14 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             }
           >
             This chat was created on{' '}
-            {new Intl.DateTimeFormat().format(thread.createdAt as number)}.
+            {new Intl.DateTimeFormat().format(new Date(thread.createdAt))}.
           </Alert>
         </Box>
         <MessageContainer
           loading={false}
           avatars={[]}
           actions={actions}
-          elements={elements as IMessageElement[]}
+          elements={(elements || []) as IMessageElement[]}
           messages={nestMessages(thread.steps)}
         />
       </SideView>

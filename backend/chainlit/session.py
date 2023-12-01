@@ -27,6 +27,7 @@ class BaseSession:
     """Base object."""
 
     active_steps: List["Step"]
+    thread_id_to_resume: Optional[str] = None
 
     def __init__(
         self,
@@ -45,6 +46,8 @@ class BaseSession:
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
     ):
+        if thread_id:
+            self.thread_id_to_resume = thread_id
         self.thread_id = thread_id or str(uuid.uuid4())
         self.user = user
         self.token = token
@@ -168,8 +171,8 @@ class WebsocketSession(BaseSession):
     async def flush_method_queue(self):
         for method_name, queue in self.thread_queues.items():
             while queue:
-                method, args, kwargs = queue.popleft()
-                await method(*args, **kwargs)
+                method, self, args, kwargs = queue.popleft()
+                await method(self, *args, **kwargs)
 
     @classmethod
     def get(cls, socket_id: str):

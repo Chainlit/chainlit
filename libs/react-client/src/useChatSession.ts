@@ -120,18 +120,15 @@ const useChatSession = () => {
           setChatProfile(thread.metadata?.chat_profile);
         }
         setMessages(messages);
+        const elements = thread.elements || [];
         setAvatars(
-          (thread.elements as IAvatarElement[]).filter(
-            (e) => e.type === 'avatar'
-          )
+          (elements as IAvatarElement[]).filter((e) => e.type === 'avatar')
         );
         setTasklists(
-          (thread.elements as ITasklistElement[]).filter(
-            (e) => e.type === 'tasklist'
-          )
+          (elements as ITasklistElement[]).filter((e) => e.type === 'tasklist')
         );
         setElements(
-          (thread.elements as IMessageElement[]).filter(
+          (elements as IMessageElement[]).filter(
             (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
           )
         );

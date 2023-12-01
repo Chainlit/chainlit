@@ -41,7 +41,7 @@ def queue_until_user_message():
                 method_name = method.__name__
                 if method_name not in queues:
                     queues[method_name] = deque()
-                queues[method_name].append((method, args, kwargs))
+                queues[method_name].append((method, self, args, kwargs))
 
             else:
                 # Otherwise, Execute the method immediately
@@ -61,7 +61,6 @@ class BaseDataLayer:
     async def create_user(self, user: "User") -> Optional["PersistedUser"]:
         pass
 
-    @queue_until_user_message()
     async def upsert_feedback(
         self,
         feedback: Feedback,

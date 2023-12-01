@@ -44,6 +44,7 @@ const FeedbackButtons = ({ message }: Props) => {
         },
         {
           ...(message.feedback || { strategy: 'BINARY' }),
+          forId: message.id,
           value: feedback,
           comment
         }
@@ -166,6 +167,7 @@ const FeedbackButtons = ({ message }: Props) => {
         }
         actions={
           <AccentButton
+            id="feedbackSubmit"
             type="submit"
             variant="outlined"
             onClick={() => {

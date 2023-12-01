@@ -200,7 +200,7 @@ export class ChainlitAPI extends APIBase {
   }
 
   async setFeedback(feedback: IFeedback, accessToken?: string) {
-    await this.put(`/feedback`, feedback, accessToken);
+    await this.put(`/feedback`, { feedback }, accessToken);
   }
 
   async listThreads(

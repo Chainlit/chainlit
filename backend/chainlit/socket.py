@@ -35,15 +35,16 @@ async def persist_user_session(thread_id: str, metadata: Dict):
 
 async def resume_thread(session: WebsocketSession):
     data_layer = get_data_layer()
-    if not data_layer or not session.user or not session.thread_id:
+    if not data_layer or not session.user or not session.thread_id_to_resume:
+        return
+    thread = await data_layer.get_thread(thread_id=session.thread_id_to_resume)
+    if not thread:
         return
 
-    thread = await data_layer.get_thread(thread_id=session.thread_id)
-
-    author = thread["user"].get("username") if thread["user"] else None
+    author = thread.get("user").get("identifier") if thread["user"] else None
     user_is_author = author == session.user.identifier
 
-    if thread and user_is_author:
+    if user_is_author:
         metadata = thread["metadata"] or {}
         user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
@@ -124,7 +125,6 @@ async def connect(sid, environ, auth):
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
-
     trace_event("connection_successful")
     return True
 
@@ -136,12 +136,12 @@ async def connection_successful(sid):
     if context.session.restored:
         return
 
-    if context.session.thread_id and config.code.on_chat_resume:
+    if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
         if thread:
             context.session.has_user_message = True
-            await config.code.on_chat_resume(thread)
             await context.emitter.resume_thread(thread)
+            await config.code.on_chat_resume(thread)
             return
 
     if config.code.on_chat_start:
@@ -166,7 +166,8 @@ async def clean_session(sid):
 @socket.on("disconnect")
 async def disconnect(sid):
     session = WebsocketSession.get(sid)
-    init_ws_context(session)
+    if session:
+        init_ws_context(session)
 
     if config.code.on_chat_end and session:
         await config.code.on_chat_end()

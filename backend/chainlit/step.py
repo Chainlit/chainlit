@@ -4,7 +4,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from functools import wraps
-from typing import Callable, Dict, List, Optional, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
 from chainlit.context import context
@@ -44,7 +44,6 @@ def step(
     name: Optional[str] = "",
     type: StepType = "UNDEFINED",
     id: Optional[str] = None,
-    parent_id: Optional[str] = None,
     disable_feedback: bool = True,
 ):
     """Step decorator for async and sync functions."""
@@ -64,7 +63,6 @@ def step(
                     type=type,
                     name=name,
                     id=id,
-                    parent_id=parent_id,
                     disable_feedback=disable_feedback,
                 ) as step:
                     try:
@@ -87,7 +85,6 @@ def step(
                     type=type,
                     name=name,
                     id=id,
-                    parent_id=parent_id,
                     disable_feedback=disable_feedback,
                 ) as step:
                     try:
@@ -110,6 +107,10 @@ def step(
         return wrapper(func)
 
 
+# Useful to check if parent_id was passed or default value was used
+_sentinel: Any = object()
+
+
 class Step:
     # Constructor
     name: str
@@ -120,6 +121,8 @@ class Step:
 
     streaming: bool
     persisted: bool
+
+    _root: bool
 
     is_error: Optional[bool]
     metadata: Dict
@@ -137,7 +140,7 @@ class Step:
         name: Optional[str] = config.ui.name,
         type: StepType = "UNDEFINED",
         id: Optional[str] = None,
-        parent_id: Optional[str] = None,
+        parent_id: Optional[str] = _sentinel,
         elements: Optional[List[Element]] = None,
         disable_feedback: bool = True,
     ):
@@ -148,10 +151,22 @@ class Step:
         self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
-        self.parent_id = parent_id
         self.disable_feedback = disable_feedback
         self.metadata = {}
         self.is_error = False
+
+        if parent_id is _sentinel:
+            # parent_id was not provided
+            self.parent_id = None
+            self._root = False
+        else:
+            # parent_id was provided (even if it is None)
+            assert parent_id is None or isinstance(
+                parent_id, str
+            ), "parent_id must be None or a string"
+
+            self.parent_id = parent_id
+            self._root = parent_id is None
 
         self.language = None
         self.generation = None
@@ -344,7 +359,7 @@ class Step:
     # Handle Context Manager Protocol
     async def __aenter__(self):
         self.start = datetime.now(timezone.utc).isoformat()
-        if not self.parent_id:
+        if not self.parent_id and not self._root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             elif context.session.root_message:
@@ -360,7 +375,7 @@ class Step:
 
     def __enter__(self):
         self.start = datetime.now(timezone.utc).isoformat()
-        if not self.parent_id:
+        if not self.parent_id and not self._root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             elif context.session.root_message:

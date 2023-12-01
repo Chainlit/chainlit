@@ -44,7 +44,7 @@ export default function ResumeButton({ threadId }: Props) {
         justifyContent: 'center'
       }}
     >
-      <Button onClick={onClick} variant="contained">
+      <Button id="resumeThread" onClick={onClick} variant="contained">
         Resume chat
       </Button>
       <WaterMark />

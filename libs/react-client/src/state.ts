@@ -143,7 +143,6 @@ export const threadHistoryState = atom<ThreadHistory | undefined>({
           oldValue: ThreadHistory | undefined
         ) => {
           let timeGroupedThreads = newValue?.timeGroupedThreads;
-
           if (
             newValue?.threads &&
             !isEqual(newValue.threads, oldValue?.timeGroupedThreads)

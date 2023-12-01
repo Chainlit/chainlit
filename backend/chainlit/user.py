@@ -25,7 +25,7 @@ class User(DataClassJsonMixin):
 @dataclass
 class PersistedUserFields:
     id: str
-    createdAt: int
+    createdAt: str
 
 
 @dataclass

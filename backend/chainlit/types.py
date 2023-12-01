@@ -27,11 +27,11 @@ InputWidgetType = Literal[
 
 
 class ThreadDict(TypedDict):
-    id: Optional[str]
+    id: str
+    createdAt: str
+    user: Optional["UserDict"]
     tags: Optional[List[str]]
     metadata: Optional[Dict]
-    createdAt: Optional[str]
-    user: Optional["UserDict"]
     steps: List["StepDict"]
     elements: Optional[List["ElementDict"]]
 
