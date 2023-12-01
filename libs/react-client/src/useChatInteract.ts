@@ -89,11 +89,19 @@ const useChatInteract = () => {
       const socket = session?.socket;
       if (!socket) return;
 
-      const promise = new Promise<{ id: string; response?: string }>(
-        (resolve) => {
-          socket.once('action_response', resolve);
-        }
-      );
+      const promise = new Promise<{
+        id: string;
+        status: boolean;
+        response?: string;
+      }>((resolve, reject) => {
+        socket.once('action_response', (response) => {
+          if (response.status) {
+            resolve(response);
+          } else {
+            reject(response);
+          }
+        });
+      });
 
       socket.emit('action_call', action);
 

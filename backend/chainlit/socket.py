@@ -193,7 +193,9 @@ async def stop(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(author="System", content="Task stopped by the user.").send()
+        await Message(
+            author="System", content="Task stopped by the user.", disable_feedback=True
+        ).send()
 
         session.should_stop = True
 
@@ -249,15 +251,17 @@ async def call_action(sid, action):
     try:
         res = await process_action(action)
         await context.emitter.send_action_response(
-            id=action.id, response=res if isinstance(res, str) else None
+            id=action.id, status=True, response=res if isinstance(res, str) else None
         )
 
     except InterruptedError:
-        pass
+        await context.emitter.send_action_response(
+            id=action.id, status=False, response="Action interrupted by the user"
+        )
     except Exception as e:
         logger.exception(e)
         await context.emitter.send_action_response(
-            id=action.id, response="An error occured"
+            id=action.id, status=False, response="An error occured"
         )
 
 

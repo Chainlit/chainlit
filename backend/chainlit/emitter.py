@@ -93,7 +93,9 @@ class BaseChainlitEmitter:
         """Stub method to set chat settings."""
         pass
 
-    async def send_action_response(self, id: str, response: Optional[str] = None):
+    async def send_action_response(
+        self, id: str, status: bool, response: Optional[str] = None
+    ):
         """Send an action response to the UI."""
         pass
 
@@ -268,5 +270,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def set_chat_settings(self, settings: Dict[str, Any]):
         self.session.chat_settings = settings
 
-    def send_action_response(self, id: str, response: Optional[str] = None):
-        return self.emit("action_response", {"id": id, "response": response})
+    def send_action_response(
+        self, id: str, status: bool, response: Optional[str] = None
+    ):
+        return self.emit(
+            "action_response", {"id": id, "status": status, "response": response}
+        )

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -29,21 +30,31 @@ const Messages = ({
   const { callAction } = useChatInteract();
   const { idToResume } = useChatSession();
 
-  const callActionWithToast = (action: IAction) => {
-    const promise = callAction(action);
-    if (promise) {
-      toast.promise(promise, {
-        loading: `Running ${action.name}`,
-        success: (res) => {
-          if (res.response) {
-            return res.response;
-          } else {
-            return `${action.name} executed successfully`;
+  const callActionWithToast = useCallback(
+    (action: IAction) => {
+      const promise = callAction(action);
+      if (promise) {
+        toast.promise(promise, {
+          loading: `Running ${action.name}`,
+          success: (res) => {
+            if (res.response) {
+              return res.response;
+            } else {
+              return `${action.name} executed successfully`;
+            }
+          },
+          error: (res) => {
+            if (res.response) {
+              return res.response;
+            } else {
+              return `${action.name} failed`;
+            }
           }
-        }
-      });
-    }
-  };
+        });
+      }
+    },
+    [callAction]
+  );
 
   return !idToResume &&
     !messages.length &&
