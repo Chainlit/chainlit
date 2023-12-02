@@ -108,7 +108,18 @@ function App() {
           body: { backgroundColor: theme.palette.background.default }
         }}
       />
-      <Toaster className="toast" position="top-right" />
+      <Toaster
+        className="toast"
+        position="top-right"
+        toastOptions={{
+          style: {
+            fontFamily: 'Inter',
+            background: theme.palette.background.paper,
+            border: `1px solid ${theme.palette.divider}`,
+            color: theme.palette.text.primary
+          }
+        }}
+      />
       <Box
         display="flex"
         height="100vh"
