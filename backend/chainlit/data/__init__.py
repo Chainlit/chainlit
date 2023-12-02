@@ -113,7 +113,6 @@ class BaseDataLayer:
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
         return None
 
-    @queue_until_user_message()
     async def update_thread(
         self,
         thread_id: str,

@@ -30,7 +30,7 @@ def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
 
 async def persist_user_session(thread_id: str, metadata: Dict):
     if data_layer := get_data_layer():
-        await data_layer.update_thread(thread_id == thread_id, metadata=metadata)
+        await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
 
 
 async def resume_thread(session: WebsocketSession):
@@ -172,7 +172,7 @@ async def disconnect(sid):
     if config.code.on_chat_end and session:
         await config.code.on_chat_end()
 
-    if session and session.thread_id:
+    if session and session.thread_id and session.has_user_message:
         await persist_user_session(session.thread_id, session.to_persistable())
 
     async def disconnect_on_timeout(sid):
