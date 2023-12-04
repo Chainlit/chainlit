@@ -183,7 +183,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         message = Message.from_dict(step_dict)
 
-        asyncio.create_task(message._create())
+        await message._create()
 
         if not self.session.has_user_message:
             self.session.has_user_message = True
