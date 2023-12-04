@@ -1,4 +1,4 @@
-import type { IImageElement } from 'client-types/';
+import { type IImageElement } from 'client-types/';
 
 import { FrameElement } from './Frame';
 
@@ -18,17 +18,19 @@ const handleImageClick = (name: string, src: string) => {
 };
 
 const ImageElement = ({ element }: Props) => {
-  const src = element.url || URL.createObjectURL(new Blob([element.content!]));
+  if (!element.url) {
+    return null;
+  }
 
   return (
     <FrameElement>
       <img
         className={`${element.display}-image`}
-        src={src}
+        src={element.url}
         onClick={() => {
           if (element.display === 'inline') {
             const name = `${element.name}.png`;
-            handleImageClick(name, src);
+            handleImageClick(name, element.url!);
           }
         }}
         style={{

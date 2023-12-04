@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
+  accessTokenState,
   actionState,
   askUserState,
   avatarState,
@@ -16,12 +17,16 @@ import {
   threadIdToResumeState,
   tokenCountState
 } from 'src/state';
-import { IAction, IFileElement, IStep } from 'src/types';
+import { IAction, IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
 
+import { ChainlitAPI } from './api';
+
 const useChatInteract = () => {
+  const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
+  const sessionId = useRecoilValue(sessionIdState);
 
   const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
   const resetSessionId = useResetRecoilState(sessionIdState);
@@ -54,10 +59,10 @@ const useChatInteract = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IStep, files?: IFileElement[]) => {
+    (message: IStep, fileReferences?: IFileRef[]) => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
-      session?.socket.emit('ui_message', { message, files });
+      session?.socket.emit('ui_message', { message, fileReferences });
     },
     [session?.socket]
   );
@@ -110,7 +115,19 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const uploadFile = useCallback(
+    (
+      client: ChainlitAPI,
+      file: File,
+      onProgress: (progress: number) => void
+    ) => {
+      return client.uploadFile(file, onProgress, sessionId, accessToken);
+    },
+    [sessionId, accessToken]
+  );
+
   return {
+    uploadFile,
     callAction,
     clear,
     replyMessage,

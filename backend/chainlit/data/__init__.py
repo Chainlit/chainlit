@@ -68,7 +68,11 @@ class BaseDataLayer:
         pass
 
     async def upload_element(
-        self, thread_id: str, content: Union[bytes, str], mime: str
+        self,
+        thread_id: str,
+        path: Optional[str],
+        content: Optional[Union[bytes, str]],
+        mime: str,
     ) -> UploadElementResponse:
         return {"object_key": None, "url": None}
 

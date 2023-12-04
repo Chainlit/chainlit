@@ -11,16 +11,12 @@ export interface ActionSpec {
   keys?: string[];
 }
 
-export interface IFileResponse {
-  name: string;
-  path?: string;
-  size: number;
-  type: string;
-  content: ArrayBuffer;
+export interface IFileRef {
+  id: string;
 }
 
 export interface IAsk {
-  callback: (payload: IStep | IFileResponse[] | IAction) => void;
+  callback: (payload: IStep | IFileRef[] | IAction) => void;
   spec: {
     type: 'text' | 'file' | 'action';
     timeout: number;

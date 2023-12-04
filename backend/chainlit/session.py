@@ -1,11 +1,14 @@
 import json
+import shutil
 import uuid
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Optional, Union
+
+import aiofiles
 
 if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.step import Step
-    from chainlit.types import AskResponse
+    from chainlit.types import AskResponse, FileDict, FileReference
     from chainlit.user import PersistedUser, User
 
 
@@ -60,6 +63,15 @@ class BaseSession:
         self.id = id
 
         self.chat_settings: Dict[str, Any] = {}
+
+    async def persist_file(
+        self,
+        name: str,
+        mime: str,
+        path: Optional[str] = None,
+        content: Optional[Union[bytes, str]] = None,
+    ):
+        return None
 
     def to_persistable(self) -> Dict:
         from chainlit.user_session import user_sessions
@@ -152,9 +164,59 @@ class WebsocketSession(BaseSession):
         self.restored = False
 
         self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
+        self.files = {}  # type: Dict[str, "FileDict"]
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
+
+    @property
+    def files_dir(self):
+        from chainlit.config import FILES_DIRECTORY
+
+        return FILES_DIRECTORY / self.id
+
+    async def persist_file(
+        self,
+        name: str,
+        mime: str,
+        path: Optional[str] = None,
+        content: Optional[Union[bytes, str]] = None,
+    ) -> "FileReference":
+        if not path and not content:
+            raise ValueError(
+                "Either path or content must be provided to persist a file"
+            )
+
+        self.files_dir.mkdir(exist_ok=True)
+
+        file_id = str(uuid.uuid4())
+        file_path = self.files_dir / file_id
+
+        if path:
+            # Copy the file from the given path
+            async with aiofiles.open(path, "rb") as src, aiofiles.open(
+                file_path, "wb"
+            ) as dst:
+                await dst.write(await src.read())
+        elif content:
+            # Write the provided content to the file
+            async with aiofiles.open(file_path, "wb") as buffer:
+                if isinstance(content, str):
+                    content = content.encode("utf-8")
+                await buffer.write(content)
+
+        # Get the file size
+        file_size = file_path.stat().st_size
+        # Store the file content in memory
+        self.files[file_id] = {
+            "id": file_id,
+            "path": file_path,
+            "name": name,
+            "type": mime,
+            "size": file_size,
+        }
+
+        return {"id": file_id}
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""
@@ -165,6 +227,8 @@ class WebsocketSession(BaseSession):
 
     def delete(self):
         """Delete the session."""
+        if self.files_dir.is_dir():
+            shutil.rmtree(self.files_dir)
         ws_sessions_sid.pop(self.socket_id, None)
         ws_sessions_id.pop(self.id, None)
 

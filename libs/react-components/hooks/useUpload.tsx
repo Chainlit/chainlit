@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import {
   DropzoneOptions,
   FileRejection,
@@ -6,18 +6,16 @@ import {
   useDropzone
 } from 'react-dropzone';
 
-import type { FileSpec, IFileResponse } from 'client-types/';
+import type { FileSpec } from 'client-types/';
 
 interface useUploadProps {
   onError?: (error: string) => void;
-  onResolved: (payloads: IFileResponse[]) => void;
+  onResolved: (payloads: FileWithPath[]) => void;
   options?: DropzoneOptions;
   spec: FileSpec;
 }
 
 const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
-  const [uploading, setUploading] = useState(false);
-
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
     (acceptedFiles: FileWithPath[], fileRejections: FileRejection[]) => {
       if (fileRejections.length > 0) {
@@ -26,39 +24,7 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
       }
 
       if (!acceptedFiles.length) return;
-      setUploading(true);
-
-      const promises = acceptedFiles.map((file) => {
-        return new Promise<IFileResponse>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const rawData = e.target?.result;
-            const payload: IFileResponse = {
-              path: file.path,
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              content: rawData as ArrayBuffer
-            };
-            resolve(payload);
-          };
-          reader.onerror = function () {
-            if (!reader.error) return;
-            reject(reader.error.message);
-          };
-          reader.readAsArrayBuffer(file);
-        });
-      });
-
-      Promise.all(promises)
-        .then((payloads) => {
-          onResolved(payloads);
-          setUploading(false);
-        })
-        .catch((err) => {
-          onError && onError(err);
-          setUploading(false);
-        });
+      return onResolved(acceptedFiles);
     },
     [spec]
   );
@@ -84,7 +50,7 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
     ...options
   });
 
-  return { getInputProps, getRootProps, isDragActive, uploading };
+  return { getInputProps, getRootProps, isDragActive };
 };
 
 export { useUpload };

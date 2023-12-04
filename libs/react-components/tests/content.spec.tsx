@@ -38,7 +38,7 @@ it('highlights multiple sources correctly (no substring matching)', () => {
           name: 'source_1',
           type: 'text',
           display: 'side',
-          content: 'source_1',
+          url: 'source_1',
           forId: 'test2'
         } as ITextElement,
         {
@@ -46,14 +46,14 @@ it('highlights multiple sources correctly (no substring matching)', () => {
           display: 'side',
           type: 'text',
           forId: 'test2',
-          content: 'hi'
+          url: 'hi'
         } as ITextElement,
         {
           name: 'source_121',
           display: 'side',
           type: 'text',
           forId: 'test2',
-          content: 'hi'
+          url: 'hi'
         } as ITextElement
       ]}
     />
@@ -79,21 +79,21 @@ it('highlights sources containing regex characters correctly', () => {
           name: 'Document[1]',
           display: 'side',
           type: 'text',
-          content: 'hi',
+          url: 'hi',
           forId: 'test2'
         } as ITextElement,
         {
           name: 'source(12)',
           display: 'side',
           type: 'text',
-          content: 'hi',
+          url: 'hi',
           forId: 'test2'
         } as ITextElement,
         {
           name: 'page{12}',
           display: 'side',
           type: 'text',
-          content: 'hi',
+          url: 'hi',
           forId: 'test2'
         } as ITextElement
       ]}
@@ -120,19 +120,19 @@ it('preserves the box size when collapsing', () => {
           name: 'source_1',
           type: 'text',
           display: 'side',
-          content: 'source_1'
+          url: 'source_1'
         } as ITextElement,
         {
           name: 'source_12',
           display: 'side',
           type: 'text',
-          content: 'hi'
+          url: 'hi'
         } as ITextElement,
         {
           name: 'source_121',
           display: 'side',
           type: 'text',
-          content: 'hi'
+          url: 'hi'
         } as ITextElement
       ]}
       preserveSize

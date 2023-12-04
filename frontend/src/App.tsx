@@ -1,4 +1,4 @@
-import { wsEndpoint } from 'api';
+import { apiClient } from 'api';
 import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
@@ -89,7 +89,7 @@ function App() {
       return;
     } else {
       connect({
-        wsEndpoint,
+        client: apiClient,
         userEnv,
         accessToken
       });

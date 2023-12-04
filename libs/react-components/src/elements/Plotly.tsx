@@ -3,7 +3,7 @@ import { ErrorBoundary } from 'src/ErrorBoundary';
 
 import { useFetch } from 'hooks/useFetch';
 
-import type { IPlotlyElement } from 'client-types/';
+import { type IPlotlyElement } from 'client-types/';
 
 const Plot = lazy(() => import('react-plotly.js'));
 
@@ -12,9 +12,7 @@ interface Props {
 }
 
 const _PlotlyElement = ({ element }: Props) => {
-  const { data, error, isLoading } = useFetch(
-    !element.content && element.url ? element.url : null
-  );
+  const { data, error, isLoading } = useFetch(element.url || null);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -26,8 +24,6 @@ const _PlotlyElement = ({ element }: Props) => {
 
   if (data) {
     state = data;
-  } else if (element.content) {
-    state = JSON.parse(element.content);
   } else {
     return null;
   }
@@ -47,10 +43,10 @@ const _PlotlyElement = ({ element }: Props) => {
   );
 };
 
-const PlotlyElement = ({ element }: Props) => {
+const PlotlyElement = (props: Props) => {
   return (
     <ErrorBoundary prefix="Failed to load chart.">
-      <_PlotlyElement element={element} />
+      <_PlotlyElement {...props} />
     </ErrorBoundary>
   );
 };

@@ -41,6 +41,7 @@ async def main():
     task_list.status = "Running..."
     for i in range(17):
         task = cl.Task(title=fake_tasks[i])
+        await cl.sleep(0.2)
         await task_list.add_task(task)
     await task_list.send()
 
@@ -50,6 +51,7 @@ async def main():
     for i in range(9):
         task_list.tasks[i].status = cl.TaskStatus.DONE
         task_list.tasks[i + 1].status = cl.TaskStatus.RUNNING
+        await cl.sleep(0.2)
         await task_list.send()
 
     task_list.tasks[9].status = cl.TaskStatus.FAILED

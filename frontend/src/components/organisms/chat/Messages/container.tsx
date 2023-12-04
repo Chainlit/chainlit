@@ -15,7 +15,8 @@ import {
   ITool,
   accessTokenState,
   messagesState,
-  updateMessageById
+  updateMessageById,
+  useChatInteract
 } from '@chainlit/react-client';
 import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
 
@@ -55,6 +56,14 @@ const MessageContainer = memo(
     const setMessages = useSetRecoilState(messagesState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
+    const { uploadFile: _uploadFile } = useChatInteract();
+
+    const uploadFile = useCallback(
+      (file: File, onProgress: (progress: number) => void) => {
+        return _uploadFile(apiClient, file, onProgress);
+      },
+      [_uploadFile]
+    );
 
     const enableFeedback = !!projectSettings?.dataPersistence;
 
@@ -163,6 +172,7 @@ const MessageContainer = memo(
     // This prevents unnecessary re-renders of children components when no props have changed.
     const memoizedContext = useMemo(() => {
       return {
+        uploadFile,
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
         latex: projectSettings?.features?.latex,

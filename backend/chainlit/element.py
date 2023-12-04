@@ -2,25 +2,14 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import (
-    Any,
-    ClassVar,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
 
-import aiofiles
 import filetype
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
+from chainlit.types import FileDict
 from pydantic.dataclasses import Field, dataclass
 from syncer import asyncio
 
@@ -41,7 +30,8 @@ class ElementDict(TypedDict):
     id: str
     threadId: Optional[str]
     type: ElementType
-    url: str
+    chainlitKey: Optional[str]
+    url: Optional[str]
     objectKey: Optional[str]
     name: str
     display: ElementDisplay
@@ -55,11 +45,12 @@ class ElementDict(TypedDict):
 class Element:
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
-
+    # Name of the element, this will be used to reference the element in the UI.
+    name: str
     # The ID of the element. This is set automatically when the element is sent to the UI.
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    # Name of the element, this will be used to reference the element in the UI.
-    name: Optional[str] = None
+    # The key of the element hosted on Chainlit.
+    chainlit_key: Optional[str] = None
     # The URL of the element if already hosted somehwere else.
     url: Optional[str] = None
     # The S3 object key.
@@ -82,7 +73,7 @@ class Element:
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
-
+        self.updatable = False
         self.thread_id = context.session.thread_id
 
         if not self.url and not self.path and not self.content:
@@ -94,8 +85,9 @@ class Element:
                 "id": self.id,
                 "threadId": self.thread_id,
                 "type": self.type,
-                "url": self.url or "",
-                "name": self.name or "",
+                "url": self.url,
+                "chainlitKey": self.chainlit_key,
+                "name": self.name,
                 "display": self.display,
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
@@ -107,50 +99,51 @@ class Element:
         return _dict
 
     @classmethod
-    def from_dict(self, _dict: Dict):
-        if "image" in _dict.get("mime", ""):
+    def from_dict(self, _dict: FileDict):
+        if "image" in _dict.get("type", ""):
             return Image(
                 id=_dict.get("id", str(uuid.uuid4())),
-                content=_dict.get("content"),
-                name=_dict.get("name"),
-                url=_dict.get("url"),
-                display=_dict.get("display", "inline"),
-                mime=_dict.get("mime"),
+                name=_dict.get("name", ""),
+                path=str(_dict.get("path")),
+                chainlit_key=_dict.get("id"),
+                display="inline",
+                mime=_dict.get("type"),
             )
         else:
             return File(
                 id=_dict.get("id", str(uuid.uuid4())),
-                content=_dict.get("content"),
-                name=_dict.get("name"),
-                url=_dict.get("url"),
-                language=_dict.get("language"),
-                display=_dict.get("display", "inline"),
-                size=_dict.get("size"),
-                mime=_dict.get("mime"),
+                name=_dict.get("name", ""),
+                path=str(_dict.get("path")),
+                chainlit_key=_dict.get("id"),
+                display="inline",
+                mime=_dict.get("type"),
             )
 
-    async def preprocess_content(self):
-        pass
-
-    async def load(self):
-        if self.path:
-            async with aiofiles.open(self.path, "rb") as f:
-                self.content = await f.read()
-        else:
-            raise ValueError("Must provide path or content to load element")
-
     async def _upload_and_persist(self) -> Optional[ElementDict]:
-        data_layer = get_data_layer()
-        if data_layer and not self.url and self.content and not self.persisted:
+        if (self.persisted or self.url) and not self.updatable:
+            return self.to_dict()
+
+        if data_layer := get_data_layer():
             upload_res = await data_layer.upload_element(
                 thread_id=context.session.thread_id,
+                path=self.path,
                 content=self.content,
                 mime=self.mime or "",
             )
             self.url = upload_res["url"]
             self.object_key = upload_res["object_key"]
-        element_dict = self.to_dict()
+        elif not self.chainlit_key or self.updatable:
+            file_dict = await context.session.persist_file(
+                name=self.name,
+                path=self.path,
+                content=self.content,
+                mime=self.mime or "",
+            )
+            self.chainlit_key = file_dict["id"]
 
+        self.persisted = True
+
+        element_dict = self.to_dict()
         asyncio.create_task(self._persist(element_dict))
 
         return element_dict
@@ -160,12 +153,8 @@ class Element:
             try:
                 if not self.persisted:
                     await data_layer.create_element(element)
-                    self.persisted = True
             except Exception as e:
                 logger.error(f"Failed to persist element: {str(e)}")
-
-    async def before_emit(self, element: Dict) -> Dict:
-        return element
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
@@ -175,38 +164,26 @@ class Element:
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):
-        if self.persisted:
+        if self.persisted and not self.updatable:
             return
 
-        if not self.content and not self.url and self.path:
-            await self.load()
-
-        await self.preprocess_content()
+        self.for_id = for_id
 
         if not self.mime:
             # Only guess the mime type when the content is binary
             self.mime = (
                 mime_types[self.type]
                 if self.type in mime_types
-                else filetype.guess_mime(self.content)
+                else filetype.guess_mime(self.path or self.content)
             )
-
-        self.for_id = for_id
 
         await self._upload_and_persist()
 
-        if not self.url and not self.content:
-            raise ValueError("Must provide url or content to send element")
-
-        emit_dict = cast(Dict, self.to_dict())
-
-        # Adding this out of to_dict since the dict will be persisted in the DB
-        if self.content:
-            emit_dict["content"] = self.content
+        if not self.url and not self.chainlit_key:
+            raise ValueError("Must provide url or chainlit key to send element")
 
         trace_event(f"send {self.__class__.__name__}")
-        emit_dict = await self.before_emit(emit_dict)
-        await context.emitter.emit("element", emit_dict)
+        await context.emitter.emit("element", self.to_dict())
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)
@@ -224,23 +201,7 @@ class Avatar(Element):
     type: ClassVar[ElementType] = "avatar"
 
     async def send(self):
-        element = None
-
-        if not self.content and not self.url and self.path:
-            await self.load()
-
-        if not self.url and not self.content:
-            raise ValueError("Must provide url or content to send element")
-
-        element = self.to_dict()
-
-        # Adding this out of to_dict since the dict will be persisted in the DB
-        element["content"] = self.content
-
-        if element:
-            trace_event(f"send {self.__class__.__name__}")
-            element = await self.before_emit(element)
-            await context.emitter.emit("element", element)
+        await super().send(for_id="")
 
 
 @dataclass
@@ -248,14 +209,7 @@ class Text(Element):
     """Useful to send a text (not a message) to the UI."""
 
     type: ClassVar[ElementType] = "text"
-
-    content: bytes = b""
     language: Optional[str] = None
-
-    async def before_emit(self, text_element):
-        if "content" in text_element and isinstance(text_element["content"], bytes):
-            text_element["content"] = text_element["content"].decode("utf-8")
-        return text_element
 
 
 @dataclass
@@ -328,6 +282,10 @@ class TaskList(Element):
     name: str = "tasklist"
     content: str = "dummy content to pass validation"
 
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self.updatable = True
+
     async def add_task(self, task: Task):
         self.tasks.append(task)
 
@@ -335,33 +293,8 @@ class TaskList(Element):
         await self.send()
 
     async def send(self):
-        if not self.content and not self.url and self.path:
-            await self.load()
-
         await self.preprocess_content()
-
-        if not self.mime:
-            # Only guess the mime type when the content is binary
-            self.mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.content)
-            )
-
-        await self._upload_and_persist()
-
-        if not self.url and not self.content:
-            raise ValueError("Must provide url or content to send element")
-
-        emit_dict = cast(Dict, self.to_dict())
-
-        # Adding this out of to_dict since the dict will be persisted in the DB
-        if self.content:
-            emit_dict["content"] = self.content
-
-        trace_event(f"send {self.__class__.__name__}")
-        emit_dict = await self.before_emit(emit_dict)
-        await context.emitter.emit("element", emit_dict)
+        await super().send(for_id="")
 
     async def preprocess_content(self):
         # serialize enum

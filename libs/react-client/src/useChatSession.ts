@@ -40,6 +40,7 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
+import { ChainlitAPI } from './api';
 import type { IToken } from './useChatData';
 
 const useChatSession = () => {
@@ -63,15 +64,15 @@ const useChatSession = () => {
 
   const _connect = useCallback(
     ({
-      wsEndpoint,
+      client,
       userEnv,
       accessToken
     }: {
-      wsEndpoint: string;
+      client: ChainlitAPI;
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
-      const socket = io(wsEndpoint, {
+      const socket = io(client.httpEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
           Authorization: accessToken || '',
@@ -186,12 +187,41 @@ const useChatSession = () => {
       });
 
       socket.on('element', (element: IElement) => {
+        if (!element.url && element.chainlitKey) {
+          element.url = client.getElementUrl(
+            element.chainlitKey,
+            sessionId,
+            accessToken
+          );
+        }
+
         if (element.type === 'avatar') {
-          setAvatars((old) => [...old, element]);
+          setAvatars((old) => {
+            const index = old.findIndex((e) => e.id === element.id);
+            if (index === -1) {
+              return [...old, element];
+            } else {
+              return [...old.slice(0, index), element, ...old.slice(index + 1)];
+            }
+          });
         } else if (element.type === 'tasklist') {
-          setTasklists((old) => [...old, element]);
+          setTasklists((old) => {
+            const index = old.findIndex((e) => e.id === element.id);
+            if (index === -1) {
+              return [...old, element];
+            } else {
+              return [...old.slice(0, index), element, ...old.slice(index + 1)];
+            }
+          });
         } else {
-          setElements((old) => [...old, element]);
+          setElements((old) => {
+            const index = old.findIndex((e) => e.id === element.id);
+            if (index === -1) {
+              return [...old, element];
+            } else {
+              return [...old.slice(0, index), element, ...old.slice(index + 1)];
+            }
+          });
         }
       });
 

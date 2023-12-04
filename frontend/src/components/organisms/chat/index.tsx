@@ -1,3 +1,4 @@
+import { apiClient } from 'api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -6,9 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Alert, Box } from '@mui/material';
 
 import {
-  IFileResponse,
   threadHistoryState,
-  useChatData
+  useChatData,
+  useChatInteract
 } from '@chainlit/react-client';
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
@@ -16,7 +17,7 @@ import SideView from 'components/atoms/element/sideView';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
-import { attachmentsState } from 'state/chat';
+import { IAttachment, attachmentsState } from 'state/chat';
 import { projectSettingsState, sideViewState } from 'state/project';
 
 import Messages from './Messages';
@@ -31,20 +32,74 @@ const Chat = () => {
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
+  const { uploadFile } = useChatInteract();
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 20 }), []);
+  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
 
-  const onFileUpload = useCallback((payloads: IFileResponse[]) => {
-    const fileElements = payloads.map((file) => ({
-      id: uuidv4(),
-      type: 'file' as const,
-      display: 'inline' as const,
-      name: file.name,
-      mime: file.type,
-      content: file.content,
-      forId: ''
-    }));
-    setAttachments((prev) => prev.concat(fileElements));
+  const onFileUpload = useCallback((payloads: File[]) => {
+    const attachements: IAttachment[] = payloads.map((file) => {
+      const id = uuidv4();
+
+      const { xhr, promise } = uploadFile(apiClient, file, (progress) => {
+        setAttachments((prev) =>
+          prev.map((attachment) => {
+            if (attachment.id === id) {
+              return {
+                ...attachment,
+                uploadProgress: progress
+              };
+            }
+            return attachment;
+          })
+        );
+      });
+
+      promise
+        .then((res) => {
+          setAttachments((prev) =>
+            prev.map((attachment) => {
+              if (attachment.id === id) {
+                return {
+                  ...attachment,
+                  // Update with the server ID
+                  serverId: res.id,
+                  uploaded: true,
+                  uploadProgress: 100,
+                  cancel: undefined
+                };
+              }
+              return attachment;
+            })
+          );
+        })
+        .catch((error) => {
+          toast.error(`Failed to upload ${file.name}: ${error.message}`);
+          setAttachments((prev) =>
+            prev.filter((attachment) => attachment.id !== id)
+          );
+        });
+
+      return {
+        id,
+        type: file.type,
+        name: file.name,
+        size: file.size,
+        uploadProgress: 0,
+        cancel: () => {
+          toast.info(`Cancelled upload of ${file.name}`);
+          xhr.abort();
+          setAttachments((prev) =>
+            prev.filter((attachment) => attachment.id !== id)
+          );
+        },
+        remove: () => {
+          setAttachments((prev) =>
+            prev.filter((attachment) => attachment.id !== id)
+          );
+        }
+      };
+    });
+    setAttachments((prev) => prev.concat(attachements));
   }, []);
 
   const onFileUploadError = useCallback(

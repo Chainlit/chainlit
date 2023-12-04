@@ -30,13 +30,15 @@ describe('Upload attachments', () => {
     cy.fixture('hello.cpp', 'utf-8').as('cppFile');
     cy.fixture('hello.py', 'utf-8').as('pyFile');
 
+    // Wait for the socket connection to be created
+    cy.wait(1000);
+
     /**
      * Should be able to upload file from D&D input
      */
     cy.get("[id='#upload-drop-input']").should('exist');
     // Upload a text file
     cy.get("[id='#upload-drop-input']").selectFile('@txtFile', { force: true });
-    // cy.get('#upload-drop-input').selectFile('@txtFile', { force: true });
     cy.get('#attachments').should('contain', 'state_of_the_union.txt');
 
     // Upload a C++ file

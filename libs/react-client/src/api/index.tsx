@@ -226,6 +226,65 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  uploadFile(
+    file: File,
+    onProgress: (progress: number) => void,
+    sessionId: string,
+    token?: string
+  ) {
+    const xhr = new XMLHttpRequest();
+
+    const promise = new Promise<{ id: string }>((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      xhr.open(
+        'POST',
+        this.buildEndpoint(`/project/file?session_id=${sessionId}`),
+        true
+      );
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', this.checkToken(token));
+      }
+
+      // Track the progress of the upload
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          const percentage = (event.loaded / event.total) * 100;
+          onProgress(percentage);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } else {
+          reject('Upload failed');
+        }
+      };
+
+      xhr.onerror = function () {
+        reject('Upload error');
+      };
+
+      xhr.send(formData);
+    });
+
+    return { xhr, promise };
+  }
+
+  getElementUrl(id: string, sessionId: string, accessToken?: string) {
+    let tokenParam = '';
+    if (accessToken) {
+      tokenParam = `?token=${accessToken}`;
+    }
+    return this.buildEndpoint(
+      `/project/file/${id}?session_id=${sessionId}${tokenParam}`
+    );
+  }
+
   getLogoEndpoint(theme: string) {
     return this.buildEndpoint(`/logo?theme=${theme}`);
   }

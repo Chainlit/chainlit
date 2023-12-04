@@ -1,6 +1,7 @@
 import os
 import sys
 from importlib import util
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import tomli
@@ -22,6 +23,10 @@ PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
 
 # Get the directory the script is running from
 APP_ROOT = os.getcwd()
+
+# Create the directory to store the uploaded files
+FILES_DIRECTORY = Path(APP_ROOT) / ".files"
+FILES_DIRECTORY.mkdir(exist_ok=True)
 
 config_dir = os.path.join(APP_ROOT, ".chainlit")
 config_file = os.path.join(config_dir, "config.toml")

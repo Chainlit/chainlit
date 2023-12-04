@@ -1,6 +1,7 @@
 import glob
 import json
 import mimetypes
+import shutil
 import urllib.parse
 from typing import Optional, Union
 
@@ -21,6 +22,7 @@ from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
     DEFAULT_HOST,
+    FILES_DIRECTORY,
     PACKAGE_ROOT,
     config,
     load_module,
@@ -40,7 +42,7 @@ from chainlit.types import (
     UpdateFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -117,6 +119,9 @@ async def lifespan(app: FastAPI):
             except asyncio.exceptions.CancelledError:
                 pass
 
+        if FILES_DIRECTORY.is_dir():
+            shutil.rmtree(FILES_DIRECTORY)
+
         # Force exit the process to avoid potential AnyIO threads still running
         os._exit(0)
 
@@ -133,6 +138,7 @@ def get_build_dir():
 
 
 build_dir = get_build_dir()
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -156,14 +162,10 @@ app.add_middleware(
 )
 
 
-# Define max HTTP data size to 100 MB
-max_message_size = 100 * 1024 * 1024
-
 socket = SocketManager(
     app,
     cors_allowed_origins=[],
     async_mode="asgi",
-    max_http_buffer_size=max_message_size,
 )
 
 
@@ -553,6 +555,72 @@ async def delete_thread(
 
     await data_layer.delete_thread(thread_id)
     return JSONResponse(content={"success": True})
+
+
+@app.post("/project/file")
+async def upload_file(
+    session_id: str,
+    file: UploadFile,
+    current_user: Annotated[
+        Union[None, User, PersistedUser], Depends(get_current_user)
+    ],
+):
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(session_id)
+
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found",
+        )
+
+    if current_user:
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to upload files for this session",
+            )
+
+    session.files_dir.mkdir(exist_ok=True)
+
+    content = await file.read()
+
+    file_response = await session.persist_file(
+        name=file.filename, content=content, mime=file.content_type
+    )
+
+    return JSONResponse(file_response)
+
+
+@app.get("/project/file/{file_id}")
+async def get_file(
+    file_id: str,
+    session_id: Optional[str] = None,
+    token: Optional[str] = None,
+):
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(session_id) if session_id else None
+
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found",
+        )
+
+    if current_user := await get_current_user(token or ""):
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to upload files for this session",
+            )
+
+    if file_id in session.files:
+        file = session.files[file_id]
+        return FileResponse(file["path"], media_type=file["type"])
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.get("/files/{filename:path}")

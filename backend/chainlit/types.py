@@ -1,3 +1,4 @@
+import pathlib
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -97,26 +98,29 @@ class AskResponse(TypedDict):
     name: str
 
 
-class UIMessagePayload(TypedDict):
-    message: "StepDict"
-    files: Optional[List[Dict]]
+class FileReference(TypedDict):
+    id: str
 
 
-class AskFileResponseDict(TypedDict):
+class FileDict(TypedDict):
+    id: str
     name: str
     path: str
     size: int
     type: str
-    content: bytes
+
+
+class UIMessagePayload(TypedDict):
+    message: "StepDict"
+    fileReferences: Optional[List[FileReference]]
 
 
 @dataclass
 class AskFileResponse:
     name: str
-    path: str
+    path: pathlib.Path
     size: int
     type: str
-    content: bytes
 
 
 class AskActionResponse(TypedDict):

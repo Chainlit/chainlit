@@ -5,14 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Box } from '@mui/material';
 
-import {
-  FileSpec,
-  IFileElement,
-  IFileResponse,
-  IStep,
-  useChatInteract
-} from '@chainlit/react-client';
+import { FileSpec, IStep, useChatInteract } from '@chainlit/react-client';
 
+import { IAttachment } from 'state/chat';
 import { IProjectSettings } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
@@ -22,7 +17,7 @@ import WaterMark from './waterMark';
 
 interface Props {
   fileSpec: FileSpec;
-  onFileUpload: (payload: IFileResponse[]) => void;
+  onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   setAutoScroll: (autoScroll: boolean) => void;
   projectSettings?: IProjectSettings;
@@ -43,7 +38,7 @@ const InputBox = memo(
     // const tokenCount = useRecoilValue(tokenCountState);
 
     const onSubmit = useCallback(
-      async (msg: string, files?: IFileElement[]) => {
+      async (msg: string, attachments?: IAttachment[]) => {
         const message: IStep = {
           threadId: '',
           id: uuidv4(),
@@ -70,8 +65,12 @@ const InputBox = memo(
           };
         });
 
+        const fileReferences = attachments
+          ?.filter((a) => !!a.serverId)
+          .map((a) => ({ id: a.serverId! }));
+
         setAutoScroll(true);
-        sendMessage(message, files);
+        sendMessage(message, fileReferences);
       },
       [user, projectSettings, sendMessage]
     );
