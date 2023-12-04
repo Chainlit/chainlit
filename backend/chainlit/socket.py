@@ -1,6 +1,5 @@
 import asyncio
 import json
-import uuid
 from typing import Any, Dict
 
 from chainlit.action import Action
@@ -140,12 +139,14 @@ async def connection_successful(sid):
         thread = await resume_thread(context.session)
         if thread:
             context.session.has_user_message = True
+            await context.emitter.clear_ask()
             await context.emitter.resume_thread(thread)
             await config.code.on_chat_resume(thread)
             return
 
     if config.code.on_chat_start:
         """Call the on_chat_start function provided by the developer."""
+        await context.emitter.clear_ask()
         await config.code.on_chat_start()
 
 
