@@ -8,5 +8,5 @@ async def main():
     res = await AskUserMessage(content="What is your name?", timeout=30).send()
     if res:
         await Message(
-            content=f"Your name is: {res['content']}.\nChainlit installation is working!\nYou can now start building your own chainlit apps!",
+            content=f"Your name is: {res['output']}.\nChainlit installation is working!\nYou can now start building your own chainlit apps!",
         ).send()
