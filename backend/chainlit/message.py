@@ -20,7 +20,7 @@ from chainlit.types import (
     AskResponse,
     AskSpec,
 )
-from chainlit_client import MessageType
+from chainlit_client import MessageStepType
 
 if TYPE_CHECKING:
     from chainlit.step import StepDict
@@ -31,7 +31,7 @@ class MessageBase(ABC):
     thread_id: str
     author: str
     content: str = ""
-    type: MessageType = "ASSISTANT_MESSAGE"
+    type: MessageStepType = "ASSISTANT_MESSAGE"
     disable_feedback = False
     streaming = False
     created_at: Union[str, None] = None
@@ -204,7 +204,7 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
         disable_feedback: bool = False,
-        type: MessageType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "ASSISTANT_MESSAGE",
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -342,7 +342,7 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        type: MessageType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "ASSISTANT_MESSAGE",
         disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
@@ -407,7 +407,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
-        type: MessageType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "ASSISTANT_MESSAGE",
         disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,

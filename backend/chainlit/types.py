@@ -1,16 +1,6 @@
 import pathlib
 from enum import Enum
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Generic,
-    List,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
@@ -35,21 +25,6 @@ class ThreadDict(TypedDict):
     metadata: Optional[Dict]
     steps: List["StepDict"]
     elements: Optional[List["ElementDict"]]
-
-
-@dataclass
-class PageInfo:
-    hasNextPage: bool
-    endCursor: Optional[str]
-
-
-T = TypeVar("T")
-
-
-@dataclass
-class PaginatedResponse(DataClassJsonMixin, Generic[T]):
-    pageInfo: PageInfo
-    data: List[T]
 
 
 class Pagination(BaseModel):

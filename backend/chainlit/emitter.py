@@ -249,7 +249,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                                 mime=file["type"],
                                 chainlit_key=file["id"],
                                 for_id=step_dict["id"],
-                            )._upload_and_persist()
+                            )._create()
                             for file in files
                         ]
                         await asyncio.gather(*coros)

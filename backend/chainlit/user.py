@@ -3,7 +3,6 @@ from typing import Dict, Literal, TypedDict
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 
-Role = Literal["USER", "ADMIN", "OWNER", "ANONYMOUS"]
 Provider = Literal[
     "credentials", "header", "github", "google", "azure-ad", "okta", "auth0", "descope"
 ]

@@ -5,7 +5,7 @@ from uuid import UUID
 from chainlit.context import context_var
 from chainlit.message import Message
 from chainlit.playground.providers.openai import stringify_function_call
-from chainlit.step import Step, StepType
+from chainlit.step import Step, TrueStepType
 from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
@@ -545,7 +545,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if ignore:
             return
 
-        step_type: StepType = "UNDEFINED"
+        step_type: TrueStepType = "UNDEFINED"
 
         if run.run_type in ["agent", "chain"]:
             step_type = "RUN"

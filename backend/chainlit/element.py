@@ -119,19 +119,12 @@ class Element:
                 mime=_dict.get("type"),
             )
 
-    async def _upload_and_persist(self) -> Optional[ElementDict]:
+    async def _create(self) -> bool:
         if (self.persisted or self.url) and not self.updatable:
-            return self.to_dict()
+            return True
 
         if data_layer := get_data_layer():
-            upload_res = await data_layer.upload_element(
-                thread_id=context.session.thread_id,
-                path=self.path,
-                content=self.content,
-                mime=self.mime or "",
-            )
-            self.url = upload_res["url"]
-            self.object_key = upload_res["object_key"]
+            await data_layer.create_element(self)
         elif not self.chainlit_key or self.updatable:
             file_dict = await context.session.persist_file(
                 name=self.name,
@@ -143,18 +136,7 @@ class Element:
 
         self.persisted = True
 
-        element_dict = self.to_dict()
-        asyncio.create_task(self._persist(element_dict))
-
-        return element_dict
-
-    async def _persist(self, element: ElementDict):
-        if data_layer := get_data_layer():
-            try:
-                if not self.persisted:
-                    await data_layer.create_element(element)
-            except Exception as e:
-                logger.error(f"Failed to persist element: {str(e)}")
+        return True
 
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
@@ -177,7 +159,7 @@ class Element:
                 else filetype.guess_mime(self.path or self.content)
             )
 
-        await self._upload_and_persist()
+        await self._create()
 
         if not self.url and not self.chainlit_key:
             raise ValueError("Must provide url or chainlit key to send element")

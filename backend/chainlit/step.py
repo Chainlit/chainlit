@@ -13,12 +13,12 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from chainlit_client import BaseGeneration, MessageType, StepType
+from chainlit_client import BaseGeneration, StepType, TrueStepType
 
 
 class StepDict(TypedDict, total=False):
     name: str
-    type: Union[StepType, MessageType]
+    type: StepType
     id: str
     threadId: str
     parentId: Optional[str]
@@ -42,7 +42,7 @@ def step(
     original_function: Optional[Callable] = None,
     *,
     name: Optional[str] = "",
-    type: StepType = "UNDEFINED",
+    type: TrueStepType = "UNDEFINED",
     id: Optional[str] = None,
     disable_feedback: bool = True,
 ):
@@ -114,7 +114,7 @@ _sentinel: Any = object()
 class Step:
     # Constructor
     name: str
-    type: StepType
+    type: TrueStepType
     id: str
     parent_id: Optional[str]
     disable_feedback: bool
@@ -138,7 +138,7 @@ class Step:
     def __init__(
         self,
         name: Optional[str] = config.ui.name,
-        type: StepType = "UNDEFINED",
+        type: TrueStepType = "UNDEFINED",
         id: Optional[str] = None,
         parent_id: Optional[str] = _sentinel,
         elements: Optional[List[Element]] = None,
