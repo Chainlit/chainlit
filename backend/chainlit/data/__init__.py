@@ -9,7 +9,8 @@ from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
 from chainlit_client import Attachment
 from chainlit_client import Feedback as ClientFeedback
-from chainlit_client import PageInfo, PaginatedResponse, Step
+from chainlit_client import PageInfo, PaginatedResponse
+from chainlit_client import Step as ClientStep
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -143,7 +144,7 @@ class ChainlitDataLayer:
             "strategy": "BINARY",
         }
 
-    def step_to_step_dict(self, step: Step) -> "StepDict":
+    def step_to_step_dict(self, step: ClientStep) -> "StepDict":
         metadata = step.metadata or {}
         return {
             "createdAt": step.created_at,
