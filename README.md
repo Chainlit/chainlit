@@ -8,6 +8,8 @@
 
 Chainlit is an open-source async Python framework that makes it incredibly fast to build Chat GPT like applications with your **own business logic and data**.
 
+Contact us here for **Enterprise Support** and to get early access to the **Monitoring** product: https://forms.gle/BX3UNBLmTF75KgZVA 
+
 Key features:
 
 - [💬 Multi Modal chats](https://docs.chainlit.io/chat-experience/elements)
