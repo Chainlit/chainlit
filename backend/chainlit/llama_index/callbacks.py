@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from chainlit.context import context_var
@@ -85,7 +85,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             disable_feedback=False,
         )
         self.steps[event_id] = step
-        step.start = datetime.now(timezone.utc).isoformat()
+        step.start = datetime.utcnow().isoformat()
         step.input = payload or {}
         asyncio.run(step.send())
 
@@ -116,7 +116,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     for idx, source in enumerate(sources)
                 ]
                 step.output = f"Retrieved the following sources: {source_refs}"
-                step.end = datetime.now(timezone.utc).isoformat()
+                step.end = datetime.utcnow().isoformat()
                 asyncio.run(step.update())
 
         if event_type == CBEventType.LLM:
@@ -142,7 +142,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 content = ""
 
             step.output = content
-            step.end = datetime.now(timezone.utc).isoformat()
+            step.end = datetime.utcnow().isoformat()
 
             token_count = self.total_llm_token_count
 

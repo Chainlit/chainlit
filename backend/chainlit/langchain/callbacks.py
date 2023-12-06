@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
@@ -567,7 +567,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
             disable_feedback=disable_feedback,
         )
-        step.start = run.start_time.isoformat()
+        step.start = datetime.utcnow().isoformat()
         step.input = run.inputs
 
         self.steps[str(run.id)] = step
@@ -617,7 +617,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             if current_step:
                 current_step.output = completion
                 current_step.language = language
-                current_step.end = datetime.now(timezone.utc).isoformat()
+                current_step.end = datetime.utcnow().isoformat()
                 current_step.generation = current_generation
                 self._run_sync(current_step.update())
 
@@ -636,7 +636,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
 
         if current_step:
             current_step.output = output
-            current_step.end = datetime.now(timezone.utc).isoformat()
+            current_step.end = datetime.utcnow().isoformat()
             self._run_sync(current_step.update())
 
     def _on_error(self, error: BaseException, *, run_id: UUID, **kwargs: Any):
@@ -645,7 +645,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if current_step := self.steps.get(str(run_id), None):
             current_step.is_error = True
             current_step.output = str(error)
-            current_step.end = datetime.now(timezone.utc).isoformat()
+            current_step.end = datetime.utcnow().isoformat()
             self._run_sync(current_step.update())
 
     on_llm_error = _on_error

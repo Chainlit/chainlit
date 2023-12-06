@@ -8,7 +8,7 @@ import aiofiles
 if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.step import Step
-    from chainlit.types import AskResponse, FileDict, FileReference
+    from chainlit.types import FileDict, FileReference
     from chainlit.user import PersistedUser, User
 
 
@@ -132,7 +132,7 @@ class WebsocketSession(BaseSession):
         # Function to emit a message to the user
         emit: Callable[[str, Any], None],
         # Function to ask the user a question
-        ask_user: Callable[[Any, Optional[int]], Union["AskResponse", None]],
+        ask_user: Callable[[Any, Optional[int]], Any],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
         # Thread id

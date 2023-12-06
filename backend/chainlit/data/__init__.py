@@ -4,6 +4,7 @@ from collections import deque
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from chainlit.context import context
+from chainlit.logger import logger
 from chainlit.session import WebsocketSession
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
@@ -55,8 +56,8 @@ class BaseDataLayer:
     async def upsert_feedback(
         self,
         feedback: Feedback,
-    ):
-        pass
+    ) -> str:
+        return ""
 
     @queue_until_user_message()
     async def create_element(self, element_dict: "ElementDict"):
@@ -114,7 +115,8 @@ class ChainlitDataLayer:
     ):
         from chainlit_client import ChainlitClient
 
-        self.client = ChainlitClient(api_key=api_key, endpoint=chainlit_server)
+        self.client = ChainlitClient(api_key=api_key, url=chainlit_server)
+        logger.info("Chainlit data layer initialized")
 
     def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
         metadata = attachment.metadata or {}
@@ -195,17 +197,21 @@ class ChainlitDataLayer:
         if feedback.id:
             await self.client.api.update_feedback(
                 id=feedback.id,
-                value=feedback.value,
-                comment=feedback.comment,
-                strategy=feedback.strategy,
+                update_params={
+                    "comment": feedback.comment,
+                    "strategy": feedback.strategy,
+                    "value": feedback.value,
+                },
             )
+            return feedback.id
         else:
-            await self.client.api.create_feedback(
+            created = await self.client.api.create_feedback(
                 step_id=feedback.forId,
                 value=feedback.value,
                 comment=feedback.comment,
                 strategy=feedback.strategy,
             )
+            return created.id or ""
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
@@ -215,16 +221,16 @@ class ChainlitDataLayer:
             "display": element.display,
             "type": element.type,
         }
-        attachment = Attachment(
+
+        await self.client.api.create_attachment(
             thread_id=element.thread_id,
             step_id=element.for_id or "",
-            name=element.name,
             mime=element.mime,
+            name=element.name,
             url=element.url,
+            content=element.content,
+            path=element.path,
             metadata=metadata,
-        )
-        await self.client.api.create_attachment(
-            attachment=attachment, content=element.content, path=element.path
         )
 
     async def get_element(
@@ -242,25 +248,26 @@ class ChainlitDataLayer:
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
         metadata = {
-            "disableFeedback": step_dict["disableFeedback"],
-            "isError": step_dict["isError"],
-            "waitForAnswer": step_dict["waitForAnswer"],
-            "language": step_dict["language"],
+            "disableFeedback": step_dict.get("disableFeedback"),
+            "isError": step_dict.get("isError"),
+            "waitForAnswer": step_dict.get("waitForAnswer"),
+            "language": step_dict.get("language"),
         }
 
         await self.client.api.send_steps(
             [
                 {
-                    "startTime": step_dict["start"],
-                    "endTime": step_dict["end"],
-                    "generation": step_dict["generation"],
-                    "id": step_dict["id"],
-                    "parentId": step_dict["parentId"],
-                    "input": step_dict["input"],
-                    "output": step_dict["output"],
-                    "name": step_dict["name"],
-                    "threadId": step_dict["threadId"],
-                    "type": step_dict["type"],
+                    "createdAt": step_dict.get("createdAt"),
+                    "startTime": step_dict.get("start"),
+                    "endTime": step_dict.get("end"),
+                    "generation": step_dict.get("generation"),
+                    "id": step_dict.get("id"),
+                    "parentId": step_dict.get("parentId"),
+                    "input": step_dict.get("input"),
+                    "output": step_dict.get("output"),
+                    "name": step_dict.get("name"),
+                    "threadId": step_dict.get("threadId"),
+                    "type": step_dict.get("type"),
                     "metadata": metadata,
                 }
             ]
@@ -268,25 +275,7 @@ class ChainlitDataLayer:
 
     @queue_until_user_message()
     async def update_step(self, step_dict: "StepDict"):
-        metadata = {
-            "disableFeedback": step_dict["disableFeedback"],
-            "isError": step_dict["isError"],
-            "waitForAnswer": step_dict["waitForAnswer"],
-            "language": step_dict["language"],
-        }
-
-        await self.client.api.update_step(
-            id=step_dict["id"],
-            type=step_dict["type"],
-            start_time=step_dict["start"],
-            end_time=step_dict["end"],
-            input=step_dict["input"],
-            output=step_dict["output"],
-            parent_id=step_dict["parentId"],
-            name=step_dict["name"],
-            generation=step_dict["generation"],
-            metadata=metadata,
-        )
+        await self.create_step(step_dict)
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
@@ -350,7 +339,9 @@ class ChainlitDataLayer:
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
-        await self.client.api.update_thread(id=thread_id, metadata=metadata, tags=tags)
+        await self.client.api.upsert_thread(
+            thread_id=thread_id, metadata=metadata, tags=tags
+        )
 
 
 if api_key := os.environ.get("CHAINLIT_API_KEY"):

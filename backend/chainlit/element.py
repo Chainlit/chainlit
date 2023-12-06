@@ -122,10 +122,12 @@ class Element:
     async def _create(self) -> bool:
         if (self.persisted or self.url) and not self.updatable:
             return True
-
         if data_layer := get_data_layer():
-            await data_layer.create_element(self)
-        elif not self.chainlit_key or self.updatable:
+            try:
+                asyncio.create_task(data_layer.create_element(self))
+            except Exception as e:
+                logger.error(f"Failed to create element: {str(e)}")
+        if not self.chainlit_key or self.updatable:
             file_dict = await context.session.persist_file(
                 name=self.name,
                 path=self.path,

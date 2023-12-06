@@ -40,11 +40,7 @@ const Attachment = ({ name, mime, children }: Props) => {
       >
         <Box
           sx={{
-            height: '30px',
-            borderRadius: 1,
-            '> svg': {
-              height: '30px'
-            }
+            width: '2rem'
           }}
         >
           <FileIcon {...defaultStyles[extension]} extension={extension} />

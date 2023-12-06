@@ -1,12 +1,11 @@
+from datetime import datetime
 from typing import Any, Generic, List, Optional, TypeVar
-from datetime import datetime, timezone
 
-from chainlit.sync import run_sync
 from chainlit.context import context
+from chainlit.step import Step
+from chainlit.sync import run_sync
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
-
-from chainlit.step import Step
 
 T = TypeVar("T")
 
@@ -52,7 +51,7 @@ class HaystackAgentCallbackHandler:
         root_message = context.session.root_message
         parent_id = root_message.id if root_message else None
         run_step = Step(name=self.agent_name, type="RUN", parent_id=parent_id)
-        run_step.start = datetime.now(timezone.utc).isoformat()
+        run_step.start = datetime.utcnow().isoformat()
         run_step.input = kwargs
 
         run_sync(run_step.send())
@@ -61,7 +60,7 @@ class HaystackAgentCallbackHandler:
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
         run_step = self.stack.pop()
-        run_step.end = datetime.now(timezone.utc).isoformat()
+        run_step.end = datetime.utcnow().isoformat()
         run_step.output = agent_step.prompt_node_response
         run_sync(run_step.update())
 
@@ -73,7 +72,7 @@ class HaystackAgentCallbackHandler:
         # If token streaming is disabled
         if self.last_step.output == "":
             self.last_step.output = agent_step.prompt_node_response
-        self.last_step.end = datetime.now(timezone.utc).isoformat()
+        self.last_step.end = datetime.utcnow().isoformat()
         run_sync(self.last_step.update())
 
         if not agent_step.is_last():
@@ -90,7 +89,7 @@ class HaystackAgentCallbackHandler:
         parent_id = self.stack.items[0].id if self.stack.items[0] else None
         tool_step = Step(name=tool.name, type="TOOL", parent_id=parent_id)
         tool_step.input = tool_input
-        tool_step.start = datetime.now(timezone.utc).isoformat()
+        tool_step.start = datetime.utcnow().isoformat()
         self.stack.push(tool_step)
 
     def on_tool_finish(
@@ -103,7 +102,7 @@ class HaystackAgentCallbackHandler:
         # Tool finished, send step with tool_result
         tool_step = self.stack.pop()
         tool_step.output = tool_result
-        tool_step.end = datetime.now(timezone.utc).isoformat()
+        tool_step.end = datetime.utcnow().isoformat()
         run_sync(tool_step.update())
 
     def on_tool_error(self, exception: Exception, tool: Tool, **kwargs: Any) -> None:
@@ -111,5 +110,5 @@ class HaystackAgentCallbackHandler:
         error_step = self.stack.pop()
         error_step.is_error = True
         error_step.output = str(exception)
-        error_step.end = datetime.now(timezone.utc).isoformat()
+        error_step.end = datetime.utcnow().isoformat()
         run_sync(error_step.update())

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 import chainlit.data as cl_data
@@ -6,7 +6,7 @@ from chainlit.step import StepDict
 
 import chainlit as cl
 
-now = datetime.now(timezone.utc).isoformat()
+now = datetime.utcnow().isoformat()
 
 create_step_counter = 0
 

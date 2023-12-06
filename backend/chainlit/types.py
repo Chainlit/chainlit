@@ -68,11 +68,6 @@ class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user an action"""
 
 
-class AskResponse(TypedDict):
-    output: str
-    name: str
-
-
 class FileReference(TypedDict):
     id: str
 
@@ -92,8 +87,9 @@ class UIMessagePayload(TypedDict):
 
 @dataclass
 class AskFileResponse:
+    id: str
     name: str
-    path: pathlib.Path
+    path: str
     size: int
     type: str
 

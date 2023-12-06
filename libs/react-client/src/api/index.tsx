@@ -199,8 +199,12 @@ export class ChainlitAPI extends APIBase {
     return stream;
   }
 
-  async setFeedback(feedback: IFeedback, accessToken?: string) {
-    await this.put(`/feedback`, { feedback }, accessToken);
+  async setFeedback(
+    feedback: IFeedback,
+    accessToken?: string
+  ): Promise<{ success: boolean; feedbackId: string }> {
+    const res = await this.put(`/feedback`, { feedback }, accessToken);
+    return res.json();
   }
 
   async listThreads(

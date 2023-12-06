@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
 from chainlit.data import get_data_layer
@@ -72,7 +73,7 @@ class BaseChainlitEmitter:
 
     async def send_ask_user(
         self, step_dict: StepDict, spec: AskSpec, raise_on_timeout=False
-    ):
+    ) -> Optional[Union["StepDict", "AskActionResponse", List["FileDict"]]]:
         """Stub method to send a prompt to the UI and wait for a response."""
         pass
 
@@ -182,12 +183,14 @@ class ChainlitEmitter(BaseChainlitEmitter):
         assert uuid.UUID(step_dict["id"]).version == 4
 
         message = Message.from_dict(step_dict)
+        # Overwrite the created_at timestamp with the current time
+        message.created_at = datetime.utcnow().isoformat()
 
-        await message._create()
+        asyncio.create_task(message._create())
 
         if not self.session.has_user_message:
             self.session.has_user_message = True
-            await self.init_thread(message.to_dict())
+            asyncio.create_task(self.init_thread(message.to_dict()))
 
         if file_refs:
             files = [
@@ -217,7 +220,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
             # Send the prompt to the UI
             user_res = await self.ask_user(
                 {"msg": step_dict, "spec": spec.to_dict()}, spec.timeout
-            )  # type: Optional[Union["StepDict", List["FileReference"]]]
+            )  # type: Optional[Union["StepDict", "AskActionResponse", List["FileReference"]]]
 
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
@@ -245,7 +248,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                         coros = [
                             File(
                                 name=file["name"],
-                                path=file["path"],
+                                path=str(file["path"]),
                                 mime=file["type"],
                                 chainlit_key=file["id"],
                                 for_id=step_dict["id"],

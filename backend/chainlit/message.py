@@ -2,8 +2,8 @@ import asyncio
 import json
 import uuid
 from abc import ABC
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from datetime import datetime
+from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
 from chainlit.config import config
@@ -11,19 +11,17 @@ from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.element import ElementBased
 from chainlit.logger import logger
+from chainlit.step import StepDict
 from chainlit.telemetry import trace_event
 from chainlit.types import (
     AskActionResponse,
     AskActionSpec,
     AskFileResponse,
     AskFileSpec,
-    AskResponse,
     AskSpec,
+    FileDict,
 )
 from chainlit_client import MessageStepType
-
-if TYPE_CHECKING:
-    from chainlit.step import StepDict
 
 
 class MessageBase(ABC):
@@ -46,13 +44,14 @@ class MessageBase(ABC):
         trace_event(f"init {self.__class__.__name__}")
         self.thread_id = context.session.thread_id
 
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
+
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
-        if not self.created_at:
-            self.created_at = datetime.now(timezone.utc).isoformat()
 
     @classmethod
-    def from_dict(self, _dict: "StepDict"):
+    def from_dict(self, _dict: StepDict):
         type = _dict.get("type", "ASSISTANT_MESSAGE")
         message = Message(
             id=_dict["id"],
@@ -66,11 +65,13 @@ class MessageBase(ABC):
 
         return message
 
-    def to_dict(self) -> "StepDict":
-        _dict: "StepDict" = {
+    def to_dict(self) -> StepDict:
+        _dict: StepDict = {
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
+            "start": self.created_at,
+            "end": self.created_at,
             "output": self.content,
             "name": self.author,
             "type": self.type,
@@ -99,7 +100,7 @@ class MessageBase(ABC):
         step_dict = self.to_dict()
 
         data_layer = get_data_layer()
-        if data_layer and not self.persisted:
+        if data_layer:
             try:
                 asyncio.create_task(data_layer.update_step(step_dict))
             except Exception as e:
@@ -356,7 +357,7 @@ class AskUserMessage(AskMessageBase):
 
         super().__post_init__()
 
-    async def send(self) -> Union[AskResponse, None]:
+    async def send(self) -> Union[StepDict, None]:
         """
         Sends the question to ask to the UI and waits for the reply.
         """
@@ -374,8 +375,9 @@ class AskUserMessage(AskMessageBase):
 
         spec = AskSpec(type="text", timeout=self.timeout)
 
-        res = await context.emitter.send_ask_user(
-            step_dict, spec, self.raise_on_timeout
+        res = cast(
+            Union[None, StepDict],
+            await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
         self.wait_for_answer = False
@@ -448,14 +450,24 @@ class AskFileMessage(AskMessageBase):
             timeout=self.timeout,
         )
 
-        res = await context.emitter.send_ask_user(
-            step_dict, spec, self.raise_on_timeout
+        res = cast(
+            Union[None, List[FileDict]],
+            await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
         self.wait_for_answer = False
 
         if res:
-            return [AskFileResponse(**r) for r in res]
+            return [
+                AskFileResponse(
+                    id=r["id"],
+                    name=r["name"],
+                    path=str(r["path"]),
+                    size=r["size"],
+                    type=r["type"],
+                )
+                for r in res
+            ]
         else:
             return None
 

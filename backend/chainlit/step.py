@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
@@ -29,9 +29,9 @@ class StepDict(TypedDict, total=False):
     metadata: Dict
     input: str
     output: str
-    createdAt: Union[str, None]
-    start: Union[str, None]
-    end: Union[str, None]
+    createdAt: Optional[str]
+    start: Optional[str]
+    end: Optional[str]
     generation: Optional[Dict]
     language: Optional[str]
     indent: Optional[int]
@@ -172,7 +172,7 @@ class Step:
         self.generation = None
         self.elements = elements or []
 
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = datetime.utcnow().isoformat()
         self.start = None
         self.end = None
 
@@ -358,7 +358,7 @@ class Step:
 
     # Handle Context Manager Protocol
     async def __aenter__(self):
-        self.start = datetime.now(timezone.utc).isoformat()
+        self.start = datetime.utcnow().isoformat()
         if not self.parent_id and not self._root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
@@ -369,12 +369,12 @@ class Step:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.now(timezone.utc).isoformat()
+        self.end = datetime.utcnow().isoformat()
         context.session.active_steps.pop()
         await self.update()
 
     def __enter__(self):
-        self.start = datetime.now(timezone.utc).isoformat()
+        self.start = datetime.utcnow().isoformat()
         if not self.parent_id and not self._root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
@@ -386,6 +386,6 @@ class Step:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.now(timezone.utc).isoformat()
+        self.end = datetime.utcnow().isoformat()
         context.session.active_steps.pop()
         asyncio.create_task(self.update())

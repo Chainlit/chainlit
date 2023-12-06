@@ -167,7 +167,7 @@ const _ThreadHistorySideBar = () => {
               color: (theme) => theme.palette.text.primary
             }}
           >
-            My Threads
+            My Chats
           </Typography>
           <IconButton edge="end" onClick={() => setChatHistoryOpen(false)}>
             <KeyboardDoubleArrowLeftIcon sx={{ color: 'text.primary' }} />

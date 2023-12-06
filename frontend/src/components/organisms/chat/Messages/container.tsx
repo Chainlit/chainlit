@@ -110,11 +110,14 @@ const MessageContainer = memo(
         try {
           toast.promise(apiClient.setFeedback(feedback, accessToken), {
             loading: 'Updating',
-            success: () => {
+            success: (res) => {
               setMessages((prev) =>
                 updateMessageById(prev, message.id, {
                   ...message,
-                  feedback: feedback
+                  feedback: {
+                    ...feedback,
+                    id: res.feedbackId
+                  }
                 })
               );
               onSuccess();
