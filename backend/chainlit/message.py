@@ -44,9 +44,6 @@ class MessageBase(ABC):
         trace_event(f"init {self.__class__.__name__}")
         self.thread_id = context.session.thread_id
 
-        if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
-
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
 
@@ -147,6 +144,9 @@ class MessageBase(ABC):
         return step_dict
 
     async def send(self):
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
+
         if self.content is None:
             self.content = ""
 
@@ -362,6 +362,8 @@ class AskUserMessage(AskMessageBase):
         Sends the question to ask to the UI and waits for the reply.
         """
         trace_event("send_ask_user")
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
 
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
@@ -432,6 +434,9 @@ class AskFileMessage(AskMessageBase):
         """
         trace_event("send_ask_file")
 
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
+
         if self.streaming:
             self.streaming = False
 
@@ -501,6 +506,9 @@ class AskActionMessage(AskMessageBase):
         Sends the question to ask to the UI and waits for the reply
         """
         trace_event("send_ask_action")
+
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
 
         if self.streaming:
             self.streaming = False

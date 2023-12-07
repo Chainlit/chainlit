@@ -10,8 +10,10 @@ from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
 from chainlit_client import Attachment
 from chainlit_client import Feedback as ClientFeedback
-from chainlit_client import PageInfo, PaginatedResponse
+from chainlit_client import NumberListFilter, PageInfo, PaginatedResponse
 from chainlit_client import Step as ClientStep
+from chainlit_client import StringFilter, StringListFilter
+from chainlit_client import ThreadFilter as ClientThreadFilter
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -91,7 +93,7 @@ class BaseDataLayer:
         pass
 
     async def list_threads(
-        self, pagination: "Pagination", filter: "ThreadFilter"
+        self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
         return PaginatedResponse(
             data=[], pageInfo=PageInfo(hasNextPage=False, endCursor=None)
@@ -103,6 +105,7 @@ class BaseDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
@@ -141,6 +144,8 @@ class ChainlitDataLayer:
         if not feedback:
             return None
         return {
+            "id": feedback.id or "",
+            "forId": feedback.step_id or "",
             "value": feedback.value or 0,  # type: ignore
             "comment": feedback.comment,
             "strategy": "BINARY",
@@ -166,6 +171,7 @@ class ChainlitDataLayer:
             "language": metadata.get("language"),
             "isError": metadata.get("isError", False),
             "waitForAnswer": metadata.get("waitForAnswer", False),
+            "feedback": self.feedback_to_feedback_dict(step.feedback),
         }
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
@@ -180,14 +186,16 @@ class ChainlitDataLayer:
         )
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
-        created_user = await self.client.api.create_user(
-            identifier=user.identifier, metadata=user.metadata
-        )
+        _user = await self.client.api.get_user(identifier=user.identifier)
+        if not _user:
+            _user = await self.client.api.create_user(
+                identifier=user.identifier, metadata=user.metadata
+            )
         return PersistedUser(
-            id=created_user.id or "",
-            identifier=created_user.identifier or "",
-            metadata=created_user.metadata,
-            createdAt=created_user.created_at or "",
+            id=_user.id or "",
+            identifier=_user.identifier or "",
+            metadata=_user.metadata,
+            createdAt=_user.created_at or "",
         )
 
     async def upsert_feedback(
@@ -294,12 +302,24 @@ class ChainlitDataLayer:
         await self.client.api.delete_thread(id=thread_id)
 
     async def list_threads(
-        self, pagination: "Pagination", filter: "ThreadFilter"
+        self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
-        # TODO
-        # await self.client.api.list_threads(first=pagination.first, skip=pagination.cursor)
-        return PaginatedResponse(
-            data=[], pageInfo=PageInfo(hasNextPage=False, endCursor=None)
+        if not filters.userIdentifier:
+            raise ValueError("userIdentifier is required")
+
+        client_filters = ClientThreadFilter(
+            participantsIdentifier=StringListFilter(
+                operator="in", value=[filters.userIdentifier]
+            ),
+        )
+        if filters.search:
+            client_filters.search = StringFilter(operator="ilike", value=filters.search)
+        if filters.feedback:
+            client_filters.feedbacksValue = NumberListFilter(
+                operator="in", value=[filters.feedback]
+            )
+        return await self.client.api.list_threads(
+            first=pagination.first, after=pagination.cursor, filters=client_filters
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
@@ -336,11 +356,15 @@ class ChainlitDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
         await self.client.api.upsert_thread(
-            thread_id=thread_id, metadata=metadata, tags=tags
+            thread_id=thread_id,
+            participant_id=user_id,
+            metadata=metadata,
+            tags=tags,
         )
 
 

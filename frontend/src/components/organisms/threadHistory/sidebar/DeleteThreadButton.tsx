@@ -34,10 +34,10 @@ const DeleteThreadButton = ({ threadId, onDelete }: Props) => {
 
   const handleConfirm = async () => {
     toast.promise(apiClient.deleteThread(threadId, accessToken), {
-      loading: 'Deleting thread',
+      loading: 'Deleting chat',
       success: () => {
         onDelete();
-        return 'Thread deleted!';
+        return 'Chat deleted!';
       },
       error: (err) => {
         if (err instanceof ClientError) {

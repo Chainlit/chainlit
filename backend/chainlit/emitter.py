@@ -16,6 +16,7 @@ from chainlit.types import (
     ThreadDict,
     UIMessagePayload,
 )
+from chainlit.user import PersistedUser
 from socketio.exceptions import TimeoutError
 
 
@@ -169,8 +170,14 @@ class ChainlitEmitter(BaseChainlitEmitter):
     async def init_thread(self, step: StepDict):
         """Signal the UI that a new thread (with a user message) exists"""
         if data_layer := get_data_layer():
+            if isinstance(self.session.user, PersistedUser):
+                user_id = self.session.user.id
+            else:
+                user_id = None
             await data_layer.update_thread(
-                thread_id=self.session.thread_id, metadata={"name": step["output"]}
+                thread_id=self.session.thread_id,
+                user_id=user_id,
+                metadata={"name": step["output"]},
             )
             await self.session.flush_method_queue()
 

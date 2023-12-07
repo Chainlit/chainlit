@@ -75,7 +75,6 @@ class GithubOAuthProvider(OAuthProvider):
             emails = emails_response.json()
 
             github_user.update({"emails": emails})
-
             user = User(
                 identifier=github_user["login"],
                 metadata={"image": github_user["avatar_url"], "provider": "github"},
@@ -129,9 +128,8 @@ class GoogleOAuthProvider(OAuthProvider):
             )
             response.raise_for_status()
             google_user = response.json()
-
             user = User(
-                identifier=google_user["name"],
+                identifier=google_user["email"],
                 metadata={"image": google_user["picture"], "provider": "google"},
             )
             return (google_user, user)

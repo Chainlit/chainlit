@@ -13,9 +13,6 @@ import {
   IMessageElement,
   IStep,
   ITool,
-  accessTokenState,
-  messagesState,
-  updateMessageById,
   useChatInteract
 } from '@chainlit/react-client';
 import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
@@ -33,6 +30,11 @@ interface Props {
   messages: IStep[];
   askUser?: IAsk;
   autoScroll?: boolean;
+  onFeedbackUpdated: (
+    message: IStep,
+    onSuccess: () => void,
+    feedback: IFeedback
+  ) => void;
   callAction?: (action: IAction) => void;
   setAutoScroll?: (autoScroll: boolean) => void;
 }
@@ -46,14 +48,13 @@ const MessageContainer = memo(
     autoScroll,
     elements,
     messages,
+    onFeedbackUpdated,
     callAction,
     setAutoScroll
   }: Props) => {
-    const accessToken = useRecoilValue(accessTokenState);
     const appSettings = useRecoilValue(settingsState);
     const projectSettings = useRecoilValue(projectSettingsState);
     const setPlayground = useSetRecoilState(playgroundState);
-    const setMessages = useSetRecoilState(messagesState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
@@ -103,35 +104,6 @@ const MessageContainer = memo(
         });
       },
       [setPlayground]
-    );
-
-    const onFeedbackUpdated = useCallback(
-      async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-        try {
-          toast.promise(apiClient.setFeedback(feedback, accessToken), {
-            loading: 'Updating',
-            success: (res) => {
-              setMessages((prev) =>
-                updateMessageById(prev, message.id, {
-                  ...message,
-                  feedback: {
-                    ...feedback,
-                    id: res.feedbackId
-                  }
-                })
-              );
-              onSuccess();
-              return 'Feedback updated!';
-            },
-            error: (err) => {
-              return <span>{err.message}</span>;
-            }
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      },
-      []
     );
 
     const onElementRefClick = useCallback(

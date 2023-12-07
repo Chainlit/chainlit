@@ -1,11 +1,18 @@
+import { apiClient } from 'api';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { toast } from 'sonner';
 
 import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
 import {
   IAction,
+  IFeedback,
   IMessageElement,
+  IStep,
   IThread,
+  accessTokenState,
   nestMessages
 } from '@chainlit/react-client';
 
@@ -19,6 +26,49 @@ type Props = {
 };
 
 const Thread = ({ thread, error, isLoading }: Props) => {
+  const accessToken = useRecoilValue(accessTokenState);
+  const [steps, setSteps] = useState<IStep[]>([]);
+
+  useEffect(() => {
+    if (!thread) return;
+    setSteps(thread.steps);
+  }, [thread]);
+
+  const onFeedbackUpdated = useCallback(
+    async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
+      try {
+        toast.promise(apiClient.setFeedback(feedback, accessToken), {
+          loading: 'Updating',
+          success: (res) => {
+            setSteps((prev) =>
+              prev.map((step) => {
+                if (step.id === message.id) {
+                  return {
+                    ...step,
+                    feedback: {
+                      ...feedback,
+                      id: res.feedbackId
+                    }
+                  };
+                }
+                return step;
+              })
+            );
+
+            onSuccess();
+            return 'Feedback updated!';
+          },
+          error: (err) => {
+            return <span>{err.message}</span>;
+          }
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
   if (isLoading) {
     return [1, 2, 3].map((index) => (
       <Stack
@@ -53,6 +103,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
 
   const elements = thread.elements;
   const actions: IAction[] = [];
+  const messages = nestMessages(steps);
 
   return (
     <Stack direction="row" flexGrow={1} width="100%" height="100%">
@@ -76,7 +127,14 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             }
           >
             This chat was created on{' '}
-            {new Intl.DateTimeFormat().format(new Date(thread.createdAt))}.
+            {new Intl.DateTimeFormat(undefined, {
+              day: 'numeric',
+              month: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+            }).format(new Date(thread.createdAt))}
+            .
           </Alert>
         </Box>
         <MessageContainer
@@ -84,7 +142,8 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           avatars={[]}
           actions={actions}
           elements={(elements || []) as IMessageElement[]}
-          messages={nestMessages(thread.steps)}
+          onFeedbackUpdated={onFeedbackUpdated}
+          messages={messages}
         />
       </SideView>
     </Stack>
