@@ -45,6 +45,7 @@ def step(
     type: TrueStepType = "UNDEFINED",
     id: Optional[str] = None,
     disable_feedback: bool = True,
+    root: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -64,6 +65,7 @@ def step(
                     name=name,
                     id=id,
                     disable_feedback=disable_feedback,
+                    root=root,
                 ) as step:
                     try:
                         step.input = {"args": args, "kwargs": kwargs}
@@ -71,7 +73,8 @@ def step(
                         pass
                     result = await func(*args, **kwargs)
                     try:
-                        step.output = result
+                        if result:
+                            step.output = result
                     except:
                         pass
                     return result
@@ -86,6 +89,7 @@ def step(
                     name=name,
                     id=id,
                     disable_feedback=disable_feedback,
+                    root=root,
                 ) as step:
                     try:
                         step.input = {"args": args, "kwargs": kwargs}
@@ -93,7 +97,8 @@ def step(
                         pass
                     result = func(*args, **kwargs)
                     try:
-                        step.output = result
+                        if result:
+                            step.output = result
                     except:
                         pass
                     return result
@@ -107,10 +112,6 @@ def step(
         return wrapper(func)
 
 
-# Useful to check if parent_id was passed or default value was used
-_sentinel: Any = object()
-
-
 class Step:
     # Constructor
     name: str
@@ -122,7 +123,7 @@ class Step:
     streaming: bool
     persisted: bool
 
-    _root: bool
+    root: bool
 
     is_error: Optional[bool]
     metadata: Dict
@@ -140,9 +141,10 @@ class Step:
         name: Optional[str] = config.ui.name,
         type: TrueStepType = "UNDEFINED",
         id: Optional[str] = None,
-        parent_id: Optional[str] = _sentinel,
+        parent_id: Optional[str] = None,
         elements: Optional[List[Element]] = None,
         disable_feedback: bool = True,
+        root: bool = False,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         self._input = ""
@@ -154,19 +156,8 @@ class Step:
         self.disable_feedback = disable_feedback
         self.metadata = {}
         self.is_error = False
-
-        if parent_id is _sentinel:
-            # parent_id was not provided
-            self.parent_id = None
-            self._root = False
-        else:
-            # parent_id was provided (even if it is None)
-            assert parent_id is None or isinstance(
-                parent_id, str
-            ), "parent_id must be None or a string"
-
-            self.parent_id = parent_id
-            self._root = parent_id is None
+        self.parent_id = parent_id
+        self.root = root
 
         self.language = None
         self.generation = None
@@ -359,7 +350,7 @@ class Step:
     # Handle Context Manager Protocol
     async def __aenter__(self):
         self.start = datetime.utcnow().isoformat()
-        if not self.parent_id and not self._root:
+        if not self.parent_id and not self.root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             elif context.session.root_message:
@@ -375,7 +366,7 @@ class Step:
 
     def __enter__(self):
         self.start = datetime.utcnow().isoformat()
-        if not self.parent_id and not self._root:
+        if not self.parent_id and not self.root:
             if current_step := context.current_step:
                 self.parent_id = current_step.id
             elif context.session.root_message:
