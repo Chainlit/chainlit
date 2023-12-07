@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -87,8 +86,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         self.steps[event_id] = step
         step.start = datetime.utcnow().isoformat()
         step.input = payload or {}
-        asyncio.run(step.send())
-
+        self.context.loop.create_task(step.send())
         return event_id
 
     def on_event_end(
@@ -100,10 +98,13 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> None:
         """Run when an event ends."""
         step = self.steps.get(event_id, None)
+
         if payload is None or step is None:
             return
 
         self._restore_context()
+
+        step.end = datetime.utcnow().isoformat()
 
         if event_type == CBEventType.RETRIEVE:
             sources = payload.get(EventPayload.NODES)
@@ -116,8 +117,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     for idx, source in enumerate(sources)
                 ]
                 step.output = f"Retrieved the following sources: {source_refs}"
-                step.end = datetime.utcnow().isoformat()
-                asyncio.run(step.update())
+            self.context.loop.create_task(step.update())
 
         if event_type == CBEventType.LLM:
             formatted_messages = payload.get(
@@ -142,9 +142,8 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 content = ""
 
             step.output = content
-            step.end = datetime.utcnow().isoformat()
 
-            token_count = self.total_llm_token_count
+            token_count = self.total_llm_token_count or None
 
             if messages:
                 step.generation = ChatGeneration(
@@ -157,7 +156,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     token_count=token_count,
                 )
 
-            asyncio.run(step.update())
+            self.context.loop.create_task(step.update())
 
         self.steps.pop(event_id, None)
 

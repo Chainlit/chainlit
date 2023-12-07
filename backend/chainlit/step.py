@@ -228,9 +228,7 @@ class Step:
         }
         return _dict
 
-    async def update(
-        self,
-    ):
+    async def update(self):
         """
         Update a step already sent to the UI.
         """
