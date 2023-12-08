@@ -6,6 +6,7 @@ import { exportToFile } from 'utils/exportToFile';
 import { prepareContent } from 'utils/message';
 
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -27,12 +28,61 @@ export interface Props {
 const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
     const isUser = 'role' in message && message.role === 'user';
-    const { preparedContent, inlinedElements, refElements } = prepareContent({
+
+    let lineCount = 0;
+    let contentLength = 0;
+
+    const {
+      preparedContent: output,
+      inlinedElements: outputInlinedElements,
+      refElements: outputRefElements
+    } = prepareContent({
       elements,
       id: message.id,
       content: message.output,
       language: message.language
     });
+
+    lineCount += output.split('\n').length;
+    contentLength += output.length;
+
+    const outputMarkdown = (
+      <Markdown
+        allowHtml={allowHtml}
+        latex={latex}
+        refElements={outputRefElements}
+      >
+        {output}
+      </Markdown>
+    );
+
+    let inputMarkdown;
+
+    if (message.input && message.showInput) {
+      const { preparedContent: input, refElements: inputRefElements } =
+        prepareContent({
+          elements,
+          id: message.id,
+          content: message.input,
+          language:
+            typeof message.showInput === 'string'
+              ? message.showInput
+              : undefined
+        });
+
+      lineCount += input.split('\n').length;
+      contentLength += input.length;
+
+      inputMarkdown = (
+        <Markdown
+          allowHtml={allowHtml}
+          latex={latex}
+          refElements={inputRefElements}
+        >
+          {input}
+        </Markdown>
+      );
+    }
 
     const markdownContent = (
       <Typography
@@ -46,21 +96,19 @@ const MessageContent = memo(
         }}
         component="div"
       >
-        <Markdown allowHtml={allowHtml} latex={latex} refElements={refElements}>
-          {preparedContent}
-        </Markdown>
+        {inputMarkdown}
+        {inputMarkdown && outputMarkdown ? <Divider sx={{ my: 1 }} /> : null}
+        {outputMarkdown}
       </Typography>
     );
 
-    const lineCount = preparedContent.split('\n').length;
     const collapse =
-      lineCount > COLLAPSE_MIN_LINES ||
-      preparedContent.length > COLLAPSE_MIN_LENGTH;
+      lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH;
 
     const messageContent = collapse ? (
       <Collapse
         defaultExpandAll={preserveSize}
-        onDownload={() => exportToFile(preparedContent, `${message.id}.txt`)}
+        onDownload={() => exportToFile(output, `${message.id}.txt`)}
       >
         {markdownContent}
       </Collapse>
@@ -71,8 +119,8 @@ const MessageContent = memo(
     return (
       <Stack width="100%" direction="row">
         <Box width="100%" sx={{ minWidth: '100px' }}>
-          {preparedContent ? messageContent : null}
-          <InlinedElements elements={inlinedElements} />
+          {output ? messageContent : null}
+          <InlinedElements elements={outputInlinedElements} />
         </Box>
         <MessageButtons message={message} />
       </Stack>

@@ -166,6 +166,7 @@ class ChainlitDataLayer:
             "generation": step.generation.to_dict() if step.generation else None,
             "input": step.input or "",
             "output": step.output or "",
+            "showInput": metadata.get("showInput", False),
             "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
             "language": metadata.get("language"),
@@ -260,6 +261,7 @@ class ChainlitDataLayer:
             "isError": step_dict.get("isError"),
             "waitForAnswer": step_dict.get("waitForAnswer"),
             "language": step_dict.get("language"),
+            "showInput": step_dict.get("showInput"),
         }
 
         await self.client.api.send_steps(

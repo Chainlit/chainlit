@@ -4,7 +4,7 @@ import json
 import uuid
 from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
+from typing import Callable, Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
 from chainlit.context import context
@@ -33,6 +33,7 @@ class StepDict(TypedDict, total=False):
     start: Optional[str]
     end: Optional[str]
     generation: Optional[Dict]
+    showInput: Optional[Union[bool, str]]
     language: Optional[str]
     indent: Optional[int]
     feedback: Optional[FeedbackDict]
@@ -46,6 +47,7 @@ def step(
     id: Optional[str] = None,
     disable_feedback: bool = True,
     root: bool = False,
+    show_input: Union[bool, str] = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -66,6 +68,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    show_input=show_input,
                 ) as step:
                     try:
                         step.input = {"args": args, "kwargs": kwargs}
@@ -73,7 +76,7 @@ def step(
                         pass
                     result = await func(*args, **kwargs)
                     try:
-                        if result:
+                        if result and not step.output:
                             step.output = result
                     except:
                         pass
@@ -90,6 +93,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    show_input=show_input,
                 ) as step:
                     try:
                         step.input = {"args": args, "kwargs": kwargs}
@@ -97,7 +101,7 @@ def step(
                         pass
                     result = func(*args, **kwargs)
                     try:
-                        if result:
+                        if result and not step.output:
                             step.output = result
                     except:
                         pass
@@ -124,6 +128,7 @@ class Step:
     persisted: bool
 
     root: bool
+    show_input: Union[bool, str]
 
     is_error: Optional[bool]
     metadata: Dict
@@ -145,6 +150,7 @@ class Step:
         elements: Optional[List[Element]] = None,
         disable_feedback: bool = True,
         root: bool = False,
+        show_input: Union[bool, str] = False,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         self._input = ""
@@ -156,6 +162,7 @@ class Step:
         self.disable_feedback = disable_feedback
         self.metadata = {}
         self.is_error = False
+        self.show_input = show_input
         self.parent_id = parent_id
         self.root = root
 
@@ -224,6 +231,7 @@ class Step:
             "start": self.start,
             "end": self.end,
             "language": self.language,
+            "showInput": self.show_input,
             "generation": self.generation.to_dict() if self.generation else None,
         }
         return _dict
