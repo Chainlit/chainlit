@@ -8,15 +8,7 @@
 
 Chainlit is an open-source async Python framework that makes it incredibly fast to build Chat GPT like applications with your **own business logic and data**.
 
-Contact us here for **Enterprise Support** and to get early access to the **Monitoring** product: https://forms.gle/BX3UNBLmTF75KgZVA 
-
-Key features:
-
-- [💬 Multi Modal chats](https://docs.chainlit.io/chat-experience/elements)
-- [💭 Chain of Thought visualisation](https://docs.chainlit.io/observability-iteration/chain-of-thought)
-- [💾 Data persistence + human feedback](https://docs.chainlit.io/chat-data/overview)
-- [🛝 In context Prompt Playground](https://docs.chainlit.io/observability-iteration/prompt-playground/overview)
-- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
+Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to the **Analytics & Observability** product.
 
 https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 
@@ -110,10 +102,6 @@ To build and connect your own frontend, check out our [Custom Frontend Cookbook]
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
 Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/k73SQ3FyUh).
-
-## 🏢 Enterprise support
-
-For entreprise grade features and self hosting, please visit this [page](https://docs.chainlit.io/cloud/persistence/enterprise) and fill the form.
 
 ## 💁 Contributing
 
