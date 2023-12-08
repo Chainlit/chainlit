@@ -518,6 +518,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             if self.answer_reached:
                 if not self.final_stream:
                     self.final_stream = Message(content="")
+                    self._run_sync(self.final_stream.send())
                 self._run_sync(self.final_stream.stream_token(token))
                 self.has_streamed_final_answer = True
             else:
@@ -624,7 +625,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             if self.final_stream and self.has_streamed_final_answer:
                 self.final_stream.content = completion
                 self.final_stream.language = language
-                self._run_sync(self.final_stream.send())
+                self._run_sync(self.final_stream.update())
 
             return
 

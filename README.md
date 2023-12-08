@@ -69,7 +69,7 @@ async def main(message: cl.Message):
     tool()
 
     # Send the final answer.
-    await cl.Message(content=f"This is the final answer").send()
+    await cl.Message(content="This is the final answer").send()
 ```
 
 Now run it!
