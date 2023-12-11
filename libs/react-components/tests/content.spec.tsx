@@ -10,7 +10,7 @@ it('renders the message content', () => {
     <MessageContent
       message={{
         threadId: 'test',
-        type: 'SYSTEM_MESSAGE',
+        type: 'system_message',
         output: 'Hello World',
         id: 'test',
         name: 'User',
@@ -27,7 +27,7 @@ it('highlights multiple sources correctly (no substring matching)', () => {
     <MessageContent
       message={{
         threadId: 'test',
-        type: 'SYSTEM_MESSAGE',
+        type: 'system_message',
         output: `Hello world source_121, source_1, source_12`,
         id: 'test2',
         name: 'Test',
@@ -68,7 +68,7 @@ it('highlights sources containing regex characters correctly', () => {
     <MessageContent
       message={{
         threadId: 'test',
-        type: 'SYSTEM_MESSAGE',
+        type: 'system_message',
         output: `Hello world: Document[1], source(12), page{12}`,
         id: 'test2',
         name: 'Test',
@@ -109,7 +109,7 @@ it('preserves the box size when collapsing', () => {
     <MessageContent
       message={{
         threadId: 'test',
-        type: 'SYSTEM_MESSAGE',
+        type: 'system_message',
         output: 'hello'.repeat(650),
         id: 'test2',
         name: 'Test',

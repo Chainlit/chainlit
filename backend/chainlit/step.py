@@ -13,7 +13,8 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from chainlit_client import BaseGeneration, StepType, TrueStepType
+from chainlit_client import BaseGeneration
+from chainlit_client.step import StepType, TrueStepType
 
 
 class StepDict(TypedDict, total=False):
@@ -43,10 +44,11 @@ def step(
     original_function: Optional[Callable] = None,
     *,
     name: Optional[str] = "",
-    type: TrueStepType = "UNDEFINED",
+    type: TrueStepType = "undefined",
     id: Optional[str] = None,
     disable_feedback: bool = True,
     root: bool = False,
+    language: Optional[str] = None,
     show_input: Union[bool, str] = False,
 ):
     """Step decorator for async and sync functions."""
@@ -68,6 +70,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    language=language,
                     show_input=show_input,
                 ) as step:
                     try:
@@ -93,6 +96,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    language=language,
                     show_input=show_input,
                 ) as step:
                     try:
@@ -144,12 +148,13 @@ class Step:
     def __init__(
         self,
         name: Optional[str] = config.ui.name,
-        type: TrueStepType = "UNDEFINED",
+        type: TrueStepType = "undefined",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         elements: Optional[List[Element]] = None,
         disable_feedback: bool = True,
         root: bool = False,
+        language: Optional[str] = None,
         show_input: Union[bool, str] = False,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
@@ -166,7 +171,7 @@ class Step:
         self.parent_id = parent_id
         self.root = root
 
-        self.language = None
+        self.language = language
         self.generation = None
         self.elements = elements or []
 

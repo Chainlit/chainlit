@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "0.7.700"
+version = "1.0.0rc0"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
 description = "A faster way to build chatbot UIs."
 authors = ["Chainlit"]
@@ -67,7 +67,7 @@ types-aiofiles = "^23.1.0.5"
 [tool.mypy]
 python_version = "3.8"
 # TODO: remove this once the client is published
-mypy_path = "../../sdks/python-client"
+mypy_path = "../../sdks"
 
 
 [[tool.mypy.overrides]]

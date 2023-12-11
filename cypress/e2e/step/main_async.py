@@ -2,7 +2,7 @@ import chainlit as cl
 
 
 async def tool_3():
-    async with cl.Step(name="Tool 3", type="TOOL") as s:
+    async with cl.Step(name="Tool 3", type="tool") as s:
         await cl.sleep(2)
         s.output = "Response from tool 3"
 
@@ -14,7 +14,7 @@ async def tool_2():
     return "Response from tool 2"
 
 
-@cl.step(name="Tool 1", type="TOOL")
+@cl.step(name="Tool 1", type="tool")
 async def tool_1():
     await tool_2()
     return "Response from tool 1"

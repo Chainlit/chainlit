@@ -546,18 +546,18 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if ignore:
             return
 
-        step_type: TrueStepType = "UNDEFINED"
+        step_type: TrueStepType = "undefined"
 
         if run.run_type in ["agent", "chain"]:
-            step_type = "RUN"
+            step_type = "run"
         elif run.run_type == "llm":
-            step_type = "LLM"
+            step_type = "llm"
         elif run.run_type == "retriever":
-            step_type = "RETRIEVAL"
+            step_type = "retrieval"
         elif run.run_type == "tool":
-            step_type = "TOOL"
+            step_type = "tool"
         elif run.run_type == "embedding":
-            step_type = "EMBEDDING"
+            step_type = "embedding"
 
         disable_feedback = not self._is_annotable(run)
 

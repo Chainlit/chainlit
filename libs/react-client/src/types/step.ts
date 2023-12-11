@@ -2,22 +2,22 @@ import { IFeedback } from './feedback';
 import { IGeneration } from './generation';
 
 type StepType =
-  | 'ASSISTANT_MESSAGE'
-  | 'USER_MESSAGE'
-  | 'SYSTEM_MESSAGE'
-  | 'RUN'
-  | 'TOOL'
-  | 'LLM'
-  | 'EMBEDDING'
-  | 'RETRIEVAL'
-  | 'RERANK'
-  | 'UNDEFINED';
+  | 'assistant_message'
+  | 'user_message'
+  | 'system_message'
+  | 'run'
+  | 'tool'
+  | 'llm'
+  | 'embedding'
+  | 'retrieval'
+  | 'rerank'
+  | 'undefined';
 
 export interface IStep {
   id: string;
   name: string;
   type: StepType;
-  threadId: string;
+  threadId?: string;
   parentId?: string;
   isError?: boolean;
   showInput?: boolean | string;

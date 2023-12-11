@@ -50,7 +50,7 @@ class HaystackAgentCallbackHandler:
         self.stack = Stack[Step]()
         root_message = context.session.root_message
         parent_id = root_message.id if root_message else None
-        run_step = Step(name=self.agent_name, type="RUN", parent_id=parent_id)
+        run_step = Step(name=self.agent_name, type="run", parent_id=parent_id)
         run_step.start = datetime.utcnow().isoformat()
         run_step.input = kwargs
 
@@ -87,7 +87,7 @@ class HaystackAgentCallbackHandler:
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any) -> None:
         # Tool started, create step
         parent_id = self.stack.items[0].id if self.stack.items[0] else None
-        tool_step = Step(name=tool.name, type="TOOL", parent_id=parent_id)
+        tool_step = Step(name=tool.name, type="tool", parent_id=parent_id)
         tool_step.input = tool_input
         tool_step.start = datetime.utcnow().isoformat()
         self.stack.push(tool_step)

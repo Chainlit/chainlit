@@ -10,10 +10,10 @@ from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
 from chainlit_client import Attachment
 from chainlit_client import Feedback as ClientFeedback
-from chainlit_client import NumberListFilter, PageInfo, PaginatedResponse
+from chainlit_client import PageInfo, PaginatedResponse
 from chainlit_client import Step as ClientStep
-from chainlit_client import StringFilter, StringListFilter
-from chainlit_client import ThreadFilter as ClientThreadFilter
+from chainlit_client.thread import NumberListFilter, StringFilter, StringListFilter
+from chainlit_client.thread import ThreadFilter as ClientThreadFilter
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -161,7 +161,7 @@ class ChainlitDataLayer:
             "feedback": self.feedback_to_feedback_dict(step.feedback),
             "start": step.start_time,
             "end": step.end_time,
-            "type": step.type or "UNDEFINED",
+            "type": step.type or "undefined",
             "name": step.name or "",
             "generation": step.generation.to_dict() if step.generation else None,
             "input": step.input or "",

@@ -21,7 +21,7 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from chainlit_client import MessageStepType
+from chainlit_client.step import MessageStepType
 
 
 class MessageBase(ABC):
@@ -29,7 +29,7 @@ class MessageBase(ABC):
     thread_id: str
     author: str
     content: str = ""
-    type: MessageStepType = "ASSISTANT_MESSAGE"
+    type: MessageStepType = "assistant_message"
     disable_feedback = False
     streaming = False
     created_at: Union[str, None] = None
@@ -49,7 +49,7 @@ class MessageBase(ABC):
 
     @classmethod
     def from_dict(self, _dict: StepDict):
-        type = _dict.get("type", "ASSISTANT_MESSAGE")
+        type = _dict.get("type", "assistant_message")
         message = Message(
             id=_dict["id"],
             created_at=_dict["createdAt"],
@@ -205,7 +205,7 @@ class Message(MessageBase):
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
         disable_feedback: bool = False,
-        type: MessageStepType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "assistant_message",
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -303,7 +303,7 @@ class ErrorMessage(MessageBase):
     ):
         self.content = content
         self.author = author
-        self.type = "SYSTEM_MESSAGE"
+        self.type = "system_message"
         self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
 
@@ -343,7 +343,7 @@ class AskUserMessage(AskMessageBase):
         self,
         content: str,
         author: str = config.ui.name,
-        type: MessageStepType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "assistant_message",
         disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
@@ -411,7 +411,7 @@ class AskFileMessage(AskMessageBase):
         max_size_mb=2,
         max_files=1,
         author=config.ui.name,
-        type: MessageStepType = "ASSISTANT_MESSAGE",
+        type: MessageStepType = "assistant_message",
         disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,

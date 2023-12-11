@@ -18,7 +18,7 @@ inputs = {
 completion = "This is the original completion"
 
 
-@cl.step(type="LLM")
+@cl.step(type="llm")
 async def gen_response():
     res = "This is a message with a basic prompt"
     if current_step := cl.context.current_step:

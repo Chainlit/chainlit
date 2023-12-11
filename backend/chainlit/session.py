@@ -1,4 +1,5 @@
 import json
+import mimetypes
 import shutil
 import uuid
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Optional, Union
@@ -190,7 +191,12 @@ class WebsocketSession(BaseSession):
         self.files_dir.mkdir(exist_ok=True)
 
         file_id = str(uuid.uuid4())
+
         file_path = self.files_dir / file_id
+
+        file_extension = mimetypes.guess_extension(mime)
+        if file_extension:
+            file_path = file_path.with_suffix(file_extension)
 
         if path:
             # Copy the file from the given path

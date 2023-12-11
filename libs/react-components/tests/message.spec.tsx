@@ -12,13 +12,13 @@ describe('Message', () => {
       threadId: '1',
       id: '1',
       output: 'Hello',
-      type: 'USER_MESSAGE',
+      type: 'user_message',
       steps: [
         {
           id: '2',
           threadId: '1',
           input: '',
-          type: 'LLM',
+          type: 'llm',
           output: 'bar',
           name: 'bar',
           createdAt: '12/12/2002',

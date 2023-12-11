@@ -100,14 +100,15 @@ class Element:
 
     @classmethod
     def from_dict(self, _dict: FileDict):
-        if "image" in _dict.get("type", ""):
+        type = _dict.get("type", "")
+        if "image" in type and "svg" not in type:
             return Image(
                 id=_dict.get("id", str(uuid.uuid4())),
                 name=_dict.get("name", ""),
                 path=str(_dict.get("path")),
                 chainlit_key=_dict.get("id"),
                 display="inline",
-                mime=_dict.get("type"),
+                mime=type,
             )
         else:
             return File(
@@ -116,7 +117,7 @@ class Element:
                 path=str(_dict.get("path")),
                 chainlit_key=_dict.get("id"),
                 display="inline",
-                mime=_dict.get("type"),
+                mime=type,
             )
 
     async def _create(self) -> bool:

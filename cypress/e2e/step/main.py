@@ -2,7 +2,7 @@ import chainlit as cl
 
 
 def tool_3():
-    with cl.Step(name="Tool 3", type="TOOL") as s:
+    with cl.Step(name="Tool 3", type="tool") as s:
         cl.run_sync(cl.sleep(2))
         s.output = "Response from tool 3"
 
@@ -14,7 +14,7 @@ def tool_2():
     return "Response from tool 2"
 
 
-@cl.step(name="Tool 1", type="TOOL")
+@cl.step(name="Tool 1", type="tool")
 def tool_1():
     tool_2()
     return "Response from tool 1"

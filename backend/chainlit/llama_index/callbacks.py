@@ -68,11 +68,11 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         self._restore_context()
-        step_type: StepType = "UNDEFINED"
+        step_type: StepType = "undefined"
         if event_type == CBEventType.RETRIEVE:
-            step_type = "RETRIEVAL"
+            step_type = "retrieval"
         elif event_type == CBEventType.LLM:
-            step_type = "LLM"
+            step_type = "llm"
         else:
             return event_id
 

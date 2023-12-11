@@ -57,7 +57,7 @@ const Message = memo(
       return null;
     }
 
-    const isUser = message.type === 'USER_MESSAGE';
+    const isUser = message.type === 'user_message';
     const isAsk = message.waitForAnswer;
 
     return (

@@ -24,7 +24,7 @@ const Author = ({ message, show }: Props) => {
   const getColorForName = useColorForName(context.uiName);
 
   const author = message.name;
-  const isUser = message.type === 'USER_MESSAGE';
+  const isUser = message.type === 'user_message';
 
   const avatarEl = context.avatars.find((e) => e.name === author);
 

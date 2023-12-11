@@ -43,7 +43,7 @@ const InputBox = memo(
           threadId: '',
           id: uuidv4(),
           name: user?.identifier || 'User',
-          type: 'USER_MESSAGE',
+          type: 'user_message',
           output: msg,
           createdAt: new Date().toISOString()
         };
@@ -81,7 +81,7 @@ const InputBox = memo(
           threadId: '',
           id: uuidv4(),
           name: user?.identifier || 'User',
-          type: 'USER_MESSAGE',
+          type: 'user_message',
           output: msg,
           createdAt: new Date().toISOString()
         };
