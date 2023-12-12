@@ -17,9 +17,9 @@ export async function runTests(matchName) {
   runCommand('pnpm exec ts-node ./cypress/support/run.ts action');
 
   // Recording the cypress run is time consuming. Disabled by default.
-  // const recordOptions = ` --record --key ${process.env.CYPRESS_RECORD_KEY} `;
+  const recordOptions = ` --record --key ${process.env.CYPRESS_RECORD_KEY} `;
   return runCommand(
-    `pnpm exec cypress run --record false --spec "cypress/e2e/${matchName}/spec.cy.ts"`
+    `pnpm exec cypress run ${recordOptions} --spec "cypress/e2e/${matchName}/spec.cy.ts"`
   );
 }
 
