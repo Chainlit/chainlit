@@ -6,7 +6,7 @@ describe('tasklist', () => {
   });
 
   it('should display the tasklist ', () => {
-    cy.get('.message').should('have.length', 0);
+    cy.get('.step').should('have.length', 0);
     cy.get('.tasklist').should('have.length', 2);
     cy.get('.tasklist.tasklist-mobile').should('not.be.visible');
     cy.get('.tasklist.tasklist-mobile .task').should('not.be.visible');

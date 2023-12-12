@@ -18,25 +18,25 @@ export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
   const submit = async () => {
     try {
       const { provider } = getProviders(playground);
-      const prompt = cloneDeep(playground.prompt)!;
-      prompt.provider = provider.id;
+      const generation = cloneDeep(playground.generation)!;
+      generation.provider = provider.id;
       const controller = new AbortController();
 
       setCompletionController(controller);
       setPlayground((old) => {
-        if (!old?.prompt) return old;
+        if (!old?.generation) return old;
 
         return {
           ...old,
-          prompt: {
-            ...old.prompt!,
+          generation: {
+            ...old.generation!,
             completion: ''
           }
         };
       });
 
       await createCompletion(
-        prompt,
+        generation,
         controller,
         (done: boolean, token: string) => {
           onSubmit && onSubmit();
@@ -46,13 +46,13 @@ export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
             return;
           }
           setPlayground((old) => {
-            if (!old?.prompt) return old;
+            if (!old?.generation) return old;
 
             return {
               ...old,
-              prompt: {
-                ...old.prompt!,
-                completion: (old.prompt?.completion || '') + token
+              generation: {
+                ...old.generation!,
+                completion: (old.generation?.completion || '') + token
               }
             };
           });

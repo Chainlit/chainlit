@@ -23,10 +23,12 @@ const VariableModal = (): JSX.Element | null => {
   const theme = useTheme();
 
   useEffect(() => {
-    if (variableName && playground?.prompt?.inputs) {
+    if (variableName && playground?.generation?.inputs) {
       setState(
         EditorState.createWithContent(
-          ContentState.createFromText(playground.prompt.inputs[variableName])
+          ContentState.createFromText(
+            playground.generation.inputs[variableName]
+          )
         )
       );
     }
@@ -35,14 +37,14 @@ const VariableModal = (): JSX.Element | null => {
   const updateVariable = () => {
     if (variableName) {
       setPlayground((old) => {
-        if (!old?.prompt) return old;
+        if (!old?.generation) return old;
 
         return {
           ...old,
-          prompt: {
-            ...old.prompt,
+          generation: {
+            ...old.generation,
             inputs: {
-              ...old?.prompt?.inputs,
+              ...old?.generation?.inputs,
               [variableName]: state?.getCurrentContent().getPlainText() || ''
             }
           }

@@ -41,7 +41,11 @@ This hook is responsible for managing the chat session's connection to the WebSo
 #### Example
 
 ```jsx
-import { useChatSession } from '@chainlit/react-client';
+import { ChainlitAPI, useChatSession } from '@chainlit/react-client';
+
+const CHAINLIT_SERVER_URL = 'http://localhost:8000';
+
+const apiClient = new ChainlitAPI(CHAINLIT_SERVER_URL);
 
 const ChatComponent = () => {
   const { connect, disconnect, chatProfile, setChatProfile } = useChatSession();
@@ -49,7 +53,7 @@ const ChatComponent = () => {
   // Connect to the WebSocket server
   useEffect(() => {
     connect({
-      wsEndpoint: 'YOUR_WEBSOCKET_ENDPOINT', // Your Chainlit server url
+      client: apiClient,
       userEnv: {
         /* user environment variables */
       },
@@ -140,7 +144,7 @@ This hook provides methods to interact with the chat, such as sending messages, 
 - `replyMessage`: Replies to a message.
 - `sendMessage`: Sends a message.
 - `stopTask`: Stops the current task.
-- `setIdToResume`: Sets the ID to resume a conversation.
+- `setIdToResume`: Sets the ID to resume a thread.
 - `updateChatSettings`: Updates the chat settings.
 
 #### Example

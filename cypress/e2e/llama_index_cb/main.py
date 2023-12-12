@@ -13,6 +13,8 @@ async def start():
 
     cb.on_event_start(CBEventType.RETRIEVE, payload={})
 
+    await cl.sleep(0.2)
+
     cb.on_event_end(
         CBEventType.RETRIEVE,
         payload={
@@ -23,6 +25,8 @@ async def start():
     )
 
     cb.on_event_start(CBEventType.LLM)
+
+    await cl.sleep(0.2)
 
     response = ChatResponse(message=ChatMessage(content="This is the LLM response"))
     cb.on_event_end(

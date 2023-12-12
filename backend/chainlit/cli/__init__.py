@@ -21,7 +21,7 @@ from chainlit.config import (
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
-from chainlit.server import app, max_message_size, register_wildcard_route_handler
+from chainlit.server import app, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
 
 
@@ -73,7 +73,6 @@ def run_chainlit(target: str):
             host=host,
             port=port,
             log_level=log_level,
-            ws_max_size=max_message_size,
             ws_per_message_deflate=ws_per_message_deflate,
         )
         server = uvicorn.Server(config)

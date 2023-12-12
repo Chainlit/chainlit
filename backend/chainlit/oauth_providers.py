@@ -4,7 +4,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
-from chainlit.client.base import AppUser
+from chainlit.user import User
 from fastapi import HTTPException
 
 
@@ -22,7 +22,7 @@ class OAuthProvider:
     async def get_token(self, code: str, url: str) -> str:
         raise NotImplementedError()
 
-    async def get_user_info(self, token: str) -> Tuple[Dict[str, str], AppUser]:
+    async def get_user_info(self, token: str) -> Tuple[Dict[str, str], User]:
         raise NotImplementedError()
 
 
@@ -65,7 +65,7 @@ class GithubOAuthProvider(OAuthProvider):
                 headers={"Authorization": f"token {token}"},
             )
             user_response.raise_for_status()
-            user = user_response.json()
+            github_user = user_response.json()
 
             emails_response = await client.get(
                 "https://api.github.com/user/emails",
@@ -74,14 +74,12 @@ class GithubOAuthProvider(OAuthProvider):
             emails_response.raise_for_status()
             emails = emails_response.json()
 
-            user.update({"emails": emails})
-
-            app_user = AppUser(
-                username=user["login"],
-                image=user["avatar_url"],
-                provider="github",
+            github_user.update({"emails": emails})
+            user = User(
+                identifier=github_user["login"],
+                metadata={"image": github_user["avatar_url"], "provider": "github"},
             )
-            return (user, app_user)
+            return (github_user, user)
 
 
 class GoogleOAuthProvider(OAuthProvider):
@@ -129,12 +127,12 @@ class GoogleOAuthProvider(OAuthProvider):
                 headers={"Authorization": f"Bearer {token}"},
             )
             response.raise_for_status()
-            user = response.json()
-
-            app_user = AppUser(
-                username=user["name"], image=user["picture"], provider="google"
+            google_user = response.json()
+            user = User(
+                identifier=google_user["email"],
+                metadata={"image": google_user["picture"], "provider": "google"},
             )
-            return (user, app_user)
+            return (google_user, user)
 
 
 class AzureADOAuthProvider(OAuthProvider):
@@ -196,7 +194,7 @@ class AzureADOAuthProvider(OAuthProvider):
             )
             response.raise_for_status()
 
-            user = response.json()
+            azure_user = response.json()
 
             try:
                 photo_response = await client.get(
@@ -205,19 +203,18 @@ class AzureADOAuthProvider(OAuthProvider):
                 )
                 photo_data = await photo_response.aread()
                 base64_image = base64.b64encode(photo_data)
-                user[
+                azure_user[
                     "image"
                 ] = f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
             except Exception as e:
                 # Ignore errors getting the photo
                 pass
 
-            app_user = AppUser(
-                username=user["userPrincipalName"],
-                image=user.get("image", ""),
-                provider="azure-ad",
+            user = User(
+                identifier=azure_user["userPrincipalName"],
+                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
             )
-            return (user, app_user)
+            return (azure_user, user)
 
 
 class OktaOAuthProvider(OAuthProvider):
@@ -284,10 +281,13 @@ class OktaOAuthProvider(OAuthProvider):
                 headers={"Authorization": f"Bearer {token}"},
             )
             response.raise_for_status()
-            user = response.json()
+            okta_user = response.json()
 
-            app_user = AppUser(username=user.get("email"), image="", provider="okta")
-            return (user, app_user)
+            user = User(
+                identifier=okta_user.get("email"),
+                metadata={"image": "", "provider": "okta"},
+            )
+            return (okta_user, user)
 
 
 class Auth0OAuthProvider(OAuthProvider):
@@ -342,13 +342,15 @@ class Auth0OAuthProvider(OAuthProvider):
                 headers={"Authorization": f"Bearer {token}"},
             )
             response.raise_for_status()
-            user = response.json()
-            app_user = AppUser(
-                username=user.get("email"),
-                image=user.get("picture", ""),
-                provider="auth0",
+            auth0_user = response.json()
+            user = User(
+                identifier=auth0_user.get("email"),
+                metadata={
+                    "image": auth0_user.get("picture", ""),
+                    "provider": "auth0",
+                },
             )
-            return (user, app_user)
+            return (auth0_user, user)
 
 
 class DescopeOAuthProvider(OAuthProvider):
@@ -398,10 +400,13 @@ class DescopeOAuthProvider(OAuthProvider):
                 f"{self.domain}/userinfo", headers={"Authorization": f"Bearer {token}"}
             )
             response.raise_for_status()  # This will raise an exception for 4xx/5xx responses
-            user = response.json()
+            descope_user = response.json()
 
-            app_user = AppUser(username=user.get("email"), image="", provider="descope")
-            return (user, app_user)
+            user = User(
+                identifier=descope_user.get("email"),
+                metadata={"image": "", "provider": "descope"},
+            )
+            return (descope_user, user)
 
 
 providers = [

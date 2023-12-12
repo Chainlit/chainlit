@@ -5,6 +5,8 @@ dist
 
 .env
 
+*.files
+
 poetry.lock
 
 venv

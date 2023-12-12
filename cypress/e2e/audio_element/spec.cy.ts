@@ -6,8 +6,8 @@ describe('audio', () => {
   });
 
   it('should be able to display an audio element', () => {
-    cy.get('.message').should('have.length', 1);
-    cy.get('.message').eq(0).find('.inline-audio').should('have.length', 1);
+    cy.get('.step').should('have.length', 1);
+    cy.get('.step').eq(0).find('.inline-audio').should('have.length', 1);
 
     cy.get('.inline-audio audio')
       .then(($el) => {

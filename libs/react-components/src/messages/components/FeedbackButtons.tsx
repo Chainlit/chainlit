@@ -15,12 +15,12 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import type { IMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 const ICON_SIZE = '16px';
 
 interface Props {
-  message: IMessage;
+  message: IStep;
 }
 
 const FeedbackButtons = ({ message }: Props) => {
@@ -28,8 +28,8 @@ const FeedbackButtons = ({ message }: Props) => {
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
 
-  const [feedback, setFeedback] = useState(message.humanFeedback || 0);
-  const [comment, setComment] = useState(message.humanFeedbackComment);
+  const [feedback, setFeedback] = useState(message.feedback?.value || 0);
+  const [comment, setComment] = useState(message.feedback?.comment);
 
   const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
@@ -38,12 +38,16 @@ const FeedbackButtons = ({ message }: Props) => {
     onFeedbackUpdated &&
       onFeedbackUpdated(
         message,
-        feedback,
         () => {
           setFeedback(feedback);
           setComment(comment);
         },
-        comment
+        {
+          ...(message.feedback || { strategy: 'BINARY' }),
+          forId: message.id,
+          value: feedback,
+          comment
+        }
       );
   };
 
@@ -69,7 +73,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     const baseButtons = [
       () => (
-        <Tooltip title="Negative feedback">
+        <Tooltip title="Not helpful">
           <span>
             <Button
               disabled={disabled}
@@ -85,7 +89,7 @@ const FeedbackButtons = ({ message }: Props) => {
         </Tooltip>
       ),
       () => (
-        <Tooltip title="Positive feedback">
+        <Tooltip title="Helpful">
           <span>
             <Button
               disabled={disabled}
@@ -104,7 +108,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     if (comment) {
       baseButtons.push(() => (
-        <Tooltip title="Feedback comment">
+        <Tooltip title="Feedback">
           <span>
             <Button
               disabled={disabled}
@@ -163,6 +167,7 @@ const FeedbackButtons = ({ message }: Props) => {
         }
         actions={
           <AccentButton
+            id="feedbackSubmit"
             type="submit"
             variant="outlined"
             onClick={() => {

@@ -9,7 +9,11 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import type { IPromptMessage, PromptMessageRole } from 'client-types/';
+import type {
+  GenerationMessageRole,
+  IChatGeneration,
+  IGenerationMessage
+} from 'client-types/';
 
 const roles = ['Assistant', 'System', 'User'];
 
@@ -17,7 +21,7 @@ interface MessageWrapperProps {
   canSelectRole?: boolean;
   children: React.ReactElement;
   index?: number;
-  message?: IPromptMessage;
+  message?: IGenerationMessage;
   role?: string;
   name?: string;
 }
@@ -34,17 +38,19 @@ const MessageWrapper = ({
   const { setPlayground } = useContext(PlaygroundContext);
 
   const onRoleSelected = (event: SelectChangeEvent) => {
-    const role = event.target.value as PromptMessageRole;
+    const role = event.target.value as GenerationMessageRole;
 
     if (role) {
       setPlayground((old) => ({
         ...old,
-        prompt: {
-          ...old!.prompt!,
-          messages: old?.prompt?.messages?.map((message, mIndex) => ({
-            ...message,
-            ...(mIndex === index ? { role } : {}) // Update role if it's the selected message
-          }))
+        generation: {
+          ...old!.generation!,
+          messages: (old!.generation! as IChatGeneration).messages?.map(
+            (message, mIndex) => ({
+              ...message,
+              ...(mIndex === index ? { role } : {}) // Update role if it's the selected message
+            })
+          )
         }
       }));
     }
@@ -56,11 +62,11 @@ const MessageWrapper = ({
     if (index !== undefined) {
       setPlayground((old) => ({
         ...old,
-        prompt: {
-          ...old!.prompt!,
+        generation: {
+          ...old!.generation!,
           messages: [
-            ...old!.prompt!.messages!.slice(0, index),
-            ...old!.prompt!.messages!.slice(index + 1)
+            ...(old!.generation! as IChatGeneration).messages!.slice(0, index),
+            ...(old!.generation! as IChatGeneration).messages!.slice(index + 1)
           ]
         }
       }));

@@ -7,7 +7,7 @@ const VariableInput = (): JSX.Element | null => {
   const { variableName, setVariableName, playground } =
     useContext(PlaygroundContext);
 
-  const variables = map(playground?.prompt?.inputs, (input, index) => ({
+  const variables = map(playground?.generation?.inputs, (input, index) => ({
     label: index,
     value: index
   }));

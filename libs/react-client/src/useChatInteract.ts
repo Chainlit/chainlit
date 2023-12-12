@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
+  accessTokenState,
   actionState,
   askUserState,
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
-  conversationIdToResumeState,
   elementState,
   firstUserMessageState,
   loadingState,
@@ -14,14 +14,19 @@ import {
   sessionIdState,
   sessionState,
   tasklistState,
+  threadIdToResumeState,
   tokenCountState
 } from 'src/state';
-import { IAction, IFileElement, IMessage } from 'src/types';
+import { IAction, IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
 
+import { ChainlitAPI } from './api';
+
 const useChatInteract = () => {
+  const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
+  const sessionId = useRecoilValue(sessionIdState);
 
   const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
   const resetSessionId = useResetRecoilState(sessionIdState);
@@ -35,7 +40,7 @@ const useChatInteract = () => {
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
-  const setIdToResume = useSetRecoilState(conversationIdToResumeState);
+  const setIdToResume = useSetRecoilState(threadIdToResumeState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
@@ -54,44 +59,75 @@ const useChatInteract = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IMessage, files?: IFileElement[]) => {
+    (message: IStep, fileReferences?: IFileRef[]) => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
-      session?.socket.emit('ui_message', { message, files });
+      session?.socket.emit('ui_message', { message, fileReferences });
     },
-    [session]
+    [session?.socket]
   );
 
   const replyMessage = useCallback(
-    (message: IMessage) => {
+    (message: IStep) => {
       if (askUser) {
         setMessages((oldMessages) => addMessage(oldMessages, message));
         askUser.callback(message);
       }
     },
-    [askUser, session]
+    [askUser]
   );
 
   const updateChatSettings = useCallback(
     (values: object) => {
       session?.socket.emit('chat_settings_change', values);
     },
-    [session]
+    [session?.socket]
   );
 
   const stopTask = useCallback(() => {
     setLoading(false);
     session?.socket.emit('stop');
-  }, [session]);
+  }, [session?.socket]);
 
   const callAction = useCallback(
     (action: IAction) => {
-      session?.socket.emit('action_call', action);
+      const socket = session?.socket;
+      if (!socket) return;
+
+      const promise = new Promise<{
+        id: string;
+        status: boolean;
+        response?: string;
+      }>((resolve, reject) => {
+        socket.once('action_response', (response) => {
+          if (response.status) {
+            resolve(response);
+          } else {
+            reject(response);
+          }
+        });
+      });
+
+      socket.emit('action_call', action);
+
+      return promise;
     },
-    [session]
+    [session?.socket]
+  );
+
+  const uploadFile = useCallback(
+    (
+      client: ChainlitAPI,
+      file: File,
+      onProgress: (progress: number) => void
+    ) => {
+      return client.uploadFile(file, onProgress, sessionId, accessToken);
+    },
+    [sessionId, accessToken]
   );
 
   return {
+    uploadFile,
     callAction,
     clear,
     replyMessage,

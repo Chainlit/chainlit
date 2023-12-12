@@ -6,8 +6,8 @@ describe('video', () => {
   });
 
   it('should be able to display a video element', () => {
-    cy.get('.message').should('have.length', 1);
-    cy.get('.message').eq(0).find('.inline-video').should('have.length', 1);
+    cy.get('.step').should('have.length', 1);
+    cy.get('.step').eq(0).find('.inline-video').should('have.length', 1);
 
     cy.get('video.inline-video')
       .then(($el) => {

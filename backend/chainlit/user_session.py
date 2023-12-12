@@ -1,8 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, TypedDict, Union
-
-if TYPE_CHECKING:
-    from chainlit.message import Message
-    from chainlit.client.base import AppUser, PersistedAppUser
+from typing import Dict
 
 from chainlit.context import context
 

@@ -3,7 +3,7 @@ import { memo, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 
-import type { IAction, IMessage, IMessageElement } from 'client-types/';
+import type { IAction, IMessageElement, IStep } from 'client-types/';
 import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';
@@ -13,7 +13,7 @@ interface Props {
   autoScroll?: boolean;
   context: IMessageContext;
   elements: IMessageElement[];
-  messages: IMessage[];
+  messages: IStep[];
   setAutoScroll?: (autoScroll: boolean) => void;
 }
 

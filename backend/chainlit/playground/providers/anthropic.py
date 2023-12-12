@@ -1,12 +1,12 @@
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
-from chainlit.prompt import PromptMessage
+from chainlit_client import GenerationMessage
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 
 
 class AnthropicProvider(BaseProvider):
-    def message_to_string(self, message: PromptMessage) -> str:
+    def message_to_string(self, message: GenerationMessage) -> str:
         import anthropic
 
         if message.role == "user":
@@ -29,10 +29,10 @@ class AnthropicProvider(BaseProvider):
 
         env_settings = self.validate_env(request=request)
 
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
         self.require_settings(llm_settings)
 
-        prompt = self.concatenate_messages(self.create_prompt(request), joiner="")
+        prompt = self.concatenate_messages(self.create_generation(request), joiner="")
 
         if not prompt.endswith(anthropic.AI_PROMPT):
             prompt += anthropic.AI_PROMPT

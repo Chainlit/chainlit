@@ -8,15 +8,7 @@
 
 Chainlit is an open-source async Python framework that makes it incredibly fast to build Chat GPT like applications with your **own business logic and data**.
 
-Contact us here for **Enterprise Support** and to get early access to the **Monitoring** product: https://forms.gle/BX3UNBLmTF75KgZVA 
-
-Key features:
-
-- [💬 Multi Modal chats](https://docs.chainlit.io/chat-experience/elements)
-- [💭 Chain of Thought visualisation](https://docs.chainlit.io/observability-iteration/chain-of-thought)
-- [💾 Data persistence + human feedback](https://docs.chainlit.io/chat-data/overview)
-- [🛝 In context Prompt Playground](https://docs.chainlit.io/observability-iteration/prompt-playground/overview)
-- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
+Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to the **Analytics & Observability** product.
 
 https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 
@@ -49,11 +41,16 @@ Create a new file `demo.py` with the following code:
 import chainlit as cl
 
 
+@cl.step
+def tool():
+    return "Response from the tool!"
+
+
 @cl.on_message  # this function will be called every time a user inputs a message in the UI
 async def main(message: cl.Message):
     """
     This function is called every time a user inputs a message in the UI.
-    It sends back an intermediate response from Tool 1, followed by the final answer.
+    It sends back an intermediate response from the tool, followed by the final answer.
 
     Args:
         message: The user's message.
@@ -62,15 +59,11 @@ async def main(message: cl.Message):
         None.
     """
 
-    # Send an intermediate response from Tool 1.
-    await cl.Message(
-        author="Tool 1",
-        content=f"Response from tool1",
-        parent_id=message.id,
-    ).send()
+    # Call the tool
+    tool()
 
     # Send the final answer.
-    await cl.Message(content=f"This is the final answer").send()
+    await cl.Message(content="This is the final answer").send()
 ```
 
 Now run it!
@@ -90,7 +83,6 @@ Chainlit is compatible with all Python programs and libraries. That being said, 
 - [OpenAI Assistant](https://github.com/Chainlit/cookbook/tree/main/openai-assistant)
 - [Llama Index](https://docs.chainlit.io/integrations/llama-index)
 - [Haystack](https://docs.chainlit.io/integrations/haystack)
-- [Langflow](https://docs.chainlit.io/integrations/langflow)
 
 ## 🎨 Custom Frontend
 
@@ -109,21 +101,7 @@ To build and connect your own frontend, check out our [Custom Frontend Cookbook]
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
-## 🛣 Roadmap
-
-- [x] Selectable chat profiles (at the beginning of a chat)
-- [ ] One click chat sharing
-- New clients:
-  - [x] Custom React app
-  - [ ] Slack
-  - [ ] Discord
-  - [ ] Website embbed
-
 Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/k73SQ3FyUh).
-
-## 🏢 Enterprise support
-
-For entreprise grade features and self hosting, please visit this [page](https://docs.chainlit.io/cloud/persistence/enterprise) and fill the form.
 
 ## 💁 Contributing
 

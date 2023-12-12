@@ -127,11 +127,11 @@ class ChatOpenAIProvider(BaseProvider):
 
         client = AsyncClient(api_key=env_settings["api_key"])
 
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
 
         self.require_settings(llm_settings)
 
-        messages = self.create_prompt(request)
+        messages = self.create_generation(request)
 
         if "stop" in llm_settings:
             stop = llm_settings["stop"]
@@ -142,8 +142,8 @@ class ChatOpenAIProvider(BaseProvider):
 
             llm_settings["stop"] = stop
 
-        if request.prompt.functions:
-            llm_settings["functions"] = request.prompt.functions
+        if request.generation.functions:
+            llm_settings["functions"] = request.generation.functions
             llm_settings["stream"] = False
         else:
             llm_settings["stream"] = True
@@ -188,11 +188,11 @@ class OpenAIProvider(BaseProvider):
 
         client = AsyncClient(api_key=env_settings["api_key"])
 
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
 
         self.require_settings(llm_settings)
 
-        prompt = self.create_prompt(request)
+        prompt = self.create_generation(request)
 
         if "stop" in llm_settings:
             stop = llm_settings["stop"]
@@ -240,11 +240,11 @@ class AzureOpenAIProvider(BaseProvider):
             azure_ad_token_provider=self.get_var(request, "AZURE_AD_TOKEN_PROVIDER"),
             azure_deployment=self.get_var(request, "AZURE_DEPLOYMENT"),
         )
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
 
         self.require_settings(llm_settings)
 
-        prompt = self.create_prompt(request)
+        prompt = self.create_generation(request)
 
         if "stop" in llm_settings:
             stop = llm_settings["stop"]
@@ -294,11 +294,11 @@ class AzureChatOpenAIProvider(BaseProvider):
             azure_deployment=self.get_var(request, "AZURE_DEPLOYMENT"),
         )
 
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
 
         self.require_settings(llm_settings)
 
-        messages = self.create_prompt(request)
+        messages = self.create_generation(request)
 
         if "stop" in llm_settings:
             stop = llm_settings["stop"]
@@ -311,8 +311,8 @@ class AzureChatOpenAIProvider(BaseProvider):
 
         llm_settings["model"] = env_settings["deployment_name"]
 
-        if request.prompt.functions:
-            llm_settings["functions"] = request.prompt.functions
+        if request.generation.functions:
+            llm_settings["functions"] = request.generation.functions
             llm_settings["stream"] = False
         else:
             llm_settings["stream"] = True
@@ -362,7 +362,13 @@ ChatOpenAI = ChatOpenAIProvider(
         Select(
             id="model",
             label="Model",
-            values=["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-32k", "gpt-4-1106-preview"],
+            values=[
+                "gpt-3.5-turbo",
+                "gpt-3.5-turbo-16k",
+                "gpt-4",
+                "gpt-4-32k",
+                "gpt-4-1106-preview",
+            ],
             initial_value="gpt-3.5-turbo",
         ),
         *openai_common_inputs,

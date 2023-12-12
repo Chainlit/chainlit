@@ -18,7 +18,7 @@ class BaseHuggingFaceProvider(BaseProvider):
         from huggingface_hub.inference_api import InferenceApi
 
         env_settings = self.validate_env(request=request)
-        llm_settings = request.prompt.settings
+        llm_settings = request.generation.settings
         self.require_settings(llm_settings)
 
         client = InferenceApi(
@@ -27,7 +27,7 @@ class BaseHuggingFaceProvider(BaseProvider):
             task=self.task,
         )
 
-        prompt = self.create_prompt(request)
+        prompt = self.create_generation(request)
 
         response = await make_async(client)(inputs=prompt, params=llm_settings)
 

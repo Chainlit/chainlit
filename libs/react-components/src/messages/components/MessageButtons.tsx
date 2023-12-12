@@ -3,26 +3,29 @@ import { useContext } from 'react';
 
 import Stack from '@mui/material/Stack';
 
-import type { IMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 import { FeedbackButtons } from './FeedbackButtons';
 import { PlaygroundButton } from './PlaygroundButton';
 
 interface Props {
-  message: IMessage;
+  message: IStep;
 }
 
 const MessageButtons = ({ message }: Props) => {
   const { showFeedbackButtons: showFbButtons } = useContext(MessageContext);
 
-  const showPlaygroundButton = !!message.prompt && !!message.content;
+  const showPlaygroundButton = !!message.generation;
+  const isUser = message.type === 'user_message';
+  const isAsk = message.waitForAnswer;
+  const hasContent = !!message.output;
 
   const showFeedbackButtons =
     showFbButtons &&
-    !message.disableHumanFeedback &&
-    !message.authorIsUser &&
-    !message.waitForAnswer &&
-    !!message.content;
+    !message.disableFeedback &&
+    !isUser &&
+    !isAsk &&
+    hasContent;
 
   const show = showPlaygroundButton || showFeedbackButtons;
 
@@ -32,7 +35,7 @@ const MessageButtons = ({ message }: Props) => {
 
   return (
     <Stack alignItems="start" ml="auto" direction="row">
-      {showPlaygroundButton ? <PlaygroundButton message={message} /> : null}
+      {showPlaygroundButton ? <PlaygroundButton step={message} /> : null}
       {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}
     </Stack>
   );

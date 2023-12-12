@@ -6,13 +6,13 @@ describe('Llama Index Callback', () => {
   });
 
   it('should be able to send messages to the UI with prompts and elements', () => {
-    cy.get('.message').should('have.length', 1);
+    cy.get('.step').should('have.length', 1);
 
     cy.get('#llm-done').should('exist').click();
 
-    cy.get('.message').should('have.length', 3);
+    cy.get('.step').should('have.length', 3);
 
-    cy.get('.message')
+    cy.get('.step')
       .eq(1)
       .find('.element-link')
       .eq(0)

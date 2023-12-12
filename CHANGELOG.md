@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.0rc0] - 2023-12-12
+
+### Added
+
+- cl.Step
+
+### Changed
+
+- File upload uses HTTP instead of WS and no longer has size limitation
+- `cl.AppUser` becomes `cl.User`
+- `Prompt` has been split in `ChatGeneration` and `CompletionGeneration`
+- `Action` now display a toaster in the UI while running
+
 ## [0.7.700] - 2023-11-28
 
 ### Added

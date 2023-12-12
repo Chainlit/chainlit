@@ -1,9 +1,12 @@
 from enum import Enum
-from typing import Dict, List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
-from chainlit.client.base import ConversationFilter, MessageDict, Pagination
-from chainlit.element import File
-from chainlit.prompt import Prompt
+if TYPE_CHECKING:
+    from chainlit.element import ElementDict
+    from chainlit.user import UserDict
+    from chainlit.step import StepDict
+
+from chainlit_client import ChatGeneration, CompletionGeneration
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -11,6 +14,27 @@ from pydantic.dataclasses import dataclass
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
 ]
+
+
+class ThreadDict(TypedDict):
+    id: str
+    createdAt: str
+    user: Optional["UserDict"]
+    tags: Optional[List[str]]
+    metadata: Optional[Dict]
+    steps: List["StepDict"]
+    elements: Optional[List["ElementDict"]]
+
+
+class Pagination(BaseModel):
+    first: int
+    cursor: Optional[str] = None
+
+
+class ThreadFilter(BaseModel):
+    feedback: Optional[Literal[-1, 0, 1]] = None
+    userIdentifier: Optional[str] = None
+    search: Optional[str] = None
 
 
 @dataclass
@@ -43,23 +67,30 @@ class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user an action"""
 
 
-class AskResponse(TypedDict):
-    content: str
-    author: str
+class FileReference(TypedDict):
+    id: str
 
 
-class UIMessagePayload(TypedDict):
-    message: MessageDict
-    files: Optional[List[Dict]]
-
-
-@dataclass
-class AskFileResponse:
+class FileDict(TypedDict):
+    id: str
     name: str
     path: str
     size: int
     type: str
-    content: bytes
+
+
+class UIMessagePayload(TypedDict):
+    message: "StepDict"
+    fileReferences: Optional[List[FileReference]]
+
+
+@dataclass
+class AskFileResponse:
+    id: str
+    name: str
+    path: str
+    size: int
+    type: str
 
 
 class AskActionResponse(TypedDict):
@@ -72,24 +103,28 @@ class AskActionResponse(TypedDict):
     collapsed: bool
 
 
-class CompletionRequest(BaseModel):
-    prompt: Prompt
+class GenerationRequest(BaseModel):
+    chatGeneration: Optional[ChatGeneration] = None
+    completionGeneration: Optional[CompletionGeneration] = None
     userEnv: Dict[str, str]
 
+    @property
+    def generation(self):
+        if self.chatGeneration:
+            return self.chatGeneration
+        return self.completionGeneration
 
-class UpdateFeedbackRequest(BaseModel):
-    messageId: str
-    feedback: Literal[-1, 0, 1]
-    feedbackComment: Optional[str] = None
+    def is_chat(self):
+        return self.chatGeneration is not None
 
 
-class DeleteConversationRequest(BaseModel):
-    conversationId: str
+class DeleteThreadRequest(BaseModel):
+    threadId: str
 
 
-class GetConversationsRequest(BaseModel):
+class GetThreadsRequest(BaseModel):
     pagination: Pagination
-    filter: ConversationFilter
+    filter: ThreadFilter
 
 
 class Theme(str, Enum):
@@ -99,8 +134,30 @@ class Theme(str, Enum):
 
 @dataclass
 class ChatProfile(DataClassJsonMixin):
-    """Specification for a chat profile that can be chosen by the user at the conversation start."""
+    """Specification for a chat profile that can be chosen by the user at the thread start."""
 
     name: str
     markdown_description: str
     icon: Optional[str] = None
+
+
+FeedbackStrategy = Literal["BINARY"]
+
+
+class FeedbackDict(TypedDict):
+    value: Literal[-1, 0, 1]
+    strategy: FeedbackStrategy
+    comment: Optional[str]
+
+
+@dataclass
+class Feedback:
+    forId: str
+    value: Literal[-1, 0, 1]
+    strategy: FeedbackStrategy = "BINARY"
+    id: Optional[str] = None
+    comment: Optional[str] = None
+
+
+class UpdateFeedbackRequest(BaseModel):
+    feedback: Feedback

@@ -9,22 +9,22 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import type { IPrompt } from 'client-types/';
+import type { IChatGeneration } from 'client-types/';
 
 import Completion from './editor/completion';
 import PromptMessage from './editor/promptMessage';
 
 interface Props {
-  prompt: IPrompt;
+  generation: IChatGeneration;
   hasTemplate: boolean;
   restoredTime: number;
 }
 
 export const ChatPromptPlayground = forwardRef(
-  ({ hasTemplate, prompt, restoredTime }: Props, ref) => {
+  ({ hasTemplate, generation, restoredTime }: Props, ref) => {
     const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
-    const messages = prompt.messages;
+    const messages = generation.messages;
 
     const onChange = (index: number, nextState: EditorState) => {
       const text = nextState.getCurrentContent().getPlainText();
@@ -32,17 +32,19 @@ export const ChatPromptPlayground = forwardRef(
 
       setPlayground((old) => ({
         ...old,
-        prompt: {
-          ...old!.prompt!,
-          messages: old?.prompt?.messages?.map((message, mIndex) => {
-            if (mIndex === index) {
-              return {
-                ...message,
-                [key]: text
-              };
+        generation: {
+          ...old!.generation!,
+          messages: (old!.generation! as IChatGeneration).messages?.map(
+            (message, mIndex) => {
+              if (mIndex === index) {
+                return {
+                  ...message,
+                  [key]: text
+                };
+              }
+              return message;
             }
-            return message;
-          })
+          )
         }
       }));
     };
@@ -77,7 +79,7 @@ export const ChatPromptPlayground = forwardRef(
                 <Fragment key={`prompt-message-${index}`}>
                   <PromptMessage
                     message={message}
-                    prompt={prompt}
+                    generation={generation}
                     mode={promptMode}
                     index={index}
                     onChange={onChange}
@@ -91,15 +93,15 @@ export const ChatPromptPlayground = forwardRef(
               onClick={() => {
                 setPlayground((old) => ({
                   ...old,
-                  prompt: {
-                    ...old!.prompt!,
+                  generation: {
+                    ...old!.generation!,
                     messages: [
-                      ...old!.prompt!.messages!,
+                      ...(old!.generation! as IChatGeneration).messages!,
                       {
                         role: 'assistant',
                         template: '',
                         formatted: '',
-                        template_format: old!.prompt!.template_format
+                        templateFormat: 'f-string'
                       }
                     ]
                   }
@@ -112,7 +114,7 @@ export const ChatPromptPlayground = forwardRef(
               Add Message
             </Button>
           </Box>
-          <Completion completion={prompt.completion} chatMode />
+          <Completion completion={generation.completion} chatMode />
         </Box>
       </Stack>
     );

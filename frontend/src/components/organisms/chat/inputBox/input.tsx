@@ -7,28 +7,23 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import {
-  FileSpec,
-  IFileElement,
-  IFileResponse,
-  useChatData
-} from '@chainlit/react-client';
-import { Attachments } from '@chainlit/react-components';
+import { FileSpec, useChatData } from '@chainlit/react-client';
 
+import { Attachments } from 'components/molecules/attachments';
 import HistoryButton from 'components/organisms/chat/history';
 
-import { attachmentsState } from 'state/chat';
-import { chatHistoryState } from 'state/chatHistory';
+import { IAttachment, attachmentsState } from 'state/chat';
 import { chatSettingsOpenState, projectSettingsState } from 'state/project';
+import { inputHistoryState } from 'state/userInputHistory';
 
 import UploadButton from './UploadButton';
 import SpeechButton from './speechButton';
 
 interface Props {
   fileSpec: FileSpec;
-  onFileUpload: (payload: IFileResponse[]) => void;
+  onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
-  onSubmit: (message: string, files?: IFileElement[]) => void;
+  onSubmit: (message: string, attachments?: IAttachment[]) => void;
   onReply: (message: string) => void;
 }
 
@@ -43,13 +38,20 @@ function getLineCount(el: HTMLDivElement) {
 
 const Input = memo(
   ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
-    const [fileElements, setFileElements] = useRecoilState(attachmentsState);
+    const [attachments, setAttachments] = useRecoilState(attachmentsState);
     const [pSettings] = useRecoilState(projectSettingsState);
-    const setChatHistory = useSetRecoilState(chatHistoryState);
+    const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
     const ref = useRef<HTMLDivElement>(null);
-    const { loading, askUser, chatSettingsInputs, disabled } = useChatData();
+    const {
+      loading,
+      askUser,
+      chatSettingsInputs,
+      disabled: _disabled
+    } = useChatData();
+
+    const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
@@ -64,21 +66,7 @@ const Input = memo(
             if (item.kind === 'file') {
               const file = item.getAsFile();
               if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                  const content = e.target?.result as ArrayBuffer;
-                  if (content) {
-                    onFileUpload([
-                      {
-                        name: file.name,
-                        type: file.type,
-                        content,
-                        size: file.size
-                      }
-                    ]);
-                  }
-                };
-                reader.readAsArrayBuffer(file);
+                onFileUpload([file]);
               }
             }
           });
@@ -111,17 +99,17 @@ const Input = memo(
       if (askUser) {
         onReply(value);
       } else {
-        onSubmit(value, fileElements);
+        onSubmit(value, attachments);
       }
-      setFileElements([]);
+      setAttachments([]);
       setValue('');
     }, [
       value,
       disabled,
       setValue,
       askUser,
-      fileElements,
-      setFileElements,
+      attachments,
+      setAttachments,
       onSubmit
     ]);
 
@@ -135,11 +123,11 @@ const Input = memo(
         } else if (e.key === 'ArrowUp') {
           const lineCount = getLineCount(e.currentTarget as HTMLDivElement);
           if (lineCount <= 1) {
-            setChatHistory((old) => ({ ...old, open: true }));
+            setInputHistory((old) => ({ ...old, open: true }));
           }
         }
       },
-      [submit, setChatHistory, isComposing]
+      [submit, setInputHistory, isComposing]
     );
 
     const onHistoryClick = useCallback((content: string) => {
@@ -201,7 +189,7 @@ const Input = memo(
           }
         }}
       >
-        {fileElements.length > 0 ? (
+        {attachments.length > 0 ? (
           <Box
             sx={{
               mt: 2,
@@ -209,10 +197,7 @@ const Input = memo(
               padding: '2px'
             }}
           >
-            <Attachments
-              fileElements={fileElements}
-              setFileElements={setFileElements}
-            />
+            <Attachments />
           </Box>
         ) : null}
 

@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IMessage, IMessageElement } from '@chainlit/react-client';
+import { IMessageElement, IStep } from '@chainlit/react-client';
 
 export interface ChatProfile {
   icon: string;
@@ -30,7 +30,7 @@ export interface IProjectSettings {
   };
   userEnv: string[];
   dataPersistence: boolean;
-  conversationResumable: boolean;
+  threadResumable: boolean;
   chatProfiles: ChatProfile[];
 }
 
@@ -44,7 +44,7 @@ export const sideViewState = atom<IMessageElement | undefined>({
   default: undefined
 });
 
-export const highlightMessage = atom<IMessage['id'] | null>({
+export const highlightMessage = atom<IStep['id'] | null>({
   key: 'HighlightMessage',
   default: null
 });

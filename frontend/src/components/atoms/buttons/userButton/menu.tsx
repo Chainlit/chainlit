@@ -36,7 +36,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
         {user.id}
       </Typography>
       <Typography width="100%" fontSize="13px" fontWeight={400}>
-        {user.username}
+        {user.identifier}
       </Typography>
     </ListItem>
   );

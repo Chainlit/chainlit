@@ -1,13 +1,13 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 
 import AuthCallback from 'pages/AuthCallback';
-import Conversation from 'pages/Conversation';
 import Design from 'pages/Design';
 import Element from 'pages/Element';
 import Env from 'pages/Env';
 import Home from 'pages/Home';
 import Login from 'pages/Login';
 import Readme from 'pages/Readme';
+import Thread from 'pages/Thread';
 
 export const router = createBrowserRouter([
   {
@@ -23,8 +23,8 @@ export const router = createBrowserRouter([
     element: <Env />
   },
   {
-    path: '/conversation/:id?',
-    element: <Conversation />
+    path: '/thread/:id?',
+    element: <Thread />
   },
   {
     path: '/element/:id',

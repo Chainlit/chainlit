@@ -8,12 +8,12 @@ import Typography from '@mui/material/Typography';
 
 import { useColorForName } from 'hooks/useColors';
 
-import type { IMessage } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 import { MessageTime } from './MessageTime';
 
 interface Props {
-  message: IMessage;
+  message: IStep;
   show?: boolean;
 }
 
@@ -22,14 +22,18 @@ export const AUTHOR_BOX_WIDTH = 70;
 const Author = ({ message, show }: Props) => {
   const context = useContext(MessageContext);
   const getColorForName = useColorForName(context.uiName);
-  const avatarEl = context.avatars.find((e) => e.name === message.author);
+
+  const author = message.name;
+  const isUser = message.type === 'user_message';
+
+  const avatarEl = context.avatars.find((e) => e.name === author);
 
   const avatar = show && avatarEl && (
-    <AvatarElement element={avatarEl} author={message.author} />
+    <AvatarElement element={avatarEl} author={author} />
   );
 
   const name = show && (
-    <Tooltip title={message.author}>
+    <Tooltip title={author}>
       <Typography
         noWrap
         lineHeight="24px"
@@ -38,14 +42,10 @@ const Author = ({ message, show }: Props) => {
           width: AUTHOR_BOX_WIDTH,
           fontSize: '12px',
           fontWeight: 500,
-          color: getColorForName(
-            message.author,
-            message.authorIsUser,
-            message.isError
-          )
+          color: getColorForName(author, isUser, message.isError)
         }}
       >
-        {message.author}
+        {author}
       </Typography>
     </Tooltip>
   );
@@ -62,7 +62,7 @@ const Author = ({ message, show }: Props) => {
         <Box
           width="2px"
           borderRadius="13px"
-          bgcolor={getColorForName(message.author, message.authorIsUser)}
+          bgcolor={getColorForName(author, isUser)}
           mr={2}
         />
       )}

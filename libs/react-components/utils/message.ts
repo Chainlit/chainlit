@@ -1,18 +1,11 @@
-import type { IMessage, IMessageElement } from 'client-types/';
+import type { IMessageElement, IStep } from 'client-types/';
 
-const isForIdMatch = (
-  id: string | number | undefined,
-  forIds: string[] | undefined
-) => {
-  if (!forIds || !forIds.length || !id) {
+const isForIdMatch = (id: string | number | undefined, forId: string) => {
+  if (!forId || !id) {
     return false;
   }
 
-  return forIds.includes(id.toString());
-};
-
-const isGlobalMatch = (forIds: string[] | undefined) => {
-  return !forIds || !forIds.length;
+  return forId === id.toString();
 };
 
 const escapeRegExp = (string: string) => {
@@ -42,7 +35,7 @@ export const prepareContent = ({
 
   let preparedContent = content ? content.trim() : '';
   const inlinedElements = elements.filter(
-    (e) => isForIdMatch(id, e?.forIds) && e.display === 'inline'
+    (e) => isForIdMatch(id, e?.forId) && e.display === 'inline'
   );
   const refElements: IMessageElement[] = [];
 
@@ -50,8 +43,7 @@ export const prepareContent = ({
     preparedContent = preparedContent.replaceAll(elementRegexp, (match) => {
       const element = elements.find((e) => {
         const nameMatch = e.name === match;
-        const scopeMatch =
-          isGlobalMatch(e?.forIds) || isForIdMatch(id, e?.forIds);
+        const scopeMatch = isForIdMatch(id, e?.forId);
         return nameMatch && scopeMatch;
       });
       const foundElement = !!element;
@@ -89,7 +81,7 @@ export const prepareContent = ({
   };
 };
 
-export const isLastMessage = (messages: IMessage[], index: number) => {
+export const isLastMessage = (messages: IStep[], index: number) => {
   if (messages.length - 1 === index) {
     return true;
   }

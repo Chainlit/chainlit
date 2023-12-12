@@ -7,9 +7,8 @@ from chainlit.session import HTTPSession, WebsocketSession
 from lazify import LazyProxy
 
 if TYPE_CHECKING:
-    from chainlit.client.cloud import AppUser, PersistedAppUser
     from chainlit.emitter import BaseChainlitEmitter
-    from chainlit.message import Message
+    from chainlit.user import PersistedUser, User
 
 
 class ChainlitContextException(Exception):
@@ -21,6 +20,11 @@ class ChainlitContext:
     loop: asyncio.AbstractEventLoop
     emitter: "BaseChainlitEmitter"
     session: Union["HTTPSession", "WebsocketSession"]
+
+    @property
+    def current_step(self):
+        if self.session.active_steps:
+            return self.session.active_steps[-1]
 
     def __init__(self, session: Union["HTTPSession", "WebsocketSession"]):
         from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
@@ -47,7 +51,7 @@ def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitCon
 
 
 def init_http_context(
-    user: Optional[Union["AppUser", "PersistedAppUser"]] = None,
+    user: Optional[Union["User", "PersistedUser"]] = None,
     auth_token: Optional[str] = None,
     user_env: Optional[Dict[str, str]] = None,
 ) -> ChainlitContext:

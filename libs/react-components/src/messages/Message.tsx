@@ -11,12 +11,12 @@ import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
 import { MessageContent } from './components/MessageContent';
 
-import type { IAction, IMessage, IMessageElement } from 'client-types/';
+import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import { Messages } from './Messages';
 
 interface Props {
-  message: IMessage;
+  message: IStep;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -57,18 +57,21 @@ const Message = memo(
       return null;
     }
 
+    const isUser = message.type === 'user_message';
+    const isAsk = message.waitForAnswer;
+
     return (
       <Box
         sx={{
           color: 'text.primary',
           backgroundColor: (theme) =>
-            message.authorIsUser
+            isUser
               ? 'transparent'
               : theme.palette.mode === 'dark'
               ? theme.palette.grey[800]
               : theme.palette.grey[100]
         }}
-        className="message"
+        className="step"
       >
         <Box
           sx={{
@@ -82,7 +85,7 @@ const Message = memo(
           }}
         >
           <Stack
-            id={`message-${message.id}`}
+            id={`step-${message.id}`}
             direction="row"
             ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
             sx={{
@@ -117,16 +120,18 @@ const Message = memo(
                 onClick={() => setShowDetails(!showDetails)}
                 loading={isRunning && isLast}
               />
-              {!isRunning && isLast && message.waitForAnswer && (
+              {!isRunning && isLast && isAsk && (
                 <AskUploadButton onError={onError} />
               )}
-              <MessageActions message={message} actions={actions} />
+              {actions?.length ? (
+                <MessageActions message={message} actions={actions} />
+              ) : null}
             </Stack>
           </Stack>
         </Box>
-        {message.subMessages && showDetails && (
+        {message.steps && showDetails && (
           <Messages
-            messages={message.subMessages}
+            messages={message.steps}
             actions={actions}
             elements={elements}
             indent={indent + 1}

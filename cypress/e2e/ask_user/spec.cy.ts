@@ -6,11 +6,11 @@ describe('Ask User', () => {
   });
 
   it('should send a new message containing the user input', () => {
-    cy.get('.message').should('have.length', 1);
+    cy.get('.step').should('have.length', 1);
     submitMessage('Jeeves');
     cy.wait(2000);
-    cy.get('.message').should('have.length', 3);
+    cy.get('.step').should('have.length', 3);
 
-    cy.get('.message').eq(2).should('contain', 'Jeeves');
+    cy.get('.step').eq(2).should('contain', 'Jeeves');
   });
 });

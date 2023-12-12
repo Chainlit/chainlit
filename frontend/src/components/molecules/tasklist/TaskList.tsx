@@ -1,3 +1,5 @@
+import { useFetch } from 'usehooks-ts';
+
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
 import { useChatData } from '@chainlit/react-client';
@@ -50,17 +52,21 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const theme = useTheme();
   const { tasklists } = useChatData();
 
-  let content: ITaskList | null = null;
   const tasklist = tasklists[tasklists.length - 1];
 
-  try {
-    if (tasklist?.content) {
-      content = JSON.parse(tasklist.content);
-    }
-  } catch (e) {
-    console.error(e);
-    content = null;
+  const url = tasklist?.url;
+
+  const { data, error } = useFetch(url);
+
+  if (!url) return null;
+
+  if (!data && !error) {
+    return <div>Loading...</div>;
+  } else if (error) {
+    return <div>An error occured</div>;
   }
+
+  const content = data as ITaskList;
 
   if (!content) {
     return null;

@@ -1,11 +1,12 @@
-import { IConversation, IPrompt } from 'src/types';
+import { IGeneration, IThread } from 'src/types';
 import { removeToken } from 'src/utils/token';
+
+import { IFeedback } from 'src/types/feedback';
 
 export * from './hooks/auth';
 export * from './hooks/api';
 
-export interface IConversationsFilters {
-  authorEmail?: string;
+export interface IThreadFilters {
   search?: string;
   feedback?: number;
 }
@@ -147,16 +148,22 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async getCompletion(
-    prompt: IPrompt,
+  async getGeneration(
+    generation: IGeneration,
     userEnv = {},
     controller: AbortController,
     accessToken?: string,
     tokenCb?: (done: boolean, token: string) => void
   ) {
+    const payload = { userEnv };
+    if (generation.type === 'CHAT') {
+      payload['chatGeneration'] = generation;
+    } else {
+      payload['completionGeneration'] = generation;
+    }
     const response = await this.post(
-      `/completion`,
-      { prompt, userEnv },
+      `/generation`,
+      payload,
       accessToken,
       controller.signal
     );
@@ -192,29 +199,24 @@ export class ChainlitAPI extends APIBase {
     return stream;
   }
 
-  async setHumanFeedback(
-    messageId: string,
-    feedback: number,
-    feedbackComment?: string,
+  async setFeedback(
+    feedback: IFeedback,
     accessToken?: string
-  ) {
-    await this.put(
-      `/message/feedback`,
-      { messageId, feedback, feedbackComment },
-      accessToken
-    );
+  ): Promise<{ success: boolean; feedbackId: string }> {
+    const res = await this.put(`/feedback`, { feedback }, accessToken);
+    return res.json();
   }
 
-  async getConversations(
+  async listThreads(
     pagination: IPagination,
-    filter: IConversationsFilters,
+    filter: IThreadFilters,
     accessToken?: string
   ): Promise<{
     pageInfo: IPageInfo;
-    data: IConversation[];
+    data: IThread[];
   }> {
     const res = await this.post(
-      `/project/conversations`,
+      `/project/threads`,
       { pagination, filter },
       accessToken
     );
@@ -222,14 +224,69 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async deleteConversation(conversationId: string, accessToken?: string) {
-    const res = await this.delete(
-      `/project/conversation`,
-      { conversationId },
-      accessToken
-    );
+  async deleteThread(threadId: string, accessToken?: string) {
+    const res = await this.delete(`/project/thread`, { threadId }, accessToken);
 
     return res.json();
+  }
+
+  uploadFile(
+    file: File,
+    onProgress: (progress: number) => void,
+    sessionId: string,
+    token?: string
+  ) {
+    const xhr = new XMLHttpRequest();
+
+    const promise = new Promise<{ id: string }>((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      xhr.open(
+        'POST',
+        this.buildEndpoint(`/project/file?session_id=${sessionId}`),
+        true
+      );
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', this.checkToken(token));
+      }
+
+      // Track the progress of the upload
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          const percentage = (event.loaded / event.total) * 100;
+          onProgress(percentage);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } else {
+          reject('Upload failed');
+        }
+      };
+
+      xhr.onerror = function () {
+        reject('Upload error');
+      };
+
+      xhr.send(formData);
+    });
+
+    return { xhr, promise };
+  }
+
+  getElementUrl(id: string, sessionId: string, accessToken?: string) {
+    let tokenParam = '';
+    if (accessToken) {
+      tokenParam = `?token=${accessToken}`;
+    }
+    return this.buildEndpoint(
+      `/project/file/${id}?session_id=${sessionId}${tokenParam}`
+    );
   }
 
   getLogoEndpoint(theme: string) {

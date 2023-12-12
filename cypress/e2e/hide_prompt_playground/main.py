@@ -1,5 +1,3 @@
-from chainlit.prompt import Prompt
-
 import chainlit as cl
 
 template = """Hello, this is a template.
@@ -20,12 +18,19 @@ inputs = {
 completion = "This is the original completion"
 
 
+@cl.step(type="llm")
+async def gen_response():
+    res = "This is a message with a basic prompt"
+    if current_step := cl.context.current_step:
+        current_step.generation = cl.CompletionGeneration(
+            template=template, inputs=inputs, completion=res
+        )
+    return res
+
+
 @cl.on_chat_start
 async def start():
+    content = await gen_response()
     await cl.Message(
-        content="This is a message with a basic prompt",
-        prompt=Prompt(
-            template=template,
-            inputs=inputs,
-        ),
+        content=content,
     ).send()

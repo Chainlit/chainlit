@@ -1,7 +1,7 @@
-import { IConversation } from 'src/types';
+import { IThread } from 'src/types';
 
-export const groupByDate = (data: IConversation[]) => {
-  const groupedData: { [key: string]: IConversation[] } = {};
+export const groupByDate = (data: IThread[]) => {
+  const groupedData: { [key: string]: IThread[] } = {};
 
   const today = new Date();
   const yesterday = new Date();

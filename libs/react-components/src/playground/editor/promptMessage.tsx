@@ -3,7 +3,7 @@ import { EditorState } from 'draft-js';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
-import type { IPrompt, IPromptMessage } from 'client-types/';
+import type { IChatGeneration, IGenerationMessage } from 'client-types/';
 import { PromptMode } from 'src/types/playground';
 
 import MessageWrapper from './MessageWrapper';
@@ -11,8 +11,8 @@ import FormattedEditor from './formatted';
 import TemplateEditor from './template';
 
 interface Props {
-  message: IPromptMessage;
-  prompt: IPrompt;
+  message: IGenerationMessage;
+  generation: IChatGeneration;
   mode: PromptMode;
   index: number;
   onChange: (index: number, nextState: EditorState) => void;
@@ -20,7 +20,7 @@ interface Props {
 
 export default function PromptMessage({
   message,
-  prompt,
+  generation,
   mode,
   index,
   onChange
@@ -28,7 +28,8 @@ export default function PromptMessage({
   const theme = useTheme();
 
   const templateProps = {
-    prompt,
+    inputs: generation.inputs,
+    format: message.templateFormat,
     sxEditorChildren: {
       padding: theme.spacing(2),
       backgroundColor: '',

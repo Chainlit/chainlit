@@ -1,12 +1,12 @@
 import os
 
+from chainlit.input_widget import Select, Slider
+from chainlit.playground.config import BaseProvider, add_llm_provider
+from chainlit.playground.providers.langchain import LangchainGenericProvider
 from fastapi.responses import StreamingResponse
 from langchain.llms.fake import FakeListLLM
 
 import chainlit as cl
-from chainlit.input_widget import Select, Slider
-from chainlit.playground.config import BaseProvider, add_llm_provider
-from chainlit.playground.providers.langchain import LangchainGenericProvider
 
 os.environ["TEST_LLM_API_KEY"] = "sk..."
 
@@ -15,8 +15,8 @@ class TestLLMProvider(BaseProvider):
     async def create_completion(self, request):
         await super().create_completion(request)
 
-        self.create_prompt(request)
-        self.require_settings(request.prompt.settings)
+        self.create_generation(request)
+        self.require_settings(request.generation.settings)
 
         stream = ["This ", "is ", "the ", "test ", "completion"]
 

@@ -7,17 +7,17 @@ describe('Upload attachments', () => {
 
   const shouldHaveInlineAttachments = () => {
     submitMessage('Message with attachments');
-    cy.get('.message').should('have.length', 5);
-    cy.get('.message')
+    cy.get('.step').should('have.length', 5);
+    cy.get('.step')
       .eq(1)
       .should('contain', 'Content: Message with attachments');
-    cy.get('.message')
+    cy.get('.step')
       .eq(2)
       .should('contain', 'Received element 0: state_of_the_union.txt');
-    cy.get('.message').eq(3).should('contain', 'Received element 1: hello.cpp');
-    cy.get('.message').eq(4).should('contain', 'Received element 2: hello.py');
+    cy.get('.step').eq(3).should('contain', 'Received element 1: hello.cpp');
+    cy.get('.step').eq(4).should('contain', 'Received element 2: hello.py');
 
-    cy.get('.message').eq(0).find('.inline-file').should('have.length', 3);
+    cy.get('.step').eq(0).find('.inline-file').should('have.length', 3);
     cy.get('.inline-file')
       .eq(0)
       .should('have.attr', 'download', 'state_of_the_union.txt');
@@ -30,13 +30,15 @@ describe('Upload attachments', () => {
     cy.fixture('hello.cpp', 'utf-8').as('cppFile');
     cy.fixture('hello.py', 'utf-8').as('pyFile');
 
+    // Wait for the socket connection to be created
+    cy.wait(1000);
+
     /**
      * Should be able to upload file from D&D input
      */
     cy.get("[id='#upload-drop-input']").should('exist');
     // Upload a text file
     cy.get("[id='#upload-drop-input']").selectFile('@txtFile', { force: true });
-    // cy.get('#upload-drop-input').selectFile('@txtFile', { force: true });
     cy.get('#attachments').should('contain', 'state_of_the_union.txt');
 
     // Upload a C++ file

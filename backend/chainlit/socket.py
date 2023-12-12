@@ -6,7 +6,7 @@ from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.config import config
 from chainlit.context import init_ws_context
-from chainlit.data import chainlit_client
+from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
@@ -27,39 +27,33 @@ def restore_existing_session(sid, session_id, emit_fn, ask_user_fn):
     return False
 
 
-async def persist_user_session(conversation_id: str, metadata: Dict):
-    if not chainlit_client:
+async def persist_user_session(thread_id: str, metadata: Dict):
+    if data_layer := get_data_layer():
+        await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+
+
+async def resume_thread(session: WebsocketSession):
+    data_layer = get_data_layer()
+    if not data_layer or not session.user or not session.thread_id_to_resume:
+        return
+    thread = await data_layer.get_thread(thread_id=session.thread_id_to_resume)
+    if not thread:
         return
 
-    await chainlit_client.update_conversation_metadata(
-        conversation_id=conversation_id, metadata=metadata
-    )
+    author = thread.get("user").get("identifier") if thread["user"] else None
+    user_is_author = author == session.user.identifier
 
-
-async def resume_conversation(session: WebsocketSession):
-    if not chainlit_client or not session.user or not session.conversation_id:
-        return
-
-    conversation = await chainlit_client.get_conversation(
-        conversation_id=session.conversation_id
-    )
-
-    author = (
-        conversation["appUser"].get("username") if conversation["appUser"] else None
-    )
-    user_is_author = author == session.user.username
-
-    if conversation and user_is_author:
-        metadata = conversation["metadata"] or {}
+    if user_is_author:
+        metadata = thread["metadata"] or {}
         user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
         if chat_settings := metadata.get("chat_settings"):
             session.chat_settings = chat_settings
 
-        trace_event("conversation_resumed")
+        trace_event("thread_resumed")
 
-        return conversation
+        return thread
 
 
 def load_user_env(user_env):
@@ -128,9 +122,8 @@ async def connect(sid, environ, auth):
         user=user,
         token=token,
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
-        conversation_id=environ.get("HTTP_X_CHAINLIT_CONVERSATION_ID"),
+        thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
-
     trace_event("connection_successful")
     return True
 
@@ -142,13 +135,13 @@ async def connection_successful(sid):
     if context.session.restored:
         return
 
-    if context.session.conversation_id and config.code.on_chat_resume:
-        conversation = await resume_conversation(context.session)
-        if conversation:
+    if context.session.thread_id_to_resume and config.code.on_chat_resume:
+        thread = await resume_thread(context.session)
+        if thread:
             context.session.has_user_message = True
             await context.emitter.clear_ask()
-            await config.code.on_chat_resume(conversation)
-            await context.emitter.resume_conversation(conversation)
+            await context.emitter.resume_thread(thread)
+            await config.code.on_chat_resume(thread)
             return
 
     if config.code.on_chat_start:
@@ -174,13 +167,14 @@ async def clean_session(sid):
 @socket.on("disconnect")
 async def disconnect(sid):
     session = WebsocketSession.get(sid)
+    if session:
+        init_ws_context(session)
 
     if config.code.on_chat_end and session:
-        init_ws_context(session)
         await config.code.on_chat_end()
 
-    if session and session.conversation_id:
-        await persist_user_session(session.conversation_id, session.to_persistable())
+    if session and session.thread_id and session.has_user_message:
+        await persist_user_session(session.thread_id, session.to_persistable())
 
     async def disconnect_on_timeout(sid):
         await asyncio.sleep(config.project.session_timeout)
@@ -200,7 +194,9 @@ async def stop(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(author="System", content="Task stopped by the user.").send()
+        await Message(
+            author="System", content="Task stopped by the user.", disable_feedback=True
+        ).send()
 
         session.should_stop = True
 
@@ -240,7 +236,8 @@ async def message(sid, payload: UIMessagePayload):
 async def process_action(action: Action):
     callback = config.code.action_callbacks.get(action.name)
     if callback:
-        await callback(action)
+        res = await callback(action)
+        return res
     else:
         logger.warning("No callback found for action %s", action.name)
 
@@ -248,11 +245,25 @@ async def process_action(action: Action):
 @socket.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
-    init_ws_context(sid)
+    context = init_ws_context(sid)
 
     action = Action(**action)
 
-    await process_action(action)
+    try:
+        res = await process_action(action)
+        await context.emitter.send_action_response(
+            id=action.id, status=True, response=res if isinstance(res, str) else None
+        )
+
+    except InterruptedError:
+        await context.emitter.send_action_response(
+            id=action.id, status=False, response="Action interrupted by the user"
+        )
+    except Exception as e:
+        logger.exception(e)
+        await context.emitter.send_action_response(
+            id=action.id, status=False, response="An error occured"
+        )
 
 
 @socket.on("chat_settings_change")

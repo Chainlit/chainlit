@@ -4,7 +4,7 @@ import chainlit as cl
 
 
 def sync_function():
-    time.sleep(5)
+    time.sleep(1)
 
 
 @cl.on_chat_start
