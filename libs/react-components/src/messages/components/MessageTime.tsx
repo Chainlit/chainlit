@@ -12,6 +12,9 @@ const MessageTime = ({ timestamp }: Props) => {
     hour: '2-digit',
     minute: '2-digit'
   };
+  if (typeof timestamp === 'string' && !timestamp.endsWith('Z')) {
+    timestamp = timestamp + 'Z';
+  }
   const date = new Date(timestamp).toLocaleTimeString(undefined, dateOptions);
   return (
     <Typography lineHeight="24px" color={grey[500]} fontSize="11px">

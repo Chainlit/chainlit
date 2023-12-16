@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import json
+import time
 import uuid
 from datetime import datetime
 from functools import wraps
@@ -158,6 +159,7 @@ class Step:
         show_input: Union[bool, str] = False,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
+        time.sleep(0.001)
         self._input = ""
         self._output = ""
         self.thread_id = context.session.thread_id
@@ -372,7 +374,9 @@ class Step:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.end = datetime.utcnow().isoformat()
-        context.session.active_steps.pop()
+
+        if self in context.session.active_steps:
+            context.session.active_steps.remove(self)
         await self.update()
 
     def __enter__(self):
@@ -389,5 +393,6 @@ class Step:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.end = datetime.utcnow().isoformat()
-        context.session.active_steps.pop()
+        if self in context.session.active_steps:
+            context.session.active_steps.remove(self)
         asyncio.create_task(self.update())
