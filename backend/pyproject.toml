@@ -19,7 +19,7 @@ include = [
 chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
-python = ">=3.8.1"
+python = ">=3.8.1,<4.0.0"
 chainlit_client = "0.1.0rc5"
 dataclasses_json = "^0.5.7"
 uvicorn = "^0.23.2"
@@ -48,8 +48,8 @@ optional = true
 
 [tool.poetry.group.tests.dependencies]
 openai = ">=1.1.0"
-langchain = "^0.0.331"
-llama-index = "^0.8.64"
+langchain = "^0.0.350"
+llama-index = "^0.9.15"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"

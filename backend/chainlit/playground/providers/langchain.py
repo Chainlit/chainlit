@@ -56,7 +56,7 @@ class LangchainGenericProvider(BaseProvider):
         return self.prompt_message_to_langchain_message(message)
 
     def message_to_string(self, message: BaseMessage) -> str:  # type: ignore[override]
-        return message.content
+        return str(message.content)
 
     async def create_completion(self, request):
         from langchain.schema.messages import BaseMessageChunk
