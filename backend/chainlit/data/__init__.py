@@ -3,6 +3,7 @@ import os
 from collections import deque
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
@@ -332,6 +333,8 @@ class ChainlitDataLayer:
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
+                if config.ui.hide_cot and step.parent_id:
+                    continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
                 steps.append(self.step_to_step_dict(step))
