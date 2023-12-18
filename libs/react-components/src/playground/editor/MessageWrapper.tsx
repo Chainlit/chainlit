@@ -154,7 +154,7 @@ const MessageWrapper = ({
         {index !== undefined ? (
           <Box color="text.secondary">
             <IconButton color="inherit" onClick={onRemove}>
-              <RemoveCircleOutlineOutlined fontSize="small" />
+              <RemoveCircleOutlineOutlined sx={{ height: 18, width: 18 }} />
             </IconButton>
           </Box>
         ) : null}

@@ -1,6 +1,5 @@
 import { useToggle } from 'usehooks-ts';
 
-import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
@@ -11,13 +10,11 @@ import Tooltip from '@mui/material/Tooltip';
 
 interface CollapseProps {
   children: React.ReactNode;
-  onDownload: () => void;
   defaultExpandAll?: boolean;
 }
 
 const Collapse = ({
   children,
-  onDownload,
   defaultExpandAll = false
 }: CollapseProps): JSX.Element => {
   const [expandAll, toggleExpandAll] = useToggle(defaultExpandAll);
@@ -45,11 +42,6 @@ const Collapse = ({
         <Tooltip title={expandAll ? 'Collapse' : 'Expand'}>
           <IconButton onClick={toggleExpandAll}>
             {expandAll ? <ExpandLess /> : <ExpandMore />}
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Download">
-          <IconButton onClick={onDownload} edge="end">
-            <DownloadOutlined />
           </IconButton>
         </Tooltip>
       </Stack>

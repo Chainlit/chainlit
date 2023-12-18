@@ -9,6 +9,7 @@ import { AskUploadButton } from './components/AskUploadButton';
 import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
 import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
+import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
@@ -126,6 +127,7 @@ const Message = memo(
               {actions?.length ? (
                 <MessageActions message={message} actions={actions} />
               ) : null}
+              <MessageButtons message={message} />
             </Stack>
           </Stack>
         </Box>
