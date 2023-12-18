@@ -10,8 +10,7 @@ import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -64,43 +63,39 @@ const FeedbackButtons = ({ message }: Props) => {
   const buttons = useMemo(() => {
     const iconSx = {
       width: ICON_SIZE,
-      height: ICON_SIZE,
-      color: (theme) =>
-        theme.palette.mode === 'light'
-          ? theme.palette.grey[600]
-          : theme.palette.text.primary
+      height: ICON_SIZE
     };
 
     const baseButtons = [
       () => (
-        <Tooltip title="Not helpful">
-          <span>
-            <Button
-              disabled={disabled}
-              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
-              onClick={() => {
-                handleFeedbackClick(-1);
-              }}
-              size="small"
-            >
-              <DownIcon sx={iconSx} />
-            </Button>
-          </span>
-        </Tooltip>
-      ),
-      () => (
         <Tooltip title="Helpful">
           <span>
-            <Button
+            <IconButton
+              color="inherit"
               disabled={disabled}
               className={`positive-feedback-${feedback === 1 ? 'on' : 'off'}`}
               onClick={() => {
                 handleFeedbackClick(1);
               }}
-              size="small"
             >
               <UpIcon sx={iconSx} />
-            </Button>
+            </IconButton>
+          </span>
+        </Tooltip>
+      ),
+      () => (
+        <Tooltip title="Not helpful">
+          <span>
+            <IconButton
+              color="inherit"
+              disabled={disabled}
+              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
+              onClick={() => {
+                handleFeedbackClick(-1);
+              }}
+            >
+              <DownIcon sx={iconSx} />
+            </IconButton>
           </span>
         </Tooltip>
       )
@@ -110,17 +105,17 @@ const FeedbackButtons = ({ message }: Props) => {
       baseButtons.push(() => (
         <Tooltip title="Feedback">
           <span>
-            <Button
+            <IconButton
+              color="inherit"
               disabled={disabled}
               onClick={() => {
                 setShowFeedbackDialog(feedback);
                 setCommentInput(comment);
               }}
               className="feedback-comment-edit"
-              size="small"
             >
               <StickyNote2Outlined sx={iconSx} />
-            </Button>
+            </IconButton>
           </span>
         </Tooltip>
       ));
@@ -131,12 +126,10 @@ const FeedbackButtons = ({ message }: Props) => {
 
   return (
     <>
-      <Stack direction="row" spacing={1} color="text.secondary">
-        <ButtonGroup variant="text" color="inherit" sx={{ height: 26 }}>
-          {buttons.map((FeedbackButton, index) => (
-            <FeedbackButton key={`feedback-button-${index}`} />
-          ))}
-        </ButtonGroup>
+      <Stack direction="row">
+        {buttons.map((FeedbackButton, index) => (
+          <FeedbackButton key={`feedback-button-${index}`} />
+        ))}
       </Stack>
 
       <Dialog

@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.0rc2] - 2023-12-18
+
+### Added
+
+- Copy button under messages
+- OAuth samesite cookie policy is now configurable through the `CHAINLIT_COOKIE_SAMESITE` env var
+
+### Changed
+
+- Relax Python version requirements
+- If `hide_cot` is configured to `true`, steps will never be sent to the UI, but still persisted.
+- Message buttons are now positioned below
+
 ## [1.0.0rc0] - 2023-12-12
 
 ### Added

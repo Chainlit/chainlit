@@ -3,7 +3,7 @@ import json
 import mimetypes
 import shutil
 import urllib.parse
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
@@ -317,7 +317,10 @@ async def oauth_login(provider_id: str, request: Request):
     response = RedirectResponse(
         url=f"{provider.authorize_url}?{params}",
     )
-    response.set_cookie("oauth_state", random, httponly=True, max_age=3 * 60)
+    samesite = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")  # type: Any
+    response.set_cookie(
+        "oauth_state", random, httponly=True, samesite=samesite, max_age=3 * 60
+    )
     return response
 
 

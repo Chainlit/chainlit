@@ -167,8 +167,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         return self.emit("clear_ask", {})
 
-    async def init_thread(self, step: StepDict):
-        """Signal the UI that a new thread (with a user message) exists"""
+    async def flush_thread_queues(self, name: str):
         if data_layer := get_data_layer():
             if isinstance(self.session.user, PersistedUser):
                 user_id = self.session.user.id
@@ -177,10 +176,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
             await data_layer.update_thread(
                 thread_id=self.session.thread_id,
                 user_id=user_id,
-                metadata={"name": step["output"]},
+                metadata={"name": name},
             )
             await self.session.flush_method_queue()
 
+    async def init_thread(self, step: StepDict):
+        """Signal the UI that a new thread (with a user message) exists"""
+        await self.flush_thread_queues(name=step["output"])
         await self.emit("init_thread", step)
 
     async def process_user_message(self, payload: UIMessagePayload):
@@ -251,6 +253,12 @@ class ChainlitEmitter(BaseChainlitEmitter):
                         if file["id"] in self.session.files
                     ]
                     final_res = files
+                    if not self.session.has_user_message:
+                        self.session.has_user_message = True
+                        await self.flush_thread_queues(
+                            name=",".join([file["name"] for file in files])
+                        )
+
                     if get_data_layer():
                         coros = [
                             File(

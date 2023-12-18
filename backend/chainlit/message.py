@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 import uuid
 from abc import ABC
 from datetime import datetime
@@ -146,7 +147,6 @@ class MessageBase(ABC):
     async def send(self):
         if not self.created_at:
             self.created_at = datetime.utcnow().isoformat()
-
         if self.content is None:
             self.content = ""
 
@@ -157,7 +157,6 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = await self._create()
-
         await context.emitter.send_step(step_dict)
 
         return self.id
@@ -209,6 +208,7 @@ class Message(MessageBase):
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
+        time.sleep(0.001)
         self.language = language
 
         if isinstance(content, dict):

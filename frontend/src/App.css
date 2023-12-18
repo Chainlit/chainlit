@@ -6,7 +6,7 @@
   max-width: 100%;
 }
 
-.markdown-body *:first-child {
+.markdown-body *:first-child:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
   margin-top: 0;
 }
 

@@ -1,7 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
-import BugReport from '@mui/icons-material/BugReport';
+import Terminal from '@mui/icons-material/Terminal';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -17,13 +17,13 @@ const PlaygroundButton = ({ step }: Props) => {
   return (
     <Tooltip title="Inspect in prompt playground">
       <IconButton
-        size="small"
+        color="inherit"
         className="playground-button"
         onClick={() => {
           onPlaygroundButtonClick && onPlaygroundButtonClick(step);
         }}
       >
-        <BugReport sx={{ width: '16px', height: '16px' }} />
+        <Terminal sx={{ width: '18px', height: '18px' }} />
       </IconButton>
     </Tooltip>
   );

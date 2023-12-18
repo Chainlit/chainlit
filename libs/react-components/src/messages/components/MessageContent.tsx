@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { Collapse } from 'src/Collapse';
 import { Markdown } from 'src/Markdown';
 import { InlinedElements } from 'src/elements/InlinedElements';
-import { exportToFile } from 'utils/exportToFile';
 import { prepareContent } from 'utils/message';
 
 import Box from '@mui/material/Box';
@@ -11,8 +10,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import type { IMessageElement, IStep } from 'client-types/';
-
-import { MessageButtons } from './MessageButtons';
 
 const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
@@ -106,12 +103,7 @@ const MessageContent = memo(
       lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH;
 
     const messageContent = collapse ? (
-      <Collapse
-        defaultExpandAll={preserveSize}
-        onDownload={() => exportToFile(output, `${message.id}.txt`)}
-      >
-        {markdownContent}
-      </Collapse>
+      <Collapse defaultExpandAll={preserveSize}>{markdownContent}</Collapse>
     ) : (
       markdownContent
     );
@@ -122,7 +114,6 @@ const MessageContent = memo(
           {output ? messageContent : null}
           <InlinedElements elements={outputInlinedElements} />
         </Box>
-        <MessageButtons message={message} />
       </Stack>
     );
   }
