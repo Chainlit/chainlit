@@ -266,6 +266,9 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
+        if config.ui.hide_cot and self.parent_id:
+            return
+
         if not config.features.prompt_playground and "generation" in step_dict:
             step_dict.pop("generation", None)
 
@@ -347,6 +350,10 @@ class Step:
             self.output += token
 
         assert self.id
+
+        if config.ui.hide_cot and self.parent_id:
+            return
+
         await context.emitter.send_token(
             id=self.id, token=token, is_sequence=is_sequence
         )
