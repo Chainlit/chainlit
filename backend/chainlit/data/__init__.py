@@ -128,6 +128,7 @@ class ChainlitDataLayer:
             "chainlitKey": None,
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
+            "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
             "forId": attachment.step_id,
@@ -230,6 +231,7 @@ class ChainlitDataLayer:
             "language": element.language,
             "display": element.display,
             "type": element.type,
+            "page": getattr(element, "page", None),
         }
 
         await self.client.api.create_attachment(
