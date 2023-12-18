@@ -20,7 +20,7 @@ chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0.0"
-chainlit_client = "0.1.0rc5"
+chainlit_client = "0.1.0rc7"
 dataclasses_json = "^0.5.7"
 uvicorn = "^0.23.2"
 fastapi = "^0.100"

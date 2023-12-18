@@ -1,4 +1,5 @@
-import { useCopyToClipboard, useToggle } from 'usehooks-ts';
+import { useState } from 'react';
+import { useCopyToClipboard } from 'usehooks-ts';
 
 import ContentPaste from '@mui/icons-material/ContentPaste';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
@@ -11,27 +12,28 @@ interface ClipboardCopyProps {
 }
 
 const ClipboardCopy = ({ value, edge }: ClipboardCopyProps): JSX.Element => {
-  const [showTooltip, toggleTooltip] = useToggle();
+  const [isCopied, setIsCopied] = useState(false);
   const [_, copy] = useCopyToClipboard();
+
+  const handleCopy = () => {
+    copy(value)
+      .then(() => {
+        setIsCopied(true);
+      })
+      .catch((err) => console.log('An error occurred while copying: ', err));
+  };
+
+  const handleTooltipClose = () => {
+    setIsCopied(false);
+  };
 
   return (
     <Tooltip
-      open={showTooltip}
-      title={'Copied to clipboard!'}
-      onClose={toggleTooltip}
+      title={isCopied ? 'Copied to clipboard!' : 'Copy'}
+      onClose={handleTooltipClose}
       sx={{ zIndex: 2 }}
     >
-      <IconButton
-        color="inherit"
-        edge={edge}
-        onClick={() => {
-          copy(value)
-            .then(() => toggleTooltip())
-            .catch((err) =>
-              console.log('An error occurred while copying: ', err)
-            );
-        }}
-      >
+      <IconButton color="inherit" edge={edge} onClick={handleCopy}>
         <ContentPaste sx={{ height: 16, width: 16 }} />
       </IconButton>
     </Tooltip>
