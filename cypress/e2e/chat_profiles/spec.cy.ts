@@ -1,4 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
+import { runTestServer, submitMessage } from '../../support/testUtils';
 
 describe('Chat profiles', () => {
   before(() => {
@@ -28,7 +28,6 @@ describe('Chat profiles', () => {
     // Change chat profile
 
     cy.get('[data-test="chat-profile:GPT-4"]').click();
-    cy.get('#confirm').click();
 
     cy.get('.step')
       .should('have.length', 1)
@@ -47,6 +46,19 @@ describe('Chat profiles', () => {
       .should(
         'contain',
         'starting chat with admin using the GPT-4 chat profile'
+      );
+
+    submitMessage('hello');
+    cy.get('.step').should('have.length', 2).eq(1).should('contain', 'hello');
+    cy.get('[data-test="chat-profile:GPT-5"]').click();
+    cy.get('#confirm').click();
+
+    cy.get('.step')
+      .should('have.length', 1)
+      .eq(0)
+      .should(
+        'contain',
+        'starting chat with admin using the GPT-5 chat profile'
       );
   });
 });
