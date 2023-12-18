@@ -64,8 +64,7 @@ class BaseChainlitEmitter:
         """Stub method to clear the prompt from the UI."""
         pass
 
-    async def init_thread(self, step_dict: StepDict):
-        """Signal the UI that a new thread (with a user message) exists"""
+    async def init_thread(self, interaction: str):
         pass
 
     async def process_user_message(self, payload: UIMessagePayload) -> Message:
@@ -167,7 +166,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         return self.emit("clear_ask", {})
 
-    async def flush_thread_queues(self, name: str):
+    async def flush_thread_queues(self, interaction: str):
         if data_layer := get_data_layer():
             if isinstance(self.session.user, PersistedUser):
                 user_id = self.session.user.id
@@ -176,14 +175,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
             await data_layer.update_thread(
                 thread_id=self.session.thread_id,
                 user_id=user_id,
-                metadata={"name": name},
+                metadata={"name": interaction},
             )
             await self.session.flush_method_queue()
 
-    async def init_thread(self, step: StepDict):
-        """Signal the UI that a new thread (with a user message) exists"""
-        await self.flush_thread_queues(name=step["output"])
-        await self.emit("init_thread", step)
+    async def init_thread(self, interaction: str):
+        await self.flush_thread_queues(interaction)
+        await self.emit("first_interaction", interaction)
 
     async def process_user_message(self, payload: UIMessagePayload):
         step_dict = payload["message"]
@@ -197,9 +195,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         asyncio.create_task(message._create())
 
-        if not self.session.has_user_message:
-            self.session.has_user_message = True
-            asyncio.create_task(self.init_thread(message.to_dict()))
+        if not self.session.has_first_interaction:
+            self.session.has_first_interaction = True
+            asyncio.create_task(self.init_thread(message.content))
 
         if file_refs:
             files = [
@@ -239,11 +237,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
             ] = None
 
             if user_res:
+                interaction = None
                 if spec.type == "text":
                     message_dict_res = cast(StepDict, user_res)
                     await self.process_user_message(
                         {"message": message_dict_res, "fileReferences": None}
                     )
+                    interaction = message_dict_res["output"]
                     final_res = message_dict_res
                 elif spec.type == "file":
                     file_refs = cast(List[FileReference], user_res)
@@ -253,12 +253,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                         if file["id"] in self.session.files
                     ]
                     final_res = files
-                    if not self.session.has_user_message:
-                        self.session.has_user_message = True
-                        await self.flush_thread_queues(
-                            name=",".join([file["name"] for file in files])
-                        )
-
+                    interaction = ",".join([file["name"] for file in files])
                     if get_data_layer():
                         coros = [
                             File(
@@ -274,6 +269,12 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 elif spec.type == "action":
                     action_res = cast(AskActionResponse, user_res)
                     final_res = action_res
+                    interaction = action_res["value"]
+
+                if not self.session.has_first_interaction and interaction:
+                    self.session.has_first_interaction = True
+                    await self.init_thread(interaction=interaction)
+
             await self.clear_ask()
             return final_res
         except TimeoutError as e:

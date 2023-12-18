@@ -18,9 +18,27 @@ cache = false
 # Show the prompt playground
 prompt_playground = true
 
+# Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
+unsafe_allow_html = false
+
+# Process and display mathematical expressions. This can clash with "$" characters in messages.
+latex = false
+
+# Authorize users to upload files with messages
+multi_modal = true
+
+# Allows user to use speech to text
+[features.speech_to_text]
+    enabled = false
+    # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
+    # language = "en-US"
+
 [UI]
 # Name of the app and chatbot.
 name = "Chatbot"
+
+# Show the readme while the thread is empty.
+show_readme_as_default = false
 
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
@@ -40,9 +58,6 @@ hide_cot = false
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
-
-# If the app is served behind a reverse proxy (like cloud run) we need to know the base url for oauth
-# base_url = "https://mydomain.com"
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
@@ -66,4 +81,4 @@ hide_cot = false
 
 
 [meta]
-generated_by = "0.7.1"
+generated_by = "1.0.0rc2"

@@ -29,7 +29,7 @@ def queue_until_user_message():
         async def wrapper(self, *args, **kwargs):
             if (
                 isinstance(context.session, WebsocketSession)
-                and not context.session.has_user_message
+                and not context.session.has_first_interaction
             ):
                 # Queue the method invocation waiting for the first user message
                 queues = context.session.thread_queues
