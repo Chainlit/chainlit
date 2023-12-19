@@ -37,6 +37,7 @@ class ElementDict(TypedDict):
     display: ElementDisplay
     size: Optional[ElementSize]
     language: Optional[str]
+    page: Optional[int]
     forId: Optional[str]
     mime: Optional[str]
 
@@ -46,7 +47,7 @@ class Element:
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
     # Name of the element, this will be used to reference the element in the UI.
-    name: str
+    name: str = ""
     # The ID of the element. This is set automatically when the element is sent to the UI.
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     # The key of the element hosted on Chainlit.
@@ -91,6 +92,7 @@ class Element:
                 "display": self.display,
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
+                "page": getattr(self, "page", None),
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
@@ -201,6 +203,7 @@ class Text(Element):
 class Pdf(Element):
     """Useful to send a pdf to the UI."""
 
+    page: Optional[int] = None
     type: ClassVar[ElementType] = "pdf"
 
 

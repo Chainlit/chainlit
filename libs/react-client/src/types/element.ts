@@ -48,7 +48,9 @@ export interface ITextElement extends TMessageElement<'text'> {
   language?: string;
 }
 
-export interface IPdfElement extends TMessageElement<'pdf'> {}
+export interface IPdfElement extends TMessageElement<'pdf'> {
+  page?: number;
+}
 
 export interface IAudioElement extends TMessageElement<'audio'> {}
 
