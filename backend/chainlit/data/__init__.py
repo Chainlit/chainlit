@@ -234,9 +234,12 @@ class ChainlitDataLayer:
             "page": getattr(element, "page", None),
         }
 
+        if not element.for_id:
+            return
+
         await self.client.api.create_attachment(
             thread_id=element.thread_id,
-            step_id=element.for_id or "",
+            step_id=element.for_id,
             mime=element.mime,
             name=element.name,
             url=element.url,

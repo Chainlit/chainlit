@@ -282,6 +282,9 @@ export class ChainlitAPI extends APIBase {
   getElementUrl(id: string, sessionId: string, accessToken?: string) {
     let queryParams = `?session_id=${sessionId}`;
     if (accessToken) {
+      if (accessToken.startsWith('Bearer ')) {
+        accessToken = accessToken.slice(7);
+      }
       queryParams += `&token=${accessToken}`;
     }
     return this.buildEndpoint(`/project/file/${id}${queryParams}`);
