@@ -1,14 +1,14 @@
 import { useRecoilValue } from 'recoil';
 
-import { firstUserMessageState, messagesState } from './state';
+import { firstUserInteraction, messagesState } from './state';
 
 const useChatMessages = () => {
   const messages = useRecoilValue(messagesState);
-  const firstUserMessage = useRecoilValue(firstUserMessageState);
+  const firstInteraction = useRecoilValue(firstUserInteraction);
 
   return {
     messages,
-    firstUserMessage
+    firstInteraction
   };
 };
 

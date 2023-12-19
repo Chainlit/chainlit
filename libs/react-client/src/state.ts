@@ -112,8 +112,8 @@ export const tasklistState = atom<ITasklistElement[]>({
   default: []
 });
 
-export const firstUserMessageState = atom<IStep | undefined>({
-  key: 'FirstUserMessage',
+export const firstUserInteraction = atom<string | undefined>({
+  key: 'FirstUserInteraction',
   default: undefined
 });
 

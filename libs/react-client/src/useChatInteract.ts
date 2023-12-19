@@ -8,7 +8,7 @@ import {
   chatSettingsInputsState,
   chatSettingsValueState,
   elementState,
-  firstUserMessageState,
+  firstUserInteraction,
   loadingState,
   messagesState,
   sessionIdState,
@@ -32,7 +32,7 @@ const useChatInteract = () => {
   const resetSessionId = useResetRecoilState(sessionIdState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
 
-  const setFirstUserMessage = useSetRecoilState(firstUserMessageState);
+  const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
   const setElements = useSetRecoilState(elementState);
@@ -47,7 +47,7 @@ const useChatInteract = () => {
     session?.socket.disconnect();
     setIdToResume(undefined);
     resetSessionId();
-    setFirstUserMessage(undefined);
+    setFirstUserInteraction(undefined);
     setMessages([]);
     setElements([]);
     setAvatars([]);

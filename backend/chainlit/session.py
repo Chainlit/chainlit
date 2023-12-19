@@ -56,7 +56,7 @@ class BaseSession:
         self.user = user
         self.token = token
         self.root_message = root_message
-        self.has_user_message = False
+        self.has_first_interaction = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
         self.active_steps = []
