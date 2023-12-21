@@ -24,7 +24,8 @@ const MessageButtons = ({ message }: Props) => {
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
-  const showCopyButton = hasContent && !isUser && !isAsk;
+  const showCopyButton =
+    hasContent && !isUser && !isAsk && !message.disableFeedback;
 
   const showFeedbackButtons =
     showFbButtons &&

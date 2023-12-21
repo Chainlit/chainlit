@@ -237,7 +237,6 @@ class AzureOpenAIProvider(BaseProvider):
             api_version=env_settings["api_version"],
             azure_endpoint=env_settings["azure_endpoint"],
             azure_ad_token=self.get_var(request, "AZURE_AD_TOKEN"),
-            azure_ad_token_provider=self.get_var(request, "AZURE_AD_TOKEN_PROVIDER"),
             azure_deployment=self.get_var(request, "AZURE_DEPLOYMENT"),
         )
         llm_settings = request.generation.settings
@@ -290,7 +289,6 @@ class AzureChatOpenAIProvider(BaseProvider):
             api_version=env_settings["api_version"],
             azure_endpoint=env_settings["azure_endpoint"],
             azure_ad_token=self.get_var(request, "AZURE_AD_TOKEN"),
-            azure_ad_token_provider=self.get_var(request, "AZURE_AD_TOKEN_PROVIDER"),
             azure_deployment=self.get_var(request, "AZURE_DEPLOYMENT"),
         )
 

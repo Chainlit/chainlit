@@ -280,13 +280,14 @@ export class ChainlitAPI extends APIBase {
   }
 
   getElementUrl(id: string, sessionId: string, accessToken?: string) {
-    let tokenParam = '';
+    let queryParams = `?session_id=${sessionId}`;
     if (accessToken) {
-      tokenParam = `?token=${accessToken}`;
+      if (accessToken.startsWith('Bearer ')) {
+        accessToken = accessToken.slice(7);
+      }
+      queryParams += `&token=${accessToken}`;
     }
-    return this.buildEndpoint(
-      `/project/file/${id}?session_id=${sessionId}${tokenParam}`
-    );
+    return this.buildEndpoint(`/project/file/${id}${queryParams}`);
   }
 
   getLogoEndpoint(theme: string) {

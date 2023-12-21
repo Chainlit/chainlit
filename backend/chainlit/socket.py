@@ -140,6 +140,7 @@ async def connection_successful(sid):
         if thread:
             context.session.has_first_interaction = True
             await context.emitter.clear_ask()
+            await context.emitter.emit("first_interaction", "resume")
             await context.emitter.resume_thread(thread)
             await config.code.on_chat_resume(thread)
             return
