@@ -36,7 +36,7 @@ async def on_message():
 @cl.on_chat_start
 async def main():
     global task_list
-
+    await cl.sleep(0.5)
     task_list = cl.TaskList()
     task_list.status = "Running..."
     for i in range(17):
