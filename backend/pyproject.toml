@@ -85,7 +85,9 @@ module = [
     "socketio.*",
     "uptrace",
     "syncer",
-    "vertexai.language_models"
+    "vertexai.language_models",
+    "vertexai.preview.generative_models",
+    "google.cloud"
 ]
 ignore_missing_imports = true
 

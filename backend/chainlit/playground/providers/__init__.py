@@ -9,4 +9,5 @@ from .openai import (
 from .vertexai import (
     ChatVertexAI,
     GenerationVertexAI,
+    Gemini
 )
