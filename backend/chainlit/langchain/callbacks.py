@@ -388,11 +388,13 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         self.steps = {}
         self.parent_id_map = {}
         self.ignored_runs = set()
-        self.root_parent_id = (
-            self.context.session.root_message.id
-            if self.context.session.root_message
-            else None
-        )
+
+        if self.context.current_step:
+            self.root_parent_id = self.context.current_step.id
+        elif self.context.session.root_message:
+            self.root_parent_id = self.context.session.root_message.id
+        else:
+            self.root_parent_id = None
 
         if to_ignore is None:
             self.to_ignore = DEFAULT_TO_IGNORE
