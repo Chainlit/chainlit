@@ -57,7 +57,7 @@ const ChatComponent = () => {
       userEnv: {
         /* user environment variables */
       },
-      accessToken: 'YOUR_ACCESS_TOKEN' // Optional Chainlit auth token
+      accessToken: 'Bearer YOUR_ACCESS_TOKEN' // Optional Chainlit auth token
     });
 
     return () => {

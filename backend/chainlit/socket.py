@@ -89,6 +89,7 @@ async def connect(sid, environ, auth):
             token = authorization_header.split(" ")[1] if authorization_header else None
             user = await get_current_user(token=token)
     except Exception as e:
+        logger.info("Authentication failed")
         return False
 
     # Function to send a message to this particular session
