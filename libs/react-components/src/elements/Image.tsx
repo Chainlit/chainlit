@@ -1,3 +1,7 @@
+import { useState } from 'react';
+
+import Skeleton from '@mui/material/Skeleton';
+
 import { type IImageElement } from 'client-types/';
 
 import { FrameElement } from './Frame';
@@ -18,15 +22,19 @@ const handleImageClick = (name: string, src: string) => {
 };
 
 const ImageElement = ({ element }: Props) => {
+  const [loading, setLoading] = useState(true);
+
   if (!element.url) {
     return null;
   }
 
   return (
     <FrameElement>
+      {loading && <Skeleton variant="rectangular" width="100%" height={200} />}
       <img
         className={`${element.display}-image`}
         src={element.url}
+        onLoad={() => setLoading(false)}
         onClick={() => {
           if (element.display === 'inline') {
             const name = `${element.name}.png`;
