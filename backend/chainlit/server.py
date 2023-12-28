@@ -471,12 +471,12 @@ async def update_feedback(
     """Update the human feedback for a particular message."""
     data_layer = get_data_layer()
     if not data_layer:
-        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+        raise HTTPException(status_code=500, detail="Data persistence is not enabled")
 
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
     except Exception as e:
-        raise HTTPException(detail=str(e), status_code=401)
+        raise HTTPException(detail=str(e), status_code=500)
 
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
