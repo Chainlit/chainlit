@@ -265,7 +265,14 @@ const useChatSession = () => {
     }
   }, [session]);
 
-  return { connect, disconnect, chatProfile, idToResume, setChatProfile };
+  return {
+    connect,
+    disconnect,
+    session,
+    chatProfile,
+    idToResume,
+    setChatProfile
+  };
 };
 
 export { useChatSession };
