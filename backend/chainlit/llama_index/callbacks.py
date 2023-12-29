@@ -118,7 +118,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     [f"Source {idx}" for idx, _ in enumerate(sources)]
                 )
                 step.elements = [
-                    Text(name=f"Source {idx}", content=source.node.get_text())
+                    Text(name=f"Source {idx}", content=source.node.get_text() or "Empty node")
                     for idx, source in enumerate(sources)
                 ]
                 step.output = f"Retrieved the following sources: {source_refs}"
