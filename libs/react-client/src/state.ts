@@ -1,4 +1,4 @@
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
