@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import Any, Generic, List, Optional, TypeVar
+import re
 
 from chainlit.context import context
 from chainlit.step import Step
 from chainlit.sync import run_sync
+from chainlit import Message
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
 
@@ -44,6 +46,11 @@ class HaystackAgentCallbackHandler:
         agent.tm.callback_manager.on_tool_finish += self.on_tool_finish
         agent.tm.callback_manager.on_tool_error += self.on_tool_error
 
+        self.final_answer_pattern = agent.final_answer_pattern
+        self.final_stream = Message(content="")
+        self.last_tokens = []
+        self.answer_reached = False
+
     def on_agent_start(self, **kwargs: Any) -> None:
         # Prepare agent step message for streaming
         self.agent_name = kwargs.get("name", "Agent")
@@ -59,6 +66,9 @@ class HaystackAgentCallbackHandler:
         self.stack.push(run_step)
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
+        self.answer_reached = False
+        self.final_stream = Message(content="")
+        self.last_tokens = []
         run_step = self.stack.pop()
         run_step.end = datetime.utcnow().isoformat()
         run_step.output = agent_step.prompt_node_response
@@ -82,6 +92,18 @@ class HaystackAgentCallbackHandler:
 
     def on_new_token(self, token, **kwargs: Any) -> None:
         # Stream agent step tokens
+        if self.answer_reached:
+            run_sync(self.final_stream.stream_token(token))
+        else:
+            self.last_tokens.append(token)
+
+            last_tokens_concat = ''.join(self.last_tokens)
+            final_answer_match = re.search(self.final_answer_pattern, last_tokens_concat)
+
+            if final_answer_match:
+                self.answer_reached = True
+                run_sync(self.final_stream.stream_token(final_answer_match.group(1)))
+
         run_sync(self.stack.peek().stream_token(token))
 
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any) -> None:
