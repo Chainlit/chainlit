@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from chainlit import input_widget
+from chainlit.input_widget import InputWidget
 from chainlit.playground.provider import BaseProvider
 from chainlit.sync import make_async
 from chainlit_client import GenerationMessage
@@ -19,7 +19,7 @@ class LangchainGenericProvider(BaseProvider):
         id: str,
         name: str,
         llm: Union[LLM, BaseChatModel],
-        inputs: List[input_widget.InputWidget],
+        inputs: List[InputWidget],
         is_chat: bool = False,
     ):
         super().__init__(
