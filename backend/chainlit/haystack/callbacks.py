@@ -36,7 +36,7 @@ class HaystackAgentCallbackHandler:
     stack: Stack[Step]
     last_step: Optional[Step]
 
-    def __init__(self, agent: Agent):
+    def __init__(self, agent: Agent, stream_final_answer: bool = False, stream_final_answer_agent_name: str = 'Agent'):
         agent.callback_manager.on_agent_start += self.on_agent_start
         agent.callback_manager.on_agent_step += self.on_agent_step
         agent.callback_manager.on_agent_finish += self.on_agent_finish
@@ -47,14 +47,19 @@ class HaystackAgentCallbackHandler:
         agent.tm.callback_manager.on_tool_error += self.on_tool_error
 
         self.final_answer_pattern = agent.final_answer_pattern
-        self.final_stream = Message(content="")
-        self.last_tokens = []
-        self.answer_reached = False
+        self.stream_final_answer = stream_final_answer
+        self.stream_final_answer_agent_name = stream_final_answer_agent_name
 
     def on_agent_start(self, **kwargs: Any) -> None:
         # Prepare agent step message for streaming
         self.agent_name = kwargs.get("name", "Agent")
         self.stack = Stack[Step]()
+
+        if self.stream_final_answer:
+            self.final_stream = Message(author=self.stream_final_answer_agent_name, content="")
+            self.last_tokens: list[str] = []
+            self.answer_reached = False
+
         root_message = context.session.root_message
         parent_id = root_message.id if root_message else None
         run_step = Step(name=self.agent_name, type="run", parent_id=parent_id)
@@ -66,10 +71,7 @@ class HaystackAgentCallbackHandler:
         self.stack.push(run_step)
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
-        self.answer_reached = False
-        self.final_stream = Message(content="")
-        self.last_tokens = []
-        run_step = self.stack.pop()
+        run_step = self.last_step
         run_step.end = datetime.utcnow().isoformat()
         run_step.output = agent_step.prompt_node_response
         run_sync(run_step.update())
@@ -92,17 +94,18 @@ class HaystackAgentCallbackHandler:
 
     def on_new_token(self, token, **kwargs: Any) -> None:
         # Stream agent step tokens
-        if self.answer_reached:
-            run_sync(self.final_stream.stream_token(token))
-        else:
-            self.last_tokens.append(token)
+        if self.stream_final_answer:
+            if self.answer_reached:
+                run_sync(self.final_stream.stream_token(token))
+            else:
+                self.last_tokens.append(token)
 
-            last_tokens_concat = ''.join(self.last_tokens)
-            final_answer_match = re.search(self.final_answer_pattern, last_tokens_concat)
+                last_tokens_concat = ''.join(self.last_tokens)
+                final_answer_match = re.search(self.final_answer_pattern, last_tokens_concat)
 
-            if final_answer_match:
-                self.answer_reached = True
-                run_sync(self.final_stream.stream_token(final_answer_match.group(1)))
+                if final_answer_match:
+                    self.answer_reached = True
+                    run_sync(self.final_stream.stream_token(final_answer_match.group(1)))
 
         run_sync(self.stack.peek().stream_token(token))
 
