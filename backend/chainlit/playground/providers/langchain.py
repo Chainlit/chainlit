@@ -1,5 +1,6 @@
-from typing import Union
+from typing import List, Union
 
+from chainlit import input_widget
 from chainlit.playground.provider import BaseProvider
 from chainlit.sync import make_async
 from chainlit_client import GenerationMessage
@@ -18,13 +19,14 @@ class LangchainGenericProvider(BaseProvider):
         id: str,
         name: str,
         llm: Union[LLM, BaseChatModel],
+        inputs: List[input_widget.InputWidget],
         is_chat: bool = False,
     ):
         super().__init__(
             id=id,
             name=name,
             env_vars={},
-            inputs=[],
+            inputs=inputs,
             is_chat=is_chat,
         )
         self.llm = llm
@@ -63,9 +65,15 @@ class LangchainGenericProvider(BaseProvider):
 
         await super().create_completion(request)
 
+        self.require_settings(request.prompt.settings)
+
         messages = self.create_generation(request)
 
-        stream = make_async(self.llm.stream)
+        # https://github.com/langchain-ai/langchain/issues/14980
+        stream = make_async(self.llm.stream)(
+            input=messages,
+            **request.prompt.settings
+        )
 
         result = await stream(
             input=messages,
