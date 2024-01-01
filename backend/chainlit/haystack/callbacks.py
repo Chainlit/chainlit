@@ -89,7 +89,7 @@ class HaystackAgentCallbackHandler:
 
         if not agent_step.is_last():
             # Prepare step for next agent step
-            step = Step(name=self.agent_name, parent_id=self.stack.peek().id)
+            step = Step(name=self.agent_name, parent_id=self.last_step.id)
             self.stack.push(step)
 
     def on_new_token(self, token, **kwargs: Any) -> None:
