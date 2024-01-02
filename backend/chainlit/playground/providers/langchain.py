@@ -64,7 +64,7 @@ class LangchainGenericProvider(BaseProvider):
         from langchain.schema.messages import BaseMessageChunk
 
         await super().create_completion(request)
-        
+
         messages = self.create_generation(request)
 
         # https://github.com/langchain-ai/langchain/issues/14980
