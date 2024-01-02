@@ -64,13 +64,13 @@ class LangchainGenericProvider(BaseProvider):
         from langchain.schema.messages import BaseMessageChunk
 
         await super().create_completion(request)
-
+        
         messages = self.create_generation(request)
 
         # https://github.com/langchain-ai/langchain/issues/14980
         stream = make_async(self.llm.stream)(
             input=messages,
-            **request.prompt.settings
+            **request.generation.settings
         )
 
         result = await stream(
