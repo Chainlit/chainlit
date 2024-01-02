@@ -65,8 +65,6 @@ class LangchainGenericProvider(BaseProvider):
 
         await super().create_completion(request)
 
-        self.require_settings(request.prompt.settings)
-
         messages = self.create_generation(request)
 
         # https://github.com/langchain-ai/langchain/issues/14980
