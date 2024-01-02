@@ -122,7 +122,7 @@ class BaseDataLayer:
         return {}
 
     async def update_user_session(
-        self, id: str, interactive: bool, ended_at: Optional[str]
+        self, id: str, is_interactive: bool, ended_at: Optional[str]
     ) -> Dict:
         return {}
 
@@ -410,10 +410,10 @@ class ChainlitDataLayer:
         return session
 
     async def update_user_session(
-        self, id: str, interactive: bool, ended_at: Optional[str]
+        self, id: str, is_interactive: bool, ended_at: Optional[str]
     ) -> Dict:
         session = await self.client.api.update_user_session(
-            id=id, interactive=interactive, ended_at=ended_at
+            id=id, is_interactive=is_interactive, ended_at=ended_at
         )
         return session
 

@@ -196,7 +196,7 @@ async def disconnect(sid, force_clear=False):
             asyncio.create_task(
                 data_layer.update_user_session(
                     id=session.id,
-                    interactive=session.has_first_interaction,
+                    is_interactive=session.has_first_interaction,
                     ended_at=datetime.utcnow().isoformat(),
                 )
             )
