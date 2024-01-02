@@ -19,7 +19,7 @@ class LangchainGenericProvider(BaseProvider):
         id: str,
         name: str,
         llm: Union[LLM, BaseChatModel],
-        inputs: List[InputWidget],
+        inputs: List[InputWidget] = [],
         is_chat: bool = False,
     ):
         super().__init__(
