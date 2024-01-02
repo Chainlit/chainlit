@@ -57,7 +57,7 @@ class HaystackAgentCallbackHandler:
 
         if self.stream_final_answer:
             self.final_stream = Message(author=self.stream_final_answer_agent_name, content="")
-            self.last_tokens: list[str] = []
+            self.last_tokens: List[str] = []
             self.answer_reached = False
 
         root_message = context.session.root_message
