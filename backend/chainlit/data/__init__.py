@@ -402,10 +402,10 @@ class ChainlitDataLayer:
         user_id: Optional[str],
     ) -> Dict:
         session = await self.client.api.create_user_session(
-            anon_participant_identifier=anon_user_id,
             id=id,
             started_at=started_at,
             participant_identifier=user_id,
+            anon_participant_identifier=anon_user_id,
         )
         return session
 
