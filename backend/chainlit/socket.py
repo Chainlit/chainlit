@@ -94,10 +94,10 @@ def build_anon_user_identifier(environ):
 @socket.on("connect")
 async def connect(sid, environ, auth):
     if not config.code.on_chat_start and not config.code.on_message:
-        raise ConnectionRefusedError(
+        logger.warning(
             "You need to configure at least an on_chat_start or an on_message callback"
         )
-
+        return False
     user = None
     anon_user_identifier = build_anon_user_identifier(environ)
     token = None
