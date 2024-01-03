@@ -1,5 +1,7 @@
 import asyncio
 import json
+import uuid
+from datetime import datetime
 from typing import Any, Dict
 
 from chainlit.action import Action
@@ -73,6 +75,22 @@ def load_user_env(user_env):
     return user_env
 
 
+def build_anon_user_identifier(environ):
+    scope = environ.get("asgi.scope", {})
+    client_ip, _ = scope.get("client")
+    ip = environ.get("HTTP_X_FORWARDED_FOR", client_ip)
+
+    try:
+        headers = scope.get("headers", {})
+        user_agent = next(
+            (v.decode("utf-8") for k, v in headers if k.decode("utf-8") == "user-agent")
+        )
+        return str(uuid.uuid5(uuid.NAMESPACE_DNS, user_agent + ip))
+
+    except StopIteration:
+        return str(uuid.uuid5(uuid.NAMESPACE_DNS, ip))
+
+
 @socket.on("connect")
 async def connect(sid, environ, auth):
     if not config.code.on_chat_start and not config.code.on_message:
@@ -81,10 +99,12 @@ async def connect(sid, environ, auth):
         )
 
     user = None
+    anon_user_identifier = build_anon_user_identifier(environ)
     token = None
+    login_required = require_login()
     try:
         # Check if the authentication is required
-        if require_login():
+        if login_required:
             authorization_header = environ.get("HTTP_AUTHORIZATION")
             token = authorization_header.split(" ")[1] if authorization_header else None
             user = await get_current_user(token=token)
@@ -114,7 +134,7 @@ async def connect(sid, environ, auth):
 
     user_env_string = environ.get("HTTP_USER_ENV")
     user_env = load_user_env(user_env_string)
-    WebsocketSession(
+    ws_session = WebsocketSession(
         id=session_id,
         socket_id=sid,
         emit=emit_fn,
@@ -125,6 +145,17 @@ async def connect(sid, environ, auth):
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
+
+    if data_layer := get_data_layer():
+        asyncio.create_task(
+            data_layer.create_user_session(
+                id=session_id,
+                started_at=datetime.utcnow().isoformat(),
+                anon_user_id=anon_user_identifier,
+                user_id=user.identifier if user else None,
+            )
+        )
+
     trace_event("connection_successful")
     return True
 
@@ -154,22 +185,22 @@ async def connection_successful(sid):
 
 @socket.on("clear_session")
 async def clean_session(sid):
-    if session := WebsocketSession.get(sid):
-        if config.code.on_chat_end:
-            init_ws_context(session)
-            await config.code.on_chat_end()
-        # Clean up the user session
-        if session.id in user_sessions:
-            user_sessions.pop(session.id)
-
-        # Clean up the session
-        session.delete()
+    await disconnect(sid, force_clear=True)
 
 
 @socket.on("disconnect")
-async def disconnect(sid):
+async def disconnect(sid, force_clear=False):
     session = WebsocketSession.get(sid)
     if session:
+        if data_layer := get_data_layer():
+            asyncio.create_task(
+                data_layer.update_user_session(
+                    id=session.id,
+                    is_interactive=session.has_first_interaction,
+                    ended_at=datetime.utcnow().isoformat(),
+                )
+            )
+
         init_ws_context(session)
 
     if config.code.on_chat_end and session:
@@ -178,8 +209,7 @@ async def disconnect(sid):
     if session and session.thread_id and session.has_first_interaction:
         await persist_user_session(session.thread_id, session.to_persistable())
 
-    async def disconnect_on_timeout(sid):
-        await asyncio.sleep(config.project.session_timeout)
+    def clear():
         if session := WebsocketSession.get(sid):
             # Clean up the user session
             if session.id in user_sessions:
@@ -187,7 +217,14 @@ async def disconnect(sid):
             # Clean up the session
             session.delete()
 
-    asyncio.ensure_future(disconnect_on_timeout(sid))
+    async def clear_on_timeout(sid):
+        await asyncio.sleep(config.project.session_timeout)
+        clear()
+
+    if force_clear:
+        clear()
+    else:
+        asyncio.ensure_future(clear_on_timeout(sid))
 
 
 @socket.on("stop")

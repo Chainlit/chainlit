@@ -112,6 +112,23 @@ class BaseDataLayer:
     ):
         pass
 
+    async def create_user_session(
+        self,
+        id: str,
+        started_at: str,
+        anon_user_id: str,
+        user_id: Optional[str],
+    ) -> Dict:
+        return {}
+
+    async def update_user_session(
+        self, id: str, is_interactive: bool, ended_at: Optional[str]
+    ) -> Dict:
+        return {}
+
+    async def delete_user_session(self, id: str) -> bool:
+        return True
+
 
 class ChainlitDataLayer:
     def __init__(
@@ -376,6 +393,33 @@ class ChainlitDataLayer:
             metadata=metadata,
             tags=tags,
         )
+
+    async def create_user_session(
+        self,
+        id: str,
+        started_at: str,
+        anon_user_id: str,
+        user_id: Optional[str],
+    ) -> Dict:
+        session = await self.client.api.create_user_session(
+            id=id,
+            started_at=started_at,
+            participant_identifier=user_id,
+            anon_participant_identifier=anon_user_id,
+        )
+        return session
+
+    async def update_user_session(
+        self, id: str, is_interactive: bool, ended_at: Optional[str]
+    ) -> Dict:
+        session = await self.client.api.update_user_session(
+            id=id, is_interactive=is_interactive, ended_at=ended_at
+        )
+        return session
+
+    async def delete_user_session(self, id: str) -> bool:
+        await self.client.api.delete_user_session(id=id)
+        return True
 
 
 if api_key := os.environ.get("CHAINLIT_API_KEY"):
