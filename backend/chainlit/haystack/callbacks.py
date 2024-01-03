@@ -71,10 +71,11 @@ class HaystackAgentCallbackHandler:
         self.stack.push(run_step)
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
-        run_step = self.last_step
-        run_step.end = datetime.utcnow().isoformat()
-        run_step.output = agent_step.prompt_node_response
-        run_sync(run_step.update())
+        if self.last_step:
+            run_step = self.last_step
+            run_step.end = datetime.utcnow().isoformat()
+            run_step.output = agent_step.prompt_node_response
+            run_sync(run_step.update())
 
     # This method is called when a step has finished
     def on_agent_step(self, agent_step: AgentStep, **kwargs: Any) -> None:
