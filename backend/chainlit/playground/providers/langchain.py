@@ -68,7 +68,7 @@ class LangchainGenericProvider(BaseProvider):
         messages = self.create_generation(request)
 
         # https://github.com/langchain-ai/langchain/issues/14980
-        result = make_async(self.llm.stream)(
+        result = await make_async(self.llm.stream)(
             input=messages,
             **request.generation.settings
         )
