@@ -1,7 +1,9 @@
 import { MessageContext, defaultMessageContext } from 'contexts/MessageContext';
 import { memo, useEffect, useRef } from 'react';
 
+import ExpandCircleDown from '@mui/icons-material/ExpandCircleDown';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 import { IMessageContext } from 'src/types/messageContext';
@@ -62,6 +64,19 @@ const MessageContainer = memo(
             elements={elements}
             actions={actions}
           />
+          {!autoScroll ? (
+            <IconButton
+              sx={{
+                width: 'fit-content',
+                margin: 'auto',
+                position: 'sticky',
+                bottom: 0
+              }}
+              onClick={() => setAutoScroll && setAutoScroll(true)}
+            >
+              <ExpandCircleDown fontSize="large" />
+            </IconButton>
+          ) : null}
         </Box>
       </MessageContext.Provider>
     );
