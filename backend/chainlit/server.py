@@ -599,7 +599,6 @@ async def upload_file(
 async def get_file(
     file_id: str,
     session_id: Optional[str] = None,
-    token: Optional[str] = None,
 ):
     from chainlit.session import WebsocketSession
 
@@ -610,13 +609,6 @@ async def get_file(
             status_code=404,
             detail="Session not found",
         )
-
-    if current_user := await get_current_user(token or ""):
-        if not session.user or session.user.identifier != current_user.identifier:
-            raise HTTPException(
-                status_code=401,
-                detail="You are not authorized to upload files for this session",
-            )
 
     if file_id in session.files:
         file = session.files[file_id]
