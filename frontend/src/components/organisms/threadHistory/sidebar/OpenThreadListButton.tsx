@@ -6,30 +6,14 @@ import IconButton from '@mui/material/IconButton';
 
 import { settingsState } from 'state/settings';
 
-const OpenThreadListButton = ({ mode }: { mode: 'mobile' | 'desktop' }) => {
+const OpenThreadListButton = () => {
   const [settings, setSettings] = useRecoilState(settingsState);
-  const isDesktop = mode === 'desktop';
 
   return !settings.isChatHistoryOpen ? (
-    <Box
-      sx={
-        isDesktop
-          ? {
-              zIndex: 1,
-              mt: 1,
-              ml: 1,
-              display: 'none',
-              '@media (min-width: 66rem)': {
-                position: 'absolute',
-                display: 'block'
-              }
-            }
-          : {}
-      }
-    >
+    <Box>
       <IconButton
         sx={{
-          borderRadius: isDesktop ? 1 : 8,
+          borderRadius: 8,
           backgroundColor: (theme) => theme.palette.background.paper
         }}
         onClick={() =>
@@ -45,4 +29,4 @@ const OpenThreadListButton = ({ mode }: { mode: 'mobile' | 'desktop' }) => {
   ) : null;
 };
 
-export default OpenThreadListButton;
+export { OpenThreadListButton };

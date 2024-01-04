@@ -5,9 +5,7 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -23,6 +21,7 @@ import { settingsState } from 'state/settings';
 import { threadsFiltersState } from 'state/threads';
 
 import { ThreadList } from './ThreadList';
+import TriggerButton from './TriggerButton';
 import Filters from './filters';
 
 const DRAWER_WIDTH = 260;
@@ -169,9 +168,6 @@ const _ThreadHistorySideBar = () => {
           >
             Past Chats
           </Typography>
-          <IconButton edge="end" onClick={() => setChatHistoryOpen(false)}>
-            <KeyboardDoubleArrowLeftIcon sx={{ color: 'text.primary' }} />
-          </IconButton>
         </Stack>
         <Filters />
         {threadHistory ? (
@@ -184,6 +180,12 @@ const _ThreadHistorySideBar = () => {
           />
         ) : null}
       </Drawer>
+      {!isMobile ? (
+        <TriggerButton
+          onClick={() => setChatHistoryOpen(!settings.isChatHistoryOpen)}
+          open={settings.isChatHistoryOpen}
+        />
+      ) : null}
     </>
   );
 };
