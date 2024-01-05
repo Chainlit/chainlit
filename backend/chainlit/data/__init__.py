@@ -401,6 +401,9 @@ class ChainlitDataLayer:
         anon_user_id: str,
         user_id: Optional[str],
     ) -> Dict:
+        existing_session = await self.client.api.get_user_session(id=id)
+        if existing_session:
+            return existing_session
         session = await self.client.api.create_user_session(
             id=id,
             started_at=started_at,
