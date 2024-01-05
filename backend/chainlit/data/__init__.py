@@ -1,8 +1,9 @@
 import functools
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+import aiofiles
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
@@ -254,15 +255,38 @@ class ChainlitDataLayer:
         if not element.for_id:
             return
 
-        await self.client.api.create_attachment(
-            thread_id=element.thread_id,
-            step_id=element.for_id,
-            mime=element.mime,
-            name=element.name,
-            url=element.url,
-            content=element.content,
-            path=element.path,
-            metadata=metadata,
+        object_key = None
+
+        if not element.url:
+            if element.path:
+                async with aiofiles.open(element.path, "rb") as f:
+                    content = await f.read()  # type: Union[bytes, str]
+            elif element.content:
+                content = element.content
+            else:
+                raise ValueError("Either path or content must be provided")
+            uploaded = await self.client.api.upload_file(
+                content=content, mime=element.mime, thread_id=element.thread_id
+            )
+            object_key = uploaded["object_key"]
+
+        await self.client.api.send_steps(
+            [
+                {
+                    "id": element.for_id,
+                    "threadId": element.thread_id,
+                    "attachments": [
+                        {
+                            "id": element.id,
+                            "name": element.name,
+                            "metadata": metadata,
+                            "mime": element.mime,
+                            "url": element.url,
+                            "objectKey": object_key,
+                        }
+                    ],
+                }
+            ]
         )
 
     async def get_element(
