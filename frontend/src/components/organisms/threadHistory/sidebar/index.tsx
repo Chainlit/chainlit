@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -17,13 +16,12 @@ import {
   threadHistoryState
 } from '@chainlit/react-client';
 
-import ChevronLeftIcon from 'assets/chevronLeft';
-
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { threadsFiltersState } from 'state/threads';
 
 import { ThreadList } from './ThreadList';
+import TriggerButton from './TriggerButton';
 import Filters from './filters';
 
 const DRAWER_WIDTH = 260;
@@ -175,9 +173,6 @@ const _ThreadHistorySideBar = () => {
           >
             Past Chats
           </Typography>
-          <IconButton edge="end" onClick={() => setChatHistoryOpen(false)}>
-            <ChevronLeftIcon sx={{ color: 'text.primary' }} />
-          </IconButton>
         </Stack>
         <Filters />
         {threadHistory ? (
@@ -190,6 +185,12 @@ const _ThreadHistorySideBar = () => {
           />
         ) : null}
       </Drawer>
+      {!isMobile ? (
+        <TriggerButton
+          onClick={() => setChatHistoryOpen(!settings.isChatHistoryOpen)}
+          open={settings.isChatHistoryOpen}
+        />
+      ) : null}
     </>
   );
 };

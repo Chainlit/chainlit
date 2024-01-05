@@ -23,7 +23,7 @@ import NewChatButton from 'components/molecules/newChatButton';
 
 import { IProjectSettings } from 'state/project';
 
-import OpenChatHistoryButton from './threadHistory/sidebar/OpenThreadListButton';
+import { OpenThreadListButton } from './threadHistory/sidebar/OpenThreadListButton';
 
 interface INavItem {
   to: string;
@@ -105,9 +105,7 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
         >
           <MenuIcon />
         </IconButton>
-        {isAuthenticated && dataPersistence ? (
-          <OpenChatHistoryButton mode="mobile" />
-        ) : null}
+        {isAuthenticated && dataPersistence ? <OpenThreadListButton /> : null}
         <Menu
           autoFocus
           anchorEl={anchorEl}

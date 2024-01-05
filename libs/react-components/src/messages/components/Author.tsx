@@ -48,7 +48,7 @@ const Author = ({ message, show, children }: Props) => {
           )}
         </Stack>
       ) : (
-        <Box width={20} />
+        <Box width={AUTHOR_BOX_WIDTH} />
       )}
 
       <Stack gap={1} width="100%">
