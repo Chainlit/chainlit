@@ -191,7 +191,7 @@ const _ThreadHistorySideBar = () => {
           position="absolute"
           sx={{
             top: '50%',
-            transform: 'translateY(-50%)',
+            transform: 'translateY(-100%)',
             right: -30,
             zIndex: 10
           }}
