@@ -6,7 +6,6 @@ import { Alert, Box, Stack } from '@mui/material';
 
 import { Header } from 'components/organisms/header';
 import { ThreadHistorySideBar } from 'components/organisms/threadHistory/sidebar';
-import OpenChatHistoryButton from 'components/organisms/threadHistory/sidebar/OpenThreadListButton';
 
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
@@ -44,7 +43,6 @@ const Page = ({ children }: Props) => {
       ) : (
         <Stack direction="row" height="100%" width="100%" overflow="auto">
           <ThreadHistorySideBar />
-          <OpenChatHistoryButton mode={'desktop'} />
           {children}
         </Stack>
       )}
