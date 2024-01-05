@@ -11,7 +11,13 @@ interface Props {
 const AvatarElement = ({ element, author, bgColor }: Props) => (
   <span className={`message-avatar`}>
     <Avatar
-      sx={{ width: 24, height: 24, bgcolor: bgColor, fontSize: '0.75rem' }}
+      sx={{
+        width: 26,
+        height: 26,
+        bgcolor: bgColor,
+        fontSize: '0.75rem',
+        mt: '-2px'
+      }}
       src={element?.url}
     >
       {author[0]}

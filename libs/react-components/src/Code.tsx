@@ -93,8 +93,7 @@ const Code = ({ children, ...props }: any) => {
           alignItems: 'center',
           borderTopLeftRadius: '4px',
           borderTopRightRadius: '4px',
-          background: isDarkMode ? grey[900] : grey[200],
-          borderBottom: `1px solid ${grey[950]}`
+          background: isDarkMode ? grey[900] : grey[200]
         }}
       >
         <Typography variant="caption">{match?.[1] || 'Raw code'}</Typography>

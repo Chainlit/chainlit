@@ -5,7 +5,6 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -17,6 +16,8 @@ import {
   accessTokenState,
   threadHistoryState
 } from '@chainlit/react-client';
+
+import ChevronLeftIcon from 'assets/chevronLeft';
 
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
@@ -147,7 +148,12 @@ const _ThreadHistorySideBar = () => {
             gap: 1,
             display: 'flex',
             padding: '0px 4px',
-            backgroundImage: 'none'
+            backgroundImage: 'none',
+            borderRight: 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0px 4px 20px 0px rgba(0, 0, 0, 0.20)'
+                : '0px 4px 20px 0px rgba(0, 0, 0, 0.05)'
           }
         }}
       >
@@ -170,7 +176,7 @@ const _ThreadHistorySideBar = () => {
             Past Chats
           </Typography>
           <IconButton edge="end" onClick={() => setChatHistoryOpen(false)}>
-            <KeyboardDoubleArrowLeftIcon sx={{ color: 'text.primary' }} />
+            <ChevronLeftIcon sx={{ color: 'text.primary' }} />
           </IconButton>
         </Stack>
         <Filters />

@@ -18,7 +18,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const AUTHOR_BOX_WIDTH = 24;
+export const AUTHOR_BOX_WIDTH = 26;
 
 const Author = ({ message, show, children }: Props) => {
   const context = useContext(MessageContext);
@@ -30,7 +30,7 @@ const Author = ({ message, show, children }: Props) => {
   const avatarEl = context.avatars.find((e) => e.name === author);
 
   return (
-    <Stack direction="row" gap={1} width="100%">
+    <Stack direction="row" gap={1.5} width="100%">
       {show ? (
         <Stack alignItems="center" gap={1}>
           <AvatarElement

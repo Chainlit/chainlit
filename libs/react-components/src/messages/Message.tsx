@@ -88,7 +88,7 @@ const Message = memo(
           <Stack
             id={`step-${message.id}`}
             direction="row"
-            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 8)}px` : 0}
+            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 12)}px` : 0}
             sx={{
               py: 2,
               borderBottom: (theme) =>
