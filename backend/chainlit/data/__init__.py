@@ -425,7 +425,6 @@ class ChainlitDataLayer:
         anon_user_id: str,
         user_id: Optional[str],
     ) -> Dict:
-        print(id, user_id, anon_user_id)
         session = await self.client.api.create_user_session(
             id=id,
             started_at=started_at,
