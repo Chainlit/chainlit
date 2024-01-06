@@ -144,6 +144,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           elements={(elements || []) as IMessageElement[]}
           onFeedbackUpdated={onFeedbackUpdated}
           messages={messages}
+          autoScroll={true}
         />
       </SideView>
     </Stack>
