@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import 'regenerator-runtime';
 
-import SendIcon from '@mui/icons-material/Telegram';
 import TuneIcon from '@mui/icons-material/Tune';
 import { Box, IconButton, Stack, TextField } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -16,6 +15,7 @@ import { IAttachment, attachmentsState } from 'state/chat';
 import { chatSettingsOpenState, projectSettingsState } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
+import { SubmitButton } from './SubmitButton';
 import UploadButton from './UploadButton';
 import SpeechButton from './speechButton';
 
@@ -164,11 +164,6 @@ const Input = memo(
         />
       </>
     );
-    const endAdornment = (
-      <IconButton disabled={disabled} color="inherit" onClick={() => submit()}>
-        <SendIcon />
-      </IconButton>
-    );
 
     return (
       <Stack
@@ -226,14 +221,7 @@ const Input = memo(
                 {startAdornment}
               </InputAdornment>
             ),
-            endAdornment: (
-              <InputAdornment
-                position="end"
-                sx={{ mr: 1, color: 'text.secondary' }}
-              >
-                {endAdornment}
-              </InputAdornment>
-            )
+            endAdornment: <SubmitButton onSubmit={submit} disabled={disabled} />
           }}
         />
       </Stack>

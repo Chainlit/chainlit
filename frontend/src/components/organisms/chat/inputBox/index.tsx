@@ -11,7 +11,6 @@ import { IAttachment } from 'state/chat';
 import { IProjectSettings } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
-import StopButton from '../stopButton';
 import Input from './input';
 import WaterMark from './waterMark';
 
@@ -106,7 +105,6 @@ const InputBox = memo(
           justifyContent: 'center'
         }}
       >
-        <StopButton />
         <Box>
           <Input
             fileSpec={fileSpec}
