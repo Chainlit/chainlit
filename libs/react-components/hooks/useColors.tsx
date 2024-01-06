@@ -2,26 +2,26 @@ import { useCallback } from 'react';
 
 import { useIsDarkMode } from './useIsDarkMode';
 
-const lightColors = [
-  '#066DEB',
-  '#04857C',
-  '#FF9900',
-  '#F34F3C',
-  '#E86004',
-  '#2D8C26',
-  '#5E5BFE',
-  '#A132FE'
+const darkColors = [
+  '#fb923c',
+  '#facc15',
+  '#34d399',
+  '#38bdf8',
+  '#818cf8',
+  '#c084fc',
+  '#f472b6',
+  '#0ea5e9'
 ];
 
-const darkColors = [
-  '#67A0F8',
-  '#25B1A7',
-  '#FFC266',
-  '#F09691',
-  '#FA7F54',
-  '#59C654',
-  '#9695F8',
-  '#B889F8'
+const lightColors = [
+  '#ea580c',
+  '#ca8a04',
+  '#059669',
+  '#0284c7',
+  '#4f46e5',
+  '#9333ea',
+  '#db2777',
+  '#2563eb'
 ];
 
 const hashCode = (str: string) => {

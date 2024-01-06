@@ -17,7 +17,12 @@ const MessageTime = ({ timestamp }: Props) => {
   }
   const date = new Date(timestamp).toLocaleTimeString(undefined, dateOptions);
   return (
-    <Typography lineHeight="24px" color={grey[500]} fontSize="11px">
+    <Typography
+      sx={{ mt: '1px' }}
+      color={grey[500]}
+      fontSize="12px"
+      lineHeight="unset"
+    >
       {date}
     </Typography>
   );

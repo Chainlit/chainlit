@@ -151,7 +151,7 @@ async def connect(sid, environ, auth):
             data_layer.create_user_session(
                 id=session_id,
                 started_at=datetime.utcnow().isoformat(),
-                anon_user_id=anon_user_identifier,
+                anon_user_id=anon_user_identifier if not user else None,
                 user_id=user.identifier if user else None,
             )
         )

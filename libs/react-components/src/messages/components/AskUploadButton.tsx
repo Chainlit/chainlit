@@ -86,7 +86,8 @@ const AskUploadChildButton = ({
         width: '100%',
         borderRadius: 1,
         backgroundColor: (theme) => theme.palette.background.paper,
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        mt: 1
       }}
       direction="row"
       alignItems="center"

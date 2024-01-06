@@ -4,7 +4,6 @@ import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 import AutoDelete from '@mui/icons-material/AutoDelete';
-import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import {
   IconButton,
   Menu,
@@ -16,6 +15,8 @@ import {
 
 import { UserInput } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components/theme';
+
+import ChevronUpIcon from 'assets/chevronUp';
 
 import { inputHistoryState } from 'state/userInputHistory';
 
@@ -247,7 +248,7 @@ export default function InputHistoryButton({ disabled, onClick }: Props) {
             onClick={() => toggleChatHistoryMenu(!inputHistory.open)}
             ref={ref}
           >
-            <KeyboardDoubleArrowUpIcon />
+            <ChevronUpIcon />
           </IconButton>
         </span>
       </Tooltip>

@@ -88,7 +88,7 @@ const Message = memo(
           <Stack
             id={`step-${message.id}`}
             direction="row"
-            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 16)}px` : 0}
+            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 12)}px` : 0}
             sx={{
               py: 2,
               borderBottom: (theme) =>
@@ -100,35 +100,30 @@ const Message = memo(
               overflowX: 'auto'
             }}
           >
-            <Author message={message} show={showAvatar} />
-            <Stack
-              alignItems="flex-start"
-              width={0}
-              flexGrow={1}
-              spacing={1}
-              minWidth={150}
-            >
-              <MessageContent
-                elements={elements}
-                message={message}
-                preserveSize={!!message.streaming || !defaultCollapseContent}
-                allowHtml={allowHtml}
-                latex={latex}
-              />
-              <DetailsButton
-                message={message}
-                opened={showDetails}
-                onClick={() => setShowDetails(!showDetails)}
-                loading={isRunning && isLast}
-              />
-              {!isRunning && isLast && isAsk && (
-                <AskUploadButton onError={onError} />
-              )}
-              {actions?.length ? (
-                <MessageActions message={message} actions={actions} />
-              ) : null}
-              <MessageButtons message={message} />
-            </Stack>
+            <Author message={message} show={showAvatar}>
+              <Stack alignItems="flex-start" minWidth={150}>
+                <MessageContent
+                  elements={elements}
+                  message={message}
+                  preserveSize={!!message.streaming || !defaultCollapseContent}
+                  allowHtml={allowHtml}
+                  latex={latex}
+                />
+                <DetailsButton
+                  message={message}
+                  opened={showDetails}
+                  onClick={() => setShowDetails(!showDetails)}
+                  loading={isRunning && isLast}
+                />
+                {!isRunning && isLast && isAsk && (
+                  <AskUploadButton onError={onError} />
+                )}
+                {actions?.length ? (
+                  <MessageActions message={message} actions={actions} />
+                ) : null}
+                <MessageButtons message={message} />
+              </Stack>
+            </Author>
           </Stack>
         </Box>
         {message.steps && showDetails && (

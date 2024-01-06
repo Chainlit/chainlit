@@ -2,6 +2,8 @@ import { useAuth } from 'api/auth';
 
 import { Avatar, Box } from '@mui/material';
 
+import UserIcon from 'assets/user';
+
 export default function UserAvatar() {
   const { user } = useAuth();
 
@@ -16,7 +18,7 @@ export default function UserAvatar() {
         }}
         src={user.metadata?.image || undefined}
       >
-        {user.identifier?.[0]}
+        {user.identifier?.[0]?.toUpperCase()}
       </Avatar>
     );
   } else {
@@ -29,7 +31,9 @@ export default function UserAvatar() {
             bgcolor: 'primary.main',
             color: 'primary.contrastText'
           }}
-        />
+        >
+          <UserIcon sx={{ width: 20 }} />
+        </Avatar>
       </Box>
     );
   }
