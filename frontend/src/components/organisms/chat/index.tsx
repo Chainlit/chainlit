@@ -171,6 +171,7 @@ const Chat = () => {
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
             onFileUploadError={onFileUploadError}
+            autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
             projectSettings={projectSettings}
           />
