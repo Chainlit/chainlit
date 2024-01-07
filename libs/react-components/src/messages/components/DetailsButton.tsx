@@ -27,12 +27,11 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   const content = message.output;
 
-  const isRunningEmptyStep = loading && !content;
+  const showDefaultLoader = loading && (!content || messageContext.hideCot);
 
-  const show = tool || isRunningEmptyStep;
-  const hide = messageContext.hideCot && !isRunningEmptyStep;
+  const show = tool || showDefaultLoader;
 
-  if (!show || hide) {
+  if (!show) {
     return null;
   }
 
