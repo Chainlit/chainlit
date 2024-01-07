@@ -383,6 +383,8 @@ class ChainlitDataLayer:
                     continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
+                if not config.features.prompt_playground and step.generation:
+                    step.generation = None
                 steps.append(self.step_to_step_dict(step))
 
         user = None  # type: Optional["UserDict"]
