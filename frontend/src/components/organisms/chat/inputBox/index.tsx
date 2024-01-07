@@ -7,6 +7,8 @@ import { Box } from '@mui/material';
 
 import { FileSpec, IStep, useChatInteract } from '@chainlit/react-client';
 
+import ScrollDownButton from 'components/atoms/buttons/scrollDownButton';
+
 import { IAttachment } from 'state/chat';
 import { IProjectSettings } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
@@ -19,6 +21,7 @@ interface Props {
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   setAutoScroll: (autoScroll: boolean) => void;
+  autoScroll?: boolean;
   projectSettings?: IProjectSettings;
 }
 
@@ -28,6 +31,7 @@ const InputBox = memo(
     onFileUpload,
     onFileUploadError,
     setAutoScroll,
+    autoScroll,
     projectSettings
   }: Props) => {
     const setInputHistory = useSetRecoilState(inputHistoryState);
@@ -94,6 +98,7 @@ const InputBox = memo(
     return (
       <Box
         display="flex"
+        position="relative"
         flexDirection="column"
         gap={1}
         p={2}
@@ -105,6 +110,9 @@ const InputBox = memo(
           justifyContent: 'center'
         }}
       >
+        {!autoScroll ? (
+          <ScrollDownButton onClick={() => setAutoScroll(true)} />
+        ) : null}
         <Box>
           <Input
             fileSpec={fileSpec}
