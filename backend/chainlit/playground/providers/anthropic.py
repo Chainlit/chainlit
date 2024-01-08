@@ -1,8 +1,8 @@
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
-from chainlit_client import GenerationMessage
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
+from literalai import GenerationMessage
 
 
 class AnthropicProvider(BaseProvider):

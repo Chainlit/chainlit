@@ -14,8 +14,8 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from chainlit_client import BaseGeneration
-from chainlit_client.step import StepType, TrueStepType
+from literalai import BaseGeneration
+from literalai.step import StepType, TrueStepType
 
 
 class StepDict(TypedDict, total=False):

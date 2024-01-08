@@ -6,11 +6,11 @@ from chainlit.context import context_var
 from chainlit.message import Message
 from chainlit.playground.providers.openai import stringify_function_call
 from chainlit.step import Step, TrueStepType
-from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import BaseMessage
 from langchain.schema.output import ChatGenerationChunk, GenerationChunk
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 

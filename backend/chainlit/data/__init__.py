@@ -10,12 +10,12 @@ from chainlit.logger import logger
 from chainlit.session import WebsocketSession
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
-from chainlit_client import Attachment
-from chainlit_client import Feedback as ClientFeedback
-from chainlit_client import PageInfo, PaginatedResponse
-from chainlit_client import Step as ClientStep
-from chainlit_client.thread import NumberListFilter, StringFilter, StringListFilter
-from chainlit_client.thread import ThreadFilter as ClientThreadFilter
+from literalai import Attachment
+from literalai import Feedback as ClientFeedback
+from literalai import PageInfo, PaginatedResponse
+from literalai import Step as ClientStep
+from literalai.thread import NumberListFilter, StringFilter, StringListFilter
+from literalai.thread import ThreadFilter as ClientThreadFilter
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -132,12 +132,10 @@ class BaseDataLayer:
 
 
 class ChainlitDataLayer:
-    def __init__(
-        self, api_key: str, chainlit_server: Optional[str] = "https://cloud.chainlit.io"
-    ):
-        from chainlit_client import ChainlitClient
+    def __init__(self, api_key: str, server: Optional[str]):
+        from literalai import LiteralClient
 
-        self.client = ChainlitClient(api_key=api_key, url=chainlit_server)
+        self.client = LiteralClient(api_key=api_key, url=server)
         logger.info("Chainlit data layer initialized")
 
     def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
@@ -451,9 +449,9 @@ class ChainlitDataLayer:
         return True
 
 
-if api_key := os.environ.get("CHAINLIT_API_KEY"):
-    chainlit_server = os.environ.get("CHAINLIT_SERVER")
-    _data_layer = ChainlitDataLayer(api_key=api_key, chainlit_server=chainlit_server)
+if api_key := os.environ.get("LITERAL_API_KEY"):
+    server = os.environ.get("LITERAL_SERVER")
+    _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 
 def get_data_layer():

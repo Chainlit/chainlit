@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Optional, Union
 from chainlit.config import config
 from chainlit.telemetry import trace_event
 from chainlit.types import GenerationRequest
-from chainlit_client import BaseGeneration, ChatGeneration, GenerationMessage
 from fastapi import HTTPException
+from literalai import BaseGeneration, ChatGeneration, GenerationMessage
 from pydantic.dataclasses import dataclass
 
 from chainlit import input_widget

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.step import Step, StepType
-from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from llama_index.callbacks import TokenCountingHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.llms.base import ChatMessage, ChatResponse, CompletionResponse
@@ -118,7 +118,10 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     [f"Source {idx}" for idx, _ in enumerate(sources)]
                 )
                 step.elements = [
-                    Text(name=f"Source {idx}", content=source.node.get_text() or "Empty node")
+                    Text(
+                        name=f"Source {idx}",
+                        content=source.node.get_text() or "Empty node",
+                    )
                     for idx, source in enumerate(sources)
                 ]
                 step.output = f"Retrieved the following sources: {source_refs}"

@@ -54,7 +54,7 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
-from chainlit_client import ChatGeneration, CompletionGeneration, GenerationMessage
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 if env_found:
     logger.info("Loaded .env file")

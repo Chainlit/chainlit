@@ -3,8 +3,8 @@ from typing import List, Union
 from chainlit.input_widget import InputWidget
 from chainlit.playground.provider import BaseProvider
 from chainlit.sync import make_async
-from chainlit_client import GenerationMessage
 from fastapi.responses import StreamingResponse
+from literalai import GenerationMessage
 
 
 class LangchainGenericProvider(BaseProvider):
@@ -69,8 +69,7 @@ class LangchainGenericProvider(BaseProvider):
 
         # https://github.com/langchain-ai/langchain/issues/14980
         result = await make_async(self.llm.stream)(
-            input=messages,
-            **request.generation.settings
+            input=messages, **request.generation.settings
         )
 
         def create_event_stream():
