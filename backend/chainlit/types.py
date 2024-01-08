@@ -6,8 +6,8 @@ if TYPE_CHECKING:
     from chainlit.user import UserDict
     from chainlit.step import StepDict
 
-from chainlit_client import ChatGeneration, CompletionGeneration
 from dataclasses_json import DataClassJsonMixin
+from literalai import ChatGeneration, CompletionGeneration
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 

@@ -22,7 +22,7 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from chainlit_client.step import MessageStepType
+from literalai.step import MessageStepType
 
 
 class MessageBase(ABC):

@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.0] - 2023-01-08
+
+### Added
+
+- Scroll down button
+- If `hide_cot` is set to `true`, a `running` loader is displayed by default under the last message when a task is running.
+
+### Changed
+
+- Avatars are now always displayed
+- Chat history sidebar has been revamped
+- Stop task button has been moved to the input bar
+
+### Fixed
+
+- If `hide_cot` is set to `true`, the UI will never get the intermediary steps (but they will still be persisted)
+
 ## [1.0.0rc3] - 2023-12-21
 
 ### Fixed
