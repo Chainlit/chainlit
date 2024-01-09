@@ -129,10 +129,10 @@ def oauth_callback(
 
 
 @trace
-def on_logout(func: Callable[[Request], Optional[Response]]) -> Callable:
+def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
     """
     Function called when the user logs out.
-    Takes the FastAPI request as parameter. Returns the FastAPI response if defined.
+    Takes the FastAPI request and response as parameters.
     """
 
     config.code.on_logout = wrap_user_function(func)

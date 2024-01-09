@@ -42,7 +42,16 @@ from chainlit.types import (
     UpdateFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -265,9 +274,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @app.post("/logout")
-async def logout(request: Request):
+async def logout(request: Request, response: Response):
     if config.code.on_logout:
-        return await config.code.on_logout(request)
+        return await config.code.on_logout(request, response)
     return {"success": True}
 
 

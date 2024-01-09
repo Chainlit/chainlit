@@ -199,7 +199,7 @@ class CodeSettings:
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
-    on_logout: Optional[Callable[["Request"], Optional["Response"]]] = None
+    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
