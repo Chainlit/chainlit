@@ -8,21 +8,21 @@ interface Props {
   element?: IAvatarElement;
 }
 
-const AvatarElement = ({ element, author, bgColor }: Props) => (
-  <span className={`message-avatar`}>
-    <Avatar
-      sx={{
-        width: 26,
-        height: 26,
-        bgcolor: bgColor,
-        fontSize: '0.75rem',
-        mt: '-2px'
-      }}
-      src={element?.url}
-    >
-      {author[0]}
-    </Avatar>
-  </span>
-);
+const AvatarElement = ({ element, author, bgColor }: Props) => {
+  let avatar: JSX.Element;
+  const sx = {
+    width: 26,
+    height: 26,
+    fontSize: '0.75rem',
+    mt: '-2px',
+    bgcolor: element?.url ? 'transparent' : bgColor
+  };
+  if (element?.url) {
+    avatar = <Avatar sx={sx} src={element?.url} />;
+  } else {
+    avatar = <Avatar sx={sx}>{author[0]}</Avatar>;
+  }
+  return <span className={`message-avatar`}>{avatar}</span>;
+};
 
 export { AvatarElement };
