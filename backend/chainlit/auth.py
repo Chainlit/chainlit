@@ -75,7 +75,7 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         try:
             persisted_user = await data_layer.get_user(user.identifier)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            return user
         if persisted_user == None:
             raise HTTPException(status_code=401, detail="User does not exist")
 
