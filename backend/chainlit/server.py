@@ -264,6 +264,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
+@app.post("/logout")
+async def logout(request: Request):
+    if config.code.on_logout:
+        return await config.code.on_logout(request)
+    return {"success": True}
+
+
 @app.post("/auth/header")
 async def header_auth(request: Request):
     if not config.code.header_auth_callback:
