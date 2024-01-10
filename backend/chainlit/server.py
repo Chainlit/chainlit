@@ -266,7 +266,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     access_token = create_jwt(user)
     if data_layer := get_data_layer():
-        await data_layer.create_user(user)
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -298,7 +302,11 @@ async def header_auth(request: Request):
 
     access_token = create_jwt(user)
     if data_layer := get_data_layer():
-        await data_layer.create_user(user)
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -406,7 +414,10 @@ async def oauth_callback(
     access_token = create_jwt(user)
 
     if data_layer := get_data_layer():
-        await data_layer.create_user(user)
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
 
     params = urllib.parse.urlencode(
         {

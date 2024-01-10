@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 from chainlit.data import get_data_layer
 from chainlit.element import Element, File
+from chainlit.logger import logger
 from chainlit.message import Message
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
@@ -172,11 +173,14 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 user_id = self.session.user.id
             else:
                 user_id = None
-            await data_layer.update_thread(
-                thread_id=self.session.thread_id,
-                user_id=user_id,
-                metadata={"name": interaction},
-            )
+            try:
+                await data_layer.update_thread(
+                    thread_id=self.session.thread_id,
+                    user_id=user_id,
+                    metadata={"name": interaction},
+                )
+            except Exception as e:
+                logger.error(f"Error updating thread: {e}")
             await self.session.flush_method_queue()
 
     async def init_thread(self, interaction: str):

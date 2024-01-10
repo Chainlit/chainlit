@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Optional, Union
 
 import aiofiles
+from chainlit.logger import logger
 
 if TYPE_CHECKING:
     from chainlit.message import Message
@@ -242,7 +243,10 @@ class WebsocketSession(BaseSession):
         for method_name, queue in self.thread_queues.items():
             while queue:
                 method, self, args, kwargs = queue.popleft()
-                await method(self, *args, **kwargs)
+                try:
+                    await method(self, *args, **kwargs)
+                except Exception as e:
+                    logger.error(f"Error while flushing {method_name}: {e}")
 
     @classmethod
     def get(cls, socket_id: str):
