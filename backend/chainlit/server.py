@@ -334,8 +334,9 @@ async def oauth_login(provider_id: str, request: Request):
         url=f"{provider.authorize_url}?{params}",
     )
     samesite = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")  # type: Any
+    secure = samesite.lower() == 'none'
     response.set_cookie(
-        "oauth_state", random, httponly=True, samesite=samesite, max_age=3 * 60
+        "oauth_state", random, httponly=True, samesite=samesite, secure=secure, max_age=3 * 60
     )
     return response
 
