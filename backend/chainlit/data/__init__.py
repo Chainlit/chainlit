@@ -210,6 +210,8 @@ class ChainlitDataLayer:
             _user = await self.client.api.create_user(
                 identifier=user.identifier, metadata=user.metadata
             )
+        elif _user.id:
+            await self.client.api.update_user(id=_user.id, metadata=user.metadata)
         return PersistedUser(
             id=_user.id or "",
             identifier=_user.identifier or "",
