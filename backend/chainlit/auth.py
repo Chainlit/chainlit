@@ -20,7 +20,7 @@ def get_jwt_secret():
 def ensure_jwt_secret():
     if require_login() and get_jwt_secret() is None:
         raise ValueError(
-            "You must provide a JWT secret in the environment to use password authentication. Run `chainlit create-secret` to generate one."
+            "You must provide a JWT secret in the environment to use authentication. Run `chainlit create-secret` to generate one."
         )
 
 

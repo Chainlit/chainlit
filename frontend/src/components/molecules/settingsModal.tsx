@@ -1,4 +1,4 @@
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
@@ -16,9 +16,11 @@ import {
 
 import { SwitchInput } from '@chainlit/react-components';
 
+import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
 export default function SettingsModal() {
+  const projectSettings = useRecoilValue(projectSettingsState);
   const [settings, setSettings] = useRecoilState(settingsState);
 
   return (
@@ -55,24 +57,26 @@ export default function SettingsModal() {
               />
             </Box>
           </ListItem>
-          <ListItem sx={{ display: 'flex', gap: 2 }}>
-            <ListItemIcon>
-              <EmojiObjectsIcon />
-            </ListItemIcon>
-            <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
-            <Box>
-              <SwitchInput
-                id="switch-hide-cot"
-                onChange={() =>
-                  setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
-                }
-                checked={settings.hideCot}
-                inputProps={{
-                  'aria-labelledby': 'hide-cot'
-                }}
-              />
-            </Box>
-          </ListItem>
+          {projectSettings?.ui.hide_cot ? null : (
+            <ListItem sx={{ display: 'flex', gap: 2 }}>
+              <ListItemIcon>
+                <EmojiObjectsIcon />
+              </ListItemIcon>
+              <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
+              <Box>
+                <SwitchInput
+                  id="switch-hide-cot"
+                  onChange={() =>
+                    setSettings((old) => ({ ...old, hideCot: !old.hideCot }))
+                  }
+                  checked={settings.hideCot}
+                  inputProps={{
+                    'aria-labelledby': 'hide-cot'
+                  }}
+                />
+              </Box>
+            </ListItem>
+          )}
           <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
               <DarkModeOutlined />
