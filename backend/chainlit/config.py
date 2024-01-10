@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.types import ChatProfile, ThreadDict
     from chainlit.user import User
+    from fastapi import Request, Response
 
 
 BACKEND_ROOT = os.path.dirname(__file__)
@@ -198,6 +199,7 @@ class CodeSettings:
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
+    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None

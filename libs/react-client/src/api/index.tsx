@@ -148,6 +148,11 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async logout() {
+    const res = await this.post(`/logout`, {});
+    return res.json();
+  }
+
   async getGeneration(
     generation: IGeneration,
     userEnv = {},

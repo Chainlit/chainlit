@@ -7,6 +7,7 @@ env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
+from fastapi import Request, Response
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -124,6 +125,17 @@ def oauth_callback(
         )
 
     config.code.oauth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
+def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
+    """
+    Function called when the user logs out.
+    Takes the FastAPI request and response as parameters.
+    """
+
+    config.code.on_logout = wrap_user_function(func)
     return func
 
 
@@ -320,6 +332,7 @@ __all__ = [
     "ChatGeneration",
     "CompletionGeneration",
     "GenerationMessage",
+    "on_logout",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",

@@ -21,7 +21,8 @@ export const useAuth = (apiClient: ChainlitAPI) => {
 
   const isReady = !!(!isLoading && data);
 
-  const logout = () => {
+  const logout = async () => {
+    await apiClient.logout();
     setUser(null);
     removeToken();
     setAccessToken('');
