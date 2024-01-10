@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.100] - 2023-01-10
+
+### Added
+
+- `on_logout` hook allowing to clear cookies when a user logs out
+
+### Changed
+
+- Chainlit apps won't crash anymore if the data layer is not reachable
+
+### Fixed
+
+- File upload now works when switching chat profiles
+- Avatar with an image no longer have a background color
+- If `hide_cot` is set to `true`, the UI will never get the intermediary steps (but they will still be persisted)
+- Fixed a bug preventing to open past chats
+
 ## [1.0.0] - 2023-01-08
 
 ### Added
