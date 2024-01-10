@@ -20,7 +20,7 @@ const AvatarElement = ({ element, author, bgColor }: Props) => {
   if (element?.url) {
     avatar = <Avatar sx={sx} src={element?.url} />;
   } else {
-    avatar = <Avatar sx={sx}>{author[0]}</Avatar>;
+    avatar = <Avatar sx={sx}>{author[0]?.toUpperCase()}</Avatar>;
   }
   return <span className={`message-avatar`}>{avatar}</span>;
 };
