@@ -1,6 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
-import { isLastMessage } from 'utils/message';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
@@ -45,7 +44,7 @@ const Messages = memo(
       <>
         {filtered.map((m, i) => {
           const author = m.name;
-          const isLast = isLastMessage(filtered, i);
+          const isLast = filtered.length - 1 === i;
           let messageRunning =
             isRunning === undefined ? messageContext.loading : isRunning;
           if (isRoot) {
