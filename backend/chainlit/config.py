@@ -94,6 +94,9 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Select language for the UI. Currently supported languages are "en-US" and "pt-BR".
+# language = "en-US"
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
@@ -185,6 +188,8 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    # Select language for the UI. https://support.mozilla.org/pt-BR/kb/abreviacao-de-localizacao
+    language: Optional[str] = None
 
 
 @dataclass()
