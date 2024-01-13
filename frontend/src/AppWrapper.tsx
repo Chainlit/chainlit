@@ -2,18 +2,25 @@ import App from 'App';
 import { apiClient } from 'api';
 import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { useApi } from '@chainlit/react-client';
 
 import { IProjectSettings, projectSettingsState } from 'state/project';
-import { settingsState } from 'state/settings';
+import { Language, settingsState } from 'state/settings';
 
 export default function AppWrapper() {
   const [projectSettings, setProjectSettings] =
     useRecoilState(projectSettingsState);
   const setAppSettings = useSetRecoilState(settingsState);
   const { isAuthenticated, isReady } = useAuth();
+
+  const { i18n } = useTranslation();
+
+  function handleChangeLanguage(language: string): void {
+    i18n.changeLanguage(language);
+  }
 
   const { data } = useApi<IProjectSettings>(
     apiClient,
@@ -38,8 +45,10 @@ export default function AppWrapper() {
       ...prev,
       defaultCollapseContent: data.ui.default_collapse_content ?? true,
       expandAll: !!data.ui.default_expand_messages,
-      hideCot: !!data.ui.hide_cot
+      hideCot: !!data.ui.hide_cot,
+      language: data.ui.language as Language
     }));
+    handleChangeLanguage(data.ui.language as Language);
   }, [data, setProjectSettings, setAppSettings]);
 
   if (!isReady) {

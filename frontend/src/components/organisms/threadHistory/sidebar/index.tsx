@@ -17,6 +17,8 @@ import {
   threadHistoryState
 } from '@chainlit/react-client';
 
+import { Translator } from 'components/i18n';
+
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { threadsFiltersState } from 'state/threads';
@@ -172,7 +174,7 @@ const _ThreadHistorySideBar = () => {
               color: (theme) => theme.palette.text.primary
             }}
           >
-            Past Chats
+            <Translator path="components.organisms.threadHistory.sidebar.index.pastChats" />
           </Typography>
         </Stack>
         <Filters />

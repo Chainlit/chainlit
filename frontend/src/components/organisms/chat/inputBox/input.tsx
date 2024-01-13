@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import 'regenerator-runtime';
 
@@ -57,6 +58,8 @@ const Input = memo(
     const [isComposing, setIsComposing] = useState(false);
 
     const showTextToSpeech = pSettings?.features.speech_to_text?.enabled;
+
+    const { t } = useTranslation();
 
     useEffect(() => {
       const pasteEvent = (event: ClipboardEvent) => {
@@ -203,7 +206,9 @@ const Input = memo(
           multiline
           variant="standard"
           autoComplete="false"
-          placeholder={'Type your message here...'}
+          placeholder={t(
+            'components.organisms.chat.inputBox.input.placeholder'
+          )}
           disabled={disabled}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}

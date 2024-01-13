@@ -1,5 +1,6 @@
 import debounce from 'lodash/debounce';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -14,6 +15,8 @@ import { threadsFiltersState } from 'state/threads';
 
 export default function SearchBar() {
   const [filters, setFilters] = useRecoilState(threadsFiltersState);
+
+  const { t } = useTranslation();
 
   const handleChange = (value: string) => {
     value = value.trim();
@@ -61,7 +64,9 @@ export default function SearchBar() {
           </IconButton>
         ) : null
       }}
-      placeholder="Search"
+      placeholder={t(
+        'components.organisms.threadHistory.sidebar.filters.SearchBar.search'
+      )}
       inputProps={{
         'aria-label': 'search',
         ref: inputRef,

@@ -1,5 +1,6 @@
 import { apiClient } from 'api';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +15,7 @@ import {
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import SideView from 'components/atoms/element/sideView';
+import { Translator } from 'components/i18n';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
@@ -36,6 +38,8 @@ const Chat = () => {
   const uploadFileRef = useRef(uploadFile);
 
   const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -83,7 +87,11 @@ const Chat = () => {
             );
           })
           .catch((error) => {
-            toast.error(`Failed to upload ${file.name}: ${error.message}`);
+            toast.error(
+              `${t('components.organisms.chat.index.failedToUpload')} ${
+                file.name
+              }: ${error.message}`
+            );
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
             );
@@ -96,7 +104,11 @@ const Chat = () => {
           size: file.size,
           uploadProgress: 0,
           cancel: () => {
-            toast.info(`Cancelled upload of ${file.name}`);
+            toast.info(
+              `${t('components.organisms.chat.index.cancelledUploadOf')} ${
+                file.name
+              }`
+            );
             xhr.abort();
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
@@ -167,7 +179,7 @@ const Chat = () => {
             }}
           >
             <Alert sx={{ mx: 2 }} id="session-error" severity="error">
-              Could not reach the server.
+              <Translator path="components.organisms.chat.index.couldNotReachServer" />
             </Alert>
           </Box>
         )}

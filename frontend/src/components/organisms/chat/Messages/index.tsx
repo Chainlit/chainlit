@@ -1,5 +1,6 @@
 import { apiClient } from 'api';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -39,24 +40,32 @@ const Messages = ({
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
 
+  const { t } = useTranslation();
+
   const callActionWithToast = useCallback(
     (action: IAction) => {
       const promise = callAction(action);
       if (promise) {
         toast.promise(promise, {
-          loading: `Running ${action.name}`,
+          loading: `${t('components.organisms.chat.Messages.index.running')} ${
+            action.name
+          }`,
           success: (res) => {
             if (res.response) {
               return res.response;
             } else {
-              return `${action.name} executed successfully`;
+              return `${action.name} ${t(
+                'components.organisms.chat.Messages.index.executedSuccessfully'
+              )}`;
             }
           },
           error: (res) => {
             if (res.response) {
               return res.response;
             } else {
-              return `${action.name} failed`;
+              return `${action.name} ${t(
+                'components.organisms.chat.Messages.index.failed'
+              )}`;
             }
           }
         });
@@ -69,7 +78,7 @@ const Messages = ({
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
       try {
         toast.promise(apiClient.setFeedback(feedback, accessToken), {
-          loading: 'Updating',
+          loading: t('components.organisms.chat.Messages.index.updating'),
           success: (res) => {
             setMessages((prev) =>
               updateMessageById(prev, message.id, {
@@ -81,7 +90,7 @@ const Messages = ({
               })
             );
             onSuccess();
-            return 'Feedback updated!';
+            return t('components.organisms.chat.Messages.index.Feedback');
           },
           error: (err) => {
             return <span>{err.message}</span>;

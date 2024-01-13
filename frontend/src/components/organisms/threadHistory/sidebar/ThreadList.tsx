@@ -20,6 +20,8 @@ import {
 } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 import { DeleteThreadButton } from './DeleteThreadButton';
 
 interface Props {
@@ -77,7 +79,7 @@ const ThreadList = ({
   if (size(threadHistory?.timeGroupedThreads) === 0) {
     return (
       <Alert variant="standard" sx={{ mx: 1.5 }} severity="info">
-        Empty...
+        <Translator path="components.organisms.threadHistory.sidebar.ThreadList.empty" />
       </Alert>
     );
   }
