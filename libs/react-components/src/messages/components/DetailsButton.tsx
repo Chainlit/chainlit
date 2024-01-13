@@ -27,7 +27,8 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   const content = message.output;
 
-  const showDefaultLoader = loading && (!content || messageContext.hideCot);
+  const showDefaultLoader =
+    loading && (!content || (messageContext.hideCot && !message.streaming));
 
   const show = tool || showDefaultLoader;
 
