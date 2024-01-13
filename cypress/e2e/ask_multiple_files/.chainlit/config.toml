@@ -47,6 +47,9 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Select language for the UI. Currently supported languages are "en-US" and "pt-BR".
+# language = "en-US"
+
 # Allows user to use speech to text
 # speech_to_text = true
 
