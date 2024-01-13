@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
+import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
+import Fade from '@mui/material/Fade';
 import Popover from '@mui/material/Popover';
 
 export interface IWidgetConfig {
@@ -12,6 +14,7 @@ export interface IWidgetConfig {
     style?: {
       size?: string;
       bgcolor?: string;
+      color?: string;
       bgcolorHover?: string;
       borderColor?: string;
       borderWidth?: string;
@@ -61,10 +64,10 @@ export default function EmbedWidget({ config }: Props) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
   const customStyle = config.button?.style || {};
   const style = {
-    p: 1,
     width: customStyle.size || '60px',
     height: customStyle.size || '60px',
     bgcolor: customStyle.bgcolor || '#F80061',
+    color: customStyle.color || 'white',
     '&:hover': {
       bgcolor: customStyle.bgcolorHover || '#DA0054'
     },
@@ -74,13 +77,13 @@ export default function EmbedWidget({ config }: Props) {
     borderRadius: customStyle.borderRadius || '50%'
   };
 
-  const popoverOpen = Boolean(anchorEl);
+  const isPopoverOpen = Boolean(anchorEl);
 
   return (
     <>
       <Popover
         id="chainlit-popover"
-        open={popoverOpen}
+        open={isPopoverOpen}
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{
@@ -95,13 +98,15 @@ export default function EmbedWidget({ config }: Props) {
           paper: {
             sx: {
               mt: -2,
+              ml: -1,
+              borderRadius: '12px',
               boxShadow:
                 '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important'
             }
           }
         }}
       >
-        <Box height={500} width={300}>
+        <Box height={730} width={400}>
           Hello
         </Box>
       </Popover>
@@ -111,9 +116,9 @@ export default function EmbedWidget({ config }: Props) {
         sx={{
           minHeight: 'auto',
           position: 'fixed',
-          boxShadow: 'none',
-          bottom: 16,
-          right: 16,
+          boxShadow: '0 4px 10px 0 rgba(0,0,0,.05)!important',
+          bottom: 24,
+          right: 24,
           zIndex: 1000,
           ...style
         }}
@@ -121,11 +126,37 @@ export default function EmbedWidget({ config }: Props) {
           setAnchorEl(event.currentTarget)
         }
       >
-        {config.button?.imageUrl ? (
-          <img width="100%" src={config.button?.imageUrl} />
-        ) : (
-          defaultLogo
-        )}
+        <Fade in={!isPopoverOpen} timeout={300}>
+          <Box
+            position={'absolute'}
+            top={0}
+            left={0}
+            bottom={0}
+            right={0}
+            p={1.5}
+          >
+            {config.button?.imageUrl ? (
+              <img width="100%" src={config.button?.imageUrl} />
+            ) : (
+              defaultLogo
+            )}
+          </Box>
+        </Fade>
+        <Fade in={isPopoverOpen} timeout={300}>
+          <Box
+            position={'absolute'}
+            top={0}
+            left={0}
+            bottom={0}
+            right={0}
+            p={1.5}
+            display={'flex'}
+            alignItems={'center'}
+            justifyContent={'center'}
+          >
+            <CloseIcon color="inherit" sx={{ width: '90%', height: '90%' }} />
+          </Box>
+        </Fade>
       </Fab>
     </>
   );

@@ -36,7 +36,8 @@ export const Secondary: Story = {
           'https://steelbluemedia.com/wp-content/uploads/2019/06/new-google-favicon-512.png',
         style: {
           bgcolor: 'transparent',
-          bgcolorHover: 'transparent'
+          bgcolorHover: 'transparent',
+          color: 'black'
         }
       }
     }
