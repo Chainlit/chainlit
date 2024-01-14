@@ -19,7 +19,7 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
   const messageContext = useContext(MessageContext);
 
   const nestedCount = message.steps?.length;
-  const nested = !!nestedCount;
+  const nested = !!nestedCount && !messageContext.hideCot;
 
   const lastStep = nested ? message.steps![nestedCount - 1] : undefined;
 

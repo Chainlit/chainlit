@@ -1,4 +1,4 @@
-import type { IMessageElement, IStep } from 'client-types/';
+import type { IMessageElement } from 'client-types/';
 
 const isForIdMatch = (id: string | number | undefined, forId: string) => {
   if (!forId || !id) {
@@ -79,20 +79,4 @@ export const prepareContent = ({
     inlinedElements,
     refElements
   };
-};
-
-export const isLastMessage = (messages: IStep[], index: number) => {
-  if (messages.length - 1 === index) {
-    return true;
-  }
-
-  for (let i = index + 1; i < messages.length; i++) {
-    if (messages[i].streaming) {
-      continue;
-    } else {
-      return false;
-    }
-  }
-
-  return true;
 };

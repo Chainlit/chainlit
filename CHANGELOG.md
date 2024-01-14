@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.101] - 2023-01-12
+
+### Fixed
+
+- Llama index callback handler should now correctly nest the intermediary steps
+- Toggling hide_cot parameter in the UI should correctly hide the `took n steps` buttons
+- `running` loading button should only be displayed once when `hide_cot` is true and a message is being streamed
+
 ## [1.0.100] - 2023-01-10
 
 ### Added
