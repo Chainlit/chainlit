@@ -1,28 +1,11 @@
+import PopOver from 'popover';
 import { useState } from 'react';
+import { IWidgetConfig } from 'types';
 
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import Fade from '@mui/material/Fade';
-import Popover from '@mui/material/Popover';
-
-export interface IWidgetConfig {
-  chainlitServer: string;
-  button?: {
-    containerId?: string;
-    imageUrl?: string;
-    style?: {
-      size?: string;
-      bgcolor?: string;
-      color?: string;
-      bgcolorHover?: string;
-      borderColor?: string;
-      borderWidth?: string;
-      borderStyle?: string;
-      borderRadius?: string;
-    };
-  };
-}
 
 interface Props {
   config: IWidgetConfig;
@@ -60,7 +43,7 @@ const defaultLogo = (
   </svg>
 );
 
-export default function EmbedWidget({ config }: Props) {
+export default function Widget({ config }: Props) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
   const customStyle = config.button?.style || {};
   const style = {
@@ -74,49 +57,22 @@ export default function EmbedWidget({ config }: Props) {
     borderColor: customStyle.borderColor || 'transparent',
     borderWidth: customStyle.borderWidth || '0px',
     borderStyle: customStyle.borderStyle || 'solid',
-    borderRadius: customStyle.borderRadius || '50%'
+    borderRadius: customStyle.borderRadius || '50%',
+    boxShadow: customStyle.boxShadow || '0 4px 10px 0 rgba(0,0,0,.05)!important'
   };
 
   const isPopoverOpen = Boolean(anchorEl);
 
   return (
     <>
-      <Popover
-        id="chainlit-popover"
-        open={isPopoverOpen}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left'
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: -2,
-              ml: -1,
-              borderRadius: '12px',
-              boxShadow:
-                '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important'
-            }
-          }
-        }}
-      >
-        <Box height={730} width={400}>
-          Hello
-        </Box>
-      </Popover>
+      <PopOver anchorEl={anchorEl} onClose={() => setAnchorEl(null)} />
       <Fab
-        aria-label="open chainlit copilot"
+        disableRipple
+        aria-label="open copilot"
         id="chainlit-button"
         sx={{
           minHeight: 'auto',
           position: 'fixed',
-          boxShadow: '0 4px 10px 0 rgba(0,0,0,.05)!important',
           bottom: 24,
           right: 24,
           zIndex: 1000,

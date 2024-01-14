@@ -52,72 +52,74 @@ const error = {
   contrastText: white
 };
 
-const darkTheme = createTheme({
-  typography,
-  components,
-  shape,
-  palette: {
-    mode: 'dark',
-    success,
-    error,
-    background: {
-      default: grey[850],
-      paper: grey[900]
-    },
-    primary: {
-      main: '#F80061',
-      dark: primary[800],
-      light: '#FFE7EB',
-      contrastText: white
-    },
-    secondary: {
-      main: '#9757D7',
-      dark: '#763FB8',
-      light: '#B87FE7',
-      contrastText: white
-    },
-    divider: grey[800],
-    text: {
-      primary: grey[200],
-      secondary: grey[400]
+const darkTheme = (fontFamily?: string) =>
+  createTheme({
+    typography: fontFamily ? { fontFamily } : typography,
+    components,
+    shape,
+    palette: {
+      mode: 'dark',
+      success,
+      error,
+      background: {
+        default: grey[850],
+        paper: grey[900]
+      },
+      primary: {
+        main: '#F80061',
+        dark: primary[800],
+        light: '#FFE7EB',
+        contrastText: white
+      },
+      secondary: {
+        main: '#9757D7',
+        dark: '#763FB8',
+        light: '#B87FE7',
+        contrastText: white
+      },
+      divider: grey[800],
+      text: {
+        primary: grey[200],
+        secondary: grey[400]
+      }
     }
-  }
-});
+  });
 
-const lightTheme = createTheme({
-  typography,
-  components,
-  shape,
-  palette: {
-    mode: 'light',
-    success,
-    error,
-    background: {
-      default: grey[50],
-      paper: white
-    },
-    primary: {
-      main: '#F80061',
-      dark: primary[800],
-      light: '#FFE7EB',
-      contrastText: white
-    },
-    secondary: {
-      main: '#9757D7',
-      dark: '#763FB8',
-      light: '#B87FE7',
-      contrastText: white
-    },
-    divider: grey[200],
-    text: {
-      primary: grey[900],
-      secondary: grey[700]
+const lightTheme = (fontFamily?: string) =>
+  createTheme({
+    typography: fontFamily ? { fontFamily } : typography,
+    components,
+    shape,
+    palette: {
+      mode: 'light',
+      success,
+      error,
+      background: {
+        default: grey[50],
+        paper: white
+      },
+      primary: {
+        main: '#F80061',
+        dark: primary[800],
+        light: '#FFE7EB',
+        contrastText: white
+      },
+      secondary: {
+        main: '#9757D7',
+        dark: '#763FB8',
+        light: '#B87FE7',
+        contrastText: white
+      },
+      divider: grey[200],
+      text: {
+        primary: grey[900],
+        secondary: grey[700]
+      }
     }
-  }
-});
+  });
 
-const makeTheme = (variant: 'dark' | 'light') =>
-  variant === 'dark' ? darkTheme : lightTheme;
+const makeTheme = (variant: 'dark' | 'light', fontFamily?: string) =>
+  variant === 'dark' ? darkTheme(fontFamily) : lightTheme(fontFamily);
 
 const darkGreyButtonTheme = createTheme({
   typography,

@@ -19,6 +19,6 @@
     "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["./src"],
+  "include": ["./src", "./stories"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

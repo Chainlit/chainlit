@@ -1,20 +1,21 @@
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react(), tsconfigPaths(), svgr()],
   build: {
     rollupOptions: {
       input: {
-        embed: path.resolve(__dirname, 'src/embed/index.tsx')
+        embed: path.resolve(__dirname, 'index.tsx')
       },
       output: [
         {
           name: 'embed',
-          dir: 'dist_embed',
+          dir: 'dist',
           format: 'iife',
           entryFileNames: 'index.js',
           inlineDynamicImports: true

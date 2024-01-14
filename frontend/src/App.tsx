@@ -44,7 +44,7 @@ declare global {
   }
 }
 
-function overrideTheme(theme: Theme) {
+export function overrideTheme(theme: Theme) {
   const variant = theme.palette.mode;
   const variantOverride = window?.theme?.[variant] as ThemOverride;
   if (variantOverride?.background) {
@@ -113,7 +113,7 @@ function App() {
         position="top-right"
         toastOptions={{
           style: {
-            fontFamily: 'Inter',
+            fontFamily: theme.typography.fontFamily,
             background: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
             color: theme.palette.text.primary
