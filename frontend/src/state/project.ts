@@ -18,7 +18,6 @@ export interface IProjectSettings {
     default_collapse_content?: boolean;
     default_expand_messages?: boolean;
     github?: string;
-    language?: string;
   };
   features: {
     multi_modal?: boolean;
@@ -33,6 +32,7 @@ export interface IProjectSettings {
   dataPersistence: boolean;
   threadResumable: boolean;
   chatProfiles: ChatProfile[];
+  translation: object;
 }
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({

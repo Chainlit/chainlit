@@ -30,7 +30,9 @@ export default function NewChatDialog({
         }
       }}
     >
-      <DialogTitle id="alert-dialog-title">{'Create a new chat?'}</DialogTitle>
+      <DialogTitle id="alert-dialog-title">
+        {<Translator path="components.molecules.newChatDialog.createNewChat" />}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
           <Translator path="components.molecules.newChatDialog.clearChat" />

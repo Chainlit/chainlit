@@ -2,8 +2,6 @@ import { atom } from 'recoil';
 
 type ThemeVariant = 'dark' | 'light';
 
-export type Language = 'en-US' | 'pt-BR';
-
 const defaultTheme = 'light';
 
 const preferredTheme = localStorage.getItem(
@@ -18,7 +16,7 @@ export const defaultSettingsState = {
   expandAll: false,
   hideCot: false,
   isChatHistoryOpen: true,
-  language: 'en-US' as Language,
+  language: 'en-US',
   theme
 };
 
@@ -29,7 +27,7 @@ export const settingsState = atom<{
   hideCot: boolean;
   theme: ThemeVariant;
   isChatHistoryOpen: boolean;
-  language: Language;
+  language: string;
 }>({
   key: 'AppSettings',
   default: defaultSettingsState
