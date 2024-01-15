@@ -23,7 +23,7 @@ const Header = ({ status }: { status: string }) => {
       <Box
         sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}
       >
-        <Translator path="components.molecules.tasklist.title" />
+        <Translator path="components.molecules.tasklist.TaskList.title" />
       </Box>
       <Chip
         label={status || '?'}
@@ -65,13 +65,13 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   if (!data && !error) {
     return (
       <div>
-        <Translator path="components.molecules.tasklist.error" />
+        <Translator path="components.molecules.tasklist.TaskList.loading" />
       </div>
     );
   } else if (error) {
     return (
       <div>
-        <Translator path="components.molecules.tasklist.error" />
+        <Translator path="components.molecules.tasklist.TaskList.error" />
       </div>
     );
   }
