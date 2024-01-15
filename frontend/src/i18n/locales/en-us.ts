@@ -65,7 +65,7 @@ export default {
               attachFiles: 'Attach files'
             },
             waterMark: {
-              buildWith: 'Build with'
+              text: 'Build with'
             }
           },
           Messages: {

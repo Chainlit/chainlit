@@ -65,7 +65,7 @@ export default {
               attachFiles: 'Anexar arquivos'
             },
             waterMark: {
-              buildWith: 'Construído com'
+              text: 'Construído com'
             }
           },
           Messages: {
