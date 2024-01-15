@@ -8,7 +8,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useApi } from '@chainlit/react-client';
 
 import { IProjectSettings, projectSettingsState } from 'state/project';
-import { Language, settingsState } from 'state/settings';
+import { settingsState } from 'state/settings';
 
 export default function AppWrapper() {
   const [projectSettings, setProjectSettings] =
@@ -18,14 +18,17 @@ export default function AppWrapper() {
 
   const { i18n } = useTranslation();
 
-  function handleChangeLanguage(language: string): void {
-    i18n.changeLanguage(language);
+  const languageInUse = navigator.language || 'en-US';
+
+  function handleChangeLanguage(languageBundle: any): void {
+    i18n.addResourceBundle(languageInUse, 'translation', languageBundle);
+    i18n.changeLanguage(languageInUse);
   }
 
   const { data } = useApi<IProjectSettings>(
     apiClient,
     projectSettings === undefined && isAuthenticated
-      ? '/project/settings'
+      ? `/project/settings?language=${languageInUse}`
       : null
   );
 
@@ -45,10 +48,9 @@ export default function AppWrapper() {
       ...prev,
       defaultCollapseContent: data.ui.default_collapse_content ?? true,
       expandAll: !!data.ui.default_expand_messages,
-      hideCot: !!data.ui.hide_cot,
-      language: data.ui.language as Language
+      hideCot: !!data.ui.hide_cot
     }));
-    handleChangeLanguage(data.ui.language as Language);
+    handleChangeLanguage(data.translation);
   }, [data, setProjectSettings, setAppSettings]);
 
   if (!isReady) {
