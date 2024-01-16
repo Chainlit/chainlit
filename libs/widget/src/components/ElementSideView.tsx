@@ -41,7 +41,7 @@ const ElementSideView = ({ element, isOpen, onClose }: SideViewProps) => {
           borderTopLeftRadius: '10px',
           padding: 2,
           flex: 1,
-          height: '60%',
+          height: '80%',
           paddingBottom: '80px',
           bottom: 0,
           right: 0,

@@ -171,8 +171,8 @@ const Chat = () => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          height: '100%',
-          overflow: 'hidden'
+          height: '100%'
+          // overflow: 'hidden'
         }}
       >
         <Box my={1} />
