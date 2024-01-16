@@ -69,7 +69,7 @@ export default function App({ config }: Props) {
     <ThemeProvider theme={theme}>
       <Toaster
         className="toast"
-        position="top-right"
+        position="bottom-center"
         toastOptions={{
           style: {
             fontFamily: theme.typography.fontFamily,
