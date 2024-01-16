@@ -257,6 +257,9 @@ class ChainlitConfig:
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
                 translation = json.load(f)
         elif os.path.exists(default_translation_lib_file_path):
+            logger.warning(
+                f"Translation file for {language} not found. Using default translation."
+            )
             with open(default_translation_lib_file_path, "r", encoding="utf-8") as f:
                 translation = json.load(f)
 
