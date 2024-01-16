@@ -1,4 +1,3 @@
-import { apiClient } from 'api';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -19,6 +18,7 @@ import { Translator } from 'components/i18n';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
+import { apiClientState } from 'state/apiClient';
 import { IAttachment, attachmentsState } from 'state/chat';
 import { projectSettingsState, sideViewState } from 'state/project';
 
@@ -31,6 +31,7 @@ const Chat = () => {
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const sideViewElement = useRecoilValue(sideViewState);
+  const apiClient = useRecoilValue(apiClientState);
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();

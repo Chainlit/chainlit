@@ -1,4 +1,3 @@
-import { apiClient } from 'api';
 import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
@@ -17,6 +16,7 @@ import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
 import PromptPlayground from 'components/organisms/playground';
 
+import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
@@ -73,6 +73,7 @@ function App() {
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
+  const apiClient = useRecoilValue(apiClientState);
 
   const pSettingsLoaded = !!pSettings;
 

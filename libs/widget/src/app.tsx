@@ -1,7 +1,7 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
@@ -9,6 +9,7 @@ import Widget from 'widget';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { overrideTheme } from '@chainlit/app/src/App';
+import { apiClientState } from '@chainlit/app/src/state/apiClient';
 import {
   IProjectSettings,
   projectSettingsState
@@ -24,12 +25,14 @@ export default function App({ config }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const [projectSettings, setProjectSettings] =
     useRecoilState(projectSettingsState);
+  const setApiClient = useSetRecoilState(apiClientState);
   const [settings, setSettings] = useRecoilState(settingsState);
   const [theme, setTheme] = useState<Theme | null>(null);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
 
   useEffect(() => {
+    setApiClient(apiClient);
     if (!projectSettings) {
       apiClient
         .get(`/project/settings?language=${languageInUse}`, accessToken)
