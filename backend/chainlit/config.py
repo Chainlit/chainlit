@@ -284,11 +284,11 @@ def init_config(log=False):
 
     for file in os.listdir(TRANSLATIONS_DIR):
         if file.endswith(".json"):
-            src = os.path.join(TRANSLATIONS_DIR, file)
             dst = os.path.join(config_translation_dir, file)
-            with open(src, "r", encoding="utf-8") as f:
-                translation = json.load(f)
-                if not os.path.exists(dst):
+            if not os.path.exists(dst):
+                src = os.path.join(TRANSLATIONS_DIR, file)
+                with open(src, "r", encoding="utf-8") as f:
+                    translation = json.load(f)
                     with open(dst, "w", encoding="utf-8") as f:
                         json.dump(translation, f, indent=4)
                         logger.info(f"Created default translation file at {dst}")
