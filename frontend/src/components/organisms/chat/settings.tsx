@@ -18,6 +18,8 @@ import {
   TFormInputValue
 } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 import { chatSettingsOpenState } from 'state/project';
 
 export default function ChatSettingsModal() {
@@ -59,7 +61,9 @@ export default function ChatSettingsModal() {
         }
       }}
     >
-      <DialogTitle id="alert-dialog-title">{'Settings panel'}</DialogTitle>
+      <DialogTitle id="alert-dialog-title">
+        {<Translator path="components.organisms.chat.settings.settingsPanel" />}
+      </DialogTitle>
       <DialogContent>
         <Box
           sx={{
@@ -85,17 +89,19 @@ export default function ChatSettingsModal() {
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
         <AccentButton onClick={handleReset} color="primary" variant="outlined">
-          Reset
+          <Translator path="components.organisms.chat.settings.reset" />
         </AccentButton>
         <div style={{ flex: '1 0 0' }} />
-        <RegularButton onClick={handleClose}>Cancel</RegularButton>
+        <RegularButton onClick={handleClose}>
+          <Translator path="components.organisms.chat.settings.cancel" />
+        </RegularButton>
         <AccentButton
           id="confirm"
           variant="outlined"
           onClick={handleConfirm}
           autoFocus
         >
-          Confirm
+          <Translator path="components.organisms.chat.settings.confirm" />
         </AccentButton>
       </DialogActions>
     </Dialog>

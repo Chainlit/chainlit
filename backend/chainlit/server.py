@@ -342,9 +342,14 @@ async def oauth_login(provider_id: str, request: Request):
         url=f"{provider.authorize_url}?{params}",
     )
     samesite = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")  # type: Any
-    secure = samesite.lower() == 'none'
+    secure = samesite.lower() == "none"
     response.set_cookie(
-        "oauth_state", random, httponly=True, samesite=samesite, secure=secure, max_age=3 * 60
+        "oauth_state",
+        random,
+        httponly=True,
+        samesite=samesite,
+        secure=secure,
+        max_age=3 * 60,
     )
     return response
 
@@ -469,9 +474,14 @@ async def get_providers(
 
 @app.get("/project/settings")
 async def project_settings(
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)]
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    language: str = Query(default="en-US", description="Language code"),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
+
+    # Load translation based on the provided language
+    translation = config.load_translation(language)
+
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
@@ -486,6 +496,7 @@ async def project_settings(
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": get_markdown_str(config.root),
             "chatProfiles": profiles,
+            "translation": translation,
         }
     )
 

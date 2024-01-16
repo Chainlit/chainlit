@@ -16,6 +16,7 @@ export const defaultSettingsState = {
   expandAll: false,
   hideCot: false,
   isChatHistoryOpen: true,
+  language: 'en-US',
   theme
 };
 
@@ -26,6 +27,7 @@ export const settingsState = atom<{
   hideCot: boolean;
   theme: ThemeVariant;
   isChatHistoryOpen: boolean;
+  language: string;
 }>({
   key: 'AppSettings',
   default: defaultSettingsState

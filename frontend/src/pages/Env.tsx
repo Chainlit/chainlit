@@ -1,4 +1,5 @@
 import { useFormik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
@@ -8,6 +9,7 @@ import { Alert, Box, Button, Typography } from '@mui/material';
 
 import { TextInput } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
 import { Header } from 'components/organisms/header';
 
 import { projectSettingsState } from 'state/project';
@@ -18,6 +20,8 @@ export default function Env() {
   const pSettings = useRecoilValue(projectSettingsState);
 
   const navigate = useNavigate();
+
+  const { t } = useTranslation();
 
   const requiredKeys = pSettings?.userEnv || [];
 
@@ -37,7 +41,7 @@ export default function Env() {
     onSubmit: async (values) => {
       localStorage.setItem('userEnv', JSON.stringify(values));
       setUserEnv(values);
-      toast.success('Saved successfully');
+      toast.success(t('pages.Env.savedSuccessfully'));
       return navigate('/');
     }
   });
@@ -92,11 +96,10 @@ export default function Env() {
           fontWeight={700}
           color="text.primary"
         >
-          Required API keys
+          <Translator path="pages.Env.requiredApiKeys" />
         </Typography>
         <Alert severity="info">
-          To use this app, the following API keys are required. The keys are
-          stored on your device's local storage.
+          <Translator path="pages.Env.requiredApiKeysInfo" />
         </Alert>
         <form onSubmit={formik.handleSubmit}>
           {requiredKeys.map((key) => renderInput(key))}

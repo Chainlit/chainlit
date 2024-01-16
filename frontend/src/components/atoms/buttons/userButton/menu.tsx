@@ -15,6 +15,8 @@ import {
   Typography
 } from '@mui/material';
 
+import { Translator } from 'components/i18n';
+
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
@@ -52,9 +54,11 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       <ListItemIcon>
         <SettingsIcon fontSize="small" />
       </ListItemIcon>
-      <ListItemText>Settings</ListItemText>
+      <ListItemText>
+        <Translator path="components.atoms.buttons.userButton.menu.settings" />
+      </ListItemText>
       <Typography variant="body2" color="text.secondary">
-        S
+        <Translator path="components.atoms.buttons.userButton.menu.settingsKey" />
       </Typography>
     </MenuItem>
   );
@@ -64,7 +68,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       <ListItemIcon>
         <KeyIcon fontSize="small" />
       </ListItemIcon>
-      API keys
+      <Translator path="components.atoms.buttons.userButton.menu.APIKeys" />
     </MenuItem>
   );
 
@@ -79,7 +83,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       <ListItemIcon>
         <LogoutIcon fontSize="small" />
       </ListItemIcon>
-      Logout
+      <Translator path="components.atoms.buttons.userButton.menu.logout" />
     </MenuItem>
   );
 

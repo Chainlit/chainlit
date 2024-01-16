@@ -1,6 +1,7 @@
 import { apiClient } from 'api';
 import { useAuth } from 'api/auth';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthLogin } from '@chainlit/react-components';
@@ -15,6 +16,8 @@ export default function Login() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+
+  const { t } = useTranslation();
 
   const handleHeaderAuth = async () => {
     try {
@@ -65,7 +68,7 @@ export default function Login() {
 
   return (
     <AuthLogin
-      title="Login to access the app."
+      title={t('pages.Login.authTitle')}
       error={error}
       callbackUrl="/"
       providers={config?.oauthProviders || []}

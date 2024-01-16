@@ -6,6 +6,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import { AccentButton, RegularButton } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 type Props = {
   open: boolean;
   handleClose: () => void;
@@ -28,21 +30,25 @@ export default function NewChatDialog({
         }
       }}
     >
-      <DialogTitle id="alert-dialog-title">{'Create a new chat?'}</DialogTitle>
+      <DialogTitle id="alert-dialog-title">
+        {<Translator path="components.molecules.newChatDialog.createNewChat" />}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
-          This will clear the current messages and start a new chat.
+          <Translator path="components.molecules.newChatDialog.clearChat" />
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <RegularButton onClick={handleClose}>Cancel</RegularButton>
+        <RegularButton onClick={handleClose}>
+          <Translator path="components.molecules.newChatDialog.cancel" />
+        </RegularButton>
         <AccentButton
           id="confirm"
           variant="outlined"
           onClick={handleConfirm}
           autoFocus
         >
-          Confirm
+          <Translator path="components.molecules.newChatDialog.confirm" />
         </AccentButton>
       </DialogActions>
     </Dialog>

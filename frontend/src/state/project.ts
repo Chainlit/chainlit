@@ -32,6 +32,7 @@ export interface IProjectSettings {
   dataPersistence: boolean;
   threadResumable: boolean;
   chatProfiles: ChatProfile[];
+  translation: object;
 }
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({

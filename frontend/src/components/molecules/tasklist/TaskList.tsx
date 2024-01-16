@@ -5,6 +5,8 @@ import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 import { useChatData } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components/theme';
 
+import { Translator } from 'components/i18n';
+
 import { ITaskList, Task } from './Task';
 
 const Header = ({ status }: { status: string }) => {
@@ -21,7 +23,7 @@ const Header = ({ status }: { status: string }) => {
       <Box
         sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}
       >
-        🗒️ Task List
+        <Translator path="components.molecules.tasklist.TaskList.title" />
       </Box>
       <Chip
         label={status || '?'}
@@ -61,9 +63,17 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   if (!url) return null;
 
   if (!data && !error) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Translator path="components.molecules.tasklist.TaskList.loading" />
+      </div>
+    );
   } else if (error) {
-    return <div>An error occured</div>;
+    return (
+      <div>
+        <Translator path="components.molecules.tasklist.TaskList.error" />
+      </div>
+    );
   }
 
   const content = data as ITaskList;

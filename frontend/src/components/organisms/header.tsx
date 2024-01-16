@@ -1,5 +1,6 @@
 import { useAuth } from 'api/auth';
 import { memo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -69,16 +70,21 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
 
+  const { t } = useTranslation();
+
   let anchorEl;
 
   if (open && ref.current) {
     anchorEl = ref.current;
   }
 
-  const tabs = [{ to: '/', label: 'Chat' }];
+  const tabs = [{ to: '/', label: t('components.organisms.header.chat') }];
 
   if (hasReadme) {
-    tabs.push({ to: '/readme', label: 'Readme' });
+    tabs.push({
+      to: '/readme',
+      label: t('components.organisms.header.readme')
+    });
   }
 
   const nav = (

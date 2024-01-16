@@ -2,6 +2,8 @@ import { useRecoilValue } from 'recoil';
 
 import { Stack, Typography } from '@mui/material';
 
+import { Translator } from 'components/i18n';
+
 import LogoDark from 'assets/logo_dark.svg';
 import LogoLight from 'assets/logo_light.svg';
 
@@ -22,7 +24,7 @@ export default function WaterMark() {
         }}
       >
         <Typography fontSize="12px" color="text.secondary">
-          Built with
+          <Translator path="components.organisms.chat.inputBox.waterMark.text" />
         </Typography>
         <img
           src={src}

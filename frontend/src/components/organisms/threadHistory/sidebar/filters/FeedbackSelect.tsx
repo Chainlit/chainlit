@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
 
 import FilterList from '@mui/icons-material/FilterList';
@@ -22,6 +23,8 @@ export enum FEEDBACKS {
 export default function FeedbackSelect() {
   const [filters, setFilters] = useRecoilState(threadsFiltersState);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { t } = useTranslation();
 
   const handleChange = (feedback: number) => {
     setFilters((prev) => ({ ...prev, feedback }));
@@ -96,9 +99,24 @@ export default function FeedbackSelect() {
         }}
       >
         <Stack>
-          {renderMenuItem('Feedback: All', FEEDBACKS.ALL)}
-          {renderMenuItem('Feedback: Positive', FEEDBACKS.POSITIVE)}
-          {renderMenuItem('Feedback: Negative', FEEDBACKS.NEGATIVE)}
+          {renderMenuItem(
+            t(
+              'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackAll'
+            ),
+            FEEDBACKS.ALL
+          )}
+          {renderMenuItem(
+            t(
+              'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackPositive'
+            ),
+            FEEDBACKS.POSITIVE
+          )}
+          {renderMenuItem(
+            t(
+              'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackNegative'
+            ),
+            FEEDBACKS.NEGATIVE
+          )}
         </Stack>
       </Menu>
     </>
