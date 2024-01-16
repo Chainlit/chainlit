@@ -36,7 +36,7 @@ const ElementSideView = ({ element, isOpen, onClose }: SideViewProps) => {
         sx={{
           zIndex: 1000,
           position: 'absolute',
-          bgcolor: 'white',
+          bgcolor: (theme) => theme.palette.background.default,
           borderTopRightRadius: '10px',
           borderTopLeftRadius: '10px',
           padding: 2,
