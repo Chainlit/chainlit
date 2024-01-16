@@ -28,6 +28,8 @@ export default defineConfig({
       // To prevent conflicts with packages in @chainlit/react-components, we need to specify the resolution paths for these dependencies.
       react: path.resolve(__dirname, './node_modules/react'),
       '@mui/material': path.resolve(__dirname, './node_modules/@mui/material'),
+      i18next: path.resolve(__dirname, './node_modules/i18next'),
+      'react-i18next': path.resolve(__dirname, './node_modules/react-i18next'),
       '@mui/icons-material': path.resolve(
         __dirname,
         './node_modules/@mui/icons-material'
