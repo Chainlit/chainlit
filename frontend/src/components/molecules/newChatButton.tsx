@@ -7,6 +7,8 @@ import { Box } from '@mui/material';
 import { useChatInteract } from '@chainlit/react-client';
 import { AccentButton } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 import NewChatDialog from './newChatDialog';
 
 export default function NewChatButton() {
@@ -36,7 +38,7 @@ export default function NewChatButton() {
         onClick={handleClickOpen}
         startIcon={<AddIcon />}
       >
-        New Chat
+        <Translator path="components.molecules.newChatButton.newChat" />
       </AccentButton>
       <NewChatDialog
         open={open}

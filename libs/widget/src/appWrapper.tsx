@@ -4,6 +4,10 @@ import { WidgetContext } from 'context';
 import { RecoilRoot } from 'recoil';
 import { IWidgetConfig } from 'types';
 
+import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
+
+i18nSetupLocalization();
+
 interface Props {
   config: IWidgetConfig;
 }

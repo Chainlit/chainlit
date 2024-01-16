@@ -6,6 +6,8 @@ import { IconButton, Tooltip } from '@mui/material';
 import { FileSpec } from '@chainlit/react-client';
 import { useUpload } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 import { projectSettingsState } from 'state/project';
 
 type Props = {
@@ -34,7 +36,11 @@ const UploadButton = ({
   const { getRootProps, getInputProps } = upload;
 
   return (
-    <Tooltip title="Attach files">
+    <Tooltip
+      title={
+        <Translator path="components.organisms.chat.inputBox.UploadButton.attachFiles" />
+      }
+    >
       <span>
         <input id="upload-button-input" {...getInputProps()} />
         <IconButton

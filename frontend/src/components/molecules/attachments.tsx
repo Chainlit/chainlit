@@ -9,6 +9,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { Attachment } from '@chainlit/react-components';
 
 import CircularProgressIconButton from 'components/atoms/buttons/progressIconButton';
+import { Translator } from 'components/i18n';
 
 import { attachmentsState } from 'state/chat';
 
@@ -31,7 +32,11 @@ const Attachments = (): JSX.Element => {
         const showProgress = !attachment.uploaded && attachment.cancel;
 
         const progress = showProgress ? (
-          <Tooltip title="Cancel upload">
+          <Tooltip
+            title={
+              <Translator path="components.molecules.attachments.cancelUpload" />
+            }
+          >
             <Box
               sx={{
                 position: 'absolute',
@@ -60,7 +65,11 @@ const Attachments = (): JSX.Element => {
 
         const remove =
           !showProgress && attachment.remove ? (
-            <Tooltip title="Remove attachment">
+            <Tooltip
+              title={
+                <Translator path="components.molecules.attachments.removeAttachment" />
+              }
+            >
               <IconButton
                 sx={{
                   position: 'absolute',

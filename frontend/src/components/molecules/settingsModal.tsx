@@ -16,6 +16,8 @@ import {
 
 import { SwitchInput } from '@chainlit/react-components';
 
+import { Translator } from 'components/i18n';
+
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
@@ -43,7 +45,12 @@ export default function SettingsModal() {
             <ListItemIcon>
               <ExpandIcon />
             </ListItemIcon>
-            <ListItemText id="list-expand-all" primary="Expand Messages" />
+            <ListItemText
+              id="list-expand-all"
+              primary={
+                <Translator path="components.molecules.settingsModal.expandMessages" />
+              }
+            />
             <Box>
               <SwitchInput
                 id="switch-expand-all"
@@ -62,7 +69,12 @@ export default function SettingsModal() {
               <ListItemIcon>
                 <EmojiObjectsIcon />
               </ListItemIcon>
-              <ListItemText id="hide-cot" primary="Hide Chain of Thought" />
+              <ListItemText
+                id="hide-cot"
+                primary={
+                  <Translator path="components.molecules.settingsModal.hideChainOfThought" />
+                }
+              />
               <Box>
                 <SwitchInput
                   id="switch-hide-cot"
@@ -81,7 +93,12 @@ export default function SettingsModal() {
             <ListItemIcon>
               <DarkModeOutlined />
             </ListItemIcon>
-            <ListItemText id="switch-theme" primary="Dark mode" />
+            <ListItemText
+              id="switch-theme"
+              primary={
+                <Translator path="components.molecules.settingsModal.darkMode" />
+              }
+            />
             <Box>
               <SwitchInput
                 id="switch-theme"

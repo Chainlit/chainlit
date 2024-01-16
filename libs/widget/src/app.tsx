@@ -1,5 +1,6 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
@@ -25,11 +26,13 @@ export default function App({ config }: Props) {
     useRecoilState(projectSettingsState);
   const [settings, setSettings] = useRecoilState(settingsState);
   const [theme, setTheme] = useState<Theme | null>(null);
+  const { i18n } = useTranslation();
+  const languageInUse = navigator.language || 'en-US';
 
   useEffect(() => {
     if (!projectSettings) {
       apiClient
-        .get('/project/settings', accessToken)
+        .get(`/project/settings?language=${languageInUse}`, accessToken)
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
@@ -42,6 +45,12 @@ export default function App({ config }: Props) {
           );
           setTheme(_theme);
           setProjectSettings(data);
+          i18n.addResourceBundle(
+            languageInUse,
+            'translation',
+            data.translation
+          );
+          i18n.changeLanguage(languageInUse);
         })
         .catch((err) => {
           console.error(err);

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -14,8 +16,21 @@ const commonBoxStyles = {
 };
 
 const TriggerButton = ({ onClick, open }: TriggerButtonProps): JSX.Element => {
+  const { t } = useTranslation();
+
   return (
-    <Tooltip title={open ? 'Close sidebar' : 'Open sidebar'} placement="right">
+    <Tooltip
+      title={
+        open
+          ? t(
+              'components.organisms.threadHistory.sidebar.TriggerButton.closeSidebar'
+            )
+          : t(
+              'components.organisms.threadHistory.sidebar.TriggerButton.openSidebar'
+            )
+      }
+      placement="right"
+    >
       <Box
         sx={{
           display: 'flex',

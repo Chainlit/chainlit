@@ -7,6 +7,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
 
+import { Translator } from 'components/i18n';
+
 interface SubmitButtonProps {
   disabled?: boolean;
   onSubmit: () => void;
@@ -28,7 +30,11 @@ const SubmitButton = ({ disabled, onSubmit }: SubmitButtonProps) => {
       }}
     >
       {!loading ? (
-        <Tooltip title="Send message">
+        <Tooltip
+          title={
+            <Translator path="components.organisms.chat.inputBox.SubmitButton.sendMessage" />
+          }
+        >
           <InputAdornment position="end">
             <IconButton disabled={disabled} color="inherit" onClick={onSubmit}>
               <Telegram />
@@ -36,7 +42,11 @@ const SubmitButton = ({ disabled, onSubmit }: SubmitButtonProps) => {
           </InputAdornment>
         </Tooltip>
       ) : (
-        <Tooltip title="Stop task">
+        <Tooltip
+          title={
+            <Translator path="components.organisms.chat.inputBox.SubmitButton.stopTask" />
+          }
+        >
           <IconButton id="stop-button" onClick={handleClick}>
             <StopCircle />
           </IconButton>

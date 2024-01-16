@@ -17,6 +17,7 @@ import {
 } from '@chainlit/react-client';
 
 import SideView from 'components/atoms/element/sideView';
+import { Translator } from 'components/i18n';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
 type Props = {
@@ -122,11 +123,11 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             severity="info"
             action={
               <Button component={Link} color="inherit" size="small" to="/">
-                Go back to chat
+                <Translator path="components.organisms.threadHistory.Thread.backToChat" />
               </Button>
             }
           >
-            This chat was created on{' '}
+            <Translator path="components.organisms.threadHistory.Thread.chatCreatedOn" />{' '}
             {new Intl.DateTimeFormat(undefined, {
               day: 'numeric',
               month: 'numeric',
