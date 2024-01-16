@@ -28,7 +28,7 @@ const ElementSideView = ({ element, isOpen, onClose }: SideViewProps) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          transition: 'opacity 0.5s ease-in-out',
+          transition: 'opacity 0.225s ease-in-out',
           zIndex: 999
         }}
       />
@@ -46,7 +46,7 @@ const ElementSideView = ({ element, isOpen, onClose }: SideViewProps) => {
           bottom: 0,
           right: 0,
           left: 0,
-          transition: 'transform 0.5s ease-in-out',
+          transition: 'transform 0.225s ease-in-out',
           transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
           visibility: isOpen ? 'visible' : 'hidden'
         }}
@@ -54,7 +54,7 @@ const ElementSideView = ({ element, isOpen, onClose }: SideViewProps) => {
         <Stack direction="row" alignItems="center">
           <Typography
             noWrap
-            fontSize="20px"
+            fontSize="24px"
             fontWeight={500}
             id="side-view-title"
           >
