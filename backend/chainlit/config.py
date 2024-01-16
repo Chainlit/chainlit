@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
-TRANSLATIONS_FOLDER = os.path.join(BACKEND_ROOT, "translations")
+TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 
 
 # Get the directory the script is running from
@@ -33,6 +33,7 @@ FILES_DIRECTORY.mkdir(exist_ok=True)
 
 config_dir = os.path.join(APP_ROOT, ".chainlit")
 config_file = os.path.join(config_dir, "config.toml")
+config_translation_dir = os.path.join(config_dir, "translations")
 
 # Default config file created if none exists
 DEFAULT_CONFIG_STR = f"""[project]
@@ -246,10 +247,10 @@ class ChainlitConfig:
         translation = {}
 
         translation_lib_file_path = os.path.join(
-            TRANSLATIONS_FOLDER, f"{language}.json"
+            config_translation_dir, f"{language}.json"
         )
         default_translation_lib_file_path = os.path.join(
-            TRANSLATIONS_FOLDER, f"en-US.json"
+            config_translation_dir, f"en-US.json"
         )
 
         if os.path.exists(translation_lib_file_path):
@@ -271,6 +272,23 @@ def init_config(log=False):
             logger.info(f"Created default config file at {config_file}")
     elif log:
         logger.info(f"Config file already exists at {config_file}")
+
+    if not os.path.exists(config_translation_dir):
+        os.makedirs(config_translation_dir, exist_ok=True)
+        logger.info(
+            f"Created default translation directory at {config_translation_dir}"
+        )
+
+    for file in os.listdir(TRANSLATIONS_DIR):
+        if file.endswith(".json"):
+            src = os.path.join(TRANSLATIONS_DIR, file)
+            dst = os.path.join(config_translation_dir, file)
+            with open(src, "r", encoding="utf-8") as f:
+                translation = json.load(f)
+                if not os.path.exists(dst):
+                    with open(dst, "w", encoding="utf-8") as f:
+                        json.dump(translation, f, indent=4)
+                        logger.info(f"Created default translation file at {dst}")
 
 
 def load_module(target: str, force_refresh: bool = False):
