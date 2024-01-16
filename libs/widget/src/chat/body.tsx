@@ -7,25 +7,29 @@ import {
   useRef,
   useState
 } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import SideView from '@chainlit/app/src/components/atoms/element/sideView';
 import ChatProfiles from '@chainlit/app/src/components/molecules/chatProfiles';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import InputBox from '@chainlit/app/src/components/organisms/chat/inputBox';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
-import { projectSettingsState } from '@chainlit/app/src/state/project';
+import {
+  projectSettingsState,
+  sideViewState
+} from '@chainlit/app/src/state/project';
 import {
   threadHistoryState,
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
+
+import { ElementSideView } from 'components/ElementSideView';
 
 import Messages from './messages';
 
@@ -34,6 +38,7 @@ const Chat = () => {
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
+  const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
@@ -160,7 +165,16 @@ const Chat = () => {
           {upload?.isDragActive ? <DropScreen /> : null}
         </>
       ) : null}
-      <SideView>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          height: '100%',
+          overflow: 'hidden'
+        }}
+      >
         <Box my={1} />
         {error && (
           <Box
@@ -193,7 +207,12 @@ const Chat = () => {
             projectSettings={projectSettings}
           />
         </ErrorBoundary>
-      </SideView>
+        <ElementSideView
+          onClose={() => setSideViewElement(undefined)}
+          isOpen={!!sideViewElement}
+          element={sideViewElement}
+        />
+      </Box>
     </Box>
   );
 };
