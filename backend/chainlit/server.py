@@ -165,7 +165,7 @@ app.mount(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=config.project.allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -174,7 +174,7 @@ app.add_middleware(
 
 socket = SocketManager(
     app,
-    cors_allowed_origins=[],
+    cors_allowed_origins=[] if config.project.allow_origins[0] == "*" else [],
     async_mode="asgi",
 )
 

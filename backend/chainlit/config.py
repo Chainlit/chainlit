@@ -9,7 +9,7 @@ import tomli
 from chainlit.logger import logger
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -40,6 +40,7 @@ DEFAULT_CONFIG_STR = f"""[project]
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 
+
 # List of environment variables to be provided by each user to use the app.
 user_env = []
 
@@ -48,6 +49,9 @@ session_timeout = 3600
 
 # Enable third parties caching (e.g LangChain cache)
 cache = false
+
+# Authorized origins 
+allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
 # follow_symlink = false
@@ -224,6 +228,7 @@ class CodeSettings:
 
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
+    allow_origins: List[str] = Field(default_factory=lambda: ["*"])
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
