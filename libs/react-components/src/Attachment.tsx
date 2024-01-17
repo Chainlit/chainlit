@@ -16,17 +16,24 @@ const Attachment = ({ name, mime, children }: Props) => {
   ) as DefaultExtensionType;
 
   return (
-    <Box position="relative" height={50}>
+    <Box
+      position="relative"
+      sx={(theme) => ({
+        height: 50,
+        [theme.breakpoints.down('sm')]: {
+          height: 36
+        }
+      })}
+    >
       {children}
       <Stack
-        sx={{
+        sx={(theme) => ({
           height: '100%',
           flexDirection: 'row',
           alignItems: 'center',
           gap: 1.2,
           borderRadius: 1,
           px: 1.2,
-          width: 160,
           border: (theme) => `1px solid ${theme.palette.primary.main}`,
           color: (theme) =>
             theme.palette.mode === 'light'
@@ -35,13 +42,21 @@ const Attachment = ({ name, mime, children }: Props) => {
           background: (theme) =>
             theme.palette.mode === 'light'
               ? theme.palette.primary.light
-              : theme.palette.primary.dark
-        }}
+              : theme.palette.primary.dark,
+          width: 160,
+          [theme.breakpoints.down('sm')]: {
+            width: 'fit-content',
+            maxWidth: 120
+          }
+        })}
       >
         <Box
-          sx={{
-            width: '2rem'
-          }}
+          sx={(theme) => ({
+            width: '2rem',
+            [theme.breakpoints.down('sm')]: {
+              width: '1.25rem'
+            }
+          })}
         >
           <FileIcon {...defaultStyles[extension]} extension={extension} />
         </Box>

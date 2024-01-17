@@ -88,8 +88,8 @@ const ElementSideView = ({
   ) => setDrawerWidth(data.size.width);
 
   const { width } = useWindowSize();
-  const isSmallScreen = !useMediaQuery<Theme>((theme) =>
-    theme.breakpoints.up('sm')
+  const isSmallScreen = useMediaQuery<Theme>((theme) =>
+    theme.breakpoints.down('sm')
   );
 
   if (drawerWidth < DRAWER_DEFAULT_WIDTH && isSmallScreen) {

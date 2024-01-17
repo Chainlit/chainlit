@@ -44,7 +44,16 @@ export default function App({ config }: Props) {
             setSettings((old) => ({ ...old, theme: config.theme! }));
           }
           const _theme = overrideTheme(
-            makeTheme(config.theme || settings.theme, config.fontFamily)
+            makeTheme(config.theme || settings.theme, config.fontFamily, {
+              // Hack to provoke small responsivity
+              values: {
+                xs: 0,
+                sm: 10000,
+                md: 10000,
+                lg: 10000,
+                xl: 10000
+              }
+            })
           );
           setTheme(_theme);
           setProjectSettings(data);

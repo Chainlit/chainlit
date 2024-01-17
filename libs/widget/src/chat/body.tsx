@@ -16,7 +16,6 @@ import { Alert, Box } from '@mui/material';
 import ChatProfiles from '@chainlit/app/src/components/molecules/chatProfiles';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
-import InputBox from '@chainlit/app/src/components/organisms/chat/inputBox';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
   projectSettingsState,
@@ -30,6 +29,7 @@ import {
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import { ElementSideView } from 'components/ElementSideView';
+import { InputBox } from 'components/InputBox';
 
 import Messages from './messages';
 

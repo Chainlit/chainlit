@@ -44,6 +44,9 @@ dependencies:
   react-dom:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
+  react-file-icon:
+    specifier: ^1.3.0
+    version: 1.4.0(react-dom@18.2.0)(react@18.2.0)
   react-i18next:
     specifier: ^14.0.0
     version: 14.0.0(i18next@23.7.16)(react-dom@18.2.0)(react@18.2.0)
@@ -106,6 +109,9 @@ devDependencies:
   '@types/react':
     specifier: ^18.2.0
     version: 18.2.0
+  '@types/react-file-icon':
+    specifier: ^1.0.2
+    version: 1.0.4
   '@types/react-speech-recognition':
     specifier: ^3.9.2
     version: 3.9.2
@@ -4125,6 +4131,12 @@ packages:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
     dev: true
 
+  /@types/react-file-icon@1.0.4:
+    resolution: {integrity: sha512-c1mIklUDaxm9odxf8RTiy/EAxsblZliJ86EKIOAyuafP9eK3iudyn4ATv53DX6ZvgGymc7IttVNm97LTGnTiYA==}
+    dependencies:
+      '@types/react': 18.2.0
+    dev: true
+
   /@types/react-speech-recognition@3.9.2:
     resolution: {integrity: sha512-LS13Z4A8nluGWyT1NQncWoyaWARJdEojxmcRvaFDT9nTHpRkMgPjaYBJIc/9GBRYYFy8TQGaiCmUdH2g4M9INg==}
     dependencies:
@@ -4818,6 +4830,10 @@ packages:
   /color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
     dev: true
+
+  /colord@2.9.3:
+    resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
+    dev: false
 
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -6467,6 +6483,10 @@ packages:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: true
 
+  /lodash.uniqueid@4.0.1:
+    resolution: {integrity: sha512-GQQWaIeGlL6DIIr06kj1j6sSmBxyNMwI8kaX9aKpHR/XsMTiaXDVPNPAkiboOTK9OJpTJF/dXT3xYoFQnj386Q==}
+    dev: false
+
   /lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
@@ -7328,6 +7348,19 @@ packages:
 
   /react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
+    dev: false
+
+  /react-file-icon@1.4.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-AjiMBtiJNjdIdXLuEnhFC492DGVFhE9Llmep1mW7eEXMqqbFTFp1x47/0MGxUyeom24GQYyDSGdlLTDd/HxSFg==}
+    peerDependencies:
+      react: ^18.0.0 || ^17.0.0 || ^16.2.0
+      react-dom: ^18.0.0 || ^17.0.0 || ^16.2.0
+    dependencies:
+      colord: 2.9.3
+      lodash.uniqueid: 4.0.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-i18next@14.0.0(i18next@23.7.16)(react-dom@18.2.0)(react@18.2.0):

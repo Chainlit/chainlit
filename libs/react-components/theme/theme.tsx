@@ -1,3 +1,4 @@
+import { BreakpointsOptions } from '@mui/material';
 import createTheme from '@mui/material/styles/createTheme';
 
 import { green, grey, primary, white } from './palette';
@@ -52,11 +53,12 @@ const error = {
   contrastText: white
 };
 
-const darkTheme = (fontFamily?: string) =>
+const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
   createTheme({
     typography: fontFamily ? { fontFamily } : typography,
     components,
     shape,
+    breakpoints: breakpoints,
     palette: {
       mode: 'dark',
       success,
@@ -85,11 +87,12 @@ const darkTheme = (fontFamily?: string) =>
     }
   });
 
-const lightTheme = (fontFamily?: string) =>
+const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
   createTheme({
     typography: fontFamily ? { fontFamily } : typography,
     components,
     shape,
+    breakpoints: breakpoints,
     palette: {
       mode: 'light',
       success,
@@ -118,8 +121,14 @@ const lightTheme = (fontFamily?: string) =>
     }
   });
 
-const makeTheme = (variant: 'dark' | 'light', fontFamily?: string) =>
-  variant === 'dark' ? darkTheme(fontFamily) : lightTheme(fontFamily);
+const makeTheme = (
+  variant: 'dark' | 'light',
+  fontFamily?: string,
+  breakpoints?: BreakpointsOptions
+) =>
+  variant === 'dark'
+    ? darkTheme(fontFamily, breakpoints)
+    : lightTheme(fontFamily, breakpoints);
 
 const darkGreyButtonTheme = createTheme({
   typography,
