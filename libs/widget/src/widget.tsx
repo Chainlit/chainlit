@@ -79,7 +79,7 @@ export default function Widget({ config }: Props) {
           ...style
         }}
         onClick={(event: React.MouseEvent<HTMLElement>) =>
-          setAnchorEl(event.currentTarget)
+          setAnchorEl(anchorEl ? null : event.currentTarget)
         }
       >
         <Fade in={!isPopoverOpen} timeout={300}>

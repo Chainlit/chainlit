@@ -92,19 +92,7 @@ const InputBox = memo(
     );
 
     return (
-      <Box
-        display="flex"
-        position="relative"
-        flexDirection="column"
-        gap={1}
-        sx={{
-          boxSizing: 'border-box',
-          width: '100%',
-          maxWidth: '60rem',
-          m: 'auto',
-          justifyContent: 'center'
-        }}
-      >
+      <Box display="flex" position="relative" flexDirection="column">
         {!autoScroll ? (
           <ScrollDownButton onClick={() => setAutoScroll(true)} />
         ) : null}

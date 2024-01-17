@@ -226,7 +226,9 @@ const Input = memo(
                 {startAdornment}
               </InputAdornment>
             ),
-            endAdornment: <SubmitButton onSubmit={submit} disabled={disabled} />
+            endAdornment: (
+              <SubmitButton onSubmit={submit} disabled={disabled || !value} />
+            )
           }}
         />
       </Stack>

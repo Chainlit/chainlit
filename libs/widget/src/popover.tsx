@@ -10,6 +10,7 @@ interface Props {
 export default function PopOver({ anchorEl, onClose }: Props) {
   return (
     <Popover
+      hideBackdrop
       id="chainlit-popover"
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
@@ -23,6 +24,7 @@ export default function PopOver({ anchorEl, onClose }: Props) {
         horizontal: 'left'
       }}
       slotProps={{
+        root: { sx: { zIndex: 0 } }, // Deactivate popover backdrop to prevent it from blocking the app
         paper: {
           sx: {
             display: 'flex',

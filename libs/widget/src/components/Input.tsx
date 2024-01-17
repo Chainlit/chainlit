@@ -51,12 +51,11 @@ const Input = memo(
       disabled: _disabled
     } = useChatData();
 
-    const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
-
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
 
     const showTextToSpeech = pSettings?.features.speech_to_text?.enabled;
+    const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
     const { t } = useTranslation();
 
@@ -138,29 +137,24 @@ const Input = memo(
         <Stack
           sx={{
             backgroundColor: 'background.default',
-            border: (theme) => `1px solid ${theme.palette.divider}`,
+            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+            margin: 1,
+            paddingTop: 1,
+            paddingX: 1,
             boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
-            padding: 1,
+            gap: 1,
             textarea: {
               height: '34px',
               maxHeight: '30vh',
               overflowY: 'auto !important',
               resize: 'none',
-              paddingBottom: '0.75rem',
-              paddingTop: '0.75rem',
               color: 'text.primary',
               lineHeight: '24px'
             }
           }}
         >
           {attachments.length > 0 ? (
-            <Box
-              sx={{
-                mt: 2,
-                mx: 2,
-                padding: '2px'
-              }}
-            >
+            <Box mt={2}>
               <Attachments />
             </Box>
           ) : null}
@@ -184,42 +178,54 @@ const Input = memo(
             InputProps={{
               disableUnderline: true,
               sx: {
-                ml: 2
+                pl: 0,
+                width: '100%'
               },
               endAdornment: (
-                <SubmitButton onSubmit={submit} disabled={disabled} />
+                <Box sx={{ mr: -2 }}>
+                  <SubmitButton
+                    onSubmit={submit}
+                    disabled={disabled || (!loading && !value)}
+                  />
+                </Box>
               )
             }}
           />
           <Stack
             direction="row"
-            alignItems="flex-end"
-            justifyContent="space-between"
+            alignItems="center"
             color="text.secondary"
+            justifyContent="space-between"
           >
-            {chatSettingsInputs.length > 0 && (
-              <IconButton
-                id="chat-settings-open-modal"
+            <Stack direction="row" alignItems="center" marginLeft={-1}>
+              {chatSettingsInputs.length > 0 && (
+                <IconButton
+                  id="chat-settings-open-modal"
+                  disabled={disabled}
+                  color="inherit"
+                  onClick={() => setChatSettingsOpen(true)}
+                  size="small"
+                >
+                  <TuneIcon fontSize="small" />
+                </IconButton>
+              )}
+              {showTextToSpeech ? (
+                <SpeechButton
+                  onSpeech={(transcript) =>
+                    setValue((text) => text + transcript)
+                  }
+                  language={pSettings.features?.speech_to_text?.language}
+                  disabled={disabled}
+                />
+              ) : null}
+              <UploadButton
                 disabled={disabled}
-                color="inherit"
-                onClick={() => setChatSettingsOpen(true)}
-              >
-                <TuneIcon />
-              </IconButton>
-            )}
-            {showTextToSpeech ? (
-              <SpeechButton
-                onSpeech={(transcript) => setValue((text) => text + transcript)}
-                language={pSettings.features?.speech_to_text?.language}
-                disabled={disabled}
+                fileSpec={fileSpec}
+                onFileUploadError={onFileUploadError}
+                onFileUpload={onFileUpload}
               />
-            ) : null}
-            <UploadButton
-              disabled={disabled}
-              fileSpec={fileSpec}
-              onFileUploadError={onFileUploadError}
-              onFileUpload={onFileUpload}
-            />
+            </Stack>
+
             <Box>
               <WaterMark />
             </Box>
