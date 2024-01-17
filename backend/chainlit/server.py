@@ -136,18 +136,19 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir():
-    local_build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
-    packaged_build_dir = os.path.join(BACKEND_ROOT, "frontend", "dist")
+def get_build_dir(local_target: str, packaged_target: str):
+    local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
+    packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
     if os.path.exists(local_build_dir):
         return local_build_dir
     elif os.path.exists(packaged_build_dir):
         return packaged_build_dir
     else:
-        raise FileNotFoundError("Built UI dir not found")
+        raise FileNotFoundError(f"{local_target} built UI dir not found")
 
 
-build_dir = get_build_dir()
+build_dir = get_build_dir("frontend", "frontend")
+copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -160,6 +161,15 @@ app.mount(
         follow_symlink=config.project.follow_symlink,
     ),
     name="assets",
+)
+
+app.mount(
+    "/copilot",
+    StaticFiles(
+        packages=[("chainlit", copilot_build_dir)],
+        follow_symlink=config.project.follow_symlink,
+    ),
+    name="copilot",
 )
 
 

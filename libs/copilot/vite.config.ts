@@ -10,11 +10,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        embed: path.resolve(__dirname, 'index.tsx')
+        copilot: path.resolve(__dirname, 'index.tsx')
       },
       output: [
         {
-          name: 'embed',
+          name: 'copilot',
           dir: 'dist',
           format: 'iife',
           entryFileNames: 'index.js',

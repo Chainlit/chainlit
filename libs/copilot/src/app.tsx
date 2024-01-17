@@ -39,7 +39,7 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
-          data.ui.hide_cot = true;
+          data.ui.hide_cot = config.show_cot ? false : true;
           if (config.theme) {
             setSettings((old) => ({ ...old, theme: config.theme! }));
           }
