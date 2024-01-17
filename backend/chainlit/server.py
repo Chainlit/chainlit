@@ -1,6 +1,7 @@
 import glob
 import json
 import mimetypes
+import re
 import shutil
 import urllib.parse
 from typing import Any, Optional, Union
@@ -183,6 +184,11 @@ socket = SocketManager(
 # -------------------------------------------------------------------------------
 
 
+def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: str):
+    pattern = start_tag + ".*?" + end_tag
+    return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
+
+
 def get_html_template():
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
@@ -207,6 +213,10 @@ def get_html_template():
             f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
         )
 
+    font = None
+    if config.ui.custom_font:
+        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
+
     index_html_file_path = os.path.join(build_dir, "index.html")
 
     with open(index_html_file_path, "r", encoding="utf-8") as f:
@@ -216,6 +226,10 @@ def get_html_template():
             content = content.replace(JS_PLACEHOLDER, js)
         if css:
             content = content.replace(CSS_PLACEHOLDER, css)
+        if font:
+            content = replace_between_tags(
+                content, "<!-- FONT START -->", "<!-- FONT END -->", font
+            )
         return content
 
 

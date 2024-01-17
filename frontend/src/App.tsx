@@ -69,7 +69,9 @@ export function overrideTheme(theme: Theme) {
 function App() {
   const { theme: themeVariant } = useRecoilValue(settingsState);
   const pSettings = useRecoilValue(projectSettingsState);
-  const theme = overrideTheme(makeTheme(themeVariant));
+  // @ts-expect-error custom property
+  const fontFamily = window.theme?.font_family;
+  const theme = overrideTheme(makeTheme(themeVariant, fontFamily));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();

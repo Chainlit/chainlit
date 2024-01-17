@@ -97,7 +97,12 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Specify a custom font url.
+# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+
 # Override default MUI light theme. (Check theme.ts)
+[UI.theme]
+    #font_family = "Inter, sans-serif"
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -156,6 +161,7 @@ class Palette(DataClassJsonMixin):
 
 @dataclass()
 class Theme(DataClassJsonMixin):
+    font_family: Optional[str] = None
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 
@@ -188,6 +194,7 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_font: Optional[str] = None
 
 
 @dataclass()
