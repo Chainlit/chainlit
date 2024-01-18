@@ -171,21 +171,20 @@ async def connection_successful(sid):
     if context.session.restored:
         return
 
+    await context.emitter.task_end()
+    await context.emitter.clear("clear_ask")
+    await context.emitter.clear("clear_call_fn")
+
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
         if thread:
             context.session.has_first_interaction = True
-            await context.emitter.clear("clear_ask")
-            await context.emitter.clear("clear_call_fn")
             await context.emitter.emit("first_interaction", "resume")
             await context.emitter.resume_thread(thread)
             await config.code.on_chat_resume(thread)
             return
 
     if config.code.on_chat_start:
-        """Call the on_chat_start function provided by the developer."""
-        await context.emitter.clear("clear_ask")
-        await context.emitter.clear("clear_call_fn")
         await config.code.on_chat_start()
 
 

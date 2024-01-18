@@ -2,18 +2,23 @@ import { Stack } from '@mui/material';
 
 import { Logo } from '@chainlit/app/src/components/atoms/logo';
 
+import ChatProfiles from './ChatProfiles';
 import NewChatButton from './NewChatButton';
 
 const Header = (): JSX.Element => (
   <Stack
-    p={1.5}
-    pb={0}
+    px={2}
+    py={1.5}
     direction="row"
     alignItems="center"
     justifyContent="space-between"
+    bgcolor="background.paper"
   >
     <Logo style={{ maxHeight: '25px' }} />
-    <NewChatButton />
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <ChatProfiles />
+      <NewChatButton />
+    </Stack>
   </Stack>
 );
 

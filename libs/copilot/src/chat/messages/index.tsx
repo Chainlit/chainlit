@@ -1,9 +1,13 @@
 import { WidgetContext } from 'context';
 import { useCallback, useContext } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
-import { IProjectSettings } from '@chainlit/app/src/state/project';
+import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/Messages/welcomeScreen';
+import {
+  IProjectSettings,
+  projectSettingsState
+} from '@chainlit/app/src/state/project';
 import {
   IAction,
   IFeedback,
@@ -12,7 +16,8 @@ import {
   updateMessageById,
   useChatData,
   useChatInteract,
-  useChatMessages
+  useChatMessages,
+  useChatSession
 } from '@chainlit/react-client';
 
 import MessageContainer from './container';
@@ -27,7 +32,10 @@ const Messages = ({
   autoScroll,
   setAutoScroll
 }: MessagesProps): JSX.Element => {
+  const projectSettings = useRecoilValue(projectSettingsState);
   const { apiClient, accessToken } = useContext(WidgetContext);
+  const { idToResume } = useChatSession();
+
   const { elements, askUser, avatars, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
@@ -87,6 +95,21 @@ const Messages = ({
     },
     []
   );
+
+  const showWelcomeScreen =
+    !idToResume &&
+    !messages.length &&
+    projectSettings?.ui.show_readme_as_default;
+
+  if (showWelcomeScreen) {
+    return (
+      <WelcomeScreen
+        markdown={projectSettings?.markdown}
+        allowHtml={projectSettings?.features?.unsafe_allow_html}
+        latex={projectSettings?.features?.latex}
+      />
+    );
+  }
 
   return (
     <MessageContainer

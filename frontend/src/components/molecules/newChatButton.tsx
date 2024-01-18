@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import AddIcon from '@mui/icons-material/Add';
 import { Box } from '@mui/material';
 
 import { useChatInteract } from '@chainlit/react-client';
 import { AccentButton } from '@chainlit/react-components';
 
 import { Translator } from 'components/i18n';
+
+import SquarePenIcon from 'assets/squarePen';
 
 import NewChatDialog from './newChatDialog';
 
@@ -36,7 +37,7 @@ export default function NewChatButton() {
         id="new-chat-button"
         variant="outlined"
         onClick={handleClickOpen}
-        startIcon={<AddIcon />}
+        startIcon={<SquarePenIcon />}
       >
         <Translator path="components.molecules.newChatButton.newChat" />
       </AccentButton>

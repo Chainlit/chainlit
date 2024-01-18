@@ -2,6 +2,7 @@ import { NotificationCount } from 'src/NotificationCount';
 import { grey, primary } from 'theme/index';
 
 import MMenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
 
 import { SelectItem } from './SelectInput';
 
@@ -17,8 +18,9 @@ const MenuItem = ({
   value,
   selected,
   isDarkMode,
+  icon,
   ...props
-}: MenuItemProps) => (
+}: MenuItemProps & { icon?: JSX.Element }) => (
   <MMenuItem
     {...props}
     key={value}
@@ -38,7 +40,10 @@ const MenuItem = ({
       }
     }}
   >
-    {item.label || item.value}
+    <Stack direction="row" alignItems="center" spacing={1}>
+      {item.icon ? item.icon : null}
+      <span>{item.value}</span>
+    </Stack>
     {item.notificationCount ? (
       <NotificationCount count={item.notificationCount} />
     ) : null}

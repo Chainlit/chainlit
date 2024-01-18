@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
-import ChatProfiles from '@chainlit/app/src/components/molecules/chatProfiles';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
@@ -174,7 +173,6 @@ const Chat = () => {
           height: '100%'
         }}
       >
-        <Box my={1} />
         {error && (
           <Box
             sx={{
@@ -191,7 +189,6 @@ const Chat = () => {
         )}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <ChatProfiles />
           <Messages
             autoScroll={autoScroll}
             projectSettings={projectSettings}
