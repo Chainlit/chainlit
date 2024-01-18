@@ -35,7 +35,7 @@ export default function Widget({ config }: Props) {
 
   return (
     <>
-      <PopOver anchorEl={anchorEl} onClose={() => setAnchorEl(null)} />
+      <PopOver anchorEl={anchorEl} />
       <Fab
         disableRipple
         aria-label="open copilot"
