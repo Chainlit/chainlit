@@ -156,7 +156,7 @@ const Chat = () => {
       display="flex"
       width="100%"
       flexGrow={1}
-      position="relative"
+      overflow="auto"
     >
       {upload ? (
         <>
@@ -203,12 +203,12 @@ const Chat = () => {
             projectSettings={projectSettings}
           />
         </ErrorBoundary>
-        <ElementSideView
-          onClose={() => setSideViewElement(undefined)}
-          isOpen={!!sideViewElement}
-          element={sideViewElement}
-        />
       </Box>
+      <ElementSideView
+        onClose={() => setSideViewElement(undefined)}
+        isOpen={!!sideViewElement}
+        element={sideViewElement}
+      />
     </Box>
   );
 };
