@@ -15,7 +15,7 @@ const fetcher = async (
 
 function useApi<T>(
   client: ChainlitAPI,
-  path: string | null,
+  path?: string | null,
   options?: SWRConfiguration
 ) {
   const accessToken = useRecoilValue(accessTokenState);
