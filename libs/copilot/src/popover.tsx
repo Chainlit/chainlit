@@ -2,6 +2,8 @@ import Chat from 'chat';
 
 import Popover from '@mui/material/Popover';
 
+import Header from 'components/Header';
+
 interface Props {
   anchorEl?: HTMLElement | null;
   onClose: () => void;
@@ -28,10 +30,13 @@ export default function PopOver({ anchorEl, onClose }: Props) {
         paper: {
           sx: {
             display: 'flex',
+            flexDirection: 'column',
             mt: -2,
             ml: -1,
-            height: 730,
-            width: 400,
+            height: '100%',
+            width: '100%',
+            maxHeight: 730,
+            maxWidth: 400,
             overflow: 'hidden',
             borderRadius: '12px',
             background: (theme) => theme.palette.background.default,
@@ -41,6 +46,7 @@ export default function PopOver({ anchorEl, onClose }: Props) {
         }
       }}
     >
+      <Header />
       <Chat />
     </Popover>
   );
