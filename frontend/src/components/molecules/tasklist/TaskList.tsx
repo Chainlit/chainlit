@@ -21,7 +21,12 @@ const Header = ({ status }: { status: string }) => {
       }}
     >
       <Box
-        sx={{ flexGrow: '1', fontWeight: '600', paddingLeft: theme.spacing(1) }}
+        sx={{
+          flexGrow: '1',
+          fontWeight: '600',
+          paddingLeft: theme.spacing(1),
+          fontFamily: theme.typography.fontFamily
+        }}
       >
         <Translator path="components.molecules.tasklist.TaskList.title" />
       </Box>
@@ -44,6 +49,7 @@ const taskListContainerStyles = (theme: Theme) => ({
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
+  fontFamily: theme.typography.fontFamily,
   boxShadow:
     theme.palette.mode === 'dark'
       ? '0px 4px 20px 0px rgba(0, 0, 0, 0.20)'
