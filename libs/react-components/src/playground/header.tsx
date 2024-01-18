@@ -34,7 +34,7 @@ export default function PlaygroundHeader({
         <AccentButton
           size="large"
           target="_blank"
-          href="https://docs-prerelease.chainlit.io/advanced-features/prompt-playground"
+          href="https://docs.chainlit.io/advanced-features/prompt-playground/overview"
         >
           Help
         </AccentButton>
