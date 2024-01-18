@@ -1,5 +1,5 @@
-import { apiClient } from 'api';
 import { useMemo } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
@@ -7,6 +7,8 @@ import { useApi, useChatData } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components/theme';
 
 import { Translator } from 'components/i18n';
+
+import { apiClientState } from 'state/apiClient';
 
 import { ITaskList, Task } from './Task';
 
@@ -50,7 +52,7 @@ const taskListContainerStyles = (theme: Theme) => ({
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  fontFamily: theme.typography.fontFamily,
+  fontFamily: theme.typography.fontFamily!,
   boxShadow:
     theme.palette.mode === 'dark'
       ? '0px 4px 20px 0px rgba(0, 0, 0, 0.20)'
@@ -60,6 +62,7 @@ const taskListContainerStyles = (theme: Theme) => ({
 const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const theme = useTheme();
   const { tasklists } = useChatData();
+  const apiClient = useRecoilValue(apiClientState);
 
   const tasklist = tasklists[tasklists.length - 1];
 
