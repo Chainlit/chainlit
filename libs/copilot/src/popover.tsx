@@ -11,7 +11,7 @@ export default function PopOver({ anchorEl, onClose }: Props) {
   return (
     <Popover
       hideBackdrop
-      id="chainlit-popover"
+      id="chainlit-copilot-popover"
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
       onClose={onClose}

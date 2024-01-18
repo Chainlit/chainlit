@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import AppWrapper from './src/appWrapper';
 import { IWidgetConfig } from './src/types';
 
-const id = 'chainlit-widget';
+const id = 'chainlit-copilot';
 let root: ReactDOM.Root | null = null;
 
 // @ts-expect-error is not a valid prop

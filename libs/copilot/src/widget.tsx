@@ -69,7 +69,7 @@ export default function Widget({ config }: Props) {
       <Fab
         disableRipple
         aria-label="open copilot"
-        id="chainlit-button"
+        id="chainlit-copilot-button"
         sx={{
           minHeight: 'auto',
           position: 'fixed',
