@@ -1,0 +1,157 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "설정",
+            "settingsKey": "S",
+            "APIKeys": "API 키",
+            "logout": "로그아웃"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "새로운 채팅"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ 작업 목록",
+          "loading": "로딩 중...",
+          "error": "오류가 발생했습니다"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "업로드 취소",
+        "removeAttachment": "첨부 파일 제거"
+      },
+      "newChatDialog": {
+        "createNewChat": "새로운 채팅을 만들겠습니까?",
+        "clearChat": "현재 메시지를 지우고 새로운 채팅을 시작합니다.",
+        "cancel": "취소",
+        "confirm": "확인"
+      },
+      "settingsModal": {
+        "expandMessages": "메시지 확장",
+        "hideChainOfThought": "생각의 연결 숨기기",
+        "darkMode": "다크 모드"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "최근 입력",
+            "noInputs": "비어 있음...",
+            "loading": "로딩 중..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "여기에 메시지를 입력하세요..."
+          },
+          "speechButton": {
+            "start": "녹음 시작",
+            "stop": "녹음 중지"
+          },
+          "SubmitButton": {
+            "sendMessage": "메시지 보내기",
+            "stopTask": "작업 중지"
+          },
+          "UploadButton": {
+            "attachFiles": "파일 첨부"
+          },
+          "waterMark": {
+            "text": "다음과 함께 구축됨"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "실행 중",
+            "executedSuccessfully": "성공적으로 실행됨",
+            "failed": "실패",
+            "feedbackUpdated": "피드백 업데이트됨",
+            "updating": "업데이트 중"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "여기에 파일을 놓으세요"
+        },
+        "index": {
+          "failedToUpload": "업로드 실패",
+          "cancelledUploadOf": "취소된 업로드:",
+          "couldNotReachServer": "서버에 연결할 수 없음"
+        },
+        "settings": {
+          "settingsPanel": "설정 패널",
+          "reset": "초기화",
+          "cancel": "취소",
+          "confirm": "확인"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "피드백: 모두",
+              "feedbackPositive": "피드백: 긍정적",
+              "feedbackNegative": "피드백: 부정적"
+            },
+            "SearchBar": {
+              "search": "검색"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "이렇게 하면 스레드 및 해당 메시지 및 요소가 삭제됩니다.",
+            "cancel": "취소",
+            "confirm": "확인",
+            "deletingChat": "채팅 삭제 중",
+            "chatDeleted": "채팅 삭제됨"
+          },
+          "index": {
+            "pastChats": "이전 채팅"
+          },
+          "ThreadList": {
+            "empty": "비어 있음..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "사이드바 닫기",
+            "openSidebar": "사이드바 열기"
+          }
+        },
+        "Thread": {
+          "backToChat": "채팅으로 돌아가기",
+          "chatCreatedOn": "이 채팅은 다음에 만들어졌습니다."
+        }
+      },
+      "header": {
+        "chat": "채팅",
+        "readme": "Readme"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "공급자를 가져오지 못했습니다:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "성공적으로 저장됨",
+      "requiredApiKeys": "필수 API 키",
+      "requiredApiKeysInfo": "이 앱을 사용하려면 다음 API 키가 필요합니다. 키는 기기의 로컬 저장소에 저장됩니다."
+    },
+    "Login": {
+      "authTitle": "앱에 액세스하려면 로그인하세요."
+    },
+    "Page": {
+      "notPartOfProject": "이 프로젝트의 일부가 아닙니다."
+    },
+    "ResumeButton": {
+      "resumeChat": "채팅 계속하기"
+    }
+  }
+}

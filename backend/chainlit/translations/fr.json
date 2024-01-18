@@ -1,0 +1,157 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "Paramètres",
+            "settingsKey": "S",
+            "APIKeys": "Clés API",
+            "logout": "Déconnexion"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "Nouveau Chat"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ Liste des tâches",
+          "loading": "Chargement...",
+          "error": "Une erreur s'est produite"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "Annuler le téléchargement",
+        "removeAttachment": "Supprimer la pièce jointe"
+      },
+      "newChatDialog": {
+        "createNewChat": "Créer un nouveau chat ?",
+        "clearChat": "Cela effacera les messages actuels et démarrera un nouveau chat.",
+        "cancel": "Annuler",
+        "confirm": "Confirmer"
+      },
+      "settingsModal": {
+        "expandMessages": "Développer les messages",
+        "hideChainOfThought": "Masquer la chaîne de pensée",
+        "darkMode": "Mode sombre"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "Dernières saisies",
+            "noInputs": "Vide...",
+            "loading": "Chargement..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "Tapez votre message ici..."
+          },
+          "speechButton": {
+            "start": "Commencer l'enregistrement",
+            "stop": "Arrêter l'enregistrement"
+          },
+          "SubmitButton": {
+            "sendMessage": "Envoyer le message",
+            "stopTask": "Arrêter la tâche"
+          },
+          "UploadButton": {
+            "attachFiles": "Joindre des fichiers"
+          },
+          "waterMark": {
+            "text": "Construit avec"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "En cours d'exécution",
+            "executedSuccessfully": "exécuté avec succès",
+            "failed": "échoué",
+            "feedbackUpdated": "Feedback mis à jour",
+            "updating": "Mise à jour en cours"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "Déposez vos fichiers ici"
+        },
+        "index": {
+          "failedToUpload": "Échec du téléchargement",
+          "cancelledUploadOf": "Téléchargement de",
+          "couldNotReachServer": "Impossible de joindre le serveur"
+        },
+        "settings": {
+          "settingsPanel": "Panneau de paramètres",
+          "reset": "Réinitialiser",
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "Feedback : Tout",
+              "feedbackPositive": "Feedback : Positif",
+              "feedbackNegative": "Feedback : Négatif"
+            },
+            "SearchBar": {
+              "search": "Recherche"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "Cela supprimera le fil ainsi que ses messages et éléments.",
+            "cancel": "Annuler",
+            "confirm": "Confirmer",
+            "deletingChat": "Suppression du chat",
+            "chatDeleted": "Chat supprimé"
+          },
+          "index": {
+            "pastChats": "Chats passés"
+          },
+          "ThreadList": {
+            "empty": "Vide..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "Fermer la barre latérale",
+            "openSidebar": "Ouvrir la barre latérale"
+          }
+        },
+        "Thread": {
+          "backToChat": "Retourner au chat",
+          "chatCreatedOn": "Ce chat a été créé le"
+        }
+      },
+      "header": {
+        "chat": "Chat",
+        "readme": "Lisez-moi"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "Échec de la récupération des fournisseurs :"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "Enregistré avec succès",
+      "requiredApiKeys": "Clés API requises",
+      "requiredApiKeysInfo": "Pour utiliser cette application, les clés API suivantes sont requises. Les clés sont stockées dans le stockage local de votre appareil."
+    },
+    "Login": {
+      "authTitle": "Connectez-vous pour accéder à l'application."
+    },
+    "Page": {
+      "notPartOfProject": "Vous ne faites pas partie de ce projet."
+    },
+    "ResumeButton": {
+      "resumeChat": "Reprendre le chat"
+    }
+  }
+}
