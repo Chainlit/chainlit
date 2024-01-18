@@ -15,5 +15,5 @@ export function makeApiClient(chainlitServer: string) {
     toast.error(error.toString());
   };
 
-  return new ChainlitAPI(httpEndpoint, on401, onError);
+  return new ChainlitAPI(httpEndpoint, 'copilot', on401, onError);
 }

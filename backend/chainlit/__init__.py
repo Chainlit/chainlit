@@ -24,6 +24,7 @@ from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
+from chainlit.copilot import CopilotFunction
 from chainlit.element import (
     Audio,
     Avatar,
@@ -305,6 +306,7 @@ __getattr__ = make_module_getattr(
 
 __all__ = [
     "user_session",
+    "CopilotFunction",
     "Action",
     "User",
     "PersistedUser",

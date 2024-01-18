@@ -9,7 +9,7 @@ interface IWidgetContext {
 
 const defaultContext = {
   accessToken: undefined,
-  apiClient: new ChainlitAPI('')
+  apiClient: new ChainlitAPI('', 'copilot')
 };
 
 const WidgetContext = createContext<IWidgetContext>(defaultContext);

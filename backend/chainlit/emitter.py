@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Union, cast
 
 from chainlit.data import get_data_layer
 from chainlit.element import Element, File
@@ -37,8 +37,8 @@ class BaseChainlitEmitter:
         """Stub method to get the 'emit' property from the session."""
         pass
 
-    async def ask_user(self):
-        """Stub method to get the 'ask_user' property from the session."""
+    async def emit_call(self):
+        """Stub method to get the 'emit_call' property from the session."""
         pass
 
     async def resume_thread(self, thread_dict: ThreadDict):
@@ -57,12 +57,11 @@ class BaseChainlitEmitter:
         """Stub method to delete a message in the UI."""
         pass
 
-    async def send_ask_timeout(self):
-        """Stub method to send a prompt timeout message to the UI."""
+    def send_timeout(self, event: Literal["ask_timeout", "call_fn_timeout"]):
+        """Stub method to send a timeout to the UI."""
         pass
 
-    async def clear_ask(self):
-        """Stub method to clear the prompt from the UI."""
+    def clear(self, event: Literal["clear_ask", "clear_call_fn"]):
         pass
 
     async def init_thread(self, interaction: str):
@@ -76,6 +75,12 @@ class BaseChainlitEmitter:
         self, step_dict: StepDict, spec: AskSpec, raise_on_timeout=False
     ) -> Optional[Union["StepDict", "AskActionResponse", List["FileDict"]]]:
         """Stub method to send a prompt to the UI and wait for a response."""
+        pass
+
+    async def send_call_fn(
+        self, name: str, args: Dict[str, Any], timeout=300, raise_on_timeout=False
+    ) -> Optional[Dict[str, Any]]:
+        """Stub method to send a call function event to the copilot and wait for a response."""
         pass
 
     async def update_token_count(self, count: int):
@@ -137,9 +142,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
         return self._get_session_property("emit")
 
     @property
-    def ask_user(self):
-        """Get the 'ask_user' property from the session."""
-        return self._get_session_property("ask_user")
+    def emit_call(self):
+        """Get the 'emit_call' property from the session."""
+        return self._get_session_property("emit_call")
 
     def resume_thread(self, thread_dict: ThreadDict):
         """Send a thread to the UI to resume it"""
@@ -157,15 +162,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Delete a message in the UI."""
         return self.emit("delete_message", step_dict)
 
-    def send_ask_timeout(self):
-        """Send a prompt timeout message to the UI."""
+    def send_timeout(self, event: Literal["ask_timeout", "call_fn_timeout"]):
+        return self.emit(event, {})
 
-        return self.emit("ask_timeout", {})
-
-    def clear_ask(self):
-        """Clear the prompt from the UI."""
-
-        return self.emit("clear_ask", {})
+    def clear(self, event: Literal["clear_ask", "clear_call_fn"]):
+        return self.emit(event, {})
 
     async def flush_thread_queues(self, interaction: str):
         if data_layer := get_data_layer():
@@ -229,8 +230,8 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         try:
             # Send the prompt to the UI
-            user_res = await self.ask_user(
-                {"msg": step_dict, "spec": spec.to_dict()}, spec.timeout
+            user_res = await self.emit_call(
+                "ask", {"msg": step_dict, "spec": spec.to_dict()}, spec.timeout
             )  # type: Optional[Union["StepDict", "AskActionResponse", List["FileReference"]]]
 
             # End the task temporarily so that the User can answer the prompt
@@ -279,15 +280,33 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     self.session.has_first_interaction = True
                     await self.init_thread(interaction=interaction)
 
-            await self.clear_ask()
+            await self.clear("clear_ask")
             return final_res
         except TimeoutError as e:
-            await self.send_ask_timeout()
+            await self.send_timeout("ask_timeout")
 
             if raise_on_timeout:
                 raise e
         finally:
             await self.task_start()
+
+    async def send_call_fn(
+        self, name: str, args: Dict[str, Any], timeout=300, raise_on_timeout=False
+    ) -> Optional[Dict[str, Any]]:
+        """Stub method to send a call function event to the copilot and wait for a response."""
+        try:
+            call_fn_res = await self.emit_call(
+                "call_fn", {"name": name, "args": args}, timeout
+            )  # type: Dict
+
+            await self.clear("clear_call_fn")
+            return call_fn_res
+        except TimeoutError as e:
+            await self.send_timeout("call_fn_timeout")
+
+            if raise_on_timeout:
+                raise e
+            return None
 
     def update_token_count(self, count: int):
         """Update the token count for the UI."""
