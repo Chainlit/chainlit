@@ -21,7 +21,7 @@ describe('Copilot', () => {
     });
   });
 
-  it('should be able to display avatars', () => {
+  it('should be able to embed the copilot', () => {
     cy.get('#chainlit-copilot-button').should('be.visible').click();
     cy.get('#chainlit-copilot-popover').should('be.visible');
 
