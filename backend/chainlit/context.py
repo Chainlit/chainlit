@@ -59,6 +59,7 @@ def init_http_context(
         id=str(uuid.uuid4()),
         token=auth_token,
         user=user,
+        client_type="app",
         user_env=user_env,
     )
     context = ChainlitContext(session)

@@ -1,6 +1,7 @@
 import glob
 import json
 import mimetypes
+import re
 import shutil
 import urllib.parse
 from typing import Any, Optional, Union
@@ -135,18 +136,19 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir():
-    local_build_dir = os.path.join(PACKAGE_ROOT, "frontend", "dist")
-    packaged_build_dir = os.path.join(BACKEND_ROOT, "frontend", "dist")
+def get_build_dir(local_target: str, packaged_target: str):
+    local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
+    packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
     if os.path.exists(local_build_dir):
         return local_build_dir
     elif os.path.exists(packaged_build_dir):
         return packaged_build_dir
     else:
-        raise FileNotFoundError("Built UI dir not found")
+        raise FileNotFoundError(f"{local_target} built UI dir not found")
 
 
-build_dir = get_build_dir()
+build_dir = get_build_dir("frontend", "frontend")
+copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -161,19 +163,29 @@ app.mount(
     name="assets",
 )
 
+app.mount(
+    "/copilot",
+    StaticFiles(
+        packages=[("chainlit", copilot_build_dir)],
+        follow_symlink=config.project.follow_symlink,
+    ),
+    name="copilot",
+)
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=config.project.allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
 socket = SocketManager(
     app,
-    cors_allowed_origins=[],
+    cors_allowed_origins=[]
+    if config.project.allow_origins[0] == "*"
+    else config.project.allow_origins,
     async_mode="asgi",
 )
 
@@ -181,6 +193,11 @@ socket = SocketManager(
 # -------------------------------------------------------------------------------
 #                               HTTP HANDLERS
 # -------------------------------------------------------------------------------
+
+
+def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: str):
+    pattern = start_tag + ".*?" + end_tag
+    return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
 def get_html_template():
@@ -207,6 +224,10 @@ def get_html_template():
             f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
         )
 
+    font = None
+    if config.ui.custom_font:
+        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
+
     index_html_file_path = os.path.join(build_dir, "index.html")
 
     with open(index_html_file_path, "r", encoding="utf-8") as f:
@@ -216,6 +237,10 @@ def get_html_template():
             content = content.replace(JS_PLACEHOLDER, js)
         if css:
             content = content.replace(CSS_PLACEHOLDER, css)
+        if font:
+            content = replace_between_tags(
+                content, "<!-- FONT START -->", "<!-- FONT END -->", font
+            )
         return content
 
 

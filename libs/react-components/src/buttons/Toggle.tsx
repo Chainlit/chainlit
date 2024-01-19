@@ -32,8 +32,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
         sx={{
           border: (theme) => `1px solid ${theme.palette.divider}`,
           backgroundColor: (theme) => theme.palette.background.paper,
-          borderRadius: 1,
-          padding: 0.5
+          borderRadius: 1
         }}
       >
         <Tabs
@@ -42,8 +41,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
             onChange(items[newValue])
           }
           sx={{
-            minHeight: '40px !important',
-
+            minHeight: '39px !important',
             '& .MuiButtonBase-root': {
               textTransform: 'none',
               zIndex: 1,
@@ -51,7 +49,7 @@ const Toggle = (props: ToggleProps): JSX.Element => {
               fontSize: '14px',
               fontWeight: 500,
               padding: 0,
-              minHeight: '40px !important',
+              minHeight: '39px !important',
               width: '125px'
             },
             '& .Mui-selected': {

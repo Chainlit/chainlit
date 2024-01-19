@@ -1,16 +1,17 @@
 import App from 'App';
-import { apiClient } from 'api';
 import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { useApi } from '@chainlit/react-client';
 
+import { apiClientState } from 'state/apiClient';
 import { IProjectSettings, projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
 export default function AppWrapper() {
+  const apiClient = useRecoilValue(apiClientState);
   const [projectSettings, setProjectSettings] =
     useRecoilState(projectSettingsState);
   const setAppSettings = useSetRecoilState(settingsState);

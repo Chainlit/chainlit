@@ -7,7 +7,7 @@ type TranslatorProps = {
 const Translator = ({ path }: TranslatorProps) => {
   const { t } = useTranslation();
 
-  return t(path);
+  return <div>{t(path)}</div>;
 };
 
 export default Translator;

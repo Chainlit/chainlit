@@ -9,7 +9,7 @@ import tomli
 from chainlit.logger import logger
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -40,6 +40,7 @@ DEFAULT_CONFIG_STR = f"""[project]
 # Whether to enable telemetry (default: true). No personal data is collected.
 enable_telemetry = true
 
+
 # List of environment variables to be provided by each user to use the app.
 user_env = []
 
@@ -48,6 +49,9 @@ session_timeout = 3600
 
 # Enable third parties caching (e.g LangChain cache)
 cache = false
+
+# Authorized origins 
+allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
 # follow_symlink = false
@@ -97,7 +101,12 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Specify a custom font url.
+# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+
 # Override default MUI light theme. (Check theme.ts)
+[UI.theme]
+    #font_family = "Inter, sans-serif"
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -156,6 +165,7 @@ class Palette(DataClassJsonMixin):
 
 @dataclass()
 class Theme(DataClassJsonMixin):
+    font_family: Optional[str] = None
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 
@@ -188,6 +198,7 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_font: Optional[str] = None
 
 
 @dataclass()
@@ -217,6 +228,7 @@ class CodeSettings:
 
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
+    allow_origins: List[str] = Field(default_factory=lambda: ["*"])
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None

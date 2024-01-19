@@ -29,13 +29,15 @@ const AuthTemplate = ({
           border: (theme) => `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
           padding: theme.spacing(5, 5),
-          width: '100%',
-          height: '100%',
 
-          [theme.breakpoints.up('sm')]: {
-            maxWidth: '400px',
-            height: 'auto',
-            maxHeight: '90%'
+          maxWidth: '400px',
+          height: 'auto',
+          maxHeight: '90%',
+
+          [theme.breakpoints.down('sm')]: {
+            maxWidth: 'unset',
+            width: '100%',
+            height: '100%'
           }
         })}
       >

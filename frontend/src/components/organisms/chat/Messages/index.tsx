@@ -1,4 +1,3 @@
-import { apiClient } from 'api';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -17,6 +16,7 @@ import {
   useChatSession
 } from '@chainlit/react-client';
 
+import { apiClientState } from 'state/apiClient';
 import { IProjectSettings } from 'state/project';
 
 import MessageContainer from './container';
@@ -39,6 +39,7 @@ const Messages = ({
   const { idToResume } = useChatSession();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
+  const apiClient = useRecoilValue(apiClientState);
 
   const { t } = useTranslation();
 
@@ -107,6 +108,7 @@ const Messages = ({
     !messages.length &&
     projectSettings?.ui.show_readme_as_default ? (
     <WelcomeScreen
+      variant="app"
       markdown={projectSettings?.markdown}
       allowHtml={projectSettings?.features?.unsafe_allow_html}
       latex={projectSettings?.features?.latex}

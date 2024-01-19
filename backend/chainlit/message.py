@@ -322,7 +322,7 @@ class AskMessageBase(MessageBase):
     async def remove(self):
         removed = await super().remove()
         if removed:
-            await context.emitter.clear_ask()
+            await context.emitter.clear("clear_ask")
 
 
 class AskUserMessage(AskMessageBase):
