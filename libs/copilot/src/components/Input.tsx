@@ -160,7 +160,7 @@ const Input = memo(
           ) : null}
           <TextField
             inputRef={ref}
-            id="chat-input"
+            id="copilot-chat-input"
             autoFocus
             multiline
             variant="standard"
@@ -198,6 +198,12 @@ const Input = memo(
             justifyContent="space-between"
           >
             <Stack direction="row" alignItems="center" marginLeft={-1}>
+              <UploadButton
+                disabled={disabled}
+                fileSpec={fileSpec}
+                onFileUploadError={onFileUploadError}
+                onFileUpload={onFileUpload}
+              />
               {chatSettingsInputs.length > 0 && (
                 <IconButton
                   id="chat-settings-open-modal"
@@ -218,12 +224,6 @@ const Input = memo(
                   disabled={disabled}
                 />
               ) : null}
-              <UploadButton
-                disabled={disabled}
-                fileSpec={fileSpec}
-                onFileUploadError={onFileUploadError}
-                onFileUpload={onFileUpload}
-              />
             </Stack>
 
             <Box>

@@ -16,11 +16,13 @@ export default function PopOver({ anchorEl }: Props) {
       id="chainlit-copilot-popover"
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
+      placement="top"
       sx={{
         display: 'flex',
-        inset: 'auto auto 10px -14px !important',
-        height: 730,
-        width: 400,
+        flexDirection: 'column',
+        inset: 'auto auto 14px -24px !important',
+        height: 'min(730px, calc(100vh - 100px))',
+        width: 'min(400px, 80vw)',
         overflow: 'hidden',
         borderRadius: '12px',
         background: (theme) => theme.palette.background.default,
@@ -28,7 +30,7 @@ export default function PopOver({ anchorEl }: Props) {
           '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important'
       }}
     >
-      <Fade in={!!anchorEl} timeout={550}>
+      <Fade in={!!anchorEl}>
         <Box
           sx={{
             display: 'flex',

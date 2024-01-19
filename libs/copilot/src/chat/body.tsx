@@ -15,6 +15,7 @@ import { Alert, Box } from '@mui/material';
 
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
+import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
   projectSettingsState,
@@ -187,6 +188,7 @@ const Chat = () => {
             </Alert>
           </Box>
         )}
+        <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
           <Messages
