@@ -8,6 +8,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from fastapi import Request, Response
+from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -24,7 +25,6 @@ from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
-from chainlit.copilot import CopilotFunction
 from chainlit.element import (
     Audio,
     Avatar,
@@ -293,6 +293,15 @@ def sleep(duration: int):
         duration (int): The duration in seconds.
     """
     return asyncio.sleep(duration)
+
+
+@dataclass()
+class CopilotFunction:
+    name: str
+    args: Dict[str, Any]
+
+    def acall(self):
+        return context.emitter.send_call_fn(self.name, self.args)
 
 
 __getattr__ = make_module_getattr(
