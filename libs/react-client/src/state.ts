@@ -7,6 +7,7 @@ import {
   IAction,
   IAsk,
   IAvatarElement,
+  ICallFn,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -71,6 +72,11 @@ export const loadingState = atom<boolean>({
 
 export const askUserState = atom<IAsk | undefined>({
   key: 'AskUser',
+  default: undefined
+});
+
+export const callFnState = atom<ICallFn | undefined>({
+  key: 'CallFn',
   default: undefined
 });
 

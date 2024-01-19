@@ -179,7 +179,13 @@ export default function ChatProfiles() {
         onClose={() => setAnchorEl(null)}
         disableRestoreFocus
       >
-        <Box p={2} maxWidth="20rem">
+        <Box
+          p={2}
+          sx={{
+            fontFamily: (theme) => theme.typography.fontFamily
+          }}
+          maxWidth="20rem"
+        >
           <Markdown allowHtml={allowHtml} latex={latex}>
             {chatProfileDescription}
           </Markdown>

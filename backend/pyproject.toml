@@ -1,17 +1,19 @@
 [tool.poetry]
 name = "chainlit"
 version = "1.0.101"
-keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'langchain']
-description = "A faster way to build chatbot UIs."
+keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'openai', 'copilot', 'langchain']
+description = "Build Conversational AI."
 authors = ["Chainlit"]
 license = "Apache-2.0 license"
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = [
     "**/frontend/**/*",
+    "**/copilot/**/**/",
 ]
 include = [
     "**/frontend/dist/**/*",
+    "**/copilot/dist/**/*",
 ]
 
 [tool.poetry.scripts]
@@ -23,8 +25,9 @@ python = ">=3.8.1,<4.0.0"
 httpx = ">=0.23.0,<0.25.0"
 literalai = "0.0.102"
 dataclasses_json = "^0.5.7"
+# FastAPI 0.109.0 breaks socketio (alway 404)
+fastapi = ">=0.100,<0.109.0"
 uvicorn = "^0.25.0"
-fastapi = "^0.100"
 fastapi-socketio = "^0.0.10"
 aiofiles = "^23.1.0"
 syncer = "^2.0.3"
@@ -53,8 +56,6 @@ llama-index = "^0.9.15"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
-# forcing version until haystack fixes the issue
-tiktoken = "0.4.0"
 plotly = "^5.18.0"
 
 [tool.poetry.group.mypy]

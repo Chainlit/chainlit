@@ -27,8 +27,8 @@
     "format:react-components": "cd libs/react-components && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "cd libs/react-client && pnpm run build && cd ../react-components && pnpm run build && cd ../../frontend && pnpm run build",
+    "buildUi": "cd libs/react-client && pnpm run build && cd ../react-components && pnpm run build && cd ../copilot && pnpm run build && cd ../../frontend && pnpm run build",
     "build:react-components": "cd libs/react-client && pnpm build && cd ../react-components && pnpm build",
-    "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (cd backend && poetry build)"
+    "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (mkdir -p backend/chainlit/copilot && cp -R libs/copilot/dist backend/chainlit/copilot) && (cd backend && poetry build)"
   }
 }

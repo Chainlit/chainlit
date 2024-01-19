@@ -1,5 +1,7 @@
 import { Markdown } from 'src/Markdown';
 
+import Box from '@mui/material/Box';
+
 import { useFetch } from 'hooks/useFetch';
 
 import { type ITextElement } from 'client-types/';
@@ -25,7 +27,11 @@ const TextElement = ({ element }: Props) => {
     content = `\`\`\`${element.language}\n${content}\n\`\`\``;
   }
 
-  return <Markdown>{content}</Markdown>;
+  return (
+    <Box sx={{ fontFamily: (theme) => theme.typography.fontFamily }}>
+      <Markdown>{content}</Markdown>
+    </Box>
+  );
 };
 
 export { TextElement };

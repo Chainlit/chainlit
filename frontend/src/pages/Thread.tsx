@@ -1,7 +1,6 @@
-import { apiClient } from 'api';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
@@ -9,11 +8,15 @@ import { IThread, threadHistoryState, useApi } from '@chainlit/react-client';
 
 import { Thread } from 'components/organisms/threadHistory/Thread';
 
+import { apiClientState } from 'state/apiClient';
+
 import Page from './Page';
 import ResumeButton from './ResumeButton';
 
 export default function ThreadPage() {
   const { id } = useParams();
+  const apiClient = useRecoilValue(apiClientState);
+
   const { data, error, isLoading } = useApi<IThread>(
     apiClient,
     id ? `/project/thread/${id}` : null,

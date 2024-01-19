@@ -8,6 +8,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from fastapi import Request, Response
+from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
@@ -294,6 +295,15 @@ def sleep(duration: int):
     return asyncio.sleep(duration)
 
 
+@dataclass()
+class CopilotFunction:
+    name: str
+    args: Dict[str, Any]
+
+    def acall(self):
+        return context.emitter.send_call_fn(self.name, self.args)
+
+
 __getattr__ = make_module_getattr(
     {
         "LangchainCallbackHandler": "chainlit.langchain.callbacks",
@@ -305,6 +315,7 @@ __getattr__ = make_module_getattr(
 
 __all__ = [
     "user_session",
+    "CopilotFunction",
     "Action",
     "User",
     "PersistedUser",

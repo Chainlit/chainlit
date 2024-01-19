@@ -2,7 +2,7 @@ import { InputStateHandler } from 'src/inputs/InputStateHandler';
 import { grey, primary } from 'theme/index';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import type { SxProps } from '@mui/material';
+import { Stack, type SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
@@ -13,6 +13,7 @@ import { MenuItem } from './MenuItem';
 
 type SelectItem = {
   label: string;
+  icon?: JSX.Element;
   notificationCount?: number;
   value: string | number;
 };
@@ -62,25 +63,28 @@ const SelectInput = ({
     >
       <MSelect
         {...rest}
+        size={size}
         onClose={onClose}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
-        size={size}
         disabled={disabled}
         displayEmpty
         renderValue={() => {
+          const item = items?.find((item) => item.value === value);
           if (!value || value === '') return placeholder;
-
           return (
-            (renderLabel && renderLabel()) ||
-            `${items?.find((item) => item.value === value)?.label}`
+            (renderLabel && renderLabel()) || (
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {item?.icon}
+                <span>{item?.label}</span>
+              </Stack>
+            )
           );
         }}
         sx={{
           backgroundColor: (theme) => theme.palette.background.paper,
           borderRadius: 1,
-          padding: 0.5,
           '&.MuiOutlinedInput-root': {
             '& fieldset': {
               border: (theme) => `1px solid ${theme.palette.divider}`
@@ -93,10 +97,7 @@ const SelectInput = ({
           sx: {
             color: 'text.primary',
             fontSize: '14px',
-            fontWeight: 400,
-            px: '16px',
-            py: size === 'small' ? '10px' : '14px',
-            h: '48px'
+            fontWeight: 400
           }
         }}
         MenuProps={{
@@ -136,8 +137,8 @@ const SelectInput = ({
               isDarkMode={isDarkMode}
               item={item}
               selected={item.value === value}
-              value={item.value}
               key={item.value}
+              value={item.value}
             />
           ))}
       </MSelect>

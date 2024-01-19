@@ -133,6 +133,7 @@ const FeedbackButtons = ({ message }: Props) => {
       </Stack>
 
       <Dialog
+        maxWidth="xs"
         onClose={() => {
           setShowFeedbackDialog(undefined);
         }}

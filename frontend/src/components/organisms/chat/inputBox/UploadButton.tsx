@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
 
 import AttachFile from '@mui/icons-material/AttachFile';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { FileSpec } from '@chainlit/react-client';
 import { useUpload } from '@chainlit/react-components';
@@ -32,6 +32,10 @@ const UploadButton = ({
     options: { noDrag: true }
   });
 
+  const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
+    ? 'small'
+    : 'medium';
+
   if (!upload || !pSettings?.features?.multi_modal) return null;
   const { getRootProps, getInputProps } = upload;
 
@@ -47,9 +51,10 @@ const UploadButton = ({
           id={disabled ? 'upload-button-loading' : 'upload-button'}
           disabled={disabled}
           color="inherit"
+          size={size}
           {...getRootProps({ className: 'dropzone' })}
         >
-          <AttachFile />
+          <AttachFile fontSize={size} />
         </IconButton>
       </span>
     </Tooltip>

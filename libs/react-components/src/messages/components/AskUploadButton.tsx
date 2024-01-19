@@ -1,7 +1,6 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 
-import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
@@ -95,8 +94,7 @@ const AskUploadChildButton = ({
       {...getRootProps({ className: 'dropzone' })}
     >
       <input id="ask-button-input" {...getInputProps()} />
-      <CloudUploadOutlined fontSize="large" />
-      <Stack ml={2}>
+      <Stack>
         <Typography color="text.primary">Drag and drop files here</Typography>
         <Typography variant="caption" color="text.secondary">
           Limit {askUser.spec.max_size_mb}mb.

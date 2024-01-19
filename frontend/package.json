@@ -1,5 +1,5 @@
 {
-  "name": "chainlit-ui",
+  "name": "@chainlit/app",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -44,6 +44,7 @@
     "@vitejs/plugin-react-swc": "^3.3.2",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
+    "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.0"
   }
 }

@@ -2,3 +2,4 @@ packages:
   - 'frontend/'
   - 'libs/react-components/'
   - 'libs/react-client/'
+  - 'libs/copilot/'

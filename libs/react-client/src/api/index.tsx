@@ -43,6 +43,7 @@ type Payload = FormData | any;
 export class APIBase {
   constructor(
     public httpEndpoint: string,
+    public type: 'app' | 'copilot' | 'teams' | 'slack',
     public on401?: () => void,
     public onError?: (error: ClientError) => void
   ) {}

@@ -45,7 +45,7 @@ import { ChainlitAPI, useChatSession } from '@chainlit/react-client';
 
 const CHAINLIT_SERVER_URL = 'http://localhost:8000';
 
-const apiClient = new ChainlitAPI(CHAINLIT_SERVER_URL);
+const apiClient = new ChainlitAPI(CHAINLIT_SERVER_URL, 'app');
 
 const ChatComponent = () => {
   const { connect, disconnect, chatProfile, setChatProfile } = useChatSession();

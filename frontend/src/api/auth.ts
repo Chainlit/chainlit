@@ -1,7 +1,10 @@
-import { apiClient } from 'api';
+import { useRecoilValue } from 'recoil';
 
 import { useAuth as _useAuth } from '@chainlit/react-client';
 
+import { apiClientState } from 'state/apiClient';
+
 export function useAuth() {
-  return _useAuth(apiClient);
+  const apiClient = useRecoilValue(apiClientState);
+  return _useAuth(apiClient!);
 }

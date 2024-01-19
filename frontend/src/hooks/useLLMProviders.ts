@@ -1,15 +1,17 @@
-import { apiClient } from 'api';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { useApi } from '@chainlit/react-client';
 import { IPlayground } from '@chainlit/react-components';
 
+import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';
 
 const useLLMProviders = (shouldFetch?: boolean) => {
+  const apiClient = useRecoilValue(apiClientState);
+
   const { data, error } = useApi<IPlayground>(
     apiClient,
     shouldFetch ? '/project/llm-providers' : null
