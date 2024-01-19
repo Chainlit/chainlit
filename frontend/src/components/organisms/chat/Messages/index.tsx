@@ -91,7 +91,9 @@ const Messages = ({
               })
             );
             onSuccess();
-            return t('components.organisms.chat.Messages.index.Feedback');
+            return t(
+              'components.organisms.chat.Messages.index.feedbackUpdated'
+            );
           },
           error: (err) => {
             return <span>{err.message}</span>;
