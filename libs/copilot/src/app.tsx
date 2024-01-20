@@ -15,6 +15,7 @@ import {
   projectSettingsState
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
+import { useAuth } from '@chainlit/react-client';
 import { makeTheme } from '@chainlit/react-components/theme';
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 
 export default function App({ config }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
+  const { setAccessToken } = useAuth(apiClient);
   const [projectSettings, setProjectSettings] =
     useRecoilState(projectSettingsState);
   const setApiClient = useSetRecoilState(apiClientState);
@@ -30,6 +32,10 @@ export default function App({ config }: Props) {
   const [theme, setTheme] = useState<Theme | null>(null);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
+
+  useEffect(() => {
+    setAccessToken(config.accessToken);
+  }, [config.accessToken]);
 
   useEffect(() => {
     setApiClient(apiClient);
