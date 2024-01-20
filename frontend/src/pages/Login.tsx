@@ -1,6 +1,5 @@
 import { useAuth } from 'api/auth';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -19,8 +18,6 @@ export default function Login() {
   const apiClient = useRecoilValue(apiClientState);
 
   const navigate = useNavigate();
-
-  const { t } = useTranslation();
 
   const handleHeaderAuth = async () => {
     try {
@@ -71,7 +68,7 @@ export default function Login() {
 
   return (
     <AuthLogin
-      title={t('pages.Login.authTitle')}
+      title="Login to access the app."
       error={error}
       callbackUrl="/"
       providers={config?.oauthProviders || []}
