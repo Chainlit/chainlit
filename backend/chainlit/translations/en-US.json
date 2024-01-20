@@ -82,7 +82,8 @@
         "index": {
           "failedToUpload": "Failed to upload",
           "cancelledUploadOf": "Cancelled upload of",
-          "couldNotReachServer": "Could not reach the server"
+          "couldNotReachServer": "Could not reach the server",
+          "continuingChat": "Continuing previous chat"
         },
         "settings": {
           "settingsPanel": "Settings panel",

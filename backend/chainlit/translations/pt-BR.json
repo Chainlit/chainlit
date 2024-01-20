@@ -82,7 +82,8 @@
         "index": {
           "failedToUpload": "Falha ao enviar",
           "cancelledUploadOf": "Envio cancelado de",
-          "couldNotReachServer": "Não foi possível conectar ao servidor"
+          "couldNotReachServer": "Não foi possível conectar ao servidor",
+          "continuingChat": "Continuando o chat anterior"
         },
         "settings": {
           "settingsPanel": "Painel de Configurações",
