@@ -1,6 +1,6 @@
 export interface IWidgetConfig {
   chainlitServer: string;
-  show_cot?: boolean;
+  showCot?: boolean;
   accessToken?: string;
   theme?: 'light' | 'dark';
   fontFamily?: string;

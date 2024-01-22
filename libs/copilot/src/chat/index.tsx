@@ -12,7 +12,7 @@ export default function ChatWrapper() {
     connect({
       client: apiClient,
       userEnv: {},
-      accessToken
+      accessToken: `Bearer ${accessToken}`
     });
   }, [connect, accessToken, apiClient]);
 

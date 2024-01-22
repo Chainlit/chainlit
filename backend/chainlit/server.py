@@ -183,9 +183,7 @@ app.add_middleware(
 
 socket = SocketManager(
     app,
-    cors_allowed_origins=[]
-    if config.project.allow_origins[0] == "*"
-    else config.project.allow_origins,
+    cors_allowed_origins=[],
     async_mode="asgi",
 )
 

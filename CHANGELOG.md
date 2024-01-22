@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.200] - 2023-01-22
+
+### Added
+
+- Chainlit Copilot
+- Translations
+- Custom font
+
+### Fixed
+
+- Tasklist flickering
+
 ## [1.0.101] - 2023-01-12
 
 ### Fixed

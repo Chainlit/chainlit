@@ -15,6 +15,7 @@ import {
   projectSettingsState
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
+import { useAuth } from '@chainlit/react-client';
 import { makeTheme } from '@chainlit/react-components/theme';
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 
 export default function App({ config }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
+  const { setAccessToken } = useAuth(apiClient);
   const [projectSettings, setProjectSettings] =
     useRecoilState(projectSettingsState);
   const setApiClient = useSetRecoilState(apiClientState);
@@ -32,6 +34,10 @@ export default function App({ config }: Props) {
   const languageInUse = navigator.language || 'en-US';
 
   useEffect(() => {
+    setAccessToken(config.accessToken);
+  }, [config.accessToken]);
+
+  useEffect(() => {
     setApiClient(apiClient);
     if (!projectSettings) {
       apiClient
@@ -39,13 +45,16 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
-          data.ui.hide_cot = config.show_cot ? false : true;
-          if (config.theme) {
-            setSettings((old) => ({ ...old, theme: config.theme! }));
-          }
+          data.ui.hide_cot = config.showCot ? data.ui.hide_cot : true;
+          setSettings((old) => ({
+            ...old,
+            theme: config.theme ? config.theme : old.theme,
+            hideCot: data.ui.hide_cot!
+          }));
+
           const _theme = overrideTheme(
             makeTheme(config.theme || settings.theme, config.fontFamily, {
-              // Hack to provoke small responsivity
+              // Force mobile view
               values: {
                 xs: 0,
                 sm: 10000,
