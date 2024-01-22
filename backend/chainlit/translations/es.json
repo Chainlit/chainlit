@@ -108,7 +108,8 @@
             "cancel": "Cancelar",
             "confirm": "Confirmar",
             "deletingChat": "Eliminando chat",
-            "chatDeleted": "Chat eliminado"
+            "chatDeleted": "Chat eliminado",
+            "deleteThreadTitle": "¿Eliminar Hilo?"
           },
           "index": {
             "pastChats": "Chats Anteriores"

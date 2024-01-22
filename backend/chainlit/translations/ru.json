@@ -108,7 +108,8 @@
             "cancel": "Отмена",
             "confirm": "Подтвердить",
             "deletingChat": "Удаление чата",
-            "chatDeleted": "Чат удален"
+            "chatDeleted": "Чат удален",
+            "deleteThreadTitle": "Удалить обсуждение?"
           },
           "index": {
             "pastChats": "Прошлые чаты"

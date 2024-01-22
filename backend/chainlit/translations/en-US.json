@@ -109,7 +109,8 @@
             "cancel": "Cancel",
             "confirm": "Confirm",
             "deletingChat": "Deleting chat",
-            "chatDeleted": "Chat deleted"
+            "chatDeleted": "Chat deleted",
+            "deleteThreadTitle": "Delete Thread?"
           },
           "index": {
             "pastChats": "Past Chats"

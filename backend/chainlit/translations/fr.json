@@ -108,7 +108,8 @@
             "cancel": "Annuler",
             "confirm": "Confirmer",
             "deletingChat": "Suppression du chat",
-            "chatDeleted": "Chat supprimé"
+            "chatDeleted": "Chat supprimé",
+            "deleteThreadTitle": "Supprimer Fil?"
           },
           "index": {
             "pastChats": "Chats passés"

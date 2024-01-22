@@ -108,7 +108,8 @@
             "cancel": "取消",
             "confirm": "确认",
             "deletingChat": "正在删除聊天",
-            "chatDeleted": "聊天已删除"
+            "chatDeleted": "聊天已删除",
+            "deleteThreadTitle": "刪除話題？"
           },
           "index": {
             "pastChats": "过去的聊天"

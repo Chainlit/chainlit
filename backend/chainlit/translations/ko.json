@@ -108,7 +108,8 @@
             "cancel": "취소",
             "confirm": "확인",
             "deletingChat": "채팅 삭제 중",
-            "chatDeleted": "채팅 삭제됨"
+            "chatDeleted": "채팅 삭제됨",
+            "deleteThreadTitle": "스레드를 삭제하시겠습니까?"
           },
           "index": {
             "pastChats": "이전 채팅"
