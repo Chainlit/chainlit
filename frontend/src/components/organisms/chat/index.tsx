@@ -9,7 +9,8 @@ import { Alert, Box } from '@mui/material';
 import {
   threadHistoryState,
   useChatData,
-  useChatInteract
+  useChatInteract,
+  useChatSession
 } from '@chainlit/react-client';
 import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
@@ -27,6 +28,8 @@ import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 
 const Chat = () => {
+  const { idToResume } = useChatSession();
+
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
@@ -170,7 +173,7 @@ const Chat = () => {
       ) : null}
       <SideView>
         <Box my={1} />
-        {error && (
+        {error ? (
           <Box
             sx={{
               width: '100%',
@@ -183,7 +186,21 @@ const Chat = () => {
               <Translator path="components.organisms.chat.index.couldNotReachServer" />
             </Alert>
           </Box>
-        )}
+        ) : null}
+        {idToResume ? (
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: '60rem',
+              mx: 'auto',
+              my: 2
+            }}
+          >
+            <Alert sx={{ mx: 2 }} severity="info">
+              <Translator path="components.organisms.chat.index.continuingChat" />
+            </Alert>
+          </Box>
+        ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
           <ChatProfiles />

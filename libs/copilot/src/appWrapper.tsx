@@ -12,12 +12,14 @@ interface Props {
 }
 
 export default function AppWrapper({ config }: Props) {
+  const apiClient = makeApiClient(config.chainlitServer);
+
   return (
     <RecoilRoot>
       <WidgetContext.Provider
         value={{
           accessToken: config.accessToken,
-          apiClient: makeApiClient(config.chainlitServer)
+          apiClient
         }}
       >
         <App config={config} />

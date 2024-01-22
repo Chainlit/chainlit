@@ -1,14 +1,22 @@
-# Welcome to Chainlit 👋
+# Welcome to Chainlit by Literal AI 👋
 
 [![](https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat)](https://discord.gg/k73SQ3FyUh)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io)](https://twitter.com/chainlit_io)
 [![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
 
-**Build a production ready Chat GPT like application in minutes ⚡️**
+**Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
 
-Chainlit is an open-source async Python framework that makes it incredibly fast to build Chat GPT like applications with your **own business logic and data**.
+Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
 
-Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to the **Analytics & Observability** product.
+- ✅ ChatGPT-like application
+- ✅ Embedded Copilot
+- ✅ Custom frontend
+- ✅ API Endpoint
+- 🛠️ Teams/Slack Integration
+
+Full documentation is available [here](https://docs.chainlit.io).
+
+Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to Literal AI, our product to evaluate and monitor LLM applications.
 
 https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 
@@ -22,14 +30,6 @@ $ chainlit hello
 ```
 
 If this opens the `hello app` in your browser, you're all set!
-
-## 📖 Documentation
-
-Please see [here](https://docs.chainlit.io) for full documentation on:
-
-- Getting started (installation, simple examples)
-- Examples
-- Reference (full API docs)
 
 ## 🚀 Quickstart
 
@@ -78,24 +78,11 @@ $ chainlit run demo.py -w
 
 Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:
 
-- [Langchain](https://docs.chainlit.io/integrations/langchain)
+- [LangChain](https://docs.chainlit.io/integrations/langchain)
+- [Llama Index](https://docs.chainlit.io/integrations/llama-index)
 - [Autogen](https://github.com/Chainlit/cookbook/tree/main/pyautogen)
 - [OpenAI Assistant](https://github.com/Chainlit/cookbook/tree/main/openai-assistant)
-- [Llama Index](https://docs.chainlit.io/integrations/llama-index)
 - [Haystack](https://docs.chainlit.io/integrations/haystack)
-
-## 🎨 Custom Frontend
-
-Chainlit allows you to create a custom frontend for your application, offering you the flexibility to design a unique user experience. By integrating your frontend with Chainlit's backend, you can harness the full power of Chainlit's features, including:
-
-- Abstractions for easier development
-- Monitoring and observability
-- Seamless integrations with various tools
-- Robust authentication mechanisms
-- Support for multi-user environments
-- Efficient data streaming capabilities
-
-To build and connect your own frontend, check out our [Custom Frontend Cookbook](https://github.com/Chainlit/cookbook/tree/main/custom-frontend).
 
 ## 📚 More Examples - Cookbook
 
