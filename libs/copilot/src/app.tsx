@@ -45,13 +45,16 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
-          data.ui.hide_cot = config.show_cot ? false : true;
-          if (config.theme) {
-            setSettings((old) => ({ ...old, theme: config.theme! }));
-          }
+          data.ui.hide_cot = config.showCot ? data.ui.hide_cot : true;
+          setSettings((old) => ({
+            ...old,
+            theme: config.theme ? config.theme : old.theme,
+            hideCot: data.ui.hide_cot!
+          }));
+
           const _theme = overrideTheme(
             makeTheme(config.theme || settings.theme, config.fontFamily, {
-              // Hack to provoke small responsivity
+              // Force mobile view
               values: {
                 xs: 0,
                 sm: 10000,

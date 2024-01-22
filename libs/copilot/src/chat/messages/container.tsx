@@ -8,6 +8,7 @@ import {
   sideViewState
 } from '@chainlit/app/src/state/project';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
+import { settingsState } from '@chainlit/app/src/state/settings';
 import {
   IAction,
   IAsk,
@@ -51,6 +52,7 @@ const MessageContainer = memo(
   }: Props) => {
     const { apiClient } = useContext(WidgetContext);
     const projectSettings = useRecoilValue(projectSettingsState);
+    const { hideCot } = useRecoilValue(settingsState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
@@ -94,7 +96,6 @@ const MessageContainer = memo(
     );
 
     const onError = useCallback((error: string) => toast.error(error), [toast]);
-
     // Memoize the context object since it's created on each render.
     // This prevents unnecessary re-renders of children components when no props have changed.
     const memoizedContext = useMemo(() => {
@@ -106,7 +107,7 @@ const MessageContainer = memo(
         avatars,
         defaultCollapseContent: true,
         expandAll: false,
-        hideCot: true,
+        hideCot: hideCot,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
