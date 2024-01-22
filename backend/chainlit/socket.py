@@ -146,6 +146,7 @@ async def connect(sid, environ, auth):
         user_env=user_env,
         user=user,
         token=token,
+        query_params=environ.get("HTTP_QUERY_PARAMS"),
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
@@ -185,7 +186,9 @@ async def connection_successful(sid):
             return
 
     if config.code.on_chat_start:
-        await config.code.on_chat_start()
+        await config.code.on_chat_start({
+            "query_params": context.session.query_params,
+        })
 
 
 @socket.on("clear_session")
