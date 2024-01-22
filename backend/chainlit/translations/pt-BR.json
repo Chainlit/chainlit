@@ -130,28 +130,28 @@
         "chat": "Conversa",
         "readme": "Leia-me"
       }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "Falha ao buscar provedores:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "Salvo com sucesso",
+      "requiredApiKeys": "Chaves de API necessárias",
+      "requiredApiKeysInfo": "Para usar este aplicativo, as seguintes chaves de API são necessárias. As chaves são armazenadas localmente em seu dispositivo."
     },
-    "hooks": {
-      "useLLMProviders": {
-        "failedToFetchProviders": "Falha ao buscar provedores:"
-      }
+    "Login": {
+      "authTitle": "Faça login para acessar o aplicativo."
     },
-    "pages": {
-      "Design": {},
-      "Env": {
-        "savedSuccessfully": "Salvo com sucesso",
-        "requiredApiKeys": "Chaves de API necessárias",
-        "requiredApiKeysInfo": "Para usar este aplicativo, as seguintes chaves de API são necessárias. As chaves são armazenadas localmente em seu dispositivo."
-      },
-      "Login": {
-        "authTitle": "Faça login para acessar o aplicativo."
-      },
-      "Page": {
-        "notPartOfProject": "Você não faz parte deste projeto."
-      },
-      "ResumeButton": {
-        "resumeChat": "Continuar Conversa"
-      }
+    "Page": {
+      "notPartOfProject": "Você não faz parte deste projeto."
+    },
+    "ResumeButton": {
+      "resumeChat": "Continuar Conversa"
     }
   }
 }
