@@ -505,6 +505,9 @@ async def project_settings(
     # Load translation based on the provided language
     translation = config.load_translation(language)
 
+    # Load the markdown file based on the provided language
+    markdown = get_markdown_str(config.root, language)
+
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
@@ -517,7 +520,7 @@ async def project_settings(
             "userEnv": config.project.user_env,
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
-            "markdown": get_markdown_str(config.root),
+            "markdown": markdown,
             "chatProfiles": profiles,
             "translation": translation,
         }
