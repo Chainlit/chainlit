@@ -258,6 +258,8 @@ export class ChainlitAPI extends APIBase {
         xhr.setRequestHeader('Authorization', this.checkToken(token));
       }
 
+      xhr.setRequestHeader('X-Chainlit-Session-Id', sessionId);
+
       // Track the progress of the upload
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
