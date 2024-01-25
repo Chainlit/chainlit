@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union, List
 
 from chainlit.session import HTTPSession, WebsocketSession
 from lazify import LazyProxy
@@ -9,6 +9,7 @@ from lazify import LazyProxy
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
     from chainlit.user import PersistedUser, User
+    from chainlit.step import Step
 
 
 class ChainlitContextException(Exception):
@@ -20,17 +21,19 @@ class ChainlitContext:
     loop: asyncio.AbstractEventLoop
     emitter: "BaseChainlitEmitter"
     session: Union["HTTPSession", "WebsocketSession"]
+    active_steps: List["Step"]
 
     @property
     def current_step(self):
-        if self.session.active_steps:
-            return self.session.active_steps[-1]
+        if self.active_steps:
+            return self.active_steps[-1]
 
     def __init__(self, session: Union["HTTPSession", "WebsocketSession"]):
         from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
 
         self.loop = asyncio.get_running_loop()
         self.session = session
+        self.active_steps = []
         if isinstance(self.session, HTTPSession):
             self.emitter = BaseChainlitEmitter(self.session)
         elif isinstance(self.session, WebsocketSession):
@@ -38,6 +41,8 @@ class ChainlitContext:
 
 
 context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
+local_steps: ContextVar[Optional[List["Step"]]] = ContextVar("local_steps")
+local_steps.set(None)
 
 
 def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitContext:
