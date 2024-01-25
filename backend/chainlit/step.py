@@ -391,6 +391,12 @@ class Step:
 
         if self in context.active_steps:
             context.active_steps.remove(self)
+
+        local_active_steps = local_steps.get()
+        if local_active_steps and self in local_active_steps:
+            local_active_steps.remove(self)
+            local_steps.set(local_active_steps)
+
         await self.update()
 
     def __enter__(self):
@@ -414,4 +420,10 @@ class Step:
         self.end = datetime.utcnow().isoformat()
         if self in context.active_steps:
             context.active_steps.remove(self)
+
+        local_active_steps = local_steps.get()
+        if local_active_steps and self in local_active_steps:
+            local_active_steps.remove(self)
+            local_steps.set(local_active_steps)
+
         asyncio.create_task(self.update())
