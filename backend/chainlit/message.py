@@ -22,8 +22,8 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai.step import MessageStepType
 from literalai import BaseGeneration
+from literalai.step import MessageStepType
 
 
 class MessageBase(ABC):
@@ -41,7 +41,7 @@ class MessageBase(ABC):
     language: Optional[str] = None
     wait_for_answer = False
     indent: Optional[int] = None
-    generation: Optional[BaseGeneration]
+    generation: Optional[BaseGeneration] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
