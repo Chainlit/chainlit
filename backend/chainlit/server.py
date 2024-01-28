@@ -136,41 +136,42 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir(local_target: str, packaged_target: str):
-    local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
-    packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
-    if os.path.exists(local_build_dir):
-        return local_build_dir
-    elif os.path.exists(packaged_build_dir):
-        return packaged_build_dir
-    else:
-        raise FileNotFoundError(f"{local_target} built UI dir not found")
+# def get_build_dir(local_target: str, packaged_target: str):
+#     local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
+#     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
+#     if os.path.exists(local_build_dir):
+#         return local_build_dir
+#     elif os.path.exists(packaged_build_dir):
+#         return packaged_build_dir
+#     else:
+#         raise FileNotFoundError(f"{local_target} built UI dir not found")
 
 
-build_dir = get_build_dir("frontend", "frontend")
-copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
+# # if not config.project.backend_only:
+# build_dir = get_build_dir("frontend", "frontend")
+# copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
-app.mount(
-    "/assets",
-    StaticFiles(
-        packages=[("chainlit", os.path.join(build_dir, "assets"))],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="assets",
-)
+# app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
+# app.mount(
+#     "/assets",
+#     StaticFiles(
+#         packages=[("chainlit", os.path.join(build_dir, "assets"))],
+#         follow_symlink=config.project.follow_symlink,
+#     ),
+#     name="assets",
+# )
 
-app.mount(
-    "/copilot",
-    StaticFiles(
-        packages=[("chainlit", copilot_build_dir)],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="copilot",
-)
+# app.mount(
+#     "/copilot",
+#     StaticFiles(
+#         packages=[("chainlit", copilot_build_dir)],
+#         follow_symlink=config.project.follow_symlink,
+#     ),
+#     name="copilot",
+# )
 
 
 app.add_middleware(
@@ -198,48 +199,48 @@ def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: s
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
-def get_html_template():
-    PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
-    JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
-    CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
+# def get_html_template():
+#     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
+#     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
+#     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
-    default_url = "https://github.com/Chainlit/chainlit"
-    url = config.ui.github or default_url
+#     default_url = "https://github.com/Chainlit/chainlit"
+#     url = config.ui.github or default_url
 
-    tags = f"""<title>{config.ui.name}</title>
-    <meta name="description" content="{config.ui.description}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="{config.ui.name}">
-    <meta property="og:description" content="{config.ui.description}">
-    <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
-    <meta property="og:url" content="{url}">"""
+#     tags = f"""<title>{config.ui.name}</title>
+#     <meta name="description" content="{config.ui.description}">
+#     <meta property="og:type" content="website">
+#     <meta property="og:title" content="{config.ui.name}">
+#     <meta property="og:description" content="{config.ui.description}">
+#     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
+#     <meta property="og:url" content="{url}">"""
 
-    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
+#     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
-    css = None
-    if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
+#     css = None
+#     if config.ui.custom_css:
+#         css = (
+#             f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
+#         )
 
-    font = None
-    if config.ui.custom_font:
-        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
+#     font = None
+#     if config.ui.custom_font:
+#         font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
 
-    index_html_file_path = os.path.join(build_dir, "index.html")
+#     index_html_file_path = os.path.join(build_dir, "index.html")
 
-    with open(index_html_file_path, "r", encoding="utf-8") as f:
-        content = f.read()
-        content = content.replace(PLACEHOLDER, tags)
-        if js:
-            content = content.replace(JS_PLACEHOLDER, js)
-        if css:
-            content = content.replace(CSS_PLACEHOLDER, css)
-        if font:
-            content = replace_between_tags(
-                content, "<!-- FONT START -->", "<!-- FONT END -->", font
-            )
-        return content
+#     with open(index_html_file_path, "r", encoding="utf-8") as f:
+#         content = f.read()
+#         content = content.replace(PLACEHOLDER, tags)
+#         if js:
+#             content = content.replace(JS_PLACEHOLDER, js)
+#         if css:
+#             content = content.replace(CSS_PLACEHOLDER, css)
+#         if font:
+#             content = replace_between_tags(
+#                 content, "<!-- FONT START -->", "<!-- FONT END -->", font
+#             )
+#         return content
 
 
 def get_user_facing_url(url: URL):
@@ -697,51 +698,52 @@ async def serve_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/favicon")
-async def get_favicon():
-    custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
-    files = glob.glob(custom_favicon_path)
+# @app.get("/favicon")
+# async def get_favicon():
+#     custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
+#     files = glob.glob(custom_favicon_path)
 
-    if files:
-        favicon_path = files[0]
-    else:
-        favicon_path = os.path.join(build_dir, "favicon.svg")
+#     if files:
+#         favicon_path = files[0]
+#     else:
+#         favicon_path = os.path.join(build_dir, "favicon.svg")
 
-    media_type, _ = mimetypes.guess_type(favicon_path)
+#     media_type, _ = mimetypes.guess_type(favicon_path)
 
-    return FileResponse(favicon_path, media_type=media_type)
+#     return FileResponse(favicon_path, media_type=media_type)
 
 
-@app.get("/logo")
-async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
-    theme_value = theme.value if theme else Theme.light.value
-    logo_path = None
+# @app.get("/logo")
+# async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
+#     theme_value = theme.value if theme else Theme.light.value
+#     logo_path = None
 
-    for path in [
-        os.path.join(APP_ROOT, "public", f"logo_{theme_value}.*"),
-        os.path.join(build_dir, "assets", f"logo_{theme_value}*.*"),
-    ]:
-        files = glob.glob(path)
+#     for path in [
+#         os.path.join(APP_ROOT, "public", f"logo_{theme_value}.*"),
+#         os.path.join(build_dir, "assets", f"logo_{theme_value}*.*"),
+#     ]:
+#         files = glob.glob(path)
 
-        if files:
-            logo_path = files[0]
-            break
+#         if files:
+#             logo_path = files[0]
+#             break
 
-    if not logo_path:
-        raise HTTPException(status_code=404, detail="Missing default logo")
-    media_type, _ = mimetypes.guess_type(logo_path)
+#     if not logo_path:
+#         raise HTTPException(status_code=404, detail="Missing default logo")
+#     media_type, _ = mimetypes.guess_type(logo_path)
 
-    return FileResponse(logo_path, media_type=media_type)
+#     return FileResponse(logo_path, media_type=media_type)
 
 
 def register_wildcard_route_handler():
-    @app.get("/{path:path}")
-    async def serve(request: Request, path: str):
-        html_template = get_html_template()
-        """Serve the UI files."""
-        response = HTMLResponse(content=html_template, status_code=200)
+    pass
+    # @app.get("/{path:path}")
+    # async def serve(request: Request, path: str):
+    #     html_template = get_html_template()
+    #     """Serve the UI files."""
+    #     response = HTMLResponse(content=html_template, status_code=200)
 
-        return response
+    #     return response
 
 
 import chainlit.socket  # noqa
