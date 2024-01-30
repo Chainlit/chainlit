@@ -222,6 +222,9 @@ def get_html_template():
             f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
         )
 
+    if config.ui.custom_js:
+        js += f"""<script src="{config.ui.custom_js}"></script>"""
+
     font = None
     if config.ui.custom_font:
         font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
