@@ -1,13 +1,12 @@
 import { useAuth } from 'api/auth';
 import { memo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
 
+// import { useTranslation } from 'react-i18next';
+// import { Link, useLocation } from 'react-router-dom'; By Jay 5/2/2024
 import MenuIcon from '@mui/icons-material/Menu';
 import {
   AppBar,
-  Box,
-  Button,
+  Box, // Button, By Jay 5/2/2024
   IconButton,
   Menu,
   Stack,
@@ -15,10 +14,9 @@ import {
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { RegularButton } from '@chainlit/react-components';
-
+// import { RegularButton } from '@chainlit/react-components'; By Jay 5/2/2024
 import GithubButton from 'components/atoms/buttons/githubButton';
-import UserButton from 'components/atoms/buttons/userButton';
+// import UserButton from 'components/atoms/buttons/userButton'; By Jay 5/2/2024
 import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 
@@ -26,37 +24,38 @@ import { IProjectSettings } from 'state/project';
 
 import { OpenThreadListButton } from './threadHistory/sidebar/OpenThreadListButton';
 
-interface INavItem {
-  to: string;
-  label: string;
-}
+//By Jay 5/2/2024
+// interface INavItem {
+//   to: string;
+//   label: string;
+// }
 
-function ActiveNavItem({ to, label }: INavItem) {
-  return (
-    <RegularButton component={Link} to={to} key={to}>
-      {label}
-    </RegularButton>
-  );
-}
+// function ActiveNavItem({ to, label }: INavItem) {
+//   return (
+//     <RegularButton component={Link} to={to} key={to}>
+//       {label}
+//     </RegularButton>
+//   );
+// }
 
-function NavItem({ to, label }: INavItem) {
-  return (
-    <Button
-      component={Link}
-      to={to}
-      key={to}
-      sx={{
-        textTransform: 'none',
-        color: 'text.secondary',
-        '&:hover': {
-          background: 'transparent'
-        }
-      }}
-    >
-      {label}
-    </Button>
-  );
-}
+// function NavItem({ to, label }: INavItem) {
+//   return (
+//     <Button
+//       component={Link}
+//       to={to}
+//       key={to}
+//       sx={{
+//         textTransform: 'none',
+//         color: 'text.secondary',
+//         '&:hover': {
+//           background: 'transparent'
+//         }
+//       }}
+//     >
+//       {label}
+//     </Button>
+//   );
+// }
 
 interface NavProps {
   dataPersistence?: boolean;
@@ -64,13 +63,15 @@ interface NavProps {
   matches?: boolean;
 }
 
-const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
-  const location = useLocation();
+//By Jay 5/2/2024
+// const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
+const Nav = ({ dataPersistence, matches }: NavProps) => {
+  // const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
 
-  const { t } = useTranslation();
+  // const { t } = useTranslation(); By Jay 5/2/2024
 
   let anchorEl;
 
@@ -78,25 +79,26 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
     anchorEl = ref.current;
   }
 
-  const tabs = [{ to: '/', label: t('components.organisms.header.chat') }];
+  //By Jay 5/2/2024
+  // const tabs = [{ to: '/', label: t('components.organisms.header.chat') }];
 
-  if (hasReadme) {
-    tabs.push({
-      to: '/readme',
-      label: t('components.organisms.header.readme')
-    });
-  }
+  // if (hasReadme) {
+  //   tabs.push({
+  //     to: '/readme',
+  //     label: t('components.organisms.header.readme')
+  //   });
+  // }
 
   const nav = (
     <Stack direction={matches ? 'column' : 'row'} spacing={1}>
-      {tabs.map((t) => {
+      {/* {tabs.map((t) => {
         const active = location.pathname === t.to;
         return (
           <div key={t.to}>
             {active ? <ActiveNavItem {...t} /> : <NavItem {...t} />}
           </div>
         );
-      })}
+      })} By Jay 5/2/2024*/}
     </Stack>
   );
 
@@ -165,7 +167,7 @@ const Header = memo(
             <Nav
               matches={matches}
               dataPersistence={projectSettings?.dataPersistence}
-              hasReadme={!!projectSettings?.markdown}
+              // hasReadme={!!projectSettings?.markdown} By Jay 5/2/2024
             />
           </Stack>
           <Stack
@@ -178,7 +180,7 @@ const Header = memo(
             <NewChatButton />
             <Box ml={1} />
             <GithubButton href={projectSettings?.ui?.github} />
-            <UserButton />
+            {/* <UserButton />By Jay 5/2/2024 */}
           </Stack>
         </Toolbar>
       </AppBar>

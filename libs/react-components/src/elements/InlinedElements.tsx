@@ -3,12 +3,15 @@ import Stack from '@mui/material/Stack';
 import type { ElementType, IMessageElement } from 'client-types/';
 
 import { InlinedAudioList } from './InlinedAudioList';
+import { InlinedEchartList } from './InlinedEchartList';
 import { InlinedFileList } from './InlinedFileList';
 import { InlinedImageList } from './InlinedImageList';
 import { InlinedPDFList } from './InlinedPDFList';
 import { InlinedPlotlyList } from './InlinedPlotlyList';
 import { InlinedTextList } from './InlinedTextList';
 import { InlinedVideoList } from './InlinedVideoList';
+
+// Added By Jay 5/2/2024
 
 interface Props {
   elements: IMessageElement[];
@@ -63,6 +66,9 @@ const InlinedElements = ({ elements }: Props) => {
       ) : null}
       {elementsByType.plotly?.length ? (
         <InlinedPlotlyList items={elementsByType.plotly} />
+      ) : null}
+      {elementsByType.echarts?.length ? ( // Added by Jay 24/1/2024
+        <InlinedEchartList items={elementsByType.echarts} />
       ) : null}
     </Stack>
   );

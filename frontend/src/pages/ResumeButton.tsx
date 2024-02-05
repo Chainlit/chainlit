@@ -7,8 +7,8 @@ import { Box, Button } from '@mui/material';
 import { useChatInteract } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
-import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 
+// import WaterMark from 'components/organisms/chat/inputBox/waterMark'; By Jay 5/2/2024
 import { projectSettingsState } from 'state/project';
 
 interface Props {
@@ -48,7 +48,7 @@ export default function ResumeButton({ threadId }: Props) {
       <Button id="resumeThread" onClick={onClick} variant="contained">
         <Translator path="pages.ResumeButton.resumeChat" />
       </Button>
-      <WaterMark />
+      {/* <WaterMark /> By Jay 5/2/2024 */}
     </Box>
   );
 }

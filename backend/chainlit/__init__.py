@@ -25,6 +25,7 @@ from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
+from chainlit.element import ECharts  # Added by Jay 5/2/2024
 from chainlit.element import (
     Audio,
     Avatar,
@@ -331,6 +332,7 @@ __all__ = [
     "TaskList",
     "TaskStatus",
     "Video",
+    "Echarts",  # Added by Jay 5/2/2024
     "ChatSettings",
     "input_widget",
     "Message",

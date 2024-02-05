@@ -53,10 +53,21 @@ export const yellow = {
   900: '#995C00'
 };
 
+// By Jay 5/2/2024
+export const lightblue = {
+  50: '#ADD8E6'
+};
+
+export const darkblue = {
+  50: '#00008B'
+};
+
 export default {
   white,
   grey,
   primary,
   green,
-  yellow
+  yellow,
+  lightblue, // By Jay 5/2/2024
+  darkblue // By Jay 5/2/2024
 };

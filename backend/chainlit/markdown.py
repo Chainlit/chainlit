@@ -2,8 +2,8 @@ import os
 
 from chainlit.logger import logger
 
-# Default chainlit.md file created if none exists
-DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
+# Default chainlit.md file created if none exists #modified by Jay 5/2/2024
+DEFAULT_MARKDOWN_STR = """# Welcome to HaLLMark AI! 🚀🤖
 
 Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
 

@@ -29,4 +29,5 @@ class PersistedUserFields:
 
 @dataclass
 class PersistedUser(User, PersistedUserFields):
-    pass
+    # pass
+    metadata: Dict = Field(default_factory=dict)  # Added By Jay 3/2/2024

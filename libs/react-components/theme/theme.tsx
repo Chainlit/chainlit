@@ -1,10 +1,21 @@
 import { BreakpointsOptions } from '@mui/material';
 import createTheme from '@mui/material/styles/createTheme';
 
-import { green, grey, primary, white } from './palette';
+import { darkblue, green, grey, lightblue, white } from './palette';
 
 const typography = {
-  fontFamily: ['Inter', 'sans-serif'].join(',')
+  // fontFamily: ['Inter', 'sans-serif'].join(',') // By Jay 5/2/2024
+  fontFamily: [
+    '-apple-system',
+    'BlinkMacSystemFont',
+    '"Segoe UI"',
+    'Roboto',
+    'Oxygen-Sans',
+    'Ubuntu',
+    'Cantarell',
+    '"Helvetica Neue"',
+    'sans-serif'
+  ].join(',')
 };
 
 const components = {
@@ -68,18 +79,18 @@ const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
         paper: grey[900]
       },
       primary: {
-        main: '#F80061',
-        dark: primary[800],
-        light: '#FFE7EB',
+        main: darkblue[50], // By Jay 5/2/2024
+        dark: lightblue[50], // By Jay 5/2/2024
+        light: white,
         contrastText: white
       },
       secondary: {
-        main: '#9757D7',
-        dark: '#763FB8',
-        light: '#B87FE7',
+        main: darkblue[50], // By Jay 5/2/2024
+        dark: darkblue[50], // By Jay 5/2/2024
+        light: darkblue[50], // By Jay 5/2/2024
         contrastText: white
       },
-      divider: grey[800],
+      divider: darkblue[50], // By Jay 5/2/2024
       text: {
         primary: grey[200],
         secondary: grey[400]
@@ -102,18 +113,18 @@ const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
         paper: white
       },
       primary: {
-        main: '#F80061',
-        dark: primary[800],
-        light: '#FFE7EB',
+        main: darkblue[50], // By Jay 5/2/2024
+        dark: lightblue[50], // By Jay 5/2/2024
+        light: white,
         contrastText: white
       },
       secondary: {
-        main: '#9757D7',
-        dark: '#763FB8',
-        light: '#B87FE7',
+        main: darkblue[50], // By Jay 5/2/2024
+        dark: darkblue[50], // By Jay 5/2/2024
+        light: darkblue[50], // By Jay 5/2/2024
         contrastText: white
       },
-      divider: grey[200],
+      divider: darkblue[50], // By Jay 5/2/2024
       text: {
         primary: grey[900],
         secondary: grey[700]

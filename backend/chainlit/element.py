@@ -17,10 +17,20 @@ mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
     "plotly": "application/json",
+    "echarts": "application/json",  # Modified by Jay 5/2/2024
 }
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image",
+    "avatar",
+    "text",
+    "pdf",
+    "tasklist",
+    "audio",
+    "video",
+    "file",
+    "plotly",
+    "echarts",  # Modified by Jay 5/2/2024
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -344,4 +354,21 @@ class Plotly(Element):
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
 
+        super().__post_init__()
+
+
+# Echarts Dataclass added by Jay 24/1/2024
+@dataclass
+class ECharts(Element):
+    """Useful to send an echarts chart to the UI."""
+
+    type: ClassVar[ElementType] = "echarts"
+
+    size: ElementSize = "medium"
+    # The chart options to be sent to the UI
+    options: Optional[dict] = None
+
+    def __post_init__(self) -> None:
+        self.mime = "application/json"
+        self.content = json.dumps(self.options)
         super().__post_init__()
