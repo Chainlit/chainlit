@@ -16,6 +16,7 @@ export default function Login() {
   const { data: config, setAccessToken, user } = useAuth();
   const [error, setError] = useState('');
   const apiClient = useRecoilValue(apiClientState);
+  const redirect = query.get('redirect') || '/';
 
   const navigate = useNavigate();
 
@@ -23,7 +24,7 @@ export default function Login() {
     try {
       const json = await apiClient.headerAuth();
       setAccessToken(json.access_token);
-      navigate('/');
+      navigate(redirect);
     } catch (error: any) {
       setError(error.message);
     }
@@ -56,13 +57,13 @@ export default function Login() {
       return;
     }
     if (!config.requireLogin) {
-      navigate('/');
+      navigate(redirect);
     }
     if (config.headerAuth) {
       handleHeaderAuth();
     }
     if (user) {
-      navigate('/');
+      navigate(redirect);
     }
   }, [config, user]);
 

@@ -64,6 +64,8 @@ class BaseSession:
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Query Params
+        query_params: Optional[Dict[str, str]] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -75,6 +77,7 @@ class BaseSession:
         self.has_first_interaction = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
+        self.query_params = query_params
         self.active_steps = []
 
         self.id = id
@@ -165,6 +168,8 @@ class WebsocketSession(BaseSession):
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Query Params
+        query_params: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
             id=id,
@@ -175,6 +180,7 @@ class WebsocketSession(BaseSession):
             client_type=client_type,
             root_message=root_message,
             chat_profile=chat_profile,
+            query_params=query_params,
         )
 
         self.socket_id = socket_id

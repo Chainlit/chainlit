@@ -39,7 +39,8 @@ export default function AppWrapper() {
     window.location.pathname !== '/login' &&
     window.location.pathname !== '/login/callback'
   ) {
-    window.location.href = '/login';
+  
+    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href)
   }
 
   useEffect(() => {

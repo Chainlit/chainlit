@@ -75,6 +75,9 @@ const useChatSession = () => {
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const queryParamsObject = Object.fromEntries(queryParams.entries());      
+
       const socket = io(client.httpEndpoint, {
         path: '/ws/socket.io',
         extraHeaders: {
@@ -83,6 +86,7 @@ const useChatSession = () => {
           'X-Chainlit-Session-Id': sessionId,
           'X-Chainlit-Thread-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
+          'query-params': JSON.stringify(queryParamsObject),
           'X-Chainlit-Chat-Profile': chatProfile || ''
         }
       });
