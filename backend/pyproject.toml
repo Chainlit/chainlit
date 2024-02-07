@@ -26,7 +26,7 @@ httpx = ">=0.23.0,<0.25.0"
 literalai = "0.0.103"
 dataclasses_json = "^0.5.7"
 # FastAPI 0.109.0 breaks socketio (alway 404)
-fastapi = ">=0.100,<0.109.0"
+fastapi = ">=0.100,<0.109.1"
 uvicorn = "^0.25.0"
 fastapi-socketio = "^0.0.10"
 aiofiles = "^23.1.0"
