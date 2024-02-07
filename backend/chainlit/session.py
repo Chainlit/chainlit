@@ -43,7 +43,6 @@ def clean_metadata(metadata: Dict):
 class BaseSession:
     """Base object."""
 
-    active_steps: List["Step"]
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
 
@@ -75,7 +74,6 @@ class BaseSession:
         self.has_first_interaction = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
-        self.active_steps = []
 
         self.id = id
 
