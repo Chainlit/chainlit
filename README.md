@@ -9,10 +9,9 @@
 Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
 
 - ✅ ChatGPT-like application
-- ✅ Embedded Copilot
-- ✅ Custom frontend
+- ✅ Embedded Chatbot & Software Copilot
+- ✅ Custom frontend (build your own agentic experience)
 - ✅ API Endpoint
-- 🛠️ Teams/Slack Integration
 
 Full documentation is available [here](https://docs.chainlit.io).
 
@@ -73,8 +72,15 @@ $ chainlit run demo.py -w
 ```
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
+## 🎉 Key Features and Integrations
 
-### 🔗 Integrations
+Full documentation is available [here](https://docs.chainlit.io). Key features:
+
+- [💬 Multi Modal chats](https://docs.chainlit.io/advanced-features/multi-modal)
+- [💭 Chain of Thought visualisation](https://docs.chainlit.io/concepts/step)
+- [💾 Data persistence + human feedback](https://docs.chainlit.io/data-persistence/overview)
+- [🛝 In context Prompt Playground](https://docs.chainlit.io/advanced-features/prompt-playground/overview)
+- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
 
 Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:
 

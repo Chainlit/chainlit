@@ -8,7 +8,7 @@ from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
-from chainlit.context import context
+from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
@@ -373,36 +373,57 @@ class Step:
     # Handle Context Manager Protocol
     async def __aenter__(self):
         self.start = datetime.utcnow().isoformat()
+        previous_steps = local_steps.get() or []
+        parent_step = previous_steps[-1] if previous_steps else None
+
         if not self.parent_id and not self.root:
-            if current_step := context.current_step:
-                self.parent_id = current_step.id
+            if parent_step:
+                self.parent_id = parent_step.id
             elif context.session.root_message:
                 self.parent_id = context.session.root_message.id
-        context.session.active_steps.append(self)
+        context.active_steps.append(self)
+        local_steps.set(previous_steps + [self])
         await self.send()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.end = datetime.utcnow().isoformat()
 
-        if self in context.session.active_steps:
-            context.session.active_steps.remove(self)
+        if self in context.active_steps:
+            context.active_steps.remove(self)
+
+        local_active_steps = local_steps.get()
+        if local_active_steps and self in local_active_steps:
+            local_active_steps.remove(self)
+            local_steps.set(local_active_steps)
+
         await self.update()
 
     def __enter__(self):
         self.start = datetime.utcnow().isoformat()
+
+        previous_steps = local_steps.get() or []
+        parent_step = previous_steps[-1] if previous_steps else None
+
         if not self.parent_id and not self.root:
-            if current_step := context.current_step:
-                self.parent_id = current_step.id
+            if parent_step:
+                self.parent_id = parent_step.id
             elif context.session.root_message:
                 self.parent_id = context.session.root_message.id
-        context.session.active_steps.append(self)
+        context.active_steps.append(self)
+        local_steps.set(previous_steps + [self])
 
         asyncio.create_task(self.send())
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.end = datetime.utcnow().isoformat()
-        if self in context.session.active_steps:
-            context.session.active_steps.remove(self)
+        if self in context.active_steps:
+            context.active_steps.remove(self)
+
+        local_active_steps = local_steps.get()
+        if local_active_steps and self in local_active_steps:
+            local_active_steps.remove(self)
+            local_steps.set(local_active_steps)
+
         asyncio.create_task(self.update())

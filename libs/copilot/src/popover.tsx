@@ -27,7 +27,8 @@ export default function PopOver({ anchorEl }: Props) {
         borderRadius: '12px',
         background: (theme) => theme.palette.background.default,
         boxShadow:
-          '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important'
+          '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important',
+        zIndex: 1000
       }}
     >
       <Fade in={!!anchorEl}>

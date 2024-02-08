@@ -22,6 +22,7 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
+from literalai import BaseGeneration
 from literalai.step import MessageStepType
 
 
@@ -40,6 +41,7 @@ class MessageBase(ABC):
     language: Optional[str] = None
     wait_for_answer = False
     indent: Optional[int] = None
+    generation: Optional[BaseGeneration] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -80,6 +82,7 @@ class MessageBase(ABC):
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
+            "generation": self.generation.to_dict() if self.generation else None,
         }
 
         return _dict
@@ -205,12 +208,13 @@ class Message(MessageBase):
         elements: Optional[List[ElementBased]] = None,
         disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
+        generation: Optional[BaseGeneration] = None,
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
         self.language = language
-
+        self.generation = generation
         if isinstance(content, dict):
             try:
                 self.content = json.dumps(content, indent=4, ensure_ascii=False)
