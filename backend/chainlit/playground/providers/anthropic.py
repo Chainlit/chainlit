@@ -9,18 +9,20 @@ class AnthropicProvider(BaseProvider):
     def message_to_string(self, message: GenerationMessage) -> str:
         import anthropic
 
-        if message.role == "user":
-            message_text = f"{anthropic.HUMAN_PROMPT} {message.formatted}"
-        elif message.role == "assistant":
-            message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
-        elif message.role == "function":
-            message_text = f"{anthropic.AI_PROMPT} {message.formatted}"
-        elif message.role == "system":
+        if message["role"] == "user":
+            message_text = f"{anthropic.HUMAN_PROMPT} {message['content']}"
+        elif message["role"] == "assistant":
+            message_text = f"{anthropic.AI_PROMPT} {message['content']}"
+        elif message["role"] == "function":
+            message_text = f"{anthropic.AI_PROMPT} {message['content']}"
+        elif message["role"] == "system":
             message_text = (
-                f"{anthropic.HUMAN_PROMPT} <admin>{message.formatted}</admin>"
+                f"{anthropic.HUMAN_PROMPT} <admin>{message['content']}</admin>"
             )
         else:
-            raise HTTPException(status_code=400, detail=f"Got unknown type {message}")
+            raise HTTPException(
+                status_code=400, detail=f"Got unknown type {message['role']}"
+            )
         return message_text
 
     async def create_completion(self, request):

@@ -19,56 +19,34 @@ class BaseProvider:
     inputs: List[input_widget.InputWidget]
     is_chat: bool
 
-    # Format the message based on the template provided
-    def format_message(self, message: GenerationMessage, inputs: Optional[Dict]):
-        if message.template:
-            message.formatted = self._format_template(
-                message.template, inputs, message.template_format
-            )
-        return message
-
     # Convert the message to string format
     def message_to_string(self, message: GenerationMessage):
-        return message.formatted
+        return message["content"]
 
     # Concatenate multiple messages with a joiner
     def concatenate_messages(self, messages: List[GenerationMessage], joiner="\n\n"):
         return joiner.join([self.message_to_string(m) for m in messages])
 
     # Format the template based on the prompt inputs
-    def _format_template(
-        self, template: str, inputs: Optional[Dict], format: str = "f-string"
-    ):
-        if format == "f-string":
-            return template.format(**(inputs or {}))
-        raise HTTPException(status_code=422, detail=f"Unsupported format {format}")
+    def _format_template(self, template: str, inputs: Optional[Dict]):
+        return template.format(**(inputs or {}))
 
     # Create a prompt based on the request
     def create_generation(self, request: GenerationRequest):
         if request.chatGeneration and request.chatGeneration.messages:
-            messages = [
-                self.format_message(m, request.chatGeneration.inputs)
-                for m in request.chatGeneration.messages
-            ]
+            messages = request.chatGeneration.messages
         else:
             messages = None
 
         if self.is_chat:
             if messages:
                 return messages
-            elif request.completionGeneration and (
-                request.completionGeneration.template
-                or request.completionGeneration.formatted
-            ):
+            elif request.completionGeneration and request.completionGeneration.prompt:
                 return [
-                    self.format_message(
-                        GenerationMessage(
-                            template=request.completionGeneration.template,
-                            formatted=request.completionGeneration.formatted,
-                            role="user",
-                        ),
-                        inputs=request.completionGeneration.inputs,
-                    )
+                    GenerationMessage(
+                        content=request.completionGeneration.prompt,
+                        role="user",
+                    ),
                 ]
             else:
                 raise HTTPException(
@@ -76,14 +54,7 @@ class BaseProvider:
                 )
         else:
             if request.completionGeneration:
-                if request.completionGeneration.template:
-                    return self._format_template(
-                        request.completionGeneration.template,
-                        request.completionGeneration.inputs,
-                        request.completionGeneration.template_format,
-                    )
-                elif request.completionGeneration.formatted:
-                    return request.completionGeneration.formatted
+                return request.completionGeneration.prompt
             elif messages:
                 return self.concatenate_messages(messages)
             else:

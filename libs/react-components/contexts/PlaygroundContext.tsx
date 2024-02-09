@@ -8,7 +8,7 @@ const defaultPlaygroundContext: IPlaygroundContext = {
   setPromptMode: () => undefined,
   setPlayground: () => undefined,
   onNotification: () => undefined,
-  promptMode: 'Template'
+  promptMode: 'Formatted'
 };
 
 const PlaygroundContext = createContext<IPlaygroundContext>(

@@ -28,8 +28,8 @@ export default function PromptMessage({
   const theme = useTheme();
 
   const templateProps = {
-    inputs: generation.inputs,
-    format: message.templateFormat,
+    inputs: generation.variables || {},
+    format: 'f-string',
     sxEditorChildren: {
       padding: theme.spacing(2),
       backgroundColor: '',
@@ -44,7 +44,7 @@ export default function PromptMessage({
       <TemplateEditor
         {...templateProps}
         showTitle={false}
-        template={message.template || message.formatted || ''}
+        template={message.content || ''}
         onChange={(state) => onChange(index, state)}
       />
     );
@@ -59,12 +59,12 @@ export default function PromptMessage({
           readOnly
         />
       );
-    } else if (typeof message.formatted === 'string') {
+    } else if (typeof message.content === 'string') {
       return (
         <FormattedEditor
           {...templateProps}
           onChange={(state) => onChange(index, state)}
-          formatted={message.formatted}
+          formatted={message.content}
           readOnly={false}
           showTitle={false}
         />

@@ -39,26 +39,27 @@ class LangchainGenericProvider(BaseProvider):
             SystemMessage,
         )
 
-        content = "" if message.formatted is None else message.formatted
-        if message.role == "user":
-            return HumanMessage(content=content)
-        elif message.role == "assistant":
-            return AIMessage(content=content)
-        elif message.role == "system":
-            return SystemMessage(content=content)
-        elif message.role == "tool":
+        content = "" if message["content"] is None else message["content"]
+        if message["role"] == "user":
+            return HumanMessage(content=content)  # type: ignore
+        elif message["role"] == "assistant":
+            return AIMessage(content=content)  # type: ignore
+        elif message["role"] == "system":
+            return SystemMessage(content=content)  # type: ignore
+        elif message["role"] == "tool":
             return FunctionMessage(
-                content=content, name=message.name if message.name else "function"
+                content=content,  # type: ignore
+                name=message["name"] if message["name"] else "function",
             )
         else:
-            raise ValueError(f"Got unknown type {message}")
+            raise ValueError(f"Got unknown type {message['role']}")
 
     def format_message(self, message, prompt):
         message = super().format_message(message, prompt)
         return self.prompt_message_to_langchain_message(message)
 
     def message_to_string(self, message: BaseMessage) -> str:  # type: ignore[override]
-        return str(message.content)
+        return str(getattr(message, "content", ""))
 
     async def create_completion(self, request):
         from langchain.schema.messages import BaseMessageChunk

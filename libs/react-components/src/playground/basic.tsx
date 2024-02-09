@@ -49,9 +49,9 @@ export default function BasicPromptPlayground({
     return (
       <TemplateEditor
         showTitle={true}
-        template={generation.template || generation.formatted || ''}
-        inputs={generation.inputs}
-        format={generation.templateFormat}
+        template={generation.prompt || ''}
+        inputs={generation.variables || {}}
+        format={'f-string'}
         onChange={onTemplateChange}
       />
     );
@@ -62,19 +62,19 @@ export default function BasicPromptPlayground({
       return (
         <FormattedEditor
           showTitle={true}
-          template={generation.template}
-          inputs={generation.inputs}
-          format={generation.templateFormat}
+          template={generation.prompt || ''}
+          inputs={generation.variables || {}}
+          format={''}
           readOnly
         />
       );
-    } else if (typeof generation.formatted === 'string') {
+    } else if (typeof generation.prompt === 'string') {
       return (
         <FormattedEditor
           showTitle={true}
-          formatted={generation.formatted}
-          inputs={generation.inputs}
-          format={generation.templateFormat}
+          formatted={generation.prompt || ''}
+          inputs={generation.variables || {}}
+          format={'f-string'}
           readOnly={false}
           onChange={onFormattedChange}
         />
