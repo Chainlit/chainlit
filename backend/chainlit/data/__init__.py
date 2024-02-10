@@ -1,4 +1,5 @@
 import functools
+import json
 import os
 from collections import deque
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
@@ -107,25 +108,13 @@ class BaseDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        name: Optional[str] = None,
         user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
         pass
 
-    async def create_user_session(
-        self,
-        id: str,
-        started_at: str,
-        anon_user_id: str,
-        user_id: Optional[str],
-    ) -> Dict:
-        return {}
-
-    async def update_user_session(
-        self, id: str, is_interactive: bool, ended_at: Optional[str]
-    ) -> Dict:
-        return {}
 
     async def delete_user_session(self, id: str) -> bool:
         return True
@@ -171,6 +160,8 @@ class ChainlitDataLayer:
 
     def step_to_step_dict(self, step: ClientStep) -> "StepDict":
         metadata = step.metadata or {}
+        _input = (step.input or {}).get("content") or json.dumps(step.input or {})
+        output = (step.output or {}).get("content") or json.dumps(step.output or {})
         return {
             "createdAt": step.created_at,
             "id": step.id or "",
@@ -182,8 +173,8 @@ class ChainlitDataLayer:
             "type": step.type or "undefined",
             "name": step.name or "",
             "generation": step.generation.to_dict() if step.generation else None,
-            "input": step.input or "",
-            "output": step.output or "",
+            "input": _input,
+            "output": output,
             "showInput": metadata.get("showInput", False),
             "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
@@ -409,46 +400,20 @@ class ChainlitDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        name: Optional[str] = None,
         user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
         await self.client.api.upsert_thread(
             thread_id=thread_id,
+            name=name,
             participant_id=user_id,
             metadata=metadata,
             tags=tags,
         )
 
-    async def create_user_session(
-        self,
-        id: str,
-        started_at: str,
-        anon_user_id: str,
-        user_id: Optional[str],
-    ) -> Dict:
-        existing_session = await self.client.api.get_user_session(id=id)
-        if existing_session:
-            return existing_session
-        session = await self.client.api.create_user_session(
-            id=id,
-            started_at=started_at,
-            participant_identifier=user_id,
-            anon_participant_identifier=anon_user_id,
-        )
-        return session
 
-    async def update_user_session(
-        self, id: str, is_interactive: bool, ended_at: Optional[str]
-    ) -> Dict:
-        session = await self.client.api.update_user_session(
-            id=id, is_interactive=is_interactive, ended_at=ended_at
-        )
-        return session
-
-    async def delete_user_session(self, id: str) -> bool:
-        await self.client.api.delete_user_session(id=id)
-        return True
 
 
 if api_key := os.environ.get("LITERAL_API_KEY"):

@@ -65,14 +65,15 @@ class MessageBase(ABC):
 
         return message
 
-    def to_dict(self) -> StepDict:
+    def to_dict(self) -> StepDict:      
+        output = {"content": self.content}  
         _dict: StepDict = {
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
             "start": self.created_at,
             "end": self.created_at,
-            "output": self.content,
+            "output": output,
             "name": self.author,
             "type": self.type,
             "createdAt": self.created_at,

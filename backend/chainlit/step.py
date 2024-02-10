@@ -29,8 +29,8 @@ class StepDict(TypedDict, total=False):
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     metadata: Dict
-    input: str
-    output: str
+    input: Dict
+    output: Dict
     createdAt: Optional[str]
     start: Optional[str]
     end: Optional[str]
@@ -222,6 +222,8 @@ class Step:
         self._output = self._process_content(content, set_language=True)
 
     def to_dict(self) -> StepDict:
+        _input = {"content": self.input}
+        output = {"content": self.output}
         _dict: StepDict = {
             "name": self.name,
             "type": self.type,
@@ -231,9 +233,9 @@ class Step:
             "disableFeedback": self.disable_feedback,
             "streaming": self.streaming,
             "metadata": self.metadata,
-            "input": self.input,
+            "input": _input,
             "isError": self.is_error,
-            "output": self.output,
+            "output": output,
             "createdAt": self.created_at,
             "start": self.start,
             "end": self.end,

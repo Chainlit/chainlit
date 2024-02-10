@@ -248,7 +248,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     await self.process_user_message(
                         {"message": message_dict_res, "fileReferences": None}
                     )
-                    interaction = message_dict_res["output"]
+                    interaction = message_dict_res["output"] #type: str
                     final_res = message_dict_res
                 elif spec.type == "file":
                     file_refs = cast(List[FileReference], user_res)
