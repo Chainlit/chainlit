@@ -1,13 +1,16 @@
-from datetime import datetime
-from typing import Any, Generic, List, Optional, TypeVar
+import logging
 import re
+from datetime import datetime
+from hashlib import md5
+from typing import Any, Generic, List, Optional, TypeVar
 
 from chainlit.context import context
 from chainlit.step import Step
 from chainlit.sync import run_sync
-from chainlit import Message
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
+
+from chainlit import Message
 
 T = TypeVar("T")
 
@@ -36,7 +39,12 @@ class HaystackAgentCallbackHandler:
     stack: Stack[Step]
     last_step: Optional[Step]
 
-    def __init__(self, agent: Agent, stream_final_answer: bool = False, stream_final_answer_agent_name: str = 'Agent'):
+    def __init__(
+        self,
+        agent: Agent,
+        stream_final_answer: bool = False,
+        stream_final_answer_agent_name: str = "Agent",
+    ):
         agent.callback_manager.on_agent_start += self.on_agent_start
         agent.callback_manager.on_agent_step += self.on_agent_step
         agent.callback_manager.on_agent_finish += self.on_agent_finish
@@ -50,13 +58,18 @@ class HaystackAgentCallbackHandler:
         self.stream_final_answer = stream_final_answer
         self.stream_final_answer_agent_name = stream_final_answer_agent_name
 
+        self.hash = None
+        self.update_hash(agent)
+
     def on_agent_start(self, **kwargs: Any) -> None:
         # Prepare agent step message for streaming
         self.agent_name = kwargs.get("name", "Agent")
         self.stack = Stack[Step]()
 
         if self.stream_final_answer:
-            self.final_stream = Message(author=self.stream_final_answer_agent_name, content="")
+            self.final_stream = Message(
+                author=self.stream_final_answer_agent_name, content=""
+            )
             self.last_tokens: List[str] = []
             self.answer_reached = False
 
@@ -69,6 +82,7 @@ class HaystackAgentCallbackHandler:
         run_sync(run_step.send())
 
         self.stack.push(run_step)
+        self.update_hash(self.agent)
 
     def on_agent_finish(self, agent_step: AgentStep, **kwargs: Any) -> None:
         if self.last_step:
@@ -76,6 +90,7 @@ class HaystackAgentCallbackHandler:
             run_step.end = datetime.utcnow().isoformat()
             run_step.output = agent_step.prompt_node_response
             run_sync(run_step.update())
+            self.update_hash(self.agent)
 
     # This method is called when a step has finished
     def on_agent_step(self, agent_step: AgentStep, **kwargs: Any) -> None:
@@ -101,12 +116,16 @@ class HaystackAgentCallbackHandler:
             else:
                 self.last_tokens.append(token)
 
-                last_tokens_concat = ''.join(self.last_tokens)
-                final_answer_match = re.search(self.final_answer_pattern, last_tokens_concat)
+                last_tokens_concat = "".join(self.last_tokens)
+                final_answer_match = re.search(
+                    self.final_answer_pattern, last_tokens_concat
+                )
 
                 if final_answer_match:
                     self.answer_reached = True
-                    run_sync(self.final_stream.stream_token(final_answer_match.group(1)))
+                    run_sync(
+                        self.final_stream.stream_token(final_answer_match.group(1))
+                    )
 
         run_sync(self.stack.peek().stream_token(token))
 
@@ -117,6 +136,7 @@ class HaystackAgentCallbackHandler:
         tool_step.input = tool_input
         tool_step.start = datetime.utcnow().isoformat()
         self.stack.push(tool_step)
+        self.update_hash(self.agent)
 
     def on_tool_finish(
         self,
@@ -130,6 +150,7 @@ class HaystackAgentCallbackHandler:
         tool_step.output = tool_result
         tool_step.end = datetime.utcnow().isoformat()
         run_sync(tool_step.update())
+        self.update_hash(self.agent)
 
     def on_tool_error(self, exception: Exception, tool: Tool, **kwargs: Any) -> None:
         # Tool error, send error message
@@ -138,3 +159,16 @@ class HaystackAgentCallbackHandler:
         error_step.output = str(exception)
         error_step.end = datetime.utcnow().isoformat()
         run_sync(error_step.update())
+
+    def update_hash(self, agent: Agent):
+        """
+        Computes and updates a hash based on the tool class names for telemetry purposes.
+        """
+        try:
+            tool_names = " ".join(
+                [tool.__class__.__name__ for tool in agent.tm.get_tools()]
+            )
+            self.hash = md5(tool_names.encode()).hexdigest()
+        except Exception as exc:
+            logging.debug("Telemetry exception: %s", str(exc))
+            self.hash = "[an exception occurred during hashing]"
