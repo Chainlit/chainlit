@@ -23,7 +23,7 @@ export interface ILLMProviderSettings {
   };
 }
 
-export type PromptMode = 'Template' | 'Formatted';
+export type PromptMode = 'Formatted';
 
 export interface IPlayground {
   providers?: ILLMProvider[];

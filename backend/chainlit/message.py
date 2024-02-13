@@ -65,15 +65,14 @@ class MessageBase(ABC):
 
         return message
 
-    def to_dict(self) -> StepDict:      
-        output = {"content": self.content}  
+    def to_dict(self) -> StepDict:
         _dict: StepDict = {
             "id": self.id,
             "threadId": self.thread_id,
             "createdAt": self.created_at,
             "start": self.created_at,
             "end": self.created_at,
-            "output": output,
+            "output": self.content,
             "name": self.author,
             "type": self.type,
             "createdAt": self.created_at,
@@ -110,6 +109,7 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message update: {str(e)}")
 
+        print("update step dict", step_dict)
         await context.emitter.update_step(step_dict)
 
         return True

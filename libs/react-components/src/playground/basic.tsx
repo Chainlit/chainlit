@@ -9,7 +9,6 @@ import type { ICompletionGeneration } from 'client-types/';
 
 import Completion from './editor/completion';
 import FormattedEditor from './editor/formatted';
-import TemplateEditor from './editor/template';
 
 interface Props {
   generation: ICompletionGeneration;
@@ -23,17 +22,6 @@ export default function BasicPromptPlayground({
 }: Props) {
   const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
-  const onTemplateChange = (nextState: EditorState) => {
-    const template = nextState.getCurrentContent().getPlainText();
-    setPlayground((old) => ({
-      ...old,
-      generation: {
-        ...old!.generation!,
-        template
-      }
-    }));
-  };
-
   const onFormattedChange = (nextState: EditorState) => {
     const formatted = nextState.getCurrentContent().getPlainText();
     setPlayground((old) => ({
@@ -45,30 +33,8 @@ export default function BasicPromptPlayground({
     }));
   };
 
-  const renderTemplate = () => {
-    return (
-      <TemplateEditor
-        showTitle={true}
-        template={generation.prompt || ''}
-        inputs={generation.variables || {}}
-        format={'f-string'}
-        onChange={onTemplateChange}
-      />
-    );
-  };
-
   const renderFormatted = () => {
-    if (typeof generation.template === 'string') {
-      return (
-        <FormattedEditor
-          showTitle={true}
-          template={generation.prompt || ''}
-          inputs={generation.variables || {}}
-          format={''}
-          readOnly
-        />
-      );
-    } else if (typeof generation.prompt === 'string') {
+    if (typeof generation.prompt === 'string') {
       return (
         <FormattedEditor
           showTitle={true}
@@ -94,7 +60,6 @@ export default function BasicPromptPlayground({
       key={restoredTime} // This will re-mount the component with restored prompt
       width="100%"
     >
-      {promptMode === 'Template' ? renderTemplate() : null}
       {promptMode === 'Formatted' ? renderFormatted() : null}
       <Completion completion={generation.completion} />
     </Stack>

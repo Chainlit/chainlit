@@ -8,7 +8,6 @@ import { PromptMode } from 'src/types/playground';
 
 import MessageWrapper from './MessageWrapper';
 import FormattedEditor from './formatted';
-import TemplateEditor from './template';
 
 interface Props {
   message: IGenerationMessage;
@@ -39,27 +38,8 @@ export default function PromptMessage({
     }
   };
 
-  const renderTemplate = () => {
-    return (
-      <TemplateEditor
-        {...templateProps}
-        showTitle={false}
-        template={message.content || ''}
-        onChange={(state) => onChange(index, state)}
-      />
-    );
-  };
-
   const renderFormatted = () => {
-    if (typeof message.template === 'string') {
-      return (
-        <FormattedEditor
-          {...templateProps}
-          template={message.template}
-          readOnly
-        />
-      );
-    } else if (typeof message.content === 'string') {
+    if (typeof message.content === 'string') {
       return (
         <FormattedEditor
           {...templateProps}
@@ -86,10 +66,7 @@ export default function PromptMessage({
       role={message.role?.toUpperCase()}
       name={message.name}
     >
-      <>
-        {mode === 'Template' ? renderTemplate() : null}
-        {mode === 'Formatted' ? renderFormatted() : null}
-      </>
+      <>{mode === 'Formatted' ? renderFormatted() : null}</>
     </MessageWrapper>
   );
 }

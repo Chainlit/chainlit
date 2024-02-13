@@ -115,7 +115,6 @@ class BaseDataLayer:
     ):
         pass
 
-
     async def delete_user_session(self, id: str) -> bool:
         return True
 
@@ -311,8 +310,8 @@ class ChainlitDataLayer:
                     "generation": step_dict.get("generation"),
                     "id": step_dict.get("id"),
                     "parentId": step_dict.get("parentId"),
-                    "input": step_dict.get("input"),
-                    "output": step_dict.get("output"),
+                    "input": {"content": step_dict.get("input")},
+                    "output": {"content": step_dict.get("output")},
                     "name": step_dict.get("name"),
                     "threadId": step_dict.get("threadId"),
                     "type": step_dict.get("type"),
@@ -412,8 +411,6 @@ class ChainlitDataLayer:
             metadata=metadata,
             tags=tags,
         )
-
-
 
 
 if api_key := os.environ.get("LITERAL_API_KEY"):

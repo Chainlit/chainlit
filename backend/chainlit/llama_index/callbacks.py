@@ -154,15 +154,16 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             token_count = self.total_llm_token_count or None
 
             if messages and isinstance(response, ChatResponse):
+                msg: ChatMessage = response.message
                 step.generation = ChatGeneration(
                     messages=messages,
                     message_completion=GenerationMessage(
-                        role=response.message.content or "",  # type: ignore
-                        content=response.message.role.value,
+                        role=msg.role.value,  # type: ignore
+                        content=content,
                     ),
                     token_count=token_count,
                 )
-            elif formatted_prompt and isinstance(response, CompletionResponse):
+            elif formatted_prompt:
                 step.generation = CompletionGeneration(
                     prompt=formatted_prompt,
                     completion=content,

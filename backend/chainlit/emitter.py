@@ -242,13 +242,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
             ] = None
 
             if user_res:
-                interaction = None
+                interaction: Union[str, None] = None
                 if spec.type == "text":
                     message_dict_res = cast(StepDict, user_res)
                     await self.process_user_message(
                         {"message": message_dict_res, "fileReferences": None}
                     )
-                    interaction = message_dict_res["output"] #type: str
+                    interaction = message_dict_res["output"]
                     final_res = message_dict_res
                 elif spec.type == "file":
                     file_refs = cast(List[FileReference], user_res)
