@@ -109,7 +109,6 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message update: {str(e)}")
 
-        print("update step dict", step_dict)
         await context.emitter.update_step(step_dict)
 
         return True
