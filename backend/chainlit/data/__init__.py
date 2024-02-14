@@ -15,6 +15,7 @@ from literalai import Attachment
 from literalai import Feedback as ClientFeedback
 from literalai import PageInfo, PaginatedResponse
 from literalai import Step as ClientStep
+from literalai.step import StepDict as ClientStepDict
 from literalai.thread import NumberListFilter, StringFilter, StringListFilter
 from literalai.thread import ThreadFilter as ClientThreadFilter
 
@@ -159,8 +160,12 @@ class ChainlitDataLayer:
 
     def step_to_step_dict(self, step: ClientStep) -> "StepDict":
         metadata = step.metadata or {}
-        _input = (step.input or {}).get("content") or json.dumps(step.input or {})
-        output = (step.output or {}).get("content") or json.dumps(step.output or {})
+        input = (step.input or {}).get("content") or (
+            json.dumps(step.input) if step.input and step.input != {} else ""
+        )
+        output = (step.output or {}).get("content") or (
+            json.dumps(step.output) if step.output and step.output != {} else ""
+        )
         return {
             "createdAt": step.created_at,
             "id": step.id or "",
@@ -172,7 +177,7 @@ class ChainlitDataLayer:
             "type": step.type or "undefined",
             "name": step.name or "",
             "generation": step.generation.to_dict() if step.generation else None,
-            "input": _input,
+            "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
             "disableFeedback": metadata.get("disableFeedback", False),
@@ -301,24 +306,24 @@ class ChainlitDataLayer:
             "showInput": step_dict.get("showInput"),
         }
 
-        await self.client.api.send_steps(
-            [
-                {
-                    "createdAt": step_dict.get("createdAt"),
-                    "startTime": step_dict.get("start"),
-                    "endTime": step_dict.get("end"),
-                    "generation": step_dict.get("generation"),
-                    "id": step_dict.get("id"),
-                    "parentId": step_dict.get("parentId"),
-                    "input": {"content": step_dict.get("input")},
-                    "output": {"content": step_dict.get("output")},
-                    "name": step_dict.get("name"),
-                    "threadId": step_dict.get("threadId"),
-                    "type": step_dict.get("type"),
-                    "metadata": metadata,
-                }
-            ]
-        )
+        step: ClientStepDict = {
+            "createdAt": step_dict.get("createdAt"),
+            "startTime": step_dict.get("start"),
+            "endTime": step_dict.get("end"),
+            "generation": step_dict.get("generation"),
+            "id": step_dict.get("id"),
+            "parentId": step_dict.get("parentId"),
+            "name": step_dict.get("name"),
+            "threadId": step_dict.get("threadId"),
+            "type": step_dict.get("type"),
+            "metadata": metadata,
+        }
+        if step_dict.get("input"):
+            step["input"] = {"content": step_dict.get("input")}
+        if step_dict.get("output"):
+            step["output"] = {"content": step_dict.get("output")}
+
+        await self.client.api.send_steps([step])
 
     @queue_until_user_message()
     async def update_step(self, step_dict: "StepDict"):
