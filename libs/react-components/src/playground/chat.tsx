@@ -28,7 +28,6 @@ export const ChatPromptPlayground = forwardRef(
 
     const onChange = (index: number, nextState: EditorState) => {
       const text = nextState.getCurrentContent().getPlainText();
-      const key = hasTemplate ? 'template' : 'formatted';
 
       setPlayground((old) => ({
         ...old,
@@ -39,7 +38,7 @@ export const ChatPromptPlayground = forwardRef(
               if (mIndex === index) {
                 return {
                   ...message,
-                  [key]: text
+                  content: text
                 };
               }
               return message;
@@ -99,9 +98,7 @@ export const ChatPromptPlayground = forwardRef(
                       ...(old!.generation! as IChatGeneration).messages!,
                       {
                         role: 'assistant',
-                        template: '',
-                        formatted: '',
-                        templateFormat: 'f-string'
+                        content: ''
                       }
                     ]
                   }

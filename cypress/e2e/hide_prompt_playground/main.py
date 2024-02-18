@@ -1,13 +1,6 @@
 import chainlit as cl
 
-template = """Hello, this is a template.
-This is a simple variable {variable1}
-This is a another simple {variable2}
-Those are two simple variables {variable1} + {variable2}
-This is a formatting test {{variable1}} {{{variable2}}} {variable3}
-This is another formatting test {{{{variable1}}}} {{{{{variable1}}}}}
-This is a curly braces formatting test {{ {{{{ }} }}}}
-"""
+template = """Hello, this is a template."""
 
 inputs = {
     "variable1": "variable1 value",
@@ -23,7 +16,7 @@ async def gen_response():
     res = "This is a message with a basic prompt"
     if current_step := cl.context.current_step:
         current_step.generation = cl.CompletionGeneration(
-            template=template, inputs=inputs, completion=res
+            prompt=template, variables=inputs, completion=res
         )
     return res
 

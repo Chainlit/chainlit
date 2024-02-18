@@ -9,7 +9,6 @@ import type { ICompletionGeneration } from 'client-types/';
 
 import Completion from './editor/completion';
 import FormattedEditor from './editor/formatted';
-import TemplateEditor from './editor/template';
 
 interface Props {
   generation: ICompletionGeneration;
@@ -23,17 +22,6 @@ export default function BasicPromptPlayground({
 }: Props) {
   const { promptMode, setPlayground } = useContext(PlaygroundContext);
 
-  const onTemplateChange = (nextState: EditorState) => {
-    const template = nextState.getCurrentContent().getPlainText();
-    setPlayground((old) => ({
-      ...old,
-      generation: {
-        ...old!.generation!,
-        template
-      }
-    }));
-  };
-
   const onFormattedChange = (nextState: EditorState) => {
     const formatted = nextState.getCurrentContent().getPlainText();
     setPlayground((old) => ({
@@ -45,36 +33,14 @@ export default function BasicPromptPlayground({
     }));
   };
 
-  const renderTemplate = () => {
-    return (
-      <TemplateEditor
-        showTitle={true}
-        template={generation.template || generation.formatted || ''}
-        inputs={generation.inputs}
-        format={generation.templateFormat}
-        onChange={onTemplateChange}
-      />
-    );
-  };
-
   const renderFormatted = () => {
-    if (typeof generation.template === 'string') {
+    if (typeof generation.prompt === 'string') {
       return (
         <FormattedEditor
           showTitle={true}
-          template={generation.template}
-          inputs={generation.inputs}
-          format={generation.templateFormat}
-          readOnly
-        />
-      );
-    } else if (typeof generation.formatted === 'string') {
-      return (
-        <FormattedEditor
-          showTitle={true}
-          formatted={generation.formatted}
-          inputs={generation.inputs}
-          format={generation.templateFormat}
+          formatted={generation.prompt || ''}
+          inputs={generation.variables || {}}
+          format={'f-string'}
           readOnly={false}
           onChange={onFormattedChange}
         />
@@ -94,7 +60,6 @@ export default function BasicPromptPlayground({
       key={restoredTime} // This will re-mount the component with restored prompt
       width="100%"
     >
-      {promptMode === 'Template' ? renderTemplate() : null}
       {promptMode === 'Formatted' ? renderFormatted() : null}
       <Completion completion={generation.completion} />
     </Stack>

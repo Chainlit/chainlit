@@ -142,8 +142,8 @@ class ChatOpenAIProvider(BaseProvider):
 
             llm_settings["stop"] = stop
 
-        if request.generation.functions:
-            llm_settings["functions"] = request.generation.functions
+        if request.generation.tools:
+            llm_settings["tools"] = request.generation.tools
             llm_settings["stream"] = False
         else:
             llm_settings["stream"] = True
@@ -309,8 +309,8 @@ class AzureChatOpenAIProvider(BaseProvider):
 
         llm_settings["model"] = env_settings["deployment_name"]
 
-        if request.generation.functions:
-            llm_settings["functions"] = request.generation.functions
+        if request.generation.tools:
+            llm_settings["tools"] = request.generation.tools
             llm_settings["stream"] = False
         else:
             llm_settings["stream"] = True

@@ -242,7 +242,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
             ] = None
 
             if user_res:
-                interaction = None
+                interaction: Union[str, None] = None
                 if spec.type == "text":
                     message_dict_res = cast(StepDict, user_res)
                     await self.process_user_message(

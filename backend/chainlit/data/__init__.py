@@ -1,4 +1,5 @@
 import functools
+import json
 import os
 from collections import deque
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
@@ -14,6 +15,7 @@ from literalai import Attachment
 from literalai import Feedback as ClientFeedback
 from literalai import PageInfo, PaginatedResponse
 from literalai import Step as ClientStep
+from literalai.step import StepDict as ClientStepDict
 from literalai.thread import NumberListFilter, StringFilter, StringListFilter
 from literalai.thread import ThreadFilter as ClientThreadFilter
 
@@ -107,25 +109,12 @@ class BaseDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        name: Optional[str] = None,
         user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
         pass
-
-    async def create_user_session(
-        self,
-        id: str,
-        started_at: str,
-        anon_user_id: str,
-        user_id: Optional[str],
-    ) -> Dict:
-        return {}
-
-    async def update_user_session(
-        self, id: str, is_interactive: bool, ended_at: Optional[str]
-    ) -> Dict:
-        return {}
 
     async def delete_user_session(self, id: str) -> bool:
         return True
@@ -171,6 +160,12 @@ class ChainlitDataLayer:
 
     def step_to_step_dict(self, step: ClientStep) -> "StepDict":
         metadata = step.metadata or {}
+        input = (step.input or {}).get("content") or (
+            json.dumps(step.input) if step.input and step.input != {} else ""
+        )
+        output = (step.output or {}).get("content") or (
+            json.dumps(step.output) if step.output and step.output != {} else ""
+        )
         return {
             "createdAt": step.created_at,
             "id": step.id or "",
@@ -182,8 +177,8 @@ class ChainlitDataLayer:
             "type": step.type or "undefined",
             "name": step.name or "",
             "generation": step.generation.to_dict() if step.generation else None,
-            "input": step.input or "",
-            "output": step.output or "",
+            "input": input,
+            "output": output,
             "showInput": metadata.get("showInput", False),
             "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
@@ -311,24 +306,24 @@ class ChainlitDataLayer:
             "showInput": step_dict.get("showInput"),
         }
 
-        await self.client.api.send_steps(
-            [
-                {
-                    "createdAt": step_dict.get("createdAt"),
-                    "startTime": step_dict.get("start"),
-                    "endTime": step_dict.get("end"),
-                    "generation": step_dict.get("generation"),
-                    "id": step_dict.get("id"),
-                    "parentId": step_dict.get("parentId"),
-                    "input": step_dict.get("input"),
-                    "output": step_dict.get("output"),
-                    "name": step_dict.get("name"),
-                    "threadId": step_dict.get("threadId"),
-                    "type": step_dict.get("type"),
-                    "metadata": metadata,
-                }
-            ]
-        )
+        step: ClientStepDict = {
+            "createdAt": step_dict.get("createdAt"),
+            "startTime": step_dict.get("start"),
+            "endTime": step_dict.get("end"),
+            "generation": step_dict.get("generation"),
+            "id": step_dict.get("id"),
+            "parentId": step_dict.get("parentId"),
+            "name": step_dict.get("name"),
+            "threadId": step_dict.get("threadId"),
+            "type": step_dict.get("type"),
+            "metadata": metadata,
+        }
+        if step_dict.get("input"):
+            step["input"] = {"content": step_dict.get("input")}
+        if step_dict.get("output"):
+            step["output"] = {"content": step_dict.get("output")}
+
+        await self.client.api.send_steps([step])
 
     @queue_until_user_message()
     async def update_step(self, step_dict: "StepDict"):
@@ -409,46 +404,18 @@ class ChainlitDataLayer:
     async def update_thread(
         self,
         thread_id: str,
+        name: Optional[str] = None,
         user_id: Optional[str] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
         await self.client.api.upsert_thread(
             thread_id=thread_id,
+            name=name,
             participant_id=user_id,
             metadata=metadata,
             tags=tags,
         )
-
-    async def create_user_session(
-        self,
-        id: str,
-        started_at: str,
-        anon_user_id: str,
-        user_id: Optional[str],
-    ) -> Dict:
-        existing_session = await self.client.api.get_user_session(id=id)
-        if existing_session:
-            return existing_session
-        session = await self.client.api.create_user_session(
-            id=id,
-            started_at=started_at,
-            participant_identifier=user_id,
-            anon_participant_identifier=anon_user_id,
-        )
-        return session
-
-    async def update_user_session(
-        self, id: str, is_interactive: bool, ended_at: Optional[str]
-    ) -> Dict:
-        session = await self.client.api.update_user_session(
-            id=id, is_interactive=is_interactive, ended_at=ended_at
-        )
-        return session
-
-    async def delete_user_session(self, id: str) -> bool:
-        await self.client.api.delete_user_session(id=id)
-        return True
 
 
 if api_key := os.environ.get("LITERAL_API_KEY"):

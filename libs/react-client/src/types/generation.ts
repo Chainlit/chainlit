@@ -7,9 +7,7 @@ export type GenerationMessageRole =
 export type ILLMSettings = Record<string, string | string[] | number | boolean>;
 
 export interface IGenerationMessage {
-  template?: string;
-  formatted?: string;
-  templateFormat: string;
+  content: string;
   role: GenerationMessageRole;
   name?: string;
 }
@@ -30,24 +28,26 @@ export interface ITool {
 
 export interface IBaseGeneration {
   provider: string;
+  model?: string;
+  error?: string;
   id?: string;
-  inputs?: Record<string, string>;
-  completion?: string;
+  variables?: Record<string, string>;
+  tags?: string[];
   settings?: ILLMSettings;
-  functions?: IFunction[];
+  tools?: ITool[];
   tokenCount?: number;
 }
 
 export interface ICompletionGeneration extends IBaseGeneration {
   type: 'COMPLETION';
-  template?: string;
-  formatted?: string;
-  templateFormat: string;
+  prompt?: string;
+  completion?: string;
 }
 
 export interface IChatGeneration extends IBaseGeneration {
   type: 'CHAT';
   messages?: IGenerationMessage[];
+  message_completion?: IGenerationMessage;
 }
 
 export type IGeneration = ICompletionGeneration | IChatGeneration;

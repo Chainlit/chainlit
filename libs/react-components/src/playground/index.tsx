@@ -1,5 +1,5 @@
 import { PlaygroundContext } from 'contexts/PlaygroundContext';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { ErrorBoundary } from 'src/ErrorBoundary';
 import { useToggle } from 'usehooks-ts';
 
@@ -31,8 +31,7 @@ interface Props {
 }
 
 function _PromptPlayground() {
-  const { playground, setPlayground, promptMode, setPromptMode } =
-    useContext(PlaygroundContext);
+  const { playground, setPlayground } = useContext(PlaygroundContext);
   const [restoredTime, setRestoredTime] = useState(0);
   const [isDrawerOpen, toggleDrawer] = useToggle(false);
   const chatPromptScrollRef = useRef<HTMLDivElement | null>(null);
@@ -64,15 +63,7 @@ function _PromptPlayground() {
 
   const isChat = generation?.type === 'CHAT';
 
-  const hasTemplate = isChat
-    ? !!generation?.messages?.find((m) => typeof m.template === 'string')
-    : typeof generation?.template === 'string';
-
-  useEffect(() => {
-    if (generation && !hasTemplate && promptMode === 'Template') {
-      setPromptMode('Formatted');
-    }
-  }, [generation, promptMode, setPromptMode]);
+  const hasTemplate = false;
 
   if (!generation) {
     return null;

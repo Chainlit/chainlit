@@ -19,5 +19,5 @@ export const functionState = atom<number | undefined>({
 
 export const modeState = atom<PromptMode>({
   key: 'PlaygroundMode',
-  default: 'Template'
+  default: 'Formatted'
 });

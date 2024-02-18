@@ -99,7 +99,6 @@ async def connect(sid, environ, auth):
         )
         return False
     user = None
-    anon_user_identifier = build_anon_user_identifier(environ)
     token = None
     login_required = require_login()
     try:
@@ -150,15 +149,6 @@ async def connect(sid, environ, auth):
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
     )
 
-    if data_layer := get_data_layer():
-        asyncio.create_task(
-            data_layer.create_user_session(
-                id=session_id,
-                started_at=datetime.utcnow().isoformat(),
-                anon_user_id=anon_user_identifier if not user else None,
-                user_id=user.identifier if user else None,
-            )
-        )
 
     trace_event("connection_successful")
     return True
@@ -197,15 +187,6 @@ async def clean_session(sid):
 async def disconnect(sid, force_clear=False):
     session = WebsocketSession.get(sid)
     if session:
-        if data_layer := get_data_layer():
-            asyncio.create_task(
-                data_layer.update_user_session(
-                    id=session.id,
-                    is_interactive=session.has_first_interaction,
-                    ended_at=datetime.utcnow().isoformat(),
-                )
-            )
-
         init_ws_context(session)
 
     if config.code.on_chat_end and session:
