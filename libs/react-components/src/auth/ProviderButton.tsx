@@ -6,6 +6,7 @@ import Microsoft from '@mui/icons-material/Microsoft';
 import Button from '@mui/material/Button';
 
 import { Auth0 } from './Auth0';
+import { Cognito } from './Cognito';
 import { Descope } from './Descope';
 import { Okta } from './Okta';
 
@@ -23,6 +24,8 @@ function getProviderName(provider: string) {
       return 'Okta';
     case 'descope':
       return 'Descope';
+    case 'aws-cognito':
+      return 'Coginto';
     default:
       return capitalizeFirstLetter(provider);
   }
@@ -42,6 +45,8 @@ function renderProviderIcon(provider: string) {
       return <Auth0 />;
     case 'descope':
       return <Descope />;
+    case 'aws-cognito':
+      return <Cognito />;
     default:
       return null;
   }
