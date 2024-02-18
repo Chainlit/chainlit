@@ -101,6 +101,10 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Specify a Javascript file that can be used to customize the user interface.
+# The Javascript file can be served from the public directory.
+# custom_js = "/public/test.js"
+
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
@@ -198,6 +202,7 @@ class UISettings(DataClassJsonMixin):
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_js: Optional[str] = None
     custom_font: Optional[str] = None
 
 
@@ -221,9 +226,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[
-        Callable[[Optional["User"]], List["ChatProfile"]]
-    ] = None
+    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
+        None
+    )
 
 
 @dataclass()
