@@ -1,12 +1,11 @@
 import json
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
 from uuid import UUID
 
 from chainlit.context import context_var
 from chainlit.message import Message
-from chainlit.playground.providers.openai import stringify_function_call
 from chainlit.step import Step
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
@@ -154,10 +153,11 @@ class GenerationHelper:
         function_call = kwargs.get("additional_kwargs", {}).get("function_call")
 
         msg = GenerationMessage(
-            name=kwargs.get("name"),
             role=self._convert_message_role(class_name),
             content="",
         )
+        if name := kwargs.get("name"):
+            msg["name"] = name
         if function_call:
             msg["function_call"] = function_call
         else:
@@ -176,10 +176,12 @@ class GenerationHelper:
         function_call = message.additional_kwargs.get("function_call")
 
         msg = GenerationMessage(
-            name=getattr(message, "name", None),
             role=self._convert_message_role(message.type),
             content="",
         )
+
+        if name := getattr(message, "name", None):
+            msg["name"] = name
 
         if function_call:
             msg["function_call"] = function_call
@@ -213,7 +215,7 @@ class GenerationHelper:
         # make sure there is no api key specification
         settings = {k: v for k, v in merged.items() if not k.endswith("_api_key")}
 
-        model_keys = ["model", "model_name", "deployment", "deployment_name"]
+        model_keys = ["azure_deployment", "deployment_name", "model", "model_name"]
         model = next((settings[k] for k in model_keys if k in settings), None)
         tools = None
         if "functions" in settings:
@@ -503,6 +505,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     ],
                     message_completion=message_completion,
                 )
+                current_step.language = "json"
                 current_step.output = json.dumps(message_completion)
             else:
                 completion_start = self.completion_generations[str(run.id)]

@@ -47,7 +47,7 @@ export interface ICompletionGeneration extends IBaseGeneration {
 export interface IChatGeneration extends IBaseGeneration {
   type: 'CHAT';
   messages?: IGenerationMessage[];
-  message_completion?: IGenerationMessage;
+  messageCompletion?: IGenerationMessage;
 }
 
 export type IGeneration = ICompletionGeneration | IChatGeneration;

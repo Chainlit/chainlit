@@ -23,7 +23,6 @@ interface Props {
 export const ChatPromptPlayground = forwardRef(
   ({ hasTemplate, generation, restoredTime }: Props, ref) => {
     const { promptMode, setPlayground } = useContext(PlaygroundContext);
-
     const messages = generation.messages;
 
     const onChange = (index: number, nextState: EditorState) => {
@@ -111,7 +110,10 @@ export const ChatPromptPlayground = forwardRef(
               Add Message
             </Button>
           </Box>
-          <Completion completion={generation.completion} chatMode />
+          <Completion
+            completion={generation.messageCompletion?.content}
+            chatMode
+          />
         </Box>
       </Stack>
     );

@@ -26,13 +26,26 @@ export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
       setPlayground((old) => {
         if (!old?.generation) return old;
 
-        return {
-          ...old,
-          generation: {
-            ...old.generation!,
-            completion: ''
-          }
-        };
+        if (old.generation.type === 'CHAT') {
+          return {
+            ...old,
+            generation: {
+              ...old.generation!,
+              messageCompletion: {
+                ...(old.generation?.messageCompletion || { role: 'assistant' }),
+                content: ''
+              }
+            }
+          };
+        } else {
+          return {
+            ...old,
+            generation: {
+              ...old.generation!,
+              completion: ''
+            }
+          };
+        }
       });
 
       await createCompletion(
@@ -47,14 +60,29 @@ export default function SubmitButton({ onSubmit }: { onSubmit: () => void }) {
           }
           setPlayground((old) => {
             if (!old?.generation) return old;
-
-            return {
-              ...old,
-              generation: {
-                ...old.generation!,
-                completion: (old.generation?.completion || '') + token
-              }
-            };
+            if (old.generation.type === 'CHAT') {
+              return {
+                ...old,
+                generation: {
+                  ...old.generation!,
+                  messageCompletion: {
+                    ...(old.generation?.messageCompletion || {
+                      role: 'assistant'
+                    }),
+                    content:
+                      (old.generation?.messageCompletion?.content || '') + token
+                  }
+                }
+              };
+            } else {
+              return {
+                ...old,
+                generation: {
+                  ...old.generation!,
+                  completion: (old.generation?.completion || '') + token
+                }
+              };
+            }
           });
         }
       );
