@@ -1,12 +1,11 @@
 import json
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
 from uuid import UUID
 
 from chainlit.context import context_var
 from chainlit.message import Message
-from chainlit.playground.providers.openai import stringify_function_call
 from chainlit.step import Step
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
@@ -154,10 +153,11 @@ class GenerationHelper:
         function_call = kwargs.get("additional_kwargs", {}).get("function_call")
 
         msg = GenerationMessage(
-            name=kwargs.get("name"),
             role=self._convert_message_role(class_name),
             content="",
         )
+        if name := kwargs.get("name"):
+            msg["name"] = name
         if function_call:
             msg["function_call"] = function_call
         else:
@@ -176,10 +176,12 @@ class GenerationHelper:
         function_call = message.additional_kwargs.get("function_call")
 
         msg = GenerationMessage(
-            name=getattr(message, "name", None),
             role=self._convert_message_role(message.type),
             content="",
         )
+
+        if name := getattr(message, "name", None):
+            msg["name"] = name
 
         if function_call:
             msg["function_call"] = function_call
@@ -503,6 +505,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     ],
                     message_completion=message_completion,
                 )
+                current_step.language = "json"
                 current_step.output = json.dumps(message_completion)
             else:
                 completion_start = self.completion_generations[str(run.id)]
