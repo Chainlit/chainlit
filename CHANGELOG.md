@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.300] - 2023-02-19
+
+### Added
+
+- Custom js script injection
+- First token and token throughput per second metrics
+
+### Changed
+
+- The `ChatGeneration` and `CompletionGeneration` has been reworked to better match the OpenAI semantics
+
 ## [1.0.200] - 2023-01-22
 
 ### Added
