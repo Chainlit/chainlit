@@ -177,8 +177,8 @@ class ChainlitEmitter(BaseChainlitEmitter):
             try:
                 await data_layer.update_thread(
                     thread_id=self.session.thread_id,
+                    name=interaction,
                     user_id=user_id,
-                    metadata={"name": interaction},
                 )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
