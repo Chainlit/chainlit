@@ -394,6 +394,7 @@ class ChainlitDataLayer:
         return {
             "createdAt": thread.created_at or "",
             "id": thread.id,
+            "name": thread.name or None,
             "steps": steps,
             "elements": elements,
             "metadata": thread.metadata,
