@@ -223,7 +223,7 @@ def get_html_template():
         )
 
     if config.ui.custom_js:
-        js += f"""<script src="{config.ui.custom_js}"></script>"""
+        js += f"""<script src="{config.ui.custom_js}" defer></script>"""
 
     font = None
     if config.ui.custom_font:
