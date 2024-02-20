@@ -46,7 +46,7 @@ async def resume_thread(session: WebsocketSession):
     user_is_author = author == session.user.identifier
 
     if user_is_author:
-        metadata = thread["metadata"] or {}
+        metadata = thread.get("metadata", {})
         user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
