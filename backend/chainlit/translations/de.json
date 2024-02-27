@@ -1,0 +1,159 @@
+{
+    "components": {
+        "atoms": {
+            "buttons": {
+                "userButton": {
+                    "menu": {
+                        "settings": "Einstellungen",
+                        "settingsKey": "S",
+                        "APIKeys": "API-Schl\u00fcssel",
+                        "logout": "Abmelden"
+                    }
+                }
+            }
+        },
+        "molecules": {
+            "newChatButton": {
+                "newChat": "Neuer Chat"
+            },
+            "tasklist": {
+                "TaskList": {
+                    "title": "\ud83d\uddd2\ufe0f Aufgabenliste",
+                    "loading": "L\u00e4dt...",
+                    "error": "Ein Fehler ist aufgetreten"
+                }
+            },
+            "attachments": {
+                "cancelUpload": "Upload abbrechen",
+                "removeAttachment": "Anhang entfernen"
+            },
+            "newChatDialog": {
+                "createNewChat": "Neuen Chat erstellen?",
+                "clearChat": "Dies wird die aktuellen Nachrichten l\u00f6schen und einen neuen Chat starten.",
+                "cancel": "Abbrechen",
+                "confirm": "Best\u00e4tigen"
+            },
+            "settingsModal": {
+                "expandMessages": "Nachrichten ausklappen",
+                "hideChainOfThought": "Zwischenschritte verbergen",
+                "darkMode": "Dunkelmodus"
+            }
+        },
+        "organisms": {
+            "chat": {
+                "history": {
+                    "index": {
+                        "lastInputs": "Letzte Eingaben",
+                        "noInputs": "Leer...",
+                        "loading": "L\u00e4dt..."
+                    }
+                },
+                "inputBox": {
+                    "input": {
+                        "placeholder": "Nachricht eingeben..."
+                    },
+                    "speechButton": {
+                        "start": "Aufnahme starten",
+                        "stop": "Aufnahme stoppen"
+                    },
+                    "SubmitButton": {
+                        "sendMessage": "Nachricht senden",
+                        "stopTask": "Aufgabe stoppen"
+                    },
+                    "UploadButton": {
+                        "attachFiles": "Dateien anh\u00e4ngen"
+                    },
+                    "waterMark": {
+                        "text": "Erstellt mit"
+                    }
+                },
+                "Messages": {
+                    "index": {
+                        "running": "L\u00e4uft",
+                        "executedSuccessfully": "erfolgreich ausgef\u00fchrt",
+                        "failed": "fehlgeschlagen",
+                        "feedbackUpdated": "Feedback aktualisiert",
+                        "updating": "Aktualisiert"
+                    }
+                },
+                "dropScreen": {
+                    "dropYourFilesHere": "Ziehe deine Dateien hierher"
+                },
+                "index": {
+                    "failedToUpload": "Upload fehlgeschlagen",
+                    "cancelledUploadOf": "Upload abgebrochen von",
+                    "couldNotReachServer": "Konnte den Server nicht erreichen",
+                    "continuingChat": "Vorherigen Chat fortsetzen"
+                },
+                "settings": {
+                    "settingsPanel": "Einstellungsfenster",
+                    "reset": "Zur\u00fccksetzen",
+                    "cancel": "Abbrechen",
+                    "confirm": "Best\u00e4tigen"
+                }
+            },
+            "threadHistory": {
+                "sidebar": {
+                    "filters": {
+                        "FeedbackSelect": {
+                            "feedbackAll": "Feedback: Alle",
+                            "feedbackPositive": "Feedback: Positiv",
+                            "feedbackNegative": "Feedback: Negativ"
+                        },
+                        "SearchBar": {
+                            "search": "Suche"
+                        }
+                    },
+                    "DeleteThreadButton": {
+                        "confirmMessage": "Dies wird den Thread sowie seine Nachrichten und Elemente l\u00f6schen.",
+                        "cancel": "Abbrechen",
+                        "confirm": "Best\u00e4tigen",
+                        "deletingChat": "Chat wird gel\u00f6scht",
+                        "chatDeleted": "Chat gel\u00f6scht"
+                    },
+                    "index": {
+                        "pastChats": "Vergangene Chats"
+                    },
+                    "ThreadList": {
+                        "empty": "Leer...",
+                        "today":  "Heute",
+                        "yesterday": "Gestern",
+                        "previous7days": "Vor 7 Tagen",
+                        "previous30days": "Vor 30 Tagen"
+                    },
+                    "TriggerButton": {
+                        "closeSidebar": "Seitenleiste schlie\u00dfen",
+                        "openSidebar": "Seitenleiste \u00f6ffnen"
+                    }
+                },
+                "Thread": {
+                    "backToChat": "Zur\u00fcck zum Chat",
+                    "chatCreatedOn": "Dieser Chat wurde erstellt am"
+                }
+            },
+            "header": {
+                "chat": "Chat",
+                "readme": "Liesmich"
+            }
+        }
+    },
+    "hooks": {
+        "useLLMProviders": {
+            "failedToFetchProviders": "Anbieter konnten nicht geladen werden:"
+        }
+    },
+    "pages": {
+        "Design": {},
+        "Env": {
+            "savedSuccessfully": "Erfolgreich gespeichert",
+            "requiredApiKeys": "Ben\u00f6tigte API-Schl\u00fcssel",
+            "requiredApiKeysInfo": "Um diese App zu nutzen, werden die folgenden API-Schl\u00fcssel ben\u00f6tigt. Die Schl\u00fcssel werden im lokalen Speicher Ihres Ger\u00e4ts gespeichert."
+        },
+        "Page": {
+            "notPartOfProject": "Sie sind nicht Teil dieses Projekts."
+        },
+        "ResumeButton": {
+            "resumeChat": "Chat fortsetzen"
+        }
+    }
+}
