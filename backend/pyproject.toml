@@ -44,7 +44,7 @@ watchfiles="^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
-python-multipart = "^0.0.6"
+python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
 
 [tool.poetry.group.tests]
