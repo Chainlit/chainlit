@@ -119,7 +119,22 @@ const ThreadList = ({
                       backgroundColor: (theme) => theme.palette.background.paper
                     }}
                   >
-                    {index}
+                    if (index === 'Today')
+                    {
+                      <Translator path="components.organisms.threadHistory.sidebar.ThreadList.today" />
+                    }
+                    else if (index === 'Yesterday')
+                    {
+                      <Translator path="components.organisms.threadHistory.sidebar.ThreadList.yesterday" />
+                    }
+                    else if (index === 'Previous 7 days')
+                    {
+                      <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous7days" />
+                    }
+                    else if (index === 'Previous 30 days')
+                    {
+                      <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous30days" />
+                    }
                   </Typography>
                 </ListSubheader>
                 {map(items, (thread) => {
