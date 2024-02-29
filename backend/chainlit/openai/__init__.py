@@ -6,13 +6,13 @@ from chainlit.sync import run_sync
 from chainlit.utils import check_module_version
 from literalai import ChatGeneration, CompletionGeneration
 
-if not check_module_version("openai", "1.0.0"):
-    raise ValueError(
-        "Expected OpenAI version >= 1.0.0. Run `pip install openai --upgrade`"
-    )
-
 
 def instrument_openai():
+    if not check_module_version("openai", "1.0.0"):
+        raise ValueError(
+            "Expected OpenAI version >= 1.0.0. Run `pip install openai --upgrade`"
+        )
+
     from literalai.instrumentation.openai import instrument_openai
 
     async def on_new_generation(
