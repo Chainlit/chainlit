@@ -159,7 +159,6 @@ const Nav = ({
 
 const Header = memo(
   ({ projectSettings }: { projectSettings?: IProjectSettings }) => {
-    console.log('projectSettings', projectSettings);
     const matches = useMediaQuery('(max-width: 66rem)');
 
     return (

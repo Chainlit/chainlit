@@ -22,7 +22,6 @@ chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0.0"
-setuptools = "^69.1.1"
 httpx = ">=0.23.0"
 literalai = "0.0.204"
 dataclasses_json = "^0.5.7"
