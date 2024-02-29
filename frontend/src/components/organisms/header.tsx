@@ -62,11 +62,15 @@ interface NavProps {
   dataPersistence?: boolean;
   hasReadme?: boolean;
   matches?: boolean;
-  injectedTabs?: { to: string; label: string; }[];
+  injectedTabs?: { to: string; label: string }[];
 }
 
-const Nav = ({ dataPersistence, hasReadme, matches, injectedTabs = [] }: NavProps) => {
-  console.log('injectedTabs', injectedTabs);
+const Nav = ({
+  dataPersistence,
+  hasReadme,
+  matches,
+  injectedTabs = []
+}: NavProps) => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
@@ -88,14 +92,12 @@ const Nav = ({ dataPersistence, hasReadme, matches, injectedTabs = [] }: NavProp
       label: t('components.organisms.header.readme')
     });
 
-
-    injectedTabs.forEach((tab: { to: any; label: any; }) => {
+    injectedTabs.forEach((tab: { to: any; label: any }) => {
       tabs.push({
         to: tab.to,
         label: tab.label
       });
     });
-
   }
 
   const nav = (
