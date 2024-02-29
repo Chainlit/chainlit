@@ -174,6 +174,12 @@ class Theme(DataClassJsonMixin):
     dark: Optional[Palette] = None
 
 
+@dataclass()
+class Tab(DataClassJsonMixin):
+    to: Optional[str] = None
+    label: Optional[str] = None
+
+
 @dataclass
 class SpeechToTextFeature:
     enabled: Optional[bool] = None
@@ -193,6 +199,7 @@ class FeaturesSettings(DataClassJsonMixin):
 class UISettings(DataClassJsonMixin):
     name: str
     show_readme_as_default: bool = True
+    injected_tabs: Optional[List[Tab]] = None
     description: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
@@ -213,8 +220,10 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
-    header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
+    password_auth_callback: Optional[Callable[[
+        str, str], Optional["User"]]] = None
+    header_auth_callback: Optional[Callable[[
+        Headers], Optional["User"]]] = None
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
@@ -309,7 +318,8 @@ def init_config(log=False):
                     translation = json.load(f)
                     with open(dst, "w", encoding="utf-8") as f:
                         json.dump(translation, f, indent=4)
-                        logger.info(f"Created default translation file at {dst}")
+                        logger.info(
+                            f"Created default translation file at {dst}")
 
 
 def load_module(target: str, force_refresh: bool = False):
@@ -400,7 +410,8 @@ def load_config():
 
     settings = load_settings()
 
-    chainlit_server = os.environ.get("CHAINLIT_SERVER", "https://cloud.chainlit.io")
+    chainlit_server = os.environ.get(
+        "CHAINLIT_SERVER", "https://cloud.chainlit.io")
 
     config = ChainlitConfig(
         chainlit_server=chainlit_server,

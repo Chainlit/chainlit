@@ -62,9 +62,11 @@ interface NavProps {
   dataPersistence?: boolean;
   hasReadme?: boolean;
   matches?: boolean;
+  injectedTabs?: { to: string; label: string; }[];
 }
 
-const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
+const Nav = ({ dataPersistence, hasReadme, matches, injectedTabs = [] }: NavProps) => {
+  console.log('injectedTabs', injectedTabs);
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
@@ -85,6 +87,15 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
       to: '/readme',
       label: t('components.organisms.header.readme')
     });
+
+
+    injectedTabs.forEach((tab: { to: any; label: any; }) => {
+      tabs.push({
+        to: tab.to,
+        label: tab.label
+      });
+    });
+
   }
 
   const nav = (
@@ -146,6 +157,7 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
 
 const Header = memo(
   ({ projectSettings }: { projectSettings?: IProjectSettings }) => {
+    console.log('projectSettings', projectSettings);
     const matches = useMediaQuery('(max-width: 66rem)');
 
     return (
@@ -166,6 +178,7 @@ const Header = memo(
               matches={matches}
               dataPersistence={projectSettings?.dataPersistence}
               hasReadme={!!projectSettings?.markdown}
+              injectedTabs={projectSettings?.ui.injected_tabs}
             />
           </Stack>
           <Stack
