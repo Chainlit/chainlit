@@ -27,9 +27,7 @@ def instrument_openai():
             parent_id = context.session.root_message.id
 
         step = Step(
-            name=generation.settings.get("model", generation.provider)
-            if generation.settings
-            else generation.provider,
+            name=generation.model if generation.model else generation.provider,
             type="llm",
             parent_id=parent_id,
         )
