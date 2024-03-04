@@ -3,7 +3,7 @@ import os
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import tomli
 from chainlit.logger import logger
@@ -71,7 +71,7 @@ latex = false
     enabled = true
     accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf"]
     max_files = 10
-    max_size_mb = 20
+    max_size_mb = 1
 
 # Allows user to use speech to text
 [features.speech_to_text]
@@ -187,7 +187,7 @@ class SpeechToTextFeature:
 @dataclass
 class MultiModalFeature:
     enabled: Optional[bool] = None
-    accept: Optional[List[str]] = None
+    accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
 
