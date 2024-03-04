@@ -41,7 +41,14 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb,
+      max_files: projectSettings?.features?.multi_modal?.max_files,
+      accept: projectSettings?.features?.multi_modal?.accept
+    }),
+    [projectSettings]
+  );
 
   const { t } = useTranslation();
 
@@ -150,7 +157,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.multi_modal?.enabled;
 
   return (
     <Box

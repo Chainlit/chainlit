@@ -50,7 +50,7 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
-# Authorized origins 
+# Authorized origins
 allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -67,7 +67,11 @@ unsafe_allow_html = false
 latex = false
 
 # Authorize users to upload files with messages
-multi_modal = true
+[features.multi_modal]
+    enabled = true
+    accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+    max_files = 10
+    max_size_in_mb = 20
 
 # Allows user to use speech to text
 [features.speech_to_text]
@@ -180,10 +184,18 @@ class SpeechToTextFeature:
     language: Optional[str] = None
 
 
+@dataclass
+class MultiModalFeature:
+    enabled: Optional[bool] = None
+    accept: Optional[List[str]] = None
+    max_files: Optional[int] = None
+    max_size_in_mb: Optional[int] = None
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
-    multi_modal: bool = True
+    multi_modal: Optional[MultiModalFeature] = None
     latex: bool = False
     unsafe_allow_html: bool = False
     speech_to_text: Optional[SpeechToTextFeature] = None
