@@ -69,9 +69,9 @@ latex = false
 # Authorize users to upload files with messages
 [features.multi_modal]
     enabled = true
-    accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+    accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf"]
     max_files = 10
-    max_size_in_mb = 20
+    max_size_mb = 20
 
 # Allows user to use speech to text
 [features.speech_to_text]
@@ -189,7 +189,7 @@ class MultiModalFeature:
     enabled: Optional[bool] = None
     accept: Optional[List[str]] = None
     max_files: Optional[int] = None
-    max_size_in_mb: Optional[int] = None
+    max_size_mb: Optional[int] = None
 
 
 @dataclass()
