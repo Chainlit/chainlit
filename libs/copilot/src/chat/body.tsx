@@ -47,9 +47,8 @@ const Chat = () => {
 
   const fileSpec = useMemo(
     () => ({
-      max_size_mb:
-        (projectSettings?.features?.multi_modal?.max_size_mb || 2) * 1000000,
-      max_files: projectSettings?.features?.multi_modal?.max_files || undefined,
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb,
+      max_files: projectSettings?.features?.multi_modal?.max_files,
       accept: projectSettings?.features?.multi_modal?.accept
     }),
     [projectSettings]

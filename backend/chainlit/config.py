@@ -71,7 +71,7 @@ latex = false
     enabled = true
     accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf"]
     max_files = 10
-    max_size_mb = 1
+    max_size_mb = 20
 
 # Allows user to use speech to text
 [features.speech_to_text]
