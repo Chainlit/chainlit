@@ -123,14 +123,14 @@ class Element:
             )
 
     async def _create(self) -> bool:
-        if (self.persisted or self.url) and not self.updatable:
+        if self.persisted and not self.updatable:
             return True
         if data_layer := get_data_layer():
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
                 logger.error(f"Failed to create element: {str(e)}")
-        if not self.chainlit_key or self.updatable:
+        if not self.url and (not self.chainlit_key or self.updatable):
             file_dict = await context.session.persist_file(
                 name=self.name,
                 path=self.path,
@@ -203,6 +203,7 @@ class Text(Element):
 class Pdf(Element):
     """Useful to send a pdf to the UI."""
 
+    mime: str = "application/pdf"
     page: Optional[int] = None
     type: ClassVar[ElementType] = "pdf"
 

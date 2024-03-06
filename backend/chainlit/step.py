@@ -3,7 +3,6 @@ import inspect
 import json
 import time
 import uuid
-from datetime import datetime
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
@@ -15,6 +14,7 @@ from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
 from literalai import BaseGeneration
+from literalai.helper import utc_now
 from literalai.step import StepType, TrueStepType
 
 
@@ -177,7 +177,7 @@ class Step:
         self.generation = None
         self.elements = elements or []
 
-        self.created_at = datetime.utcnow().isoformat()
+        self.created_at = utc_now()
         self.start = None
         self.end = None
 
@@ -372,7 +372,7 @@ class Step:
 
     # Handle Context Manager Protocol
     async def __aenter__(self):
-        self.start = datetime.utcnow().isoformat()
+        self.start = utc_now()
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
 
@@ -387,7 +387,7 @@ class Step:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.utcnow().isoformat()
+        self.end = utc_now()
 
         if self in context.active_steps:
             context.active_steps.remove(self)
@@ -400,7 +400,7 @@ class Step:
         await self.update()
 
     def __enter__(self):
-        self.start = datetime.utcnow().isoformat()
+        self.start = utc_now()
 
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
@@ -417,7 +417,7 @@ class Step:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.utcnow().isoformat()
+        self.end = utc_now()
         if self in context.active_steps:
             context.active_steps.remove(self)
 

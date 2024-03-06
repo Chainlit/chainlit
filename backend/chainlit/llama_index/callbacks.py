@@ -1,10 +1,10 @@
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from chainlit.context import context_var
 from chainlit.element import Text
 from chainlit.step import Step, StepType
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
+from literalai.helper import utc_now
 from llama_index.callbacks import TokenCountingHandler
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.llms.base import ChatMessage, ChatResponse, CompletionResponse
@@ -87,7 +87,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             disable_feedback=False,
         )
         self.steps[event_id] = step
-        step.start = datetime.utcnow().isoformat()
+        step.start = utc_now()
         step.input = payload or {}
         self.context.loop.create_task(step.send())
         return event_id
@@ -107,7 +107,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
         self._restore_context()
 
-        step.end = datetime.utcnow().isoformat()
+        step.end = utc_now()
 
         if event_type == CBEventType.RETRIEVE:
             sources = payload.get(EventPayload.NODES)
