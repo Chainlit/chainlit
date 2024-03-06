@@ -23,17 +23,12 @@ if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import FeedbackDict, StepDict
 
-_data_layer = None
-
 
 def queue_until_user_message():
     def decorator(method):
         @functools.wraps(method)
         async def wrapper(self, *args, **kwargs):
-            if (
-                isinstance(context.session, WebsocketSession)
-                and not context.session.has_first_interaction
-            ):
+            if isinstance(context.session, WebsocketSession) and not context.session.has_first_interaction:
                 # Queue the method invocation waiting for the first user message
                 queues = context.session.thread_queues
                 method_name = method.__name__
@@ -69,9 +64,7 @@ class BaseDataLayer:
     async def create_element(self, element_dict: "ElementDict"):
         pass
 
-    async def get_element(
-        self, thread_id: str, element_id: str
-    ) -> Optional["ElementDict"]:
+    async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
         pass
 
     @queue_until_user_message()
@@ -96,12 +89,8 @@ class BaseDataLayer:
     async def delete_thread(self, thread_id: str):
         pass
 
-    async def list_threads(
-        self, pagination: "Pagination", filters: "ThreadFilter"
-    ) -> "PaginatedResponse[ThreadDict]":
-        return PaginatedResponse(
-            data=[], pageInfo=PageInfo(hasNextPage=False, endCursor=None)
-        )
+    async def list_threads(self, pagination: "Pagination", filters: "ThreadFilter") -> "PaginatedResponse[ThreadDict]":
+        return PaginatedResponse(data=[], pageInfo=PageInfo(hasNextPage=False, endCursor=None))
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
         return None
@@ -118,6 +107,9 @@ class BaseDataLayer:
 
     async def delete_user_session(self, id: str) -> bool:
         return True
+
+
+_data_layer: Optional[BaseDataLayer] = None
 
 
 class ChainlitDataLayer:
@@ -145,9 +137,7 @@ class ChainlitDataLayer:
             "threadId": attachment.thread_id,
         }
 
-    def feedback_to_feedback_dict(
-        self, feedback: Optional[ClientFeedback]
-    ) -> "Optional[FeedbackDict]":
+    def feedback_to_feedback_dict(self, feedback: Optional[ClientFeedback]) -> "Optional[FeedbackDict]":
         if not feedback:
             return None
         return {
@@ -160,9 +150,7 @@ class ChainlitDataLayer:
 
     def step_to_step_dict(self, step: ClientStep) -> "StepDict":
         metadata = step.metadata or {}
-        input = (step.input or {}).get("content") or (
-            json.dumps(step.input) if step.input and step.input != {} else ""
-        )
+        input = (step.input or {}).get("content") or (json.dumps(step.input) if step.input and step.input != {} else "")
         output = (step.output or {}).get("content") or (
             json.dumps(step.output) if step.output and step.output != {} else ""
         )
@@ -202,9 +190,7 @@ class ChainlitDataLayer:
     async def create_user(self, user: User) -> Optional[PersistedUser]:
         _user = await self.client.api.get_user(identifier=user.identifier)
         if not _user:
-            _user = await self.client.api.create_user(
-                identifier=user.identifier, metadata=user.metadata
-            )
+            _user = await self.client.api.create_user(identifier=user.identifier, metadata=user.metadata)
         elif _user.id:
             await self.client.api.update_user(id=_user.id, metadata=user.metadata)
         return PersistedUser(
@@ -284,9 +270,7 @@ class ChainlitDataLayer:
             ]
         )
 
-    async def get_element(
-        self, thread_id: str, element_id: str
-    ) -> Optional["ElementDict"]:
+    async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
         attachment = await self.client.api.get_attachment(id=element_id)
         if not attachment:
             return None
@@ -345,23 +329,17 @@ class ChainlitDataLayer:
     async def delete_thread(self, thread_id: str):
         await self.client.api.delete_thread(id=thread_id)
 
-    async def list_threads(
-        self, pagination: "Pagination", filters: "ThreadFilter"
-    ) -> "PaginatedResponse[ThreadDict]":
+    async def list_threads(self, pagination: "Pagination", filters: "ThreadFilter") -> "PaginatedResponse[ThreadDict]":
         if not filters.userIdentifier:
             raise ValueError("userIdentifier is required")
 
         client_filters = ClientThreadFilter(
-            participantsIdentifier=StringListFilter(
-                operator="in", value=[filters.userIdentifier]
-            ),
+            participantsIdentifier=StringListFilter(operator="in", value=[filters.userIdentifier]),
         )
         if filters.search:
             client_filters.search = StringFilter(operator="ilike", value=filters.search)
         if filters.feedback:
-            client_filters.feedbacksValue = NumberListFilter(
-                operator="in", value=[filters.feedback]
-            )
+            client_filters.feedbacksValue = NumberListFilter(operator="in", value=[filters.feedback])
         return await self.client.api.list_threads(
             first=pagination.first, after=pagination.cursor, filters=client_filters
         )
