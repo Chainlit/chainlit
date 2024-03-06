@@ -112,7 +112,7 @@ class BaseDataLayer:
 _data_layer: Optional[BaseDataLayer] = None
 
 
-class ChainlitDataLayer:
+class ChainlitDataLayer(BaseDataLayer):
     def __init__(self, api_key: str, server: Optional[str]):
         from literalai import LiteralClient
 
@@ -173,7 +173,6 @@ class ChainlitDataLayer:
             "language": metadata.get("language"),
             "isError": metadata.get("isError", False),
             "waitForAnswer": metadata.get("waitForAnswer", False),
-            "feedback": self.feedback_to_feedback_dict(step.feedback),
         }
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:

@@ -3,7 +3,8 @@ import os
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional
+from chainlit import data
 
 import tomli
 from chainlit.logger import logger
@@ -50,7 +51,7 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
-# Authorized origins 
+# Authorized origins
 allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -74,6 +75,13 @@ multi_modal = true
     enabled = false
     # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
     # language = "en-US"
+
+[data_layer]
+# Database to use. Currently Literal and MongoDB are supported.
+database = "literal"
+
+# Object storage to use. Currently Literal and S3 are supported.
+object_storage = "literal"
 
 [UI]
 # Name of the app and chatbot.
@@ -215,9 +223,7 @@ class CodeSettings:
     # Bunch of callbacks defined by the developer
     password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
     header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
-    oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
-    ] = None
+    oauth_callback: Optional[Callable[[str, str, Dict[str, str], "User"], Optional["User"]]] = None
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
@@ -226,9 +232,13 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = None
+
+
+@dataclass()
+class DataLayerSettings:
+    database: Literal["literal", "mongodb"]
+    object_storage: Literal["literal", "s3"]
 
 
 @dataclass()
@@ -259,25 +269,20 @@ class ChainlitConfig:
     ui: UISettings
     project: ProjectSettings
     code: CodeSettings
+    data_layer: DataLayerSettings
 
     def load_translation(self, language: str):
         translation = {}
         default_language = "en-US"
 
-        translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{language}.json"
-        )
-        default_translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{default_language}.json"
-        )
+        translation_lib_file_path = os.path.join(config_translation_dir, f"{language}.json")
+        default_translation_lib_file_path = os.path.join(config_translation_dir, f"{default_language}.json")
 
         if os.path.exists(translation_lib_file_path):
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
                 translation = json.load(f)
         elif os.path.exists(default_translation_lib_file_path):
-            logger.warning(
-                f"Translation file for {language} not found. Using default translation {default_language}."
-            )
+            logger.warning(f"Translation file for {language} not found. Using default translation {default_language}.")
             with open(default_translation_lib_file_path, "r", encoding="utf-8") as f:
                 translation = json.load(f)
 
@@ -296,9 +301,7 @@ def init_config(log=False):
 
     if not os.path.exists(config_translation_dir):
         os.makedirs(config_translation_dir, exist_ok=True)
-        logger.info(
-            f"Created default translation directory at {config_translation_dir}"
-        )
+        logger.info(f"Created default translation directory at {config_translation_dir}")
 
     for file in os.listdir(TRANSLATIONS_DIR):
         if file.endswith(".json"):
@@ -324,11 +327,7 @@ def load_module(target: str, force_refresh: bool = False):
     if force_refresh:
         # Clear the modules related to the app from sys.modules
         for module_name, module in list(sys.modules.items()):
-            if (
-                hasattr(module, "__file__")
-                and module.__file__
-                and module.__file__.startswith(target_dir)
-            ):
+            if hasattr(module, "__file__") and module.__file__ and module.__file__.startswith(target_dir):
                 sys.modules.pop(module_name, None)
 
     spec = util.spec_from_file_location(target, target)
@@ -355,11 +354,10 @@ def load_settings():
         features_settings = toml_dict.get("features", {})
         ui_settings = toml_dict.get("UI", {})
         meta = toml_dict.get("meta")
+        data_layer = toml_dict.get("data_layer")
 
         if not meta or meta.get("generated_by") <= "0.3.0":
-            raise ValueError(
-                "Your config file is outdated. Please delete it and restart the app to regenerate it."
-            )
+            raise ValueError("Your config file is outdated. Please delete it and restart the app to regenerate it.")
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
 
@@ -372,11 +370,14 @@ def load_settings():
 
         ui_settings = UISettings(**ui_settings)
 
+        data_layer_settings = DataLayerSettings(**data_layer)
+
         return {
             "features": features_settings,
             "ui": ui_settings,
             "project": project_settings,
             "code": CodeSettings(action_callbacks={}),
+            "data_layer": data_layer_settings,
         }
 
 
@@ -392,6 +393,7 @@ def reload_config():
     config.code = settings["code"]
     config.ui = settings["ui"]
     config.project = settings["project"]
+    config.data_layer = settings["data_layer"]
 
 
 def load_config():
