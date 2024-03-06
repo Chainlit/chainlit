@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing is unreleased!
 
+## [1.0.400] - 2023-03-06
+
+### Added
+
+- OpenAI integration
+
+### Fixed
+
+- Langchain final answer streaming should work again
+- Elements with public URLs should be correctly persisted by the data layer
+
+### Changed
+
+- Enforce UTC DateTimes
+
 ## [1.0.300] - 2023-02-19
 
 ### Added
