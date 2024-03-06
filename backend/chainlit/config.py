@@ -69,7 +69,7 @@ latex = false
 # Authorize users to upload files with messages
 [features.multi_modal]
     enabled = true
-    accept = ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf"]
+    accept = ["text/plain", "text/x-python", "text/x-c++src"]
     max_files = 10
     max_size_mb = 20
 
