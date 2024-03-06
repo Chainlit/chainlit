@@ -1,12 +1,12 @@
-from datetime import datetime
 from typing import List, Optional
 
 import chainlit.data as cl_data
 from chainlit.step import StepDict
+from literalai.helper import utc_now
 
 import chainlit as cl
 
-now = datetime.utcnow().isoformat()
+now = utc_now()
 
 create_step_counter = 0
 
