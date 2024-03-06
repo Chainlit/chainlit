@@ -202,7 +202,8 @@ class Text(Element):
 @dataclass
 class Pdf(Element):
     """Useful to send a pdf to the UI."""
-    mime: ClassVar[str] = "application/pdf"
+
+    mime: str = "application/pdf"
     page: Optional[int] = None
     type: ClassVar[ElementType] = "pdf"
 
