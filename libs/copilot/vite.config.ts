@@ -15,7 +15,7 @@ export default defineConfig({
       output: [
         {
           name: 'copilot',
-          dir: 'dist',
+          dir: '../../../avaia-chat/src/avaia_chat/public/copilot',
           format: 'iife',
           entryFileNames: 'index.js',
           inlineDynamicImports: true
