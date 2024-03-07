@@ -19,7 +19,8 @@ export default function AppWrapper({ config }: Props) {
       <WidgetContext.Provider
         value={{
           accessToken: config.accessToken,
-          apiClient
+          apiClient,
+          config
         }}
       >
         <App config={config} />

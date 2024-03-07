@@ -5,6 +5,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
+import WidgetEmbedded from 'widget-embedded';
 
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
@@ -97,7 +98,7 @@ export default function App({ config }: Props) {
           }
         }}
       />
-      <Widget config={config} />
+      {config.isEmbedded ? <WidgetEmbedded /> : <Widget config={config} />}
     </ThemeProvider>
   );
 }

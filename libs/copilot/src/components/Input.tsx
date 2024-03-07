@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import 'regenerator-runtime';
@@ -18,6 +18,7 @@ import {
 } from '@chainlit/app/src/state/project';
 import { inputHistoryState } from '@chainlit/app/src/state/userInputHistory';
 import { FileSpec, useChatData } from '@chainlit/react-client';
+import { WidgetContext } from 'context';
 
 interface Props {
   fileSpec: FileSpec;
@@ -42,6 +43,7 @@ const Input = memo(
     const [pSettings] = useRecoilState(projectSettingsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+    const { config } = useContext(WidgetContext);
 
     const ref = useRef<HTMLDivElement>(null);
     const {
@@ -88,7 +90,7 @@ const Input = memo(
 
     useEffect(() => {
       if (ref.current && !loading && !disabled) {
-        ref.current.focus();
+        !config?.isEmbedded && ref.current.focus();
       }
     }, [loading, disabled]);
 
@@ -132,6 +134,12 @@ const Input = memo(
       [submit, setInputHistory, isComposing]
     );
 
+    const inputFocusHandler = () => {
+      if (window.innerWidth < 1024) {
+        window.dispatchEvent(new CustomEvent('chainlit-open-modal'));
+      }
+    }
+
     return (
       <>
         <Stack
@@ -173,6 +181,7 @@ const Input = memo(
             onKeyDown={handleKeyDown}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
+            { ...(config?.isEmbedded ? { onClick: inputFocusHandler} : {})}
             value={value}
             fullWidth
             InputProps={{

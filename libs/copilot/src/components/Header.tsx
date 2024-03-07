@@ -4,8 +4,13 @@ import { Logo } from '@chainlit/app/src/components/atoms/logo';
 
 import ChatProfiles from './ChatProfiles';
 import NewChatButton from './NewChatButton';
+import CloseModalButton from './CloseModalButton';
 
-const Header = (): JSX.Element => (
+interface Props {
+  showClose: boolean;
+}
+
+const Header = ({ showClose }: Props): JSX.Element => (
   <Stack
     px={2}
     py={1.5}
@@ -18,6 +23,7 @@ const Header = (): JSX.Element => (
     <Stack direction="row" alignItems="center" spacing={1}>
       <ChatProfiles />
       <NewChatButton />
+      {showClose && <CloseModalButton />}
     </Stack>
   </Stack>
 );

@@ -4,6 +4,7 @@ export interface IWidgetConfig {
   accessToken?: string;
   theme?: 'light' | 'dark';
   fontFamily?: string;
+  isEmbedded?: boolean,
   button?: {
     containerId?: string;
     imageUrl?: string;

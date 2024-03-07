@@ -8,15 +8,19 @@ const id = 'chainlit-copilot';
 let root: ReactDOM.Root | null = null;
 
 // @ts-expect-error is not a valid prop
-window.mountChainlitWidget = (config: IWidgetConfig) => {
+window.mountChainlitWidget = (config: IWidgetConfig, container: HTMLElement | null) => {
   const div = document.createElement('div');
   div.id = id;
-  document.body.appendChild(div);
+  if (container !== null) {
+    container.appendChild(div);
+  } else {
+    document.body.appendChild(div);
+  }
 
   root = ReactDOM.createRoot(div);
   root.render(
     <React.StrictMode>
-      <AppWrapper config={config} />
+      <AppWrapper config={{...config, isEmbedded: !!container}} />
     </React.StrictMode>
   );
 };
