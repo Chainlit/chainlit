@@ -110,7 +110,8 @@ hide_cot = false
 
 # Specify a custom build directory for the frontend. 
 # This can be used to customize the frontend code.
-# custom_build = "/public/build"
+# Be careful: If this is a relative path, it should not start with a slash.
+# custom_build = "./public/build"
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme]
