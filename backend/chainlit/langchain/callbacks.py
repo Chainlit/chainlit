@@ -1,6 +1,5 @@
 import json
 import time
-from datetime import datetime
 from typing import Any, Dict, List, Optional, TypedDict, Union
 from uuid import UUID
 
@@ -13,6 +12,7 @@ from langchain.schema import BaseMessage
 from langchain.schema.output import ChatGenerationChunk, GenerationChunk
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
+from literalai.helper import utc_now
 from literalai.step import TrueStepType
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
@@ -179,6 +179,10 @@ class GenerationHelper:
             role=self._convert_message_role(message.type),
             content="",
         )
+
+        if literal_uuid := message.additional_kwargs.get("uuid"):
+            msg["uuid"] = literal_uuid
+            msg["templated"] = True
 
         if name := getattr(message, "name", None):
             msg["name"] = name
@@ -353,6 +357,18 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if start["tt_first_token"] is None:
             start["tt_first_token"] = (time.time() - start["start"]) * 1000
 
+        if self.stream_final_answer:
+            self._append_to_last_tokens(token)
+
+            if self.answer_reached:
+                if not self.final_stream:
+                    self.final_stream = Message(content="")
+                    self._run_sync(self.final_stream.send())
+                self._run_sync(self.final_stream.stream_token(token))
+                self.has_streamed_final_answer = True
+            else:
+                self.answer_reached = self._check_if_answer_reached()
+
         return super().on_llm_new_token(
             token,
             chunk=chunk,
@@ -458,7 +474,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
             disable_feedback=disable_feedback,
         )
-        step.start = datetime.utcnow().isoformat()
+        step.start = utc_now()
         step.input = run.inputs
 
         self.steps[str(run.id)] = step
@@ -505,6 +521,15 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     ],
                     message_completion=message_completion,
                 )
+
+                # find first message with prompt_id
+                for m in chat_start["input_messages"]:
+                    if m.additional_kwargs.get("prompt_id"):
+                        current_step.generation.prompt_id = m.additional_kwargs["prompt_id"]
+                        if custom_variables := m.additional_kwargs.get("variables"):
+                            current_step.generation.variables = custom_variables
+                    break
+    
                 current_step.language = "json"
                 current_step.output = json.dumps(message_completion)
             else:
@@ -529,7 +554,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 current_step.output = completion
 
             if current_step:
-                current_step.end = datetime.utcnow().isoformat()
+                current_step.end = utc_now()
                 self._run_sync(current_step.update())
 
             if self.final_stream and self.has_streamed_final_answer:
@@ -547,7 +572,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
 
         if current_step:
             current_step.output = output
-            current_step.end = datetime.utcnow().isoformat()
+            current_step.end = utc_now()
             self._run_sync(current_step.update())
 
     def _on_error(self, error: BaseException, *, run_id: UUID, **kwargs: Any):
@@ -556,7 +581,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if current_step := self.steps.get(str(run_id), None):
             current_step.is_error = True
             current_step.output = str(error)
-            current_step.end = datetime.utcnow().isoformat()
+            current_step.end = utc_now()
             self._run_sync(current_step.update())
 
     on_llm_error = _on_error
