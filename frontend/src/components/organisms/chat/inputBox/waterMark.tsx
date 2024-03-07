@@ -4,10 +4,10 @@ import { Stack, Typography } from '@mui/material';
 
 import { Translator } from 'components/i18n';
 
-import 'assets/logo_dark.svg';
-import LogoDark from 'assets/logo_dark.svg?react';
-import 'assets/logo_light.svg';
-import LogoLight from 'assets/logo_light.svg?react';
+import 'assets/evoya_light.svg';
+import LogoDark from 'assets/evoya_light.svg?react';
+import 'assets/evoya_light.svg';
+import LogoLight from 'assets/evoya_light.svg?react';
 
 import { settingsState } from 'state/settings';
 
@@ -17,7 +17,7 @@ export default function WaterMark() {
   return (
     <Stack mx="auto" className="watermark">
       <a
-        href="https://github.com/Chainlit/chainlit"
+        href="https://evoya.ai"
         target="_blank"
         style={{
           display: 'flex',
@@ -30,12 +30,16 @@ export default function WaterMark() {
         </Typography>
         <Logo
           style={{
-            width: 65,
+            width: 20,
             height: 'auto',
             filter: 'grayscale(1)',
-            marginLeft: '4px'
+            marginLeft: '10px',
+            marginRight: '5px'
           }}
         />
+        <Typography fontSize="12px" color="text.secondary">
+          <span>Evoya Ai</span>
+        </Typography>
       </a>
     </Stack>
   );
