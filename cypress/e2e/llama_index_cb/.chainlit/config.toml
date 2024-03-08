@@ -37,6 +37,12 @@ hide_cot = false
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
 
+[features.multi_modal]
+    enabled = true
+    accept = ["*/*"]
+    max_files = 20
+    max_size_mb = 500
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
