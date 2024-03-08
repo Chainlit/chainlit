@@ -69,9 +69,9 @@ latex = false
 # Authorize users to upload files with messages
 [features.multi_modal]
     enabled = true
-    accept = ["text/plain", "text/x-python", "text/x-c++src"]
-    max_files = 10
-    max_size_mb = 20
+    accept = ["*/*"]
+    max_files = 20
+    max_size_mb = 500
 
 # Allows user to use speech to text
 [features.speech_to_text]
