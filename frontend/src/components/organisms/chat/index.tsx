@@ -47,7 +47,7 @@ const Chat = () => {
       max_files: projectSettings?.features?.multi_modal?.max_files || 20,
       accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
     }),
-    []
+    [projectSettings]
   );
 
   const { t } = useTranslation();
@@ -138,8 +138,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
