@@ -44,7 +44,7 @@ watchfiles="^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
-python-multipart = "^0.0.6"
+python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
 
 [tool.poetry.group.tests]
@@ -53,7 +53,7 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 openai = "^1.11.1"
 langchain = "^0.1.5"
-llama-index = "^0.9.15"
+llama-index = "^0.10.15"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
