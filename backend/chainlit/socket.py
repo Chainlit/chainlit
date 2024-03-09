@@ -169,6 +169,8 @@ async def connection_successful(sid):
     context = init_ws_context(sid)
 
     if context.session.restored:
+        if config.code.on_chat_restore:
+            await config.code.on_chat_restore()
         return
 
     await context.emitter.task_end()

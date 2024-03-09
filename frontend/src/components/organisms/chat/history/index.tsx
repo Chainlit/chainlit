@@ -36,7 +36,7 @@ function buildInputHistory(userInputs: UserInput[]) {
       content: string;
     }[]
   > = {};
-
+/*
   const reversedHistory = cloneDeep(userInputs).reverse();
 
   reversedHistory?.forEach((userInput) => {
@@ -61,15 +61,17 @@ function buildInputHistory(userInputs: UserInput[]) {
       content: content
     });
   });
-
+*/
   return inputHistory;
 }
 
-export default function InputHistoryButton({ disabled, onClick }: Props) {
+export default function InputHistoryButton({ disabled, onClick}: Props) {
   const [inputHistory, setInputHistory] = useRecoilState(inputHistoryState);
 
   const ref = useRef<any>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  return null;
 
   if (inputHistory.open && !anchorEl) {
     if (ref.current) {

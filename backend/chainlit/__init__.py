@@ -190,6 +190,21 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
 
 
 @trace
+def on_chat_restore(func: Callable) -> Callable:
+    """
+    Hook to react to resume websocket connection event.
+
+    Args:
+        func (Callable[], Any]): The connection hook to execute.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_chat_restore = wrap_user_function(func, with_task=True)
+    return func
+
+@trace
 def set_chat_profiles(
     func: Callable[[Optional["User"]], List["ChatProfile"]]
 ) -> Callable:
