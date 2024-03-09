@@ -1,12 +1,13 @@
 from chainlit.data import BaseDataLayer, queue_until_user_message
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User
+from chainlit.logger import logger
 from literalai import Attachment, Feedback as _ClientFeedback
 from literalai import PageInfo, PaginatedResponse
 from literalai import Step as _ClientStep
-from pymongo import MongoClient, DESCENDING
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from datetime import datetime
+import aiofiles
 import json
 
 
@@ -31,8 +32,10 @@ if TYPE_CHECKING:
         forId: str
 
 
-class MongoDataLayer(BaseDataLayer):
+class MongoDBDataLayer(BaseDataLayer):
     def __init__(self, db_url: str):
+        from pymongo import MongoClient
+
         # Connect to the database
         self.client = MongoClient(db_url)  # type: MongoClient
         self.db = self.client.get_database()
@@ -42,6 +45,7 @@ class MongoDataLayer(BaseDataLayer):
         self.elements_collection = self.db.get_collection("elements")
         self.steps_collection = self.db.get_collection("steps")
         self.threads_collection = self.db.get_collection("threads")
+        logger.info("MongoDB data layer initialized")
 
     def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
         metadata = attachment.metadata or {}
@@ -111,33 +115,80 @@ class MongoDataLayer(BaseDataLayer):
         return None
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
-        user_data: Dict[str, Any] = {
-            "identifier": user.identifier,
-            "metadata": user.metadata,
-            "createdAt": datetime.utcnow(),
-        }
-        result = self.users_collection.insert_one(user_data)
-        user_data["_id"] = result.inserted_id
-        return PersistedUser(**user_data)
+        _user = await self.get_user(user.identifier)
+        if not _user:
+            user_data: Dict[str, Any] = {
+                "identifier": user.identifier,
+                "metadata": user.metadata,
+                "createdAt": datetime.utcnow(),
+            }
+            result = self.users_collection.insert_one(user_data)
+            user_data["_id"] = result.inserted_id
+            return PersistedUser(**user_data)
+
+        return PersistedUser(
+            id=_user.id or "",
+            identifier=_user.identifier or "",
+            metadata=_user.metadata,
+            createdAt=_user.created_at or "",
+        )
 
     async def upsert_feedback(self, feedback: Feedback):
         feedback_data = {
-            "step_id": feedback.forId,
+            "id": feedback.id,
+            "stepId": feedback.forId,
             "value": feedback.value,
             "strategy": feedback.strategy,
             "comment": feedback.comment,
         }
-        if feedback.id:
-            self.steps_collection.update_one({"_id": feedback.id}, {"$set": {"feedback": feedback_data}})
-            return feedback.id
-        else:
-            result = self.steps_collection.update_one({"_id": feedback.forId}, {"$set": {"feedback": feedback_data}})
-            return result.upserted_id or ""
+        self.steps_collection.update_one({"_id": feedback.id}, {"$set": {"feedback": feedback_data}})
+        return feedback.id
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        # TODO: Support file upload from user
-        pass
+        metadata = {
+            "size": element.size,
+            "language": element.language,
+            "display": element.display,
+            "type": element.type,
+            "page": getattr(element, "page", None),
+        }
+
+        if not element.for_id:
+            return
+
+        object_key = None
+
+        if not element.url:
+            if element.path:
+                async with aiofiles.open(element.path, "rb") as f:
+                    content = await f.read()  # type: Union[bytes, str]
+            elif element.content:
+                content = element.content
+            else:
+                raise ValueError("Either path or content must be provided")
+            uploaded = await self.client.api.upload_file(
+                content=content, mime=element.mime, thread_id=element.thread_id
+            )
+            object_key = uploaded["object_key"]
+
+        element_data = {
+            "id": element.id,
+            "threadId": element.thread_id,
+            "stepId": element.for_id,
+            "type": element.type,
+            "url": element.url,
+            "chainlitKey": element.chainlit_key,
+            "name": element.name,
+            "display": element.display,
+            "objectKey": object_key,
+            "size": element.size,
+            "page": element.page,
+            "language": element.language,
+            "mime": element.mime,
+            "metadata": metadata,
+        }
+        self.elements_collection.insert_one(element_data)
 
     async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
         element_data = self.elements_collection.find_one({"id": element_id})
@@ -160,19 +211,20 @@ class MongoDataLayer(BaseDataLayer):
         }
 
         step_data = {
-            "createdAt": step_dict.get("createdAt"),
             "id": step_dict.get("id"),
             "threadId": step_dict.get("threadId"),
             "parentId": step_dict.get("parentId"),
-            "feedback": step_dict.get("feedback"),
-            "start": step_dict.get("start"),
-            "end": step_dict.get("end"),
-            "type": step_dict.get("type"),
             "name": step_dict.get("name"),
-            "generation": step_dict.get("generation"),
+            "type": step_dict.get("type"),
             "input": step_dict.get("input"),
             "output": step_dict.get("output"),
+            "createdAt": step_dict.get("createdAt"),
+            "startTime": step_dict.get("start"),
+            "endTime": step_dict.get("end"),
+            "generation": step_dict.get("generation"),
             "metadata": metadata,
+            "feedback": step_dict.get("feedback"),
+            "attachments": step_dict.get("attachments"),
         }
 
         self.steps_collection.insert_one(step_data)
@@ -203,7 +255,7 @@ class MongoDataLayer(BaseDataLayer):
         if not filters.userIdentifier:
             raise ValueError("userIdentifier is required")
 
-        query: Dict[str, Any] = {"participants.identifier": filters.userIdentifier}
+        query = {"participants.identifier": filters.userIdentifier}
         if filters.search:
             query["$text"] = {"$search": filters.search}
         if filters.feedback:
@@ -215,7 +267,7 @@ class MongoDataLayer(BaseDataLayer):
 
         threads_data = list(self.threads_collection.find(query).sort(sort).limit(pagination.first))
 
-        threads: List[ThreadDict] = [
+        threads = [
             {
                 "id": thread["_id"],
                 "createdAt": thread["createdAt"],
@@ -230,7 +282,7 @@ class MongoDataLayer(BaseDataLayer):
         ]
 
         has_next_page = len(threads) == pagination.first
-        end_cursor = threads[-1]["id"] if has_next_page else None
+        end_cursor = threads[-1]["_id"] if has_next_page else None
 
         return PaginatedResponse(
             data=threads,
@@ -246,8 +298,8 @@ class MongoDataLayer(BaseDataLayer):
         steps = list(self.steps_collection.find({"threadId": thread_data["_id"]}))
 
         return {
-            "createdAt": thread_data["createdAt"],
             "id": thread_data["_id"],
+            "createdAt": thread_data["createdAt"],
             "name": thread_data.get("name"),
             "steps": [self.step_to_step_dict(step) for step in steps],
             "elements": [self.attachment_to_element_dict(element) for element in elements],
@@ -264,7 +316,7 @@ class MongoDataLayer(BaseDataLayer):
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
-        update_data: Dict[str, Any] = {}
+        update_data = {}
         if name is not None:
             update_data["name"] = name
         if user_id is not None:
