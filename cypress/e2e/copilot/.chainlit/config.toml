@@ -67,6 +67,10 @@ hide_cot = false
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Specify a Javascript file that can be used to customize the user interface.
+# The Javascript file can be served from the public directory.
+# custom_js = "/public/test.js"
+
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
@@ -94,4 +98,4 @@ hide_cot = false
 
 
 [meta]
-generated_by = "1.0.101"
+generated_by = "1.0.400"
