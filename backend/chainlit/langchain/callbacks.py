@@ -525,11 +525,13 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 # find first message with prompt_id
                 for m in chat_start["input_messages"]:
                     if m.additional_kwargs.get("prompt_id"):
-                        current_step.generation.prompt_id = m.additional_kwargs["prompt_id"]
+                        current_step.generation.prompt_id = m.additional_kwargs[
+                            "prompt_id"
+                        ]
                         if custom_variables := m.additional_kwargs.get("variables"):
                             current_step.generation.variables = custom_variables
                     break
-    
+
                 current_step.language = "json"
                 current_step.output = json.dumps(message_completion)
             else:
@@ -558,8 +560,6 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 self._run_sync(current_step.update())
 
             if self.final_stream and self.has_streamed_final_answer:
-                if self.final_stream.content:
-                    self.final_stream.content = completion
                 self._run_sync(self.final_stream.update())
 
             return
