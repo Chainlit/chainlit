@@ -108,6 +108,11 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
+# Specify a custom build directory for the frontend. 
+# This can be used to customize the frontend code.
+# Be careful: If this is a relative path, it should not start with a slash.
+# custom_build = "./public/build"
+
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme]
     #font_family = "Inter, sans-serif"
@@ -204,6 +209,7 @@ class UISettings(DataClassJsonMixin):
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
     custom_font: Optional[str] = None
+    custom_build: Optional[str] = None
 
 
 @dataclass()
