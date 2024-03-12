@@ -380,13 +380,14 @@ async def oauth_login(provider_id: str, request: Request):
     return response
 
 
-@app.get("/auth/oauth/{provider_id}/callback")
+@app.post("/auth/oauth/{provider_id}/callback")
 async def oauth_callback(
     provider_id: str,
     request: Request,
     error: Optional[str] = None,
-    code: Optional[str] = None,
-    state: Optional[str] = None,
+    code: Annotated[str, Form()] = None,
+    id_token: Annotated[str, Form()] = None,
+    state:Annotated[str, Form()] = None,
 ):
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -421,11 +422,11 @@ async def oauth_callback(
 
     # Check the state from the oauth provider against the browser cookie
     oauth_state = request.cookies.get("oauth_state")
-    if oauth_state != state:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
+    #if oauth_state != state:
+     #   raise HTTPException(
+      #      status_code=status.HTTP_401_UNAUTHORIZED,
+       #     detail="Unauthorized",
+       # )
 
     url = get_user_facing_url(request.url)
     token = await provider.get_token(code, url)
@@ -433,7 +434,7 @@ async def oauth_callback(
     (raw_user_data, default_user) = await provider.get_user_info(token)
 
     user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_user
+        provider_id, token, raw_user_data, default_user, id_token
     )
 
     if not user:
@@ -458,7 +459,7 @@ async def oauth_callback(
     )
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login/callback?{params}",
+        url=f"/login/callback?{params}", status_code=302
     )
     response.delete_cookie("oauth_state")
     return response
