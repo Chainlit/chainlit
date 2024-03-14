@@ -23,8 +23,6 @@ if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import FeedbackDict, StepDict
 
-_data_layer = None
-
 
 def queue_until_user_message():
     def decorator(method):
@@ -120,7 +118,10 @@ class BaseDataLayer:
         return True
 
 
-class ChainlitDataLayer:
+_data_layer: Optional[BaseDataLayer] = None
+
+
+class ChainlitDataLayer(BaseDataLayer):
     def __init__(self, api_key: str, server: Optional[str]):
         from literalai import LiteralClient
 
