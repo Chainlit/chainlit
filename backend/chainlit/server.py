@@ -380,7 +380,8 @@ async def oauth_login(provider_id: str, request: Request):
     return response
 
 
-@app.post("/auth/oauth/{provider_id}/callback")
+@app.post("/auth/oauth/azure-ad/callback")
+@app.get("/auth/oauth/{provider_id}/callback")
 async def oauth_callback(
     provider_id: str,
     request: Request,
