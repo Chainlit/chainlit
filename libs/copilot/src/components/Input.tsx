@@ -155,6 +155,7 @@ const Input = memo(
               height: '34px',
               maxHeight: '30vh',
               overflowY: 'auto !important',
+              fontSize: '16px',
               resize: 'none',
               color: 'text.primary',
               lineHeight: '24px'

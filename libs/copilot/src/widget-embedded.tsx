@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Chat from 'chat';
 
 import Header from 'components/Header';
-import Modal from '@mui/material/Modal';
 
 import { useState, useEffect } from 'react';
 
@@ -17,12 +16,15 @@ const styleOpen = {
   display: 'flex',
   flexDirection: 'column',
   position: 'fixed' as 'fixed',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 'calc(100% - 20px)',
-  height: 'calc(100% - 20px)',
-  bgcolor: 'background.paper',
+  // top: '10px',
+  left: '10px',
+  right: '10px',
+  // bottom: '10px',
+  // transform: 'translate(-50%, -50%)',
+  // width: 'calc(100% - 20px)',
+  // height: 'calc(100% - 20px)',
+  // bgcolor: 'background.paper',
+  background: (theme) => theme.palette.background.default,
   borderRadius: '10px',
   overflow: 'hidden',
   boxShadow: 24,
@@ -32,10 +34,23 @@ const styleOpen = {
 
 export default function WidgetEmbedded() {
   const [open, setOpen] = useState(false);
+  const [visualViewportHeight, setVisualViewportHeight] = useState(window.innerHeight);
+  const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0);
   // const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // const handleClose = () => setOpen(false);
+
+  const viewportHandler = () => {
+    if (window.visualViewport) {
+      setVisualViewportHeight(window.visualViewport.height);
+      setVisualViewportOffsetTop(window.visualViewport.offsetTop);
+    }
+  }
 
   useEffect(() => {
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", viewportHandler);
+      window.visualViewport.addEventListener("scroll", viewportHandler);
+    }
     window.addEventListener('chainlit-close-modal', () => {
       setOpen(false)
     });
@@ -53,28 +68,20 @@ export default function WidgetEmbedded() {
         width: '100%'
       }}
     >
-      <Box sx={open ? styleOpen : style}>
+      <Box
+        sx={
+          open ?
+          {
+            ...styleOpen,
+            top: `${visualViewportOffsetTop + 10}px`,
+            bottom: `${window.innerHeight - visualViewportHeight - visualViewportOffsetTop + 10}px`
+          }
+          : style
+        }
+      >
         <Header showClose={open} />
         <Chat />
       </Box>
-      {/*open ? (
-        <Modal
-          open={true}
-          onClose={handleClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={style}>
-            <Header />
-            <Chat />
-          </Box>
-        </Modal>
-      ) : (
-        <>
-          <Header />
-          <Chat />
-        </>
-      )*/}
     </Box>
   );
 }
