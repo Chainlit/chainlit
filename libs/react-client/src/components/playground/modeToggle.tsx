@@ -4,7 +4,8 @@ import { PlaygroundContext } from 'src/contexts/PlaygroundContext';
 import Tooltip from '@mui/material/Tooltip';
 
 import { Toggle } from 'src/components/buttons';
-import { PromptMode } from 'src/components/types/playground';
+
+import { PromptMode } from 'src/types/playground';
 
 interface Props {
   hasTemplate?: boolean;

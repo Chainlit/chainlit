@@ -4,6 +4,7 @@ import { removeToken } from 'src/utils/token';
 
 export * from './hooks/auth';
 export * from './hooks/api';
+export * from './hooks/useUpload';
 
 export interface IThreadFilters {
   search?: string;

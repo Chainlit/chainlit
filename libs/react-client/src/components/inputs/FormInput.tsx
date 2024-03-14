@@ -1,6 +1,6 @@
 import omit from 'src/utils/omit';
 
-import { IInput } from 'src/components/types/Input';
+import { IInput } from 'src/types/input';
 
 import { SliderInput, SliderInputProps } from './SliderInput';
 import { SwitchInput, SwitchInputProps } from './SwitchInput';

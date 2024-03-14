@@ -5,7 +5,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { buildVariablePlaceholder } from 'src/components/playground/helpers/format';
 
-import { useColors } from 'src/hooks/useColors';
+import { useColors } from 'src/api/hooks/useColors';
 
 interface Props {
   decoratedText: string;

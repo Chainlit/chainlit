@@ -2,7 +2,7 @@ import { grey } from 'src/theme/palette';
 
 import Box from '@mui/material/Box';
 
-import { useIsDarkMode } from 'src/hooks/useIsDarkMode';
+import { useIsDarkMode } from 'src/api/hooks/useIsDarkMode';
 
 const InlineCode = ({ children, ...props }: any) => {
   const isDarkMode = useIsDarkMode();

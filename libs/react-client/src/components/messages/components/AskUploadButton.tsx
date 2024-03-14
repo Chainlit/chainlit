@@ -7,7 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { useUpload } from 'src/hooks/useUpload';
+import { useUpload } from 'src/api/hooks/useUpload';
 
 const AskUploadChildButton = ({
   askUser,

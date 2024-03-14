@@ -7,7 +7,7 @@ import type { IAction, IMessageElement, IStep } from 'src/types';
 
 import Box from '@mui/material/Box';
 
-import { IMessageContext } from 'src/components/types/messageContext';
+import { IMessageContext } from 'src/types/messageContext';
 
 import { Messages } from './Messages';
 

@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { useIsDarkMode } from 'src/hooks/useIsDarkMode';
+import { useIsDarkMode } from 'src/api/hooks/useIsDarkMode';
 
 import 'highlight.js/styles/monokai-sublime.css';
 

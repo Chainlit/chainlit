@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import useTheme from '@mui/material/styles/useTheme';
 
-import { NotificationCountProps } from './types/NotificationCount';
+import { NotificationCountProps } from '../types/notificationCount';
 
 const NotificationCount = ({
   count,

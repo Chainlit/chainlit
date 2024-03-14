@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { IPlaygroundContext } from 'src/components/types/playgroundContext';
+import { IPlaygroundContext } from 'src/types/playgroundContext';
 
 const defaultPlaygroundContext: IPlaygroundContext = {
   setVariableName: () => undefined,

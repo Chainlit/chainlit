@@ -17,7 +17,8 @@ import Typography from '@mui/material/Typography';
 
 import { FormInput, SelectInput, TFormInput } from 'src/components/inputs';
 import { getProviders } from 'src/components/playground/helpers/provider';
-import { ILLMProvider } from 'src/components/types/playground';
+
+import { ILLMProvider } from 'src/types/playground';
 
 type Schema = {
   [key: string]: yup.Schema;

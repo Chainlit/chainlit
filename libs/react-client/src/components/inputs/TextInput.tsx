@@ -1,6 +1,6 @@
 import TextField, { TextFieldProps } from '@mui/material/TextField';
 
-import { IInput } from 'src/components/types/Input';
+import { IInput } from 'src/types/input';
 
 import { InputStateHandler } from './InputStateHandler';
 

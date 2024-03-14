@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import { AvatarElement } from 'src/components/elements/Avatar';
 
-import { useColorForName } from 'src/hooks/useColors';
+import { useColorForName } from 'src/api/hooks/useColors';
 
 import { MessageTime } from './MessageTime';
 

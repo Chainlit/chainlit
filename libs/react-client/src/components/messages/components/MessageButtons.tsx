@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 
 import { ClipboardCopy } from 'src/components/ClipboardCopy';
 
-import { useIsDarkMode } from 'src/hooks/useIsDarkMode';
+import { useIsDarkMode } from 'src/api/hooks/useIsDarkMode';
 
 import { FeedbackButtons } from './FeedbackButtons';
 import { PlaygroundButton } from './PlaygroundButton';

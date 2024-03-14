@@ -21,7 +21,7 @@ import {
   validateVariablePlaceholder
 } from 'src/components/playground/helpers/format';
 
-import { useColors } from 'src/hooks/useColors';
+import { useColors } from 'src/api/hooks/useColors';
 
 import 'draft-js/dist/Draft.css';
 
@@ -35,7 +35,7 @@ interface Props {
   template?: string;
   formatted?: string;
   format: string;
-  inputs: IGeneration['inputs'];
+  inputs: IGeneration['variables'];
   readOnly?: boolean;
   onChange?: (state: EditorState) => void;
   showTitle?: boolean;
@@ -277,8 +277,7 @@ export default function FormattedEditor({
   sxEditorChildren
 }: Props) {
   const editorRef = useRef<Editor>(null);
-  const { setVariableName, setPromptMode, onNotification } =
-    useContext(PlaygroundContext);
+  const { setVariableName, onNotification } = useContext(PlaygroundContext);
 
   const [state, setState] = useState<EditorState | undefined>();
   const [prevInputs, setPrevInputs] = useState<Record<string, string>>();
@@ -345,11 +344,7 @@ export default function FormattedEditor({
       const nextContent = nextState.getCurrentContent();
 
       if (currentContent !== nextContent) {
-        onNotification(
-          'error',
-          'Formatted prompt is read only. Edit the template/variables instead.'
-        );
-        setPromptMode('Template');
+        onNotification('error', 'Formatted prompt is read only.');
       }
 
       // Read only mode, force content but preserve selection

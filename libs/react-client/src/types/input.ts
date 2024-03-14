@@ -1,4 +1,4 @@
-import { NotificationCountProps } from './NotificationCount';
+import { NotificationCountProps } from './notificationCount';
 
 interface IInput {
   className?: string;

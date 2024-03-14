@@ -4,7 +4,7 @@ import type { IChatGeneration, IGenerationMessage } from 'src/types';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
-import { PromptMode } from 'src/components/types/playground';
+import { PromptMode } from 'src/types/playground';
 
 import MessageWrapper from './MessageWrapper';
 import FormattedEditor from './formatted';

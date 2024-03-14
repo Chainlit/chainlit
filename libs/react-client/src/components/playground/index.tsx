@@ -14,8 +14,9 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { ErrorBoundary } from 'src/components/ErrorBoundary';
-import { IPlayground } from 'src/components/types/playground';
-import { IPlaygroundContext } from 'src/components/types/playgroundContext';
+
+import { IPlayground } from 'src/types/playground';
+import { IPlaygroundContext } from 'src/types/playgroundContext';
 
 import ActionBar from './actionBar';
 import BasicPromptPlayground from './basic';

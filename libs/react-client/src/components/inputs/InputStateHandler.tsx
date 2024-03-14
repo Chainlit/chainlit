@@ -3,7 +3,7 @@ import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import Stack from '@mui/material/Stack';
 
-import { IInput } from 'src/components/types/Input';
+import { IInput } from 'src/types/input';
 
 import { InputLabel } from './InputLabel';
 

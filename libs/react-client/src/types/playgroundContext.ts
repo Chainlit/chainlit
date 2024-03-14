@@ -1,6 +1,6 @@
 import type { IGeneration } from 'src/types';
 
-import { IPlayground, PromptMode } from 'src/components/types/playground';
+import { IPlayground, PromptMode } from 'src/types/playground';
 
 interface IPlaygroundContext {
   variableName?: string;

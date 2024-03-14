@@ -4,9 +4,7 @@ export * from './elements';
 export * from './inputs';
 export * from './messages';
 export * from './playground';
-export * from './types';
 export * from 'src/theme/index';
-export * from 'src/hooks/index';
 
 export { Attachment } from './Attachment';
 export { ClipboardCopy } from './ClipboardCopy';

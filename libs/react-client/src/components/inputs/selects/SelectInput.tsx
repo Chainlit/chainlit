@@ -5,9 +5,10 @@ import { Stack, type SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
 import { InputStateHandler } from 'src/components/inputs/InputStateHandler';
-import { IInput } from 'src/components/types/Input';
 
-import { useIsDarkMode } from 'src/hooks/useIsDarkMode';
+import { useIsDarkMode } from 'src/api/hooks/useIsDarkMode';
+
+import { IInput } from 'src/types/input';
 
 import { MenuItem } from './MenuItem';
 

@@ -4,7 +4,8 @@ import MInputLabel from '@mui/material/InputLabel';
 import Tooltip from '@mui/material/Tooltip';
 
 import { NotificationCount } from 'src/components/NotificationCount';
-import { NotificationCountProps } from 'src/components/types/NotificationCount';
+
+import { NotificationCountProps } from 'src/types/notificationCount';
 
 type InputLabelProps = {
   id?: string;

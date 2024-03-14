@@ -3,7 +3,7 @@ import { green } from 'src/theme/palette';
 import MSwitch, { SwitchProps as MSwitchProps } from '@mui/material/Switch';
 import styled from '@mui/material/styles/styled';
 
-import { IInput } from 'src/components/types/Input';
+import { IInput } from 'src/types/input';
 
 import { InputStateHandler } from './InputStateHandler';
 

@@ -3,7 +3,7 @@ import { type IPlotlyElement } from 'src/types';
 
 import { ErrorBoundary } from 'src/components/ErrorBoundary';
 
-import { useFetch } from 'src/hooks/useFetch';
+import { useFetch } from 'src/api/hooks/useFetch';
 
 const Plot = lazy(() => import('react-plotly.js'));
 

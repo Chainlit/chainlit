@@ -3,7 +3,7 @@ import { grey } from 'src/theme/palette';
 import Slider, { SliderProps as MSliderProps } from '@mui/material/Slider';
 import styled from '@mui/material/styles/styled';
 
-import { IInput } from 'src/components/types/Input';
+import { IInput } from 'src/types/input';
 
 import { InputStateHandler } from './InputStateHandler';
 

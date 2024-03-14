@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 
 import { Markdown } from 'src/components/Markdown';
 
-import { useFetch } from 'src/hooks/useFetch';
+import { useFetch } from 'src/api/hooks/useFetch';
 
 interface Props {
   element: ITextElement;
