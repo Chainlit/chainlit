@@ -5,7 +5,7 @@ import { useRecoilValue } from 'recoil';
 import Page from 'pages/Page';
 
 import { IMessageElement, useApi, useChatData } from '@chainlit/react-client';
-import { ElementView } from '@chainlit/react-components';
+import { ElementView } from '@chainlit/react-client';
 
 import { useQuery } from 'hooks/query';
 

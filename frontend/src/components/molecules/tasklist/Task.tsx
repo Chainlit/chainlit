@@ -2,7 +2,7 @@ import { useSetRecoilState } from 'recoil';
 
 import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
 
-import { grey } from '@chainlit/react-components/theme';
+import { grey } from '@chainlit/react-client';
 
 import { highlightMessage } from 'state/project';
 

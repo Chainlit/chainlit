@@ -12,7 +12,7 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
+import { ErrorBoundary, useUpload } from '@chainlit/react-client';
 
 import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';

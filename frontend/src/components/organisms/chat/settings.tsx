@@ -16,7 +16,7 @@ import {
   FormInput,
   RegularButton,
   TFormInputValue
-} from '@chainlit/react-components';
+} from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 

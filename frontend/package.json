@@ -13,12 +13,11 @@
   },
   "dependencies": {
     "@chainlit/react-client": "workspace:^",
-    "@chainlit/react-components": "workspace:^",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.9",
     "@mui/lab": "^5.0.0-alpha.122",
-    "@mui/material": "^5.14.10",
+    "@mui/material": "5.14.12",
     "formik": "^2.4.3",
     "i18next": "^23.7.16",
     "lodash": "^4.17.21",

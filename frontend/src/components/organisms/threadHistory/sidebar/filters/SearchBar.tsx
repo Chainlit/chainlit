@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 
-import { grey } from '@chainlit/react-components';
+import { grey } from '@chainlit/react-client';
 
 import { threadsFiltersState } from 'state/threads';
 

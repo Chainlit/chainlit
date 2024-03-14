@@ -18,7 +18,7 @@ import {
   IStep,
   useChatInteract
 } from '@chainlit/react-client';
-import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
+import { MessageContainer as CMessageContainer } from '@chainlit/react-client';
 
 interface Props {
   loading: boolean;

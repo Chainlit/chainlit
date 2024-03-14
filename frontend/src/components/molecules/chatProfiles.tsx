@@ -14,7 +14,7 @@ import {
   Markdown,
   grey,
   useIsDarkMode
-} from '@chainlit/react-components';
+} from '@chainlit/react-client';
 
 import { projectSettingsState } from 'state/project';
 

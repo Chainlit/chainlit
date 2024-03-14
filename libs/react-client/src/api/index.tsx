@@ -1,7 +1,6 @@
 import { IGeneration, IThread } from 'src/types';
+import { IFeedback } from 'src/types';
 import { removeToken } from 'src/utils/token';
-
-import { IFeedback } from 'src/types/feedback';
 
 export * from './hooks/auth';
 export * from './hooks/api';

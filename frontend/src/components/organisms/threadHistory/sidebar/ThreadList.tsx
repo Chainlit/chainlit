@@ -18,7 +18,7 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components';
+import { grey } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 

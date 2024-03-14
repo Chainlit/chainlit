@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
 import { useApi, useChatData } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components/theme';
+import { grey } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 

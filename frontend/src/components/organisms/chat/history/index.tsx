@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 
 import { UserInput } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components/theme';
+import { grey } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 

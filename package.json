@@ -8,6 +8,7 @@
     "cypress": "12.9.0",
     "dotenv": "^16.3.1",
     "eslint": "^8.48.0",
+    "eslint-plugin-cypress": "^2.15.1",
     "husky": "^8.0.3",
     "kill-port": "^2.0.1",
     "lint-staged": "^13.3.0",
@@ -19,16 +20,16 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test": "pnpm exec ts-node ./cypress/support/e2e.ts",
-    "test:react-components": "cd libs/react-components && pnpm test",
+    "test:react-client": "cd libs/react-client && pnpm test",
     "prepare": "husky install",
     "lintUi": "cd frontend && pnpm run lint",
     "formatUi": "cd frontend && pnpm run format",
-    "lint:react-components": "cd libs/react-components && pnpm run lint",
-    "format:react-components": "cd libs/react-components && pnpm run format",
+    "lint:react-client": "cd libs/react-client && pnpm run lint",
+    "format:react-client": "cd libs/react-client && pnpm run format",
     "lintPython": "cd backend && poetry run mypy chainlit/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
-    "buildUi": "cd libs/react-client && pnpm run build && cd ../react-components && pnpm run build && cd ../copilot && pnpm run build && cd ../../frontend && pnpm run build",
-    "build:react-components": "cd libs/react-client && pnpm build && cd ../react-components && pnpm build",
+    "buildUi": "cd libs/react-client && pnpm run build && cd ../copilot && pnpm run build && cd ../../frontend && pnpm run build",
+    "build:react-client": "cd libs/react-client && pnpm build",
     "build": "pnpm run buildUi && (mkdir -p backend/chainlit/frontend && cp -R frontend/dist backend/chainlit/frontend) && (mkdir -p backend/chainlit/copilot && cp -R libs/copilot/dist backend/chainlit/copilot) && (cd backend && poetry build)"
   }
 }

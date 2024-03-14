@@ -9,7 +9,7 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { SelectInput } from '@chainlit/react-components';
+import { SelectInput } from '@chainlit/react-client';
 
 export default function ChatProfiles() {
   const pSettings = useRecoilValue(projectSettingsState);

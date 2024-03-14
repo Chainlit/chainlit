@@ -3,10 +3,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import { IGeneration, accessTokenState } from '@chainlit/react-client';
-import {
-  IPlaygroundContext,
-  PromptPlayground
-} from '@chainlit/react-components';
+import { IPlaygroundContext, PromptPlayground } from '@chainlit/react-client';
 
 import { useLLMProviders } from 'hooks/useLLMProviders';
 

@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 
-import { grey } from '@chainlit/react-components';
+import { grey } from '@chainlit/react-client';
 
 import { threadsFiltersState } from 'state/threads';
 

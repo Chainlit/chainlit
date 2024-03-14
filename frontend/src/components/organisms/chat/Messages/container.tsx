@@ -14,7 +14,7 @@ import {
   ITool,
   useChatInteract
 } from '@chainlit/react-client';
-import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
+import { MessageContainer as CMessageContainer } from '@chainlit/react-client';
 
 import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';

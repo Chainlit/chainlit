@@ -26,7 +26,7 @@ import {
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
+import { ErrorBoundary, useUpload } from '@chainlit/react-client';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox } from 'components/InputBox';

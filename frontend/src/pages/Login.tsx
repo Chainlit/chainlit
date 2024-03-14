@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
-import { AuthLogin } from '@chainlit/react-components';
+import { AuthLogin } from '@chainlit/react-client';
 
 import { Logo } from 'components/atoms/logo';
 

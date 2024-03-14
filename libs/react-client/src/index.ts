@@ -6,5 +6,6 @@ export * from './api';
 export * from './types';
 export * from './state';
 export * from './utils/message';
+export * from './components';
 
 export { Socket } from 'socket.io-client';

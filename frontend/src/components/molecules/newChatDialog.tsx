@@ -4,7 +4,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { AccentButton, RegularButton } from '@chainlit/react-components';
+import { AccentButton, RegularButton } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 

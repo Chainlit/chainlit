@@ -4,7 +4,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { useApi } from '@chainlit/react-client';
-import { IPlayground } from '@chainlit/react-components';
+import { IPlayground } from '@chainlit/react-client';
 
 import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';

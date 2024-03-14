@@ -4,7 +4,7 @@ import AttachFile from '@mui/icons-material/AttachFile';
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { FileSpec } from '@chainlit/react-client';
-import { useUpload } from '@chainlit/react-components';
+import { useUpload } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 
