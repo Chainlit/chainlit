@@ -115,7 +115,11 @@
             "pastChats": "Past Chats"
           },
           "ThreadList": {
-            "empty": "Empty..."
+            "empty": "Empty...",
+            "today":  "Today",
+            "yesterday": "Yesterday",
+            "previous7days": "Previous 7 days",
+            "previous30days": "Previous 30 days"
           },
           "TriggerButton": {
             "closeSidebar": "Close sidebar",
