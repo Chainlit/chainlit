@@ -542,7 +542,7 @@ class AskActionMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected action:** {res["label"]}'
+            self.content = f'**Selected:** {res["label"]}'
 
         self.wait_for_answer = False
 
