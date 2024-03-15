@@ -119,7 +119,27 @@ const ThreadList = ({
                       backgroundColor: (theme) => theme.palette.background.paper
                     }}
                   >
-                    {index}
+                    {(() => {
+                      if (index === 'Today') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.today" />
+                        );
+                      } else if (index === 'Yesterday') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.yesterday" />
+                        );
+                      } else if (index === 'Previous 7 days') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous7days" />
+                        );
+                      } else if (index === 'Previous 30 days') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous30days" />
+                        );
+                      } else {
+                        return <>{index}</>;
+                      }
+                    })()}
                   </Typography>
                 </ListSubheader>
                 {map(items, (thread) => {

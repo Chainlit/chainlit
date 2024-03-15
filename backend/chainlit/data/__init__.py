@@ -13,9 +13,7 @@ if api_key := os.environ.get("LITERAL_API_KEY"):
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 if mongodb_uri := os.environ.get("CHAINLIT_MONGODB_URI"):
-    s3_bucket = os.environ.get("CHAINLIT_S3_BUCKET")
-    assert s3_bucket is not None, "Environment variable CHAINLIT_S3_BUCKET is required"
-    _data_layer = MongoDataLayer(mongodb_uri=mongodb_uri, s3_bucket=s3_bucket)
+    _data_layer = MongoDataLayer(mongodb_uri=mongodb_uri)
 
 
 def get_data_layer():
