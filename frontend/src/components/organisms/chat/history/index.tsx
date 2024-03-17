@@ -239,7 +239,11 @@ export default function InputHistoryButton({ disabled, onClick }: Props) {
   return (
     <div>
       {menu}
-      <Tooltip title="Show history">
+      <Tooltip
+        title={
+          <Translator path="components.organisms.chat.history.index.showHistory" />
+        }
+      >
         {
           // In MUI, a warning is triggered if we pass a disabled button. To avoid this warning, we should wrap the button in a <span></span> element when it can be disabled.
         }
