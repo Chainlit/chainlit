@@ -28,6 +28,7 @@
     "react-i18next": "^14.0.0",
     "react-router-dom": "^6.15.0",
     "react-speech-recognition": "^3.10.0",
+    "react-use-sessionstorage": "^1.0.2",
     "recoil": "^0.7.7",
     "regenerator-runtime": "^0.14.0",
     "sonner": "^1.2.3",

@@ -53,6 +53,9 @@ dependencies:
   react-speech-recognition:
     specifier: ^3.10.0
     version: 3.10.0(react@18.2.0)
+  react-use-sessionstorage:
+    specifier: ^1.0.2
+    version: 1.0.2(react@18.2.0)
   recoil:
     specifier: ^0.7.7
     version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
@@ -1768,6 +1771,14 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-use-sessionstorage@1.0.2(react@18.2.0):
+    resolution: {integrity: sha512-mKq1CAt6JJIEuyh5//DNACKBn7iwKpt9o0//vkmHSP3CwrRvjh4zjIeZHyRJDbaaKFnhLsJ0FhvtVOQXOy+LVw==}
+    peerDependencies:
+      react: ^16.8.1
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react@18.2.0:

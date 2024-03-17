@@ -29,6 +29,28 @@ export default function Login() {
     }
   };
 
+  const handlePostAuth = async () => {
+    try {
+      const json = await apiClient.postAuth();
+      setAccessToken(json.access_token);
+      // Wipe token from formData.
+      const formDataJson = window.sessionStorage.getItem('formData');
+      if (formDataJson) {
+        let formData: any = {};
+        try {
+          formData = JSON.parse(formDataJson);
+          delete formData.token;
+        } catch (e) {
+          console.error('Failed to parse formData');
+        }
+        window.sessionStorage.setItem('formData', JSON.stringify(formData));
+      }
+      navigate('/');
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
   const handlePasswordLogin = async (
     email: string,
     password: string,
@@ -60,6 +82,9 @@ export default function Login() {
     }
     if (config.headerAuth) {
       handleHeaderAuth();
+    }
+    if (config.postAuth) {
+      handlePostAuth();
     }
     if (user) {
       navigate('/');

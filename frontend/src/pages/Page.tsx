@@ -1,5 +1,5 @@
 import { useAuth } from 'api/auth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
@@ -11,14 +11,29 @@ import { ThreadHistorySideBar } from 'components/organisms/threadHistory/sidebar
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
 
+import { useSessionStorage } from 'react-use-sessionstorage';
+import { useEffect } from 'react';
+
 type Props = {
   children: JSX.Element;
 };
 
 const Page = ({ children }: Props) => {
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const projectSettings = useRecoilValue(projectSettingsState);
   const userEnv = useRecoilValue(userEnvState);
+
+  const formDataObj = (window as any).formData ?? {};
+  const formDataJSON = JSON.stringify(formDataObj);
+
+  const [, setFormData] = useSessionStorage('formData', formDataJSON);
+
+  useEffect(() => {
+    if (formDataObj && Object.keys(formDataObj).length) {
+      setFormData(formDataJSON);
+    }
+  }, []);
 
   if (projectSettings?.userEnv) {
     for (const key of projectSettings.userEnv || []) {
@@ -27,7 +42,8 @@ const Page = ({ children }: Props) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    navigate('/login');
+    // return <Navigate to="/login" />;
   }
 
   return (

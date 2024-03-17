@@ -4,6 +4,7 @@ import mimetypes
 import re
 import shutil
 import urllib.parse
+import asyncio
 from typing import Any, Optional, Union
 
 from chainlit.oauth_providers import get_oauth_provider
@@ -139,6 +140,7 @@ async def lifespan(app: FastAPI):
 def get_build_dir(local_target: str, packaged_target: str):
     local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
+    print ('local_build_dir', local_build_dir)
 
     if config.ui.custom_build and os.path.exists(os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")):
         return os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
@@ -201,7 +203,7 @@ def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: s
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
-def get_html_template():
+def get_html_template(request: Request):
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -217,7 +219,15 @@ def get_html_template():
     <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
     <meta property="og:url" content="{url}">"""
 
+    async def get_form():
+        body = await request.form()
+        return body
+
+    form = asyncio.run(get_form())
+    jsonFormData = json.dumps(dict(form), indent = 4)
+
     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
+    js += f"""<script>window.formData = {jsonFormData}; </script>"""
 
     css = None
     if config.ui.custom_css:
@@ -341,6 +351,33 @@ async def header_auth(request: Request):
         "token_type": "bearer",
     }
 
+@app.post("/auth/post")
+async def post_auth(request: Request):
+    if not config.code.post_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No post_auth_callback defined",
+        )
+
+    user = await config.code.post_auth_callback(request)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(user)
+    if data_layer := get_data_layer():
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
 
 @app.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
@@ -742,8 +779,9 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
+    @app.post("/{path:path}")
     async def serve(request: Request, path: str):
-        html_template = get_html_template()
+        html_template = get_html_template(request)
         """Serve the UI files."""
         response = HTMLResponse(content=html_template, status_code=200)
 

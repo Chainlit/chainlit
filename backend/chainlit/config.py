@@ -11,6 +11,7 @@ from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
+from starlette.requests import Request as StarletteRequest
 
 if TYPE_CHECKING:
     from chainlit.action import Action
@@ -50,7 +51,7 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
-# Authorized origins 
+# Authorized origins
 allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -108,7 +109,7 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
-# Specify a custom build directory for the frontend. 
+# Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
@@ -221,6 +222,7 @@ class CodeSettings:
     # Bunch of callbacks defined by the developer
     password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
     header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
+    post_auth_callback: Optional[Callable[[StarletteRequest], Optional["User"]]] = None
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
@@ -232,9 +234,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
