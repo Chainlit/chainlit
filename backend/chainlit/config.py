@@ -130,6 +130,9 @@ hide_cot = false
         #dark = "#980039"
         #light = "#FFE7EB"
 
+# Override default UI metadata
+[UI.meta]
+#image = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
 [meta]
 generated_by = "{__version__}"

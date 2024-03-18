@@ -207,7 +207,7 @@ def get_html_template():
     url = config.ui.github or default_url
 
     default_meta_image = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
-    meta_image = config.ui.meta_image or default_meta_image
+    meta_image = config.ui.meta.image or default_meta_image
 
     tags = f"""<title>{config.ui.name}</title>
     <meta name="description" content="{config.ui.description}">
