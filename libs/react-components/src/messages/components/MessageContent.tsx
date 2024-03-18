@@ -87,7 +87,6 @@ const MessageContent = memo(
           width: '100%',
           minHeight: '20px',
           fontSize: '1rem',
-          lineHeight: '1.5rem',
           fontFamily: (theme) => theme.typography.fontFamily,
           fontWeight: isUser ? 500 : 300
         }}
