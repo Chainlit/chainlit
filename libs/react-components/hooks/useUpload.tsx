@@ -19,8 +19,11 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
   const onDrop: DropzoneOptions['onDrop'] = useCallback(
     (acceptedFiles: FileWithPath[], fileRejections: FileRejection[]) => {
       if (fileRejections.length > 0) {
-        onError && onError(fileRejections[0].errors[0].message);
-        return;
+        if (fileRejections[0].errors[0].code === 'file-too-large') {
+          onError && onError(`File is larger than ${spec.max_size_mb} MB`);
+        } else {
+          onError && onError(fileRejections[0].errors[0].message);
+        }
       }
 
       if (!acceptedFiles.length) return;

@@ -45,7 +45,14 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
+      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
+      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+    }),
+    [projectSettings]
+  );
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -125,8 +132,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
@@ -144,7 +151,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.multi_modal?.enabled;
 
   return (
     <Box

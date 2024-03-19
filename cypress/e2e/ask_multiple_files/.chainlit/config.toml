@@ -19,7 +19,11 @@ cache = false
 prompt_playground = true
 
 # Authorize users to upload files with messages
-multi_modal = true
+[features.multi_modal]
+    enabled = true
+    accept = ["*/*"]
+    max_files = 20
+    max_size_mb = 500
 
 [UI]
 # Name of the app and chatbot.
