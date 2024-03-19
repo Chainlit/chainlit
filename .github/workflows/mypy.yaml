@@ -1,9 +1,6 @@
 name: Mypy
 
-on:
-  push:
-    branches:
-      - last-mypy
+on: [workflow_call]
 
 jobs:
   mypy:
