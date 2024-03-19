@@ -2,8 +2,10 @@ import uuid
 from datetime import datetime, timezone
 from dataclasses import asdict
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING
 import psycopg
+from psycopg import conninfo
 from psycopg import sql
 import aiofiles
 from chainlit.context import context
@@ -11,10 +13,11 @@ from chainlit.logger import logger
 from chainlit.data import BaseDataLayer, queue_until_user_message
 from chainlit.user import PersistedUser
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
+from chainlit.user import UserDict
 from chainlit.element import ElementDict
 from literalai import PageInfo, PaginatedResponse
-from azure.storage.filedatalake import FileSystemClient
-from azure.storage.filedatalake import ContentSettings
+from azure.storage.filedatalake import FileSystemClient  # type: ignore
+from azure.storage.filedatalake import ContentSettings  # type: ignore
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -40,15 +43,14 @@ class PostgresDataLayer(BaseDataLayer):
     ###### User ######
     async def create_user(self, user: 'User') -> Optional['PersistedUser']:
         logger.info(f"Postgres: create_user, user_identifier={user.identifier}")
-        existing_user = await self.get_user(user.identifier)
+        existing_user: Optional['PersistedUser'] = await self.get_user(user.identifier)
         user_dict = user.to_dict()
         if not existing_user: # create the user
             logger.info("Postgres: create_user, creating the user")
-            user_dict['id'] = uuid.uuid4()
+            user_dict['id'] = str(uuid.uuid4())
             user_dict['createdAt'] = await self.get_current_timestamp()
             await self.sql_upsert(table='users', primary_key='id', data=user_dict)
         else: # update the user
-            logger.info("Postgres: create_user, updating the user")
             user_dict['id'] = existing_user.id
             await self.sql_upsert(table='users', primary_key='id', data=user_dict)
         _user = await self.get_user(user.identifier)
@@ -56,14 +58,16 @@ class PostgresDataLayer(BaseDataLayer):
     
     async def get_user(self, identifier: str) -> Optional['PersistedUser']:
         logger.info(f"Postgres: get_user, identifier={identifier}")
-        user_dict = await self.sql_select(table='users', data={'identifier': identifier}, one_row=True)
+        user_dict: Optional['UserDict'] = await self.sql_select(table='users', data={'identifier': identifier}, one_row=True)
         if not user_dict:
             logger.warning(f"FAILED: Postgres: get_user, identifier={identifier}")
             return None
         else:
             return PersistedUser(
-                id=str(user_dict.pop('id')),
-                **user_dict
+                id=str(user_dict.get('id')),
+                identifier=str(user_dict.get('identifier')),
+                createdAt=str(user_dict.get('createdAt')),
+                metadata=user_dict.get('metadata') or {} 
                 )
         
     ###### Threads ######
@@ -77,9 +81,7 @@ class PostgresDataLayer(BaseDataLayer):
             "tags": tags,
             "metadata": json.dumps(metadata) if metadata else None,
         }
-        logger.info(f"Postgres: update_thread, data={data}")
         data = {key: value for key, value in data.items() if value is not None} # Remove keys with None values
-        logger.info(f"Postgres: update_thread, data2={data}")
         await self.sql_upsert(table='threads', primary_key='id', data=data)
 
     # TODO Future OAI_Assistant_Thread for syning...
@@ -104,18 +106,22 @@ class PostgresDataLayer(BaseDataLayer):
 
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"Postgres: get_thread, thread_id={thread_id}")
-        thread_result = await self.sql_select(table='threads', data={'id': thread_id}, one_row=True)
+        thread_result: Optional['ThreadDict'] = await self.sql_select(table='threads', data={'id': thread_id}, one_row=True)
+        if not thread_result:
+            return None
         user_identifier = await self.get_thread_author(thread_id)
-        user = await self.get_user(user_identifier)
-        steps = await self.get_steps(thread_id)
-        elements = await self.get_elements_in_thread(thread_id)
+        user: Optional['PersistedUser'] = await self.get_user(user_identifier)
+        user_dict: Optional[UserDict]= UserDict(id=user.id, identifier=user.identifier, metadata=user.metadata) if user else None
+        steps: List['StepDict'] = await self.get_steps(thread_id) or []
+        elements: List['ElementDict'] = await self.get_elements_in_thread(thread_id) or []
+        metadata: Optional[Dict] = thread_result.get('metadata') or {}
         return ThreadDict(
             id=thread_id,
-            createdAt=thread_result.get('createdAt'),
+            createdAt=str(thread_result.get('createdAt')),
             name=thread_result.get('name'),
-            user=user.to_dict(), #json.dumps???
+            user=user_dict,
             tags=thread_result.get('tags'),
-            metadata=thread_result.get('metadata'),
+            metadata=metadata,
             steps=steps,
             elements=elements,
         )
@@ -143,25 +149,26 @@ class PostgresDataLayer(BaseDataLayer):
         """
         if filters.search is not None:
             query += "AND s.\"output\" ILIKE %s\n"
-            query_params.append(f"%{filters.search}%")
+            query_params.append(f"%{str(filters.search)}%")
         if filters.feedback is not None and filters.feedback != 0:
             query += "AND f.\"value\" IN (%s)\n"
-            query_params.append(filters.feedback)
+            query_params.append(str(filters.feedback))
         query += "ORDER BY t.\"createdAt\" DESC\n"
         query += "LIMIT %s"
-        query_params.append(pagination.first)
+        query_params.append(str(pagination.first))
 
         with self.connection.cursor(row_factory=psycopg.rows.dict_row) as cursor:
             cursor.execute(query, query_params)
             results = cursor.fetchall()
             unique_thread_ids = [str(item['id']) for item in results]
-            threads = []
+            threads: List[ThreadDict] = []
             for thread_id in unique_thread_ids:
                 thread_dict = await self.get_thread(thread_id)
-                threads.append(thread_dict)
+                if thread_dict is not None:
+                    threads.append(thread_dict)
 
-            has_next_page = len(threads) == pagination.first
-            end_cursor = threads[-1]["id"] if has_next_page else None
+            has_next_page = len(threads) > 0 and len(threads) == pagination.first
+            end_cursor = threads[-1]["id"] if has_next_page and threads else None
 
             return PaginatedResponse(
                 pageInfo=PageInfo(hasNextPage=has_next_page, endCursor=end_cursor),
@@ -172,7 +179,7 @@ class PostgresDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_step(self, step_dict: 'StepDict'):
         logger.info(f"Postgres: create_step, step_id={step_dict.get('id')}")
-        await self.sql_upsert(table='steps',primary_key='id', data=step_dict)
+        await self.sql_upsert(table='steps',primary_key='id', data=cast(Dict[Any, Any], step_dict))
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
@@ -182,37 +189,38 @@ class PostgresDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def update_step(self, step_dict: 'StepDict'):
         logger.info(f"Postgres: update_step, step_id={step_dict.get('id')}")
-        await self.sql_upsert(table='steps',primary_key='id', data=step_dict)
+        await self.sql_upsert(table='steps',primary_key='id', data=cast(Dict[Any, Any], step_dict))
         
     async def get_steps(self, thread_id: str) -> Optional[List['StepDict']]:
         steps_result = await self.sql_select(table='steps', data={'threadId': thread_id}, one_row=False)
         steps = []
-        for step in steps_result:
-            step_id = step.get('id')
-            step_feedback = await self.get_feedback(step_id)
-            step['feedback'] = step_feedback
-            if step.get('showInput') == 'false':
-                step['input'] = None
-            steps.append(step)
+        if steps_result is not None:
+            for step in steps_result:
+                step_id = step.get('id')
+                step_feedback = await self.get_feedback(step_id)
+                step['feedback'] = step_feedback
+                if step.get('showInput') == 'false':
+                    step['input'] = None
+                steps.append(step)
         return steps
     
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
         logger.info(f"Postgres: upsert_feedback, feedback_id={feedback.id}")
         if not feedback.id:
-            feedback.id = uuid.uuid4()
+            feedback.id = str(uuid.uuid4())
         await self.sql_upsert(table='feedbacks',primary_key='id', data=asdict(feedback))
-        return str(feedback.id)
+        return feedback.id
     
     async def get_feedback(self, step_id: str) -> Optional['FeedbackDict']:
         logger.info(f"Postgres: get_feedback, step_id={step_id}")
-        result = await self.sql_select(table='feedbacks', data={'forId': step_id})
+        result: Optional['FeedbackDict'] = await self.sql_select(table='feedbacks', data={'forId': step_id})
         if not result:
             return None
         else:
             return FeedbackDict(
-                value=result.get('value', None),
-                strategy=result.get('strategy', None),
+                value=result.get('value', 0),
+                strategy=result.get('strategy', 'BINARY'),
                 comment=result.get('comment', None)
             )
 
@@ -224,7 +232,7 @@ class PostgresDataLayer(BaseDataLayer):
             raise ValueError("No blob_storage_client is configured")
         if not element.for_id:
             return
-        element_dict = element.to_dict()
+        element_dict: 'ElementDict' = element.to_dict()
         object_key: Optional[str] = None
 
         if not element.url:
@@ -235,8 +243,16 @@ class PostgresDataLayer(BaseDataLayer):
                 content = element.content
             else:
                 raise ValueError("Either path or content must be provided")
+            
+            context_user: Optional[Union[User, PersistedUser]] = context.session.user 
+            if context_user is None:
+                raise ValueError("No valid user in context")
+            user_folder = 'unknown'
+            if isinstance(context_user, PersistedUser):
+                if context_user.id is None:
+                    raise ValueError("PersistedUser does not have a valid id")
+                user_folder = context_user.id
 
-            user_folder = f"{context.session.user.id}"
             object_key = f"{user_folder}/{element.id}" + f"/{element.name}" if element.name else ""
 
             if self.blob_storage_provider == 'Azure':
@@ -248,11 +264,14 @@ class PostgresDataLayer(BaseDataLayer):
                 element_dict['page'] = getattr(element, "page", None)
                 element_dict['objectKey'] = object_key
 
-        await self.sql_upsert(table='elements', primary_key='id', data=element_dict)
+        element_dict_casted = cast(Dict[Any, Any], element_dict)
+        await self.sql_upsert(table='elements', primary_key='id', data=element_dict_casted)
 
     async def get_element(self, thread_id: str, element_id: str) -> Optional['ElementDict']:
         logger.info(f"Postgres: get_element, element_id = {element_id}, thread_id = {thread_id}")
-        result = await self.sql_select(table='elements', data={'threadId': thread_id,"id": element_id}, one_row=True)
+        result: Optional['ElementDict'] = await self.sql_select(table='elements', data={'threadId': thread_id,"id": element_id}, one_row=True)
+        if not result:
+            return None
         return ElementDict(**result)
     
     async def get_elements_in_thread(self, thread_id: str) -> Optional[List['ElementDict']]:
@@ -260,9 +279,28 @@ class PostgresDataLayer(BaseDataLayer):
         results = await self.sql_select(table='elements', data={'threadId': thread_id}, one_row=False)
         if not results:
             return None
-        elements = []
+        elements: List['ElementDict'] = []
         for result in results:
-            elements.append(ElementDict(**result))
+            assert result.get("id") is not None, "Missing required field: id"
+            assert result.get("type") is not None, "Missing required field: type"
+            assert result.get("name") is not None, "Missing required field: name"
+            assert result.get("display") is not None, "Missing required field: display"
+            element = ElementDict(
+                id=result.get("id"),
+                threadId=result.get("threadId", None),
+                type=result.get("type"),
+                chainlitKey=result.get("chainlitKey", None),
+                url=result.get("url", None),
+                objectKey=result.get("objectKey", None),
+                name=result.get("name"),
+                display=result.get("display"),
+                size=result.get("size", None),
+                language=result.get("language", None),
+                page=result.get("page", None),
+                forId=result.get("forId", None),
+                mime=result.get("mime", None)
+            )            
+            elements.append(element)
         return elements
     
     @queue_until_user_message()
@@ -271,7 +309,7 @@ class PostgresDataLayer(BaseDataLayer):
         await self.sql_delete(table='elements', conditions={'id': element_id})
 
     async def delete_user_session(self, id: str) -> bool:
-        pass # Not sure why documentation wants this
+        return False # Not sure why documentation wants this
 
     ###### SQL Database Helpers ######
     async def sql_upsert(self, table: str, primary_key: str, data: dict) -> bool:
@@ -313,7 +351,7 @@ class PostgresDataLayer(BaseDataLayer):
                 logger.warning(f"An SQL error occurred on the '{table}' table: {e}")
                 return False
             
-    async def sql_select(self, table: str, data: dict, one_row: bool = True) -> list:
+    async def sql_select(self, table: str, data: dict, one_row: bool = True) -> Optional[Any]:
         """Execute a SELECT SQL query with the provided values and return the fetched results."""
         where_clauses = sql.SQL(' AND ').join(
             sql.SQL("{} = {}").format(sql.Identifier(key), sql.Placeholder(key))
@@ -327,7 +365,7 @@ class PostgresDataLayer(BaseDataLayer):
             try:
                 cursor.execute(sql_query, data)
                 if cursor.rowcount == 0:
-                    return [] # No results
+                    return None if one_row else [] # No results
                 if one_row:
                     result = cursor.fetchone()
                     return {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in result.items()} # convert UUIDs to strings
@@ -336,9 +374,9 @@ class PostgresDataLayer(BaseDataLayer):
                     return [{k: str(v) if isinstance(v, uuid.UUID) else v for k, v in row.items()} for row in result] # convert UUIDs to strings
             except psycopg.Error as e:
                 logger.warning(f"An SQL error occurred: {e}")
-                return []  # Return an empty list or raise an exception
+                return None if one_row else []   # Return an empty list or raise an exception
 
-    async def sql_delete(self, table: str, conditions: dict) -> int:
+    async def sql_delete(self, table: str, conditions: dict) -> None:
         """Execute a DELETE SQL query with the provided conditions and return the number of rows deleted."""
         where_clauses = sql.SQL(' AND ').join(
             sql.SQL("{} = {}").format(sql.Identifier(key), sql.Placeholder(key))
@@ -351,7 +389,6 @@ class PostgresDataLayer(BaseDataLayer):
                 cursor.execute(sql_query, conditions)
             except psycopg.Error as e:
                 logger.warning(f"An SQL error occurred: {e}")
-        return
 
     async def get_current_timestamp(self) -> str:
         return datetime.now(timezone.utc).astimezone().isoformat()
