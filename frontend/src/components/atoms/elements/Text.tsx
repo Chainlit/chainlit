@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 
-import { Markdown } from 'components/molecules/react-components/Markdown';
+import { Markdown } from 'components/molecules/Markdown';
 
 import { useFetch } from 'hooks/useFetch';
 

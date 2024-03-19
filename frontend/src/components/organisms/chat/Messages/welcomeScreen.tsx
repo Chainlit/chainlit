@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { Box } from '@mui/material';
 
-import { Markdown } from 'components/molecules/react-components/Markdown';
+import { Markdown } from 'components/molecules/Markdown';
 
 const WelcomeScreen = memo(
   ({

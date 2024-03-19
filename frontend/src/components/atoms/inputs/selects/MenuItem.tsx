@@ -3,7 +3,7 @@ import { grey, primary } from 'theme/index';
 import MMenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 
-import { NotificationCount } from 'components/molecules/react-components/NotificationCount';
+import { NotificationCount } from 'components/molecules/messages/components/NotificationCount';
 
 import { SelectItem } from './SelectInput';
 

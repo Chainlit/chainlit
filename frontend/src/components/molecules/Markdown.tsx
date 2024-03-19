@@ -16,12 +16,12 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
+import { Code } from 'components/molecules/Code';
 import { ElementRef } from 'components/molecules/messages/components/ElementRef';
-import { Code } from 'components/molecules/react-components/Code';
 
 import type { IMessageElement } from 'client-types/';
 
-import { InlineCode } from './InlineCode';
+import { InlineCode } from '../atoms/InlineCode';
 
 interface Props {
   allowHtml?: boolean;

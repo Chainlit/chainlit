@@ -11,9 +11,9 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
+import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
 import { TextInput } from 'components/atoms/inputs';
-import Dialog from 'components/molecules/react-components/Dialog';
 
 import type { IStep } from 'client-types/';
 

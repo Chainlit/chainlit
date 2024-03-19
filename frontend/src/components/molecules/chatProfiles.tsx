@@ -12,7 +12,7 @@ import {
 } from '@chainlit/react-client';
 
 import { InputStateHandler } from 'components/atoms/inputs';
-import { Markdown } from 'components/molecules/react-components/Markdown';
+import { Markdown } from 'components/molecules/Markdown';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

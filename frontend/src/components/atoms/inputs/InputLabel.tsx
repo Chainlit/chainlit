@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import MInputLabel from '@mui/material/InputLabel';
 import Tooltip from '@mui/material/Tooltip';
 
-import { NotificationCount } from 'components/molecules/react-components/NotificationCount';
+import { NotificationCount } from 'components/molecules/messages/components/NotificationCount';
 
 import { NotificationCountProps } from 'types/NotificationCount';
 

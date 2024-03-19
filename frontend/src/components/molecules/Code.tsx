@@ -10,7 +10,7 @@ import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import 'highlight.js/styles/monokai-sublime.css';
 
-import { ClipboardCopy } from './ClipboardCopy';
+import { ClipboardCopy } from '../atoms/ClipboardCopy';
 
 const CodeSnippet = ({
   language,

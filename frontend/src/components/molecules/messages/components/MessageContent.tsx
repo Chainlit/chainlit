@@ -6,9 +6,9 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { Collapse } from 'components/atoms/Collapse';
 import { InlinedElements } from 'components/atoms/elements/InlinedElements';
-import { Collapse } from 'components/molecules/react-components/Collapse';
-import { Markdown } from 'components/molecules/react-components/Markdown';
+import { Markdown } from 'components/molecules/Markdown';
 
 import type { IMessageElement, IStep } from 'client-types/';
 

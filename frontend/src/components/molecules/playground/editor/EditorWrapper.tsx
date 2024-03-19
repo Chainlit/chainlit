@@ -6,7 +6,7 @@ import Stack, { StackProps } from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Theme, useTheme } from '@mui/material/styles';
 
-import { ClipboardCopy } from 'components/molecules/react-components/ClipboardCopy';
+import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
 
 interface Props {
   className?: string;

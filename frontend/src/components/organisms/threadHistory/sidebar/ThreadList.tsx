@@ -43,25 +43,29 @@ const ThreadList = ({
   const { clear } = useChatInteract();
   const navigate = useNavigate();
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
-    return [1, 2, 3].map((index) => (
-      <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
-        <Skeleton width={100} />
-        {[1, 2].map((childIndex) => (
-          <Stack
-            key={`threads-skeleton-${index}-${childIndex}`}
-            sx={{
-              py: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 1.5
-            }}
-          >
-            <Skeleton width={30} />
-            <Skeleton width={'100%'} />
-          </Stack>
+    return (
+      <>
+        {[1, 2, 3].map((index) => (
+          <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
+            <Skeleton width={100} />
+            {[1, 2].map((childIndex) => (
+              <Stack
+                key={`threads-skeleton-${index}-${childIndex}`}
+                sx={{
+                  py: 2,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 1.5
+                }}
+              >
+                <Skeleton width={30} />
+                <Skeleton width={'100%'} />
+              </Stack>
+            ))}
+          </Box>
         ))}
-      </Box>
-    ));
+      </>
+    );
   }
 
   if (error) {

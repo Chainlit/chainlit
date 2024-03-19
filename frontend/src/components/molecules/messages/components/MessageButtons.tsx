@@ -4,7 +4,7 @@ import { grey } from 'theme/palette';
 
 import Stack from '@mui/material/Stack';
 
-import { ClipboardCopy } from 'components/molecules/react-components/ClipboardCopy';
+import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 

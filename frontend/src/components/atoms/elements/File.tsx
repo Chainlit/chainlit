@@ -1,6 +1,6 @@
 import Link from '@mui/material/Link';
 
-import { Attachment } from 'components/molecules/react-components/Attachment';
+import { Attachment } from 'components/atoms/Attachment';
 
 import { type IFileElement } from 'client-types/';
 
