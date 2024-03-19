@@ -56,6 +56,8 @@ export interface IAudioElement extends TMessageElement<'audio'> {}
 
 export interface IVideoElement extends TMessageElement<'video'> {
   size?: IElementSize;
+  start?: number;
+  autoplay?: boolean;
 }
 
 export interface IFileElement extends TMessageElement<'file'> {
