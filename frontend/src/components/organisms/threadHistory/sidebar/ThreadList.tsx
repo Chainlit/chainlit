@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import map from 'lodash/map';
 import size from 'lodash/size';
 import { Link, useNavigate } from 'react-router-dom';
+import { grey } from 'theme';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -18,7 +19,6 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components';
 
 import { Translator } from 'components/i18n';
 

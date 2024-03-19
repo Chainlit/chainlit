@@ -13,9 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
+import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
   projectSettingsState,
@@ -26,7 +28,6 @@ import {
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox } from 'components/InputBox';

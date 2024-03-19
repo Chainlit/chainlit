@@ -1,8 +1,8 @@
 import { useRecoilState } from 'recoil';
 
-import { ElementSideView } from '@chainlit/react-components';
-
 import { sideViewState } from 'state/project';
+
+import { ElementSideView } from '../elements/ElementSideView';
 
 interface SideViewProps {
   children: React.ReactNode;
