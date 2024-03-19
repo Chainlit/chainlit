@@ -109,7 +109,7 @@ class PostgresDataLayer(BaseDataLayer):
         user = await self.get_user(user_identifier)
         steps = await self.get_steps(thread_id)
         elements = await self.get_elements_in_thread(thread_id)
-        final = ThreadDict(
+        return ThreadDict(
             id=thread_id,
             createdAt=thread_result.get('createdAt'),
             name=thread_result.get('name'),
@@ -119,7 +119,6 @@ class PostgresDataLayer(BaseDataLayer):
             steps=steps,
             elements=elements,
         )
-        return final
     
     # TODO list_all_threads for faster retrieval. will need to add new threads to this though.
     
@@ -130,7 +129,7 @@ class PostgresDataLayer(BaseDataLayer):
         # Construct the base query
         query_params = [filters.userIdentifier]
         query = """
-        SELECT t.id
+        SELECT DISTINCT t.id, t."createdAt"
         FROM
             threads t
             JOIN
@@ -155,9 +154,9 @@ class PostgresDataLayer(BaseDataLayer):
         with self.connection.cursor(row_factory=psycopg.rows.dict_row) as cursor:
             cursor.execute(query, query_params)
             results = cursor.fetchall()
+            unique_thread_ids = [str(item['id']) for item in results]
             threads = []
-            for row in results:
-                thread_id = str(row['id'])
+            for thread_id in unique_thread_ids:
                 thread_dict = await self.get_thread(thread_id)
                 threads.append(thread_dict)
 
