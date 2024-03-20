@@ -108,6 +108,8 @@ class SQLiteClient:
 
 
 class API:
+    lock = asyncio.Lock()
+
     def __init__(self, engine):
         self.async_sessionmaker = async_sessionmaker(
             bind=engine, class_=AsyncSession, expire_on_commit=False
@@ -220,49 +222,58 @@ class API:
                 return None
             return datetime.fromisoformat(value.rstrip("Z"))
 
-        async with self.async_sessionmaker() as session:
-            for step_dict in steps:
-                step_id = step_dict.get("id")
-                if "attachments" in step_dict:
-                    for attachment_dict in step_dict["attachments"]:
-                        attachment = Attachment(
-                            id=attachment_dict.get("id"),
-                            step_id=step_id,
-                            name=attachment_dict.get("name"),
-                            mime=attachment_dict.get("mime"),
-                            object_key=attachment_dict.get("objectKey"),
-                            url=attachment_dict.get("url"),
-                            metadata_=attachment_dict.get("metadata"),
-                        )
-                        session.add(attachment)
-                else:
-                    existing_step = await session.get(Step, step_id)
-                    if existing_step:
-                        existing_step.end_time = convert_to_datetime(
-                            step_dict.get("endTime")
-                        )
-                        existing_step.generation = step_dict.get("generation")
-                        existing_step.name = step_dict.get("name")
-                        existing_step.metadata_.update(step_dict.get("metadata"))
-                        existing_step.input = step_dict.get("input")
-                        existing_step.output = step_dict.get("output")
-                    else:
-                        step = Step(
-                            created_at=convert_to_datetime(step_dict.get("createdAt")),
-                            start_time=convert_to_datetime(step_dict.get("startTime")),
-                            end_time=convert_to_datetime(step_dict.get("endTime")),
-                            generation=step_dict.get("generation"),
-                            id=step_dict.get("id"),
-                            parent_id=step_dict.get("parentId"),
-                            name=step_dict.get("name"),
-                            thread_id=step_dict.get("threadId"),
-                            type=step_dict.get("type"),
-                            metadata_=step_dict.get("metadata"),
-                            input=step_dict.get("input"),
-                            output=step_dict.get("output"),
-                        )
-                        session.add(step)
-                await session.commit()
+        async with API.lock:
+            async with self.async_sessionmaker() as session:
+                async with session.begin():
+                    for step_dict in steps:
+                        step_id = step_dict.get("id")
+                        if "attachments" in step_dict:
+                            for attachment_dict in step_dict["attachments"]:
+                                attachment = Attachment(
+                                    id=attachment_dict.get("id"),
+                                    step_id=step_id,
+                                    name=attachment_dict.get("name"),
+                                    mime=attachment_dict.get("mime"),
+                                    object_key=attachment_dict.get("objectKey"),
+                                    url=attachment_dict.get("url"),
+                                    metadata_=attachment_dict.get("metadata"),
+                                )
+                                session.add(attachment)
+                        else:
+                            existing_step = await session.get(Step, step_id)
+                            if existing_step:
+                                existing_step.end_time = convert_to_datetime(
+                                    step_dict.get("endTime")
+                                )
+                                existing_step.generation = step_dict.get("generation")
+                                existing_step.name = step_dict.get("name")
+                                existing_step.metadata_.update(
+                                    step_dict.get("metadata")
+                                )
+                                existing_step.input = step_dict.get("input")
+                                existing_step.output = step_dict.get("output")
+                            else:
+                                step = Step(
+                                    created_at=convert_to_datetime(
+                                        step_dict.get("createdAt")
+                                    ),
+                                    start_time=convert_to_datetime(
+                                        step_dict.get("startTime")
+                                    ),
+                                    end_time=convert_to_datetime(
+                                        step_dict.get("endTime")
+                                    ),
+                                    generation=step_dict.get("generation"),
+                                    id=step_dict.get("id"),
+                                    parent_id=step_dict.get("parentId"),
+                                    name=step_dict.get("name"),
+                                    thread_id=step_dict.get("threadId"),
+                                    type=step_dict.get("type"),
+                                    metadata_=step_dict.get("metadata"),
+                                    input=step_dict.get("input"),
+                                    output=step_dict.get("output"),
+                                )
+                                session.add(step)
 
     async def get_thread(self, id):
         async with self.async_sessionmaker() as session:
@@ -387,32 +398,33 @@ class API:
         return PaginatedResponse(data=threads_data, pageInfo=PageInfo.from_dict({}))
 
     async def upsert_thread(self, thread_id, name, participant_id, metadata, tags):
-        async with self.async_sessionmaker() as session:
-            stmt = select(Thread).filter_by(id=thread_id)
-            result = await session.execute(stmt)
-            thread = result.scalars().first()
-            if thread:
-                if name is not None:
-                    thread.name = name
-                if participant_id is not None:
-                    thread.user_id = participant_id
-                if metadata is not None:
-                    if thread.metadata_:
-                        thread.metadata_.update(metadata)
-                    else:
-                        thread.metadata_ = metadata
-                if tags is not None:
-                    thread.tags = tags
-            else:
-                thread = Thread(
-                    id=thread_id,
-                    name=name,
-                    user_id=participant_id,
-                    metadata_=metadata or {},
-                    tags=tags,
-                )
-                session.add(thread)
-            await session.commit()
+        async with API.lock:
+            async with self.async_sessionmaker() as session:
+                stmt = select(Thread).filter_by(id=thread_id)
+                result = await session.execute(stmt)
+                thread = result.scalars().first()
+                if thread:
+                    if name is not None:
+                        thread.name = name
+                    if participant_id is not None:
+                        thread.user_id = participant_id
+                    if metadata is not None:
+                        if thread.metadata_:
+                            thread.metadata_.update(metadata)
+                        else:
+                            thread.metadata_ = metadata
+                    if tags is not None:
+                        thread.tags = tags
+                else:
+                    thread = Thread(
+                        id=thread_id,
+                        name=name,
+                        user_id=participant_id,
+                        metadata_=metadata or {},
+                        tags=tags,
+                    )
+                    session.add(thread)
+                await session.commit()
 
     def step_to_step(self, step: Step, feedback: Feedback) -> "literalai.Step":
         step_ = literalai.Step(
