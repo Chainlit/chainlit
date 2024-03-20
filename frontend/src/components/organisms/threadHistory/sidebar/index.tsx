@@ -13,6 +13,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   IThreadFilters,
   accessTokenState,
+  firstUserInteraction,
+  messagesState,
   threadHistoryState
 } from '@chainlit/react-client';
 
@@ -46,6 +48,8 @@ const _ThreadHistorySideBar = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const apiClient = useRecoilValue(apiClientState);
+  const messages = useRecoilValue(messagesState);
+  const firstInteraction = useRecoilValue(firstUserInteraction);
 
   const ref = useRef<HTMLDivElement>(null);
   const filtersHasChanged = !isEqual(prevFilters, filters);
@@ -62,9 +66,12 @@ const _ThreadHistorySideBar = () => {
     setShouldLoadMore(atBottom);
   };
 
-  const fetchThreads = async (cursor?: string | number) => {
+  const fetchThreads = async (
+    cursor?: string | number,
+    isLoadingMore?: boolean
+  ) => {
     try {
-      if (cursor) {
+      if (cursor || isLoadingMore) {
         setIsLoadingMore(true);
       } else {
         setIsFetching(true);
@@ -128,6 +135,24 @@ const _ThreadHistorySideBar = () => {
       setChatHistoryOpen(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!firstInteraction) {
+      return;
+    }
+
+    fetchThreads(undefined, true).then(() => {
+      const currectThreadId = messages
+        .map((message) => message.threadId)
+        .find((threadId) => threadId);
+      if (currectThreadId) {
+        setThreadHistory((prev) => ({
+          ...prev,
+          currentThreadId: currectThreadId
+        }));
+      }
+    });
+  }, [firstInteraction]);
 
   return (
     <Box display="flex" position="relative">
