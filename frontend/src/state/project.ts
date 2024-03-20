@@ -21,7 +21,12 @@ export interface IProjectSettings {
     theme: any;
   };
   features: {
-    multi_modal?: boolean;
+    multi_modal?: {
+      enabled?: boolean;
+      max_size_mb?: number;
+      max_files?: number;
+      accept?: string[] | Record<string, string[]>;
+    };
     unsafe_allow_html?: boolean;
     latex?: boolean;
     speech_to_text?: {
