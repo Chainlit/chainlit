@@ -9,7 +9,11 @@ import { useState, useEffect } from 'react';
 const style = {
   display: 'flex',
   flexDirection: 'column',
-  height: '100%'
+  height: '100%',
+  background: (theme) => theme.palette.background.default,
+  borderRadius: '10px',
+  overflow: 'hidden',
+  position: 'relative'
 };
 
 const styleOpen = {
@@ -29,7 +33,7 @@ const styleOpen = {
   overflow: 'hidden',
   boxShadow: 24,
   p: 0,
-  zIndex: 1050
+  zIndex: 9999
 };
 
 export default function WidgetEmbedded() {
@@ -57,6 +61,12 @@ export default function WidgetEmbedded() {
     window.addEventListener('chainlit-open-modal', () => {
       setOpen(true)
     });
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", viewportHandler);
+        window.visualViewport.removeEventListener("scroll", viewportHandler);
+      }
+    }
   }, [])
 
   return (

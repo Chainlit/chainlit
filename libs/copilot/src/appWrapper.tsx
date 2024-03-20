@@ -9,9 +9,10 @@ import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
 i18nSetupLocalization();
 interface Props {
   config: IWidgetConfig;
+  resetChatOnMount: boolean;
 }
 
-export default function AppWrapper({ config }: Props) {
+export default function AppWrapper({ config, resetChatOnMount }: Props) {
   const apiClient = makeApiClient(config.chainlitServer);
 
   return (
@@ -23,7 +24,7 @@ export default function AppWrapper({ config }: Props) {
           config
         }}
       >
-        <App config={config} />
+        <App config={config} resetChatOnMount={resetChatOnMount} />
       </WidgetContext.Provider>
     </RecoilRoot>
   );

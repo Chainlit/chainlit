@@ -8,10 +8,12 @@ const id = 'chainlit-copilot';
 let root: ReactDOM.Root | null = null;
 
 // @ts-expect-error is not a valid prop
-window.mountChainlitWidget = (config: IWidgetConfig, container: HTMLElement | null) => {
+window.mountChainlitWidget = (config: IWidgetConfig, container: HTMLElement | null, reset = false) => {
   const div = document.createElement('div');
   div.id = id;
   if (container !== null) {
+    div.style.height = '100%';
+    div.style.width = '100%';
     container.appendChild(div);
   } else {
     document.body.appendChild(div);
@@ -20,7 +22,7 @@ window.mountChainlitWidget = (config: IWidgetConfig, container: HTMLElement | nu
   root = ReactDOM.createRoot(div);
   root.render(
     <React.StrictMode>
-      <AppWrapper config={{...config, isEmbedded: !!container}} />
+      <AppWrapper config={{...config, isEmbedded: !!container}} resetChatOnMount={reset} />
     </React.StrictMode>
   );
 };
@@ -28,4 +30,5 @@ window.mountChainlitWidget = (config: IWidgetConfig, container: HTMLElement | nu
 // @ts-expect-error is not a valid prop
 window.unmountChainlitWidget = () => {
   root?.unmount();
+  document.getElementById(id)?.remove();
 };

@@ -16,14 +16,15 @@ import {
   projectSettingsState
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
-import { useAuth } from '@chainlit/react-client';
+import { useAuth, useChatInteract } from '@chainlit/react-client';
 import { makeTheme } from '@chainlit/react-components/theme';
 
 interface Props {
   config: IWidgetConfig;
+  resetChatOnMount: boolean;
 }
 
-export default function App({ config }: Props) {
+export default function App({ config, resetChatOnMount }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { setAccessToken } = useAuth(apiClient);
   const [projectSettings, setProjectSettings] =
@@ -33,12 +34,16 @@ export default function App({ config }: Props) {
   const [theme, setTheme] = useState<Theme | null>(null);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
+  const { clear } = useChatInteract();
 
   useEffect(() => {
     setAccessToken(config.accessToken);
   }, [config.accessToken]);
 
   useEffect(() => {
+    if (resetChatOnMount) {
+      clear();
+    }
     setApiClient(apiClient);
     if (!projectSettings) {
       apiClient
