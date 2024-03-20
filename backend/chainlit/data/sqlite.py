@@ -3,7 +3,6 @@ import os
 import uuid
 from datetime import datetime
 from typing import Optional, Union, cast
-from urllib.parse import urlparse
 
 import literalai
 from chainlit.data import ChainlitDataLayer
@@ -83,20 +82,29 @@ class Attachment(Base):
 
 
 class SQLiteClient:
-    def __init__(self, database_url=None):
-        if database_url is None:
-            database_url = "sqlite+aiosqlite:///chainlit.db"
-        parsed_url = urlparse(database_url)
-        db_path = os.path.abspath(os.path.join(parsed_url.netloc, parsed_url.path))
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    def __init__(self, db_filepath=None):
+        if db_filepath is None or db_filepath == "":
+            db_filepath = "chainlit.db"
+        normalized_path = self.normalize_db_path(db_filepath)
+        os.makedirs(os.path.dirname(normalized_path), exist_ok=True)
 
-        self.engine = create_async_engine(database_url, echo=True)
+        self.engine = create_async_engine(
+            f"sqlite+aiosqlite:///{normalized_path}", echo=True
+        )
         self.api = API(self.engine)
         asyncio.run(self.create_tables())
 
     async def create_tables(self):
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
+    @staticmethod
+    def normalize_db_path(db_path):
+        abs_path = os.path.abspath(db_path)
+        normalized_path = os.path.normpath(abs_path)
+        if os.name == "nt":
+            normalized_path = normalized_path.replace("\\", "/")
+        return normalized_path
 
 
 class API:
