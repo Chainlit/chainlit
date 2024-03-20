@@ -49,6 +49,7 @@ packaging = "^23.1"
 python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
 numpy = "^1.26"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.group.tests]
 optional = true
