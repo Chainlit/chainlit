@@ -462,6 +462,6 @@ class API:
 
 
 class SQLiteDataLayer(ChainlitDataLayer):
-    def __init__(self, database_url=None):
+    def __init__(self, db_filepath=None):
         super().__init__("dummy", "")
-        self.client = SQLiteClient(database_url)
+        self.client = SQLiteClient(db_filepath)
