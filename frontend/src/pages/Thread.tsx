@@ -4,7 +4,12 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
-import { IThread, threadHistoryState, useApi } from '@chainlit/react-client';
+import {
+  IThread,
+  threadHistoryState,
+  threadIdToResumeState,
+  useApi
+} from '@chainlit/react-client';
 
 import { Thread } from 'components/organisms/threadHistory/Thread';
 
@@ -16,8 +21,9 @@ import ResumeButton from './ResumeButton';
 export default function ThreadPage() {
   const { id } = useParams();
   const apiClient = useRecoilValue(apiClientState);
+  const threadIdToResume = useRecoilValue(threadIdToResumeState);
 
-  const { data, error, isLoading } = useApi<IThread>(
+  const { data, error, isLoading, mutate } = useApi<IThread>(
     apiClient,
     id ? `/project/thread/${id}` : null,
     {
@@ -25,6 +31,12 @@ export default function ThreadPage() {
       revalidateIfStale: false
     }
   );
+
+  useEffect(() => {
+    if (threadIdToResume === id && !isLoading) {
+      mutate();
+    }
+  }, [threadIdToResume, id]);
 
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
 
