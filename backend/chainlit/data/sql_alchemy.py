@@ -183,7 +183,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         for thread in all_user_threads:
             if search_keyword or feedback_value:
                 keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step) if search_keyword else True
-                feedback_match = any(step.get('feedback', {}).get('value', 0) == feedback_value for step in thread['steps'] if step.get('feedback') is not None) if feedback_value is not None else True
+                if feedback_value is not None:
+                    for step in thread['steps']:
+                        feedback = step.get('feedback')
+                        if feedback and feedback.get('value') == feedback_value:
+                            feedback_match = True
+                            break
+                    else:
+                        feedback_match = False
                 if keyword_match and feedback_match:
                     filtered_threads.append(thread)
             else:
