@@ -140,12 +140,21 @@ const _ThreadHistorySideBar = () => {
     if (!firstInteraction) {
       return;
     }
+    // distinguish between the first interaction containing the word "resume"
+    // and the actual resume message
+    const isActualResume =
+      firstInteraction === 'resume' &&
+      messages.at(0)?.output.toLowerCase() !== 'resume';
+
+    if (isActualResume) {
+      return;
+    }
 
     fetchThreads(undefined, true).then(() => {
       const currectThreadId = messages
         .map((message) => message.threadId)
         .find((threadId) => threadId);
-      if (currectThreadId) {
+      if (currectThreadId !== threadHistory?.currentThreadId) {
         setThreadHistory((prev) => ({
           ...prev,
           currentThreadId: currectThreadId
