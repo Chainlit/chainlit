@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
-    def __init__(self, conn_info, ssl_require=False):
-        self.conn_info = conn_info
+    def __init__(self, conninfo, ssl_require=False):
+        self._conninfo = conninfo
         ssl_args = {}
         if ssl_require:
             # Create an SSL context to require an SSL connection
@@ -34,7 +34,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             ssl_args['ssl'] = ssl_context
-        self.engine = create_async_engine(self.conn_info, connect_args=ssl_args)
+        self.engine = create_async_engine(self._conninfo, connect_args=ssl_args)
         self.async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
         self.all_user_threads = None
         self.thread_update_lock = asyncio.Lock()
@@ -438,7 +438,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     "forId":row['element_forid'],
                     "mime":row['element_mime']
                 }
-                thread_elements = thread.get('elements', [])
-                thread_elements.append(element)
-                thread['elements'] = thread_elements
+                if thread['elements'] is None:
+                    thread['elements'] = []
+                thread['elements'].append(element)
         self.all_user_threads = threads
