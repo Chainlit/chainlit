@@ -40,17 +40,15 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self.thread_update_lock = asyncio.Lock()
         self.step_update_lock = asyncio.Lock()
 
-    async def add_blob_storage_client(self, blob_storage_client, access_token: Optional[str]):
+    async def add_blob_storage_client(self, blob_storage_client, access_token: Optional[str]) -> None:
         if isinstance(blob_storage_client, FileSystemClient):
             self.blob_storage_client = blob_storage_client
             self.blob_access_token = access_token
             self.blob_storage_provider = 'Azure'
             logger.info("Azure Data Lake Storage client initialized")
-            return
         # Add other checks here for AWS/Google/etc.
         else:
             raise ValueError("The provided blob_storage is not recognized")
-        return
 
     ###### SQL Helpers ######
     async def execute_sql(self, query: str, parameters: dict) -> Union[List[Dict[str, Any]], int, None]:
@@ -295,12 +293,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         element_dict['url'] = element.url
         element_dict['objectKey'] = object_key if 'object_key' in locals() else None
-        element_dict = {k: v for k, v in element_dict.items() if v is not None}
+        element_dict_cleaned = {k: v for k, v in element_dict.items() if v is not None}
 
-        columns = ', '.join(f'"{column}"' for column in element_dict.keys())
-        placeholders = ', '.join(f':{column}' for column in element_dict.keys())
+        columns = ', '.join(f'"{column}"' for column in element_dict_cleaned.keys())
+        placeholders = ', '.join(f':{column}' for column in element_dict_cleaned.keys())
         query = f"INSERT INTO elements ({columns}) VALUES ({placeholders})"
-        await self.execute_sql(query=query, parameters=element_dict)
+        await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str):
@@ -438,7 +436,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     forId=row['element_forid'],
                     mime=row['element_mime']
                 )
-                if thread['elements'] is None:
-                    thread['elements'] = []
-                thread['elements'].append(element)
+                thread_elements = thread.get('elements', [])
+                thread_elements.append(element)
+                thread['elements'] = thread_elements
         self.all_user_threads = threads
