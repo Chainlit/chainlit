@@ -438,5 +438,5 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 }
                 if thread['elements'] is None:
                     thread['elements'] = []
-                thread['elements'].append(element)
+                thread['elements'].append(element)   # type: ignore
         return threads
