@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import {
   ThreadHistory,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
 import { grey } from '@chainlit/react-components';
@@ -41,6 +42,7 @@ const ThreadList = ({
 }: Props) => {
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
+  const { messages } = useChatMessages();
   const navigate = useNavigate();
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
     return [1, 2, 3].map((index) => (
@@ -149,6 +151,14 @@ const ThreadList = ({
                   const isSelected =
                     isResumed || threadHistory.currentThreadId === thread.id;
 
+                  const isThreadOpened = messages
+                    .map((m) => m.threadId)
+                    .includes(thread.id);
+                  const redirectToOpenChat = isThreadOpened || isResumed;
+
+                  let redirectTo = isSelected ? '' : `/thread/${thread.id}`;
+                  if (redirectToOpenChat) redirectTo = '/';
+
                   return (
                     <Stack
                       component={Link}
@@ -175,7 +185,7 @@ const ThreadList = ({
                               : 'grey.200'
                         }
                       })}
-                      to={isResumed ? '' : `/thread/${thread.id}`}
+                      to={redirectTo}
                     >
                       <Stack
                         direction="row"
