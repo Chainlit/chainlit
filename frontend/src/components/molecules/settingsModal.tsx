@@ -38,7 +38,11 @@ export default function SettingsModal() {
       <DialogContent>
         <List
           sx={{ width: '100%', maxWidth: 360 }}
-          subheader={<ListSubheader>Settings</ListSubheader>}
+          subheader={
+            <ListSubheader>
+              <Translator path="components.molecules.settingsModal.settings" />
+            </ListSubheader>
+          }
         >
           <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
