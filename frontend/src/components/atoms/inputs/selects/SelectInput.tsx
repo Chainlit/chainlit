@@ -4,11 +4,12 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { Stack, type SxProps } from '@mui/material';
 import MSelect, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
 
+import { InputStateHandler } from 'components/atoms/inputs/InputStateHandler';
+
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { IInput } from 'types/Input';
 
-import { InputStateHandler } from '../InputStateHandler';
 import { MenuItem } from './MenuItem';
 
 type SelectItem = {

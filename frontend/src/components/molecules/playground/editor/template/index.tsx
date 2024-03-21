@@ -9,13 +9,14 @@ import {
 import { useState } from 'react';
 import { useIsFirstRender } from 'usehooks-ts';
 
-import type { IGeneration } from 'client-types/';
-
+import EditorWrapper from 'components/molecules/playground/editor/EditorWrapper';
 import {
   buildTemplatePlaceholdersRegexp,
   validateVariablePlaceholder
-} from '../../helpers/format';
-import EditorWrapper from '../EditorWrapper';
+} from 'components/molecules/playground/helpers/format';
+
+import type { IGeneration } from 'client-types/';
+
 import Variable from './variable';
 
 const findVariable = (

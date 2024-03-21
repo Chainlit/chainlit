@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { expect, it } from 'vitest';
 
-import { MessageContent } from '../src/components/molecules/messages/components/MessageContent';
+import { MessageContent } from 'components/molecules/messages/components/MessageContent';
 
 // Import the toBeInTheDocument function
 import type { ITextElement } from 'client-types/';

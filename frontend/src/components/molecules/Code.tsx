@@ -6,11 +6,11 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
+
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import 'highlight.js/styles/monokai-sublime.css';
-
-import { ClipboardCopy } from '../atoms/ClipboardCopy';
 
 const CodeSnippet = ({
   language,

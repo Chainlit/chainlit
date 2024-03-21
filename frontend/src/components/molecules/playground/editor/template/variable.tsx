@@ -3,9 +3,9 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import Tooltip from '@mui/material/Tooltip';
 
-import { useColors } from 'hooks/useColors';
+import { buildVariablePlaceholder } from 'components/molecules/playground/helpers/format';
 
-import { buildVariablePlaceholder } from '../../helpers/format';
+import { useColors } from 'hooks/useColors';
 
 interface Props {
   decoratedText: string;
