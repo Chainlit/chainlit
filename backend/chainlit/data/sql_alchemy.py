@@ -18,10 +18,9 @@ from chainlit.user import User, PersistedUser, UserDict
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
 from literalai import PageInfo, PaginatedResponse
 from chainlit.step import StepDict
-from chainlit.element import ElementDict
 
 if TYPE_CHECKING:
-    from chainlit.element import Element, ElementDict
+    from chainlit.element import Element
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
@@ -36,7 +35,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ssl_args['ssl'] = ssl_context
         self.engine = create_async_engine(self._conninfo, connect_args=ssl_args)
         self.async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
-        self.all_user_threads = None
         self.thread_update_lock = asyncio.Lock()
         self.step_update_lock = asyncio.Lock()
 
@@ -135,9 +133,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         user_identifier = await self.get_thread_author(thread_id=thread_id)
         if user_identifier is None:
             raise ValueError("User identifier not found for the given thread_id")
-        if not self.all_user_threads:
-            await self.get_all_user_threads(user_identifier=user_identifier)
-        for thread in self.all_user_threads:
+        user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(user_identifier=user_identifier)
+        if not user_threads:
+            return None
+        for thread in user_threads:
             if thread['id'] == thread_id:
                 return thread
         return None
@@ -171,18 +170,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": thread_id}
         await self.execute_sql(query=query, parameters=parameters)
     
-    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
+    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> Optional[PaginatedResponse[ThreadDict]]:
         logger.info(f"Postgres: list_threads, pagination={pagination}, filters={filters}")
         if not filters.userIdentifier:
             raise ValueError("userIdentifier is required")
-        if not self.all_user_threads:
-            await self.get_all_user_threads(user_identifier=filters.userIdentifier)
+        all_user_threads:Optional[List[ThreadDict]] = await self.get_all_user_threads(user_identifier=filters.userIdentifier)
 
         search_keyword = filters.search.lower() if filters.search else None
         feedback_value = int(filters.feedback) if filters.feedback else None
 
         filtered_threads = []
-        for thread in self.all_user_threads:
+        for thread in all_user_threads:
             if search_keyword or feedback_value:
                 keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step) if search_keyword else True
                 feedback_match = any(step.get('feedback', {}).get('value') == feedback_value for step in thread['steps']) if feedback_value else True
@@ -194,7 +192,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         # Apply pagination
         start = int(pagination.cursor) if pagination.cursor else 0
         end = start + pagination.first
-        paginated_threads = filtered_threads[start:end]
+        paginated_threads = filtered_threads[start:end] or []
 
         has_next_page = len(filtered_threads) > end
         end_cursor = paginated_threads[-1]['id'] if paginated_threads else None
@@ -313,8 +311,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return False # Not sure why documentation wants this
 
     #### NEW OPTIMIZATION ####
-    async def get_all_user_threads(self, user_identifier: str):
-        """Fetch all user threads and store in self.all_user_threads for fast retrieval"""
+    async def get_all_user_threads(self, user_identifier: str) -> Optional[List[ThreadDict]]:
+        """Fetch all user threads  for fast retrieval"""
         logger.info(f"Postgres: get_all_user_threads")
         parameters = {"identifier": user_identifier}
         sql_query = """
@@ -441,4 +439,4 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 if thread['elements'] is None:
                     thread['elements'] = []
                 thread['elements'].append(element)
-        self.all_user_threads = threads
+        return threads
