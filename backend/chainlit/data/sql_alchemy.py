@@ -17,8 +17,8 @@ from chainlit.data import BaseDataLayer, queue_until_user_message
 from chainlit.user import User, PersistedUser, UserDict
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
 from literalai import PageInfo, PaginatedResponse
-
 from chainlit.step import StepDict
+from chainlit.element import ElementDict
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -46,6 +46,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             self.blob_access_token = access_token
             self.blob_storage_provider = 'Azure'
             logger.info("Azure Data Lake Storage client initialized")
+            return
         # Add other checks here for AWS/Google/etc.
         else:
             raise ValueError("The provided blob_storage is not recognized")
@@ -115,7 +116,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         else: # update the user
             query = """UPDATE users SET "metadata" = :metadata WHERE "identifier" = :identifier"""
             await self.execute_sql(query=query, parameters=user_dict) # We want to update the metadata
-        # _user = await self.get_user(user.identifier)
         return await self.get_user(user.identifier)
         
     ###### Threads ######
@@ -125,7 +125,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
         if result and isinstance(result, list) and result[0]:
-            return result[0].get('identifier')
+            author_identifier = result[0].get('identifier')
+            if author_identifier is not None:
+                return author_identifier
+        raise ValueError(f"Author not found for thread_id {thread_id}")
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"Postgres: get_thread, thread_id={thread_id}")
@@ -265,7 +268,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             raise ValueError("No blob_storage_client is configured")
         if not element.for_id:
             return
-        element_dict: ElementDict = element.to_dict()
+        element_dict = element.to_dict()
         content: Optional[Union[bytes, str]] = None
 
         if not element.url:
@@ -292,7 +295,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         element_dict['url'] = element.url
         element_dict['objectKey'] = object_key if 'object_key' in locals() else None
-        element_dict: Dict[str, Any] = {k: json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in element_dict.items()}
+        element_dict = {k: v for k, v in element_dict.items() if v is not None}
 
         columns = ', '.join(f'"{column}"' for column in element_dict.keys())
         placeholders = ', '.join(f':{column}' for column in element_dict.keys())
@@ -313,7 +316,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def get_all_user_threads(self, user_identifier: str):
         """Fetch all user threads and store in self.all_user_threads for fast retrieval"""
         logger.info(f"Postgres: get_all_user_threads")
-        from chainlit.element import ElementDict
         parameters = {"identifier": user_identifier}
         sql_query = """
         SELECT
@@ -436,5 +438,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     forId=row['element_forid'],
                     mime=row['element_mime']
                 )
+                if thread['elements'] is None:
+                    thread['elements'] = []
                 thread['elements'].append(element)
         self.all_user_threads = threads
