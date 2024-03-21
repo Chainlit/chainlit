@@ -67,9 +67,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             except SQLAlchemyError as e:
                 await session.rollback()
                 logger.warn(f"An error occurred: {e}")
+                return None
             except Exception as e:
                 await session.rollback()
                 logger.warn(f"An unexpected error occurred: {e}")
+                return None
 
     async def get_current_timestamp(self) -> str:
         return datetime.now(timezone.utc).astimezone().isoformat()
@@ -421,21 +423,21 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 )
                 thread['steps'].append(step)
             if row['element_id']:
-                element = ElementDict(
-                    id=row['element_id'],
-                    threadId=row['element_threadid'],
-                    type=row['element_type'],
-                    chainlitKey=row['element_chainlitkey'],
-                    url=row['element_url'],
-                    objectKey=row['element_objectkey'],
-                    name=row['element_name'],
-                    display=row['element_display'],
-                    size=row['element_size'],
-                    language=row['element_language'],
-                    page=row['element_page'],
-                    forId=row['element_forid'],
-                    mime=row['element_mime']
-                )
+                element: Dict[str, Any] = {
+                    "id":row['element_id'],
+                    "threadId":row['element_threadid'],
+                    "type":row['element_type'],
+                    "chainlitKey":row['element_chainlitkey'],
+                    "url":row['element_url'],
+                    "objectKey":row['element_objectkey'],
+                    "name":row['element_name'],
+                    "display":row['element_display'],
+                    "size":row['element_size'],
+                    "language":row['element_language'],
+                    "page":row['element_page'],
+                    "forId":row['element_forid'],
+                    "mime":row['element_mime']
+                }
                 thread_elements = thread.get('elements', [])
                 thread_elements.append(element)
                 thread['elements'] = thread_elements
