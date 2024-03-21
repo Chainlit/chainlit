@@ -25,7 +25,7 @@ function getProviderName(provider: string) {
     case 'descope':
       return 'Descope';
     case 'aws-cognito':
-      return 'Coginto';
+      return 'Cognito';
     default:
       return capitalizeFirstLetter(provider);
   }
