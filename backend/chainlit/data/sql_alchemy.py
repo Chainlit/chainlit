@@ -10,19 +10,18 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from azure.storage.filedatalake import FileSystemClient, ContentSettings
+from azure.storage.filedatalake import FileSystemClient, ContentSettings  # type: ignore
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.data import BaseDataLayer, queue_until_user_message
 from chainlit.user import User, PersistedUser, UserDict
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
-from chainlit.element import ElementDict
 from literalai import PageInfo, PaginatedResponse
 
 from chainlit.step import StepDict
 
 if TYPE_CHECKING:
-    from chainlit.element import Element
+    from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
@@ -50,6 +49,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         # Add other checks here for AWS/Google/etc.
         else:
             raise ValueError("The provided blob_storage is not recognized")
+        return
 
     ###### SQL Helpers ######
     async def execute_sql(self, query: str, parameters: dict) -> Union[List[Dict[str, Any]], int, None]:
@@ -94,15 +94,15 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         query = "SELECT * FROM users WHERE identifier = :identifier"
         parameters = {"identifier": identifier}
         result = await self.execute_sql(query=query, parameters=parameters)
-        if result:
+        if result and isinstance(result, list):
             user_data = result[0]
             return PersistedUser(**user_data)
         return None
         
-    async def create_user(self, user: 'User') -> Optional[PersistedUser]:
+    async def create_user(self, user: User) -> Optional[PersistedUser]:
         logger.info(f"Postgres: create_user, user_identifier={user.identifier}")
         existing_user: Optional['PersistedUser'] = await self.get_user(user.identifier)
-        user_dict = {
+        user_dict: Dict[str, Any]  = {
             "identifier": str(user.identifier),
             "metadata": json.dumps(user.metadata) or {}
             }
@@ -119,16 +119,19 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return await self.get_user(user.identifier)
         
     ###### Threads ######
-    async def get_thread_author(self, thread_id: str) -> Optional[str]:
+    async def get_thread_author(self, thread_id: str) -> str:
         logger.info(f"Postgres: get_thread_author, thread_id={thread_id}")
         query = """SELECT u.* FROM threads t JOIN users u ON t."user_id" = u."id" WHERE t."id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
-        return result[0].get('identifier') if result else None
+        if result and isinstance(result, list) and result[0]:
+            return result[0].get('identifier')
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"Postgres: get_thread, thread_id={thread_id}")
         user_identifier = await self.get_thread_author(thread_id=thread_id)
+        if user_identifier is None:
+            raise ValueError("User identifier not found for the given thread_id")
         if not self.all_user_threads:
             await self.get_all_user_threads(user_identifier=user_identifier)
         for thread in self.all_user_threads:
@@ -255,14 +258,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def create_element(self, element: 'Element'):
         logger.info(f"Postgres: create_element, element_id = {element.id}")
         async with self.thread_update_lock:
-            pass  # We just want to ensure update_thread is done; no further action is needed here.
+            pass
         async with self.step_update_lock:
-            pass  # We just want to ensure create_step is done; no further action is needed here.
+            pass
         if not self.blob_storage_client:
             raise ValueError("No blob_storage_client is configured")
         if not element.for_id:
             return
-        element_dict = element.to_dict()
+        element_dict: ElementDict = element.to_dict()
         content: Optional[Union[bytes, str]] = None
 
         if not element.url:
@@ -289,7 +292,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         element_dict['url'] = element.url
         element_dict['objectKey'] = object_key if 'object_key' in locals() else None
-        element_dict = {k: json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in element_dict.items()}
+        element_dict: Dict[str, Any] = {k: json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in element_dict.items()}
 
         columns = ', '.join(f'"{column}"' for column in element_dict.keys())
         placeholders = ', '.join(f':{column}' for column in element_dict.keys())
@@ -309,7 +312,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     #### NEW OPTIMIZATION ####
     async def get_all_user_threads(self, user_identifier: str):
         """Fetch all user threads and store in self.all_user_threads for fast retrieval"""
-        logger.info(f"Postgres: get_all_user_threads, OPTIMIZATION")
+        logger.info(f"Postgres: get_all_user_threads")
+        from chainlit.element import ElementDict
         parameters = {"identifier": user_identifier}
         sql_query = """
         SELECT
@@ -366,7 +370,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         ORDER BY t."createdAt" DESC, s."start" ASC 
         """
         results = await self.execute_sql(query=sql_query, parameters=parameters)
-        threads = []
+        threads: List[ThreadDict] = []
+        if not isinstance(results, list):
+            raise ValueError("Expected a list of results")
         for row in results:
             thread_id = row['thread_id']
             thread = next((t for t in threads if t['id'] == thread_id), None)
@@ -398,7 +404,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     waitForAnswer=row['step_waitforanswer'],
                     isError=row['step_iserror'],
                     metadata=row['step_metadata'],
-                    input=None if not row['step_showinput'] else row['step_input'],
+                    input=row['step_input'] if row['step_showinput'] else None,
                     output=row['step_output'],
                     createdAt=row['step_createdat'],
                     start=row['step_start'],
