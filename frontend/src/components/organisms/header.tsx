@@ -15,8 +15,7 @@ import {
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { RegularButton } from '@chainlit/react-components';
-
+import { RegularButton } from 'components/atoms/buttons';
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';

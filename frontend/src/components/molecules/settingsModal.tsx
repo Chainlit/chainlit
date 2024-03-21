@@ -14,8 +14,7 @@ import {
   ListSubheader
 } from '@mui/material';
 
-import { SwitchInput } from '@chainlit/react-components';
-
+import { SwitchInput } from 'components/atoms/inputs/SwitchInput';
 import { Translator } from 'components/i18n';
 
 import { projectSettingsState } from 'state/project';
