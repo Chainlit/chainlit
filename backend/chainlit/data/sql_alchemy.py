@@ -170,11 +170,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": thread_id}
         await self.execute_sql(query=query, parameters=parameters)
     
-    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> Optional[PaginatedResponse[ThreadDict]]:
+    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
         logger.info(f"Postgres: list_threads, pagination={pagination}, filters={filters}")
         if not filters.userIdentifier:
             raise ValueError("userIdentifier is required")
-        all_user_threads:Optional[List[ThreadDict]] = await self.get_all_user_threads(user_identifier=filters.userIdentifier)
+        all_user_threads: List[ThreadDict] = await self.get_all_user_threads(user_identifier=filters.userIdentifier)
 
         search_keyword = filters.search.lower() if filters.search else None
         feedback_value = int(filters.feedback) if filters.feedback else None
@@ -183,7 +183,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         for thread in all_user_threads:
             if search_keyword or feedback_value:
                 keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step) if search_keyword else True
-                feedback_match = any(step.get('feedback', {}).get('value') == feedback_value for step in thread['steps']) if feedback_value else True
+                feedback_match = any(step.get('feedback', {}).get('value', 0) == feedback_value for step in thread['steps']) if feedback_value is not None else True
                 if keyword_match and feedback_match:
                     filtered_threads.append(thread)
             else:
