@@ -13,6 +13,7 @@ export interface IProjectSettings {
   ui: {
     name: string;
     show_readme_as_default?: boolean;
+    injected_tabs?: { to: string; label: string }[];
     description?: string;
     hide_cot?: boolean;
     default_collapse_content?: boolean;
