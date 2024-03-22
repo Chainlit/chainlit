@@ -2,6 +2,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
+import { grey } from 'theme';
 
 import AutoDelete from '@mui/icons-material/AutoDelete';
 import {
@@ -14,7 +15,6 @@ import {
 } from '@mui/material';
 
 import { UserInput } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components/theme';
 
 import { Translator } from 'components/i18n';
 
@@ -239,7 +239,11 @@ export default function InputHistoryButton({ disabled, onClick }: Props) {
   return (
     <div>
       {menu}
-      <Tooltip title="Show history">
+      <Tooltip
+        title={
+          <Translator path="components.organisms.chat.history.index.showHistory" />
+        }
+      >
         {
           // In MUI, a warning is triggered if we pass a disabled button. To avoid this warning, we should wrap the button in a <span></span> element when it can be disabled.
         }

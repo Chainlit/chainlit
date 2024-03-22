@@ -4,8 +4,8 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { Element } from '@chainlit/app/src/components/atoms/elements/Element';
 import { IMessageElement } from '@chainlit/react-client/src/types';
-import { Element } from '@chainlit/react-components/src/elements/Element';
 
 interface SideViewProps {
   element?: IMessageElement;

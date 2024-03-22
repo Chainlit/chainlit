@@ -13,9 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
+import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
   projectSettingsState,
@@ -26,7 +28,6 @@ import {
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox } from 'components/InputBox';
@@ -45,7 +46,14 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
+      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
+      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+    }),
+    [projectSettings]
+  );
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -125,8 +133,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
@@ -144,7 +152,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.multi_modal?.enabled;
 
   return (
     <Box

@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { Box } from '@mui/material';
 
-import { Markdown } from '@chainlit/react-components';
+import { Markdown } from 'components/molecules/Markdown';
 
 const WelcomeScreen = memo(
   ({
@@ -29,7 +29,6 @@ const WelcomeScreen = memo(
             width: '100%',
             mx: 'auto',
             color: 'text.primary',
-            lineHeight: '25px',
             fontSize: variant === 'app' ? '1rem' : '0.9rem',
             fontFamily:
               '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji',

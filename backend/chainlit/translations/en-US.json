@@ -34,6 +34,7 @@
         "confirm": "Confirm"
       },
       "settingsModal": {
+        "settings": "Settings",
         "expandMessages": "Expand Messages",
         "hideChainOfThought": "Hide Chain of Thought",
         "darkMode": "Dark Mode"
@@ -43,6 +44,7 @@
       "chat": {
         "history": {
           "index": {
+            "showHistory": "Show history",
             "lastInputs": "Last Inputs",
             "noInputs": "Such empty...",
             "loading": "Loading..."

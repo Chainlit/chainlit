@@ -1,3 +1,4 @@
+import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -12,8 +13,8 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
+import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
 import ChatProfiles from 'components/molecules/chatProfiles';
@@ -41,7 +42,14 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
+      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
+      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+    }),
+    [projectSettings]
+  );
 
   const { t } = useTranslation();
 
@@ -131,8 +139,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
@@ -150,7 +158,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.multi_modal?.enabled;
 
   return (
     <Box

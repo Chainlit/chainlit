@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
+import { grey } from 'theme';
 
 import FilterList from '@mui/icons-material/FilterList';
 import ThumbDown from '@mui/icons-material/ThumbDown';
@@ -9,8 +10,6 @@ import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
-
-import { grey } from '@chainlit/react-components';
 
 import { threadsFiltersState } from 'state/threads';
 
