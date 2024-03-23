@@ -115,7 +115,7 @@ def oauth_callback(
 
     Example:
         @cl.oauth_callback
-        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: User) -> Optional[User]:
+        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: User, id_token: str) -> Optional[User]:
 
     Returns:
         Callable[[str, str, Dict[str, str], User], Optional[User]]: The decorated authentication callback.
