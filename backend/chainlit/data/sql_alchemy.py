@@ -20,12 +20,13 @@ from literalai import PageInfo, PaginatedResponse
 from chainlit.step import StepDict
 
 if TYPE_CHECKING:
-    from chainlit.element import Element
+    from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
-    def __init__(self, conninfo, ssl_require=False):
+    def __init__(self, conninfo, ssl_require=False, user_thread_limit=100):
         self._conninfo = conninfo
+        self.user_thread_limit = user_thread_limit
         ssl_args = {}
         if ssl_require:
             # Create an SSL context to require an SSL connection
@@ -89,7 +90,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
               
     ###### User ######
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
-        logger.info(f"Postgres: get_user, identifier={identifier}")
+        logger.info(f"SQLAlchemy: get_user, identifier={identifier}")
         query = "SELECT * FROM users WHERE identifier = :identifier"
         parameters = {"identifier": identifier}
         result = await self.execute_sql(query=query, parameters=parameters)
@@ -99,17 +100,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return None
         
     async def create_user(self, user: User) -> Optional[PersistedUser]:
-        logger.info(f"Postgres: create_user, user_identifier={user.identifier}")
+        logger.info(f"SQLAlchemy: create_user, user_identifier={user.identifier}")
         existing_user: Optional['PersistedUser'] = await self.get_user(user.identifier)
         user_dict: Dict[str, Any]  = {
             "identifier": str(user.identifier),
             "metadata": json.dumps(user.metadata) or {}
             }
         if not existing_user: # create the user
-            logger.info("Postgres: create_user, creating the user")
+            logger.info("SQLAlchemy: create_user, creating the user")
             user_dict['id'] = str(uuid.uuid4())
             user_dict['createdAt'] = await self.get_current_timestamp()
-            query = "INSERT INTO users (id, identifier, createdAt, metadata) VALUES (:id, :identifier, :createdAt, :metadata)"
+            query = """INSERT INTO users ("id", "identifier", "createdAt", "metadata") VALUES (:id, :identifier, :createdAt, :metadata)"""
             await self.execute_sql(query=query, parameters=user_dict)
         else: # update the user
             query = """UPDATE users SET "metadata" = :metadata WHERE "identifier" = :identifier"""
@@ -118,7 +119,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         
     ###### Threads ######
     async def get_thread_author(self, thread_id: str) -> str:
-        logger.info(f"Postgres: get_thread_author, thread_id={thread_id}")
+        logger.info(f"SQLAlchemy: get_thread_author, thread_id={thread_id}")
         query = """SELECT u.* FROM threads t JOIN users u ON t."user_id" = u."id" WHERE t."id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
@@ -129,7 +130,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         raise ValueError(f"Author not found for thread_id {thread_id}")
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
-        logger.info(f"Postgres: get_thread, thread_id={thread_id}")
+        logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
         user_identifier = await self.get_thread_author(thread_id=thread_id)
         if user_identifier is None:
             raise ValueError("User identifier not found for the given thread_id")
@@ -142,7 +143,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return None
 
     async def update_thread(self, thread_id: str, name: Optional[str] = None, user_id: Optional[str] = None, metadata: Optional[Dict] = None, tags: Optional[List[str]] = None):
-        logger.info(f"Postgres: update_thread, thread_id={thread_id}")
+        logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
         async with self.thread_update_lock:  # Acquire the lock before updating the thread
             data = {
                 "id": thread_id,
@@ -165,13 +166,13 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             await self.execute_sql(query=query, parameters=parameters)
 
     async def delete_thread(self, thread_id: str):
-        logger.info(f"Postgres: delete_thread, thread_id={thread_id}")
+        logger.info(f"SQLAlchemy: delete_thread, thread_id={thread_id}")
         query = """DELETE FROM threads WHERE "id" = :id"""
         parameters = {"id": thread_id}
         await self.execute_sql(query=query, parameters=parameters)
     
     async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
-        logger.info(f"Postgres: list_threads, pagination={pagination}, filters={filters}")
+        logger.info(f"SQLAlchemy: list_threads, pagination={pagination}, filters={filters}")
         if not filters.userIdentifier:
             raise ValueError("userIdentifier is required")
         all_user_threads: List[ThreadDict] = await self.get_all_user_threads(user_identifier=filters.userIdentifier) or []
@@ -212,7 +213,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Steps ######
     @queue_until_user_message()
     async def create_step(self, step_dict: 'StepDict'):
-        logger.info(f"Postgres: create_step, step_id={step_dict.get('id')}")
+        logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
         async with self.thread_update_lock:  # Wait for update_thread
             pass
         async with self.step_update_lock:  # Acquire the lock before updating the step
@@ -232,19 +233,19 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     @queue_until_user_message()
     async def update_step(self, step_dict: 'StepDict'):
-        logger.info(f"Postgres: update_step, step_id={step_dict.get('id')}")
+        logger.info(f"SQLAlchemy: update_step, step_id={step_dict.get('id')}")
         await self.create_step(step_dict)
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
-        logger.info(f"Postgres: delete_step, step_id={step_id}")
+        logger.info(f"SQLAlchemy: delete_step, step_id={step_id}")
         query = """DELETE FROM steps WHERE "id" = :id"""
         parameters = {"id": step_id}
         await self.execute_sql(query=query, parameters=parameters)
     
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
-        logger.info(f"Postgres: upsert_feedback, feedback_id={feedback.id}")
+        logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
         feedback.id = feedback.id or str(uuid.uuid4())
         feedback_dict = asdict(feedback)
         parameters = {key: value for key, value in feedback_dict.items() if value is not None}  # Remove keys with None values
@@ -264,7 +265,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Elements ######
     @queue_until_user_message()
     async def create_element(self, element: 'Element'):
-        logger.info(f"Postgres: create_element, element_id = {element.id}")
+        logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
         async with self.thread_update_lock:
             pass
         async with self.step_update_lock:
@@ -309,7 +310,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str):
-        logger.info(f"Postgres: delete_element, element_id={element_id}")
+        logger.info(f"SQLAlchemy: delete_element, element_id={element_id}")
         query = """DELETE FROM elements WHERE "id" = :id"""
         parameters = {"id": element_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -317,133 +318,282 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def delete_user_session(self, id: str) -> bool:
         return False # Not sure why documentation wants this
 
+    # #### NEW OPTIMIZATION ####
+    # async def get_all_user_threads(self, user_identifier: str) -> Optional[List[ThreadDict]]:
+    #     """Fetch all user threads for fast retrieval"""
+    #     logger.info(f"SQLAlchemy: get_all_user_threads")
+    #     parameters = {"identifier": user_identifier}
+    #     sql_query = """ 
+    #     SELECT
+    #         t."id" AS thread_id,
+    #         t."createdAt" AS thread_createdat,
+    #         t."name" AS thread_name,
+    #         t."tags" AS thread_tags,       
+    #         t."metadata" AS thread_metadata,
+    #         u."id" AS user_id,
+    #         u."identifier" AS user_identifier,
+    #         u."metadata" AS user_metadata,
+    #         s."id" AS step_id,
+    #         s."name" AS step_name,
+    #         s."type" AS step_type,
+    #         s."threadId" AS step_threadid,
+    #         s."parentId" AS step_parentid,
+    #         s."disableFeedback" AS step_disablefeedback,
+    #         s."streaming" AS step_streaming,
+    #         s."waitForAnswer" AS step_waitforanswer,
+    #         s."isError" AS step_iserror,
+    #         s."metadata" AS step_metadata,
+    #         s."input" AS step_input,
+    #         s."output" AS step_output,
+    #         s."createdAt" AS step_createdat,
+    #         s."start" AS step_start,
+    #         s."end" AS step_end,
+    #         s."generation" AS step_generation,
+    #         s."showInput" AS step_showinput,
+    #         s."language" AS step_language,
+    #         s."indent" AS step_indent,
+    #         f."value" AS feedback_value,
+    #         f."strategy" AS feedback_strategy,
+    #         f."comment" AS feedback_comment,
+    #         e."id" AS element_id,
+    #         e."threadId" as element_threadid,
+    #         e."type" AS element_type,
+    #         e."url" AS element_url,
+    #         e."chainlitKey" AS element_chainlitkey,
+    #         e."objectKey" as element_objectkey,
+    #         e."name" AS element_name,
+    #         e."display" AS element_display,
+    #         e."size" AS element_size,
+    #         e."language" AS element_language,
+    #         e."page" AS element_page,
+    #         e."forId" AS element_forid,
+    #         e."mime" AS element_mime
+    #     FROM
+    #         threads t
+    #         LEFT JOIN users u ON t."user_id" = u."id"
+    #         LEFT JOIN steps s ON t."id" = s."threadId"
+    #         LEFT JOIN feedbacks f ON s."id" = f."forId"
+    #         LEFT JOIN elements e ON t."id" = e."threadId"
+    #     WHERE u."identifier" = :identifier
+    #     ORDER BY t."createdAt" DESC, s."start" ASC 
+    #     """
+    #     results = await self.execute_sql(query=sql_query, parameters=parameters)
+    #     threads: List[ThreadDict] = []
+    #     if not isinstance(results, list):
+    #         raise ValueError("Expected a list of results")
+    #     for row in results:
+    #         thread_id = row['thread_id']
+    #         thread = next((t for t in threads if t['id'] == thread_id), None)
+    #         if not thread:
+    #             thread = ThreadDict(
+    #                 id=thread_id,
+    #                 createdAt=row['thread_createdat'],
+    #                 name=row['thread_name'],
+    #                 user= UserDict(
+    #                     id=row['user_id'],
+    #                     identifier=row['user_identifier'],
+    #                     metadata=row['user_metadata']
+    #                 ) if row['user_id'] else None,
+    #                 tags=row['thread_tags'],
+    #                 metadata=row['thread_metadata'],
+    #                 steps=[],
+    #                 elements=[]
+    #             )
+    #             threads.append(thread)
+    #         if row['step_id']:
+    #             step = StepDict(
+    #                 id=row['step_id'],
+    #                 name=row['step_name'],
+    #                 type=row['step_type'],
+    #                 threadId=row['step_threadid'],
+    #                 parentId=row['step_parentid'],
+    #                 disableFeedback=row['step_disablefeedback'],
+    #                 streaming=row['step_streaming'],
+    #                 waitForAnswer=row['step_waitforanswer'],
+    #                 isError=row['step_iserror'],
+    #                 metadata=row['step_metadata'],
+    #                 input=row['step_input'] if row['step_showinput'] else None,
+    #                 output=row['step_output'],
+    #                 createdAt=row['step_createdat'],
+    #                 start=row['step_start'],
+    #                 end=row['step_end'],
+    #                 generation=row['step_generation'],
+    #                 showInput=row['step_showinput'],
+    #                 language=row['step_language'],
+    #                 indent=row['step_indent'],
+    #                 feedback= FeedbackDict(
+    #                     value=row['feedback_value'],
+    #                     strategy=row['feedback_strategy'],
+    #                     comment=row['feedback_comment']
+    #                  ) if row['feedback_value'] is not None else None
+    #             )
+    #             thread['steps'].append(step)
+    #         if row['element_id']:
+    #             element: Dict[str, Any] = {
+    #                 "id":row['element_id'],
+    #                 "threadId":row['element_threadid'],
+    #                 "type":row['element_type'],
+    #                 "chainlitKey":row['element_chainlitkey'],
+    #                 "url":row['element_url'],
+    #                 "objectKey":row['element_objectkey'],
+    #                 "name":row['element_name'],
+    #                 "display":row['element_display'],
+    #                 "size":row['element_size'],
+    #                 "language":row['element_language'],
+    #                 "page":row['element_page'],
+    #                 "forId":row['element_forid'],
+    #                 "mime":row['element_mime']
+    #             }
+    #             if thread['elements'] is None:
+    #                 thread['elements'] = []
+    #             thread['elements'].append(element)   # type: ignore
+    #     return threads
+
     #### NEW OPTIMIZATION ####
     async def get_all_user_threads(self, user_identifier: str) -> Optional[List[ThreadDict]]:
-        """Fetch all user threads  for fast retrieval"""
-        logger.info(f"Postgres: get_all_user_threads")
-        parameters = {"identifier": user_identifier}
-        sql_query = """
-        SELECT
-            t."id" AS thread_id,
-            t."createdAt" AS thread_createdat,
-            t."name" AS thread_name,
-            t."tags" AS thread_tags,
-            t."metadata" AS thread_metadata,
-            u."id" AS user_id,
-            u."identifier" AS user_identifier,
-            u."metadata" AS user_metadata,
-            s."id" AS step_id,
-            s."name" AS step_name,
-            s."type" AS step_type,
-            s."threadId" AS step_threadid,
-            s."parentId" AS step_parentid,
-            s."disableFeedback" AS step_disablefeedback,
-            s."streaming" AS step_streaming,
-            s."waitForAnswer" AS step_waitforanswer,
-            s."isError" AS step_iserror,
-            s."metadata" AS step_metadata,
-            s."input" AS step_input,
-            s."output" AS step_output,
-            s."createdAt" AS step_createdat,
-            s."start" AS step_start,
-            s."end" AS step_end,
-            s."generation" AS step_generation,
-            s."showInput" AS step_showinput,
-            s."language" AS step_language,
-            s."indent" AS step_indent,
-            f."value" AS feedback_value,
-            f."strategy" AS feedback_strategy,
-            f."comment" AS feedback_comment,
-            e."id" AS element_id,
-            e."threadId" as element_threadid,
-            e."type" AS element_type,
-            e."url" AS element_url,
-            e."chainlitKey" AS element_chainlitkey,
-            e."objectKey" as element_objectkey,
-            e."name" AS element_name,
-            e."display" AS element_display,
-            e."size" AS element_size,
-            e."language" AS element_language,
-            e."page" AS element_page,
-            e."forId" AS element_forid,
-            e."mime" AS element_mime
-        FROM
-            threads t
-            LEFT JOIN users u ON t."user_id" = u."id"
-            LEFT JOIN steps s ON t."id" = s."threadId"
-            LEFT JOIN feedbacks f ON s."id" = f."forId"
-            LEFT JOIN elements e ON t."id" = e."threadId"
-        WHERE u."identifier" = :identifier
-        ORDER BY t."createdAt" DESC, s."start" ASC 
+        """Fetch all user threads for fast retrieval, up to self.user_thread_limit"""
+        logger.info(f"SQLAlchemy: get_all_user_threads")
+        user_threads_query = """
+            SELECT
+                t."id" AS thread_id,
+                t."createdAt" AS thread_createdat,
+                t."name" AS thread_name,
+                t."tags" AS thread_tags,
+                t."metadata" AS thread_metadata,
+                u."id" AS user_id,
+                u."identifier" AS user_identifier,
+                u."metadata" AS user_metadata
+            FROM threads t JOIN users u ON t."user_id" = u."id"
+            WHERE u."identifier" = :identifier
+            ORDER BY t."createdAt" DESC
+            LIMIT :limit
         """
-        results = await self.execute_sql(query=sql_query, parameters=parameters)
-        threads: List[ThreadDict] = []
-        if not isinstance(results, list):
-            raise ValueError("Expected a list of results")
-        for row in results:
-            thread_id = row['thread_id']
-            thread = next((t for t in threads if t['id'] == thread_id), None)
-            if not thread:
-                thread = ThreadDict(
-                    id=thread_id,
-                    createdAt=row['thread_createdat'],
-                    name=row['thread_name'],
-                    user= UserDict(
-                        id=row['user_id'],
-                        identifier=row['user_identifier'],
-                        metadata=row['user_metadata']
-                    ) if row['user_id'] else None,
-                    tags=row['thread_tags'],
-                    metadata=row['thread_metadata'],
-                    steps=[],
-                    elements=[]
+        user_threads = await self.execute_sql(query=user_threads_query, parameters={"identifier": user_identifier, "limit": self.user_thread_limit})
+        thread_ids = ", ".join(str(thread_id) for thread_id in [d['thread_id'] for d in user_threads])
+
+        steps_feedbacks_query = """
+            SELECT
+                s."id" AS step_id,
+                s."name" AS step_name,
+                s."type" AS step_type,
+                s."threadId" AS step_threadid,
+                s."parentId" AS step_parentid,
+                s."disableFeedback" AS step_disablefeedback,
+                s."streaming" AS step_streaming,
+                s."waitForAnswer" AS step_waitforanswer,
+                s."isError" AS step_iserror,
+                s."metadata" AS step_metadata,
+                s."input" AS step_input,
+                s."output" AS step_output,
+                s."createdAt" AS step_createdat,
+                s."start" AS step_start,
+                s."end" AS step_end,
+                s."generation" AS step_generation,
+                s."showInput" AS step_showinput,
+                s."language" AS step_language,
+                s."indent" AS step_indent,
+                f."value" AS feedback_value,
+                f."strategy" AS feedback_strategy,
+                f."comment" AS feedback_comment
+            FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
+            WHERE s."threadId" IN ( :thread_ids )
+            ORDER BY s."start" ASC
+        """
+        steps_feedbacks = await self.execute_sql(query=steps_feedbacks_query, parameters={"thread_ids": thread_ids})
+
+        elements_query = """
+            SELECT
+                e."id" AS element_id,
+                e."threadId" as element_threadid,
+                e."type" AS element_type,
+                e."url" AS element_url,
+                e."chainlitKey" AS element_chainlitkey,
+                e."objectKey" as element_objectkey,
+                e."name" AS element_name,
+                e."display" AS element_display,
+                e."size" AS element_size,
+                e."language" AS element_language,
+                e."page" AS element_page,
+                e."forId" AS element_forid,
+                e."mime" AS element_mime
+            FROM elements e
+            WHERE e."threadId" IN ( :thread_ids )
+        """
+        elements = await self.execute_sql(query=elements_query, parameters={"thread_ids": thread_ids})
+
+        # Initialize a dictionary to hold ThreadDict objects keyed by thread_id
+        thread_dicts = {}
+        # Process threads_users to create initial ThreadDict objects
+        for thread in user_threads:
+            thread_id = thread['thread_id']
+            thread_dicts[thread_id] = ThreadDict(
+                id=thread_id,
+                createdAt=thread['thread_createdat'],
+                name=thread['thread_name'],
+                user=UserDict(
+                    id=thread['user_id'],
+                    identifier=thread['user_identifier'],
+                    metadata=thread['user_metadata']
+                ),
+                tags=thread['thread_tags'],
+                metadata=thread['thread_metadata'],
+                steps=[],
+                elements=[]
+            )
+        # Process steps_feedbacks to populate the steps in the corresponding ThreadDict
+        for step_feedback in steps_feedbacks:
+            thread_id = step_feedback['step_threadid']
+            feedback = None
+            if step_feedback['feedback_value'] is not None:
+                feedback = FeedbackDict(
+                    value=step_feedback['feedback_value'],
+                    strategy=step_feedback['feedback_strategy'],
+                    comment=step_feedback.get('feedback_comment')  # Use .get() for optional fields
                 )
-                threads.append(thread)
-            if row['step_id']:
-                step = StepDict(
-                    id=row['step_id'],
-                    name=row['step_name'],
-                    type=row['step_type'],
-                    threadId=row['step_threadid'],
-                    parentId=row['step_parentid'],
-                    disableFeedback=row['step_disablefeedback'],
-                    streaming=row['step_streaming'],
-                    waitForAnswer=row['step_waitforanswer'],
-                    isError=row['step_iserror'],
-                    metadata=row['step_metadata'],
-                    input=row['step_input'] if row['step_showinput'] else None,
-                    output=row['step_output'],
-                    createdAt=row['step_createdat'],
-                    start=row['step_start'],
-                    end=row['step_end'],
-                    generation=row['step_generation'],
-                    showInput=row['step_showinput'],
-                    language=row['step_language'],
-                    indent=row['step_indent'],
-                    feedback= FeedbackDict(
-                        value=row['feedback_value'],
-                        strategy=row['feedback_strategy'],
-                        comment=row['feedback_comment']
-                     ) if row['feedback_value'] is not None else None
-                )
-                thread['steps'].append(step)
-            if row['element_id']:
-                element: Dict[str, Any] = {
-                    "id":row['element_id'],
-                    "threadId":row['element_threadid'],
-                    "type":row['element_type'],
-                    "chainlitKey":row['element_chainlitkey'],
-                    "url":row['element_url'],
-                    "objectKey":row['element_objectkey'],
-                    "name":row['element_name'],
-                    "display":row['element_display'],
-                    "size":row['element_size'],
-                    "language":row['element_language'],
-                    "page":row['element_page'],
-                    "forId":row['element_forid'],
-                    "mime":row['element_mime']
-                }
-                if thread['elements'] is None:
-                    thread['elements'] = []
-                thread['elements'].append(element)   # type: ignore
-        return threads
+            step_dict = StepDict(
+                id=step_feedback['step_id'],
+                name=step_feedback['step_name'],
+                type=step_feedback['step_type'],
+                threadId=thread_id,
+                parentId=step_feedback.get('step_parentId'),
+                disableFeedback=step_feedback.get('step_disableFeedback', False),
+                streaming=step_feedback.get('step_streaming', False),
+                waitForAnswer=step_feedback.get('step_waitForAnswer'),
+                isError=step_feedback.get('step_isError'),
+                metadata=step_feedback.get('step_metadata', {}),
+                input=step_feedback.get('step_input', '') if step_feedback['step_showinput'] else None,
+                output=step_feedback.get('step_output', ''),
+                createdAt=step_feedback.get('step_createdAt'),
+                start=step_feedback.get('step_start'),
+                end=step_feedback.get('step_end'),
+                generation=step_feedback.get('step_generation'),
+                showInput=step_feedback.get('step_showInput'),
+                language=step_feedback.get('step_language'),
+                indent=step_feedback.get('step_indent'),
+                feedback=feedback
+            )
+            # Append the step to the steps list of the corresponding ThreadDict
+            thread_dicts[thread_id]['steps'].append(step_dict)
+
+        # Process elements to populate the elements in the corresponding ThreadDict
+        for element in elements:
+            thread_id = element['element_threadid']
+            element_dict = ElementDict(
+                id=element['element_id'],
+                threadId=thread_id,
+                type=element['element_type'],
+                chainlitKey=element.get('element_chainlitKey'),
+                url=element.get('element_url'),
+                objectKey=element.get('element_objectKey'),
+                name=element['element_name'],
+                display=element['element_display'],
+                size=element.get('element_size'),
+                language=element.get('element_language'),
+                page=element.get('element_page'),
+                forId=element.get('element_forId'),
+                mime=element.get('element_mime'),
+            )
+            # Append the element to the elements list of the corresponding ThreadDict
+            thread_dicts[thread_id]['elements'].append(element_dict)
+
+        return list(thread_dicts.values()) 
