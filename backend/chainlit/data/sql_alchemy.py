@@ -469,8 +469,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             LIMIT :limit
         """
         user_threads = await self.execute_sql(query=user_threads_query, parameters={"identifier": user_identifier, "limit": self.user_thread_limit})
+        if not isinstance(user_threads, list):
+            return None
         thread_ids = ", ".join(str(thread_id) for thread_id in [d['thread_id'] for d in user_threads])
-
+        if not thread_ids:
+            return []
+        
         steps_feedbacks_query = """
             SELECT
                 s."id" AS step_id,
@@ -500,7 +504,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ORDER BY s."start" ASC
         """
         steps_feedbacks = await self.execute_sql(query=steps_feedbacks_query, parameters={"thread_ids": thread_ids})
-
+        if not isinstance(steps_feedbacks, list):
+            # Handle the error appropriately
+            return None
+        
         elements_query = """
             SELECT
                 e."id" AS element_id,
@@ -520,7 +527,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             WHERE e."threadId" IN ( :thread_ids )
         """
         elements = await self.execute_sql(query=elements_query, parameters={"thread_ids": thread_ids})
-
+        if not isinstance(elements, list):
+            # Handle the error appropriately
+            return None
+        
         # Initialize a dictionary to hold ThreadDict objects keyed by thread_id
         thread_dicts = {}
         # Process threads_users to create initial ThreadDict objects
@@ -548,7 +558,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 feedback = FeedbackDict(
                     value=step_feedback['feedback_value'],
                     strategy=step_feedback['feedback_strategy'],
-                    comment=step_feedback.get('feedback_comment')  # Use .get() for optional fields
+                    comment=step_feedback.get('feedback_comment')
                 )
             step_dict = StepDict(
                 id=step_feedback['step_id'],
