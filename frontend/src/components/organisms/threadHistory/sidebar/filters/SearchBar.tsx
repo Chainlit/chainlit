@@ -2,14 +2,13 @@ import debounce from 'lodash/debounce';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
+import { grey } from 'theme';
 
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
-
-import { grey } from '@chainlit/react-components';
 
 import { threadsFiltersState } from 'state/threads';
 

@@ -30,9 +30,19 @@ def init_markdown(root: str):
             logger.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 
 
-def get_markdown_str(root: str):
+def get_markdown_str(root: str, language: str):
     """Get the chainlit.md file as a string."""
-    chainlit_md_path = os.path.join(root, "chainlit.md")
+    translated_chainlit_md_path = os.path.join(root, f"chainlit_{language}.md")
+    default_chainlit_md_path = os.path.join(root, "chainlit.md")
+
+    if os.path.exists(translated_chainlit_md_path):
+        chainlit_md_path = translated_chainlit_md_path
+    else:
+        chainlit_md_path = default_chainlit_md_path
+        logger.warning(
+            f"Translated markdown file for {language} not found. Defaulting to chainlit.md."
+        )
+
     if os.path.exists(chainlit_md_path):
         with open(chainlit_md_path, "r", encoding="utf-8") as f:
             chainlit_md = f.read()
