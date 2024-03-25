@@ -11,11 +11,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from azure.storage.filedatalake import FileSystemClient, ContentSettings  # type: ignore
+from literalai import PageInfo, PaginatedResponse
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.data import BaseDataLayer, queue_until_user_message
 from chainlit.user import User, PersistedUser, UserDict
-from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter, PageInfo, PaginatedResponse
+from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
 from chainlit.step import StepDict
 from chainlit.element import ElementDict
 
