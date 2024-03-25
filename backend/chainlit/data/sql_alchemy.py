@@ -18,6 +18,7 @@ from chainlit.user import User, PersistedUser, UserDict
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
 from literalai import PageInfo, PaginatedResponse
 from chainlit.step import StepDict
+from chainlit.element import ElementDict
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -214,11 +215,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_step(self, step_dict: 'StepDict'):
         logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
+        logger.info(f"SQLAlchemy: name={step_dict.get('name')}, input={step_dict.get('input')}, output={step_dict.get('name')}")
         async with self.thread_update_lock:  # Wait for update_thread
             pass
         async with self.step_update_lock:  # Acquire the lock before updating the step
             step_dict['showInput'] = str(step_dict.get('showInput', '')).lower() if 'showInput' in step_dict else None
-            parameters = {key: value for key, value in step_dict.items() if value is not None}  # Remove keys with None values
+            # parameters = {key: value for key, value in step_dict.items() if value is not None}  # Remove keys with None values
+            parameters = {key: value for key, value in step_dict.items() if value is not None and not (isinstance(value, dict) and not value)}
+
 
             columns = ', '.join(f'"{key}"' for key in parameters.keys())
             values = ', '.join(f':{key}' for key in parameters.keys())
@@ -471,11 +475,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         user_threads = await self.execute_sql(query=user_threads_query, parameters={"identifier": user_identifier, "limit": self.user_thread_limit})
         if not isinstance(user_threads, list):
             return None
-        thread_ids = ", ".join(str(thread_id) for thread_id in [d['thread_id'] for d in user_threads])
+        thread_ids = "('" + "','".join(map(str, [thread['thread_id'] for thread in user_threads])) + "')"
         if not thread_ids:
             return []
         
-        steps_feedbacks_query = """
+        steps_feedbacks_query = f"""
             SELECT
                 s."id" AS step_id,
                 s."name" AS step_name,
@@ -500,15 +504,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 f."strategy" AS feedback_strategy,
                 f."comment" AS feedback_comment
             FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
-            WHERE s."threadId" IN ( :thread_ids )
-            ORDER BY s."start" ASC
+            WHERE s."threadId" IN {thread_ids}
+            ORDER BY s."createdAt" ASC
         """
-        steps_feedbacks = await self.execute_sql(query=steps_feedbacks_query, parameters={"thread_ids": thread_ids})
-        if not isinstance(steps_feedbacks, list):
-            # Handle the error appropriately
-            return None
+        steps_feedbacks = await self.execute_sql(query=steps_feedbacks_query, parameters={})
         
-        elements_query = """
+        elements_query = f"""
             SELECT
                 e."id" AS element_id,
                 e."threadId" as element_threadid,
@@ -524,12 +525,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 e."forId" AS element_forid,
                 e."mime" AS element_mime
             FROM elements e
-            WHERE e."threadId" IN ( :thread_ids )
+            WHERE e."threadId" IN {thread_ids}
         """
-        elements = await self.execute_sql(query=elements_query, parameters={"thread_ids": thread_ids})
-        if not isinstance(elements, list):
-            # Handle the error appropriately
-            return None
+        elements = await self.execute_sql(query=elements_query, parameters={})
         
         # Initialize a dictionary to hold ThreadDict objects keyed by thread_id
         thread_dicts = {}
@@ -551,59 +549,59 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 elements=[]
             )
         # Process steps_feedbacks to populate the steps in the corresponding ThreadDict
-        for step_feedback in steps_feedbacks:
-            thread_id = step_feedback['step_threadid']
-            feedback = None
-            if step_feedback['feedback_value'] is not None:
-                feedback = FeedbackDict(
-                    value=step_feedback['feedback_value'],
-                    strategy=step_feedback['feedback_strategy'],
-                    comment=step_feedback.get('feedback_comment')
+        if isinstance(steps_feedbacks, list):
+            for step_feedback in steps_feedbacks:
+                thread_id = step_feedback['step_threadid']
+                feedback = None
+                if step_feedback['feedback_value'] is not None:
+                    feedback = FeedbackDict(
+                        value=step_feedback['feedback_value'],
+                        strategy=step_feedback['feedback_strategy'],
+                        comment=step_feedback.get('feedback_comment')
+                    )
+                step_dict = StepDict(
+                    id=step_feedback['step_id'],
+                    name=step_feedback['step_name'],
+                    type=step_feedback['step_type'],
+                    threadId=thread_id,
+                    parentId=step_feedback.get('step_parentid'),
+                    disableFeedback=step_feedback.get('step_disableFeedback', False),
+                    streaming=step_feedback.get('step_streaming', False),
+                    waitForAnswer=step_feedback.get('step_waitForAnswer'),
+                    isError=step_feedback.get('step_isError'),
+                    metadata=step_feedback.get('step_metadata', {}),
+                    input=step_feedback.get('step_input', '') if step_feedback['step_showinput'] else None,
+                    output=step_feedback.get('step_output', ''),
+                    createdAt=step_feedback.get('step_createdAt'),
+                    start=step_feedback.get('step_start'),
+                    end=step_feedback.get('step_end'),
+                    generation=step_feedback.get('step_generation'),
+                    showInput=step_feedback.get('step_showInput'),
+                    language=step_feedback.get('step_language'),
+                    indent=step_feedback.get('step_indent'),
+                    feedback=feedback
                 )
-            step_dict = StepDict(
-                id=step_feedback['step_id'],
-                name=step_feedback['step_name'],
-                type=step_feedback['step_type'],
-                threadId=thread_id,
-                parentId=step_feedback.get('step_parentId'),
-                disableFeedback=step_feedback.get('step_disableFeedback', False),
-                streaming=step_feedback.get('step_streaming', False),
-                waitForAnswer=step_feedback.get('step_waitForAnswer'),
-                isError=step_feedback.get('step_isError'),
-                metadata=step_feedback.get('step_metadata', {}),
-                input=step_feedback.get('step_input', '') if step_feedback['step_showinput'] else None,
-                output=step_feedback.get('step_output', ''),
-                createdAt=step_feedback.get('step_createdAt'),
-                start=step_feedback.get('step_start'),
-                end=step_feedback.get('step_end'),
-                generation=step_feedback.get('step_generation'),
-                showInput=step_feedback.get('step_showInput'),
-                language=step_feedback.get('step_language'),
-                indent=step_feedback.get('step_indent'),
-                feedback=feedback
-            )
-            # Append the step to the steps list of the corresponding ThreadDict
-            thread_dicts[thread_id]['steps'].append(step_dict)
+                # Append the step to the steps list of the corresponding ThreadDict
+                thread_dicts[thread_id]['steps'].append(step_dict)
 
-        # Process elements to populate the elements in the corresponding ThreadDict
-        for element in elements:
-            thread_id = element['element_threadid']
-            element_dict = ElementDict(
-                id=element['element_id'],
-                threadId=thread_id,
-                type=element['element_type'],
-                chainlitKey=element.get('element_chainlitKey'),
-                url=element.get('element_url'),
-                objectKey=element.get('element_objectKey'),
-                name=element['element_name'],
-                display=element['element_display'],
-                size=element.get('element_size'),
-                language=element.get('element_language'),
-                page=element.get('element_page'),
-                forId=element.get('element_forId'),
-                mime=element.get('element_mime'),
-            )
-            # Append the element to the elements list of the corresponding ThreadDict
-            thread_dicts[thread_id]['elements'].append(element_dict)
+        if isinstance(elements, list):
+            for element in elements:
+                thread_id = element['element_threadid']
+                element_dict = ElementDict(
+                    id=element['element_id'],
+                    threadId=thread_id,
+                    type=element['element_type'],
+                    chainlitKey=element.get('element_chainlitKey'),
+                    url=element.get('element_url'),
+                    objectKey=element.get('element_objectKey'),
+                    name=element['element_name'],
+                    display=element['element_display'],
+                    size=element.get('element_size'),
+                    language=element.get('element_language'),
+                    page=element.get('element_page'),
+                    forId=element.get('element_forId'),
+                    mime=element.get('element_mime'),
+                )
+                thread_dicts[thread_id]['elements'].append(element_dict)   # type: ignore
 
         return list(thread_dicts.values()) 
