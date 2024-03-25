@@ -183,23 +183,27 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         filtered_threads = []
         for thread in all_user_threads:
-            if search_keyword or feedback_value:
-                keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step) if search_keyword else True
+            keyword_match = True
+            feedback_match = True  # Initialize feedback_match to True
+            if search_keyword or feedback_value is not None:
+                if search_keyword:
+                    keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step)
                 if feedback_value is not None:
+                    feedback_match = False  # Assume no match until found
                     for step in thread['steps']:
                         feedback = step.get('feedback')
                         if feedback and feedback.get('value') == feedback_value:
                             feedback_match = True
                             break
-                    else:
-                        feedback_match = False
-                if keyword_match and feedback_match:
-                    filtered_threads.append(thread)
-            else:
+            if keyword_match and feedback_match:
                 filtered_threads.append(thread)
 
-        # Apply pagination
-        start = int(pagination.cursor) if pagination.cursor else 0
+        start = 0 # Find the start index using pagination.cursor
+        if pagination.cursor:
+            for i, thread in enumerate(filtered_threads):
+                if thread['id'] == pagination.cursor:
+                    start = i + 1
+                    break
         end = start + pagination.first
         paginated_threads = filtered_threads[start:end] or []
 
@@ -322,138 +326,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def delete_user_session(self, id: str) -> bool:
         return False # Not sure why documentation wants this
 
-    # #### NEW OPTIMIZATION ####
-    # async def get_all_user_threads(self, user_identifier: str) -> Optional[List[ThreadDict]]:
-    #     """Fetch all user threads for fast retrieval"""
-    #     logger.info(f"SQLAlchemy: get_all_user_threads")
-    #     parameters = {"identifier": user_identifier}
-    #     sql_query = """ 
-    #     SELECT
-    #         t."id" AS thread_id,
-    #         t."createdAt" AS thread_createdat,
-    #         t."name" AS thread_name,
-    #         t."tags" AS thread_tags,       
-    #         t."metadata" AS thread_metadata,
-    #         u."id" AS user_id,
-    #         u."identifier" AS user_identifier,
-    #         u."metadata" AS user_metadata,
-    #         s."id" AS step_id,
-    #         s."name" AS step_name,
-    #         s."type" AS step_type,
-    #         s."threadId" AS step_threadid,
-    #         s."parentId" AS step_parentid,
-    #         s."disableFeedback" AS step_disablefeedback,
-    #         s."streaming" AS step_streaming,
-    #         s."waitForAnswer" AS step_waitforanswer,
-    #         s."isError" AS step_iserror,
-    #         s."metadata" AS step_metadata,
-    #         s."input" AS step_input,
-    #         s."output" AS step_output,
-    #         s."createdAt" AS step_createdat,
-    #         s."start" AS step_start,
-    #         s."end" AS step_end,
-    #         s."generation" AS step_generation,
-    #         s."showInput" AS step_showinput,
-    #         s."language" AS step_language,
-    #         s."indent" AS step_indent,
-    #         f."value" AS feedback_value,
-    #         f."strategy" AS feedback_strategy,
-    #         f."comment" AS feedback_comment,
-    #         e."id" AS element_id,
-    #         e."threadId" as element_threadid,
-    #         e."type" AS element_type,
-    #         e."url" AS element_url,
-    #         e."chainlitKey" AS element_chainlitkey,
-    #         e."objectKey" as element_objectkey,
-    #         e."name" AS element_name,
-    #         e."display" AS element_display,
-    #         e."size" AS element_size,
-    #         e."language" AS element_language,
-    #         e."page" AS element_page,
-    #         e."forId" AS element_forid,
-    #         e."mime" AS element_mime
-    #     FROM
-    #         threads t
-    #         LEFT JOIN users u ON t."user_id" = u."id"
-    #         LEFT JOIN steps s ON t."id" = s."threadId"
-    #         LEFT JOIN feedbacks f ON s."id" = f."forId"
-    #         LEFT JOIN elements e ON t."id" = e."threadId"
-    #     WHERE u."identifier" = :identifier
-    #     ORDER BY t."createdAt" DESC, s."start" ASC 
-    #     """
-    #     results = await self.execute_sql(query=sql_query, parameters=parameters)
-    #     threads: List[ThreadDict] = []
-    #     if not isinstance(results, list):
-    #         raise ValueError("Expected a list of results")
-    #     for row in results:
-    #         thread_id = row['thread_id']
-    #         thread = next((t for t in threads if t['id'] == thread_id), None)
-    #         if not thread:
-    #             thread = ThreadDict(
-    #                 id=thread_id,
-    #                 createdAt=row['thread_createdat'],
-    #                 name=row['thread_name'],
-    #                 user= UserDict(
-    #                     id=row['user_id'],
-    #                     identifier=row['user_identifier'],
-    #                     metadata=row['user_metadata']
-    #                 ) if row['user_id'] else None,
-    #                 tags=row['thread_tags'],
-    #                 metadata=row['thread_metadata'],
-    #                 steps=[],
-    #                 elements=[]
-    #             )
-    #             threads.append(thread)
-    #         if row['step_id']:
-    #             step = StepDict(
-    #                 id=row['step_id'],
-    #                 name=row['step_name'],
-    #                 type=row['step_type'],
-    #                 threadId=row['step_threadid'],
-    #                 parentId=row['step_parentid'],
-    #                 disableFeedback=row['step_disablefeedback'],
-    #                 streaming=row['step_streaming'],
-    #                 waitForAnswer=row['step_waitforanswer'],
-    #                 isError=row['step_iserror'],
-    #                 metadata=row['step_metadata'],
-    #                 input=row['step_input'] if row['step_showinput'] else None,
-    #                 output=row['step_output'],
-    #                 createdAt=row['step_createdat'],
-    #                 start=row['step_start'],
-    #                 end=row['step_end'],
-    #                 generation=row['step_generation'],
-    #                 showInput=row['step_showinput'],
-    #                 language=row['step_language'],
-    #                 indent=row['step_indent'],
-    #                 feedback= FeedbackDict(
-    #                     value=row['feedback_value'],
-    #                     strategy=row['feedback_strategy'],
-    #                     comment=row['feedback_comment']
-    #                  ) if row['feedback_value'] is not None else None
-    #             )
-    #             thread['steps'].append(step)
-    #         if row['element_id']:
-    #             element: Dict[str, Any] = {
-    #                 "id":row['element_id'],
-    #                 "threadId":row['element_threadid'],
-    #                 "type":row['element_type'],
-    #                 "chainlitKey":row['element_chainlitkey'],
-    #                 "url":row['element_url'],
-    #                 "objectKey":row['element_objectkey'],
-    #                 "name":row['element_name'],
-    #                 "display":row['element_display'],
-    #                 "size":row['element_size'],
-    #                 "language":row['element_language'],
-    #                 "page":row['element_page'],
-    #                 "forId":row['element_forid'],
-    #                 "mime":row['element_mime']
-    #             }
-    #             if thread['elements'] is None:
-    #                 thread['elements'] = []
-    #             thread['elements'].append(element)   # type: ignore
-    #     return threads
-
-    #### NEW OPTIMIZATION ####
     async def get_all_user_threads(self, user_identifier: str) -> Optional[List[ThreadDict]]:
         """Fetch all user threads for fast retrieval, up to self.user_thread_limit"""
         logger.info(f"SQLAlchemy: get_all_user_threads")
@@ -603,5 +475,4 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     mime=element.get('element_mime'),
                 )
                 thread_dicts[thread_id]['elements'].append(element_dict)   # type: ignore
-
         return list(thread_dicts.values()) 
