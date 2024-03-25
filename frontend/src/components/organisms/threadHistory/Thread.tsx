@@ -73,31 +73,35 @@ const Thread = ({ thread, error, isLoading }: Props) => {
   );
 
   if (isLoading) {
-    return [1, 2, 3].map((index) => (
-      <Stack
-        key={`thread-skeleton-${index}`}
-        sx={{
-          px: 2,
-          gap: 4,
-          mt: 5,
-          flexDirection: 'row',
-          justifyContent: 'center'
-        }}
-      >
-        <Stack>
-          <Skeleton width={50} />
-          <Skeleton width={50} />
-        </Stack>
-        <Skeleton
-          variant="rounded"
-          sx={{
-            maxWidth: '60rem',
-            width: '100%',
-            height: 100
-          }}
-        />
-      </Stack>
-    ));
+    return (
+      <>
+        {[1, 2, 3].map((index) => (
+          <Stack
+            key={`thread-skeleton-${index}`}
+            sx={{
+              px: 2,
+              gap: 4,
+              mt: 5,
+              flexDirection: 'row',
+              justifyContent: 'center'
+            }}
+          >
+            <Stack>
+              <Skeleton width={50} />
+              <Skeleton width={50} />
+            </Stack>
+            <Skeleton
+              variant="rounded"
+              sx={{
+                maxWidth: '60rem',
+                width: '100%',
+                height: 100
+              }}
+            />
+          </Stack>
+        ))}
+      </>
+    );
   }
 
   if (!thread || error) {

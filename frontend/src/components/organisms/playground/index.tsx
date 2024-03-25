@@ -1,12 +1,11 @@
 import { useCallback } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
+import { IPlaygroundContext } from 'types';
 
 import { IGeneration, accessTokenState } from '@chainlit/react-client';
-import {
-  IPlaygroundContext,
-  PromptPlayground
-} from '@chainlit/react-components';
+
+import { PromptPlayground } from 'components/molecules/playground';
 
 import { useLLMProviders } from 'hooks/useLLMProviders';
 
