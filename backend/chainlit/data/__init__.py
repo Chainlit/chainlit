@@ -9,11 +9,10 @@ from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
-from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
+from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter, PageInfo, PaginatedResponse
 from chainlit.user import PersistedUser, User, UserDict
 from literalai import Attachment
 from literalai import Feedback as ClientFeedback
-from literalai import PageInfo, PaginatedResponse
 from literalai import Step as ClientStep
 from literalai.step import StepDict as ClientStepDict
 from literalai.thread import NumberListFilter, StringFilter, StringListFilter
@@ -22,6 +21,8 @@ from literalai.thread import ThreadFilter as ClientThreadFilter
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import FeedbackDict, StepDict
+
+_data_layer = None
 
 
 def queue_until_user_message():
@@ -118,10 +119,7 @@ class BaseDataLayer:
         return True
 
 
-_data_layer: Optional[BaseDataLayer] = None
-
-
-class ChainlitDataLayer(BaseDataLayer):
+class ChainlitDataLayer:
     def __init__(self, api_key: str, server: Optional[str]):
         from literalai import LiteralClient
 
@@ -423,7 +421,6 @@ class ChainlitDataLayer(BaseDataLayer):
 if api_key := os.environ.get("LITERAL_API_KEY"):
     server = os.environ.get("LITERAL_SERVER")
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
-
 
 def get_data_layer():
     return _data_layer
