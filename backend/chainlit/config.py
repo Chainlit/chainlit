@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import tomli
 from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
@@ -112,7 +113,7 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
-# Specify a custom build directory for the frontend. 
+# Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
@@ -244,9 +245,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
@@ -427,6 +428,24 @@ def load_config():
     )
 
     return config
+
+
+def lint_translations():
+    # Load the ground truth (en-US.json file from chainlit source code)
+    src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
+    with open(src, "r", encoding="utf-8") as f:
+        truth = json.load(f)
+
+        # Find the local app translations
+        for file in os.listdir(config_translation_dir):
+            if file.endswith(".json"):
+                # Load the translation file
+                to_lint = os.path.join(config_translation_dir, file)
+                with open(to_lint, "r", encoding="utf-8") as f:
+                    translation = json.load(f)
+
+                    # Lint the translation file
+                    lint_translation_json(file, truth, translation)
 
 
 config = load_config()
