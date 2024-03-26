@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import json
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 import aiofiles
+import aiohttp
 import asyncio
 from dataclasses import asdict
 from sqlalchemy import text
@@ -184,7 +185,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         filtered_threads = []
         for thread in all_user_threads:
             keyword_match = True
-            feedback_match = True  # Initialize feedback_match to True
+            feedback_match = True
             if search_keyword or feedback_value is not None:
                 if search_keyword:
                     keyword_match = any(search_keyword in step['output'].lower() for step in thread['steps'] if 'output' in step)
@@ -198,10 +199,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             if keyword_match and feedback_match:
                 filtered_threads.append(thread)
 
-        start = 0 # Find the start index using pagination.cursor
+        start = 0
         if pagination.cursor:
             for i, thread in enumerate(filtered_threads):
-                if thread['id'] == pagination.cursor:
+                if thread['id'] == pagination.cursor:  # Find the start index using pagination.cursor
                     start = i + 1
                     break
         end = start + pagination.first
@@ -219,12 +220,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_step(self, step_dict: 'StepDict'):
         logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
-        logger.info(f"SQLAlchemy: name={step_dict.get('name')}, input={step_dict.get('input')}, output={step_dict.get('name')}")
+        logger.info(f"SQLAlchemy: create_step, name={step_dict.get('name')}, input={step_dict.get('input')}, output={step_dict.get('name')}")
         async with self.thread_update_lock:  # Wait for update_thread
             pass
         async with self.step_update_lock:  # Acquire the lock before updating the step
             step_dict['showInput'] = str(step_dict.get('showInput', '')).lower() if 'showInput' in step_dict else None
-            # parameters = {key: value for key, value in step_dict.items() if value is not None}  # Remove keys with None values
             parameters = {key: value for key, value in step_dict.items() if value is not None and not (isinstance(value, dict) and not value)}
 
 
@@ -256,7 +256,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
         feedback.id = feedback.id or str(uuid.uuid4())
         feedback_dict = asdict(feedback)
-        parameters = {key: value for key, value in feedback_dict.items() if value is not None}  # Remove keys with None values
+        parameters = {key: value for key, value in feedback_dict.items() if value is not None}
 
         columns = ', '.join(f'"{key}"' for key in parameters.keys())
         values = ', '.join(f':{key}' for key in parameters.keys())
@@ -284,28 +284,35 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             return
         element_dict = element.to_dict()
         content: Optional[Union[bytes, str]] = None
+        
+        # if not element.url:
+        if element.path:
+            async with aiofiles.open(element.path, "rb") as f:
+                content = await f.read()
+        elif element.url:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(element.url) as response:
+                    if response.status == 200:
+                        content = await response.read()
+                    else:
+                        content = None
+        elif element.content:
+            content = element.content
+        else:
+            raise ValueError("Either path or content must be provided")
 
-        if not element.url:
-            if element.path:
-                async with aiofiles.open(element.path, "rb") as f:
-                    content = await f.read()
-            elif element.content:
-                content = element.content
-            else:
-                raise ValueError("Either path or content must be provided")
+        context_user = context.session.user
+        if not context_user or not getattr(context_user, 'id', None):
+            raise ValueError("No valid user in context")
 
-            context_user = context.session.user
-            if not context_user or not getattr(context_user, 'id', None):
-                raise ValueError("No valid user in context")
+        user_folder = getattr(context_user, 'id', 'unknown')
+        object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
 
-            user_folder = getattr(context_user, 'id', 'unknown')
-            object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
-
-            if self.blob_storage_provider == 'Azure':
-                file_client = self.blob_storage_client.get_file_client(object_key)
-                content_type = ContentSettings(content_type=element.mime)
-                file_client.upload_data(content, overwrite=True, content_settings=content_type)
-                element.url = file_client.url + (self.blob_access_token or '')
+        if self.blob_storage_provider == 'Azure':
+            file_client = self.blob_storage_client.get_file_client(object_key)
+            content_type = ContentSettings(content_type=element.mime)
+            file_client.upload_data(content, overwrite=True, content_settings=content_type)
+            element.url = file_client.url + (self.blob_access_token or '')
 
         element_dict['url'] = element.url
         element_dict['objectKey'] = object_key if 'object_key' in locals() else None
@@ -401,9 +408,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         """
         elements = await self.execute_sql(query=elements_query, parameters={})
         
-        # Initialize a dictionary to hold ThreadDict objects keyed by thread_id
         thread_dicts = {}
-        # Process threads_users to create initial ThreadDict objects
         for thread in user_threads:
             thread_id = thread['thread_id']
             thread_dicts[thread_id] = ThreadDict(
@@ -437,18 +442,18 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     type=step_feedback['step_type'],
                     threadId=thread_id,
                     parentId=step_feedback.get('step_parentid'),
-                    disableFeedback=step_feedback.get('step_disableFeedback', False),
+                    disableFeedback=step_feedback.get('step_disablefeedback', False),
                     streaming=step_feedback.get('step_streaming', False),
-                    waitForAnswer=step_feedback.get('step_waitForAnswer'),
+                    waitForAnswer=step_feedback.get('step_waitforanswer'),
                     isError=step_feedback.get('step_isError'),
                     metadata=step_feedback.get('step_metadata', {}),
                     input=step_feedback.get('step_input', '') if step_feedback['step_showinput'] else None,
                     output=step_feedback.get('step_output', ''),
-                    createdAt=step_feedback.get('step_createdAt'),
+                    createdAt=step_feedback.get('step_createdat'),
                     start=step_feedback.get('step_start'),
                     end=step_feedback.get('step_end'),
                     generation=step_feedback.get('step_generation'),
-                    showInput=step_feedback.get('step_showInput'),
+                    showInput=step_feedback.get('step_showinput'),
                     language=step_feedback.get('step_language'),
                     indent=step_feedback.get('step_indent'),
                     feedback=feedback
@@ -463,15 +468,15 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     id=element['element_id'],
                     threadId=thread_id,
                     type=element['element_type'],
-                    chainlitKey=element.get('element_chainlitKey'),
+                    chainlitKey=element.get('element_chainlitkey'),
                     url=element.get('element_url'),
-                    objectKey=element.get('element_objectKey'),
+                    objectKey=element.get('element_objectkey'),
                     name=element['element_name'],
                     display=element['element_display'],
                     size=element.get('element_size'),
                     language=element.get('element_language'),
                     page=element.get('element_page'),
-                    forId=element.get('element_forId'),
+                    forId=element.get('element_forid'),
                     mime=element.get('element_mime'),
                 )
                 thread_dicts[thread_id]['elements'].append(element_dict)   # type: ignore
