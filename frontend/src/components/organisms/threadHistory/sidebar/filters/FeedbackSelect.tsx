@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
 import { grey } from 'theme';
 
@@ -10,6 +9,8 @@ import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 import { threadsFiltersState } from 'state/threads';
 

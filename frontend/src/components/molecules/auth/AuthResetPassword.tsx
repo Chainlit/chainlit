@@ -6,6 +6,7 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
+import Translator, { useTranslation } from 'components/i18n/Translator';
 
 import { AuthTemplate } from './AuthTemplate';
 
@@ -30,6 +31,7 @@ const AuthResetPassword = ({
 }: AuthResetPasswordProps): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues: {
@@ -37,11 +39,20 @@ const AuthResetPassword = ({
       confirmPassword: ''
     },
     validationSchema: yup.object({
-      newPassword: yup.string().required('New password is a required field'),
+      newPassword: yup
+        .string()
+        .required(
+          t('components.molecules.auth.authResetPassword.newPasswordRequired')
+        ),
       confirmPassword: yup
         .string()
-        .oneOf([yup.ref('newPassword'), undefined], 'Passwords must match')
-        .required('Confirm password is a required field')
+        .oneOf(
+          [yup.ref('newPassword'), undefined],
+          t('components.molecules.auth.authResetPassword.passwordsMustMatch')
+        )
+        .required(
+          'components.molecules.auth.authResetPassword.confirmPasswordRequired'
+        )
     }),
     onSubmit: async ({ newPassword }) => {
       setLoading(true);
@@ -71,7 +82,9 @@ const AuthResetPassword = ({
       <form onSubmit={formik.handleSubmit}>
         <TextInput
           id="newPassword"
-          placeholder="New password"
+          placeholder={t(
+            'components.molecules.auth.authResetPassword.newPassword'
+          )}
           size="medium"
           value={formik.values.newPassword}
           hasError={!!formik.errors.newPassword}
@@ -87,7 +100,9 @@ const AuthResetPassword = ({
 
         <TextInput
           id="confirmPassword"
-          placeholder="Confirm password"
+          placeholder={t(
+            'components.molecules.auth.authResetPassword.confirmPassword'
+          )}
           size="medium"
           value={formik.values.confirmPassword}
           hasError={!!formik.errors.confirmPassword}
@@ -109,7 +124,7 @@ const AuthResetPassword = ({
           variant="contained"
           sx={{ marginTop: 3, width: '100%' }}
         >
-          Reset Password
+          <Translator path="components.molecules.auth.authResetPassword.resetPassword" />
         </Button>
       </form>
     </AuthTemplate>

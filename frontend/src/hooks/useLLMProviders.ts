@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { useApi } from '@chainlit/react-client';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';
