@@ -54,7 +54,7 @@ const Code = ({ children, ...props }: any) => {
   const codeChildren = props.node?.children?.[0];
   const className = codeChildren?.properties?.className?.[0];
   const match = /language-(\w+)/.exec(className || '');
-  const code = codeChildren?.children?.[0]?.value;
+  const code = codeChildren?.children?.[0]?.value.replace(/\\n/g, '\n');
 
   const showSyntaxHighlighter = match && code;
 
@@ -99,6 +99,7 @@ const Code = ({ children, ...props }: any) => {
           alignItems: 'center',
           borderTopLeftRadius: '4px',
           borderTopRightRadius: '4px',
+          color: 'text.secondary',
           background: isDarkMode ? grey[900] : grey[200]
         }}
       >
