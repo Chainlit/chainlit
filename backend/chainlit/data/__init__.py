@@ -64,7 +64,7 @@ class BaseDataLayer:
         return ""
 
     @queue_until_user_message()
-    async def create_element(self, element_dict: "ElementDict"):
+    async def create_element(self, element: "Element"):
         pass
 
     async def get_element(
