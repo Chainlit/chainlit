@@ -2,7 +2,7 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, Literal, cast
 
 import aiofiles
 from chainlit.config import config
@@ -11,13 +11,9 @@ from chainlit.logger import logger
 from chainlit.session import WebsocketSession
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User, UserDict
-from literalai import Attachment
-from literalai import Feedback as ClientFeedback
-from literalai import PageInfo, PaginatedResponse
-from literalai import Step as ClientStep
-from literalai.step import StepDict as ClientStepDict
-from literalai.thread import NumberListFilter, StringFilter, StringListFilter
-from literalai.thread import ThreadFilter as ClientThreadFilter
+from literalai import Score as LiteralScore, PageInfo, PaginatedResponse, Attachment, Step as LiteralStep
+from literalai.step import StepDict as LiteralStepDict
+from literalai.filter import threads_filters as LiteralThreadsFilters
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -56,6 +52,13 @@ class BaseDataLayer:
 
     async def create_user(self, user: "User") -> Optional["PersistedUser"]:
         pass
+
+    async def delete_feedback(
+        self,
+        feedback_id: str,
+    ) -> bool:
+        return True
+
 
     async def upsert_feedback(
         self,
@@ -98,7 +101,7 @@ class BaseDataLayer:
         self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
         return PaginatedResponse(
-            data=[], pageInfo=PageInfo(hasNextPage=False, endCursor=None)
+            data=[], pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None)
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
@@ -146,20 +149,19 @@ class ChainlitDataLayer(BaseDataLayer):
             "threadId": attachment.thread_id,
         }
 
-    def feedback_to_feedback_dict(
-        self, feedback: Optional[ClientFeedback]
+    def score_to_feedback_dict(
+        self, score: Optional[LiteralScore]
     ) -> "Optional[FeedbackDict]":
-        if not feedback:
+        if not score:
             return None
         return {
-            "id": feedback.id or "",
-            "forId": feedback.step_id or "",
-            "value": feedback.value or 0,  # type: ignore
-            "comment": feedback.comment,
-            "strategy": "BINARY",
+            "id": score.id or "",
+            "forId": score.step_id or "",
+            "value": cast(Literal[0, 1], score.value), 
+            "comment": score.comment,
         }
 
-    def step_to_step_dict(self, step: ClientStep) -> "StepDict":
+    def step_to_step_dict(self, step: LiteralStep) -> "StepDict":
         metadata = step.metadata or {}
         input = (step.input or {}).get("content") or (
             json.dumps(step.input) if step.input and step.input != {} else ""
@@ -167,12 +169,15 @@ class ChainlitDataLayer(BaseDataLayer):
         output = (step.output or {}).get("content") or (
             json.dumps(step.output) if step.output and step.output != {} else ""
         )
+        
+        user_feedback = next((s for s in step.scores if s.type == "HUMAN" and s.name == "user-feedback"), None) if step.scores else None
+        
         return {
             "createdAt": step.created_at,
             "id": step.id or "",
             "threadId": step.thread_id or "",
             "parentId": step.parent_id,
-            "feedback": self.feedback_to_feedback_dict(step.feedback),
+            "feedback": self.score_to_feedback_dict(user_feedback),
             "start": step.start_time,
             "end": step.end_time,
             "type": step.type or "undefined",
@@ -186,7 +191,6 @@ class ChainlitDataLayer(BaseDataLayer):
             "language": metadata.get("language"),
             "isError": metadata.get("isError", False),
             "waitForAnswer": metadata.get("waitForAnswer", False),
-            "feedback": self.feedback_to_feedback_dict(step.feedback),
         }
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
@@ -215,26 +219,38 @@ class ChainlitDataLayer(BaseDataLayer):
             createdAt=_user.created_at or "",
         )
 
+    async def delete_feedback(
+        self,
+        feedback_id: str,
+    ):
+        if feedback_id:
+            await self.client.api.delete_score(
+                id=feedback_id,
+            )
+            return True
+        return False
+
+
     async def upsert_feedback(
         self,
         feedback: Feedback,
     ):
         if feedback.id:
-            await self.client.api.update_feedback(
+            await self.client.api.update_score(
                 id=feedback.id,
                 update_params={
                     "comment": feedback.comment,
-                    "strategy": feedback.strategy,
                     "value": feedback.value,
                 },
             )
             return feedback.id
         else:
-            created = await self.client.api.create_feedback(
+            created = await self.client.api.create_score(
                 step_id=feedback.forId,
                 value=feedback.value,
                 comment=feedback.comment,
-                strategy=feedback.strategy,
+                name="user-feedback",
+                type="HUMAN",
             )
             return created.id or ""
 
@@ -307,7 +323,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "showInput": step_dict.get("showInput"),
         }
 
-        step: ClientStepDict = {
+        step: LiteralStepDict = {
             "createdAt": step_dict.get("createdAt"),
             "startTime": step_dict.get("start"),
             "endTime": step_dict.get("end"),
@@ -349,22 +365,26 @@ class ChainlitDataLayer(BaseDataLayer):
     async def list_threads(
         self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
-        if not filters.userIdentifier:
-            raise ValueError("userIdentifier is required")
+        if not filters.userId:
+            raise ValueError("userId is required")
 
-        client_filters = ClientThreadFilter(
-            participantsIdentifier=StringListFilter(
-                operator="in", value=[filters.userIdentifier]
-            ),
-        )
+        literal_filters: LiteralThreadsFilters = [
+            {
+                "field": "participantId",
+                "operator": "eq",
+                "value": filters.userId,  
+            }
+        ]
+        
         if filters.search:
-            client_filters.search = StringFilter(operator="ilike", value=filters.search)
-        if filters.feedback:
-            client_filters.feedbacksValue = NumberListFilter(
-                operator="in", value=[filters.feedback]
-            )
+            literal_filters.append({"field": "stepOutput", "operator": "ilike", "value": filters.search, "path": "content"})
+
+
+        if filters.feedback is not None:
+            literal_filters.append({"field": "scoreValue", "operator": "eq", "value": filters.feedback, "path": "user-feedback"})
+
         return await self.client.api.list_threads(
-            first=pagination.first, after=pagination.cursor, filters=client_filters
+            first=pagination.first, after=pagination.cursor, filters=literal_filters, order_by={"column": "createdAt", "direction": "DESC"}
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
