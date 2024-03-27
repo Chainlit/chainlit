@@ -54,7 +54,7 @@ const Code = ({ children, ...props }: any) => {
   const codeChildren = props.node?.children?.[0];
   const className = codeChildren?.properties?.className?.[0];
   const match = /language-(\w+)/.exec(className || '');
-  const code = codeChildren?.children?.[0]?.value.replace(/\\n/g, '\n');
+  const code = codeChildren?.children?.[0]?.value;
 
   const showSyntaxHighlighter = match && code;
 
