@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { firstUserInteraction } from '@chainlit/react-client';
+import { firstUserInteraction, useChatSession } from '@chainlit/react-client';
 
 import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
@@ -31,6 +31,7 @@ const FeedbackButtons = ({ message }: Props) => {
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
   const firstInteraction = useRecoilValue(firstUserInteraction);
+  const { idToResume } = useChatSession();
 
   const [feedback, setFeedback] = useState(message.feedback?.value);
   const [comment, setComment] = useState(message.feedback?.comment);
@@ -75,7 +76,10 @@ const FeedbackButtons = ({ message }: Props) => {
     }
   };
 
-  const disabled = !!message.streaming || !firstInteraction;
+  const isPersisted = firstInteraction || idToResume;
+  const isStreaming = !!message.streaming;
+
+  const disabled = isStreaming || !isPersisted;
 
   const buttons = useMemo(() => {
     const iconSx = {
