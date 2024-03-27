@@ -6,8 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { Attachment } from '@chainlit/react-components';
-
+import { Attachment } from 'components/atoms/Attachment';
 import CircularProgressIconButton from 'components/atoms/buttons/progressIconButton';
 import { Translator } from 'components/i18n';
 

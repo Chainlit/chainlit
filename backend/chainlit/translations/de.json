@@ -34,6 +34,7 @@
                 "confirm": "Best\u00e4tigen"
             },
             "settingsModal": {
+                "settings": "Einstellungen",
                 "expandMessages": "Nachrichten ausklappen",
                 "hideChainOfThought": "Zwischenschritte verbergen",
                 "darkMode": "Dunkelmodus"
@@ -43,6 +44,7 @@
             "chat": {
                 "history": {
                     "index": {
+                        "showHistory": "Zeige Chatverlauf",
                         "lastInputs": "Letzte Eingaben",
                         "noInputs": "Leer...",
                         "loading": "L\u00e4dt..."

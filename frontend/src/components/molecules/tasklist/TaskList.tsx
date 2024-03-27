@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
+import { grey } from 'theme';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
 import { useApi, useChatData } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components/theme';
 
 import { Translator } from 'components/i18n';
 

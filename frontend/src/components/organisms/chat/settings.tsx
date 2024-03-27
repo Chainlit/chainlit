@@ -11,13 +11,9 @@ import {
 } from '@mui/material';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
-import {
-  AccentButton,
-  FormInput,
-  RegularButton,
-  TFormInputValue
-} from '@chainlit/react-components';
 
+import { AccentButton, RegularButton } from 'components/atoms/buttons';
+import { FormInput, TFormInputValue } from 'components/atoms/inputs';
 import { Translator } from 'components/i18n';
 
 import { chatSettingsOpenState } from 'state/project';

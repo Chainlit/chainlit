@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
-import { AuthLogin } from '@chainlit/react-components';
-
 import { Logo } from 'components/atoms/logo';
+import { AuthLogin } from 'components/molecules/auth';
 
 import { useQuery } from 'hooks/query';
 

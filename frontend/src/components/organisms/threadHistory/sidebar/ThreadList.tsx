@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import map from 'lodash/map';
 import size from 'lodash/size';
 import { Link, useNavigate } from 'react-router-dom';
+import { grey } from 'theme';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -19,7 +20,6 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components';
 
 import { Translator } from 'components/i18n';
 
@@ -45,25 +45,29 @@ const ThreadList = ({
   const { messages } = useChatMessages();
   const navigate = useNavigate();
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
-    return [1, 2, 3].map((index) => (
-      <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
-        <Skeleton width={100} />
-        {[1, 2].map((childIndex) => (
-          <Stack
-            key={`threads-skeleton-${index}-${childIndex}`}
-            sx={{
-              py: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 1.5
-            }}
-          >
-            <Skeleton width={30} />
-            <Skeleton width={'100%'} />
-          </Stack>
+    return (
+      <>
+        {[1, 2, 3].map((index) => (
+          <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
+            <Skeleton width={100} />
+            {[1, 2].map((childIndex) => (
+              <Stack
+                key={`threads-skeleton-${index}-${childIndex}`}
+                sx={{
+                  py: 2,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 1.5
+                }}
+              >
+                <Skeleton width={30} />
+                <Skeleton width={'100%'} />
+              </Stack>
+            ))}
+          </Box>
         ))}
-      </Box>
-    ));
+      </>
+    );
   }
 
   if (error) {

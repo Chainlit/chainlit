@@ -1,6 +1,7 @@
 import size from 'lodash/size';
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { grey } from 'theme';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
 
@@ -9,12 +10,11 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import {
-  InputStateHandler,
-  Markdown,
-  grey,
-  useIsDarkMode
-} from '@chainlit/react-components';
+
+import { InputStateHandler } from 'components/atoms/inputs';
+import { Markdown } from 'components/molecules/Markdown';
+
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { projectSettingsState } from 'state/project';
 

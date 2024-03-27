@@ -1,10 +1,10 @@
+import { useUpload } from 'hooks';
 import { useRecoilValue } from 'recoil';
 
 import AttachFile from '@mui/icons-material/AttachFile';
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { FileSpec } from '@chainlit/react-client';
-import { useUpload } from '@chainlit/react-components';
 
 import { Translator } from 'components/i18n';
 

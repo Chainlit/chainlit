@@ -21,7 +21,7 @@ export default function ResumeButton({ threadId }: Props) {
   const { clear, setIdToResume } = useChatInteract();
 
   if (!threadId || !pSettings?.threadResumable) {
-    return;
+    return null;
   }
 
   const onClick = () => {

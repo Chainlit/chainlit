@@ -1,3 +1,4 @@
+import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -12,8 +13,8 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
 
+import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
 import ChatProfiles from 'components/molecules/chatProfiles';

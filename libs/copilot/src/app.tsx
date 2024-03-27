@@ -15,8 +15,8 @@ import {
   projectSettingsState
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
+import { makeTheme } from '@chainlit/app/src/theme';
 import { useAuth } from '@chainlit/react-client';
-import { makeTheme } from '@chainlit/react-components/theme';
 
 interface Props {
   config: IWidgetConfig;

@@ -14,8 +14,7 @@ import {
   ListSubheader
 } from '@mui/material';
 
-import { SwitchInput } from '@chainlit/react-components';
-
+import { SwitchInput } from 'components/atoms/inputs/SwitchInput';
 import { Translator } from 'components/i18n';
 
 import { projectSettingsState } from 'state/project';
@@ -39,7 +38,11 @@ export default function SettingsModal() {
       <DialogContent>
         <List
           sx={{ width: '100%', maxWidth: 360 }}
-          subheader={<ListSubheader>Settings</ListSubheader>}
+          subheader={
+            <ListSubheader>
+              <Translator path="components.molecules.settingsModal.settings" />
+            </ListSubheader>
+          }
         >
           <ListItem sx={{ display: 'flex', gap: 2 }}>
             <ListItemIcon>
