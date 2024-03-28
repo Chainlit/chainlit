@@ -743,6 +743,11 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     return FileResponse(logo_path, media_type=media_type)
 
 
+@app.head('/')
+def status_check():
+    return {"message": "Site is operational"}
+
+
 def register_wildcard_route_handler():
     @app.get("/{path:path}")
     async def serve(request: Request, path: str):

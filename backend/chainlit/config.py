@@ -1,5 +1,6 @@
 import json
 import os
+import site
 import sys
 from importlib import util
 from pathlib import Path
@@ -112,7 +113,7 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
-# Specify a custom build directory for the frontend. 
+# Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
@@ -340,12 +341,16 @@ def load_module(target: str, force_refresh: bool = False):
     sys.path.insert(0, target_dir)
 
     if force_refresh:
+        # Get current site packages dirs
+        site_package_dirs = site.getsitepackages()
+
         # Clear the modules related to the app from sys.modules
         for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
                 and module.__file__.startswith(target_dir)
+                and not any(module.__file__.startswith(p) for p in site_package_dirs)
             ):
                 sys.modules.pop(module_name, None)
 
