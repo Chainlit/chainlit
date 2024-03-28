@@ -2,7 +2,7 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, Protocol
 
 import aiofiles
 from chainlit.config import config
