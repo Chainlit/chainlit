@@ -419,6 +419,11 @@ class ChainlitDataLayer(BaseDataLayer):
             tags=tags,
         )
 
+class BaseStorageClient(Protocol):
+    """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
+    
+    async def upload_file(self, object_key: str, data: bytes, mime: Optional[str] = 'application/octet-stream', overwrite: Optional[bool] = True) -> Dict:
+        pass
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
     server = os.environ.get("LITERAL_SERVER")
