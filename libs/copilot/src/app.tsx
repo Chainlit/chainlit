@@ -66,6 +66,14 @@ export default function App({ config }: Props) {
           );
           setTheme(_theme);
           setProjectSettings(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      apiClient
+        .get(`/project/translations?language=${languageInUse}`, accessToken)
+        .then((res) => res.json())
+        .then((data) => {
           i18n.addResourceBundle(
             languageInUse,
             'translation',
