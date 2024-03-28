@@ -11,22 +11,21 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from azure.storage.filedatalake import FileSystemClient, ContentSettings  # type: ignore
-from literalai import PageInfo, PaginatedResponse
 from chainlit.context import context
 from chainlit.logger import logger
-from chainlit.data import BaseDataLayer, queue_until_user_message
+from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
 from chainlit.user import User, PersistedUser, UserDict
 from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, ThreadFilter
 from chainlit.step import StepDict
 from chainlit.element import ElementDict
+from literalai import PageInfo, PaginatedResponse
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
-    def __init__(self, conninfo, ssl_require=False, user_thread_limit=100):
+    def __init__(self, conninfo: str, ssl_require: bool = False, storage_provider: BaseStorageClient = None, user_thread_limit: int = 1000):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         ssl_args = {}
@@ -38,18 +37,13 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ssl_args['ssl'] = ssl_context
         self.engine = create_async_engine(self._conninfo, connect_args=ssl_args)
         self.async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
+        if storage_provider:
+            self.storage_provider = storage_provider
+            logger.info("SQLAlchemyDataLayer storage client initialized")
+        else:
+            logger.warn("SQLAlchemyDataLayer storage client is not initialized and elements will not be persisted!")
         self.thread_update_lock = asyncio.Lock()
         self.step_update_lock = asyncio.Lock()
-
-    async def add_blob_storage_client(self, blob_storage_client, access_token: Optional[str]) -> None:
-        if isinstance(blob_storage_client, FileSystemClient):
-            self.blob_storage_client = blob_storage_client
-            self.blob_access_token = access_token
-            self.blob_storage_provider = 'Azure'
-            logger.info("Azure Data Lake Storage client initialized")
-        # Add other checks here for AWS/Google/etc.
-        else:
-            raise ValueError("The provided blob_storage is not recognized")
 
     ###### SQL Helpers ######
     async def execute_sql(self, query: str, parameters: dict) -> Union[List[Dict[str, Any]], int, None]:
@@ -115,6 +109,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             query = """INSERT INTO users ("id", "identifier", "createdAt", "metadata") VALUES (:id, :identifier, :createdAt, :metadata)"""
             await self.execute_sql(query=query, parameters=user_dict)
         else: # update the user
+            logger.info("SQLAlchemy: update user metadata")
             query = """UPDATE users SET "metadata" = :metadata WHERE "identifier" = :identifier"""
             await self.execute_sql(query=query, parameters=user_dict) # We want to update the metadata
         return await self.get_user(user.identifier)
@@ -274,18 +269,19 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: 'Element'):
         logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
+        if not self.storage_provider:
+            logger.warn(f"SQLAlchemy: create_element error. No blob_storage_client is configured!")
+            return
+        if not element.for_id:
+            return
+        
         async with self.thread_update_lock:
             pass
         async with self.step_update_lock:
             pass
-        if not self.blob_storage_client:
-            raise ValueError("No blob_storage_client is configured")
-        if not element.for_id:
-            return
-        element_dict = element.to_dict()
+
         content: Optional[Union[bytes, str]] = None
-        
-        # if not element.url:
+
         if element.path:
             async with aiofiles.open(element.path, "rb") as f:
                 content = await f.read()
@@ -299,23 +295,23 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         elif element.content:
             content = element.content
         else:
-            raise ValueError("Either path or content must be provided")
+            raise ValueError("Element url, path or content must be provided")
 
         context_user = context.session.user
         if not context_user or not getattr(context_user, 'id', None):
             raise ValueError("No valid user in context")
 
         user_folder = getattr(context_user, 'id', 'unknown')
-        object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
+        file_object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
 
-        if self.blob_storage_provider == 'Azure':
-            file_client = self.blob_storage_client.get_file_client(object_key)
-            content_type = ContentSettings(content_type=element.mime)
-            file_client.upload_data(content, overwrite=True, content_settings=content_type)
-            element.url = file_client.url + (self.blob_access_token or '')
+        uploaded_file = await self.storage_provider.upload_file(object_key=file_object_key, data=content, mime=element.mime, overwrite=True)
+        if not uploaded_file:
+            raise ValueError("SQLAlchemy Error: create_element, Failed to persist data in storage_provider")
 
-        element_dict['url'] = element.url
-        element_dict['objectKey'] = object_key if 'object_key' in locals() else None
+        element_dict: ElementDict = element.to_dict()
+
+        element_dict['url'] = uploaded_file.get('url')
+        element_dict['objectKey'] = uploaded_file.get('object_key')
         element_dict_cleaned = {k: v for k, v in element_dict.items() if v is not None}
 
         columns = ', '.join(f'"{column}"' for column in element_dict_cleaned.keys())
