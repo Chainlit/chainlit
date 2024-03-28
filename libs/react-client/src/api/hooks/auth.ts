@@ -13,6 +13,7 @@ export const useAuth = (apiClient: ChainlitAPI) => {
     requireLogin: boolean;
     passwordAuth: boolean;
     headerAuth: boolean;
+    postAuth: boolean;
     oauthProviders: string[];
   }>(apiClient, '/auth/config');
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);

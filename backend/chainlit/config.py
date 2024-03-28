@@ -12,6 +12,7 @@ from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
+from starlette.requests import Request as StarletteRequest
 
 if TYPE_CHECKING:
     from chainlit.action import Action
@@ -234,6 +235,7 @@ class CodeSettings:
     # Bunch of callbacks defined by the developer
     password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
     header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
+    post_auth_callback: Optional[Callable[[StarletteRequest], Optional["User"]]] = None
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
     ] = None
@@ -245,9 +247,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()

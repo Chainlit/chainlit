@@ -144,6 +144,21 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async postAuth() {
+    const formDataStored = window.sessionStorage.getItem('formData') ?? '{}';
+    const formDataGlobal = (window as any).formData ?? {};
+    const formData = Object.keys(formDataGlobal).length
+      ? formDataGlobal
+      : JSON.parse(formDataStored);
+
+    if (!formData) {
+      console.error('WARNING: cannot find valid formData');
+    }
+    window.sessionStorage.setItem('formData', '');
+    const res = await this.post(`/auth/post`, { formData });
+    return res.json();
+  }
+
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
     return res.json();

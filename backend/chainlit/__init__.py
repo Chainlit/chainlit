@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 from fastapi import Request, Response
 from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
+from starlette.requests import Request as StarletteRequest
 
 if TYPE_CHECKING:
     from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
@@ -100,6 +101,26 @@ def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
     """
 
     config.code.header_auth_callback = wrap_user_function(func)
+    return func
+
+
+@trace
+def post_auth_callback(func: Callable[[StarletteRequest], Optional[User]]) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via posting form data
+
+    Args:
+        func (Callable[[StarletteRequest], Optional[User]]): The authentication callback to execute.
+
+    Example:
+        @cl.post_auth_callback
+        async def post_auth_callback(request: Request) -> Optional[User]:
+
+    Returns:
+        Callable[[StarletteRequest], Optional[User]]: The decorated authentication callback.
+    """
+
+    config.code.post_auth_callback = wrap_user_function(func)
     return func
 
 
@@ -355,6 +376,7 @@ __all__ = [
     "on_settings_update",
     "password_auth_callback",
     "header_auth_callback",
+    "post_auth_callback",
     "sleep",
     "run_sync",
     "make_async",
