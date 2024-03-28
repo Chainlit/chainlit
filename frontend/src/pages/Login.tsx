@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Logo } from 'components/atoms/logo';
+import { Translator } from 'components/i18n';
 import { AuthLogin } from 'components/molecules/auth';
 
 import { useQuery } from 'hooks/query';
@@ -67,7 +68,7 @@ export default function Login() {
 
   return (
     <AuthLogin
-      title="Login to access the app."
+      title={<Translator path="components.molecules.auth.authLogin.title" />}
       error={error}
       callbackUrl="/"
       providers={config?.oauthProviders || []}

@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -15,6 +14,8 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 import { apiClientState } from 'state/apiClient';
 import { IProjectSettings } from 'state/project';

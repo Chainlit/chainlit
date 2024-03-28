@@ -1,11 +1,11 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import 'regenerator-runtime';
 
 import TuneIcon from '@mui/icons-material/Tune';
 import { Box, IconButton, Stack, TextField } from '@mui/material';
 
+import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { Attachments } from '@chainlit/app/src/components/molecules/attachments';
 import { SubmitButton } from '@chainlit/app/src/components/organisms/chat/inputBox/SubmitButton';
 import UploadButton from '@chainlit/app/src/components/organisms/chat/inputBox/UploadButton';

@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next';
-
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 interface TriggerButtonProps {
   onClick: () => void;

@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 interface AuthTemplateProps {
   children: React.ReactNode;
   renderLogo?: React.ReactElement;
-  title?: string;
+  title?: React.ReactNode | string;
 }
 
 const AuthTemplate = ({

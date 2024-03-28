@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
+import Translator, { useTranslation } from 'components/i18n/Translator';
 
 import { AuthTemplate } from './AuthTemplate';
 
@@ -24,13 +25,19 @@ const AuthForgotPassword = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues: {
       email: ''
     },
     validationSchema: yup.object({
-      email: yup.string().email().required()
+      email: yup
+        .string()
+        .email()
+        .required(
+          t('components.molecules.auth.authForgotPassword.emailRequired')
+        )
     }),
     onSubmit: async ({ email }) => {
       setLoading(true);
@@ -71,8 +78,10 @@ const AuthForgotPassword = ({
       }
       title={
         showConfirmation
-          ? `Please check the email address ${formik.values.email} for instructions to reset your password.`
-          : 'Enter your email address and we will send you instructions to reset your password.'
+          ? t('components.molecules.auth.authForgotPassword.emailSent', {
+              email: formik.values.email
+            })
+          : t('components.molecules.auth.authForgotPassword.enterEmail')
       }
     >
       {error ? (
@@ -87,13 +96,15 @@ const AuthForgotPassword = ({
           variant="outlined"
           sx={{ marginTop: 1 }}
         >
-          Resend email
+          <Translator path="components.molecules.auth.authForgotPassword.resendEmail" />
         </Button>
       ) : (
         <form onSubmit={formik.handleSubmit}>
           <TextInput
             id="email"
-            placeholder="Email adress"
+            placeholder={t(
+              'components.molecules.auth.authForgotPassword.email'
+            )}
             size="medium"
             value={formik.values.email}
             hasError={!!formik.errors.email}
@@ -110,12 +121,12 @@ const AuthForgotPassword = ({
             variant="contained"
             sx={{ marginTop: 1, width: '100%' }}
           >
-            Continue
+            <Translator path="components.molecules.auth.authForgotPassword.continue" />
           </Button>
         </form>
       )}
       <Link component="button" marginTop={1} onClick={onGoBack}>
-        Go Back
+        <Translator path="components.molecules.auth.authForgotPassword.goBack" />
       </Link>
     </AuthTemplate>
   );

@@ -9,6 +9,7 @@ import { Auth0 } from 'components/atoms/icons/Auth0';
 import { Cognito } from 'components/atoms/icons/Cognito';
 import { Descope } from 'components/atoms/icons/Descope';
 import { Okta } from 'components/atoms/icons/Okta';
+import { useTranslation } from 'components/i18n/Translator';
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -63,6 +64,7 @@ const ProviderButton = ({
   onClick,
   isSignIn
 }: ProviderButtonProps): JSX.Element => {
+  const { t } = useTranslation();
   return (
     <Button
       variant="outlined"
@@ -78,7 +80,13 @@ const ProviderButton = ({
         justifyContent: 'flex-start'
       }}
     >
-      {`${isSignIn ? 'Continue' : 'Sign up'} with ${getProviderName(provider)}`}
+      {isSignIn
+        ? t('components.molecules.auth.providerButton.continue', {
+            provider: getProviderName(provider)
+          })
+        : t('components.molecules.auth.providerButton.signup', {
+            provider: getProviderName(provider)
+          })}
     </Button>
   );
 };

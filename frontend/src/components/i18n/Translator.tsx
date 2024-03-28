@@ -1,13 +1,40 @@
-import { useTranslation } from 'react-i18next';
+import { TOptions } from 'i18next';
+import { $Dictionary } from 'i18next/typescript/helpers';
+import { useTranslation as usei18nextTranslation } from 'react-i18next';
+
+import { Skeleton } from '@mui/material';
+
+type options = TOptions<$Dictionary>;
 
 type TranslatorProps = {
-  path: string;
+  path: string | string[];
+  options?: options;
 };
 
-const Translator = ({ path }: TranslatorProps) => {
-  const { t } = useTranslation();
+const Translator = ({ path, options }: TranslatorProps) => {
+  const { t, i18n } = usei18nextTranslation();
 
-  return <div>{t(path)}</div>;
+  if (!i18n.exists(path, options)) {
+    return <Skeleton variant="text" width={20} />;
+  }
+
+  return <span>{t(path, options)}</span>;
+};
+
+export const useTranslation = () => {
+  const { t, ready, i18n } = usei18nextTranslation();
+
+  return {
+    t: (path: string | string[], options?: options) => {
+      if (!i18n.exists(path, options)) {
+        return '...';
+      }
+
+      return t(path, options);
+    },
+    ready,
+    i18n
+  };
 };
 
 export default Translator;

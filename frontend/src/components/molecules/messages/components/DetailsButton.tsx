@@ -6,6 +6,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { GreyButton } from 'components/atoms/buttons/GreyButton';
+import { Translator } from 'components/i18n';
 
 import type { IStep } from 'client-types/';
 
@@ -42,11 +43,29 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
     ? message.steps!.filter((m) => !!m.output || m.steps?.length).length
     : 0;
 
-  const text = loading
-    ? tool
-      ? `Using ${tool}`
-      : 'Running'
-    : `Took ${stepCount} step${stepCount <= 1 ? '' : 's'}`;
+  const text = (
+    <span>
+      {loading ? (
+        tool ? (
+          <>
+            <Translator path="components.molecules.detailsButton.using" />{' '}
+            {tool}
+          </>
+        ) : (
+          <Translator path="components.molecules.detailsButton.running" />
+        )
+      ) : (
+        <>
+          <Translator
+            path="components.molecules.detailsButton.took"
+            options={{
+              count: stepCount
+            }}
+          />
+        </>
+      )}
+    </span>
+  );
 
   let id = '';
   if (tool) {
