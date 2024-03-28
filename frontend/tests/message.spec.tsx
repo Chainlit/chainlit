@@ -16,8 +16,8 @@ const i18nConfig = {
   defaultNS: 'translation'
 };
 
-beforeAll(() => {
-  i18n.use(initReactI18next).init(i18nConfig);
+beforeAll(async () => {
+  await i18n.use(initReactI18next).init(i18nConfig);
   i18n.addResourceBundle('en-US', 'translation', json);
 });
 
