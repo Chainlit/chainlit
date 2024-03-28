@@ -2,7 +2,7 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, Protocol
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, Protocol, Any
 
 import aiofiles
 from chainlit.config import config
@@ -422,7 +422,7 @@ class ChainlitDataLayer(BaseDataLayer):
 class BaseStorageClient(Protocol):
     """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
     
-    async def upload_file(self, object_key: str, data: bytes, mime: Optional[str] = 'application/octet-stream', overwrite: Optional[bool] = True) -> Dict:
+    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', overwrite: bool = True) -> Dict[str, Any]:
         pass
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
