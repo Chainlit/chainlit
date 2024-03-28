@@ -1,0 +1,158 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "Настройки",
+            "settingsKey": "S",
+            "APIKeys": "Ключи API",
+            "logout": "Выйти"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "Новый чат"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ Список задач",
+          "loading": "Загрузка...",
+          "error": "Произошла ошибка"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "Отменить загрузку",
+        "removeAttachment": "Удалить вложение"
+      },
+      "newChatDialog": {
+        "createNewChat": "Создать новый чат?",
+        "clearChat": "Это удалит текущие сообщения и начнет новый чат.",
+        "cancel": "Отмена",
+        "confirm": "Подтвердить"
+      },
+      "settingsModal": {
+        "expandMessages": "Развернуть сообщения",
+        "hideChainOfThought": "Скрыть цепочку мыслей",
+        "darkMode": "Темный режим"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "Последние вводы",
+            "noInputs": "Пусто...",
+            "loading": "Загрузка..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "Введите ваше сообщение здесь..."
+          },
+          "speechButton": {
+            "start": "Начать запись",
+            "stop": "Остановить запись"
+          },
+          "SubmitButton": {
+            "sendMessage": "Отправить сообщение",
+            "stopTask": "Остановить задачу"
+          },
+          "UploadButton": {
+            "attachFiles": "Прикрепить файлы"
+          },
+          "waterMark": {
+            "text": "Построено с помощью"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "Выполняется",
+            "executedSuccessfully": "успешно выполнено",
+            "failed": "не удалось",
+            "feedbackUpdated": "Обновлен обратный отклик",
+            "updating": "Обновление"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "Перетащите ваши файлы сюда"
+        },
+        "index": {
+          "failedToUpload": "Не удалось загрузить",
+          "cancelledUploadOf": "Отменено загрузка",
+          "couldNotReachServer": "Не удалось достичь сервера"
+        },
+        "settings": {
+          "settingsPanel": "Панель настроек",
+          "reset": "Сброс",
+          "cancel": "Отмена",
+          "confirm": "Подтвердить"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "Обратная связь: Все",
+              "feedbackPositive": "Обратная связь: Положительная",
+              "feedbackNegative": "Обратная связь: Отрицательная"
+            },
+            "SearchBar": {
+              "search": "Поиск"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "Это удалит ветку, а также ее сообщения и элементы.",
+            "cancel": "Отмена",
+            "confirm": "Подтвердить",
+            "deletingChat": "Удаление чата",
+            "chatDeleted": "Чат удален",
+            "deleteThreadTitle": "Удалить обсуждение?"
+          },
+          "index": {
+            "pastChats": "Прошлые чаты"
+          },
+          "ThreadList": {
+            "empty": "Пусто..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "Закрыть боковую панель",
+            "openSidebar": "Открыть боковую панель"
+          }
+        },
+        "Thread": {
+          "backToChat": "Вернуться к чату",
+          "chatCreatedOn": "Этот чат был создан"
+        }
+      },
+      "header": {
+        "chat": "Чат",
+        "readme": "Readme"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "Не удалось получить провайдеров:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "Успешно сохранено",
+      "requiredApiKeys": "Требуемые ключи API",
+      "requiredApiKeysInfo": "Для использования этого приложения требуются следующие ключи API. Ключи хранятся в локальном хранилище вашего устройства."
+    },
+    "Login": {
+      "authTitle": "Войдите, чтобы получить доступ к приложению."
+    },
+    "Page": {
+      "notPartOfProject": "Вы не являетесь частью этого проекта."
+    },
+    "ResumeButton": {
+      "resumeChat": "Возобновить чат"
+    }
+  }
+}

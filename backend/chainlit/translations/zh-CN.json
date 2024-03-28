@@ -1,0 +1,158 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "设置",
+            "settingsKey": "S",
+            "APIKeys": "API密钥",
+            "logout": "注销"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "新聊天"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ 任务列表",
+          "loading": "加载中...",
+          "error": "发生错误"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "取消上传",
+        "removeAttachment": "移除附件"
+      },
+      "newChatDialog": {
+        "createNewChat": "创建新聊天？",
+        "clearChat": "这将清除当前的消息并开始新的聊天。",
+        "cancel": "取消",
+        "confirm": "确认"
+      },
+      "settingsModal": {
+        "expandMessages": "展开消息",
+        "hideChainOfThought": "隐藏思路链",
+        "darkMode": "深色模式"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "最后的输入",
+            "noInputs": "如此空...",
+            "loading": "加载中..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "在这里输入您的消息..."
+          },
+          "speechButton": {
+            "start": "开始录音",
+            "stop": "停止录音"
+          },
+          "SubmitButton": {
+            "sendMessage": "发送消息",
+            "stopTask": "停止任务"
+          },
+          "UploadButton": {
+            "attachFiles": "附加文件"
+          },
+          "waterMark": {
+            "text": "构建于"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "运行中",
+            "executedSuccessfully": "成功执行",
+            "failed": "失败",
+            "feedbackUpdated": "反馈已更新",
+            "updating": "更新中"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "将文件拖到这里"
+        },
+        "index": {
+          "failedToUpload": "上传失败",
+          "cancelledUploadOf": "取消上传",
+          "couldNotReachServer": "无法连接服务器"
+        },
+        "settings": {
+          "settingsPanel": "设置面板",
+          "reset": "重置",
+          "cancel": "取消",
+          "confirm": "确认"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "反馈：全部",
+              "feedbackPositive": "反馈：积极",
+              "feedbackNegative": "反馈：消极"
+            },
+            "SearchBar": {
+              "search": "搜索"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "这将删除线程以及其消息和元素。",
+            "cancel": "取消",
+            "confirm": "确认",
+            "deletingChat": "正在删除聊天",
+            "chatDeleted": "聊天已删除",
+            "deleteThreadTitle": "刪除話題？"
+          },
+          "index": {
+            "pastChats": "过去的聊天"
+          },
+          "ThreadList": {
+            "empty": "空..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "关闭侧边栏",
+            "openSidebar": "打开侧边栏"
+          }
+        },
+        "Thread": {
+          "backToChat": "返回聊天",
+          "chatCreatedOn": "此聊天创建于"
+        }
+      },
+      "header": {
+        "chat": "聊天",
+        "readme": "自述"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "获取提供者失败："
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "保存成功",
+      "requiredApiKeys": "所需的API密钥",
+      "requiredApiKeysInfo": "要使用此应用程序，需要以下API密钥。密钥存储在您设备的本地存储中。"
+    },
+    "Login": {
+      "authTitle": "登录以访问应用程序。"
+    },
+    "Page": {
+      "notPartOfProject": "您不是此项目的成员。"
+    },
+    "ResumeButton": {
+      "resumeChat": "恢复聊天"
+    }
+  }
+}

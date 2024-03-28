@@ -1,0 +1,158 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "الإعدادات",
+            "settingsKey": "S",
+            "APIKeys": "مفاتيح API",
+            "logout": "تسجيل الخروج"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "دردشة جديدة"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ قائمة المهام",
+          "loading": "جار التحميل...",
+          "error": "حدث خطأ"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "إلغاء التحميل",
+        "removeAttachment": "إزالة المرفق"
+      },
+      "newChatDialog": {
+        "createNewChat": "إنشاء دردشة جديدة؟",
+        "clearChat": "سيؤدي هذا إلى مسح الرسائل الحالية وبدء دردشة جديدة.",
+        "cancel": "إلغاء",
+        "confirm": "تأكيد"
+      },
+      "settingsModal": {
+        "expandMessages": "توسيع الرسائل",
+        "hideChainOfThought": "إخفاء سلسلة الأفكار",
+        "darkMode": "الوضع الداكن"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "آخر الإدخالات",
+            "noInputs": "كالفارغة...",
+            "loading": "جار التحميل..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "اكتب رسالتك هنا..."
+          },
+          "speechButton": {
+            "start": "بدء التسجيل",
+            "stop": "إيقاف التسجيل"
+          },
+          "SubmitButton": {
+            "sendMessage": "إرسال رسالة",
+            "stopTask": "إيقاف المهمة"
+          },
+          "UploadButton": {
+            "attachFiles": "إرفاق ملفات"
+          },
+          "waterMark": {
+            "text": "بنيت بواسطة"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "جار التشغيل",
+            "executedSuccessfully": "تم التنفيذ بنجاح",
+            "failed": "فشل",
+            "feedbackUpdated": "تم تحديث التعليق",
+            "updating": "جار التحديث"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "أسقط ملفاتك هنا"
+        },
+        "index": {
+          "failedToUpload": "فشل في التحميل",
+          "cancelledUploadOf": "تم إلغاء التحميل لـ",
+          "couldNotReachServer": "تعذر الوصول إلى الخادم"
+        },
+        "settings": {
+          "settingsPanel": "لوحة الإعدادات",
+          "reset": "إعادة تعيين",
+          "cancel": "إلغاء",
+          "confirm": "تأكيد"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "التعليقات: الكل",
+              "feedbackPositive": "التعليقات: إيجابية",
+              "feedbackNegative": "التعليقات: سلبية"
+            },
+            "SearchBar": {
+              "search": "البحث"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "سيتم حذف المحادثة ورسائلها وعناصرها.",
+            "cancel": "إلغاء",
+            "confirm": "تأكيد",
+            "deletingChat": "جار حذف المحادثة",
+            "chatDeleted": "تم حذف المحادثة",
+            "deleteThreadTitle": "حذف موضوع؟"
+          },
+          "index": {
+            "pastChats": "المحادثات السابقة"
+          },
+          "ThreadList": {
+            "empty": "فارغ..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "إغلاق الشريط الجانبي",
+            "openSidebar": "فتح الشريط الجانبي"
+          }
+        },
+        "Thread": {
+          "backToChat": "العودة إلى المحادثة",
+          "chatCreatedOn": "تم إنشاء هذه المحادثة في"
+        }
+      },
+      "header": {
+        "chat": "الدردشة",
+        "readme": "ملف التعليمات"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "فشل في جلب مزودي الخدمة:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "تم الحفظ بنجاح",
+      "requiredApiKeys": "المفاتيح الAPI المطلوبة",
+      "requiredApiKeysInfo": "لاستخدام هذا التطبيق، تحتاج إلى المفاتيح الAPI التالية. تتم تخزين المفاتيح على تخزين الجهاز المحلي."
+    },
+    "Login": {
+      "authTitle": "تسجيل الدخول للوصول إلى التطبيق."
+    },
+    "Page": {
+      "notPartOfProject": "أنت لست جزءًا من هذا المشروع."
+    },
+    "ResumeButton": {
+      "resumeChat": "استئناف الدردشة"
+    }
+  }
+}

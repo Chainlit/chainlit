@@ -66,7 +66,7 @@
             "attachFiles": "Anexar arquivos"
           },
           "waterMark": {
-            "text": "Construído com"
+            "text": "Feito com"
           }
         },
         "Messages": {
@@ -84,8 +84,7 @@
         "index": {
           "failedToUpload": "Falha ao enviar",
           "cancelledUploadOf": "Envio cancelado de",
-          "couldNotReachServer": "Não foi possível conectar ao servidor",
-          "continuingChat": "Continuando o chat anterior"
+          "couldNotReachServer": "Não foi possível conectar ao servidor"
         },
         "settings": {
           "settingsPanel": "Painel de Configurações",
@@ -111,7 +110,8 @@
             "cancel": "Cancelar",
             "confirm": "Confirmar",
             "deletingChat": "Deletando conversa",
-            "chatDeleted": "Conversa deletada"
+            "chatDeleted": "Conversa deletada",
+            "deleteThreadTitle": "Deletar Thread?"
           },
           "index": {
             "pastChats": "Conversas Anteriores"
@@ -133,25 +133,28 @@
         "chat": "Conversa",
         "readme": "Leia-me"
       }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "Falha ao buscar provedores:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "Salvo com sucesso",
+      "requiredApiKeys": "Chaves de API necessárias",
+      "requiredApiKeysInfo": "Para usar este aplicativo, as seguintes chaves de API são necessárias. As chaves são armazenadas localmente em seu dispositivo."
     },
-    "hooks": {
-      "useLLMProviders": {
-        "failedToFetchProviders": "Falha ao buscar provedores:"
-      }
+    "Login": {
+      "authTitle": "Faça login para acessar o aplicativo."
     },
-    "pages": {
-      "Design": {},
-      "Env": {
-        "savedSuccessfully": "Salvo com sucesso",
-        "requiredApiKeys": "Chaves de API necessárias",
-        "requiredApiKeysInfo": "Para usar este aplicativo, as seguintes chaves de API são necessárias. As chaves são armazenadas localmente em seu dispositivo."
-      },
-      "Page": {
-        "notPartOfProject": "Você não faz parte deste projeto."
-      },
-      "ResumeButton": {
-        "resumeChat": "Continuar Conversa"
-      }
+    "Page": {
+      "notPartOfProject": "Você não faz parte deste projeto."
+    },
+    "ResumeButton": {
+      "resumeChat": "Continuar Conversa"
     }
   }
 }

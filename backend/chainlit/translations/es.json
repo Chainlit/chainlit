@@ -1,0 +1,158 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "Configuración",
+            "settingsKey": "S",
+            "APIKeys": "Claves de API",
+            "logout": "Cerrar sesión"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "Nuevo Chat"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "🗒️ Lista de Tareas",
+          "loading": "Cargando...",
+          "error": "Se produjo un error"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "Cancelar carga",
+        "removeAttachment": "Eliminar adjunto"
+      },
+      "newChatDialog": {
+        "createNewChat": "¿Crear nuevo chat?",
+        "clearChat": "Esto borrará los mensajes actuales y comenzará un nuevo chat.",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar"
+      },
+      "settingsModal": {
+        "expandMessages": "Expandir Mensajes",
+        "hideChainOfThought": "Ocultar Cadena de Pensamiento",
+        "darkMode": "Modo Oscuro"
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "lastInputs": "Últimos Ingresos",
+            "noInputs": "Vacío...",
+            "loading": "Cargando..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "Escribe tu mensaje aquí..."
+          },
+          "speechButton": {
+            "start": "Comenzar grabación",
+            "stop": "Detener grabación"
+          },
+          "SubmitButton": {
+            "sendMessage": "Enviar mensaje",
+            "stopTask": "Detener Tarea"
+          },
+          "UploadButton": {
+            "attachFiles": "Adjuntar archivos"
+          },
+          "waterMark": {
+            "text": "Hecho con"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "Ejecutando",
+            "executedSuccessfully": "ejecutado exitosamente",
+            "failed": "fallido",
+            "feedbackUpdated": "Retroalimentación actualizada",
+            "updating": "Actualizando"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "Suelta tus archivos aquí"
+        },
+        "index": {
+          "failedToUpload": "Error al cargar",
+          "cancelledUploadOf": "Carga de cancelada",
+          "couldNotReachServer": "No se pudo conectar con el servidor"
+        },
+        "settings": {
+          "settingsPanel": "Panel de Configuración",
+          "reset": "Restablecer",
+          "cancel": "Cancelar",
+          "confirm": "Confirmar"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "Retroalimentación: Todas",
+              "feedbackPositive": "Retroalimentación: Positiva",
+              "feedbackNegative": "Retroalimentación: Negativa"
+            },
+            "SearchBar": {
+              "search": "Buscar"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "Esto eliminará el hilo, así como sus mensajes y elementos.",
+            "cancel": "Cancelar",
+            "confirm": "Confirmar",
+            "deletingChat": "Eliminando chat",
+            "chatDeleted": "Chat eliminado",
+            "deleteThreadTitle": "¿Eliminar Hilo?"
+          },
+          "index": {
+            "pastChats": "Chats Anteriores"
+          },
+          "ThreadList": {
+            "empty": "Vacío..."
+          },
+          "TriggerButton": {
+            "closeSidebar": "Cerrar barra lateral",
+            "openSidebar": "Abrir barra lateral"
+          }
+        },
+        "Thread": {
+          "backToChat": "Volver al chat",
+          "chatCreatedOn": "Este chat fue creado en"
+        }
+      },
+      "header": {
+        "chat": "Chat",
+        "readme": "Leerme"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "Error al recuperar proveedores:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "Guardado exitosamente",
+      "requiredApiKeys": "Claves de API requeridas",
+      "requiredApiKeysInfo": "Para usar esta aplicación, se requieren las siguientes claves de API. Las claves se almacenan en el almacenamiento local de tu dispositivo."
+    },
+    "Login": {
+      "authTitle": "Inicia sesión para acceder a la aplicación."
+    },
+    "Page": {
+      "notPartOfProject": "No eres parte de este proyecto."
+    },
+    "ResumeButton": {
+      "resumeChat": "Reanudar Chat"
+    }
+  }
+}
