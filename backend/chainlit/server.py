@@ -41,6 +41,7 @@ from chainlit.types import (
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
+    DeleteFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
 from fastapi import (
@@ -551,6 +552,24 @@ async def update_feedback(
 
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
+@app.delete("/feedback")
+async def delete_feedback(
+    request: Request,
+    payload: DeleteFeedbackRequest,
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+):
+    """Delete a feedback."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    feedback_id = payload.feedbackId
+
+    await data_layer.delete_feedback(feedback_id)
+    return JSONResponse(content={"success": True})
+
 
 @app.post("/project/threads")
 async def get_user_threads(
@@ -566,7 +585,10 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    payload.filter.userIdentifier = current_user.identifier
+    if not isinstance(current_user, PersistedUser):
+        raise HTTPException(status_code=400, detail="User not persisted")
+
+    payload.filter.userId = current_user.id
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())

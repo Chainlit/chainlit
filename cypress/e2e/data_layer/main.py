@@ -81,7 +81,7 @@ class TestDataLayer(cl_data.BaseDataLayer):
     ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
         return cl_data.PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
-            pageInfo=cl_data.PageInfo(hasNextPage=False, endCursor=None),
+            pageInfo=cl_data.PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
         )
 
     async def get_thread(self, thread_id: str):

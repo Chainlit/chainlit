@@ -33,8 +33,8 @@ class Pagination(BaseModel):
 
 
 class ThreadFilter(BaseModel):
-    feedback: Optional[Literal[-1, 0, 1]] = None
-    userIdentifier: Optional[str] = None
+    feedback: Optional[Literal[0, 1]] = None
+    userId: Optional[str] = None
     search: Optional[str] = None
 
 
@@ -122,6 +122,9 @@ class GenerationRequest(BaseModel):
 class DeleteThreadRequest(BaseModel):
     threadId: str
 
+class DeleteFeedbackRequest(BaseModel):
+    feedbackId: str
+
 
 class GetThreadsRequest(BaseModel):
     pagination: Pagination
@@ -146,16 +149,16 @@ FeedbackStrategy = Literal["BINARY"]
 
 
 class FeedbackDict(TypedDict):
-    value: Literal[-1, 0, 1]
-    strategy: FeedbackStrategy
+    forId: str
+    id: Optional[str]
+    value: Literal[0, 1]
     comment: Optional[str]
 
 
 @dataclass
 class Feedback:
     forId: str
-    value: Literal[-1, 0, 1]
-    strategy: FeedbackStrategy = "BINARY"
+    value: Literal[0, 1]
     id: Optional[str] = None
     comment: Optional[str] = None
 

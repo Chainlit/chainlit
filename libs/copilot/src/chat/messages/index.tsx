@@ -96,6 +96,32 @@ const Messages = ({
     []
   );
 
+  const onFeedbackDeleted = useCallback(
+    async (message: IStep, onSuccess: () => void, feedbackId: string) => {
+      try {
+        toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
+          loading: 'Updating',
+          success: (res) => {
+            setMessages((prev) =>
+              updateMessageById(prev, message.id, {
+                ...message,
+                feedback: undefined
+              })
+            );
+            onSuccess();
+            return 'Feedback updated!';
+          },
+          error: (err) => {
+            return <span>{err.message}</span>;
+          }
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
   const showWelcomeScreen =
     !idToResume &&
     !messages.length &&
@@ -122,6 +148,7 @@ const Messages = ({
       messages={messages}
       autoScroll={autoScroll}
       onFeedbackUpdated={onFeedbackUpdated}
+      onFeedbackDeleted={onFeedbackDeleted}
       callAction={callActionWithToast}
       setAutoScroll={setAutoScroll}
     />

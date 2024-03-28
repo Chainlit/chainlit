@@ -213,6 +213,14 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async deleteFeedback(
+    feedbackId: string,
+    accessToken?: string
+  ): Promise<{ success: boolean }> {
+    const res = await this.delete(`/feedback`, { feedbackId }, accessToken);
+    return res.json();
+  }
+
   async listThreads(
     pagination: IPagination,
     filter: IThreadFilters,

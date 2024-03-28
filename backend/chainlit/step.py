@@ -194,13 +194,13 @@ class Step:
                 if set_language:
                     self.language = "json"
             except TypeError:
-                processed_content = str(content)
+                processed_content = str(content).replace("\\n", "\n")
                 if set_language:
                     self.language = "text"
         elif isinstance(content, str):
             processed_content = content
         else:
-            processed_content = str(content)
+            processed_content = str(content).replace("\\n", "\n")
             if set_language:
                 self.language = "text"
         return processed_content

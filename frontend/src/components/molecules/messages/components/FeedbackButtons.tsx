@@ -1,6 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 import { useMemo } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
@@ -10,6 +11,8 @@ import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+
+import { firstUserInteraction, useChatSession } from '@chainlit/react-client';
 
 import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
@@ -24,18 +27,31 @@ interface Props {
 }
 
 const FeedbackButtons = ({ message }: Props) => {
-  const { onFeedbackUpdated } = useContext(MessageContext);
+  const { onFeedbackUpdated, onFeedbackDeleted } = useContext(MessageContext);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
+  const firstInteraction = useRecoilValue(firstUserInteraction);
+  const { idToResume } = useChatSession();
 
-  const [feedback, setFeedback] = useState(message.feedback?.value || 0);
+  const [feedback, setFeedback] = useState(message.feedback?.value);
   const [comment, setComment] = useState(message.feedback?.comment);
 
-  const DownIcon = feedback === -1 ? ThumbDownAlt : ThumbDownAltOutlined;
+  const DownIcon = feedback === 0 ? ThumbDownAlt : ThumbDownAltOutlined;
   const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
 
-  const handleFeedbackChanged = (feedback: number, comment?: string) => {
-    onFeedbackUpdated &&
+  const handleFeedbackChanged = (feedback?: number, comment?: string) => {
+    if (feedback === undefined) {
+      if (onFeedbackDeleted && message.feedback?.id) {
+        onFeedbackDeleted(
+          message,
+          () => {
+            setFeedback(undefined);
+            setComment(undefined);
+          },
+          message.feedback.id
+        );
+      }
+    } else if (onFeedbackUpdated) {
       onFeedbackUpdated(
         message,
         () => {
@@ -43,23 +59,27 @@ const FeedbackButtons = ({ message }: Props) => {
           setComment(comment);
         },
         {
-          ...(message.feedback || { strategy: 'BINARY' }),
+          ...(message.feedback || {}),
           forId: message.id,
           value: feedback,
           comment
         }
       );
-  };
-
-  const handleFeedbackClick = (status: number) => {
-    if (feedback === status) {
-      handleFeedbackChanged(0);
-    } else {
-      setShowFeedbackDialog(status);
     }
   };
 
-  const disabled = !!message.streaming;
+  const handleFeedbackClick = (nextValue: number) => {
+    if (feedback === nextValue) {
+      handleFeedbackChanged(undefined);
+    } else {
+      setShowFeedbackDialog(nextValue);
+    }
+  };
+
+  const isPersisted = firstInteraction || idToResume;
+  const isStreaming = !!message.streaming;
+
+  const disabled = isStreaming || !isPersisted;
 
   const buttons = useMemo(() => {
     const iconSx = {
@@ -92,7 +112,7 @@ const FeedbackButtons = ({ message }: Props) => {
               disabled={disabled}
               className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
               onClick={() => {
-                handleFeedbackClick(-1);
+                handleFeedbackClick(0);
               }}
             >
               <DownIcon sx={iconSx} />
@@ -138,11 +158,11 @@ const FeedbackButtons = ({ message }: Props) => {
         onClose={() => {
           setShowFeedbackDialog(undefined);
         }}
-        open={!!showFeedbackDialog}
+        open={showFeedbackDialog !== undefined}
         title={
           <Stack direction="row" alignItems="center" gap={2}>
-            {showFeedbackDialog === -1 ? <DownIcon /> : <UpIcon />}
-            Provide additional feedback
+            {showFeedbackDialog === 0 ? <DownIcon /> : <UpIcon />}
+            Add a comment
           </Stack>
         }
         content={
