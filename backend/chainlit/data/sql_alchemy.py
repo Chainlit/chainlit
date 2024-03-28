@@ -9,7 +9,7 @@ import asyncio
 from dataclasses import asdict
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from chainlit.context import context
 from chainlit.logger import logger
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from chainlit.step import StepDict
 
 class SQLAlchemyDataLayer(BaseDataLayer):
-    def __init__(self, conninfo: str, ssl_require: bool = False, storage_provider: BaseStorageClient = None, user_thread_limit: int = 1000):
+    def __init__(self, conninfo: str, ssl_require: bool = False, storage_provider: Optional[BaseStorageClient] = None, user_thread_limit: Optional[int] = 1000):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         ssl_args = {}
@@ -35,8 +35,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             ssl_args['ssl'] = ssl_context
-        self.engine = create_async_engine(self._conninfo, connect_args=ssl_args)
-        self.async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
+        self.engine: AsyncEngine = create_async_engine(self._conninfo, connect_args=ssl_args)
+        self.async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)  # type: ignore
         if storage_provider:
             self.storage_provider = storage_provider
             logger.info("SQLAlchemyDataLayer storage client initialized")
@@ -303,8 +303,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         user_folder = getattr(context_user, 'id', 'unknown')
         file_object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
+        mime_type = element.mime if element.mime is not None else 'application/octet-stream'
 
-        uploaded_file = await self.storage_provider.upload_file(object_key=file_object_key, data=content, mime=element.mime, overwrite=True)
+        if not content:
+            return
+        uploaded_file = await self.storage_provider.upload_file(object_key=file_object_key, data=content, mime=mime_type, overwrite=True)
         if not uploaded_file:
             raise ValueError("SQLAlchemy Error: create_element, Failed to persist data in storage_provider")
 
