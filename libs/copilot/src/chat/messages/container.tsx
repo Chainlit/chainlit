@@ -3,6 +3,7 @@ import { memo, useCallback, useContext, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
+import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
 import {
   highlightMessage,
   sideViewState
@@ -18,7 +19,6 @@ import {
   IStep,
   useChatInteract
 } from '@chainlit/react-client';
-import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
 
 interface Props {
   loading: boolean;

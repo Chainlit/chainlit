@@ -511,6 +511,9 @@ async def project_settings(
     # Load translation based on the provided language
     translation = config.load_translation(language)
 
+    # Load the markdown file based on the provided language
+    markdown = get_markdown_str(config.root, language)
+
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
@@ -523,7 +526,7 @@ async def project_settings(
             "userEnv": config.project.user_env,
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
-            "markdown": get_markdown_str(config.root),
+            "markdown": markdown,
             "chatProfiles": profiles,
             "translation": translation,
         }
@@ -738,6 +741,11 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
+
+
+@app.head('/')
+def status_check():
+    return {"message": "Site is operational"}
 
 
 def register_wildcard_route_handler():
