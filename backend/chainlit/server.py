@@ -54,6 +54,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -141,7 +142,9 @@ def get_build_dir(local_target: str, packaged_target: str):
     local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
 
-    if config.ui.custom_build and os.path.exists(os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")):
+    if config.ui.custom_build and os.path.exists(
+        os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
+    ):
         return os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
     elif os.path.exists(local_build_dir):
         return local_build_dir
@@ -184,6 +187,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(GZipMiddleware)
 
 socket = SocketManager(
     app,
@@ -502,15 +507,28 @@ async def get_providers(
     return JSONResponse(content={"providers": providers})
 
 
+@app.get("/project/translations")
+async def project_translations(
+    language: str = Query(default="en-US", description="Language code"),
+):
+    """Return project translations."""
+
+    # Load translation based on the provided language
+    translation = config.load_translation(language)
+
+    return JSONResponse(
+        content={
+            "translation": translation,
+        }
+    )
+
+
 @app.get("/project/settings")
 async def project_settings(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
     language: str = Query(default="en-US", description="Language code"),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
-
-    # Load translation based on the provided language
-    translation = config.load_translation(language)
 
     # Load the markdown file based on the provided language
     markdown = get_markdown_str(config.root, language)
@@ -529,7 +547,6 @@ async def project_settings(
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
-            "translation": translation,
         }
     )
 

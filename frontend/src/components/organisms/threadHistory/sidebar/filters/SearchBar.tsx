@@ -1,6 +1,5 @@
 import debounce from 'lodash/debounce';
 import { useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
 import { grey } from 'theme';
 
@@ -9,6 +8,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 import { threadsFiltersState } from 'state/threads';
 
