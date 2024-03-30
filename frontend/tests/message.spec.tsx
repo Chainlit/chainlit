@@ -24,7 +24,8 @@ describe('Message', () => {
           name: 'bar',
           createdAt: '12/12/2002',
           start: '12/12/2002',
-          end: '12/12/2002'
+          end: '12/12/2002',
+          disableFeedback: true
         }
       ],
       waitForAnswer: false,
