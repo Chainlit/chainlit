@@ -42,7 +42,7 @@ async def resume_thread(session: WebsocketSession):
     if not thread:
         return
 
-    author = thread.get("user_identifier")
+    author = thread.get("userIdentifier")
     user_is_author = author == session.user.identifier
 
     if user_is_author:

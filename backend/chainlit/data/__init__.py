@@ -366,7 +366,7 @@ class ChainlitDataLayer(BaseDataLayer):
         thread = await self.get_thread(thread_id)
         if not thread:
             return ""
-        user_identifier = thread.get("user_identifier")
+        user_identifier = thread.get("userIdentifier")
         if not user_identifier:
             return ""
 
@@ -439,8 +439,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "steps": steps,
             "elements": elements,
             "metadata": thread.metadata,
-            "user_id": thread.participant_id,
-            "user_identifier": thread.participant_identifier,
+            "userId": thread.participant_id,
+            "userIdentifier": thread.participant_identifier,
             "tags": thread.tags,
         }
 

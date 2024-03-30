@@ -5,8 +5,8 @@ export interface IThread {
   id: string;
   createdAt: number | string;
   name?: string;
-  user_id?: string;
-  user_identifier?: string;
+  userId?: string;
+  userIdentifier?: string;
   metadata?: Record<string, any>;
   steps: IStep[];
   elements?: IElement[];

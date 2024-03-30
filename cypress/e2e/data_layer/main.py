@@ -16,8 +16,8 @@ thread_history = [
         "id": "test1",
         "name": "thread 1",
         "createdAt": now,
-        "user_id": "test",
-        "user_identifier": "admin",
+        "userId": "test",
+        "userIdentifier": "admin",
         "steps": [
             {
                 "id": "test1",
@@ -38,8 +38,8 @@ thread_history = [
     {
         "id": "test2",
         "createdAt": now,
-        "user_id": "test",
-        "user_identifier": "admin",
+        "userId": "test",
+        "userIdentifier": "admin",
         "name": "thread 2",
         "steps": [
             {
@@ -82,7 +82,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
     ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
         return cl_data.PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
-            pageInfo=cl_data.PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
+            pageInfo=cl_data.PageInfo(
+                hasNextPage=False, startCursor=None, endCursor=None
+            ),
         )
 
     async def get_thread(self, thread_id: str):
