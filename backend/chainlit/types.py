@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
-    from chainlit.user import UserDict
     from chainlit.step import StepDict
 
 from dataclasses_json import DataClassJsonMixin
@@ -20,7 +19,7 @@ class ThreadDict(TypedDict):
     id: str
     createdAt: str
     name: Optional[str]
-    user: Optional["UserDict"]
+    user_id: Optional[str]
     tags: Optional[List[str]]
     metadata: Optional[Dict]
     steps: List["StepDict"]
@@ -121,6 +120,7 @@ class GenerationRequest(BaseModel):
 
 class DeleteThreadRequest(BaseModel):
     threadId: str
+
 
 class DeleteFeedbackRequest(BaseModel):
     feedbackId: str
