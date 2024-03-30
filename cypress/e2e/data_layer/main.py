@@ -10,14 +10,14 @@ now = utc_now()
 
 create_step_counter = 0
 
-user_dict = {"id": "test", "createdAt": now, "identifier": "admin"}
 
 thread_history = [
     {
         "id": "test1",
         "name": "thread 1",
         "createdAt": now,
-        "user": user_dict,
+        "user_id": "test",
+        "user_identifier": "admin",
         "steps": [
             {
                 "id": "test1",
@@ -38,7 +38,8 @@ thread_history = [
     {
         "id": "test2",
         "createdAt": now,
-        "user": user_dict,
+        "user_id": "test",
+        "user_identifier": "admin",
         "name": "thread 2",
         "steps": [
             {
