@@ -20,6 +20,7 @@ class ThreadDict(TypedDict):
     createdAt: str
     name: Optional[str]
     user_id: Optional[str]
+    user_identifier: Optional[str]
     tags: Optional[List[str]]
     metadata: Optional[Dict]
     steps: List["StepDict"]
