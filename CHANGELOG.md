@@ -22,6 +22,7 @@ Nothing is unreleased!
 
 - Translated will no longer flash at app load
 - Llama Index callback handler has been updated
+- File watcher should now properly refresh the app when the code changes
 - Markdown titles should now have the correct line height
 
 ### Changed
