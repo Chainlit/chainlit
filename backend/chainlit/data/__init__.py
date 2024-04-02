@@ -417,7 +417,7 @@ class ChainlitDataLayer(BaseDataLayer):
             order_by={"column": "createdAt", "direction": "DESC"},
         )
         return PaginatedResponse(
-            pageInfo=PageInfo(**literal_response.page_info),
+            pageInfo=PageInfo(**literal_response.pageInfo),
             data=literal_response.data,
         )
 
