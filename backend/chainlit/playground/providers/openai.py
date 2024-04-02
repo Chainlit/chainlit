@@ -168,8 +168,8 @@ class ChatOpenAIProvider(BaseProvider):
 
             async def create_event_stream():
                 message = response.choices[0].message
-                if function_call := message.function_call:
-                    yield stringify_function_call(function_call)
+                if tool_calls := message.tool_calls:
+                    yield json.dumps([tc.model_dump() for tc in tool_calls], indent=4, ensure_ascii=False)
                 else:
                     yield message.content or ""
 
