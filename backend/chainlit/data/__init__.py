@@ -100,7 +100,7 @@ class BaseDataLayer:
 
     async def list_threads(
         self, pagination: "Pagination", filters: "ThreadFilter"
-    ) -> "PaginatedResponse[ThreadDict]":
+    ) -> "PaginatedResponse":
         return PaginatedResponse(
             data=[],
             pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
