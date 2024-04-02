@@ -36,12 +36,12 @@ from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
+    DeleteFeedbackRequest,
     DeleteThreadRequest,
     GenerationRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
-    DeleteFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
 from fastapi import (
@@ -194,6 +194,7 @@ socket = SocketManager(
     app,
     cors_allowed_origins=[],
     async_mode="asgi",
+    socketio_path="/ws/socket.io",
 )
 
 
@@ -569,6 +570,7 @@ async def update_feedback(
 
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
+
 @app.delete("/feedback")
 async def delete_feedback(
     request: Request,
@@ -782,7 +784,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     return FileResponse(logo_path, media_type=media_type)
 
 
-@app.head('/')
+@app.head("/")
 def status_check():
     return {"message": "Site is operational"}
 
