@@ -124,10 +124,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
-        if context.session.user is not None:
+        if isinstance(context.session.user, PersistedUser):
             user_id = context.session.user.id
         else:
-            raise ValueError("User not found in session context")
+            raise ValueError("User not found in session context or is not a PersistedUser")
         user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(user_id=user_id)
         if not user_threads:
             return None
