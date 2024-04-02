@@ -409,12 +409,13 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        return await self.client.api.list_threads(
+        threads: PaginatedResponse[ThreadDict] = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
             order_by={"column": "createdAt", "direction": "DESC"},
-        )   # PaginatedResponse[ThreadDict]
+        ) 
+        return threads
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
         thread = await self.client.api.get_thread(id=thread_id)
