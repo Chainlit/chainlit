@@ -462,7 +462,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
-    server = os.environ.get("LITERAL_SERVER")
+    server = os.environ.get("LITERAL_API_URL")
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 
