@@ -1,6 +1,5 @@
 import { useAuth } from 'api/auth';
-import { memo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { memo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -19,6 +18,7 @@ import { RegularButton } from 'components/atoms/buttons';
 import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';
+import { Translator } from 'components/i18n';
 import NewChatButton from 'components/molecules/newChatButton';
 
 import { IProjectSettings } from 'state/project';
@@ -27,7 +27,7 @@ import { OpenThreadListButton } from './threadHistory/sidebar/OpenThreadListButt
 
 interface INavItem {
   to: string;
-  label: string;
+  label: React.ReactElement | string;
 }
 
 function ActiveNavItem({ to, label }: INavItem) {
@@ -69,20 +69,20 @@ const Nav = ({ dataPersistence, hasReadme, matches }: NavProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<any>();
 
-  const { t } = useTranslation();
-
   let anchorEl;
 
   if (open && ref.current) {
     anchorEl = ref.current;
   }
 
-  const tabs = [{ to: '/', label: t('components.organisms.header.chat') }];
+  const tabs = [
+    { to: '/', label: <Translator path="components.organisms.header.chat" /> }
+  ];
 
   if (hasReadme) {
     tabs.push({
       to: '/readme',
-      label: t('components.organisms.header.readme')
+      label: <Translator path="components.organisms.header.readme" />
     });
   }
 

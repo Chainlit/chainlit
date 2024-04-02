@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PasswordChecklist, { RuleNames } from 'react-password-checklist';
 import { grey } from 'theme/palette';
 import { useToggle } from 'usehooks-ts';
@@ -17,38 +17,13 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
+import Translator, { useTranslation } from 'components/i18n/Translator';
 
 import { AuthTemplate } from './AuthTemplate';
 import { ProviderButton } from './ProviderButton';
 
-const signinErrors: Record<string, string> = {
-  default: 'Unable to sign in.',
-  signin: 'Try signing in with a different account.',
-  oauthsignin: 'Try signing in with a different account.',
-  redirect_uri_mismatch:
-    'The redirect URI is not matching the oauth app configuration.',
-  oauthcallbackerror: 'Try signing in with a different account.',
-  oauthcreateaccount: 'Try signing in with a different account.',
-  emailcreateaccount: 'Try signing in with a different account.',
-  callback: 'Try signing in with a different account.',
-  oauthaccountnotlinked:
-    'To confirm your identity, sign in with the same account you used originally.',
-  emailsignin: 'The e-mail could not be sent.',
-  emailverify: 'Please verify your email, a new email has been sent.',
-  credentialssignin:
-    'Sign in failed. Check the details you provided are correct.',
-  sessionrequired: 'Please sign in to access this page.'
-};
-
-const getErrorMessage = (errorType?: string): string => {
-  if (!errorType) {
-    return '';
-  }
-  return signinErrors[errorType.toLowerCase()] ?? signinErrors.default;
-};
-
 type AuthLoginProps = {
-  title: string;
+  title: React.ReactNode | string;
   error?: string;
   providers: string[];
   callbackUrl: string;
@@ -92,6 +67,7 @@ const AuthLogin = ({
   const [showSignIn, toggleShowSignIn] = useToggle(true);
   const [showPassword, toggleShowPassword] = useToggle();
   const [errorState, setErrorState] = useState(error);
+  const { t } = useTranslation();
 
   const oAuthReady = onOAuthSignIn && providers.length;
 
@@ -109,8 +85,14 @@ const AuthLogin = ({
       password: ''
     },
     validationSchema: yup.object({
-      email: yup.string().required(),
-      password: yup.string().required()
+      email: yup
+        .string()
+        .required(t('components.molecules.auth.authLogin.form.emailRequired')),
+      password: yup
+        .string()
+        .required(
+          t('components.molecules.auth.authLogin.form.passwordRequired')
+        )
     }),
     onSubmit: async ({ email, password }) => {
       setLoading(true);
@@ -138,7 +120,10 @@ const AuthLogin = ({
     <AuthTemplate title={title} renderLogo={renderLogo}>
       {errorState ? (
         <Alert sx={{ my: 1 }} severity="error">
-          {getErrorMessage(errorState)}
+          {t([
+            `components.molecules.auth.authLogin.error.${errorState.toLowerCase()}`,
+            `components.molecules.auth.authLogin.error.default`
+          ])}
         </Alert>
       ) : null}
 
@@ -146,7 +131,7 @@ const AuthLogin = ({
         <form onSubmit={formik.handleSubmit}>
           <TextInput
             id="email"
-            placeholder="Email address"
+            placeholder={t('components.molecules.auth.authLogin.form.email')}
             size="medium"
             value={formik.values.email}
             hasError={!!formik.errors.email}
@@ -158,7 +143,7 @@ const AuthLogin = ({
           />
           <TextInput
             id="password"
-            placeholder="Password"
+            placeholder={t('components.molecules.auth.authLogin.form.password')}
             value={formik.values.password}
             hasError={!!formik.errors.password}
             description={
@@ -198,7 +183,7 @@ const AuthLogin = ({
                 fontSize: 14
               }}
             >
-              Your password must contain:
+              <Translator path="components.molecules.auth.authLogin.form.passwordMustContain" />
               <PasswordChecklist
                 rules={passwordChecklistSettings.rules}
                 minLength={passwordChecklistSettings.minLength}
@@ -212,7 +197,7 @@ const AuthLogin = ({
 
           {showSignIn && onForgotPassword ? (
             <Link href="#" marginTop={1} onClick={onForgotPassword}>
-              Forgot password?
+              <Translator path="components.molecules.auth.authLogin.form.forgotPassword" />
             </Link>
           ) : null}
           <Button
@@ -221,7 +206,7 @@ const AuthLogin = ({
             variant="contained"
             sx={{ marginTop: 3, width: '100%' }}
           >
-            Continue
+            <Translator path="components.molecules.auth.authLogin.form.continue" />
           </Button>
         </form>
       ) : null}
@@ -230,16 +215,20 @@ const AuthLogin = ({
         <Stack direction="row" alignItems="center" gap={0.5} marginTop={1}>
           {showSignIn ? (
             <>
-              <Typography color="text.primary">{`${"Don't have an account?"}`}</Typography>
+              <Typography color="text.primary">
+                <Translator path="components.molecules.auth.authLogin.form.noAccount" />
+              </Typography>
               <Link component="button" onClick={toggleShowSignIn}>
-                Sign Up
+                <Translator path="components.molecules.auth.authLogin.form.signup" />
               </Link>
             </>
           ) : (
             <>
-              <Typography color="text.primary">{`${'Already have an account?'}`}</Typography>
+              <Typography color="text.primary">
+                <Translator path="components.molecules.auth.authLogin.form.alreadyHaveAccount" />
+              </Typography>
               <Link component="button" onClick={toggleShowSignIn}>
-                Sign In
+                <Translator path="components.molecules.auth.authLogin.form.signin" />
               </Link>
             </>
           )}
@@ -263,7 +252,7 @@ const AuthLogin = ({
             }
           }}
         >
-          OR
+          <Translator path="components.molecules.auth.authLogin.form.or" />
         </Typography>
       ) : null}
       {oAuthReady ? (

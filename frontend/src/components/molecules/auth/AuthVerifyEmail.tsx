@@ -7,6 +7,9 @@ import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
+import { Translator } from 'components/i18n';
+import { useTranslation } from 'components/i18n/Translator';
+
 import { AuthTemplate } from './AuthTemplate';
 
 interface AuthVerifyEmailProps {
@@ -23,13 +26,14 @@ const AuthVerifyEmail = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { t } = useTranslation();
 
   const onSubmit = async () => {
     setLoading(true);
 
     try {
       await onResend(email);
-      setSuccess('Email sent successfully.');
+      setSuccess(t('components.molecules.auth.authVerifyEmail.emailSent'));
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -57,7 +61,7 @@ const AuthVerifyEmail = ({
             <MailOutline color="success" fontSize="large" />
           </Box>
           <Typography fontSize="18px" fontWeight={700} color="text.primary">
-            {'Verify your email address'}
+            <Translator path="components.molecules.auth.authVerifyEmail.verifyEmail" />
           </Typography>
         </>
       }
@@ -77,17 +81,19 @@ const AuthVerifyEmail = ({
       <Box display="flex" flexDirection="column" gap={3}>
         <Box>
           <Typography>
-            {"You're almost there! We've sent an email to "}
+            <Translator path="components.molecules.auth.authVerifyEmail.almostThere" />
           </Typography>
           <Typography fontWeight="fontWeightMedium" component="span">
             {email}
           </Typography>
         </Box>
         <Typography>
-          Please click on the link in that email to complete your signup.
+          <Translator path="components.molecules.auth.authVerifyEmail.verifyEmailLink" />
         </Typography>
 
-        <Typography>{"Can't find the email?"}</Typography>
+        <Typography>
+          <Translator path="components.molecules.auth.authVerifyEmail.didNotReceive" />
+        </Typography>
       </Box>
 
       <Button
@@ -97,11 +103,11 @@ const AuthVerifyEmail = ({
         sx={{ marginTop: 1 }}
         disabled={loading}
       >
-        Resend email
+        <Translator path="components.molecules.auth.authVerifyEmail.resendEmail" />
       </Button>
 
       <Link component="button" marginTop={1} onClick={onGoBack}>
-        Go Back
+        <Translator path="components.molecules.auth.authVerifyEmail.goBack" />
       </Link>
     </AuthTemplate>
   );

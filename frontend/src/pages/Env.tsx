@@ -1,5 +1,4 @@
 import { useFormik } from 'formik';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
@@ -9,6 +8,7 @@ import { Alert, Box, Button, Typography } from '@mui/material';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
 import { Translator } from 'components/i18n';
+import { useTranslation } from 'components/i18n/Translator';
 import { Header } from 'components/organisms/header';
 
 import { projectSettingsState } from 'state/project';
