@@ -99,6 +99,7 @@ const Code = ({ children, ...props }: any) => {
           alignItems: 'center',
           borderTopLeftRadius: '4px',
           borderTopRightRadius: '4px',
+          color: 'text.secondary',
           background: isDarkMode ? grey[900] : grey[200]
         }}
       >

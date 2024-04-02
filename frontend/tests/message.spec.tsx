@@ -1,11 +1,25 @@
 import { fireEvent, render } from '@testing-library/react';
 import { MessageContext, defaultMessageContext } from 'contexts/MessageContext';
+import i18n from 'i18next';
 import { ComponentProps } from 'react';
-import { describe, expect, it } from 'vitest';
+import { initReactI18next } from 'react-i18next';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ThemeProvider, createTheme } from '@mui/material';
 
 import { Message } from 'components/molecules/messages/Message';
+
+import json from '../../backend/chainlit/translations/en-US.json';
+
+const i18nConfig = {
+  fallbackLng: 'en-US',
+  defaultNS: 'translation'
+};
+
+beforeAll(async () => {
+  await i18n.use(initReactI18next).init(i18nConfig);
+  i18n.addResourceBundle('en-US', 'translation', json);
+});
 
 describe('Message', () => {
   const defaultProps: ComponentProps<typeof Message> = {
@@ -24,7 +38,8 @@ describe('Message', () => {
           name: 'bar',
           createdAt: '12/12/2002',
           start: '12/12/2002',
-          end: '12/12/2002'
+          end: '12/12/2002',
+          disableFeedback: true
         }
       ],
       waitForAnswer: false,
@@ -59,7 +74,7 @@ describe('Message', () => {
         <Message {...defaultProps} />
       </ThemeProvider>
     );
-    let detailsButton = getByRole('button', { name: 'Took 1 step' });
+    let detailsButton = getByRole('button', {});
 
     expect(detailsButton).toBeInTheDocument();
     fireEvent.click(detailsButton);

@@ -33,6 +33,11 @@ interface Props {
     onSuccess: () => void,
     feedback: IFeedback
   ) => void;
+  onFeedbackDeleted: (
+    message: IStep,
+    onSuccess: () => void,
+    feedbackId: string
+  ) => void;
   callAction?: (action: IAction) => void;
   setAutoScroll?: (autoScroll: boolean) => void;
 }
@@ -47,6 +52,7 @@ const MessageContainer = memo(
     elements,
     messages,
     onFeedbackUpdated,
+    onFeedbackDeleted,
     callAction,
     setAutoScroll
   }: Props) => {
@@ -115,6 +121,7 @@ const MessageContainer = memo(
         onElementRefClick,
         onError,
         onFeedbackUpdated,
+        onFeedbackDeleted,
         onPlaygroundButtonClick
       };
     }, [

@@ -30,6 +30,11 @@ interface IMessageContext {
     onSuccess: () => void,
     feedback: IFeedback
   ) => void;
+  onFeedbackDeleted?: (
+    message: IStep,
+    onSuccess: () => void,
+    feedbackId: string
+  ) => void;
   onError: (error: string) => void;
 }
 
