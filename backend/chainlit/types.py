@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union, Generic, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union, Generic, TypeVar, Protocol, Any
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
@@ -60,6 +60,11 @@ class PageInfo:
         )
 
 T = TypeVar("T", covariant=True)
+
+class HasFromDict(Protocol[T]):
+    @classmethod
+    def from_dict(cls, obj_dict: Any) -> T:
+        raise NotImplementedError()
 
 @dataclass
 class PaginatedResponse(Generic[T]):
