@@ -124,9 +124,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
-        user_id = context.session.user.id
-        if user_id is None:
-            raise ValueError("UserId not found for the given thread_id")
+        if context.session.user is not None:
+            user_id = context.session.user.id
+        else:
+            raise ValueError("User not found in session context")
         user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(user_id=user_id)
         if not user_threads:
             return None
@@ -137,7 +138,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     async def update_thread(self, thread_id: str, name: Optional[str] = None, user_id: Optional[str] = None, metadata: Optional[Dict] = None, tags: Optional[List[str]] = None):
         logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
-        user_identifier = context.session.user.identifier or None
+        if context.session.user is not None:
+            user_identifier = context.session.user.identifier
+        else:
+            raise ValueError("User not found in session context")
         data = {
             "id": thread_id,
             "createdAt": await self.get_current_timestamp() if metadata is None else None,
@@ -292,6 +296,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             content = element.content
         else:
             raise ValueError("Element url, path or content must be provided")
+        if content is None:
+            raise ValueError("Content is None, cannot upload file")
 
         context_user = context.session.user
         if not context_user or not getattr(context_user, 'id', None):
