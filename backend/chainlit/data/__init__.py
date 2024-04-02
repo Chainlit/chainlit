@@ -2,16 +2,16 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast, Protocol, Any
 
 import aiofiles
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
-from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
+from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter, PageInfo, PaginatedResponse
 from chainlit.user import PersistedUser, User, UserDict
-from literalai import Attachment, PageInfo, PaginatedResponse
+from literalai import Attachment
 from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
@@ -460,6 +460,11 @@ class ChainlitDataLayer(BaseDataLayer):
             tags=tags,
         )
 
+class BaseStorageClient(Protocol):
+    """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
+
+    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', overwrite: bool = True) -> Dict[str, Any]:
+        pass
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
     server = os.environ.get("LITERAL_SERVER")
