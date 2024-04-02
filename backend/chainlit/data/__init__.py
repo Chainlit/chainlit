@@ -16,6 +16,7 @@ from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
 from literalai.step import StepDict as LiteralStepDict
+from literalai import PaginatedResponse as LiteralPaginatedResponse
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -409,13 +410,16 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        threads: PaginatedResponse[ThreadDict] = await self.client.api.list_threads(
+        literal_response: LiteralPaginatedResponse = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
             order_by={"column": "createdAt", "direction": "DESC"},
-        ) 
-        return threads
+        )
+        return PaginatedResponse(
+            pageInfo=PageInfo(**literal_response.page_info),
+            data=literal_response.data,
+        )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
         thread = await self.client.api.get_thread(id=thread_id)
