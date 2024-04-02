@@ -34,7 +34,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             ssl_context.verify_mode = ssl.CERT_NONE
             ssl_args['ssl'] = ssl_context
         self.engine: AsyncEngine = create_async_engine(self._conninfo, connect_args=ssl_args)
-        self.async_session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)
+        self.async_session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)  # type: ignore
         if storage_provider:
             self.storage_provider = storage_provider
             logger.info("SQLAlchemyDataLayer storage client initialized")
@@ -124,10 +124,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
-        user_identifier = await self.get_thread_author(thread_id=thread_id)
-        if user_identifier is None:
-            raise ValueError("User identifier not found for the given thread_id")
-        user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(user_identifier=user_identifier)
+        user_id = context.session.user.id
+        if user_id is None:
+            raise ValueError("UserId not found for the given thread_id")
+        user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(user_id=user_id)
         if not user_threads:
             return None
         for thread in user_threads:
@@ -137,13 +137,13 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     async def update_thread(self, thread_id: str, name: Optional[str] = None, user_id: Optional[str] = None, metadata: Optional[Dict] = None, tags: Optional[List[str]] = None):
         logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
-        user_identifier = context.session.user.identifier
+        user_identifier = context.session.user.identifier or None
         data = {
             "id": thread_id,
             "createdAt": await self.get_current_timestamp() if metadata is None else None,
             "name": name if name is not None else (metadata.get('name') if metadata and 'name' in metadata else None),
             "userId": user_id,
-            "userIdentifier": user_identifier or None,
+            "userIdentifier": user_identifier,
             "tags": tags,
             "metadata": json.dumps(metadata) if metadata else None,
         }
@@ -276,7 +276,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if not element.for_id:
             return
 
-        content: Union[bytes, str] = None
+        content: Optional[Union[bytes, str]] = None
 
         if element.path:
             async with aiofiles.open(element.path, "rb") as f:
@@ -299,6 +299,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         user_folder = getattr(context_user, 'id', 'unknown')
         file_object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
+
+        if not element.mime:
+            element.mime = "application/octet-stream"
 
         uploaded_file = await self.storage_provider.upload_file(object_key=file_object_key, data=content, mime=element.mime, overwrite=True)
         if not uploaded_file:
