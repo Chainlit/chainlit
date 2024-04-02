@@ -409,7 +409,7 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        return await self.client.api.list_threads(
+        return PaginatedResponse[ThreadDict] = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
