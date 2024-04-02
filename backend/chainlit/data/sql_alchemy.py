@@ -169,7 +169,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": thread_id}
         await self.execute_sql(query=query, parameters=parameters)
       
-    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
+    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse:
         logger.info(f"SQLAlchemy: list_threads, pagination={pagination}, filters={filters}")
         if not filters.userId:
             raise ValueError("userId is required")
