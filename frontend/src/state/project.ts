@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { IMessageElement, IStep } from '@chainlit/react-client';
+import { IStep } from '@chainlit/react-client';
 
 export interface ChatProfile {
   icon: string;
@@ -43,11 +43,6 @@ export interface IProjectSettings {
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({
   key: 'ProjectSettings',
-  default: undefined
-});
-
-export const sideViewState = atom<IMessageElement | undefined>({
-  key: 'SideView',
   default: undefined
 });
 

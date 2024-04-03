@@ -14,12 +14,13 @@ import {
   ITool,
   useChatInteract
 } from '@chainlit/react-client';
+import { sideViewState } from '@chainlit/react-client';
 
 import { MessageContainer as CMessageContainer } from 'components/molecules/messages/MessageContainer';
 
 import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';
-import { highlightMessage, sideViewState } from 'state/project';
+import { highlightMessage } from 'state/project';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
