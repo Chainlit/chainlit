@@ -171,7 +171,8 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             step.output = content
 
             token_count = self.total_llm_token_count or None
-            model = response.raw.get("model", None) if response else None
+            raw_response = response.raw if response else None
+            model = raw_response.get("model", None) if raw_response else None
             provider = "openai"
             
             if messages and isinstance(response, ChatResponse):
