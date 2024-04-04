@@ -54,6 +54,15 @@ export const ChatPromptPlayground = forwardRef(
           : 'Formatted messages'
         : 'Prompt messages';
 
+    const completionContent = generation.messageCompletion?.content;
+    const completionToolCalls = generation.messageCompletion?.tool_calls;
+
+    const completion = completionContent
+      ? completionContent
+      : completionToolCalls
+      ? JSON.stringify(completionToolCalls, null, 2)
+      : '';
+
     return (
       <Stack sx={{ width: '100%' }}>
         <Typography fontSize="14px" fontWeight={700} color={grey[400]}>
@@ -110,10 +119,7 @@ export const ChatPromptPlayground = forwardRef(
               Add Message
             </Button>
           </Box>
-          <Completion
-            completion={generation.messageCompletion?.content}
-            chatMode
-          />
+          <Completion completion={completion} chatMode />
         </Box>
       </Stack>
     );
