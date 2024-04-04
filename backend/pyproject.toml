@@ -90,6 +90,7 @@ module = [
     "vertexai.preview.generative_models",
     "google.cloud"
 ]
+ignore_missing_imports = true
 
 [tool.poetry.group.custom-data]
 optional = true
@@ -100,8 +101,6 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
-
-ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core"]
