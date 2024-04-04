@@ -114,7 +114,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Threads ######
     async def get_thread_author(self, thread_id: str) -> str:
         logger.info(f"SQLAlchemy: get_thread_author, thread_id={thread_id}")
-        query = """SELECT u.* FROM threads t JOIN users u ON t."user_id" = u."id" WHERE t."id" = :id"""
+        query = """SELECT "userIdentifier" FROM threads "id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
         if isinstance(result, list) and result[0]:
@@ -353,7 +353,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             LIMIT :limit
         """
         user_threads = await self.execute_sql(query=user_threads_query, parameters={"user_id": user_id, "limit": self.user_thread_limit})
-        if not isinstance(user_threads, list):
+        if not isinstance(user_threads, list) or not user_threads:
             return None
         thread_ids = "('" + "','".join(map(str, [thread['thread_id'] for thread in user_threads])) + "')"
         if not thread_ids:
