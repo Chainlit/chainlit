@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing is unreleased!
+### Changed
+
+- Renamed the Literal environment variable to `LITERAL_API_URL` (it used to be `LITERAL_SERVER`)
 
 ## [1.0.500] - 2024-04-02
 

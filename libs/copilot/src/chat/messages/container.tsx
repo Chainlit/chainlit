@@ -4,10 +4,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
-import {
-  highlightMessage,
-  sideViewState
-} from '@chainlit/app/src/state/project';
+import { highlightMessage } from '@chainlit/app/src/state/project';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
 import {
@@ -19,6 +16,7 @@ import {
   IStep,
   useChatInteract
 } from '@chainlit/react-client';
+import { sideViewState } from '@chainlit/react-client';
 
 interface Props {
   loading: boolean;

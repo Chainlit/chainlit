@@ -19,15 +19,13 @@ import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
 import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
-import {
-  projectSettingsState,
-  sideViewState
-} from '@chainlit/app/src/state/project';
+import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
   threadHistoryState,
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
+import { sideViewState } from '@chainlit/react-client';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox } from 'components/InputBox';
