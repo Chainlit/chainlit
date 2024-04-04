@@ -327,13 +327,16 @@ class ChainlitDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
-        metadata = {
-            "disableFeedback": step_dict.get("disableFeedback"),
-            "isError": step_dict.get("isError"),
-            "waitForAnswer": step_dict.get("waitForAnswer"),
-            "language": step_dict.get("language"),
-            "showInput": step_dict.get("showInput"),
-        }
+        metadata = dict(
+            step_dict.get("metadata", {}),
+            **{
+                "disableFeedback": step_dict.get("disableFeedback"),
+                "isError": step_dict.get("isError"),
+                "waitForAnswer": step_dict.get("waitForAnswer"),
+                "language": step_dict.get("language"),
+                "showInput": step_dict.get("showInput"),
+            },
+        )
 
         step: LiteralStepDict = {
             "createdAt": step_dict.get("createdAt"),
@@ -345,6 +348,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "name": step_dict.get("name"),
             "threadId": step_dict.get("threadId"),
             "type": step_dict.get("type"),
+            "tags": step_dict.get("tags"),
             "metadata": metadata,
         }
         if step_dict.get("input"):
