@@ -2,7 +2,7 @@ from chainlit.data import BaseStorageClient
 from chainlit.logger import logger
 from typing import TYPE_CHECKING, Optional, Dict, Union, Any
 from azure.storage.filedatalake import DataLakeServiceClient, FileSystemClient, DataLakeFileClient, ContentSettings
-import boto3    # type: ignore
+# import boto3    # type: ignore
 
 if TYPE_CHECKING:
     from azure.core.credentials import AzureNamedKeyCredential, AzureSasCredential, TokenCredential
@@ -40,10 +40,10 @@ class S3StorageClient(BaseStorageClient):
     """
     Class to enable Amazon S3 storage provider
     """
-    def __init__(self, service_name: str, bucket: str):
+    def __init__(self, bucket: str):
         try:
             self.bucket = bucket
-            self.client = boto3.client(service_name)
+            self.client = boto3.client("s3")
             logger.info("S3StorageClient initialized")
         except Exception as e:
             logger.warn(f"S3StorageClient initialization error: {e}")
