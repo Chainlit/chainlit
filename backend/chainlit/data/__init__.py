@@ -466,7 +466,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
-    server = os.environ.get("LITERAL_SERVER")
+    # support legacy LITERAL_SERVER variable as fallback
+    server = os.environ.get("LITERAL_API_URL", os.environ.get("LITERAL_SERVER"))
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 
