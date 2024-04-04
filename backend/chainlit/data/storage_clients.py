@@ -2,7 +2,7 @@ from chainlit.data import BaseStorageClient
 from chainlit.logger import logger
 from typing import TYPE_CHECKING, Optional, Dict, Union, Any
 from azure.storage.filedatalake import DataLakeServiceClient, FileSystemClient, DataLakeFileClient, ContentSettings
-# import boto3    # type: ignore
+import boto3    # type: ignore
 
 if TYPE_CHECKING:
     from azure.core.credentials import AzureNamedKeyCredential, AzureSasCredential, TokenCredential
