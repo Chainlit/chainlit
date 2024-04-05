@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 
 import Chat from 'chat';
 
-import Header from 'components/Header';
+import EvoyaHeader from 'evoya/EvoyaHeader';
 
 import { useState, useEffect } from 'react';
 
@@ -20,14 +20,8 @@ const styleOpen = {
   display: 'flex',
   flexDirection: 'column',
   position: 'fixed' as 'fixed',
-  // top: '10px',
   left: '10px',
   right: '10px',
-  // bottom: '10px',
-  // transform: 'translate(-50%, -50%)',
-  // width: 'calc(100% - 20px)',
-  // height: 'calc(100% - 20px)',
-  // bgcolor: 'background.paper',
   background: (theme) => theme.palette.background.default,
   borderRadius: '10px',
   overflow: 'hidden',
@@ -40,8 +34,6 @@ export default function WidgetEmbedded() {
   const [open, setOpen] = useState(false);
   const [visualViewportHeight, setVisualViewportHeight] = useState(window.innerHeight);
   const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0);
-  // const handleOpen = () => setOpen(true);
-  // const handleClose = () => setOpen(false);
 
   const viewportHandler = () => {
     if (window.visualViewport) {
@@ -89,7 +81,7 @@ export default function WidgetEmbedded() {
           : style
         }
       >
-        <Header showClose={open} />
+        <EvoyaHeader showClose={open} />
         <Chat />
       </Box>
     </Box>

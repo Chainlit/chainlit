@@ -45,7 +45,7 @@ export default function Widget({ config }: Props) {
           position: 'fixed',
           bottom: 24,
           right: 24,
-          zIndex: 1000,
+          zIndex: 9999,
           ...style
         }}
         onClick={(event: React.MouseEvent<HTMLElement>) =>

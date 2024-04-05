@@ -43,7 +43,7 @@ const Input = memo(
     const [pSettings] = useRecoilState(projectSettingsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
-    const { config } = useContext(WidgetContext);
+    const { evoya } = useContext(WidgetContext);
 
     const ref = useRef<HTMLDivElement>(null);
     const {
@@ -90,7 +90,7 @@ const Input = memo(
 
     useEffect(() => {
       if (ref.current && !loading && !disabled) {
-        !config?.isEmbedded && ref.current.focus();
+        evoya?.type === 'default' && ref.current.focus();
       }
     }, [loading, disabled]);
 
@@ -177,12 +177,11 @@ const Input = memo(
             placeholder={t(
               'components.organisms.chat.inputBox.input.placeholder'
             )}
-            disabled={disabled}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
-            { ...(config?.isEmbedded ? { onClick: inputFocusHandler} : {})}
+            { ...(evoya?.type !== 'default' ? { onClick: inputFocusHandler} : {})}
             value={value}
             fullWidth
             InputProps={{

@@ -18,13 +18,14 @@ import {
 import { settingsState } from '@chainlit/app/src/state/settings';
 import { useAuth, useChatInteract } from '@chainlit/react-client';
 import { makeTheme } from '@chainlit/react-components/theme';
+import { EvoyaConfig } from 'evoya/types';
 
 interface Props {
   config: IWidgetConfig;
-  resetChatOnMount: boolean;
+  evoya: EvoyaConfig;
 }
 
-export default function App({ config, resetChatOnMount }: Props) {
+export default function App({ config, evoya }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { setAccessToken } = useAuth(apiClient);
   const [projectSettings, setProjectSettings] =
@@ -41,9 +42,12 @@ export default function App({ config, resetChatOnMount }: Props) {
   }, [config.accessToken]);
 
   useEffect(() => {
-    if (resetChatOnMount) {
+    if (evoya.reset) {
       clear();
     }
+    // window.addEventListener('chainlit-set-token', (event) => {
+    //   setAccessToken(event.detail?.token);
+    // });
     setApiClient(apiClient);
     if (!projectSettings) {
       apiClient
@@ -92,18 +96,19 @@ export default function App({ config, resetChatOnMount }: Props) {
   return (
     <ThemeProvider theme={theme}>
       <Toaster
-        className="toast"
-        position="bottom-center"
+        richColors
+        className="toast show"
+        position="top-right"
         toastOptions={{
           style: {
             fontFamily: theme.typography.fontFamily,
-            background: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.divider}`,
-            color: theme.palette.text.primary
+            // background: theme.palette.background.paper,
+            // border: `1px solid ${theme.palette.divider}`,
+            // color: theme.palette.text.primary
           }
         }}
       />
-      {config.isEmbedded ? <WidgetEmbedded /> : <Widget config={config} />}
+      {evoya.type === 'default' ? <Widget config={config} /> : <WidgetEmbedded />}
     </ThemeProvider>
   );
 }

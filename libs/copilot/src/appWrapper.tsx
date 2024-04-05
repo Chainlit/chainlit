@@ -3,16 +3,17 @@ import App from 'app';
 import { WidgetContext } from 'context';
 import { RecoilRoot } from 'recoil';
 import { IWidgetConfig } from 'types';
+import { EvoyaConfig } from 'evoya/types';
 
 import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
 
 i18nSetupLocalization();
 interface Props {
   config: IWidgetConfig;
-  resetChatOnMount: boolean;
+  evoya: EvoyaConfig;
 }
 
-export default function AppWrapper({ config, resetChatOnMount }: Props) {
+export default function AppWrapper({ config, evoya }: Props) {
   const apiClient = makeApiClient(config.chainlitServer);
 
   return (
@@ -21,10 +22,11 @@ export default function AppWrapper({ config, resetChatOnMount }: Props) {
         value={{
           accessToken: config.accessToken,
           apiClient,
-          config
+          config,
+          evoya
         }}
       >
-        <App config={config} resetChatOnMount={resetChatOnMount} />
+        <App config={config} evoya={evoya} />
       </WidgetContext.Provider>
     </RecoilRoot>
   );
