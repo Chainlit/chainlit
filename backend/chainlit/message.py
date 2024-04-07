@@ -42,6 +42,8 @@ class MessageBase(ABC):
     persisted = False
     is_error = False
     language: Optional[str] = None
+    metadata: Optional[Dict] = None
+    tags: Optional[List[str]] = None
     wait_for_answer = False
     indent: Optional[int] = None
     generation: Optional[BaseGeneration] = None
@@ -86,6 +88,8 @@ class MessageBase(ABC):
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
             "generation": self.generation.to_dict() if self.generation else None,
+            "metadata": self.metadata or {},
+            "tags": self.tags,
         }
 
         return _dict
@@ -212,6 +216,8 @@ class Message(MessageBase):
         disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
         generation: Optional[BaseGeneration] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -236,6 +242,9 @@ class Message(MessageBase):
 
         if created_at:
             self.created_at = created_at
+
+        self.metadata = metadata
+        self.tags = tags
 
         self.author = author
         self.type = type

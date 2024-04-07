@@ -1,6 +1,5 @@
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,16 +12,18 @@ import {
   useChatInteract,
   useChatSession
 } from '@chainlit/react-client';
+import { sideViewState } from '@chainlit/react-client';
 
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
+import { useTranslation } from 'components/i18n/Translator';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { apiClientState } from 'state/apiClient';
 import { IAttachment, attachmentsState } from 'state/chat';
-import { projectSettingsState, sideViewState } from 'state/project';
+import { projectSettingsState } from 'state/project';
 
 import Messages from './Messages';
 import DropScreen from './dropScreen';

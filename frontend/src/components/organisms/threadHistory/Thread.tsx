@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
@@ -31,6 +32,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
   const accessToken = useRecoilValue(accessTokenState);
   const [steps, setSteps] = useState<IStep[]>([]);
   const apiClient = useRecoilValue(apiClientState);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!thread) return;
@@ -60,6 +62,40 @@ const Thread = ({ thread, error, isLoading }: Props) => {
 
             onSuccess();
             return 'Feedback updated!';
+          },
+          error: (err) => {
+            return <span>{err.message}</span>;
+          }
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+  const onFeedbackDeleted = useCallback(
+    async (message: IStep, onSuccess: () => void, feedbackId: string) => {
+      try {
+        toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
+          loading: t('components.organisms.chat.Messages.index.updating'),
+          success: () => {
+            setSteps((prev) =>
+              prev.map((step) => {
+                if (step.id === message.id) {
+                  return {
+                    ...step,
+                    feedback: undefined
+                  };
+                }
+                return step;
+              })
+            );
+
+            onSuccess();
+            return t(
+              'components.organisms.chat.Messages.index.feedbackUpdated'
+            );
           },
           error: (err) => {
             return <span>{err.message}</span>;
@@ -150,6 +186,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           actions={actions}
           elements={(elements || []) as IMessageElement[]}
           onFeedbackUpdated={onFeedbackUpdated}
+          onFeedbackDeleted={onFeedbackDeleted}
           messages={messages}
           autoScroll={true}
         />

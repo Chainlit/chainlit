@@ -6,9 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing is unreleased!
+### Changed
 
-## [1.0.400] - 2023-03-06
+- Renamed the Literal environment variable to `LITERAL_API_URL` (it used to be `LITERAL_SERVER`)
+
+## [1.0.500] - 2024-04-02
+
+### Added
+
+- Added a new command `chainlit lint-translations` to check that translations file are OK
+- Added new sections to the translations, like signin page
+- chainlit.md now supports translations based on the browser's language. Like chainlit_pt-BR.md
+- A health check endpoint is now available through a HEAD http call at root
+- You can now specify a custom frontend build path
+
+### Fixed
+
+- Translated will no longer flash at app load
+- Llama Index callback handler has been updated
+- File watcher should now properly refresh the app when the code changes
+- Markdown titles should now have the correct line height
+
+### Changed
+
+- `multi_modal` is now under feature in the config.toml and has more granularity
+- Feedback no longer has a -1 value. Instead a delete_feedback method has been added to the data layer
+- ThreadDict no longer has the full User object. Instead it has user_id and user_identifier fields
+
+## [1.0.400] - 2024-03-06
 
 ### Added
 
@@ -23,7 +48,7 @@ Nothing is unreleased!
 
 - Enforce UTC DateTimes
 
-## [1.0.300] - 2023-02-19
+## [1.0.300] - 2024-02-19
 
 ### Added
 
@@ -34,7 +59,7 @@ Nothing is unreleased!
 
 - The `ChatGeneration` and `CompletionGeneration` has been reworked to better match the OpenAI semantics
 
-## [1.0.200] - 2023-01-22
+## [1.0.200] - 2024-01-22
 
 ### Added
 
@@ -46,7 +71,7 @@ Nothing is unreleased!
 
 - Tasklist flickering
 
-## [1.0.101] - 2023-01-12
+## [1.0.101] - 2024-01-12
 
 ### Fixed
 
@@ -54,7 +79,7 @@ Nothing is unreleased!
 - Toggling hide_cot parameter in the UI should correctly hide the `took n steps` buttons
 - `running` loading button should only be displayed once when `hide_cot` is true and a message is being streamed
 
-## [1.0.100] - 2023-01-10
+## [1.0.100] - 2024-01-10
 
 ### Added
 
@@ -71,7 +96,7 @@ Nothing is unreleased!
 - If `hide_cot` is set to `true`, the UI will never get the intermediary steps (but they will still be persisted)
 - Fixed a bug preventing to open past chats
 
-## [1.0.0] - 2023-01-08
+## [1.0.0] - 2024-01-08
 
 ### Added
 
