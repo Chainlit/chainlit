@@ -24,6 +24,7 @@ import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
+from chainlit.checkbox_group import CheckboxGroup, CheckboxGroupOption
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import (
@@ -43,6 +44,7 @@ from chainlit.element import (
 from chainlit.logger import logger
 from chainlit.message import (
     AskActionMessage,
+    AskCheckboxMessage,
     AskFileMessage,
     AskUserMessage,
     ErrorMessage,
@@ -270,6 +272,26 @@ def action_callback(name: str) -> Callable:
     return decorator
 
 
+def checkbox_group_callback(name: str) -> Callable:
+    """
+    Callback to call when a multi select option is clicked in the UI.
+
+    Args:
+        func (Callable[[CheckboxGroupOption], Any]): The multi select option callback to execute. First parameter is the multi select option.
+    """
+
+    def decorator(func: Callable[[CheckboxGroup], Any]):
+        import pdb
+
+        pdb.set_trace()
+        config.code.checkbox_group_callbacks[name] = wrap_user_function(
+            func, with_task=True
+        )
+        return func
+
+    return decorator
+
+
 def on_settings_update(
     func: Callable[[Dict[str, Any]], Any]
 ) -> Callable[[Dict[str, Any]], Any]:
@@ -319,6 +341,8 @@ __all__ = [
     "user_session",
     "CopilotFunction",
     "Action",
+    "CheckboxGroup",
+    "CheckboxGroupOption",
     "User",
     "PersistedUser",
     "Audio",
@@ -339,6 +363,7 @@ __all__ = [
     "ErrorMessage",
     "AskUserMessage",
     "AskActionMessage",
+    "AskCheckboxMessage",
     "AskFileMessage",
     "Step",
     "step",

@@ -6,6 +6,7 @@ from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
+from chainlit.checkbox_group import CheckboxGroup, CheckboxGroupOption
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.data import get_data_layer
@@ -16,6 +17,8 @@ from chainlit.telemetry import trace_event
 from chainlit.types import (
     AskActionResponse,
     AskActionSpec,
+    AskCheckboxResponse,
+    AskCheckboxSpec,
     AskFileResponse,
     AskFileSpec,
     AskSpec,
@@ -479,6 +482,76 @@ class AskFileMessage(AskMessageBase):
             ]
         else:
             return None
+
+
+class AskCheckboxMessage(AskMessageBase):
+    """
+    Ask the user to select one or more options before continuing.
+    If the user does not answer in time (see timeout), a TimeoutError will be raised or None will be returned depending on raise_on_timeout.
+    """
+
+    def __init__(
+        self,
+        content: str,
+        checkbox_group: CheckboxGroup,
+        author=config.ui.name,
+        disable_feedback=False,
+        timeout=90,
+        raise_on_timeout=False,
+    ):
+        self.content = content
+        self.checkbox_group = checkbox_group
+        self.author = author
+        self.disable_feedback = disable_feedback
+        self.timeout = timeout
+        self.raise_on_timeout = raise_on_timeout
+
+        super().__post_init__()
+
+    async def send(self) -> Union[AskCheckboxResponse, None]:
+        """
+        Sends the question to ask to the UI and waits for the reply
+        """
+        trace_event("send_ask_checkbox_group")
+
+        if not self.created_at:
+            self.created_at = utc_now()
+
+        if self.streaming:
+            self.streaming = False
+
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
+        self.wait_for_answer = True
+
+        step_dict = await self._create()
+
+        await self.checkbox_group.send(for_id=str(step_dict["id"]))
+
+        # Use a different type???
+        spec = AskCheckboxSpec(
+            type="text", timeout=self.timeout, options=self.checkbox_group.options
+        )
+
+        res = cast(
+            Union[AskCheckboxResponse, None],
+            await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
+        )
+
+        for option in self.checkbox_group.options:
+            pass
+            # await option.remove()
+        if res is None:
+            self.content = "Timed out: no action was taken"
+        else:
+            self.content = f'**Selected:** {res["value"]}'
+
+        self.wait_for_answer = False
+
+        await self.update()
+
+        return res
 
 
 class AskActionMessage(AskMessageBase):

@@ -28,6 +28,7 @@ import {
 import {
   IAction,
   IAvatarElement,
+  ICheckboxGroup,
   IElement,
   IMessageElement,
   IStep,
@@ -256,6 +257,11 @@ const useChatSession = () => {
         setAvatars((old) => {
           return old.filter((e) => e.id !== remove.id);
         });
+      });
+
+      socket.on('checkbox', (element: ICheckboxGroup) => {
+        console.log('checkbox group', element);
+        alert('HI');
       });
 
       socket.on('action', (action: IAction) => {

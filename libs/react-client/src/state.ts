@@ -8,6 +8,7 @@ import {
   IAsk,
   IAvatarElement,
   ICallFn,
+  ICheckboxGroup,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -51,6 +52,11 @@ export const sessionState = atom<ISession | undefined>({
 
 export const actionState = atom<IAction[]>({
   key: 'Actions',
+  default: []
+});
+
+export const checkboxGroupState = atom<ICheckboxGroup[]>({
+  key: 'CheckboxGroupOptions',
   default: []
 });
 

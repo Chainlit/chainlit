@@ -18,6 +18,7 @@ import {
   tokenCountState
 } from 'src/state';
 import { IAction, IFileRef, IStep } from 'src/types';
+// TODO: probably need CheckboxGroup type here
 import { addMessage } from 'src/utils/message';
 
 import { ChainlitAPI } from './api';
