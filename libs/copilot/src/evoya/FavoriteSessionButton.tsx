@@ -9,18 +9,25 @@ import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
 
 export default function FavoriteSessionButton() {
-  const { evoya, accessToken } = useContext(WidgetContext);
+  const { evoya, accessToken, apiClient } = useContext(WidgetContext);
   const [isFavorite, setIsFavorite] = useState<boolean>(!!evoya?.api?.favorite?.is_favorite);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleClick = async () => {
     setIsLoading(true);
-    if (evoya?.api?.favorite && accessToken && evoya.session_uuid) {
+    if (evoya?.api?.favorite && accessToken) {
+      let session_uuid = null;
+      if (!evoya.session_uuid) {
+        const sessionResponse = await apiClient.get('/chat_session_uuid', accessToken);
+        const sessionJson = await sessionResponse.json();
+        console.log(sessionJson);
+        session_uuid = sessionJson.session_uuid;
+      }
       if (isFavorite) {
         // remove favorite
         setIsLoading(true);
         try {
-          const response = await fetch(evoya.api.favorite.remove.replace('{{uuid}}', evoya.session_uuid), {
+          const response = await fetch(evoya.api.favorite.remove.replace('{{uuid}}', session_uuid), {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
@@ -43,7 +50,7 @@ export default function FavoriteSessionButton() {
         // add favorite
         setIsLoading(true);
         try {
-          const response = await fetch(evoya.api.favorite.add.replace('{{uuid}}', evoya.session_uuid), {
+          const response = await fetch(evoya.api.favorite.add.replace('{{uuid}}', session_uuid), {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
@@ -69,7 +76,7 @@ export default function FavoriteSessionButton() {
   return (
     <Box>
       <Tooltip
-        title={<Translator path="components.molecules.favoriteSessionButton.favoriteSession" />}
+        title={<Translator path="components.molecules.favoriteSession.favoriteButton" />}
       >
         <IconButton edge="end" id="favorite-session-button" onClick={handleClick}>
           {isLoading ? (

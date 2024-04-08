@@ -39,6 +39,7 @@ export default function ShareSessionButton() {
   const [expireTimeDynamic, setExpireTimeDynamic] = useState(7);
   const [shareLink, setShareLink] = useState<EvoyaShareLink>({});
   const [open, setOpen] = useState(false);
+  const [sessionUuid, setSessionUuid] = useState('');
   const [_, copyToClipboard] = useCopyToClipboard();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCreatingStatic, setIsCreatingStatic] = useState<boolean>(false);
@@ -49,9 +50,10 @@ export default function ShareSessionButton() {
   const handleClickOpen = async() => {
     setOpen(true);
     setIsLoading(true);
-    if (evoya?.api && evoya.session_uuid) {
+    if (evoya?.api) {
       try {
-        const shareDataResponse = await fetch(evoya.api.share.check.replace('{{uuid}}', evoya.session_uuid), {
+        const session_uuid = await getSessionUuid();
+        const shareDataResponse = await fetch(evoya.api.share.check.replace('{{uuid}}', session_uuid), {
           method: 'GET',
           headers: {
             'Accept': 'application/json'
@@ -92,9 +94,10 @@ export default function ShareSessionButton() {
 
   const handleRevokeShareLink = async (shareLinkConfig: EvoyaShareLink) => {
     console.log(shareLinkConfig);
-    if (evoya?.api?.share && evoya.session_uuid && accessToken) {
+    if (evoya?.api?.share && accessToken) {
       try {
-        const shareResponse = await fetch(evoya.api.share.remove.replace('{{uuid}}', evoya.session_uuid), {
+        const session_uuid = await getSessionUuid();
+        const shareResponse = await fetch(evoya.api.share.remove.replace('{{uuid}}', session_uuid), {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json',
@@ -118,30 +121,39 @@ export default function ShareSessionButton() {
     }
   }
 
+  const getSessionUuid = async () => {
+    if (sessionUuid) {
+      return sessionUuid;
+    } else if (!evoya?.session_uuid) {
+      const sessionResponse = await apiClient.get('/chat_session_uuid', accessToken);
+      const sessionJson = await sessionResponse.json();
+      setSessionUuid(sessionJson.session_uuid);
+      return sessionJson.session_uuid;
+    } 
+
+    return evoya?.session_uuid;
+  }
+
   const handleCopyShareLink = async (type: string, expireTime: number) => {
     const shareConfig: EvoyaShareLink = {
       expire: expireTime,
       type
     };
-    if (evoya?.api?.share && evoya.session_uuid && accessToken) {
+    if (evoya?.api?.share && accessToken) {
       if (type === 'STATIC') {
         setIsCreatingStatic(true);
       } else {
         setIsCreatingDynamic(true);
       }
       try {
-        // const formData = new FormData();
-        // formData.append('csrfmiddlewaretoken', evoya.api.csrf_token);
-        // formData.append('expires_in', expireMap[expireTime]);
-        // formData.append('share_type', type);
-        const shareResponse = await fetch(evoya.api.share.add.replace('{{uuid}}', evoya.session_uuid), {
+        const session_uuid = await getSessionUuid();
+        const shareResponse = await fetch(evoya.api.share.add.replace('{{uuid}}', session_uuid), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'X-CSRFTOKEN': evoya.api.csrf_token,
           },
-          // body: formData,
           body: JSON.stringify({
             ...(expireTime > 0 ? {expires_in: expireTime}: {}),
             share_type: type
