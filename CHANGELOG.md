@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.502] - 2024-04-08
+
+### Added
+
+- Actions now trigger conversation persistence
+
 ## [1.0.501] - 2024-04-08
 
 ### Added
