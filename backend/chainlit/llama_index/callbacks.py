@@ -173,12 +173,10 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             token_count = self.total_llm_token_count or None
             raw_response = response.raw if response else None
             model = raw_response.get("model", None) if raw_response else None
-            provider = "openai"
             
             if messages and isinstance(response, ChatResponse):
                 msg: ChatMessage = response.message
                 step.generation = ChatGeneration(
-                    provider=provider,
                     model=model,
                     messages=messages,
                     message_completion=GenerationMessage(
@@ -189,7 +187,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 )
             elif formatted_prompt:
                 step.generation = CompletionGeneration(
-                    provider=provider,
                     model=model,
                     prompt=formatted_prompt,
                     completion=content,
