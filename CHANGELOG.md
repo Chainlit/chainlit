@@ -6,9 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing unreleased!
+
+## [1.0.502] - 2024-04-08
+
+### Added
+
+- Actions now trigger conversation persistence
+
+## [1.0.501] - 2024-04-08
+
+### Added
+
+- Messages and steps now accept tags and metadata (useful for the data layer)
+
 ### Changed
 
+- The LLama Index callback handler should now show retrieved chunks in the intermadiary steps
 - Renamed the Literal environment variable to `LITERAL_API_URL` (it used to be `LITERAL_SERVER`)
+
+### Fixed
+
+- Starting a new conversation should close the element side bar
+- Resolved security issues by upgrading starlette dependency
 
 ## [1.0.500] - 2024-04-02
 

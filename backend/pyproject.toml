@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.0.500"
+version = "1.0.502"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'openai', 'copilot', 'langchain', 'conversational ai']
 description = "Build Conversational AI."
 authors = ["Chainlit"]
@@ -23,7 +23,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.401"
+literalai = "0.0.500"
 dataclasses_json = "^0.5.7"
 fastapi = "^0.110.1"
 starlette = "^0.37.2"
