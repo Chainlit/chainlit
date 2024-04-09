@@ -10,13 +10,10 @@ from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter, PageInfo, PaginatedResponse
-from chainlit.user import PersistedUser, User, UserDict
-from literalai import Attachment
-from literalai import Score as LiteralScore
-from literalai import Step as LiteralStep
+from chainlit.user import PersistedUser, User
+from literalai import Attachment, PaginatedResponse as LiteralPaginatedResponse, Score as LiteralScore, Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
 from literalai.step import StepDict as LiteralStepDict
-from literalai import PaginatedResponse as LiteralPaginatedResponse
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -129,9 +126,9 @@ _data_layer: Optional[BaseDataLayer] = None
 
 class ChainlitDataLayer(BaseDataLayer):
     def __init__(self, api_key: str, server: Optional[str]):
-        from literalai import LiteralClient
+        from literalai import AsyncLiteralClient
 
-        self.client = LiteralClient(api_key=api_key, url=server)
+        self.client = AsyncLiteralClient(api_key=api_key, url=server)
         logger.info("Chainlit data layer initialized")
 
     def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
@@ -466,7 +463,7 @@ class ChainlitDataLayer(BaseDataLayer):
         tags: Optional[List[str]] = None,
     ):
         await self.client.api.upsert_thread(
-            thread_id=thread_id,
+            id=thread_id,
             name=name,
             participant_id=user_id,
             metadata=metadata,
