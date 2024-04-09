@@ -144,7 +144,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
         if not getattr(context.session.user, 'id', None):
             raise ValueError("No authenticated user in context")
-        if context.session.user.identifier is not None:
+        if context.session.user is not None:
             user_identifier = context.session.user.identifier
         else:
             raise ValueError("User not found in session context")
