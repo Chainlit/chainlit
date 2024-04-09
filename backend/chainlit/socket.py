@@ -147,6 +147,7 @@ async def connect(sid, environ, auth):
         token=token,
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
+        languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
     )
 
     trace_event("connection_successful")
