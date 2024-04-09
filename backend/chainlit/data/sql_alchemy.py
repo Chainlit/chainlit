@@ -18,7 +18,6 @@ from chainlit.types import Feedback, FeedbackDict, Pagination, ThreadDict, Threa
 from chainlit.step import StepDict
 from chainlit.element import ElementDict, Avatar
 
-
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
@@ -114,7 +113,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Threads ######
     async def get_thread_author(self, thread_id: str) -> str:
         logger.info(f"SQLAlchemy: get_thread_author, thread_id={thread_id}")
-        query = """SELECT "userIdentifier" FROM threads "id" = :id"""
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
+        query = """SELECT u.* FROM threads t JOIN users u ON t."user_id" = u."id" WHERE t."id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
         if isinstance(result, list) and result[0]:
@@ -125,6 +126,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         if isinstance(context.session.user, PersistedUser):
             user_id = context.session.user.id
         else:
@@ -139,7 +142,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     async def update_thread(self, thread_id: str, name: Optional[str] = None, user_id: Optional[str] = None, metadata: Optional[Dict] = None, tags: Optional[List[str]] = None):
         logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
-        if context.session.user is not None:
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
+        if context.session.user.identifier is not None:
             user_identifier = context.session.user.identifier
         else:
             raise ValueError("User not found in session context")
@@ -166,12 +171,16 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     async def delete_thread(self, thread_id: str):
         logger.info(f"SQLAlchemy: delete_thread, thread_id={thread_id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         query = """DELETE FROM threads WHERE "id" = :id"""
         parameters = {"id": thread_id}
         await self.execute_sql(query=query, parameters=parameters)
       
     async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse:
         logger.info(f"SQLAlchemy: list_threads, pagination={pagination}, filters={filters}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         if not filters.userId:
             raise ValueError("userId is required")
         all_user_threads: List[ThreadDict] = await self.get_all_user_threads(user_id=filters.userId) or []
@@ -195,6 +204,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                             break
             if keyword_match and feedback_match:
                 filtered_threads.append(thread)
+                
         start = 0
         if pagination.cursor:
             for i, thread in enumerate(filtered_threads):
@@ -217,6 +227,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_step(self, step_dict: 'StepDict'):
         logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         step_dict['showInput'] = str(step_dict.get('showInput', '')).lower() if 'showInput' in step_dict else None
         parameters = {key: value for key, value in step_dict.items() if value is not None and not (isinstance(value, dict) and not value)}
         columns = ', '.join(f'"{key}"' for key in parameters.keys())
@@ -238,6 +250,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
         logger.info(f"SQLAlchemy: delete_step, step_id={step_id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         query = """DELETE FROM steps WHERE "id" = :id"""
         parameters = {"id": step_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -245,6 +259,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
         logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         feedback.id = feedback.id or str(uuid.uuid4())
         feedback_dict = asdict(feedback)
         parameters = {key: value for key, value in feedback_dict.items() if value is not None}
@@ -263,6 +279,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     
     async def delete_feedback(self, feedback_id: str) -> bool:
         logger.info(f"SQLAlchemy: delete_feedback, feedback_id={feedback_id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         query = """DELETE FROM feedbacks WHERE "id" = :feedback_id"""
         parameters = {"feedback_id": feedback_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -272,6 +290,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: 'Element'):
         logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         if isinstance(element, Avatar): # Skip creating elements of type avatar
             return
         if not self.storage_provider:
@@ -300,8 +320,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             raise ValueError("Content is None, cannot upload file")
 
         context_user = context.session.user
-        if not context_user or not getattr(context_user, 'id', None):
-            raise ValueError("No valid user in context")
 
         user_folder = getattr(context_user, 'id', 'unknown')
         file_object_key = f"{user_folder}/{element.id}" + (f"/{element.name}" if element.name else "")
@@ -310,7 +328,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             element.mime = "application/octet-stream"
 
         uploaded_file = await self.storage_provider.upload_file(object_key=file_object_key, data=content, mime=element.mime, overwrite=True)
-
         if not uploaded_file:
             raise ValueError("SQLAlchemy Error: create_element, Failed to persist data in storage_provider")
 
@@ -328,6 +345,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def delete_element(self, element_id: str):
         logger.info(f"SQLAlchemy: delete_element, element_id={element_id}")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         query = """DELETE FROM elements WHERE "id" = :id"""
         parameters = {"id": element_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -338,6 +357,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def get_all_user_threads(self, user_id: str) -> Optional[List[ThreadDict]]:
         """Fetch all user threads for fast retrieval, up to self.user_thread_limit"""
         logger.info(f"SQLAlchemy: get_all_user_threads")
+        if not getattr(context.session.user, 'id', None):
+            raise ValueError("No authenticated user in context")
         user_threads_query = """
             SELECT
                 "id" AS thread_id,
@@ -353,7 +374,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             LIMIT :limit
         """
         user_threads = await self.execute_sql(query=user_threads_query, parameters={"user_id": user_id, "limit": self.user_thread_limit})
-        if not isinstance(user_threads, list) or not user_threads:
+        if not isinstance(user_threads, list):
             return None
         thread_ids = "('" + "','".join(map(str, [thread['thread_id'] for thread in user_threads])) + "')"
         if not thread_ids:
