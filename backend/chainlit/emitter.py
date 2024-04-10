@@ -175,10 +175,14 @@ class ChainlitEmitter(BaseChainlitEmitter):
             else:
                 user_id = None
             try:
+                tags = (
+                    [self.session.chat_profile] if self.session.chat_profile else None
+                )
                 await data_layer.update_thread(
                     thread_id=self.session.thread_id,
                     name=interaction,
                     user_id=user_id,
+                    tags=tags,
                 )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
