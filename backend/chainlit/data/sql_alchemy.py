@@ -252,8 +252,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
         logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
-        if not getattr(context.session.user, 'id', None):
-            raise ValueError("No authenticated user in context")
         feedback.id = feedback.id or str(uuid.uuid4())
         feedback_dict = asdict(feedback)
         parameters = {key: value for key, value in feedback_dict.items() if value is not None}
