@@ -37,6 +37,8 @@ def cli():
 def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    ssl_cert_file = os.environ.get("CHAINLIT_SSL_CERT_FILE")
+    ssl_key_file = os.environ.get("CHAINLIT_SSL_KEY_FILE")
 
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
@@ -49,6 +51,8 @@ def run_chainlit(target: str):
 
     config.run.host = host
     config.run.port = port
+    config.run.ssl_cert_file = ssl_cert_file
+    config.run.ssl_key_file = ssl_key_file
 
     check_file(target)
     # Load the module provided by the user
@@ -76,6 +80,10 @@ def run_chainlit(target: str):
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
         )
+        if ssl_cert_file:
+            config.ssl_certfile = ssl_cert_file
+        if ssl_key_file:
+            config.ssl_keyfile = ssl_key_file
         server = uvicorn.Server(config)
         await server.serve()
 
@@ -128,11 +136,34 @@ def run_chainlit(target: str):
 )
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+@click.option(
+    "--ssl-cert-file",
+    help="SSL certificate file for passthrough to webserver (uvicorn)",
+)
+@click.option(
+    "--ssl-key-file",
+    help="SSL certificate key file for passthrough to webserver (uvicorn)",
+)
+def chainlit_run(
+    target,
+    watch,
+    headless,
+    debug,
+    ci,
+    no_cache,
+    host,
+    port,
+    ssl_cert_file,
+    ssl_key_file,
+):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
+    if ssl_cert_file:
+        os.environ["CHAINLIT_SSL_CERT_FILE"] = ssl_cert_file
+    if ssl_key_file:
+        os.environ["CHAINLIT_SSL_KEY_FILE"] = ssl_key_file
     if ci:
         logger.info("Running in CI mode")
 
