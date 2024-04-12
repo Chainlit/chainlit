@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
+from typing import (TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict,
+                    Union)
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict

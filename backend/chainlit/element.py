@@ -2,7 +2,8 @@ import json
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
+from typing import (Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar,
+                    Union)
 
 import filetype
 from chainlit.context import context

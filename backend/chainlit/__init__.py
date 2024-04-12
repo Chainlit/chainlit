@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar
 
 from fastapi import Request, Response
 from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
+from typing_extensions import ParamSpec
 
 if TYPE_CHECKING:
     from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
@@ -26,28 +27,11 @@ from chainlit.cache import cache
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
-from chainlit.element import (
-    Audio,
-    Avatar,
-    File,
-    Image,
-    Pdf,
-    Plotly,
-    Pyplot,
-    Task,
-    TaskList,
-    TaskStatus,
-    Text,
-    Video,
-)
+from chainlit.element import (Audio, Avatar, File, Image, Pdf, Plotly, Pyplot,
+                              Task, TaskList, TaskStatus, Text, Video)
 from chainlit.logger import logger
-from chainlit.message import (
-    AskActionMessage,
-    AskFileMessage,
-    AskUserMessage,
-    ErrorMessage,
-    Message,
-)
+from chainlit.message import (AskActionMessage, AskFileMessage, AskUserMessage,
+                              ErrorMessage, Message)
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
@@ -64,7 +48,9 @@ if env_found:
 
 
 @trace
-def password_auth_callback(func: Callable[[str, str], Optional[User]]) -> Callable:
+def password_auth_callback(
+    func: Callable[[str, str], Optional[User]]
+) -> Callable[[str, str], Optional[User]]:
     """
     Framework agnostic decorator to authenticate the user.
 
@@ -84,7 +70,9 @@ def password_auth_callback(func: Callable[[str, str], Optional[User]]) -> Callab
 
 
 @trace
-def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
+def header_auth_callback(
+    func: Callable[[Headers], Optional[User]]
+) -> Callable[[Headers], Optional[User]]:
     """
     Framework agnostic decorator to authenticate the user via a header
 
@@ -105,8 +93,8 @@ def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
 
 @trace
 def oauth_callback(
-    func: Callable[[str, str, Dict[str, str], User], Optional[User]]
-) -> Callable:
+    func: Callable[[str, str, Dict[str, str], User], Optional[User]],
+) -> Callable[[str, str, Dict[str, str], User], Optional[User]]:
     """
     Framework agnostic decorator to authenticate the user via oauth
 
@@ -131,7 +119,9 @@ def oauth_callback(
 
 
 @trace
-def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
+def on_logout(
+    func: Callable[[Request, Response], Any]
+) -> Callable[[Request, Response], Any]:
     """
     Function called when the user logs out.
     Takes the FastAPI request and response as parameters.
@@ -141,8 +131,12 @@ def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
     return func
 
 
+P = ParamSpec("P")
+T = TypeVar("T")
+
+
 @trace
-def on_message(func: Callable) -> Callable:
+def on_message(func: Callable[P, T]) -> Callable[P, T]:
     """
     Framework agnostic decorator to react to messages coming from the UI.
     The decorated function is called every time a new message is received.
@@ -159,7 +153,7 @@ def on_message(func: Callable) -> Callable:
 
 
 @trace
-def on_chat_start(func: Callable) -> Callable:
+def on_chat_start(func: Callable[P, T]) -> Callable[P, T]:
     """
     Hook to react to the user websocket connection event.
 
@@ -175,7 +169,7 @@ def on_chat_start(func: Callable) -> Callable:
 
 
 @trace
-def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
+def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable[[ThreadDict], Any]:
     """
     Hook to react to resume websocket connection event.
 
@@ -192,8 +186,8 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
 
 @trace
 def set_chat_profiles(
-    func: Callable[[Optional["User"]], List["ChatProfile"]]
-) -> Callable:
+    func: Callable[[Optional["User"]], List["ChatProfile"]],
+) -> Callable[[Optional["User"]], List["ChatProfile"]]:
     """
     Programmatic declaration of the available chat profiles (can depend on the User from the session if authentication is setup).
 
@@ -209,7 +203,7 @@ def set_chat_profiles(
 
 
 @trace
-def on_chat_end(func: Callable) -> Callable:
+def on_chat_end(func: Callable[P, T]) -> Callable[P, T]:
     """
     Hook to react to the user websocket disconnect event.
 
@@ -240,7 +234,7 @@ def author_rename(func: Callable[[str], str]) -> Callable[[str], str]:
 
 
 @trace
-def on_stop(func: Callable) -> Callable:
+def on_stop(func: Callable[P, T]) -> Callable[P, T]:
     """
     Hook to react to the user stopping a thread.
 
@@ -255,7 +249,9 @@ def on_stop(func: Callable) -> Callable:
     return func
 
 
-def action_callback(name: str) -> Callable:
+def action_callback(
+    name: str,
+) -> Callable[[Callable[[Action], Any]], Callable[[Action], Any]]:
     """
     Callback to call when an action is clicked in the UI.
 

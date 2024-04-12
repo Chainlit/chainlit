@@ -1,5 +1,6 @@
-from typing import Union
 import asyncio
+from typing import Union
+
 from chainlit.context import get_context
 from chainlit.step import Step
 from chainlit.utils import check_module_version
@@ -57,5 +58,5 @@ def instrument_openai():
         generation: Union["ChatGeneration", "CompletionGeneration"], timing
     ):
         asyncio.create_task(on_new_generation(generation, timing))
- 
+
     instrument_openai(None, on_new_generation_sync)

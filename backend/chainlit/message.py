@@ -13,14 +13,8 @@ from chainlit.element import ElementBased
 from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.telemetry import trace_event
-from chainlit.types import (
-    AskActionResponse,
-    AskActionSpec,
-    AskFileResponse,
-    AskFileSpec,
-    AskSpec,
-    FileDict,
-)
+from chainlit.types import (AskActionResponse, AskActionSpec, AskFileResponse,
+                            AskFileSpec, AskSpec, FileDict)
 from literalai import BaseGeneration
 from literalai.helper import utc_now
 from literalai.step import MessageStepType

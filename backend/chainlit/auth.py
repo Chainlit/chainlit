@@ -42,9 +42,9 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": get_configured_oauth_providers()
-        if is_oauth_enabled()
-        else [],
+        "oauthProviders": (
+            get_configured_oauth_providers() if is_oauth_enabled() else []
+        ),
     }
 
 

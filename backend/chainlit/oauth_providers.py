@@ -203,9 +203,9 @@ class AzureADOAuthProvider(OAuthProvider):
                 )
                 photo_data = await photo_response.aread()
                 base64_image = base64.b64encode(photo_data)
-                azure_user[
-                    "image"
-                ] = f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
+                azure_user["image"] = (
+                    f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
+                )
             except Exception as e:
                 # Ignore errors getting the photo
                 pass

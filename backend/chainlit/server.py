@@ -19,43 +19,24 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
-from chainlit.config import (
-    APP_ROOT,
-    BACKEND_ROOT,
-    DEFAULT_HOST,
-    FILES_DIRECTORY,
-    PACKAGE_ROOT,
-    config,
-    load_module,
-    reload_config,
-)
+from chainlit.config import (APP_ROOT, BACKEND_ROOT, DEFAULT_HOST,
+                             FILES_DIRECTORY, PACKAGE_ROOT, config,
+                             load_module, reload_config)
 from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
-from chainlit.types import (
-    DeleteFeedbackRequest,
-    DeleteThreadRequest,
-    GenerationRequest,
-    GetThreadsRequest,
-    Theme,
-    UpdateFeedbackRequest,
-)
+from chainlit.types import (DeleteFeedbackRequest, DeleteThreadRequest,
+                            GenerationRequest, GetThreadsRequest, Theme,
+                            UpdateFeedbackRequest)
 from chainlit.user import PersistedUser, User
-from fastapi import (
-    Depends,
-    FastAPI,
-    HTTPException,
-    Query,
-    Request,
-    Response,
-    UploadFile,
-    status,
-)
+from fastapi import (Depends, FastAPI, HTTPException, Query, Request, Response,
+                     UploadFile, status)
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse,
+                               RedirectResponse)
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager

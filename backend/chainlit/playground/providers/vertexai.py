@@ -1,10 +1,9 @@
-import chainlit as cl
-from fastapi import HTTPException
-
-from fastapi.responses import StreamingResponse
-
 from chainlit.input_widget import Select, Slider, Tags
 from chainlit.playground.provider import BaseProvider
+from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
+
+import chainlit as cl
 
 vertexai_common_inputs = [
     Slider(
@@ -62,7 +61,8 @@ class ChatVertexAIProvider(BaseProvider):
 class GenerationVertexAIProvider(BaseProvider):
     async def create_completion(self, request):
         await super().create_completion(request)
-        from vertexai.language_models import TextGenerationModel, CodeGenerationModel
+        from vertexai.language_models import (CodeGenerationModel,
+                                              TextGenerationModel)
 
         self.validate_env(request=request)
 
@@ -94,9 +94,10 @@ class GenerationVertexAIProvider(BaseProvider):
 class GeminiProvider(BaseProvider):
     async def create_completion(self, request):
         await super().create_completion(request)
-        from vertexai.preview.generative_models import GenerativeModel
-        from google.cloud import aiplatform
         import os
+
+        from google.cloud import aiplatform
+        from vertexai.preview.generative_models import GenerativeModel
 
         self.validate_env(request=request)
 
@@ -106,7 +107,7 @@ class GeminiProvider(BaseProvider):
         messages = self.create_generation(request)
         aiplatform.init(  # TODO: remove this when Gemini is released in all the regions
             project=os.environ["GCP_PROJECT_ID"],
-            location='us-central1',
+            location="us-central1",
         )
         model = GenerativeModel(llm_settings["model"])
         del llm_settings["model"]

@@ -1,15 +1,15 @@
 import asyncio
 import uuid
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Dict, Optional, Union, List
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from chainlit.session import HTTPSession, WebsocketSession
 from lazify import LazyProxy
 
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
-    from chainlit.user import PersistedUser, User
     from chainlit.step import Step
+    from chainlit.user import PersistedUser, User
 
 
 class ChainlitContextException(Exception):

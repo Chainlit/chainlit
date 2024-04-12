@@ -11,7 +11,9 @@ from chainlit.logger import logger
 from chainlit.session import WebsocketSession
 from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User
-from literalai import Attachment, PageInfo, PaginatedResponse, Score as LiteralScore, Step as LiteralStep
+from literalai import Attachment, PageInfo, PaginatedResponse
+from literalai import Score as LiteralScore
+from literalai import Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
 from literalai.step import StepDict as LiteralStepDict
 

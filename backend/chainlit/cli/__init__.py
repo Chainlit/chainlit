@@ -10,15 +10,8 @@ nest_asyncio.apply()
 from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.cli.utils import check_file
-from chainlit.config import (
-    BACKEND_ROOT,
-    DEFAULT_HOST,
-    DEFAULT_PORT,
-    config,
-    init_config,
-    lint_translations,
-    load_module,
-)
+from chainlit.config import (BACKEND_ROOT, DEFAULT_HOST, DEFAULT_PORT, config,
+                             init_config, lint_translations, load_module)
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret

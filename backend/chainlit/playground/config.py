@@ -1,14 +1,9 @@
 from typing import Dict
 
 from chainlit.playground.provider import BaseProvider
-from chainlit.playground.providers import (
-    Anthropic,
-    AzureChatOpenAI,
-    ChatOpenAI,
-    ChatVertexAI,
-    GenerationVertexAI,
-    Gemini,
-)
+from chainlit.playground.providers import (Anthropic, AzureChatOpenAI,
+                                           ChatOpenAI, ChatVertexAI, Gemini,
+                                           GenerationVertexAI)
 
 providers = {
     AzureChatOpenAI.id: AzureChatOpenAI,

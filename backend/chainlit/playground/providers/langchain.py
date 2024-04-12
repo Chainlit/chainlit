@@ -32,12 +32,8 @@ class LangchainGenericProvider(BaseProvider):
         self.llm = llm
 
     def prompt_message_to_langchain_message(self, message: GenerationMessage):
-        from langchain.schema.messages import (
-            AIMessage,
-            FunctionMessage,
-            HumanMessage,
-            SystemMessage,
-        )
+        from langchain.schema.messages import (AIMessage, FunctionMessage,
+                                               HumanMessage, SystemMessage)
 
         content = "" if message["content"] is None else message["content"]
         if message["role"] == "user":

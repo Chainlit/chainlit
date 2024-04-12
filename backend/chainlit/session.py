@@ -2,17 +2,8 @@ import json
 import mimetypes
 import shutil
 import uuid
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Union,
-)
+from typing import (TYPE_CHECKING, Any, Callable, Deque, Dict, List, Literal,
+                    Optional, Union)
 
 import aiofiles
 from chainlit.logger import logger

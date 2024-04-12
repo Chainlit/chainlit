@@ -51,9 +51,8 @@ class ChainlitTelemetry:
 
     def configure_tracer(self):
         import uptrace
-        from opentelemetry.exporter.otlp.proto.grpc.exporter import (
-            logger as exporter_logger,
-        )
+        from opentelemetry.exporter.otlp.proto.grpc.exporter import \
+            logger as exporter_logger
         from opentelemetry.trace import get_tracer
 
         if self._tracer:

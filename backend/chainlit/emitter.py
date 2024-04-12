@@ -8,14 +8,8 @@ from chainlit.logger import logger
 from chainlit.message import Message
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
-from chainlit.types import (
-    AskActionResponse,
-    AskSpec,
-    FileDict,
-    FileReference,
-    ThreadDict,
-    UIMessagePayload,
-)
+from chainlit.types import (AskActionResponse, AskSpec, FileDict,
+                            FileReference, ThreadDict, UIMessagePayload)
 from chainlit.user import PersistedUser
 from literalai.helper import utc_now
 from socketio.exceptions import TimeoutError

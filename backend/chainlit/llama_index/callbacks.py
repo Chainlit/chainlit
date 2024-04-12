@@ -70,7 +70,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         self._restore_context()
-        
+
         step_type: StepType = "undefined"
         if event_type == CBEventType.RETRIEVE:
             step_type = "retrieval"
@@ -104,7 +104,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         """Run when an event ends."""
         step = self.steps.get(event_id, None)
 
-
         if payload is None or step is None:
             return
 
@@ -117,7 +116,8 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             source_nodes = getattr(response, "source_nodes", None)
             if source_nodes:
                 source_refs = ", ".join(
-                    [f"Source {idx}" for idx, _ in enumerate(source_nodes)])
+                    [f"Source {idx}" for idx, _ in enumerate(source_nodes)]
+                )
                 step.elements = [
                     Text(
                         name=f"Source {idx}",
@@ -173,7 +173,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             token_count = self.total_llm_token_count or None
             raw_response = response.raw if response else None
             model = raw_response.get("model", None) if raw_response else None
-            
+
             if messages and isinstance(response, ChatResponse):
                 msg: ChatMessage = response.message
                 step.generation = ChatGeneration(
@@ -207,4 +207,3 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
     start_trace = _noop
     end_trace = _noop
-
