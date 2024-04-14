@@ -116,7 +116,7 @@ async def connect(sid, environ, auth):
         if session := WebsocketSession.get(sid):
             if session.should_stop:
                 session.should_stop = False
-                raise InterruptedError("Task stopped by user")
+                logger.debug("Task stopped by user, socket_id: %s", sid)
         return socket.emit(event, data, to=sid)
 
     # Session scoped function to emit to the client and wait for a response
@@ -124,7 +124,7 @@ async def connect(sid, environ, auth):
         if session := WebsocketSession.get(sid):
             if session.should_stop:
                 session.should_stop = False
-                raise InterruptedError("Task stopped by user")
+                logger.debug("Task stopped by user, socket_id: %s", sid)
         return socket.call(event, data, timeout=timeout, to=sid)
 
     session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
