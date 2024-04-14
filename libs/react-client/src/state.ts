@@ -165,3 +165,8 @@ export const threadHistoryState = atom<ThreadHistory | undefined>({
     }
   ]
 });
+
+export const sideViewState = atom<IMessageElement | undefined>({
+  key: 'SideView',
+  default: undefined
+});

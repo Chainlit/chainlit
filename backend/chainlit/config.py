@@ -1,5 +1,6 @@
 import json
 import os
+import site
 import sys
 from importlib import util
 from pathlib import Path
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import tomli
 from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
@@ -112,7 +114,7 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
-# Specify a custom build directory for the frontend. 
+# Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
@@ -244,9 +246,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
@@ -281,9 +283,14 @@ class ChainlitConfig:
     def load_translation(self, language: str):
         translation = {}
         default_language = "en-US"
+        # fallback to root language (ex: `de` when `de-DE` is not found)
+        parent_language = language.split("-")[0]
 
         translation_lib_file_path = os.path.join(
             config_translation_dir, f"{language}.json"
+        )
+        translation_lib_parent_language_file_path = os.path.join(
+            config_translation_dir, f"{parent_language}.json"
         )
         default_translation_lib_file_path = os.path.join(
             config_translation_dir, f"{default_language}.json"
@@ -291,6 +298,14 @@ class ChainlitConfig:
 
         if os.path.exists(translation_lib_file_path):
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
+                translation = json.load(f)
+        elif os.path.exists(translation_lib_parent_language_file_path):
+            logger.warning(
+                f"Translation file for {language} not found. Using parent translation {parent_language}."
+            )
+            with open(
+                translation_lib_parent_language_file_path, "r", encoding="utf-8"
+            ) as f:
                 translation = json.load(f)
         elif os.path.exists(default_translation_lib_file_path):
             logger.warning(
@@ -340,12 +355,16 @@ def load_module(target: str, force_refresh: bool = False):
     sys.path.insert(0, target_dir)
 
     if force_refresh:
+        # Get current site packages dirs
+        site_package_dirs = site.getsitepackages()
+
         # Clear the modules related to the app from sys.modules
         for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
                 and module.__file__.startswith(target_dir)
+                and not any(module.__file__.startswith(p) for p in site_package_dirs)
             ):
                 sys.modules.pop(module_name, None)
 
@@ -427,6 +446,24 @@ def load_config():
     )
 
     return config
+
+
+def lint_translations():
+    # Load the ground truth (en-US.json file from chainlit source code)
+    src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
+    with open(src, "r", encoding="utf-8") as f:
+        truth = json.load(f)
+
+        # Find the local app translations
+        for file in os.listdir(config_translation_dir):
+            if file.endswith(".json"):
+                # Load the translation file
+                to_lint = os.path.join(config_translation_dir, file)
+                with open(to_lint, "r", encoding="utf-8") as f:
+                    translation = json.load(f)
+
+                    # Lint the translation file
+                    lint_translation_json(file, truth, translation)
 
 
 config = load_config()

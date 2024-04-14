@@ -42,7 +42,7 @@ async def resume_thread(session: WebsocketSession):
     if not thread:
         return
 
-    author = thread.get("user").get("identifier") if thread["user"] else None
+    author = thread.get("userIdentifier")
     user_is_author = author == session.user.identifier
 
     if user_is_author:
@@ -276,6 +276,9 @@ async def call_action(sid, action):
     action = Action(**action)
 
     try:
+        if not context.session.has_first_interaction:
+            context.session.has_first_interaction = True
+            asyncio.create_task(context.emitter.init_thread(action.name))
         res = await process_action(action)
         await context.emitter.send_action_response(
             id=action.id, status=True, response=res if isinstance(res, str) else None

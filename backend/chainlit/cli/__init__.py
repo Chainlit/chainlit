@@ -16,6 +16,7 @@ from chainlit.config import (
     DEFAULT_PORT,
     config,
     init_config,
+    lint_translations,
     load_module,
 )
 from chainlit.logger import logger
@@ -176,3 +177,11 @@ def chainlit_create_secret(args=None, **kwargs):
     print(
         f"Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET={random_secret()}"
     )
+
+
+@cli.command("lint-translations")
+@click.argument("args", nargs=-1)
+def chainlit_lint_translations(args=None, **kwargs):
+    trace_event("chainlit lint-translation")
+
+    lint_translations()

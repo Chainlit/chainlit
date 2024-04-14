@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 
 import { useChatInteract } from '@chainlit/react-client';
-import { AccentButton } from '@chainlit/react-components';
 
+import { AccentButton } from 'components/atoms/buttons';
 import { Translator } from 'components/i18n';
 
 import SquarePenIcon from 'assets/squarePen';
