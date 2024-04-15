@@ -18,6 +18,6 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
       - name: Install dependencies
-        run: poetry install --with tests --with mypy
+        run: poetry install --with tests --with mypy --with custom-data
       - name: Run Mypy
         run: poetry run mypy chainlit/
