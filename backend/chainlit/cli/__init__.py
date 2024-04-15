@@ -175,7 +175,7 @@ def chainlit_create_secret(args=None, **kwargs):
     trace_event("chainlit secret")
 
     print(
-        f"Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET={random_secret()}"
+        f'Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET="{random_secret()}"'
     )
 
 
