@@ -2,16 +2,16 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast, Protocol, Any
 
 import aiofiles
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
-from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
+from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter, PageInfo, PaginatedResponse
 from chainlit.user import PersistedUser, User
-from literalai import Attachment, PageInfo, PaginatedResponse, Score as LiteralScore, Step as LiteralStep
+from literalai import Attachment, PaginatedResponse as LiteralPaginatedResponse, Score as LiteralScore, Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
 from literalai.step import StepDict as LiteralStepDict
 
@@ -411,11 +411,19 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        return await self.client.api.list_threads(
+        literal_response: LiteralPaginatedResponse = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
             order_by={"column": "createdAt", "direction": "DESC"},
+        )
+        return PaginatedResponse(
+            pageInfo=PageInfo(
+                hasNextPage=literal_response.pageInfo.hasNextPage,
+                startCursor=literal_response.pageInfo.startCursor,
+                endCursor=literal_response.pageInfo.endCursor
+                ),
+            data=literal_response.data,
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
@@ -462,6 +470,10 @@ class ChainlitDataLayer(BaseDataLayer):
             tags=tags,
         )
 
+class BaseStorageClient(Protocol):
+    """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
+    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', overwrite: bool = True) -> Dict[str, Any]:
+        pass
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
     # support legacy LITERAL_SERVER variable as fallback

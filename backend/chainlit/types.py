@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union, Generic, TypeVar, Protocol, Any
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
@@ -37,6 +37,58 @@ class ThreadFilter(BaseModel):
     userId: Optional[str] = None
     search: Optional[str] = None
 
+@dataclass
+class PageInfo:
+    hasNextPage: bool
+    startCursor: Optional[str]
+    endCursor: Optional[str]
+
+    def to_dict(self):
+        return {
+            "hasNextPage": self.hasNextPage,
+            "startCursor": self.startCursor,
+            "endCursor": self.endCursor,
+        }
+
+    @classmethod
+    def from_dict(cls, page_info_dict: Dict) -> "PageInfo":
+        hasNextPage = page_info_dict.get("hasNextPage", False)
+        startCursor = page_info_dict.get("startCursor", None)
+        endCursor = page_info_dict.get("endCursor", None)
+        return cls(
+            hasNextPage=hasNextPage, startCursor=startCursor, endCursor=endCursor
+        )
+
+T = TypeVar("T", covariant=True)
+
+class HasFromDict(Protocol[T]):
+    @classmethod
+    def from_dict(cls, obj_dict: Any) -> T:
+        raise NotImplementedError()
+
+@dataclass
+class PaginatedResponse(Generic[T]):
+    pageInfo: PageInfo
+    data: List[T]
+
+    def to_dict(self):
+        return {
+            "pageInfo": self.pageInfo.to_dict(),
+            "data": [
+                (d.to_dict() if hasattr(d, "to_dict") and callable(d.to_dict) else d)
+                for d in self.data
+            ],
+        }
+
+    @classmethod
+    def from_dict(
+        cls, paginated_response_dict: Dict, the_class: HasFromDict[T]
+    ) -> "PaginatedResponse[T]":
+        pageInfo = PageInfo.from_dict(paginated_response_dict.get("pageInfo", {}))
+
+        data = [the_class.from_dict(d) for d in paginated_response_dict.get("data", [])]
+
+        return cls(pageInfo=pageInfo, data=data)
 
 @dataclass
 class FileSpec(DataClassJsonMixin):
