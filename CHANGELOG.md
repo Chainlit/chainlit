@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.503] - 2024-04-15
+
+### Added
+
+- Enable persisting threads using a Custom Data Layer (through SQLAlchemy) - @hayescode
+
+### Changed
+
+- React-client: Expose `sessionId` in `useChatSession`
+- Add chat profile as thread tag metadata
+
+### Fixed
+
+- Add quotes around the chainlit create-secret CLI output to avoid any issues with special characters
+
 ## [1.0.502] - 2024-04-08
 
 ### Added
