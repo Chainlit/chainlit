@@ -294,6 +294,7 @@ const useChatSession = () => {
     connect,
     disconnect,
     session,
+    sessionId,
     chatProfile,
     idToResume,
     setChatProfile
