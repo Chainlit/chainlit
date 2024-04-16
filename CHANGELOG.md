@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.504] - 2024-04-16
+
+### Changed
+
+- Chainlit apps should function correctly even if the data layer is down
+
 ## [1.0.503] - 2024-04-15
 
 ### Added
