@@ -71,8 +71,17 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         user = User(**dict)
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
+    if data_layer := get_data_layer():
+        try:
+            persisted_user = await data_layer.get_user(user.identifier)
+            if persisted_user == None:
+                persisted_user = await data_layer.create_user(user)
+        except Exception as e:
+            return user
 
-    return user
+        return persisted_user
+    else:
+        return user
 
 
 async def get_current_user(token: str = Depends(reuseable_oauth)):
