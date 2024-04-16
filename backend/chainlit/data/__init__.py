@@ -477,7 +477,7 @@ class BaseStorageClient(Protocol):
 
 if api_key := os.environ.get("LITERAL_API_KEY"):
     # support legacy LITERAL_SERVER variable as fallback
-    server = os.environ.get("LITERAL_API_URL", os.environ.get("LITERAL_SERVER"))
+    server = os.environ.get("LITERAL_API_URL") or os.environ.get("LITERAL_SERVER")
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 
