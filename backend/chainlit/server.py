@@ -597,7 +597,6 @@ async def get_user_threads(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get the threads page by page."""
-    # Only show the current user threads
 
     data_layer = get_data_layer()
 
@@ -605,9 +604,12 @@ async def get_user_threads(
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     if not isinstance(current_user, PersistedUser):
-        raise HTTPException(status_code=400, detail="User not persisted")
-
-    payload.filter.userId = current_user.id
+        persisted_user = await data_layer.get_user(identifier=current_user.identifier)
+        if not persisted_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        payload.filter.userId = persisted_user.id
+    else:
+        payload.filter.userId = current_user.id
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())

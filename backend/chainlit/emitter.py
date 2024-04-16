@@ -178,15 +178,15 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 tags = (
                     [self.session.chat_profile] if self.session.chat_profile else None
                 )
-                await data_layer.update_thread(
+                asyncio.create_task(data_layer.update_thread(
                     thread_id=self.session.thread_id,
                     name=interaction,
                     user_id=user_id,
                     tags=tags,
-                )
+                ))
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
-            await self.session.flush_method_queue()
+            asyncio.create_task(self.session.flush_method_queue())
 
     async def init_thread(self, interaction: str):
         await self.flush_thread_queues(interaction)
