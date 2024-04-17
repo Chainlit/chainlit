@@ -137,7 +137,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 step.elements = [
                     Text(
                         name=f"Source {idx}",
-                        content=source.node.get_text() or "Empty node",
+                        content=f"Metadata:\n{source.node.get_metadata_str()}\n\nContent:\n{source.node.get_text()}" or "Empty node",
                     )
                     for idx, source in enumerate(sources)
                 ]
