@@ -10,6 +10,7 @@ import {
   threadHistoryState,
   useChatData,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
 import { sideViewState } from '@chainlit/react-client';
@@ -151,10 +152,12 @@ const Chat = () => {
     options: { noClick: true }
   });
 
+  const { threadId } = useChatMessages();
+
   useEffect(() => {
     setThreads((prev) => ({
       ...prev,
-      currentThreadId: undefined
+      currentThreadId: threadId
     }));
   }, []);
 
