@@ -39,6 +39,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             self.storage_provider = storage_provider
             logger.info("SQLAlchemyDataLayer storage client initialized")
         else:
+            self.storage_provider = None
             logger.warn("SQLAlchemyDataLayer storage client is not initialized and elements will not be persisted!")
 
     ###### SQL Helpers ######
@@ -221,6 +222,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         step_dict['showInput'] = str(step_dict.get('showInput', '')).lower() if 'showInput' in step_dict else None
         parameters = {key: value for key, value in step_dict.items() if value is not None and not (isinstance(value, dict) and not value)}
         parameters['metadata'] = json.dumps(step_dict.get('metadata', {}))
+        parameters['generation'] = json.dumps(step_dict.get('generation', {}))
         columns = ', '.join(f'"{key}"' for key in parameters.keys())
         values = ', '.join(f':{key}' for key in parameters.keys())
         updates = ', '.join(f'"{key}" = :{key}' for key in parameters.keys() if key != 'id')
