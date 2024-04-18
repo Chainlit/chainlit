@@ -65,7 +65,7 @@ export default function ChatSettingsModal() {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            minWidth: '20vw',
+            minWidth: '30vw', // Increased minWidth from 20vw to 30vw to make the text box larger
             maxHeight: '70vh',
             gap: '15px'
           }}
@@ -77,7 +77,8 @@ export default function ChatSettingsModal() {
                 ...input,
                 value: formik.values[input.id],
                 onChange: formik.handleChange,
-                setField: formik.setFieldValue
+                setField: formik.setFieldValue,
+                style: { resize: 'both', overflow: 'auto' } // Make the text box resizable
               }}
             />
           ))}
