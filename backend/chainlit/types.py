@@ -1,5 +1,17 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union, Generic, TypeVar, Protocol, Any
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
 if TYPE_CHECKING:
     from chainlit.element import ElementDict
@@ -37,6 +49,7 @@ class ThreadFilter(BaseModel):
     userId: Optional[str] = None
     search: Optional[str] = None
 
+
 @dataclass
 class PageInfo:
     hasNextPage: bool
@@ -59,12 +72,15 @@ class PageInfo:
             hasNextPage=hasNextPage, startCursor=startCursor, endCursor=endCursor
         )
 
+
 T = TypeVar("T", covariant=True)
+
 
 class HasFromDict(Protocol[T]):
     @classmethod
     def from_dict(cls, obj_dict: Any) -> T:
         raise NotImplementedError()
+
 
 @dataclass
 class PaginatedResponse(Generic[T]):
@@ -90,6 +106,7 @@ class PaginatedResponse(Generic[T]):
 
         return cls(pageInfo=pageInfo, data=data)
 
+
 @dataclass
 class FileSpec(DataClassJsonMixin):
     accept: Union[List[str], Dict[str, List[str]]]
@@ -106,7 +123,7 @@ class ActionSpec(DataClassJsonMixin):
 class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
-    timeout: int
+    timeout: Optional[int]
     type: Literal["text", "file", "action"]
 
 
