@@ -7,7 +7,7 @@ import { Markdown } from 'components/molecules/Markdown';
 import { useFetch } from 'hooks/useFetch';
 
 import { type ITextElement } from 'client-types/';
-import { projectSettingsState } from '@chainlit/app/src/state/project';
+import { projectSettingsState } from 'state/project';
 
 interface Props {
   element: ITextElement;
