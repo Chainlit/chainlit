@@ -68,6 +68,9 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
+# Automatically tag threads with the current chat profile (if a chat profile is used)
+auto_tag_thread = true
+
 # Authorize users to upload files with messages
 [features.multi_modal]
     enabled = true
@@ -206,6 +209,7 @@ class FeaturesSettings(DataClassJsonMixin):
     latex: bool = False
     unsafe_allow_html: bool = False
     speech_to_text: Optional[SpeechToTextFeature] = None
+    auto_tag_thread: bool = True
 
 
 @dataclass()
@@ -246,9 +250,9 @@ class CodeSettings:
     on_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[
-        Callable[[Optional["User"]], List["ChatProfile"]]
-    ] = None
+    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
+        None
+    )
 
 
 @dataclass()
