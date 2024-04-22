@@ -28,7 +28,9 @@ export default function ResumeButton({ threadId }: Props) {
     clear();
     setIdToResume(threadId!);
     toast.success('Chat resumed!');
-    navigate('/');
+    if (!pSettings?.dataPersistence) {
+      navigate('/');
+    }
   };
 
   return (
