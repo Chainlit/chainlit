@@ -7,6 +7,7 @@ import {
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  currentThreadIdState,
   elementState,
   firstUserInteraction,
   loadingState,
@@ -43,6 +44,7 @@ const useChatInteract = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setIdToResume = useSetRecoilState(threadIdToResumeState);
   const setSideView = useSetRecoilState(sideViewState);
+  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
@@ -59,6 +61,7 @@ const useChatInteract = () => {
     resetChatSettings();
     resetChatSettingsValue();
     setSideView(undefined);
+    setCurrentThreadId(undefined);
   }, [session]);
 
   const sendMessage = useCallback(

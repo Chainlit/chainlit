@@ -188,13 +188,27 @@ class ChainlitEmitter(BaseChainlitEmitter):
                         tags=tags,
                     )
                 )
+                asyncio.create_task(
+                    data_layer.update_thread(
+                        thread_id=self.session.thread_id,
+                        name=interaction,
+                        user_id=user_id,
+                        tags=tags,
+                    )
+                )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
             asyncio.create_task(self.session.flush_method_queue())
 
     async def init_thread(self, interaction: str):
         await self.flush_thread_queues(interaction)
-        await self.emit("first_interaction", interaction)
+        await self.emit(
+            "first_interaction",
+            {
+                "interaction": interaction,
+                "thread_id": self.session.thread_id,
+            },
+        )
 
     async def process_user_message(self, payload: UIMessagePayload):
         step_dict = payload["message"]
