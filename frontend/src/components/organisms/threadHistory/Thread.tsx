@@ -170,7 +170,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
                 component={Link}
                 color="inherit"
                 size="small"
-                to={`/thread/${threadId}`}
+                to={threadId ? `/thread/${threadId}` : '/'}
               >
                 <Translator path="components.organisms.threadHistory.Thread.backToChat" />
               </Button>

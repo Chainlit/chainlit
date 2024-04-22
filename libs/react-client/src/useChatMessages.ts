@@ -6,7 +6,9 @@ const useChatMessages = () => {
   const messages = useRecoilValue(messagesState);
   const firstInteraction = useRecoilValue(firstUserInteraction);
 
-  const threadId = messages.find((message) => message.threadId)?.threadId;
+  const threadId = firstInteraction
+    ? messages.find((message) => message.threadId)?.threadId
+    : undefined;
 
   return {
     threadId,
