@@ -2,6 +2,7 @@ import asyncio
 import uuid
 from typing import Any, Dict, List, Literal, Optional, Union, cast
 
+from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.element import Element, File
 from chainlit.logger import logger
@@ -175,15 +176,18 @@ class ChainlitEmitter(BaseChainlitEmitter):
             else:
                 user_id = None
             try:
-                tags = (
-                    [self.session.chat_profile] if self.session.chat_profile else None
+                should_tag_thread = (
+                    self.session.chat_profile and config.features.auto_tag_thread
                 )
-                asyncio.create_task(data_layer.update_thread(
-                    thread_id=self.session.thread_id,
-                    name=interaction,
-                    user_id=user_id,
-                    tags=tags,
-                ))
+                tags = [self.session.chat_profile] if should_tag_thread else None
+                asyncio.create_task(
+                    data_layer.update_thread(
+                        thread_id=self.session.thread_id,
+                        name=interaction,
+                        user_id=user_id,
+                        tags=tags,
+                    )
+                )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
             asyncio.create_task(self.session.flush_method_queue())

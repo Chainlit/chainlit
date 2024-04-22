@@ -42,11 +42,14 @@ function resumeThread() {
   cy.get('#resumeThread').click();
   cy.get(`#chat-input`).should('exist');
 
-  cy.get('.step').should('have.length', 3);
+  cy.get('.step').should('have.length', 4);
 
   cy.get('.step').eq(0).should('contain', 'Message 3');
   cy.get('.step').eq(1).should('contain', 'Message 4');
-  cy.get('.step').eq(2).should('contain', 'Welcome back to thread 2');
+  // Thread name should be renamed with first interaction
+  cy.get('.step').eq(2).should('contain', 'Welcome back to Hello');
+  cy.get('.step').eq(3).should('contain', 'metadata');
+  cy.get('.step').eq(3).should('contain', 'chat_profile');
 }
 
 describe('Data Layer', () => {
