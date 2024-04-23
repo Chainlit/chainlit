@@ -3,6 +3,7 @@ import { atom } from 'recoil';
 import { IStep } from '@chainlit/react-client';
 
 export interface ChatProfile {
+  default: boolean;
   icon: string;
   name: string;
   markdown_description: string;
