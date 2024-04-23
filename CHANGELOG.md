@@ -20,6 +20,7 @@ Nothing unreleased!
 
 ### Fixed
 
+- Fixed incorrect step ancestor in the OpenAI instrumentation
 - Enabled having a `storage_provider` set to `None` in SQLAlchemyDataLayer - @mohamedalani
 - Correctly serialize `generation` in SQLAlchemyDataLayer - @mohamedalani
 
