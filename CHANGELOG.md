@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.505] - 2024-04-23
+
+### Added
+
+- The user's browser language configuration is available in `cl.user_session.get("languages")`
+
+### Changed
+
+- The thread auto-tagging feature is now opt-in using `auto_tag_thread` in the config.toml file
+
 ## [1.0.504] - 2024-04-16
 
 ### Changed
