@@ -37,7 +37,7 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
       rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
     }
     if (latex) {
-      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
+      rehypePlugins = [[rehypeKatex as any, {output: 'mathml'}], ...rehypePlugins];
     }
     return rehypePlugins;
   }, [allowHtml, latex]);
@@ -55,6 +55,7 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
+      //skipHtml
       className="markdown-body"
       components={{
         a({ children, ...props }) {

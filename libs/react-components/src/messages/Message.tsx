@@ -78,7 +78,6 @@ const Message = memo(
           sx={{
             boxSizing: 'border-box',
             mx: 'auto',
-            maxWidth: '60rem',
             px: 2,
             display: 'flex',
             flexDirection: 'column',
