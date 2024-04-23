@@ -14,6 +14,7 @@ Nothing unreleased!
 
 - The user's browser language configuration is available in `cl.user_session.get("languages")`
 - Allow html in text elements - @jdb78
+- Allow for setting a ChatProfile default - @kevinwmerritt
 
 ### Changed
 
