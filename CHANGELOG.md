@@ -18,6 +18,11 @@ Nothing unreleased!
 
 - The thread auto-tagging feature is now opt-in using `auto_tag_thread` in the config.toml file
 
+### Fixed
+
+- Enabled having a `storage_provider` set to `None` in SQLAlchemyDataLayer - @mohamedalani
+- Correctly serialize `generation` in SQLAlchemyDataLayer - @mohamedalani
+
 ## [1.0.504] - 2024-04-16
 
 ### Changed
