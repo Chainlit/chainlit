@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import {
   ThreadHistory,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
 
@@ -41,6 +42,7 @@ const ThreadList = ({
 }: Props) => {
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
+  const { threadId: currentThreadId } = useChatMessages();
   const navigate = useNavigate();
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
     return (
@@ -89,7 +91,7 @@ const ThreadList = ({
   }
 
   const handleDeleteThread = (threadId: string) => {
-    if (threadId === idToResume) {
+    if (threadId === idToResume || threadId === currentThreadId) {
       clear();
     }
     if (threadId === threadHistory.currentThreadId) {

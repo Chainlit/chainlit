@@ -1,5 +1,6 @@
 import size from 'lodash/size';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { grey } from 'theme';
 
@@ -30,10 +31,12 @@ export default function ChatProfiles() {
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const isDarkMode = useIsDarkMode();
+  const navigate = useNavigate();
 
   const handleClose = () => {
     setOpenDialog(false);
     setNewChatProfile(null);
+    navigate('/');
   };
 
   const handleConfirm = (newChatProfileWithoutConfirm?: string) => {

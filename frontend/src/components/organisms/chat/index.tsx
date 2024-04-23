@@ -1,5 +1,6 @@
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +11,7 @@ import {
   threadHistoryState,
   useChatData,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
 import { sideViewState } from '@chainlit/react-client';
@@ -42,6 +44,7 @@ const Chat = () => {
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
+  const navigate = useNavigate();
 
   const fileSpec = useMemo(
     () => ({
@@ -151,11 +154,22 @@ const Chat = () => {
     options: { noClick: true }
   });
 
+  const { threadId } = useChatMessages();
+
   useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
-      currentThreadId: undefined
-    }));
+    const currentPage = new URL(window.location.href);
+    if (
+      projectSettings?.dataPersistence &&
+      threadId &&
+      currentPage.pathname === '/'
+    ) {
+      navigate(`/thread/${threadId}`);
+    } else {
+      setThreads((prev) => ({
+        ...prev,
+        currentThreadId: threadId
+      }));
+    }
   }, []);
 
   const enableMultiModalUpload =

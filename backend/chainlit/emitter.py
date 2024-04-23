@@ -194,7 +194,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     async def init_thread(self, interaction: str):
         await self.flush_thread_queues(interaction)
-        await self.emit("first_interaction", interaction)
+        await self.emit(
+            "first_interaction",
+            {
+                "interaction": interaction,
+                "thread_id": self.session.thread_id,
+            },
+        )
 
     async def process_user_message(self, payload: UIMessagePayload):
         step_dict = payload["message"]

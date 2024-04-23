@@ -13,7 +13,8 @@ import {
   IStep,
   IThread,
   accessTokenState,
-  nestMessages
+  nestMessages,
+  useChatMessages
 } from '@chainlit/react-client';
 
 import SideView from 'components/atoms/element/sideView';
@@ -33,6 +34,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
   const [steps, setSteps] = useState<IStep[]>([]);
   const apiClient = useRecoilValue(apiClientState);
   const { t } = useTranslation();
+  const { threadId } = useChatMessages();
 
   useEffect(() => {
     if (!thread) return;
@@ -164,7 +166,12 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             id="thread-info"
             severity="info"
             action={
-              <Button component={Link} color="inherit" size="small" to="/">
+              <Button
+                component={Link}
+                color="inherit"
+                size="small"
+                to={threadId ? `/thread/${threadId}` : '/'}
+              >
                 <Translator path="components.organisms.threadHistory.Thread.backToChat" />
               </Button>
             }

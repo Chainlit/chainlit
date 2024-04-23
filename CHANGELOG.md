@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.505] - 2024-04-23
+
+### Added
+
+- The user's browser language configuration is available in `cl.user_session.get("languages")`
+- Allow html in text elements - @jdb78
+- Allow for setting a ChatProfile default - @kevinwmerritt
+
+### Changed
+
+- The thread history refreshes right after a new thread is created.
+- The thread auto-tagging feature is now opt-in using `auto_tag_thread` in the config.toml file
+
+### Fixed
+
+- Fixed incorrect step ancestor in the OpenAI instrumentation
+- Enabled having a `storage_provider` set to `None` in SQLAlchemyDataLayer - @mohamedalani
+- Correctly serialize `generation` in SQLAlchemyDataLayer - @mohamedalani
+
 ## [1.0.504] - 2024-04-16
 
 ### Changed

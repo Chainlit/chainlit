@@ -15,6 +15,7 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  currentThreadIdState,
   elementState,
   firstUserInteraction,
   loadingState,
@@ -64,6 +65,7 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
+  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
 
   const _connect = useCallback(
     ({
@@ -147,9 +149,13 @@ const useChatSession = () => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('first_interaction', (interaction: string) => {
-        setFirstUserInteraction(interaction);
-      });
+      socket.on(
+        'first_interaction',
+        (event: { interaction: string; thread_id: string }) => {
+          setFirstUserInteraction(event.interaction);
+          setCurrentThreadId(event.thread_id);
+        }
+      );
 
       socket.on('update_message', (message: IStep) => {
         setMessages((oldMessages) =>
