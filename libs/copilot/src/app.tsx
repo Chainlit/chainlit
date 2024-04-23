@@ -98,14 +98,15 @@ export default function App({ config, evoya }: Props) {
       <Toaster
         richColors
         className="toast show"
-        position="top-right"
+        position="top-center"
         toastOptions={{
           style: {
             fontFamily: theme.typography.fontFamily,
             // background: theme.palette.background.paper,
             // border: `1px solid ${theme.palette.divider}`,
             // color: theme.palette.text.primary
-          }
+          },
+          duration: 2000
         }}
       />
       {evoya.type === 'default' ? <Widget config={config} /> : <WidgetEmbedded />}
