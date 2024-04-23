@@ -44,6 +44,7 @@ function threadList() {
 }
 
 function resumeThread() {
+  // Go to the "thread 2" thread and resume it
   cy.get('#thread-test2').click();
   let initialUrl;
   cy.url().then((url) => {
@@ -52,6 +53,7 @@ function resumeThread() {
   cy.get(`#chat-input`).should('not.exist');
   cy.get('#resumeThread').click();
   cy.get(`#chat-input`).should('exist');
+  // Make sure the url stays the same after resuming
   cy.url().then((newUrl) => {
     expect(newUrl).to.equal(initialUrl);
   });
@@ -65,7 +67,6 @@ function resumeThread() {
   cy.get('.step').should('have.length', 8);
 
   cy.get('.step').eq(0).should('contain', 'Hello');
-  // Thread name should be renamed with first interaction
   cy.get('.step').eq(5).should('contain', 'Welcome back to Hello');
   // Because the Thread was closed, the metadata should have been updated automatically
   cy.get('.step').eq(6).should('contain', 'metadata');
