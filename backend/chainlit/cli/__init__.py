@@ -38,6 +38,9 @@ def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
 
+    ssl_certfile = os.environ.get("SSL_CERT", None)
+    ssl_keyfile = os.environ.get("SSL_KEY", None)
+
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
     )
@@ -75,6 +78,8 @@ def run_chainlit(target: str):
             port=port,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile,
         )
         server = uvicorn.Server(config)
         await server.serve()
@@ -126,13 +131,30 @@ def run_chainlit(target: str):
     envvar="NO_CACHE",
     help="Useful to disable third parties cache, such as langchain.",
 )
+@click.option(
+    "--ssl-cert",
+    default=None,
+    envvar="SSL_CERT",
+    help="Specify the file path for the SSL certificate.",
+)
+@click.option(
+    "--ssl-key",
+    default=None,
+    envvar="SSL_KEY",
+    help="Specify the file path for the SSL key",
+)
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+def chainlit_run(target, watch, headless, debug, ci, no_cache, ssl_cert, ssl_key, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
+    if bool(ssl_cert) != bool(ssl_key):
+        raise click.UsageError("Both --ssl-cert and --ssl-key must be provided together.")
+    if ssl_cert:
+        os.environ["SSL_CERT"] = ssl_cert
+        os.environ["SSL_KEY"] = ssl_key
     if ci:
         logger.info("Running in CI mode")
 
@@ -150,6 +172,8 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     config.run.no_cache = no_cache
     config.run.ci = ci
     config.run.watch = watch
+    config.run.ssl_cert = ssl_cert
+    config.run.ssl_key = ssl_key
 
     run_chainlit(target)
 
