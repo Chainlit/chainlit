@@ -29,7 +29,6 @@ from chainlit.types import (
 )
 from chainlit.user import PersistedUser, User
 from literalai import Attachment
-from literalai import PaginatedResponse as LiteralPaginatedResponse
 from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
@@ -431,7 +430,7 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        literal_response: LiteralPaginatedResponse = await self.client.api.list_threads(
+        literal_response = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
