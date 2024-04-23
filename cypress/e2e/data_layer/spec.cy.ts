@@ -6,7 +6,14 @@ function login() {
 }
 
 function feedback() {
+  cy.location('pathname').should((loc) => {
+    expect(loc).to.eq('/');
+  });
   submitMessage('Hello');
+  cy.location('pathname').should((loc) => {
+    // starts with /thread/
+    expect(loc).to.match(/^\/thread\//);
+  });
   cy.get('.negative-feedback-off').should('have.length', 1);
   cy.get('.positive-feedback-off').should('have.length', 1).click();
   cy.get('#feedbackSubmit').click();
@@ -40,7 +47,14 @@ function resumeThread() {
   cy.get('#thread-test2').click();
   cy.get(`#chat-input`).should('not.exist');
   cy.get('#resumeThread').click();
+  let initialUrl;
+  cy.url().then((url) => {
+    initialUrl = url;
+  });
   cy.get(`#chat-input`).should('exist');
+  cy.url().then((newUrl) => {
+    expect(newUrl).to.equal(initialUrl);
+  });
 
   cy.get('.step').should('have.length', 4);
 
