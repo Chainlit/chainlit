@@ -18,6 +18,7 @@ Nothing unreleased!
 
 ### Changed
 
+- The thread history refreshes right after a new thread is created.
 - The thread auto-tagging feature is now opt-in using `auto_tag_thread` in the config.toml file
 
 ### Fixed

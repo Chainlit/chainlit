@@ -77,7 +77,7 @@ class TestDataLayer(cl_data.BaseDataLayer):
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
-        thread = next((t for t in thread_history if t["id"] == "test2"), None)
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
         if thread:
             if name:
                 thread["name"] = name
@@ -85,11 +85,30 @@ class TestDataLayer(cl_data.BaseDataLayer):
                 thread["metadata"] = metadata
             if tags:
                 thread["tags"] = tags
+        else:
+            thread_history.append(
+                {
+                    "id": thread_id,
+                    "name": name,
+                    "metadata": metadata,
+                    "tags": tags,
+                    "createdAt": utc_now(),
+                    "userId": user_id,
+                    "userIdentifier": "admin",
+                    "steps": [],
+                }
+            )
 
     @cl_data.queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
         global create_step_counter
         create_step_counter += 1
+
+        thread = next(
+            (t for t in thread_history if t["id"] == step_dict.get("threadId")), None
+        )
+        if thread:
+            thread["steps"].append(step_dict)
 
     async def get_thread_author(self, thread_id: str):
         return "admin"

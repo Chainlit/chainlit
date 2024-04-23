@@ -45,25 +45,31 @@ function threadList() {
 
 function resumeThread() {
   cy.get('#thread-test2').click();
-  cy.get(`#chat-input`).should('not.exist');
-  cy.get('#resumeThread').click();
   let initialUrl;
   cy.url().then((url) => {
     initialUrl = url;
   });
+  cy.get(`#chat-input`).should('not.exist');
+  cy.get('#resumeThread').click();
   cy.get(`#chat-input`).should('exist');
   cy.url().then((newUrl) => {
     expect(newUrl).to.equal(initialUrl);
   });
 
-  cy.get('.step').should('have.length', 4);
+  // back to the "hello" thread
+  cy.get('a').contains('Hello').click();
+  cy.get(`#chat-input`).should('not.exist');
+  cy.get('#resumeThread').click();
+  cy.get(`#chat-input`).should('exist');
 
-  cy.get('.step').eq(0).should('contain', 'Message 3');
-  cy.get('.step').eq(1).should('contain', 'Message 4');
+  cy.get('.step').should('have.length', 8);
+
+  cy.get('.step').eq(0).should('contain', 'Hello');
   // Thread name should be renamed with first interaction
-  cy.get('.step').eq(2).should('contain', 'Welcome back to Hello');
-  cy.get('.step').eq(3).should('contain', 'metadata');
-  cy.get('.step').eq(3).should('contain', 'chat_profile');
+  cy.get('.step').eq(5).should('contain', 'Welcome back to Hello');
+  // Because the Thread was closed, the metadata should have been updated automatically
+  cy.get('.step').eq(6).should('contain', 'metadata');
+  cy.get('.step').eq(6).should('contain', 'chat_profile');
 }
 
 describe('Data Layer', () => {
