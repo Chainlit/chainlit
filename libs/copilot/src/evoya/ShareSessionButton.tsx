@@ -10,6 +10,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { Translator } from '@chainlit/app/src/components/i18n';
 import { EvoyaShareLink } from './types';
+import { sessionIdState } from '@chainlit/react-client';
+import { useRecoilValue } from 'recoil';
 
 import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
@@ -22,7 +24,6 @@ const shareLinkExpires = (expires) => {
     case 1:
       return <Trans i18nKey="components.molecules.shareSession.expire.1Day" />;
     default:
-      // return <Translator path="components.molecules.shareSession.expire.xDays" />;
       return <Trans
         i18nKey="components.molecules.shareSession.expire.xDays"
         components={{
@@ -45,7 +46,7 @@ export default function ShareSessionButton() {
   const [isCreatingStatic, setIsCreatingStatic] = useState<boolean>(false);
   const [isCreatingDynamic, setIsCreatingDynamic] = useState<boolean>(false);
   const [isOverlayError, setIsOverlayError] = useState<boolean>(false);
-  const [hasShareLink, setHasShareLink] = useState<boolean>(false);
+  const sessionId = useRecoilValue(sessionIdState);
 
   const handleClickOpen = async() => {
     setOpen(true);
@@ -64,9 +65,8 @@ export default function ShareSessionButton() {
           throw new Error(shareDataResponse.statusText);
         }
         const shareData = await shareDataResponse.json();
-        console.log(shareData);
         if (shareData.error) {
-          setHasShareLink(false);
+          setShareLink({});
         } else if (shareData.success) {
           let dateDiff = 0;
           if (shareData.data.expires_at) {
@@ -108,12 +108,10 @@ export default function ShareSessionButton() {
         if (!shareResponse.ok) {
           throw new Error(shareResponse.statusText);
         }
-        const shareData = await shareResponse.json();
-        console.log(shareData);
+        await shareResponse.json();
 
         toast.success(<Translator path="components.molecules.shareSession.messages.successRemove" />);
         setShareLink({});
-        //handleClose();
       } catch(e) {
         console.error(e);
         toast.error(<Translator path="components.molecules.shareSession.messages.error" />);
@@ -125,7 +123,7 @@ export default function ShareSessionButton() {
     if (sessionUuid) {
       return sessionUuid;
     } else if (!evoya?.session_uuid) {
-      const sessionResponse = await apiClient.get('/chat_session_uuid', accessToken);
+      const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
       const sessionJson = await sessionResponse.json();
       setSessionUuid(sessionJson.session_uuid);
       return sessionJson.session_uuid;
@@ -164,7 +162,6 @@ export default function ShareSessionButton() {
           throw new Error(shareResponse.statusText);
         }
         const shareData = await shareResponse.json();
-        console.log(shareData);
         if (shareData.success) {
           const shareUrl = shareData.data.link;
 
@@ -205,7 +202,9 @@ export default function ShareSessionButton() {
         </DialogTitle>
         <DialogContent>
           {isLoading ? (
-            <CircularProgress />
+            <Box sx={{ display: 'flex', justifyContent: 'center', minWidth: '300px' }}>
+              <CircularProgress />
+            </Box>
           ) : (
             <DialogContentText id="share-alert-dialog-description">
               <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
@@ -237,11 +236,6 @@ export default function ShareSessionButton() {
                     </Select>
                   </FormControl>
                 </Box>
-                {/* {!hasShareLink &&
-                  <Button variant="contained" onClick={() => handleCopyShareLink('STATIC', expireTime)}>
-                    <Translator path="components.molecules.shareSession.copyButton" />
-                  </Button>
-                } */}
                 {shareLink.type === 'STATIC' ? (
                   <LoadingButton variant="contained" loading={isCreatingStatic} loadingPosition="center" onClick={() => handleCopyShareLink('STATIC', expireTime)}>
                     <Translator path="components.molecules.shareSession.copyUpdateButton" />
@@ -281,9 +275,9 @@ export default function ShareSessionButton() {
                     </Select>
                   </FormControl>
                 </Box>
-                <Button variant="contained" onClick={() => handleCopyShareLink('DYNAMIC', expireTimeDynamic)}>
+                <LoadingButton variant="contained" loading={isCreatingDynamic} loadingPosition="center" onClick={() => handleCopyShareLink('DYNAMIC', expireTimeDynamic)}>
                   <Translator path="components.molecules.shareSession.copyButton" />
-                </Button>
+                </LoadingButton>
               </Box>
               {shareLink.url && (
                 <Box sx={{ marginTop: 3 }}>
@@ -301,7 +295,6 @@ export default function ShareSessionButton() {
                       components={{
                         shareLink: <ShareLink url={shareLink.url} />,
                         expires: shareLinkExpires(shareLink.expire),
-                        // expires: <>{t(`components.molecules.shareSession.expire.${shareLink.expire}`)}</>
                       }}
                     />
                   </Alert>

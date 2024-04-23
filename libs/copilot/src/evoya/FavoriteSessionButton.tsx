@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 
 import { Box, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import { Translator } from '@chainlit/app/src/components/i18n';
+import { sessionIdState } from '@chainlit/react-client';
+import { useRecoilValue } from 'recoil';
 
 import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
@@ -12,15 +14,15 @@ export default function FavoriteSessionButton() {
   const { evoya, accessToken, apiClient } = useContext(WidgetContext);
   const [isFavorite, setIsFavorite] = useState<boolean>(!!evoya?.api?.favorite?.is_favorite);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const sessionId = useRecoilValue(sessionIdState);
 
   const handleClick = async () => {
     setIsLoading(true);
     if (evoya?.api?.favorite && accessToken) {
-      let session_uuid = null;
+      let session_uuid = evoya.session_uuid;
       if (!evoya.session_uuid) {
-        const sessionResponse = await apiClient.get('/chat_session_uuid', accessToken);
+        const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
         const sessionJson = await sessionResponse.json();
-        console.log(sessionJson);
         session_uuid = sessionJson.session_uuid;
       }
       if (isFavorite) {

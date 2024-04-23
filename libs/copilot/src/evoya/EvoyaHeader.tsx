@@ -11,12 +11,16 @@ import FavoriteSessionButton from './FavoriteSessionButton';
 import { WidgetContext } from 'context';
 import { useContext } from 'react';
 
+import { firstUserInteraction } from '@chainlit/react-client';
+import { useRecoilValue } from 'recoil';
+
 interface Props {
   showClose: boolean;
 }
 
 const Header = ({ showClose }: Props): JSX.Element => {
   const { evoya } = useContext(WidgetContext);
+  const firstUserInt = useRecoilValue(firstUserInteraction);
 
   return (
     <Stack
@@ -33,7 +37,7 @@ const Header = ({ showClose }: Props): JSX.Element => {
         <Logo style={{ maxHeight: '25px' }} />
       )}
       <Stack direction="row" alignItems="center" spacing={2}>
-        {evoya?.type === 'dashboard' && (
+        {(evoya?.type === 'dashboard' && (evoya.session_uuid || firstUserInt)) && (
           <>
             <FavoriteSessionButton />
             <ShareSessionButton />
