@@ -163,6 +163,8 @@ class WebsocketSession(BaseSession):
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Languages of the user's browser
+        languages: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -187,6 +189,8 @@ class WebsocketSession(BaseSession):
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
+
+        self.languages = languages
 
     @property
     def files_dir(self):

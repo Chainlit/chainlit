@@ -29,6 +29,7 @@ class StepDict(TypedDict, total=False):
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     metadata: Dict
+    tags: Optional[List[str]]
     input: str
     output: str
     createdAt: Optional[str]
@@ -47,6 +48,7 @@ def step(
     name: Optional[str] = "",
     type: TrueStepType = "undefined",
     id: Optional[str] = None,
+    tags: Optional[List[str]] = None,
     disable_feedback: bool = True,
     root: bool = False,
     language: Optional[str] = None,
@@ -71,6 +73,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
@@ -97,6 +100,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
@@ -137,6 +141,7 @@ class Step:
 
     is_error: Optional[bool]
     metadata: Dict
+    tags: Optional[List[str]]
     thread_id: str
     created_at: Union[str, None]
     start: Union[str, None]
@@ -153,6 +158,8 @@ class Step:
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         elements: Optional[List[Element]] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
         disable_feedback: bool = True,
         root: bool = False,
         language: Optional[str] = None,
@@ -167,7 +174,8 @@ class Step:
         self.type = type
         self.id = id or str(uuid.uuid4())
         self.disable_feedback = disable_feedback
-        self.metadata = {}
+        self.metadata = metadata or {}
+        self.tags = tags
         self.is_error = False
         self.show_input = show_input
         self.parent_id = parent_id
@@ -194,13 +202,13 @@ class Step:
                 if set_language:
                     self.language = "json"
             except TypeError:
-                processed_content = str(content)
+                processed_content = str(content).replace("\\n", "\n")
                 if set_language:
                     self.language = "text"
         elif isinstance(content, str):
             processed_content = content
         else:
-            processed_content = str(content)
+            processed_content = str(content).replace("\\n", "\n")
             if set_language:
                 self.language = "text"
         return processed_content
@@ -231,6 +239,7 @@ class Step:
             "disableFeedback": self.disable_feedback,
             "streaming": self.streaming,
             "metadata": self.metadata,
+            "tags": self.tags,
             "input": self.input,
             "isError": self.is_error,
             "output": self.output,

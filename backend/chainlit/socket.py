@@ -42,7 +42,7 @@ async def resume_thread(session: WebsocketSession):
     if not thread:
         return
 
-    author = thread.get("user").get("identifier") if thread["user"] else None
+    author = thread.get("userIdentifier")
     user_is_author = author == session.user.identifier
 
     if user_is_author:
@@ -147,6 +147,7 @@ async def connect(sid, environ, auth):
         token=token,
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
+        languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
     )
 
     trace_event("connection_successful")
@@ -168,7 +169,10 @@ async def connection_successful(sid):
         thread = await resume_thread(context.session)
         if thread:
             context.session.has_first_interaction = True
-            await context.emitter.emit("first_interaction", "resume")
+            await context.emitter.emit(
+                "first_interaction",
+                {"interaction": "resume", "thread_id": thread.get("id")},
+            )
             await context.emitter.resume_thread(thread)
             await config.code.on_chat_resume(thread)
             return
@@ -276,6 +280,9 @@ async def call_action(sid, action):
     action = Action(**action)
 
     try:
+        if not context.session.has_first_interaction:
+            context.session.has_first_interaction = True
+            asyncio.create_task(context.emitter.init_thread(action.name))
         res = await process_action(action)
         await context.emitter.send_action_response(
             id=action.id, status=True, response=res if isinstance(res, str) else None

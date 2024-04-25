@@ -1,5 +1,4 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import 'regenerator-runtime';
 
@@ -9,6 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { FileSpec, useChatData } from '@chainlit/react-client';
 
+import { useTranslation } from 'components/i18n/Translator';
 import { Attachments } from 'components/molecules/attachments';
 import HistoryButton from 'components/organisms/chat/history';
 

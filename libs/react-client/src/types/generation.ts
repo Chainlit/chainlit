@@ -10,6 +10,7 @@ export interface IGenerationMessage {
   content: string;
   role: GenerationMessageRole;
   name?: string;
+  tool_calls?: any[];
 }
 
 export interface IFunction {

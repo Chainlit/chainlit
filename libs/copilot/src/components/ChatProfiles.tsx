@@ -2,6 +2,7 @@ import size from 'lodash/size';
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
+import { SelectInput } from '@chainlit/app/src/components/atoms/inputs';
 import NewChatDialog from '@chainlit/app/src/components/molecules/newChatDialog';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
@@ -9,7 +10,6 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { SelectInput } from '@chainlit/react-components';
 
 export default function ChatProfiles() {
   const pSettings = useRecoilValue(projectSettingsState);

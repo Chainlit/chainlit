@@ -1,8 +1,9 @@
 import { atom } from 'recoil';
 
-import { IMessageElement, IStep } from '@chainlit/react-client';
+import { IStep } from '@chainlit/react-client';
 
 export interface ChatProfile {
+  default: boolean;
   icon: string;
   name: string;
   markdown_description: string;
@@ -21,7 +22,12 @@ export interface IProjectSettings {
     theme: any;
   };
   features: {
-    multi_modal?: boolean;
+    multi_modal?: {
+      enabled?: boolean;
+      max_size_mb?: number;
+      max_files?: number;
+      accept?: string[] | Record<string, string[]>;
+    };
     unsafe_allow_html?: boolean;
     latex?: boolean;
     speech_to_text?: {
@@ -38,11 +44,6 @@ export interface IProjectSettings {
 
 export const projectSettingsState = atom<IProjectSettings | undefined>({
   key: 'ProjectSettings',
-  default: undefined
-});
-
-export const sideViewState = atom<IMessageElement | undefined>({
-  key: 'SideView',
   default: undefined
 });
 

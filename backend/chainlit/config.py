@@ -1,12 +1,14 @@
 import json
 import os
+import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import tomli
 from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
@@ -50,7 +52,7 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
-# Authorized origins 
+# Authorized origins
 allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -66,8 +68,15 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
+# Automatically tag threads with the current chat profile (if a chat profile is used)
+auto_tag_thread = true
+
 # Authorize users to upload files with messages
-multi_modal = true
+[features.multi_modal]
+    enabled = true
+    accept = ["*/*"]
+    max_files = 20
+    max_size_mb = 500
 
 # Allows user to use speech to text
 [features.speech_to_text]
@@ -107,6 +116,11 @@ hide_cot = false
 
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+
+# Specify a custom build directory for the frontend.
+# This can be used to customize the frontend code.
+# Be careful: If this is a relative path, it should not start with a slash.
+# custom_build = "./public/build"
 
 # Override default MUI light theme. (Check theme.ts)
 [UI.theme]
@@ -180,13 +194,22 @@ class SpeechToTextFeature:
     language: Optional[str] = None
 
 
+@dataclass
+class MultiModalFeature:
+    enabled: Optional[bool] = None
+    accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
+    max_files: Optional[int] = None
+    max_size_mb: Optional[int] = None
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
-    multi_modal: bool = True
+    multi_modal: Optional[MultiModalFeature] = None
     latex: bool = False
     unsafe_allow_html: bool = False
     speech_to_text: Optional[SpeechToTextFeature] = None
+    auto_tag_thread: bool = True
 
 
 @dataclass()
@@ -204,6 +227,7 @@ class UISettings(DataClassJsonMixin):
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
     custom_font: Optional[str] = None
+    custom_build: Optional[str] = None
 
 
 @dataclass()
@@ -263,9 +287,14 @@ class ChainlitConfig:
     def load_translation(self, language: str):
         translation = {}
         default_language = "en-US"
+        # fallback to root language (ex: `de` when `de-DE` is not found)
+        parent_language = language.split("-")[0]
 
         translation_lib_file_path = os.path.join(
             config_translation_dir, f"{language}.json"
+        )
+        translation_lib_parent_language_file_path = os.path.join(
+            config_translation_dir, f"{parent_language}.json"
         )
         default_translation_lib_file_path = os.path.join(
             config_translation_dir, f"{default_language}.json"
@@ -273,6 +302,14 @@ class ChainlitConfig:
 
         if os.path.exists(translation_lib_file_path):
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
+                translation = json.load(f)
+        elif os.path.exists(translation_lib_parent_language_file_path):
+            logger.warning(
+                f"Translation file for {language} not found. Using parent translation {parent_language}."
+            )
+            with open(
+                translation_lib_parent_language_file_path, "r", encoding="utf-8"
+            ) as f:
                 translation = json.load(f)
         elif os.path.exists(default_translation_lib_file_path):
             logger.warning(
@@ -322,12 +359,16 @@ def load_module(target: str, force_refresh: bool = False):
     sys.path.insert(0, target_dir)
 
     if force_refresh:
+        # Get current site packages dirs
+        site_package_dirs = site.getsitepackages()
+
         # Clear the modules related to the app from sys.modules
         for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
                 and module.__file__.startswith(target_dir)
+                and not any(module.__file__.startswith(p) for p in site_package_dirs)
             ):
                 sys.modules.pop(module_name, None)
 
@@ -409,6 +450,24 @@ def load_config():
     )
 
     return config
+
+
+def lint_translations():
+    # Load the ground truth (en-US.json file from chainlit source code)
+    src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
+    with open(src, "r", encoding="utf-8") as f:
+        truth = json.load(f)
+
+        # Find the local app translations
+        for file in os.listdir(config_translation_dir):
+            if file.endswith(".json"):
+                # Load the translation file
+                to_lint = os.path.join(config_translation_dir, file)
+                with open(to_lint, "r", encoding="utf-8") as f:
+                    translation = json.load(f)
+
+                    # Lint the translation file
+                    lint_translation_json(file, truth, translation)
 
 
 config = load_config()

@@ -1,5 +1,6 @@
+import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,18 +11,21 @@ import {
   threadHistoryState,
   useChatData,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
+import { sideViewState } from '@chainlit/react-client';
 
+import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
+import { useTranslation } from 'components/i18n/Translator';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { apiClientState } from 'state/apiClient';
 import { IAttachment, attachmentsState } from 'state/chat';
-import { projectSettingsState, sideViewState } from 'state/project';
+import { projectSettingsState } from 'state/project';
 
 import Messages from './Messages';
 import DropScreen from './dropScreen';
@@ -40,8 +44,16 @@ const Chat = () => {
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
+  const navigate = useNavigate();
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
+      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
+      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+    }),
+    [projectSettings]
+  );
 
   const { t } = useTranslation();
 
@@ -131,8 +143,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
@@ -142,15 +154,26 @@ const Chat = () => {
     options: { noClick: true }
   });
 
+  const { threadId } = useChatMessages();
+
   useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
-      currentThreadId: undefined
-    }));
+    const currentPage = new URL(window.location.href);
+    if (
+      projectSettings?.dataPersistence &&
+      threadId &&
+      currentPage.pathname === '/'
+    ) {
+      navigate(`/thread/${threadId}`);
+    } else {
+      setThreads((prev) => ({
+        ...prev,
+        currentThreadId: threadId
+      }));
+    }
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.multi_modal?.enabled;
 
   return (
     <Box

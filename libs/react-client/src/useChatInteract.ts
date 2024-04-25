@@ -7,12 +7,14 @@ import {
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  currentThreadIdState,
   elementState,
   firstUserInteraction,
   loadingState,
   messagesState,
   sessionIdState,
   sessionState,
+  sideViewState,
   tasklistState,
   threadIdToResumeState,
   tokenCountState
@@ -41,6 +43,8 @@ const useChatInteract = () => {
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setIdToResume = useSetRecoilState(threadIdToResumeState);
+  const setSideView = useSetRecoilState(sideViewState);
+  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
@@ -56,6 +60,8 @@ const useChatInteract = () => {
     setTokenCount(0);
     resetChatSettings();
     resetChatSettingsValue();
+    setSideView(undefined);
+    setCurrentThreadId(undefined);
   }, [session]);
 
   const sendMessage = useCallback(

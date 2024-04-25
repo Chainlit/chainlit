@@ -1,6 +1,8 @@
 import size from 'lodash/size';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
+import { grey } from 'theme';
 
 import { Box, Popover, Tab, Tabs } from '@mui/material';
 
@@ -9,12 +11,11 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import {
-  InputStateHandler,
-  Markdown,
-  grey,
-  useIsDarkMode
-} from '@chainlit/react-components';
+
+import { InputStateHandler } from 'components/atoms/inputs';
+import { Markdown } from 'components/molecules/Markdown';
+
+import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { projectSettingsState } from 'state/project';
 
@@ -30,10 +31,12 @@ export default function ChatProfiles() {
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const isDarkMode = useIsDarkMode();
+  const navigate = useNavigate();
 
   const handleClose = () => {
     setOpenDialog(false);
     setNewChatProfile(null);
+    navigate('/');
   };
 
   const handleConfirm = (newChatProfileWithoutConfirm?: string) => {

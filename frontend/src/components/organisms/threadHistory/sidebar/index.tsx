@@ -2,6 +2,7 @@ import { useAuth } from 'api/auth';
 import isEqual from 'lodash/isEqual';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import Box from '@mui/material/Box';
@@ -13,7 +14,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   IThreadFilters,
   accessTokenState,
-  threadHistoryState
+  threadHistoryState,
+  useChatMessages
 } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
@@ -46,6 +48,8 @@ const _ThreadHistorySideBar = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const apiClient = useRecoilValue(apiClientState);
+  const { firstInteraction, messages, threadId } = useChatMessages();
+  const navigate = useNavigate();
 
   const ref = useRef<HTMLDivElement>(null);
   const filtersHasChanged = !isEqual(prevFilters, filters);
@@ -62,9 +66,12 @@ const _ThreadHistorySideBar = () => {
     setShouldLoadMore(atBottom);
   };
 
-  const fetchThreads = async (cursor?: string | number) => {
+  const fetchThreads = async (
+    cursor?: string | number,
+    isLoadingMore?: boolean
+  ) => {
     try {
-      if (cursor) {
+      if (cursor || isLoadingMore) {
         setIsLoadingMore(true);
       } else {
         setIsFetching(true);
@@ -128,6 +135,29 @@ const _ThreadHistorySideBar = () => {
       setChatHistoryOpen(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!firstInteraction) {
+      return;
+    }
+
+    // distinguish between the first interaction containing the word "resume"
+    // and the actual resume message
+    const isActualResume =
+      firstInteraction === 'resume' &&
+      messages.at(0)?.output.toLowerCase() !== 'resume';
+
+    if (isActualResume) {
+      return;
+    }
+
+    fetchThreads(undefined, true).then(() => {
+      const currentPage = new URL(window.location.href);
+      if (threadId && currentPage.pathname === '/') {
+        navigate(`/thread/${threadId}`);
+      }
+    });
+  }, [firstInteraction]);
 
   return (
     <Box display="flex" position="relative">

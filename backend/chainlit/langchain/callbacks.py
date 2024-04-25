@@ -533,7 +533,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                     break
 
                 current_step.language = "json"
-                current_step.output = json.dumps(message_completion)
+                current_step.output = json.dumps(message_completion, indent=4, ensure_ascii=False)
             else:
                 completion_start = self.completion_generations[str(run.id)]
                 completion = generation.get("text", "")

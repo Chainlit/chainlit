@@ -1,8 +1,8 @@
+import asyncio
 from typing import Union
 
 from chainlit.context import get_context
 from chainlit.step import Step
-from chainlit.sync import run_sync
 from chainlit.utils import check_module_version
 from literalai import ChatGeneration, CompletionGeneration
 from literalai.helper import timestamp_utc
@@ -16,7 +16,7 @@ def instrument_openai():
 
     from literalai.instrumentation.openai import instrument_openai
 
-    async def on_new_generation(
+    def on_new_generation(
         generation: Union["ChatGeneration", "CompletionGeneration"], timing
     ):
         context = get_context()
@@ -52,11 +52,6 @@ def instrument_openai():
             step.input = generation.prompt
             step.output = generation.completion
 
-        await step.send()
+        asyncio.create_task(step.send())
 
-    def on_new_generation_sync(
-        generation: Union["ChatGeneration", "CompletionGeneration"], timing
-    ):
-        run_sync(on_new_generation(generation, timing))
-
-    instrument_openai(None, on_new_generation_sync)
+    instrument_openai(None, on_new_generation)

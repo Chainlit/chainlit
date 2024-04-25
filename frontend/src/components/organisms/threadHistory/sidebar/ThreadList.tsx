@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import map from 'lodash/map';
 import size from 'lodash/size';
 import { Link, useNavigate } from 'react-router-dom';
+import { grey } from 'theme';
 
 import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutline';
 import Alert from '@mui/material/Alert';
@@ -16,9 +17,9 @@ import Typography from '@mui/material/Typography';
 import {
   ThreadHistory,
   useChatInteract,
+  useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { grey } from '@chainlit/react-components';
 
 import { Translator } from 'components/i18n';
 
@@ -41,27 +42,32 @@ const ThreadList = ({
 }: Props) => {
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
+  const { threadId: currentThreadId } = useChatMessages();
   const navigate = useNavigate();
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
-    return [1, 2, 3].map((index) => (
-      <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
-        <Skeleton width={100} />
-        {[1, 2].map((childIndex) => (
-          <Stack
-            key={`threads-skeleton-${index}-${childIndex}`}
-            sx={{
-              py: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 1.5
-            }}
-          >
-            <Skeleton width={30} />
-            <Skeleton width={'100%'} />
-          </Stack>
+    return (
+      <>
+        {[1, 2, 3].map((index) => (
+          <Box key={`threads-skeleton-${index}`} sx={{ px: 1.5, mt: 2 }}>
+            <Skeleton width={100} />
+            {[1, 2].map((childIndex) => (
+              <Stack
+                key={`threads-skeleton-${index}-${childIndex}`}
+                sx={{
+                  py: 2,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 1.5
+                }}
+              >
+                <Skeleton width={30} />
+                <Skeleton width={'100%'} />
+              </Stack>
+            ))}
+          </Box>
         ))}
-      </Box>
-    ));
+      </>
+    );
   }
 
   if (error) {
@@ -85,7 +91,7 @@ const ThreadList = ({
   }
 
   const handleDeleteThread = (threadId: string) => {
-    if (threadId === idToResume) {
+    if (threadId === idToResume || threadId === currentThreadId) {
       clear();
     }
     if (threadId === threadHistory.currentThreadId) {
@@ -119,7 +125,27 @@ const ThreadList = ({
                       backgroundColor: (theme) => theme.palette.background.paper
                     }}
                   >
-                    {index}
+                    {(() => {
+                      if (index === 'Today') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.today" />
+                        );
+                      } else if (index === 'Yesterday') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.yesterday" />
+                        );
+                      } else if (index === 'Previous 7 days') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous7days" />
+                        );
+                      } else if (index === 'Previous 30 days') {
+                        return (
+                          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous30days" />
+                        );
+                      } else {
+                        return <>{index}</>;
+                      }
+                    })()}
                   </Typography>
                 </ListSubheader>
                 {map(items, (thread) => {

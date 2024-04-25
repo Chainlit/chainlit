@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState } from 'recoil';
+import { grey } from 'theme';
 
 import FilterList from '@mui/icons-material/FilterList';
 import ThumbDown from '@mui/icons-material/ThumbDown';
@@ -10,14 +10,13 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 
-import { grey } from '@chainlit/react-components';
+import { useTranslation } from 'components/i18n/Translator';
 
 import { threadsFiltersState } from 'state/threads';
 
-export enum FEEDBACKS {
-  ALL = 0,
+export enum Feedback {
   POSITIVE = 1,
-  NEGATIVE = -1
+  NEGATIVE = 0
 }
 
 export default function FeedbackSelect() {
@@ -26,12 +25,12 @@ export default function FeedbackSelect() {
 
   const { t } = useTranslation();
 
-  const handleChange = (feedback: number) => {
+  const handleChange = (feedback?: number) => {
     setFilters((prev) => ({ ...prev, feedback }));
     setAnchorEl(null);
   };
 
-  const renderMenuItem = (label: string, feedback: number) => {
+  const renderMenuItem = (label: string, feedback?: number) => {
     return (
       <Box
         onClick={() => handleChange(feedback)}
@@ -54,9 +53,9 @@ export default function FeedbackSelect() {
     const sx = { width: 16, height: 16 };
 
     switch (filters.feedback) {
-      case FEEDBACKS.POSITIVE:
+      case Feedback.POSITIVE:
         return <ThumbUp sx={sx} />;
-      case FEEDBACKS.NEGATIVE:
+      case Feedback.NEGATIVE:
         return <ThumbDown sx={sx} />;
       default:
         return <FilterList sx={sx} />;
@@ -103,19 +102,19 @@ export default function FeedbackSelect() {
             t(
               'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackAll'
             ),
-            FEEDBACKS.ALL
+            undefined
           )}
           {renderMenuItem(
             t(
               'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackPositive'
             ),
-            FEEDBACKS.POSITIVE
+            Feedback.POSITIVE
           )}
           {renderMenuItem(
             t(
               'components.organisms.threadHistory.sidebar.filters.FeedbackSelect.feedbackNegative'
             ),
-            FEEDBACKS.NEGATIVE
+            Feedback.NEGATIVE
           )}
         </Stack>
       </Menu>

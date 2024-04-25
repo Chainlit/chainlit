@@ -21,14 +21,16 @@ export default function ResumeButton({ threadId }: Props) {
   const { clear, setIdToResume } = useChatInteract();
 
   if (!threadId || !pSettings?.threadResumable) {
-    return;
+    return null;
   }
 
   const onClick = () => {
     clear();
     setIdToResume(threadId!);
     toast.success('Chat resumed!');
-    navigate('/');
+    if (!pSettings?.dataPersistence) {
+      navigate('/');
+    }
   };
 
   return (
