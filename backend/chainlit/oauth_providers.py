@@ -4,6 +4,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
+from chainlit.secret import random_secret
 from chainlit.user import User
 from fastapi import HTTPException
 
@@ -160,9 +161,9 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code id_token",
-            "scope": "https://graph.microsoft.com/User.Read",
+            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
             "response_mode": "form_post",
-            "nonce": nonce
+            "nonce": nonce,
         }
 
     async def get_token(self, code: str, url: str):
