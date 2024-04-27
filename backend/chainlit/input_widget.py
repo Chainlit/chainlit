@@ -127,6 +127,7 @@ class TextInput(InputWidget):
     type: InputWidgetType = "textinput"
     initial: Optional[str] = None
     placeholder: Optional[str] = None
+    multiline: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -137,6 +138,7 @@ class TextInput(InputWidget):
             "placeholder": self.placeholder,
             "tooltip": self.tooltip,
             "description": self.description,
+            "multiline": self.multiline,
         }
 
 
