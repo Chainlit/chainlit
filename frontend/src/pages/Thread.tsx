@@ -25,7 +25,10 @@ export default function ThreadPage() {
 
   const { data, error, isLoading } = useApi<IThread>(
     apiClient,
-    id ? `/project/thread/${id}` : null
+    id ? `/project/thread/${id}` : null,
+    {
+      revalidateOnFocus: false
+    }
   );
 
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
