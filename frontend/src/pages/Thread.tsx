@@ -27,8 +27,7 @@ export default function ThreadPage() {
     apiClient,
     id ? `/project/thread/${id}` : null,
     {
-      revalidateOnFocus: false,
-      revalidateIfStale: false
+      revalidateOnFocus: false
     }
   );
 
