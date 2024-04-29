@@ -65,6 +65,15 @@ const Input = memo(
       const pasteEvent = (event: ClipboardEvent) => {
         if (event.clipboardData && event.clipboardData.items) {
           const items = Array.from(event.clipboardData.items);
+
+          // Attempt to handle text data first
+          const textData = event.clipboardData.getData('text/plain');
+          if (textData) {
+            // Skip file handling if text data is present
+            return;
+          }
+
+          // If no text data, check for files (e.g., images)
           items.forEach((item) => {
             if (item.kind === 'file') {
               const file = item.getAsFile();
