@@ -43,7 +43,7 @@ const MenuItem = ({
   >
     <Stack direction="row" alignItems="center" spacing={1}>
       {item.icon ? item.icon : null}
-      <span>{item.value}</span>
+      <span>{item?.label || item.value}</span>
     </Stack>
     {item.notificationCount ? (
       <NotificationCount count={item.notificationCount} />
