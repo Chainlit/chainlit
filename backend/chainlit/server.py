@@ -54,7 +54,6 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -187,8 +186,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(GZipMiddleware)
 
 socket = SocketManager(
     app,
