@@ -14,6 +14,10 @@ Nothing unreleased!
 
 - add support for multiline option in TextInput chat settings field - @kevinwmerritt
 
+### Changed
+
+- disable gzip middleware to prevent a compression issue on safari
+
 ### Fixed
 
 - pasting from microsoft products generates text instead of an image
