@@ -8,6 +8,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.0.506] - 2024-04-30
+
+### Added
+
+- add support for multiline option in TextInput chat settings field - @kevinwmerritt
+
+### Changed
+
+- disable gzip middleware to prevent a compression issue on safari
+
+### Fixed
+
+- pasting from microsoft products generates text instead of an image
+- do not prevent thread history revalidation - @kevinwmerritt
+- display the label instead of the value for menu item - @kevinwmerritt
+
+### Added
+
 ## [1.0.505] - 2024-04-23
 
 ### Added
