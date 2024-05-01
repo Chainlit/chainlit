@@ -124,7 +124,7 @@ class HaystackAgentCallbackHandler:
 
     def on_tool_start(self, tool_input: str, tool: Tool, **kwargs: Any) -> None:
         # Tool started, create step
-        parent_id = self.stack.items[0].id if self.stack.items[0] else None
+        parent_id = self.stack.items[0].parent_id if self.stack.items[0] else None
         tool_step = Step(name=tool.name, type="tool", parent_id=parent_id)
         tool_step.input = tool_input
         tool_step.start = utc_now()
@@ -139,9 +139,9 @@ class HaystackAgentCallbackHandler:
     ) -> None:
         # Tool finished, send step with tool_result
         tool_step = self.stack.pop()
-        tool_step.output = tool_result
         tool_step.end = utc_now()
         run_sync(tool_step.update())
+        run_sync(tool_step.stream_token(tool_result))
 
     def on_tool_error(self, exception: Exception, tool: Tool, **kwargs: Any) -> None:
         # Tool error, send error message
