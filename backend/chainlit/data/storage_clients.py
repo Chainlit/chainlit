@@ -39,16 +39,32 @@ class AzureStorageClient(BaseStorageClient):
 class S3StorageClient(BaseStorageClient):
     """
     Class to enable Amazon S3 storage provider
+
+    params:
+        bucket: Name of the S3 bucket
+        access_key: AWS access key
+        secret_key: AWS secret key
+        session_token: AWS session token
     """
-    def __init__(self, bucket: str):
+    def __init__(self, bucket: str, access_key: Optional[str] = None, secret_key: Optional[str] = None, session_token: Optional[str] = None):
         try:
             self.bucket = bucket
-            self.client = boto3.client("s3")
+            if access_key and secret_key and session_token:
+                self.client = boto3.client("s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key, aws_session_token=session_token)
+            else:
+                self.client = boto3.client("s3")
             logger.info("S3StorageClient initialized")
         except Exception as e:
             logger.warn(f"S3StorageClient initialization error: {e}")
 
-    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', overwrite: bool = True) -> Dict[str, Any]:
+    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', **kwargs) -> Dict[str, Any]:
+        """
+        Upload file to S3 bucket
+        
+        params:
+            object_key: Key to store the object in the bucket
+            data: Data to be stored
+            mime: Mime type of the object"""
         try:
             self.client.put_object(Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime)
             url = f"https://{self.bucket}.s3.amazonaws.com/{object_key}"
