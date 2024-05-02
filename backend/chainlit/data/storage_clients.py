@@ -3,6 +3,7 @@ from chainlit.logger import logger
 from typing import TYPE_CHECKING, Optional, Dict, Union, Any
 from azure.storage.filedatalake import DataLakeServiceClient, FileSystemClient, DataLakeFileClient, ContentSettings
 import boto3    # type: ignore
+from google.cloud import storage
 
 if TYPE_CHECKING:
     from azure.core.credentials import AzureNamedKeyCredential, AzureSasCredential, TokenCredential
@@ -71,4 +72,36 @@ class S3StorageClient(BaseStorageClient):
             return {"object_key": object_key, "url": url}
         except Exception as e:
             logger.warn(f"S3StorageClient, upload_file error: {e}")
+            return {}
+        
+class GoogleCloudClient(BaseStorageClient):
+    """
+    Class to enable Google Cloud Storage
+
+    params:
+        bucket: Name of the GCS bucket
+    """
+    def __init__(self, bucket: str):
+        try:
+            self.client = storage.Client()
+            self.bucket = self.client.bucket(bucket)
+            logger.info("GoogleCloudClient initialized")
+        except Exception as e:
+            logger.warn(f"GoogleCloudClient initialization error: {e}")
+
+    async def upload_file(self, object_key: str, data: Union[bytes, str], mime: str = 'application/octet-stream', **kwargs) -> Dict[str, Any]:
+        """
+        Upload file to GCS bucket
+        
+        params:
+            object_key: Key to store the object in the bucket
+            data: Data to be stored
+            mime: Mime type of the object"""
+        try:
+            blob = self.bucket.blob(object_key)
+            blob.upload_from_string(data, content_type=mime)
+            url = f"https://storage.googleapis.com/{self.bucket.name}/{object_key}"
+            return {"object_key": object_key, "url": url}
+        except Exception as e:
+            logger.warn(f"GoogleCloudClient, upload_file error: {e}")
             return {}
