@@ -8,17 +8,23 @@ type options = TOptions<$Dictionary>;
 
 type TranslatorProps = {
   path: string | string[];
+  suffix?: string;
   options?: options;
 };
 
-const Translator = ({ path, options }: TranslatorProps) => {
+const Translator = ({ path, options, suffix }: TranslatorProps) => {
   const { t, i18n } = usei18nextTranslation();
 
   if (!i18n.exists(path, options)) {
     return <Skeleton variant="text" width={20} />;
   }
 
-  return <span>{t(path, options)}</span>;
+  return (
+    <span>
+      {t(path, options)}
+      {suffix}
+    </span>
+  );
 };
 
 export const useTranslation = () => {

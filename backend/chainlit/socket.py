@@ -9,12 +9,13 @@ from chainlit.auth import get_current_user, require_login
 from chainlit.config import config
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
+from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
-from chainlit.types import UIMessagePayload
+from chainlit.types import AudioChunkPayload, AudioEndPayload, UIMessagePayload
 from chainlit.user_session import user_sessions
 
 
@@ -93,9 +94,13 @@ def build_anon_user_identifier(environ):
 
 @socket.on("connect")
 async def connect(sid, environ, auth):
-    if not config.code.on_chat_start and not config.code.on_message:
+    if (
+        not config.code.on_chat_start
+        and not config.code.on_message
+        and not config.code.on_audio_chunk
+    ):
         logger.warning(
-            "You need to configure at least an on_chat_start or an on_message callback"
+            "You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback"
         )
         return False
     user = None
@@ -257,6 +262,56 @@ async def message(sid, payload: UIMessagePayload):
 
     task = asyncio.create_task(process_message(session, payload))
     session.current_task = task
+
+
+@socket.on("audio_chunk")
+async def audio_chunk(sid, payload: AudioChunkPayload):
+    """Handle an audio chunk sent by the user."""
+    session = WebsocketSession.require(sid)
+
+    init_ws_context(session)
+
+    if config.code.on_audio_chunk:
+        asyncio.create_task(
+            config.code.on_audio_chunk(
+                payload["isStart"], payload["mimeType"], payload["data"]
+            )
+        )
+
+
+@socket.on("audio_end")
+async def audio_end(sid, payload: AudioEndPayload):
+    """Handle the end of the audio stream."""
+    session = WebsocketSession.require(sid)
+    try:
+        context = init_ws_context(session)
+        await context.emitter.task_start()
+
+        if not session.has_first_interaction:
+            session.has_first_interaction = True
+            asyncio.create_task(context.emitter.init_thread("audio"))
+
+        file_elements = []
+        if config.code.on_audio_end:
+            file_refs = payload.get("fileReferences")
+            if file_refs:
+                files = [
+                    session.files[file["id"]]
+                    for file in file_refs
+                    if file["id"] in session.files
+                ]
+                file_elements = [Element.from_dict(file) for file in files]
+
+            await config.code.on_audio_end(file_elements)
+    except asyncio.CancelledError:
+        pass
+    except Exception as e:
+        logger.exception(e)
+        await ErrorMessage(
+            author="Error", content=str(e) or e.__class__.__name__
+        ).send()
+    finally:
+        await context.emitter.task_end()
 
 
 async def process_action(action: Action):

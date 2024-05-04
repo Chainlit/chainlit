@@ -73,6 +73,20 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const sendAudioChunk = useCallback(
+    (isStart: boolean, mimeType: string, data: Blob) => {
+      session?.socket.emit('audio_chunk', { isStart, mimeType, data });
+    },
+    [session?.socket]
+  );
+
+  const endAudioStream = useCallback(
+    (fileReferences?: IFileRef[]) => {
+      session?.socket.emit('audio_end', { fileReferences });
+    },
+    [session?.socket]
+  );
+
   const replyMessage = useCallback(
     (message: IStep) => {
       if (askUser) {
@@ -138,6 +152,8 @@ const useChatInteract = () => {
     clear,
     replyMessage,
     sendMessage,
+    sendAudioChunk,
+    endAudioStream,
     stopTask,
     setIdToResume,
     updateChatSettings

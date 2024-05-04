@@ -154,6 +154,16 @@ class UIMessagePayload(TypedDict):
     fileReferences: Optional[List[FileReference]]
 
 
+class AudioChunkPayload(TypedDict):
+    isStart: bool
+    mimeType: str
+    data: bytes
+
+
+class AudioEndPayload(TypedDict):
+    fileReferences: Optional[List[FileReference]]
+
+
 @dataclass
 class AskFileResponse:
     id: str

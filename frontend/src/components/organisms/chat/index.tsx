@@ -44,9 +44,13 @@ const Chat = () => {
 
   const fileSpec = useMemo(
     () => ({
-      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
-      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
-      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+      max_size_mb:
+        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files:
+        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
+        '*/*'
+      ]
     }),
     [projectSettings]
   );
@@ -169,7 +173,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal?.enabled;
+    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box

@@ -36,7 +36,8 @@ const UploadButton = ({
     ? 'small'
     : 'medium';
 
-  if (!upload || !pSettings?.features?.multi_modal?.enabled) return null;
+  if (!upload || !pSettings?.features?.spontaneous_file_upload?.enabled)
+    return null;
   const { getRootProps, getInputProps } = upload;
 
   return (

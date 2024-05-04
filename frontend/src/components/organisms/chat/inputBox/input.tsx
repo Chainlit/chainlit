@@ -13,12 +13,12 @@ import { Attachments } from 'components/molecules/attachments';
 import HistoryButton from 'components/organisms/chat/history';
 
 import { IAttachment, attachmentsState } from 'state/chat';
-import { chatSettingsOpenState, projectSettingsState } from 'state/project';
+import { chatSettingsOpenState } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
+import MicButton from './MicButton';
 import { SubmitButton } from './SubmitButton';
 import UploadButton from './UploadButton';
-import SpeechButton from './speechButton';
 
 interface Props {
   fileSpec: FileSpec;
@@ -40,7 +40,6 @@ function getLineCount(el: HTMLDivElement) {
 const Input = memo(
   ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
     const [attachments, setAttachments] = useRecoilState(attachmentsState);
-    const [pSettings] = useRecoilState(projectSettingsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
@@ -56,8 +55,6 @@ const Input = memo(
 
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
-
-    const showTextToSpeech = pSettings?.features.speech_to_text?.enabled;
 
     const { t } = useTranslation();
 
@@ -167,13 +164,7 @@ const Input = memo(
             <TuneIcon />
           </IconButton>
         )}
-        {showTextToSpeech ? (
-          <SpeechButton
-            onSpeech={(transcript) => setValue((text) => text + transcript)}
-            language={pSettings.features?.speech_to_text?.language}
-            disabled={disabled}
-          />
-        ) : null}
+        <MicButton disabled={disabled} />
       </>
     );
 
