@@ -25,7 +25,7 @@ const ElementView = ({ element, onGoBack }: ElementViewProps) => {
       mx="auto"
       sx={{
         width: '100%',
-        maxWidth: '60rem',
+        maxWidth: '48rem',
         color: 'text.primary'
       }}
       id="element-view"

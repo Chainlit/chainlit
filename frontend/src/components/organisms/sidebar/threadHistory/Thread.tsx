@@ -17,7 +17,6 @@ import {
   useChatMessages
 } from '@chainlit/react-client';
 
-import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
@@ -131,7 +130,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             <Skeleton
               variant="rounded"
               sx={{
-                maxWidth: '60rem',
+                maxWidth: '48rem',
                 width: '100%',
                 height: 100
               }}
@@ -151,53 +150,51 @@ const Thread = ({ thread, error, isLoading }: Props) => {
   const messages = nestMessages(steps);
 
   return (
-    <Stack direction="row" flexGrow={1} width="100%" height="100%">
-      <SideView>
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: '60rem',
-            mx: 'auto',
-            my: 2
-          }}
+    <Stack flexGrow={1} width="100%" height="100%">
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '48rem',
+          mx: 'auto',
+          my: 2
+        }}
+      >
+        <Alert
+          sx={{ mx: 2 }}
+          id="thread-info"
+          severity="info"
+          action={
+            <Button
+              component={Link}
+              color="inherit"
+              size="small"
+              to={threadId ? `/thread/${threadId}` : '/'}
+            >
+              <Translator path="components.organisms.threadHistory.Thread.backToChat" />
+            </Button>
+          }
         >
-          <Alert
-            sx={{ mx: 2 }}
-            id="thread-info"
-            severity="info"
-            action={
-              <Button
-                component={Link}
-                color="inherit"
-                size="small"
-                to={threadId ? `/thread/${threadId}` : '/'}
-              >
-                <Translator path="components.organisms.threadHistory.Thread.backToChat" />
-              </Button>
-            }
-          >
-            <Translator path="components.organisms.threadHistory.Thread.chatCreatedOn" />{' '}
-            {new Intl.DateTimeFormat(undefined, {
-              day: 'numeric',
-              month: 'numeric',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric'
-            }).format(new Date(thread.createdAt))}
-            .
-          </Alert>
-        </Box>
-        <MessageContainer
-          loading={false}
-          avatars={[]}
-          actions={actions}
-          elements={(elements || []) as IMessageElement[]}
-          onFeedbackUpdated={onFeedbackUpdated}
-          onFeedbackDeleted={onFeedbackDeleted}
-          messages={messages}
-          autoScroll={true}
-        />
-      </SideView>
+          <Translator path="components.organisms.threadHistory.Thread.chatCreatedOn" />{' '}
+          {new Intl.DateTimeFormat(undefined, {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          }).format(new Date(thread.createdAt))}
+          .
+        </Alert>
+      </Box>
+      <MessageContainer
+        loading={false}
+        avatars={[]}
+        actions={actions}
+        elements={(elements || []) as IMessageElement[]}
+        onFeedbackUpdated={onFeedbackUpdated}
+        onFeedbackDeleted={onFeedbackDeleted}
+        messages={messages}
+        autoScroll={true}
+      />
     </Stack>
   );
 };

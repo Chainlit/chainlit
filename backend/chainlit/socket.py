@@ -113,18 +113,10 @@ async def connect(sid, environ, auth):
 
     # Session scoped function to emit to the client
     def emit_fn(event, data):
-        if session := WebsocketSession.get(sid):
-            if session.should_stop:
-                session.should_stop = False
-                raise InterruptedError("Task stopped by user")
         return socket.emit(event, data, to=sid)
 
     # Session scoped function to emit to the client and wait for a response
     def emit_call_fn(event: Literal["ask", "call_fn"], data, timeout):
-        if session := WebsocketSession.get(sid):
-            if session.should_stop:
-                session.should_stop = False
-                raise InterruptedError("Task stopped by user")
         return socket.call(event, data, timeout=timeout, to=sid)
 
     session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
@@ -135,6 +127,7 @@ async def connect(sid, environ, auth):
     user_env = load_user_env(user_env_string)
 
     client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
+    http_referer = environ.get("HTTP_REFERER")
 
     ws_session = WebsocketSession(
         id=session_id,
@@ -148,6 +141,7 @@ async def connect(sid, environ, auth):
         chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
+        http_referer=http_referer,
     )
 
     trace_event("connection_successful")
@@ -178,7 +172,8 @@ async def connection_successful(sid):
             return
 
     if config.code.on_chat_start:
-        await config.code.on_chat_start()
+        task = asyncio.create_task(config.code.on_chat_start())
+        context.session.current_task = task
 
 
 @socket.on("clear_session")
@@ -223,10 +218,11 @@ async def stop(sid):
 
         init_ws_context(session)
         await Message(
-            author="System", content="Task stopped by the user.", disable_feedback=True
+            author="System", content="Task manually stopped.", disable_feedback=True
         ).send()
 
-        session.should_stop = True
+        if session.current_task:
+            session.current_task.cancel()
 
         if config.code.on_stop:
             await config.code.on_stop()
@@ -243,7 +239,7 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
             # Sleep 1ms to make sure any children step starts after the message step start
             time.sleep(0.001)
             await config.code.on_message(message)
-    except InterruptedError:
+    except asyncio.CancelledError:
         pass
     except Exception as e:
         logger.exception(e)
@@ -258,9 +254,9 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
 async def message(sid, payload: UIMessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
-    session.should_stop = False
 
-    await process_message(session, payload)
+    task = asyncio.create_task(process_message(session, payload))
+    session.current_task = task
 
 
 async def process_action(action: Action):
@@ -288,7 +284,7 @@ async def call_action(sid, action):
             id=action.id, status=True, response=res if isinstance(res, str) else None
         )
 
-    except InterruptedError:
+    except asyncio.CancelledError:
         await context.emitter.send_action_response(
             id=action.id, status=False, response="Action interrupted by the user"
         )

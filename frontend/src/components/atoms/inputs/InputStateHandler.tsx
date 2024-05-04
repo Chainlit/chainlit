@@ -25,7 +25,7 @@ const InputStateHandler = (props: InputStateHandlerProps): JSX.Element => {
   } = props;
 
   return (
-    <Stack width="100%" sx={sx} gap={0.5}>
+    <Stack sx={sx} gap={0.5}>
       {label ? (
         <InputLabel
           id={id}
