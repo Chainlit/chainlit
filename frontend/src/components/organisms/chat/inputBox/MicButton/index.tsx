@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
@@ -8,9 +8,10 @@ import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { Translator } from 'components/i18n';
 
+import { attachmentsState } from 'state/chat';
 import { projectSettingsState } from 'state/project';
 
-import { useChatInteract } from 'client-types/*';
+import { askUserState, useChatInteract } from 'client-types/*';
 
 import RecordScreen from './RecordScreen';
 
@@ -19,25 +20,21 @@ interface Props {
 }
 
 const MicButton = ({ disabled }: Props) => {
+  const askUser = useRecoilValue(askUserState);
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState<NodeJS.Timeout | undefined>(undefined);
-  const isRecordingRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { sendAudioChunk, endAudioStream } = useChatInteract();
   const pSettings = useRecoilValue(projectSettingsState);
+  const [attachments, setAttachments] = useRecoilState(attachmentsState);
 
-  useHotkeys('p', () => {
-    if (!isRecording && !disabled) {
-      isRecordingRef.current = true;
-      setIsRecording(true);
-    }
-  });
+  disabled = disabled || !!askUser;
 
-  useEffect(() => {
-    if (!isRecording) {
-      clearTimeout(timer);
+  const startRecording = useCallback(() => {
+    if (isRecording || disabled) {
       return;
     }
+    clearTimeout(timer);
 
     if (!pSettings) {
       return;
@@ -57,29 +54,56 @@ const MicButton = ({ disabled }: Props) => {
         let spokeAtLeastOnce = false;
         let isSpeaking = false;
         let isFirstChunk = true;
+        let audioBuffer: Blob | null = null;
 
         const mediaRecorder = new MediaRecorder(stream);
 
+        mediaRecorder.addEventListener('start', () => {
+          setIsRecording(true);
+        });
+
         mediaRecorder.addEventListener('dataavailable', async (event) => {
           if (!spokeAtLeastOnce) {
+            if (!audioBuffer) {
+              audioBuffer = new Blob([event.data], { type: event.data.type });
+            } else {
+              audioBuffer = new Blob([audioBuffer, event.data], {
+                type: event.data.type
+              });
+            }
+          }
+          if (mediaRecorder.state === 'inactive') {
             return;
           }
           setIsSpeaking(isSpeaking);
-          sendAudioChunk(isFirstChunk, mediaRecorder.mimeType, event.data);
+          const [mimeType, _] = mediaRecorder.mimeType.split(';');
+
+          if (audioBuffer) {
+            // If there is buffered data and the user has spoken, send the buffered data first
+            await sendAudioChunk(
+              isFirstChunk,
+              mimeType,
+              new Blob([audioBuffer, event.data])
+            );
+            audioBuffer = null; // Clear the buffer
+          } else {
+            await sendAudioChunk(isFirstChunk, mimeType, event.data);
+          }
+
           if (isFirstChunk) {
             isFirstChunk = false;
           }
         });
 
-        mediaRecorder.addEventListener('stop', (event) => {
-          console.log('MediaRecorder stop:', event);
-          isRecordingRef.current = false;
-
+        mediaRecorder.addEventListener('stop', async () => {
           setIsRecording(false);
           setIsSpeaking(false);
-
           if (spokeAtLeastOnce) {
-            endAudioStream();
+            const fileReferences = attachments
+              ?.filter((a) => !!a.serverId)
+              .map((a) => ({ id: a.serverId! }));
+            await endAudioStream(fileReferences);
+            setAttachments([]);
           }
         });
 
@@ -96,8 +120,12 @@ const MicButton = ({ disabled }: Props) => {
         mediaRecorder.start(chunk_duration);
 
         const detectSound = () => {
+          if (mediaRecorder.state === 'inactive') {
+            return;
+          }
           analyser.getByteFrequencyData(domainData);
           const soundDetected = domainData.some((value) => value > 0);
+
           if (!isSpeaking) {
             isSpeaking = soundDetected;
           }
@@ -130,7 +158,9 @@ const MicButton = ({ disabled }: Props) => {
       .catch((err) => {
         toast.error('Failed to start recording: ' + err.message);
       });
-  }, [isRecording]);
+  }, [pSettings, timer, isRecording, disabled, attachments]);
+
+  useHotkeys('p', startRecording);
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
@@ -156,10 +186,7 @@ const MicButton = ({ disabled }: Props) => {
             disabled={disabled || isRecording}
             color="inherit"
             size={size}
-            onClick={() => {
-              isRecordingRef.current = true;
-              setIsRecording(true);
-            }}
+            onClick={startRecording}
           >
             <KeyboardVoiceIcon fontSize={size} />
           </IconButton>

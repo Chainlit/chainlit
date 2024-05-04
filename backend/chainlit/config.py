@@ -86,7 +86,7 @@ auto_tag_thread = true
     # Delay for the user to start speaking in MS
     initial_silence_timeout = 3000
     # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
-    silence_timeout = 2000
+    silence_timeout = 1500
     # Duration of the audio chunks in MS
     chunk_duration = 1000
     # Sample rate of the audio
@@ -208,7 +208,7 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
 class AudioFeature(DataClassJsonMixin):
     min_decibels: int = -45
     initial_silence_timeout: int = 3000
-    silence_timeout: int = 2000
+    silence_timeout: int = 1500
     chunk_duration: int = 1000
     sample_rate: int = 44100
     enabled: bool = False

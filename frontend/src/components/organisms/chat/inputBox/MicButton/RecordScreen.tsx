@@ -9,7 +9,7 @@ interface Props {
   isSpeaking?: boolean;
 }
 
-export default function RecordScreen({ open, isSpeaking = true }: Props) {
+export default function RecordScreen({ open, isSpeaking }: Props) {
   return (
     <Backdrop
       sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}

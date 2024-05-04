@@ -226,6 +226,7 @@ class WebsocketSession(BaseSession):
         file_path = self.files_dir / file_id
 
         file_extension = mimetypes.guess_extension(mime)
+
         if file_extension:
             file_path = file_path.with_suffix(file_extension)
 
