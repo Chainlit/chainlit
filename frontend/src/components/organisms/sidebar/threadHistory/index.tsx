@@ -2,7 +2,7 @@ import isEqual from 'lodash/isEqual';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
@@ -14,7 +14,6 @@ import {
 } from '@chainlit/react-client';
 
 import { apiClientState } from 'state/apiClient';
-import { settingsState } from 'state/settings';
 import { threadsFiltersState } from 'state/threads';
 
 import { ThreadList } from './ThreadList';
@@ -32,7 +31,6 @@ export function ThreadHistory() {
   const filtersHasChanged = !isEqual(prevFilters, filters);
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
   const accessToken = useRecoilValue(accessTokenState);
-  const setSettings = useSetRecoilState(settingsState);
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
