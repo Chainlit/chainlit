@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.element import ElementBased
     from chainlit.message import Message
-    from chainlit.types import ChatProfile, ThreadDict
+    from chainlit.types import AudioChunk, ChatProfile, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -87,6 +87,8 @@ auto_tag_thread = true
     initial_silence_timeout = 3000
     # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
     silence_timeout = 1500
+    # Above this duration (MS), the recording will forcefully stop.
+    max_duration = 15000
     # Duration of the audio chunks in MS
     chunk_duration = 1000
     # Sample rate of the audio
@@ -97,7 +99,7 @@ auto_tag_thread = true
 name = "Chatbot"
 
 # Show the readme while the thread is empty.
-show_readme_as_default = false
+show_readme_as_default = true
 
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
@@ -207,9 +209,10 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
 @dataclass
 class AudioFeature(DataClassJsonMixin):
     min_decibels: int = -45
-    initial_silence_timeout: int = 3000
+    initial_silence_timeout: int = 2000
     silence_timeout: int = 1500
     chunk_duration: int = 1000
+    max_duration: int = 15000
     sample_rate: int = 44100
     enabled: bool = False
 
@@ -227,7 +230,7 @@ class FeaturesSettings(DataClassJsonMixin):
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
-    show_readme_as_default: bool = False
+    show_readme_as_default: bool = True
     description: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
@@ -260,7 +263,7 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
-    on_audio_chunk: Optional[Callable[[bool, str, str], Any]] = None
+    on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
 
     author_rename: Optional[Callable[[str], str]] = None

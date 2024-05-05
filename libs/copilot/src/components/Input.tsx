@@ -212,7 +212,6 @@ const Input = memo(
               )}
               <MicButton disabled={disabled} />
             </Stack>
-
             <Box>
               <WaterMark />
             </Box>

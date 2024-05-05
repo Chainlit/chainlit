@@ -45,7 +45,8 @@ const MicButton = ({ disabled }: Props) => {
       silence_timeout,
       initial_silence_timeout,
       sample_rate,
-      chunk_duration
+      chunk_duration,
+      max_duration
     } = pSettings.features.audio;
 
     navigator.mediaDevices
@@ -55,11 +56,13 @@ const MicButton = ({ disabled }: Props) => {
         let isSpeaking = false;
         let isFirstChunk = true;
         let audioBuffer: Blob | null = null;
+        let startTime = Date.now();
 
         const mediaRecorder = new MediaRecorder(stream);
 
         mediaRecorder.addEventListener('start', () => {
           setIsRecording(true);
+          startTime = Date.now();
         });
 
         mediaRecorder.addEventListener('dataavailable', async (event) => {
@@ -75,6 +78,13 @@ const MicButton = ({ disabled }: Props) => {
           if (mediaRecorder.state === 'inactive') {
             return;
           }
+          const elapsedTime = Date.now() - startTime;
+          if (elapsedTime >= max_duration) {
+            mediaRecorder.stop();
+            stream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+
           setIsSpeaking(isSpeaking);
           const [mimeType, _] = mediaRecorder.mimeType.split(';');
 
@@ -83,11 +93,17 @@ const MicButton = ({ disabled }: Props) => {
             await sendAudioChunk(
               isFirstChunk,
               mimeType,
+              elapsedTime,
               new Blob([audioBuffer, event.data])
             );
             audioBuffer = null; // Clear the buffer
           } else {
-            await sendAudioChunk(isFirstChunk, mimeType, event.data);
+            await sendAudioChunk(
+              isFirstChunk,
+              mimeType,
+              elapsedTime,
+              event.data
+            );
           }
 
           if (isFirstChunk) {

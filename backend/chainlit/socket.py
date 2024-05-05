@@ -15,7 +15,12 @@ from chainlit.message import ErrorMessage, Message
 from chainlit.server import socket
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
-from chainlit.types import AudioChunkPayload, AudioEndPayload, UIMessagePayload
+from chainlit.types import (
+    AudioChunk,
+    AudioChunkPayload,
+    AudioEndPayload,
+    UIMessagePayload,
+)
 from chainlit.user_session import user_sessions
 
 
@@ -272,11 +277,7 @@ async def audio_chunk(sid, payload: AudioChunkPayload):
     init_ws_context(session)
 
     if config.code.on_audio_chunk:
-        asyncio.create_task(
-            config.code.on_audio_chunk(
-                payload["isStart"], payload["mimeType"], payload["data"]
-            )
-        )
+        asyncio.create_task(config.code.on_audio_chunk(AudioChunk(**payload)))
 
 
 @socket.on("audio_end")

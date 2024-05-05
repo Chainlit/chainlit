@@ -157,6 +157,15 @@ class UIMessagePayload(TypedDict):
 class AudioChunkPayload(TypedDict):
     isStart: bool
     mimeType: str
+    elapsedTime: float
+    data: bytes
+
+
+@dataclass
+class AudioChunk:
+    isStart: bool
+    mimeType: str
+    elapsedTime: float
     data: bytes
 
 

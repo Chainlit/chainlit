@@ -74,8 +74,13 @@ const useChatInteract = () => {
   );
 
   const sendAudioChunk = useCallback(
-    (isStart: boolean, mimeType: string, data: Blob) => {
-      session?.socket.emit('audio_chunk', { isStart, mimeType, data });
+    (isStart: boolean, mimeType: string, elapsedTime: number, data: Blob) => {
+      session?.socket.emit('audio_chunk', {
+        isStart,
+        mimeType,
+        elapsedTime,
+        data
+      });
     },
     [session?.socket]
   );

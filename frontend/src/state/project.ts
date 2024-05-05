@@ -35,6 +35,7 @@ export interface IProjectSettings {
       silence_timeout: number;
       sample_rate: number;
       chunk_duration: number;
+      max_duration: number;
     };
     unsafe_allow_html?: boolean;
     latex?: boolean;

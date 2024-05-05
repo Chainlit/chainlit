@@ -1,5 +1,6 @@
 import { grey } from 'theme/palette';
 
+import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import useTheme from '@mui/material/styles/useTheme';
 
@@ -14,7 +15,7 @@ const AudioElement = ({ element }: { element: IAudioElement }) => {
 
   return (
     <Box className={`${element.display}-audio`}>
-      <Box
+      <Typography
         sx={{
           fontSize: '14px',
           lineHeight: 1.72,
@@ -23,8 +24,8 @@ const AudioElement = ({ element }: { element: IAudioElement }) => {
         }}
       >
         {element.name}
-      </Box>
-      <audio controls src={element.url}></audio>
+      </Typography>
+      <audio controls src={element.url} autoPlay={element.autoPlay}></audio>
     </Box>
   );
 };

@@ -52,7 +52,7 @@ from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import ChatProfile, ThreadDict
+from chainlit.types import AudioChunk, ChatProfile, ThreadDict
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
@@ -230,9 +230,7 @@ def on_audio_chunk(func: Callable) -> Callable:
     Hook to react to the audio chunks being sent.
 
     Args:
-        is_start (bool): Whether this is the start of the audio stream.
-        mime_type (str): The mime type of the audio chunk.
-        chunk (bytes): The audio chunk.
+        chunk (AudioChunk): The audio chunk being sent.
 
     Returns:
         Callable[], Any]: The decorated hook.
@@ -352,6 +350,7 @@ __getattr__ = make_module_getattr(
 __all__ = [
     "user_session",
     "CopilotFunction",
+    "AudioChunk",
     "Action",
     "User",
     "PersistedUser",
