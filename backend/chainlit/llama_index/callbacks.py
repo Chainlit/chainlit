@@ -70,7 +70,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         self._restore_context()
-        
+
         step_type: StepType = "undefined"
         if event_type == CBEventType.RETRIEVE:
             step_type = "retrieval"
@@ -104,7 +104,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         """Run when an event ends."""
         step = self.steps.get(event_id, None)
 
-
         if payload is None or step is None:
             return
 
@@ -117,11 +116,13 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             source_nodes = getattr(response, "source_nodes", None)
             if source_nodes:
                 source_refs = ", ".join(
-                    [f"Source {idx}" for idx, _ in enumerate(source_nodes)])
+                    [f"Source {idx}" for idx, _ in enumerate(source_nodes)]
+                )
                 step.elements = [
                     Text(
                         name=f"Source {idx}",
                         content=source.text or "Empty node",
+                        display="side",
                     )
                     for idx, source in enumerate(source_nodes)
                 ]
@@ -137,6 +138,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 step.elements = [
                     Text(
                         name=f"Source {idx}",
+                        display="side",
                         content=source.node.get_text() or "Empty node",
                     )
                     for idx, source in enumerate(sources)
@@ -173,7 +175,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             token_count = self.total_llm_token_count or None
             raw_response = response.raw if response else None
             model = raw_response.get("model", None) if raw_response else None
-            
+
             if messages and isinstance(response, ChatResponse):
                 msg: ChatMessage = response.message
                 step.generation = ChatGeneration(
@@ -198,7 +200,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         else:
             step.output = payload
             self.context.loop.create_task(step.update())
- 
+
         self.steps.pop(event_id, None)
 
     def _noop(self, *args, **kwargs):
@@ -206,4 +208,3 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
     start_trace = _noop
     end_trace = _noop
-

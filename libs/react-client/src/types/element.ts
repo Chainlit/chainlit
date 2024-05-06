@@ -52,7 +52,9 @@ export interface IPdfElement extends TMessageElement<'pdf'> {
   page?: number;
 }
 
-export interface IAudioElement extends TMessageElement<'audio'> {}
+export interface IAudioElement extends TMessageElement<'audio'> {
+  autoPlay?: boolean;
+}
 
 export interface IVideoElement extends TMessageElement<'video'> {
   size?: IElementSize;

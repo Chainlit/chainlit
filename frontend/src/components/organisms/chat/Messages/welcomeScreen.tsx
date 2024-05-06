@@ -23,9 +23,9 @@ const WelcomeScreen = memo(
         <Box
           id="welcome-screen"
           sx={{
-            p: variant === 'app' ? 2.5 : 2,
+            px: variant === 'app' ? 2.5 : 2,
             boxSizing: 'border-box',
-            maxWidth: '60rem',
+            maxWidth: '48rem',
             width: '100%',
             mx: 'auto',
             color: 'text.primary',

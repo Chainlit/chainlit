@@ -42,7 +42,7 @@ export default function ResumeButton({ threadId }: Props) {
       sx={{
         boxSizing: 'border-box',
         width: '100%',
-        maxWidth: '60rem',
+        maxWidth: '48rem',
         m: 'auto',
         justifyContent: 'center'
       }}

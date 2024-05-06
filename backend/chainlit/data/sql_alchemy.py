@@ -170,12 +170,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             raise ValueError("User not found in session context")
         data = {
             "id": thread_id,
-            "createdAt": await self.get_current_timestamp()
-            if metadata is None
-            else None,
-            "name": name
-            if name is not None
-            else (metadata.get("name") if metadata and "name" in metadata else None),
+            "createdAt": (
+                await self.get_current_timestamp() if metadata is None else None
+            ),
+            "name": (
+                name
+                if name is not None
+                else (metadata.get("name") if metadata and "name" in metadata else None)
+            ),
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
@@ -552,13 +554,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         streaming=step_feedback.get("step_streaming", False),
                         waitForAnswer=step_feedback.get("step_waitforanswer"),
                         isError=step_feedback.get("step_iserror"),
-                        metadata=step_feedback["step_metadata"]
-                        if step_feedback.get("step_metadata") is not None
-                        else {},
+                        metadata=(
+                            step_feedback["step_metadata"]
+                            if step_feedback.get("step_metadata") is not None
+                            else {}
+                        ),
                         tags=step_feedback.get("step_tags"),
-                        input=step_feedback.get("step_input", "")
-                        if step_feedback["step_showinput"]
-                        else "",
+                        input=(
+                            step_feedback.get("step_input", "")
+                            if step_feedback["step_showinput"]
+                            else ""
+                        ),
                         output=step_feedback.get("step_output", ""),
                         createdAt=step_feedback.get("step_createdat"),
                         start=step_feedback.get("step_start"),
@@ -587,6 +593,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         display=element["element_display"],
                         size=element.get("element_size"),
                         language=element.get("element_language"),
+                        autoPlay=element.get("element_autoPlay"),
                         page=element.get("element_page"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),

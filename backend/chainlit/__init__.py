@@ -52,7 +52,7 @@ from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import ChatProfile, ThreadDict
+from chainlit.types import AudioChunk, ChatProfile, ThreadDict
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
@@ -225,6 +225,38 @@ def on_chat_end(func: Callable) -> Callable:
 
 
 @trace
+def on_audio_chunk(func: Callable) -> Callable:
+    """
+    Hook to react to the audio chunks being sent.
+
+    Args:
+        chunk (AudioChunk): The audio chunk being sent.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_chunk = wrap_user_function(func, with_task=False)
+    return func
+
+
+@trace
+def on_audio_end(func: Callable) -> Callable:
+    """
+    Hook to react to the audio stream ending. This is called after the last audio chunk is sent.
+
+    Args:
+    elements ([List[Element]): The files that were uploaded before starting the audio stream (if any).
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_end = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
 def author_rename(func: Callable[[str], str]) -> Callable[[str], str]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
@@ -318,6 +350,7 @@ __getattr__ = make_module_getattr(
 __all__ = [
     "user_session",
     "CopilotFunction",
+    "AudioChunk",
     "Action",
     "User",
     "PersistedUser",
