@@ -521,6 +521,8 @@ class AskCheckboxMessage(AskMessageBase):
         """
         Sends the question to ask to the UI and waits for the reply
         """
+        # import pdb; pdb.set_trace()
+
         trace_event("send_ask_checkbox_group")
 
         if not self.created_at:

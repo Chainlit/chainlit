@@ -15,6 +15,7 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  checkboxGroupState,
   elementState,
   firstUserInteraction,
   loadingState,
@@ -61,6 +62,7 @@ const useChatSession = () => {
   const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
+  const setCheckboxGroup = useSetRecoilState(checkboxGroupState);
   const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
@@ -263,9 +265,9 @@ const useChatSession = () => {
         });
       });
 
-      socket.on('checkbox', (element: ICheckboxGroup) => {
-        console.log('checkbox group', element);
-        alert('HI');
+      socket.on('checkbox_group', (checkboxGroup: ICheckboxGroup) => {
+        console.log('checkbox group', checkboxGroup);
+        setCheckboxGroup((old) => [...old, checkboxGroup]);
       });
 
       socket.on('action', (action: IAction) => {

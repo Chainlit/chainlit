@@ -136,7 +136,6 @@ const Message = memo(
                   />
                 ) : null}
                 <MessageButtons message={message} />
-                trying to find checkbox group
               </Stack>
             </Author>
           </Stack>
