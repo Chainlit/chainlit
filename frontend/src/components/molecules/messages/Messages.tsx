@@ -1,7 +1,7 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
-import type { IAction, IMessageElement, IStep } from 'client-types/';
+import type { IAction, ICheckboxGroup, IMessageElement, IStep } from 'client-types/';
 
 import { Message } from './Message';
 
@@ -9,12 +9,13 @@ interface Props {
   messages: IStep[];
   elements: IMessageElement[];
   actions: IAction[];
+  checkboxGroup?: ICheckboxGroup;
   indent: number;
   isRunning?: boolean;
 }
 
 const Messages = memo(
-  ({ messages, elements, actions, indent, isRunning }: Props) => {
+  ({ messages, elements, actions, checkboxGroup, indent, isRunning }: Props) => {
     const messageContext = useContext(MessageContext);
 
     const isRoot = indent === 0;
@@ -58,6 +59,7 @@ const Messages = memo(
               message={m}
               elements={elements}
               actions={actions}
+              checkboxGroup={checkboxGroup}
               showAvatar={showAvatar}
               showBorder={showBorder}
               key={m.id}

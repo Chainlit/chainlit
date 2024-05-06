@@ -55,9 +55,9 @@ export const actionState = atom<IAction[]>({
   default: []
 });
 
-export const checkboxGroupState = atom<ICheckboxGroup[]>({
-  key: 'CheckboxGroupOptions',
-  default: []
+export const checkboxGroupState = atom<ICheckboxGroup | undefined>({
+  key: 'CheckboxGroup',
+  default: undefined
 });
 
 export const messagesState = atom<IStep[]>({

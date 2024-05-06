@@ -3,13 +3,14 @@ import { memo, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 
-import type { IAction, IMessageElement, IStep } from 'client-types/';
+import type { IAction, ICheckboxGroup, IMessageElement, IStep } from 'client-types/';
 import { IMessageContext } from 'types/messageContext';
 
 import { Messages } from './Messages';
 
 interface Props {
   actions: IAction[];
+  checkboxGroup?: ICheckboxGroup;
   autoScroll?: boolean;
   context: IMessageContext;
   elements: IMessageElement[];
@@ -20,6 +21,7 @@ interface Props {
 const MessageContainer = memo(
   ({
     actions,
+    checkboxGroup,
     autoScroll,
     context,
     elements,
@@ -61,6 +63,7 @@ const MessageContainer = memo(
             messages={messages}
             elements={elements}
             actions={actions}
+            checkboxGroup={checkboxGroup}
           />
         </Box>
       </MessageContext.Provider>

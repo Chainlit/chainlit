@@ -144,6 +144,7 @@ const Message = memo(
           <Messages
             messages={message.steps}
             actions={actions}
+            checkboxGroup={checkboxGroup}
             elements={elements}
             indent={indent + 1}
             isRunning={isRunning}
