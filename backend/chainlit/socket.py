@@ -177,8 +177,8 @@ async def connection_successful(sid):
                 "first_interaction",
                 {"interaction": "resume", "thread_id": thread.get("id")},
             )
-            await context.emitter.resume_thread(thread)
             await config.code.on_chat_resume(thread)
+            await context.emitter.resume_thread(thread)
             return
 
     if config.code.on_chat_start:
