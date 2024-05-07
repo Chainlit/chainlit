@@ -216,7 +216,11 @@ class Step:
             return ""
         content = self._clean_content(content)
 
-        if isinstance(content, dict):
+        if (
+            isinstance(content, dict)
+            or isinstance(content, list)
+            or isinstance(content, tuple)
+        ):
             try:
                 processed_content = json.dumps(content, indent=4, ensure_ascii=False)
                 if set_language:
