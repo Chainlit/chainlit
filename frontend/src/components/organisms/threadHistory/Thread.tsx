@@ -184,6 +184,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           loading={false}
           avatars={[]}
           actions={actions}
+          checkboxGroup={undefined}
           elements={(elements || []) as IMessageElement[]}
           onFeedbackUpdated={onFeedbackUpdated}
           onFeedbackDeleted={onFeedbackDeleted}

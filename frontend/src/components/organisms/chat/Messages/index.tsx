@@ -34,7 +34,7 @@ const Messages = ({
   projectSettings,
   setAutoScroll
 }: MessagesProps): JSX.Element => {
-  const { elements, askUser, avatars, loading, actions } = useChatData();
+  const { elements, askUser, avatars, loading, actions, checkboxGroup } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const { idToResume } = useChatSession();
@@ -150,6 +150,7 @@ const Messages = ({
       loading={loading}
       askUser={askUser}
       actions={actions}
+      checkboxGroup={checkboxGroup}
       elements={elements}
       messages={messages}
       autoScroll={autoScroll}

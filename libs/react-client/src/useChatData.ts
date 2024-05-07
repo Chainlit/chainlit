@@ -7,6 +7,7 @@ import {
   chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
   chatSettingsValueState,
+  checkboxGroupState,
   elementState,
   loadingState,
   sessionState,
@@ -25,6 +26,7 @@ const useChatData = () => {
   const avatars = useRecoilValue(avatarState);
   const tasklists = useRecoilValue(tasklistState);
   const actions = useRecoilValue(actionState);
+  const checkboxGroup = useRecoilValue(checkboxGroupState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const chatSettingsInputs = useRecoilValue(chatSettingsInputsState);
@@ -42,6 +44,7 @@ const useChatData = () => {
 
   return {
     actions,
+    checkboxGroup,
     askUser,
     avatars,
     chatSettingsDefaultValue,

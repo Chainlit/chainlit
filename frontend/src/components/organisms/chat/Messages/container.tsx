@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import {
   IAction,
+  ICheckboxGroup,
   IAsk,
   IAvatarElement,
   IFeedback,
@@ -27,6 +28,7 @@ import { settingsState } from 'state/settings';
 interface Props {
   loading: boolean;
   actions: IAction[];
+  checkboxGroup?: ICheckboxGroup;
   elements: IMessageElement[];
   avatars: IAvatarElement[];
   messages: IStep[];
@@ -52,6 +54,7 @@ const MessageContainer = memo(
     loading,
     avatars,
     actions,
+    checkboxGroup,
     autoScroll,
     elements,
     messages,
@@ -194,6 +197,7 @@ const MessageContainer = memo(
     return (
       <CMessageContainer
         actions={messageActions}
+        checkboxGroup={checkboxGroup}
         elements={elements}
         messages={messages}
         autoScroll={autoScroll}

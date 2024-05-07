@@ -55,7 +55,7 @@ export const actionState = atom<IAction[]>({
   default: []
 });
 
-export const checkboxGroupState = atom<ICheckboxGroup | undefined>({
+export const checkboxGroupState = atom<ICheckboxGroup>({
   key: 'CheckboxGroup',
   default: undefined
 });
