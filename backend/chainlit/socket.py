@@ -188,36 +188,42 @@ async def connection_successful(sid):
 
 @socket.on("clear_session")
 async def clean_session(sid):
-    await disconnect(sid, force_clear=True)
+    session = WebsocketSession.get(sid)
+    if session:
+        session.to_clear = True
 
 
 @socket.on("disconnect")
-async def disconnect(sid, force_clear=False):
+async def disconnect(sid):
     session = WebsocketSession.get(sid)
-    if session:
-        init_ws_context(session)
 
-    if config.code.on_chat_end and session:
+    if not session:
+        return
+
+    init_ws_context(session)
+
+    if config.code.on_chat_end:
         await config.code.on_chat_end()
 
-    if session and session.thread_id and session.has_first_interaction:
+    if session.thread_id and session.has_first_interaction:
         await persist_user_session(session.thread_id, session.to_persistable())
 
-    def clear():
-        if session := WebsocketSession.get(sid):
+    def clear(_sid):
+        if session := WebsocketSession.get(_sid):
             # Clean up the user session
             if session.id in user_sessions:
                 user_sessions.pop(session.id)
             # Clean up the session
             session.delete()
 
-    async def clear_on_timeout(sid):
-        await asyncio.sleep(config.project.session_timeout)
-        clear()
-
-    if force_clear:
-        clear()
+    if session.to_clear:
+        clear(sid)
     else:
+
+        async def clear_on_timeout(_sid):
+            await asyncio.sleep(config.project.session_timeout)
+            clear(_sid)
+
         asyncio.ensure_future(clear_on_timeout(sid))
 
 
