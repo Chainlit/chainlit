@@ -147,6 +147,8 @@ class WebsocketSession(BaseSession):
     socket id for convenience.
     """
 
+    to_clear: bool = False
+
     def __init__(
         self,
         # Id from the session cookie
