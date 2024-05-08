@@ -29,10 +29,16 @@ type Primary = {
   main?: string;
 };
 
+type Text = {
+  primary?: string;
+  secondary?: string;
+};
+
 type ThemOverride = {
   primary?: Primary;
   background?: string;
   paper?: string;
+  text?: Text;
 };
 
 declare global {
@@ -61,6 +67,12 @@ export function overrideTheme(theme: Theme) {
   }
   if (variantOverride?.primary?.light) {
     theme.palette.primary.light = variantOverride.primary.light;
+  }
+  if (variantOverride?.text?.primary) {
+    theme.palette.text.primary = variantOverride.text.primary;
+  }
+  if (variantOverride?.text?.secondary) {
+    theme.palette.text.secondary = variantOverride.text.secondary;
   }
 
   return theme;
