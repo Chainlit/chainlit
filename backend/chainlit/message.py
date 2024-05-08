@@ -549,19 +549,17 @@ class AskCheckboxMessage(AskMessageBase):
             Union[AskCheckboxResponse, None],
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
-        
-        selected_options = [option['name'] for option in res['options']]
 
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {selected_options}'
+            self.content = f'**Selected:** {[option["name"] for option in res["selected_options"]]}'
 
         self.wait_for_answer = False
 
         await self.update()
 
-        return selected_options
+        return res
 
 
 class AskActionMessage(AskMessageBase):

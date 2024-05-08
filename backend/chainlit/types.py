@@ -106,10 +106,7 @@ class AskFileResponse:
 
 
 class AskCheckboxResponse(TypedDict):
-    forId: str
-    id: str
-    name: str
-    options: Optional[List[CheckboxGroupOption]]
+    selected_options: Optional[List[CheckboxGroupOption]]
 
 
 class AskActionResponse(TypedDict):

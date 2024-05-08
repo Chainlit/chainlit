@@ -23,42 +23,44 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
     return null;
   }
 
-  const [selectedOptions, setSelectedOptions] = useState<ICheckboxGroup>({
+  const [checkboxState, setCheckboxState] = useState<ICheckboxGroup>({
     ...checkboxGroup,
-    options: []
+    selectedOptions: [],
   });
 
   const handleChange = (option: ICheckboxGroupOption) => {
-    const isSelected = selectedOptions.options.some(
-      (selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value
-    );
-    if (isSelected) {
-      setSelectedOptions({
-        ...selectedOptions,
-        options: selectedOptions.options.filter(
-          (selectedOption: ICheckboxGroupOption) =>
-            selectedOption.value !== option.value
-        )
-      });
-    } else {
-      setSelectedOptions({
-        ...selectedOptions,
-        options: [...selectedOptions.options, option]
-      });
-    }
+    setCheckboxState((prevState: ICheckboxGroup) => ({
+      ...prevState,
+      selectedOptions: prevState.selectedOptions.some((selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value)
+        ? prevState.selectedOptions.filter((selectedOption: ICheckboxGroupOption) => selectedOption.value !== option.value)
+        : [...prevState.selectedOptions, option]
+    }));
   };
+  
+
+  // const handleChange = (option: ICheckboxGroupOption) => {
+  //   const isSelected = selectedOptions.options.some(
+  //     (selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value
+  //   );
+  //   if (isSelected) {
+  //     setSelectedOptions({
+  //       ...selectedOptions,
+  //       options: selectedOptions.options.filter(
+  //         (selectedOption: ICheckboxGroupOption) =>
+  //           selectedOption.value !== option.value
+  //       )
+  //     });
+  //   } else {
+  //     setSelectedOptions({
+  //       ...selectedOptions,
+  //       options: [...selectedOptions.options, option]
+  //     });
+  //   }
+  // };
 
   const handleSave = () => {
-    console.log('handleSave', selectedOptions);
-    askUser?.callback(selectedOptions);
-    // onSave?.(selectedOptions);
-    // if (onSave) {
-    //   onSave(selectedOptions);
-    // }
-    // setSelectedOptions({
-    //   ...checkboxGroup,
-    //   checkboxes: [],
-    // });
+    console.log('handleSave', checkboxState.selectedOptions);
+    askUser?.callback(checkboxState);
   };
 
   return (
@@ -70,11 +72,8 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
               key={option.value}
               control={
                 <Checkbox
-                  // checked={checkboxGroup.options.some(
-                  //   (selectedOption: ICheckboxGroupOption) =>
-                  //     selectedOption.value === option.value
-                  // )}
                   onChange={() => handleChange(option)}
+                  checked={checkboxState.selectedOptions.some(selectedOption => selectedOption.value === option.value)}
                 />
               }
               label={option.label || option.name}
@@ -85,7 +84,7 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
       <Button
         variant="contained"
         onClick={handleSave}
-        disabled={selectedOptions.options.length === 0}
+        disabled={checkboxState.selectedOptions.length === 0}
       >
         Save
       </Button>

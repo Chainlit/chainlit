@@ -277,8 +277,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     interaction = action_res["value"]
                 elif spec.type == "checkbox_group":
                     checkbox_res = cast(AskCheckboxResponse, user_res)
+                    checkbox_res['selected_options'] = checkbox_res.pop('selectedOptions')
                     final_res = checkbox_res
-                    interaction = ",".join([option["name"] for option in checkbox_res["options"]])
+                    interaction = ",".join([option["name"] for option in checkbox_res["selected_options"]])
 
                 if not self.session.has_first_interaction and interaction:
                     self.session.has_first_interaction = True

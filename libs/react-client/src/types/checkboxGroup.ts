@@ -7,7 +7,7 @@ export interface ICheckboxGroupOption {
 export interface ICheckboxGroup {
   description?: string;
   forId: string;
-  // onClick: () => void;
   value: string;
   options: ICheckboxGroupOption[];
+  selectedOptions: ICheckboxGroupOption[];
 }
