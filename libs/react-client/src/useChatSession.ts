@@ -281,6 +281,13 @@ const useChatSession = () => {
         });
       });
 
+      socket.on("remove_checkbox_group", (checkboxGroup: ICheckboxGroup) => {
+        console.log('remove_checkbox_group', checkboxGroup);
+        checkboxGroup.options = [];
+        checkboxGroup.selectedOptions = [];
+        setCheckboxGroup(checkboxGroup);
+      });
+
       socket.on('token_usage', (count: number) => {
         setTokenCount((old) => old + count);
       });

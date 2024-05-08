@@ -550,10 +550,11 @@ class AskCheckboxMessage(AskMessageBase):
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
+        await context.emitter.emit("remove_checkbox_group", self.to_dict())
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {[option["name"] for option in res["selected_options"]]}'
+            self.content = f'**Selected:** {", ".join([option["name"] for option in res["selected_options"]])}'
 
         self.wait_for_answer = False
 
