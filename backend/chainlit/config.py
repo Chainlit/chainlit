@@ -143,6 +143,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
+    [UI.theme.light.text]
+        #primary = "#212121"
+        #secondary = "#616161"
 
 # Override default MUI dark theme. (Check theme.ts)
 [UI.theme.dark]
@@ -153,7 +156,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
-
+    [UI.theme.dark.text]
+        #primary = "#EEEEEE"
+        #secondary = "#BDBDBD"
 
 [meta]
 generated_by = "{__version__}"
@@ -183,12 +188,17 @@ class PaletteOptions(DataClassJsonMixin):
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
+@dataclass()
+class TextOptions(DataClassJsonMixin):
+    primary: Optional[str] = ""
+    secondary: Optional[str] = ""
 
 @dataclass()
 class Palette(DataClassJsonMixin):
     primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
+    text: Optional[TextOptions] = None
 
 
 @dataclass()
