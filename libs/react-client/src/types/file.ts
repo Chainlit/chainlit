@@ -1,4 +1,5 @@
 import { IAction } from './action';
+import { ICheckboxGroup } from './checkboxGroup';
 import { IStep } from './step';
 
 export interface FileSpec {
@@ -15,11 +16,16 @@ export interface IFileRef {
   id: string;
 }
 
+export interface CheckboxGroupSpec {
+
+}
+
 export interface IAsk {
-  callback: (payload: IStep | IFileRef[] | IAction) => void;
+  callback: (payload: IStep | IFileRef[] | IAction | ICheckboxGroup) => void;
   spec: {
     type: 'text' | 'file' | 'action';
     timeout: number;
   } & FileSpec &
-    ActionSpec;
+    ActionSpec &
+    CheckboxGroupSpec;
 }

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { MessageContext } from 'contexts/MessageContext';
+import { useContext, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -7,7 +8,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Stack from '@mui/material/Stack';
 
-import type { ICheckboxGroup, ICheckboxOption, IStep } from 'client-types/';
+import type { ICheckboxGroup, ICheckboxGroupOption, IStep } from 'client-types/';
 
 interface Props {
   message: IStep;
@@ -15,23 +16,27 @@ interface Props {
   onSave?: (selectedOptions: ICheckboxGroup) => void;
 }
 
-const MessageCheckboxGroup = ({ message, checkboxGroup, onSave }: Props) => {
-  console.log('MessageCheckboxGroup', message, checkboxGroup, onSave);
+const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
+  const { askUser } = useContext(MessageContext);
+
+  if (checkboxGroup.forId !== message.id) {
+    return null;
+  }
 
   const [selectedOptions, setSelectedOptions] = useState<ICheckboxGroup>({
     ...checkboxGroup,
     options: []
   });
 
-  const handleChange = (option: ICheckboxOption) => {
+  const handleChange = (option: ICheckboxGroupOption) => {
     const isSelected = selectedOptions.options.some(
-      (selectedOption: ICheckboxOption) => selectedOption.value === option.value
+      (selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value
     );
     if (isSelected) {
       setSelectedOptions({
         ...selectedOptions,
         options: selectedOptions.options.filter(
-          (selectedOption: ICheckboxOption) =>
+          (selectedOption: ICheckboxGroupOption) =>
             selectedOption.value !== option.value
         )
       });
@@ -44,7 +49,9 @@ const MessageCheckboxGroup = ({ message, checkboxGroup, onSave }: Props) => {
   };
 
   const handleSave = () => {
-    console.log('handleSave');
+    console.log('handleSave', selectedOptions);
+    askUser?.callback(selectedOptions);
+    // onSave?.(selectedOptions);
     // if (onSave) {
     //   onSave(selectedOptions);
     // }
@@ -56,18 +63,17 @@ const MessageCheckboxGroup = ({ message, checkboxGroup, onSave }: Props) => {
 
   return (
     <Stack spacing={1} width="100%">
-      HEY!!! CHECKBOX GROUP!!!!!
       <Box id="checkboxes-list">
         <FormGroup>
-          {checkboxGroup.options.map((option: ICheckboxOption) => (
+          {checkboxGroup.options.map((option: ICheckboxGroupOption) => (
             <FormControlLabel
               key={option.value}
               control={
                 <Checkbox
-                  checked={checkboxGroup.options.some(
-                    (selectedOption: ICheckboxOption) =>
-                      selectedOption.value === option.value
-                  )}
+                  // checked={checkboxGroup.options.some(
+                  //   (selectedOption: ICheckboxGroupOption) =>
+                  //     selectedOption.value === option.value
+                  // )}
                   onChange={() => handleChange(option)}
                 />
               }

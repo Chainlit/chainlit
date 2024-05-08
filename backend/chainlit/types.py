@@ -56,7 +56,7 @@ class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file", "action"]
+    type: Literal["text", "file", "action", "checkbox_group"]
 
 
 @dataclass
@@ -106,11 +106,10 @@ class AskFileResponse:
 
 
 class AskCheckboxResponse(TypedDict):
-    description: str
-    name: str
-    value: str
     forId: str
     id: str
+    name: str
+    options: Optional[List[CheckboxGroupOption]]
 
 
 class AskActionResponse(TypedDict):

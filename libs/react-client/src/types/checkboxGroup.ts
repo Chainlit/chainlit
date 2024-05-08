@@ -1,4 +1,4 @@
-export interface ICheckboxOption {
+export interface ICheckboxGroupOption {
   label: string;
   name: string;
   value: string;
@@ -9,5 +9,5 @@ export interface ICheckboxGroup {
   forId: string;
   // onClick: () => void;
   value: string;
-  options: ICheckboxOption[];
+  options: ICheckboxGroupOption[];
 }

@@ -272,24 +272,21 @@ def action_callback(name: str) -> Callable:
     return decorator
 
 
-def checkbox_group_callback(name: str) -> Callable:
-    """
-    Callback to call when a multi select option is clicked in the UI.
+# def checkbox_group_callback(name: str) -> Callable:
+#     """
+#     Callback to call when a multi select option is clicked in the UI.
 
-    Args:
-        func (Callable[[CheckboxGroupOption], Any]): The multi select option callback to execute. First parameter is the multi select option.
-    """
+#     Args:
+#         func (Callable[[CheckboxGroupOption], Any]): The multi select option callback to execute. First parameter is the multi select option.
+#     """
 
-    def decorator(func: Callable[[CheckboxGroup], Any]):
-        import pdb
+#     def decorator(func: Callable[[CheckboxGroup], Any]):
+#         config.code.checkbox_group_callbacks[name] = wrap_user_function(
+#             func, with_task=True
+#         )
+#         return func
 
-        pdb.set_trace()
-        config.code.checkbox_group_callbacks[name] = wrap_user_function(
-            func, with_task=True
-        )
-        return func
-
-    return decorator
+#     return decorator
 
 
 def on_settings_update(

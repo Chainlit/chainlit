@@ -6,7 +6,7 @@ from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
-from chainlit.checkbox_group import CheckboxGroup, CheckboxGroupOption
+from chainlit.checkbox_group import CheckboxGroup
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.data import get_data_layer
@@ -521,10 +521,9 @@ class AskCheckboxMessage(AskMessageBase):
         """
         Sends the question to ask to the UI and waits for the reply
         """
-        # import pdb; pdb.set_trace()
 
         trace_event("send_ask_checkbox_group")
-
+        
         if not self.created_at:
             self.created_at = utc_now()
 
@@ -542,27 +541,27 @@ class AskCheckboxMessage(AskMessageBase):
 
         # Use a different type???
         spec = AskCheckboxSpec(
-            type="text", timeout=self.timeout, options=self.checkbox_group.options
+            # TODO: fix this one
+            type="checkbox_group", timeout=self.timeout, options=self.checkbox_group.options
         )
 
         res = cast(
             Union[AskCheckboxResponse, None],
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
+        
+        selected_options = [option['name'] for option in res['options']]
 
-        for option in self.checkbox_group.options:
-            pass
-            # await option.remove()
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {res["value"]}'
+            self.content = f'**Selected:** {selected_options}'
 
         self.wait_for_answer = False
 
         await self.update()
 
-        return res
+        return selected_options
 
 
 class AskActionMessage(AskMessageBase):

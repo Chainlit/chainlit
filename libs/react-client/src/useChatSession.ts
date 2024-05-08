@@ -266,7 +266,6 @@ const useChatSession = () => {
       });
 
       socket.on('checkbox_group', (checkboxGroup: ICheckboxGroup) => {
-        console.log('checkboxGroup', checkboxGroup);
         setCheckboxGroup(checkboxGroup);
       });
 
