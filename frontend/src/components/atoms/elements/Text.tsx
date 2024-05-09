@@ -6,9 +6,8 @@ import { Markdown } from 'components/molecules/Markdown';
 
 import { useFetch } from 'hooks/useFetch';
 
-import { projectSettingsState } from 'state/project';
-
 import { type ITextElement } from 'client-types/';
+import { projectSettingsState } from 'state/project';
 
 interface Props {
   element: ITextElement;
@@ -36,9 +35,7 @@ const TextElement = ({ element }: Props) => {
 
   return (
     <Box sx={{ fontFamily: (theme) => theme.typography.fontFamily }}>
-      <Markdown allowHtml={allowHtml} latex={latex}>
-        {content}
-      </Markdown>
+      <Markdown allowHtml={allowHtml} latex={latex}>{content}</Markdown>
     </Box>
   );
 };

@@ -7,13 +7,9 @@ from literalai.helper import utc_now
 
 import chainlit as cl
 
-storage_client = AzureStorageClient(
-    account_url="<your_account_url>", container="<your_container>"
-)
+storage_client = AzureStorageClient(account_url="<your_account_url>", container="<your_container>")
 
-cl_data._data_layer = SQLAlchemyDataLayer(
-    conninfo="<your conninfo>", storage_provider=storage_client
-)
+cl_data._data_layer = SQLAlchemyDataLayer(conninfo="<your conninfo>", storage_provider=storage_client)
 
 
 @cl.on_chat_start
