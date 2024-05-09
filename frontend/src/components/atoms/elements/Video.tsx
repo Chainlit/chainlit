@@ -1,3 +1,5 @@
+import ReactPlayer from 'react-player';
+
 import { type IVideoElement } from 'client-types/';
 
 const VideoElement = ({ element }: { element: IVideoElement }) => {
@@ -6,12 +8,13 @@ const VideoElement = ({ element }: { element: IVideoElement }) => {
   }
 
   return (
-    <video
+    <ReactPlayer
       className={`${element.display}-video`}
       width="100%"
       controls
-      src={element.url}
-    ></video>
+      url={element.url}
+      config={element.playerConfig || {}}
+    />
   );
 };
 

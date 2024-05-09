@@ -40,6 +40,7 @@ class ElementDict(TypedDict):
     language: Optional[str]
     page: Optional[int]
     autoPlay: Optional[bool]
+    playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
 
@@ -96,6 +97,7 @@ class Element:
                 "size": getattr(self, "size", None),
                 "page": getattr(self, "page", None),
                 "autoPlay": getattr(self, "auto_play", None),
+                "playerConfig": getattr(self, "player_config", None),
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
@@ -319,6 +321,9 @@ class Video(Element):
     type: ClassVar[ElementType] = "video"
 
     size: ElementSize = "medium"
+    # Override settings for each type of player in ReactPlayer
+    # https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
+    player_config: Optional[dict] = None
 
 
 @dataclass
