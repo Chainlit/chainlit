@@ -54,6 +54,9 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
+# Set langchain cache path (default is .langchain.db inside config dir)
+# lc_cache_path = './.my-cache-path.db'
+
 # Authorized origins
 allow_origins = ["*"]
 
@@ -268,9 +271,9 @@ class CodeSettings:
 
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], List["ChatProfile"]]
+    ] = None
 
 
 @dataclass()
@@ -280,7 +283,8 @@ class ProjectSettings(DataClassJsonMixin):
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
-    lc_cache_path: Optional[str] = None
+    # default to "{config_dir}/.langchain.db"
+    lc_cache_path: Optional[str] = os.path.join(config_dir, ".langchain.db")
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
@@ -420,10 +424,7 @@ def load_settings():
                 "Your config file is outdated. Please delete it and restart the app to regenerate it."
             )
 
-        lc_cache_path = os.path.join(config_dir, ".langchain.db")
-
         project_settings = ProjectSettings(
-            lc_cache_path=lc_cache_path,
             **project_config,
         )
 
