@@ -102,6 +102,11 @@ boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
 
+
+[tool.poetry.group.slack.dependencies]
+slack_bolt = "^1.18.1"
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

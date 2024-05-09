@@ -196,6 +196,18 @@ socket = SocketManager(
 
 
 # -------------------------------------------------------------------------------
+#                               SLACK HANDLER
+# -------------------------------------------------------------------------------
+
+if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
+    from chainlit.slack.app import slack_app_handler
+
+    @app.post("/slack/events")
+    async def endpoint(req: Request):
+        return await slack_app_handler.handle(req)
+
+
+# -------------------------------------------------------------------------------
 #                               HTTP HANDLERS
 # -------------------------------------------------------------------------------
 
