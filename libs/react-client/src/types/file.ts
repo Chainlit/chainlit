@@ -17,7 +17,6 @@ export interface IFileRef {
 }
 
 export interface CheckboxGroupSpec {
-
 }
 
 export interface IAsk {

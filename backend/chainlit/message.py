@@ -523,7 +523,7 @@ class AskCheckboxMessage(AskMessageBase):
         """
 
         trace_event("send_ask_checkbox_group")
-        
+
         if not self.created_at:
             self.created_at = utc_now()
 
@@ -539,10 +539,10 @@ class AskCheckboxMessage(AskMessageBase):
 
         await self.checkbox_group.send(for_id=str(step_dict["id"]))
 
-        # Use a different type???
         spec = AskCheckboxSpec(
-            # TODO: fix this one
-            type="checkbox_group", timeout=self.timeout, options=self.checkbox_group.options
+            type="checkbox_group",
+            timeout=self.timeout,
+            options=self.checkbox_group.options,
         )
 
         res = cast(

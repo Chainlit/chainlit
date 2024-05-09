@@ -8,7 +8,11 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Stack from '@mui/material/Stack';
 
-import type { ICheckboxGroup, ICheckboxGroupOption, IStep } from 'client-types/';
+import type {
+  ICheckboxGroup,
+  ICheckboxGroupOption,
+  IStep
+} from 'client-types/';
 
 interface Props {
   message: IStep;
@@ -25,38 +29,23 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
 
   const [checkboxState, setCheckboxState] = useState<ICheckboxGroup>({
     ...checkboxGroup,
-    selectedOptions: [],
+    selectedOptions: []
   });
 
   const handleChange = (option: ICheckboxGroupOption) => {
     setCheckboxState((prevState: ICheckboxGroup) => ({
       ...prevState,
-      selectedOptions: prevState.selectedOptions.some((selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value)
-        ? prevState.selectedOptions.filter((selectedOption: ICheckboxGroupOption) => selectedOption.value !== option.value)
+      selectedOptions: prevState.selectedOptions.some(
+        (selectedOption: ICheckboxGroupOption) =>
+          selectedOption.value === option.value
+      )
+        ? prevState.selectedOptions.filter(
+            (selectedOption: ICheckboxGroupOption) =>
+              selectedOption.value !== option.value
+          )
         : [...prevState.selectedOptions, option]
     }));
   };
-  
-
-  // const handleChange = (option: ICheckboxGroupOption) => {
-  //   const isSelected = selectedOptions.options.some(
-  //     (selectedOption: ICheckboxGroupOption) => selectedOption.value === option.value
-  //   );
-  //   if (isSelected) {
-  //     setSelectedOptions({
-  //       ...selectedOptions,
-  //       options: selectedOptions.options.filter(
-  //         (selectedOption: ICheckboxGroupOption) =>
-  //           selectedOption.value !== option.value
-  //       )
-  //     });
-  //   } else {
-  //     setSelectedOptions({
-  //       ...selectedOptions,
-  //       options: [...selectedOptions.options, option]
-  //     });
-  //   }
-  // };
 
   const handleSave = () => {
     console.log('handleSave', checkboxState.selectedOptions);
@@ -73,7 +62,9 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
               control={
                 <Checkbox
                   onChange={() => handleChange(option)}
-                  checked={checkboxState.selectedOptions.some(selectedOption => selectedOption.value === option.value)}
+                  checked={checkboxState.selectedOptions.some(
+                    (selectedOption) => selectedOption.value === option.value
+                  )}
                 />
               }
               label={option.label || option.name}

@@ -105,7 +105,7 @@ class AskFileResponse:
     type: str
 
 
-class AskCheckboxResponse(TypedDict):
+class AskCheckboxResponse(AskCheckboxSpec):
     selected_options: Optional[List[CheckboxGroupOption]]
 
 
