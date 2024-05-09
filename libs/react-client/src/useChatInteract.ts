@@ -7,6 +7,7 @@ import {
   avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  currentThreadIdState,
   elementState,
   firstUserInteraction,
   loadingState,
@@ -43,6 +44,7 @@ const useChatInteract = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const setIdToResume = useSetRecoilState(threadIdToResumeState);
   const setSideView = useSetRecoilState(sideViewState);
+  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
@@ -59,6 +61,7 @@ const useChatInteract = () => {
     resetChatSettings();
     resetChatSettingsValue();
     setSideView(undefined);
+    setCurrentThreadId(undefined);
   }, [session]);
 
   const sendMessage = useCallback(
@@ -66,6 +69,25 @@ const useChatInteract = () => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
       session?.socket.emit('ui_message', { message, fileReferences });
+    },
+    [session?.socket]
+  );
+
+  const sendAudioChunk = useCallback(
+    (isStart: boolean, mimeType: string, elapsedTime: number, data: Blob) => {
+      session?.socket.emit('audio_chunk', {
+        isStart,
+        mimeType,
+        elapsedTime,
+        data
+      });
+    },
+    [session?.socket]
+  );
+
+  const endAudioStream = useCallback(
+    (fileReferences?: IFileRef[]) => {
+      session?.socket.emit('audio_end', { fileReferences });
     },
     [session?.socket]
   );
@@ -135,6 +157,8 @@ const useChatInteract = () => {
     clear,
     replyMessage,
     sendMessage,
+    sendAudioChunk,
+    endAudioStream,
     stopTask,
     setIdToResume,
     updateChatSettings

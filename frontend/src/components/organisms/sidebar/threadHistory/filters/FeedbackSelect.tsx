@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { grey } from 'theme';
 
 import FilterList from '@mui/icons-material/FilterList';
 import ThumbDown from '@mui/icons-material/ThumbDown';
@@ -50,7 +49,7 @@ export default function FeedbackSelect() {
   };
 
   const renderIcon = () => {
-    const sx = { width: 16, height: 16 };
+    const sx = { width: 20, height: 20, color: 'text.secondary' };
 
     switch (filters.feedback) {
       case Feedback.POSITIVE:
@@ -65,12 +64,9 @@ export default function FeedbackSelect() {
   return (
     <>
       <IconButton
+        disableRipple
         onClick={(event) => setAnchorEl(event.currentTarget)}
-        sx={{
-          borderRadius: 1,
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? grey[850] : 'grey.100'
-        }}
+        edge="end"
       >
         {renderIcon()}
       </IconButton>

@@ -1,18 +1,20 @@
 import { grey, primary } from 'theme/index';
 
-import MMenuItem from '@mui/material/MenuItem';
+import MMenuItem, {
+  MenuItemProps as MMenuItemProps
+} from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 
 import { NotificationCount } from 'components/molecules/messages/components/NotificationCount';
 
 import { SelectItem } from './SelectInput';
 
-type MenuItemProps = {
+interface MenuItemProps extends MMenuItemProps {
   isDarkMode: boolean;
   item: SelectItem;
   selected: boolean;
   value: string | number;
-};
+}
 
 const MenuItem = ({
   item,
@@ -43,7 +45,7 @@ const MenuItem = ({
   >
     <Stack direction="row" alignItems="center" spacing={1}>
       {item.icon ? item.icon : null}
-      <span>{item.value}</span>
+      <span>{item?.label || item.value}</span>
     </Stack>
     {item.notificationCount ? (
       <NotificationCount count={item.notificationCount} />

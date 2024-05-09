@@ -4,9 +4,15 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
-import { IThread, threadHistoryState, useApi } from '@chainlit/react-client';
+import {
+  IThread,
+  threadHistoryState,
+  useApi,
+  useChatMessages
+} from '@chainlit/react-client';
 
-import { Thread } from 'components/organisms/threadHistory/Thread';
+import Chat from 'components/organisms/chat';
+import { Thread } from 'components/organisms/sidebar/threadHistory/Thread';
 
 import { apiClientState } from 'state/apiClient';
 
@@ -21,12 +27,15 @@ export default function ThreadPage() {
     apiClient,
     id ? `/project/thread/${id}` : null,
     {
-      revalidateOnFocus: false,
-      revalidateIfStale: false
+      revalidateOnFocus: false
     }
   );
 
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
+
+  const { threadId } = useChatMessages();
+
+  const isCurrentThread = threadId === id;
 
   useEffect(() => {
     if (threadHistory?.currentThreadId !== id) {
@@ -38,19 +47,24 @@ export default function ThreadPage() {
 
   return (
     <Page>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          gap: 2
-        }}
-      >
-        <Box sx={{ width: '100%', flexGrow: 1, overflow: 'auto' }}>
-          <Thread thread={data} error={error} isLoading={isLoading} />
-        </Box>
-        <ResumeButton threadId={id} />
-      </Box>
+      <>
+        {isCurrentThread && <Chat />}
+        {!isCurrentThread && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexGrow: 1,
+              gap: 2
+            }}
+          >
+            <Box sx={{ width: '100%', flexGrow: 1, overflow: 'auto' }}>
+              <Thread thread={data} error={error} isLoading={isLoading} />
+            </Box>
+            <ResumeButton threadId={id} />
+          </Box>
+        )}
+      </>
     </Page>
   );
 }

@@ -100,8 +100,15 @@ function App() {
   }, [userEnv, accessToken, isAuthenticated, connect, chatProfileOk]);
 
   if (pSettingsLoaded && pSettings.chatProfiles.length && !chatProfile) {
-    // Autoselect the chat profile if there is only one
-    setChatProfile(pSettings.chatProfiles[0].name);
+    // Autoselect the first default chat profile
+    const defaultChatProfile = pSettings.chatProfiles.find(
+      (profile) => profile.default
+    );
+    if (defaultChatProfile) {
+      setChatProfile(defaultChatProfile.name);
+    } else {
+      setChatProfile(pSettings.chatProfiles[0].name);
+    }
   }
 
   return (

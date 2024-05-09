@@ -3,7 +3,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { useTranslation } from 'components/i18n/Translator';
 
-interface TriggerButtonProps {
+interface Props {
   onClick: () => void;
   open: boolean;
 }
@@ -15,7 +15,7 @@ const commonBoxStyles = {
   transition: 'transform 0.3s ease'
 };
 
-const TriggerButton = ({ onClick, open }: TriggerButtonProps): JSX.Element => {
+const OpenSideBarButton = ({ onClick, open }: Props): JSX.Element => {
   const { t } = useTranslation();
 
   return (
@@ -55,4 +55,4 @@ const TriggerButton = ({ onClick, open }: TriggerButtonProps): JSX.Element => {
   );
 };
 
-export default TriggerButton;
+export default OpenSideBarButton;

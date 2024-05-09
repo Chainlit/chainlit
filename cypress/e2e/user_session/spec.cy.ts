@@ -1,7 +1,10 @@
 import { runTestServer, submitMessage } from '../../support/testUtils';
 
 function newSession() {
-  cy.get('#new-chat-button').should('exist').click();
+  cy.get('#header')
+    .get('#new-chat-button')
+    .should('exist')
+    .click({ force: true });
   cy.get('#new-chat-dialog').should('exist');
   cy.get('#confirm').should('exist').click();
 

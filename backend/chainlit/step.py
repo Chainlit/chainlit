@@ -193,10 +193,34 @@ class Step:
         self.persisted = False
         self.fail_on_persist_error = False
 
+    def _clean_content(self, content):
+        """
+        Recursively checks and converts bytes objects in content.
+        """
+
+        def handle_bytes(item):
+            if isinstance(item, bytes):
+                return "STRIPPED_BINARY_DATA"
+            elif isinstance(item, dict):
+                return {k: handle_bytes(v) for k, v in item.items()}
+            elif isinstance(item, list):
+                return [handle_bytes(i) for i in item]
+            elif isinstance(item, tuple):
+                return tuple(handle_bytes(i) for i in item)
+            return item
+
+        return handle_bytes(content)
+
     def _process_content(self, content, set_language=False):
         if content is None:
             return ""
-        if isinstance(content, dict):
+        content = self._clean_content(content)
+
+        if (
+            isinstance(content, dict)
+            or isinstance(content, list)
+            or isinstance(content, tuple)
+        ):
             try:
                 processed_content = json.dumps(content, indent=4, ensure_ascii=False)
                 if set_language:

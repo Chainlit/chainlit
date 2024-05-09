@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import chainlit.data as cl_data
 from chainlit.step import StepDict
@@ -69,10 +69,46 @@ class TestDataLayer(cl_data.BaseDataLayer):
     async def create_user(self, user: cl.User):
         return cl.PersistedUser(id="test", createdAt=now, identifier=user.identifier)
 
+    async def update_thread(
+        self,
+        thread_id: str,
+        name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
+    ):
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
+        if thread:
+            if name:
+                thread["name"] = name
+            if metadata:
+                thread["metadata"] = metadata
+            if tags:
+                thread["tags"] = tags
+        else:
+            thread_history.append(
+                {
+                    "id": thread_id,
+                    "name": name,
+                    "metadata": metadata,
+                    "tags": tags,
+                    "createdAt": utc_now(),
+                    "userId": user_id,
+                    "userIdentifier": "admin",
+                    "steps": [],
+                }
+            )
+
     @cl_data.queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
         global create_step_counter
         create_step_counter += 1
+
+        thread = next(
+            (t for t in thread_history if t["id"] == step_dict.get("threadId")), None
+        )
+        if thread:
+            thread["steps"].append(step_dict)
 
     async def get_thread_author(self, thread_id: str):
         return "admin"
@@ -131,3 +167,7 @@ def auth_callback(username: str, password: str) -> Optional[cl.User]:
 @cl.on_chat_resume
 async def on_chat_resume(thread: cl_data.ThreadDict):
     await cl.Message(f"Welcome back to {thread['name']}").send()
+    if "metadata" in thread:
+        await cl.Message(thread["metadata"], author="metadata", language="json").send()
+    if "tags" in thread:
+        await cl.Message(thread["tags"], author="tags", language="json").send()
