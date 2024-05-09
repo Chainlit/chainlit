@@ -9,13 +9,13 @@ import {
 import io from 'socket.io-client';
 import {
   actionState,
-  checkboxGroupState,
   askUserState,
   avatarState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  checkboxGroupState,
   elementState,
   firstUserInteraction,
   loadingState,
@@ -281,9 +281,9 @@ const useChatSession = () => {
         });
       });
 
-      socket.on("remove_checkbox_group", (checkboxGroup: ICheckboxGroup) => {
+      socket.on('remove_checkbox_group', (checkboxGroup: ICheckboxGroup) => {
         checkboxGroup.options = [];
-        checkboxGroup.selectedOptions = [];
+        checkboxGroup.selected = [];
         setCheckboxGroup(checkboxGroup);
       });
 

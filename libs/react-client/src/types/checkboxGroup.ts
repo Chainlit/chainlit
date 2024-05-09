@@ -9,5 +9,5 @@ export interface ICheckboxGroup {
   forId: string;
   value: string;
   options: ICheckboxGroupOption[];
-  selectedOptions: ICheckboxGroupOption[];
+  selected: ICheckboxGroupOption[];
 }

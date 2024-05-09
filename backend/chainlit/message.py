@@ -554,7 +554,7 @@ class AskCheckboxMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {", ".join([option.name for option in res.selected_options])}'
+            self.content = f'**Selected:** {", ".join([option["name"] for option in res["selected"]])}'
 
         self.wait_for_answer = False
 

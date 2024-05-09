@@ -17,7 +17,7 @@ import type {
 interface Props {
   message: IStep;
   checkboxGroup: ICheckboxGroup;
-  onSave?: (selectedOptions: ICheckboxGroup) => void;
+  onSave?: (selected: ICheckboxGroup) => void;
 }
 
 const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
@@ -29,26 +29,25 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
 
   const [checkboxState, setCheckboxState] = useState<ICheckboxGroup>({
     ...checkboxGroup,
-    selectedOptions: []
+    selected: []
   });
 
   const handleChange = (option: ICheckboxGroupOption) => {
     setCheckboxState((prevState: ICheckboxGroup) => ({
       ...prevState,
-      selectedOptions: prevState.selectedOptions.some(
+      selected: prevState.selected.some(
         (selectedOption: ICheckboxGroupOption) =>
           selectedOption.value === option.value
       )
-        ? prevState.selectedOptions.filter(
+        ? prevState.selected.filter(
             (selectedOption: ICheckboxGroupOption) =>
               selectedOption.value !== option.value
           )
-        : [...prevState.selectedOptions, option]
+        : [...prevState.selected, option]
     }));
   };
 
   const handleSave = () => {
-    console.log('handleSave', checkboxState.selectedOptions);
     askUser?.callback(checkboxState);
   };
 
@@ -62,7 +61,7 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
               control={
                 <Checkbox
                   onChange={() => handleChange(option)}
-                  checked={checkboxState.selectedOptions.some(
+                  checked={checkboxState.selected.some(
                     (selectedOption) => selectedOption.value === option.value
                   )}
                 />
@@ -75,7 +74,7 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
       <Button
         variant="contained"
         onClick={handleSave}
-        disabled={checkboxState.selectedOptions.length === 0}
+        disabled={checkboxState.selected.length === 0}
       >
         Save
       </Button>

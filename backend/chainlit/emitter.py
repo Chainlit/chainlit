@@ -239,7 +239,12 @@ class ChainlitEmitter(BaseChainlitEmitter):
             await self.task_end()
 
             final_res: Optional[
-                Union["StepDict", "AskActionResponse", "AskCheckboxResponse", List["FileDict"]]
+                Union[
+                    "StepDict",
+                    "AskActionResponse",
+                    "AskCheckboxResponse",
+                    List["FileDict"],
+                ]
             ] = None
 
             if user_res:
@@ -278,9 +283,6 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     interaction = action_res["value"]
                 elif spec.type == "checkbox_group":
                     checkbox_res = cast(AskCheckboxResponse, user_res)
-                    checkbox_res.selected_options = getattr(checkbox_res, 'selectedOptions')
-                    delattr(checkbox_res, 'selectedOptions')
-
                     final_res = checkbox_res
 
                 if not self.session.has_first_interaction and interaction:
