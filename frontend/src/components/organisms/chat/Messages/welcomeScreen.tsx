@@ -4,6 +4,8 @@ import { Box } from '@mui/material';
 
 import { Markdown } from 'components/molecules/Markdown';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 const WelcomeScreen = memo(
   ({
     markdown,
@@ -16,6 +18,8 @@ const WelcomeScreen = memo(
     latex?: boolean;
     variant: 'app' | 'copilot';
   }) => {
+    const layoutMaxWidth = useLayoutMaxWidth();
+
     if (!markdown) return <Box flexGrow={1} />;
 
     return (
@@ -25,7 +29,7 @@ const WelcomeScreen = memo(
           sx={{
             px: variant === 'app' ? 2.5 : 2,
             boxSizing: 'border-box',
-            maxWidth: '48rem',
+            maxWidth: layoutMaxWidth,
             width: '100%',
             mx: 'auto',
             color: 'text.primary',

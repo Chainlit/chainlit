@@ -20,6 +20,8 @@ import {
 import { Translator } from 'components/i18n';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { apiClientState } from 'state/apiClient';
 
 type Props = {
@@ -34,6 +36,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
   const apiClient = useRecoilValue(apiClientState);
   const { t } = useTranslation();
   const { threadId } = useChatMessages();
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   useEffect(() => {
     if (!thread) return;
@@ -130,7 +133,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             <Skeleton
               variant="rounded"
               sx={{
-                maxWidth: '48rem',
+                maxWidth: layoutMaxWidth,
                 width: '100%',
                 height: 100
               }}
@@ -154,7 +157,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
       <Box
         sx={{
           width: '100%',
-          maxWidth: '48rem',
+          maxWidth: layoutMaxWidth,
           mx: 'auto',
           my: 2
         }}

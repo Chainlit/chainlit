@@ -38,7 +38,6 @@ const Chat = () => {
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
-
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
@@ -188,7 +187,6 @@ const Chat = () => {
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
               mx: 'auto',
               my: 2
             }}
