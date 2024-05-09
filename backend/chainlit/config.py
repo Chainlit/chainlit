@@ -16,7 +16,9 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.types import ChatProfile, ThreadDict
+    from chainlit.element import ElementBased
+    from chainlit.message import Message
+    from chainlit.types import AudioChunk, ChatProfile, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -71,18 +73,26 @@ latex = false
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
-# Authorize users to upload files with messages
-[features.multi_modal]
+# Authorize users to spontaneously upload files with messages
+[features.spontaneous_file_upload]
     enabled = true
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
 
-# Allows user to use speech to text
-[features.speech_to_text]
-    enabled = false
-    # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
-    # language = "en-US"
+[features.audio]
+    # Threshold for audio recording
+    min_decibels = -45
+    # Delay for the user to start speaking in MS
+    initial_silence_timeout = 3000
+    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
+    silence_timeout = 1500
+    # Above this duration (MS), the recording will forcefully stop.
+    max_duration = 15000
+    # Duration of the audio chunks in MS
+    chunk_duration = 1000
+    # Sample rate of the audio
+    sample_rate = 44100
 
 [UI]
 # Name of the app and chatbot.
@@ -189,26 +199,31 @@ class Theme(DataClassJsonMixin):
 
 
 @dataclass
-class SpeechToTextFeature:
-    enabled: Optional[bool] = None
-    language: Optional[str] = None
-
-
-@dataclass
-class MultiModalFeature:
+class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None
     accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
 
 
+@dataclass
+class AudioFeature(DataClassJsonMixin):
+    min_decibels: int = -45
+    initial_silence_timeout: int = 2000
+    silence_timeout: int = 1500
+    chunk_duration: int = 1000
+    max_duration: int = 15000
+    sample_rate: int = 44100
+    enabled: bool = False
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
-    multi_modal: Optional[MultiModalFeature] = None
+    spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
+    audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     latex: bool = False
     unsafe_allow_html: bool = False
-    speech_to_text: Optional[SpeechToTextFeature] = None
     auto_tag_thread: bool = True
 
 
@@ -247,7 +262,10 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
-    on_message: Optional[Callable[[str], Any]] = None
+    on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
+
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
@@ -413,11 +431,13 @@ def load_settings():
 
         ui_settings = UISettings(**ui_settings)
 
+        code_settings = CodeSettings(action_callbacks={})
+
         return {
             "features": features_settings,
             "ui": ui_settings,
             "project": project_settings,
-            "code": CodeSettings(action_callbacks={}),
+            "code": code_settings,
         }
 
 

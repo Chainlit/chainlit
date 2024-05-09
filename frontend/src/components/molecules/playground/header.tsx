@@ -8,7 +8,6 @@ import Stack from '@mui/material/Stack';
 import { AccentButton } from 'components/atoms/buttons';
 
 import FunctionInput from './functionInput';
-import PromptModeToggle from './modeToggle';
 import VariableInput from './variableInput';
 
 interface Props {
@@ -19,7 +18,6 @@ interface Props {
 }
 
 export default function PlaygroundHeader({
-  hasTemplate,
   showToggleDrawerButton,
   toggleDrawer,
   handleClose
@@ -27,7 +25,7 @@ export default function PlaygroundHeader({
   return (
     <Stack direction="row" alignItems="center">
       <Stack direction="row" alignItems="center" gap={2}>
-        <PromptModeToggle hasTemplate={hasTemplate} />
+        {/* <PromptModeToggle hasTemplate={hasTemplate} /> */}
         <VariableInput />
         <FunctionInput />
       </Stack>

@@ -536,6 +536,10 @@ async def project_settings(
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
             profiles = [p.to_dict() for p in chat_profiles]
+
+    if config.code.on_audio_chunk:
+        config.features.audio.enabled = True
+
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),

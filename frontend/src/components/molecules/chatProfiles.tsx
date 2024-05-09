@@ -2,9 +2,8 @@ import size from 'lodash/size';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { grey } from 'theme';
 
-import { Box, Popover, Tab, Tabs } from '@mui/material';
+import { Box, Popover } from '@mui/material';
 
 import {
   useChatInteract,
@@ -12,10 +11,8 @@ import {
   useChatSession
 } from '@chainlit/react-client';
 
-import { InputStateHandler } from 'components/atoms/inputs';
+import { SelectInput } from 'components/atoms/inputs';
 import { Markdown } from 'components/molecules/Markdown';
-
-import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import { projectSettingsState } from 'state/project';
 
@@ -30,7 +27,6 @@ export default function ChatProfiles() {
   const { clear } = useChatInteract();
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const isDarkMode = useIsDarkMode();
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -64,97 +60,25 @@ export default function ChatProfiles() {
 
   const popoverOpen = Boolean(anchorEl);
 
-  return (
-    <Box pt={1} pb={2} alignSelf="center" maxWidth="min(60rem, 90vw)">
-      <InputStateHandler id={'chat-profile-selector'}>
-        <Box
-          sx={{
-            border: (theme) => `1px solid ${theme.palette.divider}`,
-            backgroundColor: (theme) => theme.palette.background.paper,
-            borderRadius: 1,
-            padding: 0.5
-          }}
-        >
-          <Tabs
-            value={chatProfile || ''}
-            onChange={(event: React.SyntheticEvent, newValue: string) => {
-              setNewChatProfile(newValue);
-              if (firstInteraction) {
-                setOpenDialog(true);
-              } else {
-                handleConfirm(newValue);
-              }
-            }}
-            variant="scrollable"
-            sx={{
-              minHeight: '40px !important',
+  const items = pSettings.chatProfiles.map((item) => ({
+    label: item.name,
+    value: item.name,
+    icon: item.icon ? (
+      <img
+        src={item.icon}
+        className="chat-profile-icon"
+        style={{
+          width: '24px',
+          height: '24px',
+          borderRadius: '50%',
+          objectFit: 'cover'
+        }}
+      />
+    ) : undefined
+  }));
 
-              '& .MuiButtonBase-root': {
-                textTransform: 'none',
-                zIndex: 1,
-                color: grey[isDarkMode ? 600 : 500],
-                fontSize: '14px',
-                fontWeight: 500,
-                padding: 0,
-                minHeight: '40px !important',
-                width: '125px'
-              },
-              '& .Mui-selected': {
-                color: 'white !important'
-              },
-              '& .MuiTabs-indicator': {
-                background: (theme) =>
-                  isDarkMode
-                    ? theme.palette.divider
-                    : theme.palette.primary.main,
-                height: '100%',
-                borderRadius: '5px'
-              }
-            }}
-          >
-            {pSettings.chatProfiles.map((item) => (
-              <Tab
-                key={`tab-${item.name}`}
-                className={`tab-${item.name}`}
-                disableRipple
-                label={item.name}
-                value={item.name}
-                sx={{
-                  '& .chat-profile-icon': {
-                    filter:
-                      item.name !== chatProfile ? 'grayscale(100%)' : undefined
-                  },
-                  '&:hover': {
-                    '& .chat-profile-icon': { filter: 'grayscale(0%)' }
-                  }
-                }}
-                icon={
-                  item.icon ? (
-                    <img
-                      src={item.icon}
-                      className="chat-profile-icon"
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        transition: 'filter 0.5s ease-in-out'
-                      }}
-                    />
-                  ) : undefined
-                }
-                iconPosition="start"
-                onMouseEnter={(event) => {
-                  setChatProfileDescription(item.markdown_description);
-                  setAnchorEl(event.currentTarget.parentElement);
-                }}
-                onMouseLeave={() => setAnchorEl(null)}
-                data-test={`chat-profile:${item.name}`}
-              />
-            ))}
-          </Tabs>
-        </Box>
-      </InputStateHandler>
+  return (
+    <>
       <Popover
         id="chat-profile-description"
         anchorEl={anchorEl}
@@ -172,12 +96,12 @@ export default function ChatProfiles() {
           marginTop: 1.5
         }}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center'
+          vertical: 'center',
+          horizontal: 'right'
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center'
+          vertical: 'center',
+          horizontal: 'left'
         }}
         onClose={() => setAnchorEl(null)}
         disableRestoreFocus
@@ -194,11 +118,35 @@ export default function ChatProfiles() {
           </Markdown>
         </Box>
       </Popover>
+      <SelectInput
+        value={chatProfile || ''}
+        items={items}
+        id="chat-profile-selector"
+        onItemMouseEnter={(event, itemName) => {
+          const item = pSettings.chatProfiles.find(
+            (item) => item.name === itemName
+          );
+          if (!item) return;
+          setChatProfileDescription(item.markdown_description);
+          setAnchorEl(event.currentTarget);
+        }}
+        onItemMouseLeave={() => setAnchorEl(null)}
+        onChange={(e) => {
+          const newValue = e.target.value;
+          setNewChatProfile(newValue);
+          if (firstInteraction) {
+            setOpenDialog(true);
+          } else {
+            handleConfirm(newValue);
+          }
+          setAnchorEl(null);
+        }}
+      />
       <NewChatDialog
         open={openDialog}
         handleClose={handleClose}
         handleConfirm={() => handleConfirm()}
       />
-    </Box>
+    </>
   );
 }

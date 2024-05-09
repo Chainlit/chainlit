@@ -58,19 +58,12 @@ const Message = memo(
       return null;
     }
 
-    const isUser = message.type === 'user_message';
     const isAsk = message.waitForAnswer;
 
     return (
       <Box
         sx={{
-          color: 'text.primary',
-          backgroundColor: (theme) =>
-            isUser
-              ? 'transparent'
-              : theme.palette.mode === 'dark'
-              ? theme.palette.grey[800]
-              : theme.palette.grey[100]
+          color: 'text.primary'
         }}
         className="step"
       >
@@ -78,7 +71,7 @@ const Message = memo(
           sx={{
             boxSizing: 'border-box',
             mx: 'auto',
-            maxWidth: '60rem',
+            maxWidth: '48rem',
             px: 2,
             display: 'flex',
             flexDirection: 'column',

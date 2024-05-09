@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react';
 import { grey, primary } from 'theme/index';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
@@ -27,6 +28,8 @@ type SelectInputProps = IInput &
     onChange: (e: SelectChangeEvent) => void;
     placeholder?: string;
     renderLabel?: () => string;
+    onItemMouseEnter?: (e: MouseEvent<HTMLLIElement>, itemName: string) => void;
+    onItemMouseLeave?: (e: MouseEvent<HTMLLIElement>) => void;
     value?: string | number;
     iconSx?: SxProps;
   };
@@ -41,6 +44,8 @@ const SelectInput = ({
   label,
   name,
   onChange,
+  onItemMouseEnter,
+  onItemMouseLeave,
   size = 'small',
   tooltip,
   value,
@@ -136,6 +141,9 @@ const SelectInput = ({
           items?.map((item) => (
             <MenuItem
               isDarkMode={isDarkMode}
+              data-test={`select-item:${item.label}`}
+              onMouseEnter={(e) => onItemMouseEnter?.(e, item.label)}
+              onMouseLeave={(e) => onItemMouseLeave?.(e)}
               item={item}
               selected={item.value === value}
               key={item.value}

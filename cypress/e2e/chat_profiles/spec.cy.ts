@@ -10,12 +10,7 @@ describe('Chat profiles', () => {
     cy.get("input[name='email']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
-    cy.get('.MuiAlert-message').should('not.exist');
     cy.get('#chat-input').should('exist');
-
-    cy.get('[data-test="chat-profile:GPT-3.5"]').should('exist');
-    cy.get('[data-test="chat-profile:GPT-4"]').should('exist');
-    cy.get('[data-test="chat-profile:GPT-5"]').should('exist');
 
     cy.get('.step')
       .should('have.length', 1)
@@ -25,9 +20,14 @@ describe('Chat profiles', () => {
         'starting chat with admin using the GPT-3.5 chat profile'
       );
 
+    cy.get('#chat-profile-selector').parent().click();
+    cy.get('[data-test="select-item:GPT-3.5"]').should('exist');
+    cy.get('[data-test="select-item:GPT-4"]').should('exist');
+    cy.get('[data-test="select-item:GPT-5"]').should('exist');
+
     // Change chat profile
 
-    cy.get('[data-test="chat-profile:GPT-4"]').click();
+    cy.get('[data-test="select-item:GPT-4"]').click();
 
     cy.get('.step')
       .should('have.length', 1)
@@ -37,7 +37,7 @@ describe('Chat profiles', () => {
         'starting chat with admin using the GPT-4 chat profile'
       );
 
-    cy.get('#new-chat-button').click();
+    cy.get('#header').get('#new-chat-button').click({ force: true });
     cy.get('#confirm').click();
 
     cy.get('.step')
@@ -50,7 +50,8 @@ describe('Chat profiles', () => {
 
     submitMessage('hello');
     cy.get('.step').should('have.length', 2).eq(1).should('contain', 'hello');
-    cy.get('[data-test="chat-profile:GPT-5"]').click();
+    cy.get('#chat-profile-selector').parent().click();
+    cy.get('[data-test="select-item:GPT-5"]').click();
     cy.get('#confirm').click();
 
     cy.get('.step')

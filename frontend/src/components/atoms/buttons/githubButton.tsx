@@ -1,20 +1,21 @@
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, IconButtonProps, Tooltip } from '@mui/material';
 
 import GithubIcon from 'assets/github';
 
-interface Props {
+interface Props extends IconButtonProps {
   href?: string;
 }
 
-export default function GithubButton({ href }: Props) {
+export default function GithubButton({ href, ...props }: Props) {
   if (!href) {
     return null;
   }
 
   return (
     <Tooltip title="See on Github">
-      <IconButton color="inherit" href={href} target="_blank">
-        <GithubIcon />
+      {/* @ts-expect-error href breaks IconButton props */}
+      <IconButton color="inherit" href={href} target="_blank" {...props}>
+        <GithubIcon sx={{ height: 20, width: 20 }} />
       </IconButton>
     </Tooltip>
   );

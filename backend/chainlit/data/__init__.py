@@ -156,6 +156,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "chainlitKey": None,
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
+            "autoPlay": metadata.get("autoPlay", None),
             "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
@@ -219,7 +220,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
             "language": metadata.get("language"),
-            "isError": metadata.get("isError", False),
+            "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
 
@@ -348,7 +349,6 @@ class ChainlitDataLayer(BaseDataLayer):
             step_dict.get("metadata", {}),
             **{
                 "disableFeedback": step_dict.get("disableFeedback"),
-                "isError": step_dict.get("isError"),
                 "waitForAnswer": step_dict.get("waitForAnswer"),
                 "language": step_dict.get("language"),
                 "showInput": step_dict.get("showInput"),
@@ -372,6 +372,8 @@ class ChainlitDataLayer(BaseDataLayer):
             step["input"] = {"content": step_dict.get("input")}
         if step_dict.get("output"):
             step["output"] = {"content": step_dict.get("output")}
+        if step_dict.get("isError"):
+            step["error"] = step_dict.get("output")
 
         await self.client.api.send_steps([step])
 
