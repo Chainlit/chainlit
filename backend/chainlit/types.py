@@ -106,7 +106,7 @@ class AskFileResponse:
 
 
 class AskCheckboxResponse(AskCheckboxSpec):
-    selected_options: Optional[List[CheckboxGroupOption]]
+    selected_options: List[CheckboxGroupOption] = []
 
 
 class AskActionResponse(TypedDict):
