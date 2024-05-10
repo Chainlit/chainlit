@@ -1,7 +1,7 @@
 import asyncio
 import os
 import uuid
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import httpx
 from chainlit.config import config
@@ -10,6 +10,7 @@ from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
 from chainlit.message import Message, StepDict
+from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
@@ -56,8 +57,44 @@ class SlackEmitter(BaseChainlitEmitter):
 
         if step_dict.get("type") == "user_message" or step_dict.get("parentId"):
             return
+
         else:
-            await self.say(step_dict["output"])
+            enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+            blocks: List[Dict] = [
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": step_dict["output"]},
+                }
+            ]
+            if enable_feedback:
+                blocks.append(
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "action_id": "thumbdown",
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "emoji": True,
+                                    "text": ":thumbsdown:",
+                                },
+                                "value": step_dict.get("id"),
+                            },
+                            {
+                                "action_id": "thumbup",
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "emoji": True,
+                                    "text": ":thumbsup:",
+                                },
+                                "value": step_dict.get("id"),
+                            },
+                        ],
+                    }
+                )
+            await self.say(text=step_dict["output"], blocks=blocks)
 
 
 slack_app = AsyncApp(
@@ -222,3 +259,53 @@ async def handle_message(message, say):
     user = await get_user(message["user"])
     thread_name = f"{user.identifier} DM"
     await process_slack_message(message, say, thread_name)
+
+
+@slack_app.block_action("thumbdown")
+async def thumb_down(ack, context, body):
+    await ack()
+    step_id = body["actions"][0]["value"]
+
+    if data_layer := get_data_layer():
+        await data_layer.upsert_feedback(Feedback(forId=step_id, value=0))
+
+    text = body["message"]["text"]
+    blocks = body["message"]["blocks"]
+    updated_blocks = [block for block in blocks if block["type"] != "actions"]
+    updated_blocks.append(
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": ":thumbsdown: Feedback received."},
+        }
+    )
+    await context.client.chat_update(
+        channel=body["channel"]["id"],
+        ts=body["container"]["message_ts"],
+        text=text,
+        blocks=updated_blocks,
+    )
+
+
+@slack_app.block_action("thumbup")
+async def thumb_up(ack, context, body):
+    await ack()
+    step_id = body["actions"][0]["value"]
+
+    if data_layer := get_data_layer():
+        await data_layer.upsert_feedback(Feedback(forId=step_id, value=1))
+
+    text = body["message"]["text"]
+    blocks = body["message"]["blocks"]
+    updated_blocks = [block for block in blocks if block["type"] != "actions"]
+    updated_blocks.append(
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": ":thumbsup: Feedback received."},
+        }
+    )
+    await context.client.chat_update(
+        channel=body["channel"]["id"],
+        ts=body["container"]["message_ts"],
+        text=text,
+        blocks=updated_blocks,
+    )
