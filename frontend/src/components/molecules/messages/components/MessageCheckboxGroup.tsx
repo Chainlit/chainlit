@@ -52,8 +52,8 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
   };
 
   return (
-    <Stack spacing={1} width="100%">
-      <Box id="checkboxes-list">
+    <Stack spacing={1} width="auto">
+      <Box className="checkbox-group">
         <FormGroup>
           {checkboxGroup.options.map((option: ICheckboxGroupOption) => (
             <FormControlLabel
@@ -73,6 +73,7 @@ const MessageCheckboxGroup = ({ message, checkboxGroup }: Props) => {
       </Box>
       <Button
         variant="contained"
+        size="large"
         onClick={handleSave}
         disabled={checkboxState.selected.length === 0}
       >
