@@ -119,16 +119,27 @@ async def lifespan(app: FastAPI):
 
         watch_task = asyncio.create_task(watch_files_for_changes())
 
+    discord_task = None
+
+    if discord_bot_token := os.environ.get("DISCORD_BOT_TOKEN"):
+        from chainlit.discord.app import client
+
+        discord_task = asyncio.create_task(client.start(discord_bot_token))
+
     try:
         yield
     finally:
-        if watch_task:
-            try:
+        try:
+            if watch_task:
                 stop_event.set()
                 watch_task.cancel()
                 await watch_task
-            except asyncio.exceptions.CancelledError:
-                pass
+
+            if discord_task:
+                discord_task.cancel()
+                await discord_task
+        except asyncio.exceptions.CancelledError:
+            pass
 
         if FILES_DIRECTORY.is_dir():
             shutil.rmtree(FILES_DIRECTORY)

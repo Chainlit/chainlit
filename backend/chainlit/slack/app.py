@@ -1,6 +1,8 @@
 import asyncio
 import os
+import re
 import uuid
+from functools import partial
 from typing import Dict, List, Optional, Union
 
 import httpx
@@ -19,13 +21,20 @@ from slack_bolt.async_app import AsyncApp
 
 class SlackEmitter(BaseChainlitEmitter):
     def __init__(
-        self, session: HTTPSession, app: AsyncApp, channel_id: str, say, enabled=False
+        self,
+        session: HTTPSession,
+        app: AsyncApp,
+        channel_id: str,
+        say,
+        enabled=False,
+        thread_ts: Optional[str] = None,
     ):
         super().__init__(session)
         self.app = app
         self.channel_id = channel_id
         self.say = say
         self.enabled = enabled
+        self.thread_ts = thread_ts
 
     async def send_element(self, element_dict: ElementDict):
         if not self.enabled:
@@ -47,6 +56,7 @@ class SlackEmitter(BaseChainlitEmitter):
 
         await self.app.client.files_upload_v2(
             channel=self.channel_id,
+            thread_ts=self.thread_ts,
             file=file,
             title=element_dict.get("name"),
         )
@@ -55,46 +65,56 @@ class SlackEmitter(BaseChainlitEmitter):
         if not self.enabled:
             return
 
-        if step_dict.get("type") == "user_message" or step_dict.get("parentId"):
+        is_chain_of_thought = bool(step_dict.get("parentId"))
+        is_empty_output = not step_dict.get("output")
+
+        if is_chain_of_thought or is_empty_output:
             return
 
-        else:
-            enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
-            blocks: List[Dict] = [
+        enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+        blocks: List[Dict] = [
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": step_dict["output"]},
+            }
+        ]
+        if enable_feedback:
+            blocks.append(
                 {
-                    "type": "section",
-                    "text": {"type": "mrkdwn", "text": step_dict["output"]},
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "action_id": "thumbdown",
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "emoji": True,
+                                "text": ":thumbsdown:",
+                            },
+                            "value": step_dict.get("id"),
+                        },
+                        {
+                            "action_id": "thumbup",
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "emoji": True,
+                                "text": ":thumbsup:",
+                            },
+                            "value": step_dict.get("id"),
+                        },
+                    ],
                 }
-            ]
-            if enable_feedback:
-                blocks.append(
-                    {
-                        "type": "actions",
-                        "elements": [
-                            {
-                                "action_id": "thumbdown",
-                                "type": "button",
-                                "text": {
-                                    "type": "plain_text",
-                                    "emoji": True,
-                                    "text": ":thumbsdown:",
-                                },
-                                "value": step_dict.get("id"),
-                            },
-                            {
-                                "action_id": "thumbup",
-                                "type": "button",
-                                "text": {
-                                    "type": "plain_text",
-                                    "emoji": True,
-                                    "text": ":thumbsup:",
-                                },
-                                "value": step_dict.get("id"),
-                            },
-                        ],
-                    }
-                )
-            await self.say(text=step_dict["output"], blocks=blocks)
+            )
+        await self.say(
+            text=step_dict["output"], blocks=blocks, thread_ts=self.thread_ts
+        )
+
+    async def update_step(self, step_dict: StepDict):
+        if not self.enabled:
+            return
+
+        await self.send_step(step_dict)
 
 
 slack_app = AsyncApp(
@@ -108,13 +128,24 @@ def init_slack_context(
     slack_channel_id: str,
     event,
     say,
+    thread_ts: Optional[str] = None,
 ) -> ChainlitContext:
     emitter = SlackEmitter(
-        session=session, app=slack_app, channel_id=slack_channel_id, say=say
+        session=session,
+        app=slack_app,
+        channel_id=slack_channel_id,
+        say=say,
+        thread_ts=thread_ts,
     )
     context = ChainlitContext(session=session, emitter=emitter)
     context_var.set(context)
     user_session.set("slack_event", event)
+    user_session.set(
+        "fetch_slack_message_history",
+        partial(
+            fetch_message_history, channel_id=slack_channel_id, thread_ts=thread_ts
+        ),
+    )
     return context
 
 
@@ -123,6 +154,11 @@ slack_app_handler = AsyncSlackRequestHandler(slack_app)
 users_by_slack_id: Dict[str, Union[User, PersistedUser]] = {}
 
 USER_PREFIX = "slack_"
+
+
+def clean_content(message: str):
+    cleaned_text = re.sub(r"<@[\w]+>", "", message).strip()
+    return cleaned_text
 
 
 async def get_user(slack_user_id: str):
@@ -140,6 +176,24 @@ async def get_user(slack_user_id: str):
             users_by_slack_id[slack_user_id] = persisted_user
 
     return users_by_slack_id[slack_user_id]
+
+
+async def fetch_message_history(
+    channel_id: str, thread_ts: Optional[str] = None, limit=30
+):
+    if not thread_ts:
+        result = await slack_app.client.conversations_history(
+            channel=channel_id, limit=limit
+        )
+    else:
+        result = await slack_app.client.conversations_replies(
+            channel=channel_id, ts=thread_ts, limit=limit
+        )
+    if result["ok"]:
+        messages = result["messages"]
+        return messages
+    else:
+        raise Exception(f"Failed to fetch messages: {result['error']}")
 
 
 async def download_slack_file(url, token):
@@ -177,12 +231,16 @@ async def download_slack_files(session: HTTPSession, files, token):
 
 
 async def process_slack_message(
-    event, say, thread_name: str, bind_thread_to_user=False
+    event,
+    say,
+    thread_name: Optional[str] = None,
+    bind_thread_to_user=False,
+    thread_ts: Optional[str] = None,
 ):
     user = await get_user(event["user"])
 
     channel_id = event["channel"]
-    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, channel_id))
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts or channel_id))
 
     text = event.get("text")
     slack_files = event.get("files", [])
@@ -200,6 +258,7 @@ async def process_slack_message(
         slack_channel_id=channel_id,
         event=event,
         say=say,
+        thread_ts=thread_ts,
     )
 
     file_elements = await download_slack_files(
@@ -207,7 +266,7 @@ async def process_slack_message(
     )
 
     msg = Message(
-        content=text,
+        content=clean_content(text),
         elements=file_elements,
         type="user_message",
         author=user.metadata.get("real_name"),
@@ -233,7 +292,7 @@ async def process_slack_message(
 
         await data_layer.update_thread(
             thread_id=thread_id,
-            name=thread_name,
+            name=thread_name or msg.content,
             metadata=ctx.session.to_persistable(),
             user_id=user_id,
         )
@@ -248,16 +307,14 @@ async def handle_app_home_opened(event, say):
 
 @slack_app.event("app_mention")
 async def handle_app_mentions(event, say):
-    response = await slack_app.client.conversations_info(channel=event["channel"])
-    channel_name = response["channel"]["name"]
-    thread_name = f"{channel_name} Slack Channel"
-    await process_slack_message(event, say, thread_name)
+    thread_ts = event.get("thread_ts", event["ts"])
+    await process_slack_message(event, say, thread_ts=thread_ts)
 
 
 @slack_app.event("message")
 async def handle_message(message, say):
     user = await get_user(message["user"])
-    thread_name = f"{user.identifier} DM"
+    thread_name = f"{user.identifier} Slack DM"
     await process_slack_message(message, say, thread_name)
 
 
