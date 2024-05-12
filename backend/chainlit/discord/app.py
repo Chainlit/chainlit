@@ -3,9 +3,13 @@ import mimetypes
 import re
 import uuid
 from io import BytesIO
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from discord.abc import MessageableChannel
 
 import discord
+
 import filetype
 import httpx
 from chainlit.config import config
@@ -44,7 +48,9 @@ class FeedbackView(View):
 
 
 class DiscordEmitter(BaseChainlitEmitter):
-    def __init__(self, session: HTTPSession, channel: discord.MessageC, enabled=False):
+    def __init__(
+        self, session: HTTPSession, channel: "MessageableChannel", enabled=False
+    ):
         super().__init__(session)
         self.channel = channel
         self.enabled = enabled
@@ -112,7 +118,7 @@ client = discord.Client(intents=intents)
 
 def init_discord_context(
     session: HTTPSession,
-    channel: discord.abc.MessageableChannel,
+    channel: "MessageableChannel",
     message: discord.Message,
 ) -> ChainlitContext:
     emitter = DiscordEmitter(session=session, channel=channel)
@@ -193,7 +199,7 @@ def clean_content(message: discord.Message):
 async def process_discord_message(
     message: discord.Message,
     thread_name: str,
-    channel: discord.abc.MessageableChannel,
+    channel: "MessageableChannel",
     bind_thread_to_user=False,
 ):
     user = await get_user(message.author)
