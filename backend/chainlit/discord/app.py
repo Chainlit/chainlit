@@ -30,21 +30,21 @@ class FeedbackView(View):
     async def thumbs_down(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
             await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=0))
-        await interaction.message.edit(view=None)
-        await interaction.message.add_reaction("👎")
+        if interaction.message:
+            await interaction.message.edit(view=None)
+            await interaction.message.add_reaction("👎")
 
     @discord.ui.button(label="👍")
     async def thumbs_up(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
             await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=1))
-        await interaction.message.edit(view=None)
-        await interaction.message.add_reaction("👍")
+        if interaction.message:
+            await interaction.message.edit(view=None)
+            await interaction.message.add_reaction("👍")
 
 
 class DiscordEmitter(BaseChainlitEmitter):
-    def __init__(
-        self, session: HTTPSession, channel: discord.TextChannel, enabled=False
-    ):
+    def __init__(self, session: HTTPSession, channel: discord.MessageC, enabled=False):
         super().__init__(session)
         self.channel = channel
         self.enabled = enabled
@@ -112,7 +112,7 @@ client = discord.Client(intents=intents)
 
 def init_discord_context(
     session: HTTPSession,
-    channel: discord.abc.Messageable,
+    channel: discord.abc.MessageableChannel,
     message: discord.Message,
 ) -> ChainlitContext:
     emitter = DiscordEmitter(session=session, channel=channel)
@@ -128,7 +128,7 @@ users_by_discord_id: Dict[int, Union[User, PersistedUser]] = {}
 USER_PREFIX = "discord_"
 
 
-async def get_user(discord_user: discord.User):
+async def get_user(discord_user: Union[discord.User, discord.Member]):
     metadata = {
         "name": discord_user.name,
         "id": discord_user.id,
@@ -165,7 +165,7 @@ async def download_discord_files(
     for idx, file_bytes in enumerate(file_bytes_list):
         if file_bytes:
             name = attachments[idx].filename
-            mime_type = attachments[idx].content_type
+            mime_type = attachments[idx].content_type or "application/octet-stream"
             file_ref = await session.persist_file(
                 name=name, mime=mime_type, content=file_bytes
             )
@@ -181,6 +181,9 @@ async def download_discord_files(
 
 
 def clean_content(message: discord.Message):
+    if not client.user:
+        return message.content
+
     # Regex to find mentions of the bot
     bot_mention = f"<@!?{client.user.id}>"
     # Replace the bot's mention with nothing
@@ -190,7 +193,7 @@ def clean_content(message: discord.Message):
 async def process_discord_message(
     message: discord.Message,
     thread_name: str,
-    channel: discord.abc.Messageable,
+    channel: discord.abc.MessageableChannel,
     bind_thread_to_user=False,
 ):
     user = await get_user(message.author)
