@@ -10,6 +10,7 @@ Chainlit is an open-source async Python framework which allows developers to bui
 
 - ✅ ChatGPT-like application
 - ✅ Embedded Chatbot & Software Copilot
+- ✅ Slack & Discord
 - ✅ Custom frontend (build your own agentic experience)
 - ✅ API Endpoint
 
@@ -72,6 +73,7 @@ $ chainlit run demo.py -w
 ```
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
+
 ## 🎉 Key Features and Integrations
 
 Full documentation is available [here](https://docs.chainlit.io). Key features:
