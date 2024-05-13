@@ -172,7 +172,7 @@ class Element:
             raise ValueError("Must provide url or chainlit key to send element")
 
         trace_event(f"send {self.__class__.__name__}")
-        await context.emitter.emit("element", self.to_dict())
+        await context.emitter.send_element(self.to_dict())
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)

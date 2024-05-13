@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -144,7 +145,7 @@ class FileReference(TypedDict):
 class FileDict(TypedDict):
     id: str
     name: str
-    path: str
+    path: Path
     size: int
     type: str
 

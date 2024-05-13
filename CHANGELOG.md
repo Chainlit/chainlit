@@ -8,16 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
-## [1.1.0rc1] - 2024-05-06
-
-### Changed
-
-- bumped literalai package version to 0.0.600
-
-## [1.1.0rc0] - 2024-05-06
+## [1.1.0] - 2024-05-13
 
 ### Added
 
+- You can know serve your Chainlit app through Slack
+- You can know serve your Chainlit app through Discord
 - `cl.on_audio_chunk` decorator to process incoming the user incoming audio stream
 - `cl.on_audio_end` decorator to react to the end of the user audio stream
 - The `cl.Audio` element now has an `auto_play` property

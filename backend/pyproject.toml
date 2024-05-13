@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.0rc1"
+version = "1.1.0"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'openai', 'copilot', 'langchain', 'conversational ai']
 description = "Build Conversational AI."
 authors = ["Chainlit"]
@@ -101,6 +101,13 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
+
+[tool.poetry.group.slack.dependencies]
+slack_bolt = "^1.18.1"
+
+[tool.poetry.group.discord.dependencies]
+discord = "^2.3.2"
+
 
 [build-system]
 requires = ["poetry-core"]

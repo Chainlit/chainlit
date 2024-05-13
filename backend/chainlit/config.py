@@ -4,7 +4,7 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Literal
 
 import tomli
 from chainlit.logger import logger
@@ -132,9 +132,10 @@ hide_cot = false
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
-# Override default MUI light theme. (Check theme.ts)
 [UI.theme]
+    #layout = "wide"
     #font_family = "Inter, sans-serif"
+# Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -194,6 +195,7 @@ class Palette(DataClassJsonMixin):
 @dataclass()
 class Theme(DataClassJsonMixin):
     font_family: Optional[str] = None
+    layout: Optional[Literal["default", "wide"]] = "default"
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 

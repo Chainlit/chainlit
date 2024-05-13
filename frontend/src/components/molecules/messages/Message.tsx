@@ -12,6 +12,8 @@ import { MessageActions } from './components/MessageActions';
 import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import { Messages } from './Messages';
@@ -47,6 +49,7 @@ const Message = memo(
       latex,
       onError
     } = useContext(MessageContext);
+    const layoutMaxWidth = useLayoutMaxWidth();
 
     const [showDetails, setShowDetails] = useState(expandAll);
 
@@ -71,7 +74,7 @@ const Message = memo(
           sx={{
             boxSizing: 'border-box',
             mx: 'auto',
-            maxWidth: '48rem',
+            maxWidth: layoutMaxWidth,
             px: 2,
             display: 'flex',
             flexDirection: 'column',

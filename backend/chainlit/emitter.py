@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Literal, Optional, Union, cast
 
 from chainlit.config import config
 from chainlit.data import get_data_layer
-from chainlit.element import Element, File
+from chainlit.element import Element, ElementDict, File
 from chainlit.logger import logger
 from chainlit.message import Message
-from chainlit.session import BaseSession, WebsocketSession
+from chainlit.session import BaseSession, HTTPSession, WebsocketSession
 from chainlit.step import StepDict
 from chainlit.types import (
     AskActionResponse,
@@ -29,6 +29,7 @@ class BaseChainlitEmitter:
     """
 
     session: BaseSession
+    enabled: bool = True
 
     def __init__(self, session: BaseSession) -> None:
         """Initialize with the user session."""
@@ -44,6 +45,10 @@ class BaseChainlitEmitter:
 
     async def resume_thread(self, thread_dict: ThreadDict):
         """Stub method to resume a thread."""
+        pass
+
+    async def send_element(self, element_dict: ElementDict):
+        """Stub method to send an element to the UI."""
         pass
 
     async def send_step(self, step_dict: StepDict):
@@ -150,6 +155,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def resume_thread(self, thread_dict: ThreadDict):
         """Send a thread to the UI to resume it"""
         return self.emit("resume_thread", thread_dict)
+
+    async def send_element(self, element_dict: ElementDict):
+        """Stub method to send an element to the UI."""
+        await self.emit("element", element_dict)
 
     def send_step(self, step_dict: StepDict):
         """Send a message to the UI."""

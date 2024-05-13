@@ -9,6 +9,8 @@ import { useChatInteract } from '@chainlit/react-client';
 import { Translator } from 'components/i18n';
 import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { projectSettingsState } from 'state/project';
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 
 export default function ResumeButton({ threadId }: Props) {
   const navigate = useNavigate();
+  const layoutMaxWidth = useLayoutMaxWidth();
   const pSettings = useRecoilValue(projectSettingsState);
   const { clear, setIdToResume } = useChatInteract();
 
@@ -42,7 +45,7 @@ export default function ResumeButton({ threadId }: Props) {
       sx={{
         boxSizing: 'border-box',
         width: '100%',
-        maxWidth: '48rem',
+        maxWidth: layoutMaxWidth,
         m: 'auto',
         justifyContent: 'center'
       }}

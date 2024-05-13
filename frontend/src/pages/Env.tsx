@@ -11,12 +11,15 @@ import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
 import { Header } from 'components/organisms/header';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
 
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
   const pSettings = useRecoilValue(projectSettingsState);
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   const navigate = useNavigate();
 
@@ -84,7 +87,7 @@ export default function Env() {
         flexGrow={1}
         gap={2}
         sx={{
-          maxWidth: '48rem',
+          maxWidth: layoutMaxWidth,
           width: '100%',
           mx: 'auto'
         }}
