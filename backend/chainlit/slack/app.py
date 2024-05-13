@@ -37,7 +37,7 @@ class SlackEmitter(BaseChainlitEmitter):
         self.thread_ts = thread_ts
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled:
+        if not self.enabled or element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")

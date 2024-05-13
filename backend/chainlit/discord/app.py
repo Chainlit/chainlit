@@ -56,7 +56,7 @@ class DiscordEmitter(BaseChainlitEmitter):
         self.enabled = enabled
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled:
+        if not self.enabled or element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")
@@ -269,9 +269,9 @@ async def on_ready():
 async def on_message(message: discord.Message):
     if message.author == client.user:
         return
-
+    
     is_dm = isinstance(message.channel, discord.DMChannel)
-    if client.user not in message.mentions and not is_dm:
+    if not client.user.mentioned_in(message) and not is_dm:
         return
 
     thread_name: str = ""
