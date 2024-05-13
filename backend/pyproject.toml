@@ -23,7 +23,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.600"
+literalai = "0.0.601"
 dataclasses_json = "^0.5.7"
 fastapi = "^0.110.1"
 starlette = "^0.37.2"
@@ -36,7 +36,6 @@ nest-asyncio = "^1.5.6"
 click = "^8.1.3"
 tomli = "^2.0.1"
 pydantic = ">=1,<3"
-python-graphql-client = "^0.4.3"
 python-dotenv = "^1.0.0"
 uptrace = "^1.22.0"
 watchfiles="^0.20.0"
@@ -82,7 +81,6 @@ module = [
     "matplotlib.*",  # remove when 3.8.0 is out, it should export types
     "plotly.*",
     "nest_asyncio",
-    "python_graphql_client",
     "socketio.*",
     "uptrace",
     "syncer",
