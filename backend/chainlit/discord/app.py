@@ -240,7 +240,8 @@ async def process_discord_message(
         await on_chat_start()
 
     if on_message := config.code.on_message:
-        await on_message(msg)
+        async with channel.typing():
+            await on_message(msg)
 
     if on_chat_end := config.code.on_chat_end:
         await on_chat_end()
@@ -269,7 +270,7 @@ async def on_ready():
 async def on_message(message: discord.Message):
     if not client.user or message.author == client.user:
         return
-    
+
     is_dm = isinstance(message.channel, discord.DMChannel)
     if not client.user.mentioned_in(message) and not is_dm:
         return
