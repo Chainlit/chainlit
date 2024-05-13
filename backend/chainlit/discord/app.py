@@ -267,7 +267,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
-    if message.author == client.user:
+    if not client.user or message.author == client.user:
         return
     
     is_dm = isinstance(message.channel, discord.DMChannel)
