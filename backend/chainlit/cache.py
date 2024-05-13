@@ -19,7 +19,7 @@ def init_lc_cache():
         if config.project.lc_cache_path is not None:
             set_llm_cache(SQLiteCache(database_path=config.project.lc_cache_path))
 
-            if not os.path.exists(config.project.lc_cache_path):
+            if os.path.exists(config.project.lc_cache_path):
                 logger.info(
                     f"LangChain cache created at: {config.project.lc_cache_path}"
                 )
