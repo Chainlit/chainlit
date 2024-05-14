@@ -22,6 +22,8 @@ from chainlit.message import Message, StepDict
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
+from chainlit.telemetry import trace
+
 from discord.ui import Button, View
 
 
@@ -33,7 +35,10 @@ class FeedbackView(View):
     @discord.ui.button(label="👎")
     async def thumbs_down(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
-            await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=0))
+            try:
+                await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=0))
+            except Exception as e:
+                logger.error(f"Error upserting feedback: {e}")
         if interaction.message:
             await interaction.message.edit(view=None)
             await interaction.message.add_reaction("👎")
@@ -41,7 +46,10 @@ class FeedbackView(View):
     @discord.ui.button(label="👍")
     async def thumbs_up(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
-            await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=1))
+            try:
+                await data_layer.upsert_feedback(Feedback(forId=self.step_id, value=1))
+            except Exception as e:
+                logger.error(f"Error upserting feedback: {e}")
         if interaction.message:
             await interaction.message.edit(view=None)
             await interaction.message.add_reaction("👍")
@@ -115,7 +123,7 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-
+@trace
 def init_discord_context(
     session: HTTPSession,
     channel: "MessageableChannel",
@@ -135,6 +143,9 @@ USER_PREFIX = "discord_"
 
 
 async def get_user(discord_user: Union[discord.User, discord.Member]):
+    if discord_user.id in users_by_discord_id:
+        return users_by_discord_id[discord_user.id]
+    
     metadata = {
         "name": discord_user.name,
         "id": discord_user.id,
@@ -144,10 +155,13 @@ async def get_user(discord_user: Union[discord.User, discord.Member]):
     users_by_discord_id[discord_user.id] = user
 
     if data_layer := get_data_layer():
-        persisted_user = await data_layer.create_user(user)
-        if persisted_user:
-            users_by_discord_id[discord_user.id] = persisted_user
-
+        try:
+            persisted_user = await data_layer.create_user(user)
+            if persisted_user:
+                users_by_discord_id[discord_user.id] = persisted_user
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+       
     return users_by_discord_id[discord_user.id]
 
 
@@ -251,12 +265,15 @@ async def process_discord_message(
         if isinstance(user, PersistedUser):
             user_id = user.id if bind_thread_to_user else None
 
-        await data_layer.update_thread(
-            thread_id=thread_id,
-            name=thread_name,
-            metadata=ctx.session.to_persistable(),
-            user_id=user_id,
-        )
+        try:
+            await data_layer.update_thread(
+                thread_id=thread_id,
+                name=thread_name,
+                metadata=ctx.session.to_persistable(),
+                user_id=user_id,
+            )
+        except Exception as e:
+            logger.error(f"Error updating thread: {e}")
 
     ctx.session.delete()
 
