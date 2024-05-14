@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.101] - 2024-05-14
+
+### Added
+
+- The discord bot now shows "typing" while responding
+
+### Fixed
+
+- Discord and Slack bots should no longer fail to respond if the data layer fails
+
 ## [1.1.0] - 2024-05-13
 
 ### Added
