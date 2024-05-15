@@ -11,12 +11,12 @@ from chainlit.context import ChainlitContext, HTTPSession, context_var
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
+from chainlit.logger import logger
 from chainlit.message import Message, StepDict
+from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from chainlit.logger import logger
-from chainlit.telemetry import trace
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_bolt.async_app import AsyncApp
 
@@ -124,6 +124,7 @@ slack_app = AsyncApp(
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
 )
 
+
 @trace
 def init_slack_context(
     session: HTTPSession,
@@ -166,7 +167,7 @@ def clean_content(message: str):
 async def get_user(slack_user_id: str):
     if slack_user_id in users_by_slack_id:
         return users_by_slack_id[slack_user_id]
-    
+
     slack_user = await slack_app.client.users_info(user=slack_user_id)
     slack_user_profile = slack_user["user"]["profile"]
 
@@ -303,7 +304,7 @@ async def process_slack_message(
                 thread_id=thread_id,
                 name=thread_name or msg.content,
                 metadata=ctx.session.to_persistable(),
-                user_id=user_id
+                user_id=user_id,
             )
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
@@ -335,7 +336,9 @@ async def thumb_down(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        await data_layer.upsert_feedback(Feedback(forId=step_id, value=0))
+        thread_id = context_var.get().session.thread_id
+        feedback = Feedback(forId=step_id, threadId=thread_id, value=0)
+        await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
     blocks = body["message"]["blocks"]
@@ -360,7 +363,9 @@ async def thumb_up(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        await data_layer.upsert_feedback(Feedback(forId=step_id, value=1))
+        thread_id = context_var.get().session.thread_id
+        feedback = Feedback(forId=step_id, threadId=thread_id, value=1)
+        await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
     blocks = body["message"]["blocks"]

@@ -61,6 +61,7 @@ const FeedbackButtons = ({ message }: Props) => {
         {
           ...(message.feedback || {}),
           forId: message.id,
+          threadId: message.threadId,
           value: feedback,
           comment
         }
