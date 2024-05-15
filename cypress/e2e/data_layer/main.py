@@ -1,15 +1,15 @@
+import os.path
+import pickle
 from typing import Dict, List, Optional
 
 import chainlit.data as cl_data
+from chainlit.socket import persist_user_session
 from chainlit.step import StepDict
 from literalai.helper import utc_now
 
 import chainlit as cl
 
 now = utc_now()
-
-create_step_counter = 0
-
 
 thread_history = [
     {
@@ -61,6 +61,22 @@ thread_history = [
 ]  # type: List[cl_data.ThreadDict]
 deleted_thread_ids = []  # type: List[str]
 
+THREAD_HISTORY_PICKLE_PATH = os.getenv("THREAD_HISTORY_PICKLE_PATH")
+if THREAD_HISTORY_PICKLE_PATH and os.path.exists(THREAD_HISTORY_PICKLE_PATH):
+    with open(THREAD_HISTORY_PICKLE_PATH, "rb") as f:
+        thread_history = pickle.load(f)
+
+
+async def save_thread_history():
+    if THREAD_HISTORY_PICKLE_PATH:
+        # Force saving of thread history for reload when server restarts
+        await persist_user_session(
+            cl.context.session.thread_id, cl.context.session.to_persistable()
+        )
+
+        with open(THREAD_HISTORY_PICKLE_PATH, "wb") as out_file:
+            pickle.dump(thread_history, out_file)
+
 
 class TestDataLayer(cl_data.BaseDataLayer):
     async def get_user(self, identifier: str):
@@ -101,8 +117,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     @cl_data.queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
-        global create_step_counter
-        create_step_counter += 1
+        cl.user_session.set(
+            "create_step_counter", cl.user_session.get("create_step_counter") + 1
+        )
 
         thread = next(
             (t for t in thread_history if t["id"] == step_dict.get("threadId")), None
@@ -134,6 +151,7 @@ cl_data._data_layer = TestDataLayer()
 
 
 async def send_count():
+    create_step_counter = cl.user_session.get("create_step_counter")
     await cl.Message(
         f"Create step counter: {create_step_counter}", disable_feedback=True
     ).send()
@@ -141,6 +159,8 @@ async def send_count():
 
 @cl.on_chat_start
 async def main():
+    # Add step counter to session so that it is saved in thread metadata
+    cl.user_session.set("create_step_counter", 0)
     await cl.Message("Hello, send me a message!", disable_feedback=True).send()
     await send_count()
 
@@ -154,6 +174,8 @@ async def handle_message():
         step.output = "Thinking..."
     await cl.Message("Ok!").send()
     await send_count()
+
+    await save_thread_history()
 
 
 @cl.password_auth_callback
