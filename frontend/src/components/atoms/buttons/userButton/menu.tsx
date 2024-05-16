@@ -138,8 +138,8 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
           }
         }
       }}
-      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+      anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
     >
       {itemsWithDivider}
     </Menu>

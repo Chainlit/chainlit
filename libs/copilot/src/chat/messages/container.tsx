@@ -3,10 +3,8 @@ import { memo, useCallback, useContext, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
-import {
-  highlightMessage,
-  sideViewState
-} from '@chainlit/app/src/state/project';
+import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
+import { highlightMessage } from '@chainlit/app/src/state/project';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
 import {
@@ -18,7 +16,7 @@ import {
   IStep,
   useChatInteract
 } from '@chainlit/react-client';
-import { MessageContainer as CMessageContainer } from '@chainlit/react-components';
+import { sideViewState } from '@chainlit/react-client';
 
 interface Props {
   loading: boolean;
@@ -32,6 +30,11 @@ interface Props {
     message: IStep,
     onSuccess: () => void,
     feedback: IFeedback
+  ) => void;
+  onFeedbackDeleted: (
+    message: IStep,
+    onSuccess: () => void,
+    feedbackId: string
   ) => void;
   callAction?: (action: IAction) => void;
   setAutoScroll?: (autoScroll: boolean) => void;
@@ -47,6 +50,7 @@ const MessageContainer = memo(
     elements,
     messages,
     onFeedbackUpdated,
+    onFeedbackDeleted,
     callAction,
     setAutoScroll
   }: Props) => {
@@ -115,6 +119,7 @@ const MessageContainer = memo(
         onElementRefClick,
         onError,
         onFeedbackUpdated,
+        onFeedbackDeleted,
         onPlaygroundButtonClick
       };
     }, [

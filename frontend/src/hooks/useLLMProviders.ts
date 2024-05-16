@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { useApi } from '@chainlit/react-client';
-import { IPlayground } from '@chainlit/react-components';
+
+import { useTranslation } from 'components/i18n/Translator';
 
 import { apiClientState } from 'state/apiClient';
 import { playgroundState } from 'state/playground';
+
+import { IPlayground } from 'types/playground';
 
 const useLLMProviders = (shouldFetch?: boolean) => {
   const apiClient = useRecoilValue(apiClientState);

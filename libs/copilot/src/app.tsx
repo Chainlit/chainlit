@@ -1,6 +1,5 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
@@ -10,6 +9,7 @@ import WidgetEmbedded from 'widget-embedded';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { overrideTheme } from '@chainlit/app/src/App';
+import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { apiClientState } from '@chainlit/app/src/state/apiClient';
 import {
   IProjectSettings,
@@ -17,7 +17,7 @@ import {
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
 import { useAuth, useChatInteract } from '@chainlit/react-client';
-import { makeTheme } from '@chainlit/react-components/theme';
+import { makeTheme } from '@chainlit/app/src/theme';
 import { EvoyaConfig } from 'evoya/types';
 
 interface Props {
@@ -76,6 +76,14 @@ export default function App({ config, evoya }: Props) {
           );
           setTheme(_theme);
           setProjectSettings(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      apiClient
+        .get(`/project/translations?language=${languageInUse}`, accessToken)
+        .then((res) => res.json())
+        .then((data) => {
           i18n.addResourceBundle(
             languageInUse,
             'translation',

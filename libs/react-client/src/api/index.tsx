@@ -43,7 +43,7 @@ type Payload = FormData | any;
 export class APIBase {
   constructor(
     public httpEndpoint: string,
-    public type: 'app' | 'copilot' | 'teams' | 'slack',
+    public type: 'webapp' | 'copilot' | 'teams' | 'slack' | 'discord',
     public on401?: () => void,
     public onError?: (error: ClientError) => void
   ) {}
@@ -210,6 +210,14 @@ export class ChainlitAPI extends APIBase {
     accessToken?: string
   ): Promise<{ success: boolean; feedbackId: string }> {
     const res = await this.put(`/feedback`, { feedback }, accessToken);
+    return res.json();
+  }
+
+  async deleteFeedback(
+    feedbackId: string,
+    accessToken?: string
+  ): Promise<{ success: boolean }> {
+    const res = await this.delete(`/feedback`, { feedbackId }, accessToken);
     return res.json();
   }
 

@@ -3,7 +3,6 @@ import inspect
 import json
 import time
 import uuid
-from datetime import datetime
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
@@ -15,6 +14,7 @@ from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
 from literalai import BaseGeneration
+from literalai.helper import utc_now
 from literalai.step import StepType, TrueStepType
 
 
@@ -29,6 +29,7 @@ class StepDict(TypedDict, total=False):
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
     metadata: Dict
+    tags: Optional[List[str]]
     input: str
     output: str
     createdAt: Optional[str]
@@ -47,6 +48,7 @@ def step(
     name: Optional[str] = "",
     type: TrueStepType = "undefined",
     id: Optional[str] = None,
+    tags: Optional[List[str]] = None,
     disable_feedback: bool = True,
     root: bool = False,
     language: Optional[str] = None,
@@ -71,6 +73,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
@@ -97,6 +100,7 @@ def step(
                     id=id,
                     disable_feedback=disable_feedback,
                     root=root,
+                    tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
@@ -137,6 +141,7 @@ class Step:
 
     is_error: Optional[bool]
     metadata: Dict
+    tags: Optional[List[str]]
     thread_id: str
     created_at: Union[str, None]
     start: Union[str, None]
@@ -153,6 +158,8 @@ class Step:
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         elements: Optional[List[Element]] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
         disable_feedback: bool = True,
         root: bool = False,
         language: Optional[str] = None,
@@ -167,7 +174,8 @@ class Step:
         self.type = type
         self.id = id or str(uuid.uuid4())
         self.disable_feedback = disable_feedback
-        self.metadata = {}
+        self.metadata = metadata or {}
+        self.tags = tags
         self.is_error = False
         self.show_input = show_input
         self.parent_id = parent_id
@@ -177,7 +185,7 @@ class Step:
         self.generation = None
         self.elements = elements or []
 
-        self.created_at = datetime.utcnow().isoformat()
+        self.created_at = utc_now()
         self.start = None
         self.end = None
 
@@ -185,22 +193,46 @@ class Step:
         self.persisted = False
         self.fail_on_persist_error = False
 
+    def _clean_content(self, content):
+        """
+        Recursively checks and converts bytes objects in content.
+        """
+
+        def handle_bytes(item):
+            if isinstance(item, bytes):
+                return "STRIPPED_BINARY_DATA"
+            elif isinstance(item, dict):
+                return {k: handle_bytes(v) for k, v in item.items()}
+            elif isinstance(item, list):
+                return [handle_bytes(i) for i in item]
+            elif isinstance(item, tuple):
+                return tuple(handle_bytes(i) for i in item)
+            return item
+
+        return handle_bytes(content)
+
     def _process_content(self, content, set_language=False):
         if content is None:
             return ""
-        if isinstance(content, dict):
+        content = self._clean_content(content)
+
+        if (
+            isinstance(content, dict)
+            or isinstance(content, list)
+            or isinstance(content, tuple)
+        ):
             try:
                 processed_content = json.dumps(content, indent=4, ensure_ascii=False)
                 if set_language:
                     self.language = "json"
             except TypeError:
-                processed_content = str(content)
+                processed_content = str(content).replace("\\n", "\n")
                 if set_language:
                     self.language = "text"
         elif isinstance(content, str):
             processed_content = content
         else:
-            processed_content = str(content)
+            processed_content = str(content).replace("\\n", "\n")
             if set_language:
                 self.language = "text"
         return processed_content
@@ -231,6 +263,7 @@ class Step:
             "disableFeedback": self.disable_feedback,
             "streaming": self.streaming,
             "metadata": self.metadata,
+            "tags": self.tags,
             "input": self.input,
             "isError": self.is_error,
             "output": self.output,
@@ -372,7 +405,7 @@ class Step:
 
     # Handle Context Manager Protocol
     async def __aenter__(self):
-        self.start = datetime.utcnow().isoformat()
+        self.start = utc_now()
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
 
@@ -387,7 +420,7 @@ class Step:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.utcnow().isoformat()
+        self.end = utc_now()
 
         if self in context.active_steps:
             context.active_steps.remove(self)
@@ -400,7 +433,7 @@ class Step:
         await self.update()
 
     def __enter__(self):
-        self.start = datetime.utcnow().isoformat()
+        self.start = utc_now()
 
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
@@ -417,7 +450,7 @@ class Step:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.end = datetime.utcnow().isoformat()
+        self.end = utc_now()
         if self in context.active_steps:
             context.active_steps.remove(self)
 

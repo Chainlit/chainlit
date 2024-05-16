@@ -5,17 +5,12 @@ import Element from 'pages/Element';
 import Env from 'pages/Env';
 import Home from 'pages/Home';
 import Login from 'pages/Login';
-import Readme from 'pages/Readme';
 import Thread from 'pages/Thread';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />
-  },
-  {
-    path: '/readme',
-    element: <Readme />
   },
   {
     path: '/env',

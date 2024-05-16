@@ -14,13 +14,10 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yaml
     secrets: inherit
-  tests-components:
-    uses: ./.github/workflows/tests-components.yaml
-    secrets: inherit
   ci:
     runs-on: ubuntu-latest
     name: Run CI
-    needs: [mypy, tests, tests-components]
+    needs: [mypy, tests]
     steps:
       - name: 'Done'
         run: echo "Done"

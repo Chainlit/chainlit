@@ -9,6 +9,8 @@ import { useChatInteract } from '@chainlit/react-client';
 import { Translator } from 'components/i18n';
 import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { projectSettingsState } from 'state/project';
 
 interface Props {
@@ -17,18 +19,21 @@ interface Props {
 
 export default function ResumeButton({ threadId }: Props) {
   const navigate = useNavigate();
+  const layoutMaxWidth = useLayoutMaxWidth();
   const pSettings = useRecoilValue(projectSettingsState);
   const { clear, setIdToResume } = useChatInteract();
 
   if (!threadId || !pSettings?.threadResumable) {
-    return;
+    return null;
   }
 
   const onClick = () => {
     clear();
     setIdToResume(threadId!);
     toast.success('Chat resumed!');
-    navigate('/');
+    if (!pSettings?.dataPersistence) {
+      navigate('/');
+    }
   };
 
   return (
@@ -40,7 +45,7 @@ export default function ResumeButton({ threadId }: Props) {
       sx={{
         boxSizing: 'border-box',
         width: '100%',
-        maxWidth: '60rem',
+        maxWidth: layoutMaxWidth,
         m: 'auto',
         justifyContent: 'center'
       }}
