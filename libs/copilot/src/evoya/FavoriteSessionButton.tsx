@@ -4,32 +4,27 @@ import { toast } from 'sonner';
 
 import { Box, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import { Translator } from '@chainlit/app/src/components/i18n';
-import { sessionIdState } from '@chainlit/react-client';
-import { useRecoilValue } from 'recoil';
 
 import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
 
-export default function FavoriteSessionButton() {
-  const { evoya, accessToken, apiClient } = useContext(WidgetContext);
+interface Props {
+  sessionUuid: string;
+}
+
+export default function FavoriteSessionButton({ sessionUuid } : Props) {
+  const { evoya, accessToken } = useContext(WidgetContext);
   const [isFavorite, setIsFavorite] = useState<boolean>(!!evoya?.api?.favorite?.is_favorite);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const sessionId = useRecoilValue(sessionIdState);
 
   const handleClick = async () => {
     setIsLoading(true);
     if (evoya?.api?.favorite && accessToken) {
-      let session_uuid = evoya.session_uuid;
-      if (!evoya.session_uuid) {
-        const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
-        const sessionJson = await sessionResponse.json();
-        session_uuid = sessionJson.session_uuid;
-      }
       if (isFavorite) {
         // remove favorite
         setIsLoading(true);
         try {
-          const response = await fetch(evoya.api.favorite.remove.replace('{{uuid}}', session_uuid), {
+          const response = await fetch(evoya.api.favorite.remove.replace('{{uuid}}', sessionUuid), {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
@@ -52,7 +47,7 @@ export default function FavoriteSessionButton() {
         // add favorite
         setIsLoading(true);
         try {
-          const response = await fetch(evoya.api.favorite.add.replace('{{uuid}}', session_uuid), {
+          const response = await fetch(evoya.api.favorite.add.replace('{{uuid}}', sessionUuid), {
             method: 'POST',
             headers: {
               'Accept': 'application/json',

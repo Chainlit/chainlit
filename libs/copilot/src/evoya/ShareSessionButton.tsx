@@ -10,8 +10,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { Translator } from '@chainlit/app/src/components/i18n';
 import { EvoyaShareLink } from './types';
-import { sessionIdState } from '@chainlit/react-client';
-import { useRecoilValue } from 'recoil';
 
 import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
@@ -33,28 +31,29 @@ const shareLinkExpires = (expires) => {
   }
 }
 
-export default function ShareSessionButton() {
+interface Props {
+  sessionUuid: string;
+}
+
+export default function ShareSessionButton({ sessionUuid }: Props) {
   const { t } = useTranslation();
-  const { evoya, accessToken, apiClient } = useContext(WidgetContext);
+  const { evoya, accessToken } = useContext(WidgetContext);
   const [expireTime, setExpireTime] = useState(7); // 7days, 30days, never
   const [expireTimeDynamic, setExpireTimeDynamic] = useState(7);
   const [shareLink, setShareLink] = useState<EvoyaShareLink>({});
   const [open, setOpen] = useState(false);
-  const [sessionUuid, setSessionUuid] = useState('');
   const [_, copyToClipboard] = useCopyToClipboard();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCreatingStatic, setIsCreatingStatic] = useState<boolean>(false);
   const [isCreatingDynamic, setIsCreatingDynamic] = useState<boolean>(false);
   const [isOverlayError, setIsOverlayError] = useState<boolean>(false);
-  const sessionId = useRecoilValue(sessionIdState);
 
   const handleClickOpen = async() => {
     setOpen(true);
     setIsLoading(true);
     if (evoya?.api) {
       try {
-        const session_uuid = await getSessionUuid();
-        const shareDataResponse = await fetch(evoya.api.share.check.replace('{{uuid}}', session_uuid), {
+        const shareDataResponse = await fetch(evoya.api.share.check.replace('{{uuid}}', sessionUuid), {
           method: 'GET',
           headers: {
             'Accept': 'application/json'
@@ -93,11 +92,9 @@ export default function ShareSessionButton() {
   };
 
   const handleRevokeShareLink = async (shareLinkConfig: EvoyaShareLink) => {
-    console.log(shareLinkConfig);
     if (evoya?.api?.share && accessToken) {
       try {
-        const session_uuid = await getSessionUuid();
-        const shareResponse = await fetch(evoya.api.share.remove.replace('{{uuid}}', session_uuid), {
+        const shareResponse = await fetch(evoya.api.share.remove.replace('{{uuid}}', sessionUuid), {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json',
@@ -119,19 +116,6 @@ export default function ShareSessionButton() {
     }
   }
 
-  const getSessionUuid = async () => {
-    if (sessionUuid) {
-      return sessionUuid;
-    } else if (!evoya?.session_uuid) {
-      const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
-      const sessionJson = await sessionResponse.json();
-      setSessionUuid(sessionJson.session_uuid);
-      return sessionJson.session_uuid;
-    } 
-
-    return evoya?.session_uuid;
-  }
-
   const handleCopyShareLink = async (type: string, expireTime: number) => {
     const shareConfig: EvoyaShareLink = {
       expire: expireTime,
@@ -144,8 +128,7 @@ export default function ShareSessionButton() {
         setIsCreatingDynamic(true);
       }
       try {
-        const session_uuid = await getSessionUuid();
-        const shareResponse = await fetch(evoya.api.share.add.replace('{{uuid}}', session_uuid), {
+        const shareResponse = await fetch(evoya.api.share.add.replace('{{uuid}}', sessionUuid), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
