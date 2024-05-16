@@ -133,6 +133,7 @@ function App() {
       <Box
         display="flex"
         height="100vh"
+        maxHeight="-webkit-fill-available"
         width="100vw"
         sx={{ overflowX: 'hidden' }}
       >
