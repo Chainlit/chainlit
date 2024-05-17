@@ -35,17 +35,16 @@ class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
             return None
 
 
-
 def clean_metadata(metadata: Dict, max_size: int = 1048576):
     cleaned_metadata = json.loads(
         json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
     )
 
-    metadata_size = len(json.dumps(cleaned_metadata).encode('utf-8'))
+    metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
         cleaned_metadata = {
-            'message': f'Metadata size exceeds the limit of {max_size} bytes. Redacted.'
+            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted."
         }
 
     return cleaned_metadata
@@ -77,6 +76,8 @@ class BaseSession:
         chat_profile: Optional[str] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -89,6 +90,7 @@ class BaseSession:
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
         self.http_referer = http_referer
+        self.http_forwarded_for = http_forwarded_for
 
         self.files = {}  # type: Dict[str, "FileDict"]
 
@@ -158,6 +160,7 @@ class BaseSession:
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
         user_session["http_referer"] = self.http_referer
+        user_session["http_forwarded_for"] = self.http_forwarded_for
         user_session["client_type"] = self.client_type
         metadata = clean_metadata(user_session)
         return metadata
@@ -182,6 +185,8 @@ class HTTPSession(BaseSession):
         root_message: Optional["Message"] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -192,6 +197,7 @@ class HTTPSession(BaseSession):
             user_env=user_env,
             root_message=root_message,
             http_referer=http_referer,
+            http_forwarded_for=http_forwarded_for,
         )
 
     def delete(self):
@@ -241,6 +247,8 @@ class WebsocketSession(BaseSession):
         languages: Optional[str] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -252,6 +260,7 @@ class WebsocketSession(BaseSession):
             root_message=root_message,
             chat_profile=chat_profile,
             http_referer=http_referer,
+            http_forwarded_for=http_forwarded_for,
         )
 
         self.socket_id = socket_id

@@ -108,6 +108,7 @@ async def connect(sid, environ, auth):
             "You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback"
         )
         return False
+
     user = None
     token = None
     login_required = require_login()
@@ -139,6 +140,11 @@ async def connect(sid, environ, auth):
     client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
     http_referer = environ.get("HTTP_REFERER")
 
+    # Get client IP
+    scope = environ.get("asgi.scope", {})
+    client_ip, _ = scope.get("client")
+    http_forwarded_for = environ.get("HTTP_X_FORWARDED_FOR", client_ip)
+
     ws_session = WebsocketSession(
         id=session_id,
         socket_id=sid,
@@ -152,6 +158,7 @@ async def connect(sid, environ, auth):
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
+        http_forwarded_for=http_forwarded_for,
     )
 
     trace_event("connection_successful")
