@@ -40,11 +40,11 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
         json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
     )
 
-    metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
+    metadata_size = len(json.dumps(cleaned_metadata).encode('utf-8'))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
         cleaned_metadata = {
-            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted."
+            'message': f'Metadata size exceeds the limit of {max_size} bytes. Redacted.'
         }
 
     return cleaned_metadata
