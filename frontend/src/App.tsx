@@ -4,12 +4,12 @@ import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { router } from 'router';
 import { Toaster } from 'sonner';
+import { makeTheme } from 'theme';
 
 import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { useChatSession } from '@chainlit/react-client';
-import { makeTheme } from '@chainlit/react-components/theme';
 
 import Hotkeys from 'components/Hotkeys';
 import SettingsModal from 'components/molecules/settingsModal';
@@ -100,8 +100,15 @@ function App() {
   }, [userEnv, accessToken, isAuthenticated, connect, chatProfileOk]);
 
   if (pSettingsLoaded && pSettings.chatProfiles.length && !chatProfile) {
-    // Autoselect the chat profile if there is only one
-    setChatProfile(pSettings.chatProfiles[0].name);
+    // Autoselect the first default chat profile
+    const defaultChatProfile = pSettings.chatProfiles.find(
+      (profile) => profile.default
+    );
+    if (defaultChatProfile) {
+      setChatProfile(defaultChatProfile.name);
+    } else {
+      setChatProfile(pSettings.chatProfiles[0].name);
+    }
   }
 
   return (
@@ -126,6 +133,7 @@ function App() {
       <Box
         display="flex"
         height="100vh"
+        maxHeight="-webkit-fill-available"
         width="100vw"
         sx={{ overflowX: 'hidden' }}
       >

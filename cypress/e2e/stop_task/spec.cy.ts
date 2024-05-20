@@ -18,7 +18,7 @@ describeSyncAsync('Stop task', (mode) => {
 
     cy.get('.step').should('have.length', 2);
 
-    cy.get('.step').last().should('contain.text', 'Task stopped by the user.');
+    cy.get('.step').last().should('contain.text', 'Task manually stopped.');
 
     cy.wait(5000);
 

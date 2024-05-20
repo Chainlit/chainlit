@@ -13,20 +13,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
+import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
-import {
-  projectSettingsState,
-  sideViewState
-} from '@chainlit/app/src/state/project';
+import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
   threadHistoryState,
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
-import { ErrorBoundary, useUpload } from '@chainlit/react-components';
+import { sideViewState } from '@chainlit/react-client';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox } from 'components/InputBox';
@@ -39,13 +38,23 @@ const Chat = () => {
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
-
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
-  const fileSpec = useMemo(() => ({ max_size_mb: 500 }), []);
+  const fileSpec = useMemo(
+    () => ({
+      max_size_mb:
+        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files:
+        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
+        '*/*'
+      ]
+    }),
+    [projectSettings]
+  );
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -125,8 +134,8 @@ const Chat = () => {
   );
 
   const onFileUploadError = useCallback(
-    () => (error: string) => toast.error(error),
-    []
+    (error: string) => toast.error(error),
+    [toast]
   );
 
   const upload = useUpload({
@@ -144,7 +153,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal;
+    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box
@@ -178,7 +187,6 @@ const Chat = () => {
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
               mx: 'auto',
               my: 2
             }}

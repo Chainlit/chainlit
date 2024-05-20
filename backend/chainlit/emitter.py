@@ -1,13 +1,13 @@
 import asyncio
 import uuid
-from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union, cast
 
+from chainlit.config import config
 from chainlit.data import get_data_layer
-from chainlit.element import Element, File
+from chainlit.element import Element, ElementDict, File
 from chainlit.logger import logger
 from chainlit.message import Message
-from chainlit.session import BaseSession, WebsocketSession
+from chainlit.session import BaseSession, HTTPSession, WebsocketSession
 from chainlit.step import StepDict
 from chainlit.types import (
     AskActionResponse,
@@ -18,6 +18,7 @@ from chainlit.types import (
     UIMessagePayload,
 )
 from chainlit.user import PersistedUser
+from literalai.helper import utc_now
 from socketio.exceptions import TimeoutError
 
 
@@ -28,6 +29,7 @@ class BaseChainlitEmitter:
     """
 
     session: BaseSession
+    enabled: bool = True
 
     def __init__(self, session: BaseSession) -> None:
         """Initialize with the user session."""
@@ -43,6 +45,10 @@ class BaseChainlitEmitter:
 
     async def resume_thread(self, thread_dict: ThreadDict):
         """Stub method to resume a thread."""
+        pass
+
+    async def send_element(self, element_dict: ElementDict):
+        """Stub method to send an element to the UI."""
         pass
 
     async def send_step(self, step_dict: StepDict):
@@ -150,6 +156,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Send a thread to the UI to resume it"""
         return self.emit("resume_thread", thread_dict)
 
+    async def send_element(self, element_dict: ElementDict):
+        """Stub method to send an element to the UI."""
+        await self.emit("element", element_dict)
+
     def send_step(self, step_dict: StepDict):
         """Send a message to the UI."""
         return self.emit("new_message", step_dict)
@@ -175,18 +185,31 @@ class ChainlitEmitter(BaseChainlitEmitter):
             else:
                 user_id = None
             try:
-                await data_layer.update_thread(
-                    thread_id=self.session.thread_id,
-                    user_id=user_id,
-                    metadata={"name": interaction},
+                should_tag_thread = (
+                    self.session.chat_profile and config.features.auto_tag_thread
+                )
+                tags = [self.session.chat_profile] if should_tag_thread else None
+                asyncio.create_task(
+                    data_layer.update_thread(
+                        thread_id=self.session.thread_id,
+                        name=interaction,
+                        user_id=user_id,
+                        tags=tags,
+                    )
                 )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
-            await self.session.flush_method_queue()
+            asyncio.create_task(self.session.flush_method_queue())
 
     async def init_thread(self, interaction: str):
         await self.flush_thread_queues(interaction)
-        await self.emit("first_interaction", interaction)
+        await self.emit(
+            "first_interaction",
+            {
+                "interaction": interaction,
+                "thread_id": self.session.thread_id,
+            },
+        )
 
     async def process_user_message(self, payload: UIMessagePayload):
         step_dict = payload["message"]
@@ -196,7 +219,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
         message = Message.from_dict(step_dict)
         # Overwrite the created_at timestamp with the current time
-        message.created_at = datetime.utcnow().isoformat()
+        message.created_at = utc_now()
 
         asyncio.create_task(message._create())
 

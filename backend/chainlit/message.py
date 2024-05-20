@@ -3,7 +3,6 @@ import json
 import time
 import uuid
 from abc import ABC
-from datetime import datetime
 from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
@@ -23,6 +22,7 @@ from chainlit.types import (
     FileDict,
 )
 from literalai import BaseGeneration
+from literalai.helper import utc_now
 from literalai.step import MessageStepType
 
 
@@ -39,6 +39,8 @@ class MessageBase(ABC):
     persisted = False
     is_error = False
     language: Optional[str] = None
+    metadata: Optional[Dict] = None
+    tags: Optional[List[str]] = None
     wait_for_answer = False
     indent: Optional[int] = None
     generation: Optional[BaseGeneration] = None
@@ -83,6 +85,8 @@ class MessageBase(ABC):
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
             "generation": self.generation.to_dict() if self.generation else None,
+            "metadata": self.metadata or {},
+            "tags": self.tags,
         }
 
         return _dict
@@ -149,7 +153,7 @@ class MessageBase(ABC):
 
     async def send(self):
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = utc_now()
         if self.content is None:
             self.content = ""
 
@@ -162,7 +166,7 @@ class MessageBase(ABC):
         step_dict = await self._create()
         await context.emitter.send_step(step_dict)
 
-        return self.id
+        return self
 
     async def stream_token(self, token: str, is_sequence=False):
         """
@@ -209,6 +213,8 @@ class Message(MessageBase):
         disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
         generation: Optional[BaseGeneration] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
         id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
@@ -234,6 +240,9 @@ class Message(MessageBase):
         if created_at:
             self.created_at = created_at
 
+        self.metadata = metadata
+        self.tags = tags
+
         self.author = author
         self.type = type
         self.actions = actions if actions is not None else []
@@ -242,7 +251,7 @@ class Message(MessageBase):
 
         super().__post_init__()
 
-    async def send(self) -> str:
+    async def send(self):
         """
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
@@ -259,7 +268,7 @@ class Message(MessageBase):
         # Run all tasks concurrently
         await asyncio.gather(*tasks)
 
-        return self.id
+        return self
 
     async def update(self):
         """
@@ -367,7 +376,7 @@ class AskUserMessage(AskMessageBase):
         """
         trace_event("send_ask_user")
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = utc_now()
 
         if config.code.author_rename:
             self.author = await config.code.author_rename(self.author)
@@ -439,7 +448,7 @@ class AskFileMessage(AskMessageBase):
         trace_event("send_ask_file")
 
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = utc_now()
 
         if self.streaming:
             self.streaming = False
@@ -512,7 +521,7 @@ class AskActionMessage(AskMessageBase):
         trace_event("send_ask_action")
 
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = utc_now()
 
         if self.streaming:
             self.streaming = False
@@ -542,7 +551,7 @@ class AskActionMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected action:** {res["label"]}'
+            self.content = f'**Selected:** {res["label"]}'
 
         self.wait_for_answer = False
 

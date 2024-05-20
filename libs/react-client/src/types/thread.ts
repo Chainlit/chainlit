@@ -1,11 +1,12 @@
 import { IElement } from './element';
 import { IStep } from './step';
-import { IUser } from './user';
 
 export interface IThread {
   id: string;
   createdAt: number | string;
-  user?: IUser;
+  name?: string;
+  userId?: string;
+  userIdentifier?: string;
   metadata?: Record<string, any>;
   steps: IStep[];
   elements?: IElement[];

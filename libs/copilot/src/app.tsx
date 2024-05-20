@@ -1,6 +1,5 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
@@ -9,14 +8,15 @@ import Widget from 'widget';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { overrideTheme } from '@chainlit/app/src/App';
+import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { apiClientState } from '@chainlit/app/src/state/apiClient';
 import {
   IProjectSettings,
   projectSettingsState
 } from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
+import { makeTheme } from '@chainlit/app/src/theme';
 import { useAuth } from '@chainlit/react-client';
-import { makeTheme } from '@chainlit/react-components/theme';
 
 interface Props {
   config: IWidgetConfig;
@@ -66,6 +66,14 @@ export default function App({ config }: Props) {
           );
           setTheme(_theme);
           setProjectSettings(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      apiClient
+        .get(`/project/translations?language=${languageInUse}`, accessToken)
+        .then((res) => res.json())
+        .then((data) => {
           i18n.addResourceBundle(
             languageInUse,
             'translation',

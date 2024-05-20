@@ -5,6 +5,7 @@ from io import BytesIO
 from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
 
 import filetype
+import mimetypes
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -38,6 +39,7 @@ class ElementDict(TypedDict):
     size: Optional[ElementSize]
     language: Optional[str]
     page: Optional[int]
+    autoPlay: Optional[bool]
     forId: Optional[str]
     mime: Optional[str]
 
@@ -61,7 +63,7 @@ class Element:
     # The byte content of the element.
     content: Optional[Union[bytes, str]] = None
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
-    display: ElementDisplay = Field(default="side")
+    display: ElementDisplay = Field(default="inline")
     # Controls element size
     size: Optional[ElementSize] = None
     # The ID of the message this element is associated with.
@@ -93,6 +95,7 @@ class Element:
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
                 "page": getattr(self, "page", None),
+                "autoPlay": getattr(self, "auto_play", None),
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
@@ -123,14 +126,14 @@ class Element:
             )
 
     async def _create(self) -> bool:
-        if (self.persisted or self.url) and not self.updatable:
+        if self.persisted and not self.updatable:
             return True
         if data_layer := get_data_layer():
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
                 logger.error(f"Failed to create element: {str(e)}")
-        if not self.chainlit_key or self.updatable:
+        if not self.url and (not self.chainlit_key or self.updatable):
             file_dict = await context.session.persist_file(
                 name=self.name,
                 path=self.path,
@@ -163,14 +166,16 @@ class Element:
                 if self.type in mime_types
                 else filetype.guess_mime(self.path or self.content)
             )
-
+            if not self.mime and self.url:
+                self.mime = mimetypes.guess_type(self.url)[0]
+            
         await self._create()
 
         if not self.url and not self.chainlit_key:
             raise ValueError("Must provide url or chainlit key to send element")
 
         trace_event(f"send {self.__class__.__name__}")
-        await context.emitter.emit("element", self.to_dict())
+        await context.emitter.send_element(self.to_dict())
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)
@@ -203,6 +208,7 @@ class Text(Element):
 class Pdf(Element):
     """Useful to send a pdf to the UI."""
 
+    mime: str = "application/pdf"
     page: Optional[int] = None
     type: ClassVar[ElementType] = "pdf"
 
@@ -305,6 +311,7 @@ class TaskList(Element):
 @dataclass
 class Audio(Element):
     type: ClassVar[ElementType] = "audio"
+    auto_play: bool = False
 
 
 @dataclass

@@ -1,12 +1,14 @@
 import json
 import os
+import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Literal
 
 import tomli
 from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
@@ -14,7 +16,9 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.types import ChatProfile, ThreadDict
+    from chainlit.element import ElementBased
+    from chainlit.message import Message
+    from chainlit.types import AudioChunk, ChatProfile, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -50,7 +54,7 @@ session_timeout = 3600
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
-# Authorized origins 
+# Authorized origins
 allow_origins = ["*"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -66,14 +70,29 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
-# Authorize users to upload files with messages
-multi_modal = true
+# Automatically tag threads with the current chat profile (if a chat profile is used)
+auto_tag_thread = true
 
-# Allows user to use speech to text
-[features.speech_to_text]
-    enabled = false
-    # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
-    # language = "en-US"
+# Authorize users to spontaneously upload files with messages
+[features.spontaneous_file_upload]
+    enabled = true
+    accept = ["*/*"]
+    max_files = 20
+    max_size_mb = 500
+
+[features.audio]
+    # Threshold for audio recording
+    min_decibels = -45
+    # Delay for the user to start speaking in MS
+    initial_silence_timeout = 3000
+    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
+    silence_timeout = 1500
+    # Above this duration (MS), the recording will forcefully stop.
+    max_duration = 15000
+    # Duration of the audio chunks in MS
+    chunk_duration = 1000
+    # Sample rate of the audio
+    sample_rate = 44100
 
 [UI]
 # Name of the app and chatbot.
@@ -111,9 +130,15 @@ hide_cot = false
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
-# Override default MUI light theme. (Check theme.ts)
+# Specify a custom build directory for the frontend.
+# This can be used to customize the frontend code.
+# Be careful: If this is a relative path, it should not start with a slash.
+# custom_build = "./public/build"
+
 [UI.theme]
+    #layout = "wide"
     #font_family = "Inter, sans-serif"
+# Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -173,23 +198,38 @@ class Palette(DataClassJsonMixin):
 @dataclass()
 class Theme(DataClassJsonMixin):
     font_family: Optional[str] = None
+    layout: Optional[Literal["default", "wide"]] = "default"
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 
 
 @dataclass
-class SpeechToTextFeature:
+class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None
-    language: Optional[str] = None
+    accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
+    max_files: Optional[int] = None
+    max_size_mb: Optional[int] = None
+
+
+@dataclass
+class AudioFeature(DataClassJsonMixin):
+    min_decibels: int = -45
+    initial_silence_timeout: int = 2000
+    silence_timeout: int = 1500
+    chunk_duration: int = 1000
+    max_duration: int = 15000
+    sample_rate: int = 44100
+    enabled: bool = False
 
 
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     prompt_playground: bool = True
-    multi_modal: bool = True
+    spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
+    audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     latex: bool = False
     unsafe_allow_html: bool = False
-    speech_to_text: Optional[SpeechToTextFeature] = None
+    auto_tag_thread: bool = True
 
 
 @dataclass()
@@ -207,9 +247,10 @@ class UISettings(DataClassJsonMixin):
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
     custom_font: Optional[str] = None
-    # Meta tags
+    # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
-    
+    # Optional custom build directory for the frontend
+    custom_build: Optional[str] = None
 
 
 @dataclass()
@@ -229,7 +270,10 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
-    on_message: Optional[Callable[[str], Any]] = None
+    on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
+
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
@@ -269,9 +313,14 @@ class ChainlitConfig:
     def load_translation(self, language: str):
         translation = {}
         default_language = "en-US"
+        # fallback to root language (ex: `de` when `de-DE` is not found)
+        parent_language = language.split("-")[0]
 
         translation_lib_file_path = os.path.join(
             config_translation_dir, f"{language}.json"
+        )
+        translation_lib_parent_language_file_path = os.path.join(
+            config_translation_dir, f"{parent_language}.json"
         )
         default_translation_lib_file_path = os.path.join(
             config_translation_dir, f"{default_language}.json"
@@ -279,6 +328,14 @@ class ChainlitConfig:
 
         if os.path.exists(translation_lib_file_path):
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
+                translation = json.load(f)
+        elif os.path.exists(translation_lib_parent_language_file_path):
+            logger.warning(
+                f"Translation file for {language} not found. Using parent translation {parent_language}."
+            )
+            with open(
+                translation_lib_parent_language_file_path, "r", encoding="utf-8"
+            ) as f:
                 translation = json.load(f)
         elif os.path.exists(default_translation_lib_file_path):
             logger.warning(
@@ -328,12 +385,16 @@ def load_module(target: str, force_refresh: bool = False):
     sys.path.insert(0, target_dir)
 
     if force_refresh:
+        # Get current site packages dirs
+        site_package_dirs = site.getsitepackages()
+
         # Clear the modules related to the app from sys.modules
         for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
                 and module.__file__.startswith(target_dir)
+                and not any(module.__file__.startswith(p) for p in site_package_dirs)
             ):
                 sys.modules.pop(module_name, None)
 
@@ -378,11 +439,13 @@ def load_settings():
 
         ui_settings = UISettings(**ui_settings)
 
+        code_settings = CodeSettings(action_callbacks={})
+
         return {
             "features": features_settings,
             "ui": ui_settings,
             "project": project_settings,
-            "code": CodeSettings(action_callbacks={}),
+            "code": code_settings,
         }
 
 
@@ -415,6 +478,24 @@ def load_config():
     )
 
     return config
+
+
+def lint_translations():
+    # Load the ground truth (en-US.json file from chainlit source code)
+    src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
+    with open(src, "r", encoding="utf-8") as f:
+        truth = json.load(f)
+
+        # Find the local app translations
+        for file in os.listdir(config_translation_dir):
+            if file.endswith(".json"):
+                # Load the translation file
+                to_lint = os.path.join(config_translation_dir, file)
+                with open(to_lint, "r", encoding="utf-8") as f:
+                    translation = json.load(f)
+
+                    # Lint the translation file
+                    lint_translation_json(file, truth, translation)
 
 
 config = load_config()

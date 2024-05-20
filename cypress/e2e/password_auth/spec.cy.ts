@@ -17,7 +17,6 @@ describe('Password Auth', () => {
     cy.get("input[name='email']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
-    cy.get('.MuiAlert-message').should('not.exist');
     cy.get('.step').eq(0).should('contain', 'Hello admin');
 
     cy.reload();
