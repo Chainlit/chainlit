@@ -19,6 +19,10 @@ export interface IProjectSettings {
     default_expand_messages?: boolean;
     github?: string;
     theme: any;
+    custom_css?: string;
+    custom_js?: string;
+    custom_font?: string;
+    custom_meta_image_url?: string;
   };
   features: {
     multi_modal?: boolean;
