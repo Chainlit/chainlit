@@ -299,7 +299,7 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and self.parent_id:
+        if config.ui.hide_cot and (self.parent_id or not self.root):
             return
 
         if not config.features.prompt_playground and "generation" in step_dict:
@@ -332,7 +332,7 @@ class Step:
 
     async def send(self):
         if self.persisted:
-            return
+            return self
 
         if config.code.author_rename:
             self.name = await config.code.author_rename(self.name)
@@ -356,27 +356,21 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and self.parent_id:
-            return self.id
+        if config.ui.hide_cot and (self.parent_id or not self.root):
+            return self
 
         if not config.features.prompt_playground and "generation" in step_dict:
             step_dict.pop("generation", None)
 
         await context.emitter.send_step(step_dict)
 
-        return self.id
+        return self
 
     async def stream_token(self, token: str, is_sequence=False):
         """
         Sends a token to the UI.
         Once all tokens have been streamed, call .send() to end the stream and persist the step if persistence is enabled.
         """
-
-        if not self.streaming:
-            self.streaming = True
-            step_dict = self.to_dict()
-            await context.emitter.stream_start(step_dict)
-
         if is_sequence:
             self.output = token
         else:
@@ -384,8 +378,13 @@ class Step:
 
         assert self.id
 
-        if config.ui.hide_cot and self.parent_id:
+        if config.ui.hide_cot and (self.parent_id or not self.root):
             return
+
+        if not self.streaming:
+            self.streaming = True
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
 
         await context.emitter.send_token(
             id=self.id, token=token, is_sequence=is_sequence

@@ -100,10 +100,16 @@ class DiscordEmitter(BaseChainlitEmitter):
         if not self.enabled:
             return
 
+        step_type = step_dict.get("type")
+        is_message = step_type in [
+            "user_message",
+            "assistant_message",
+            "system_message",
+        ]
         is_chain_of_thought = bool(step_dict.get("parentId"))
         is_empty_output = not step_dict.get("output")
 
-        if is_chain_of_thought or is_empty_output:
+        if is_chain_of_thought or is_empty_output or not is_message:
             return
         else:
             enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
