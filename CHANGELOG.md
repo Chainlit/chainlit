@@ -14,8 +14,8 @@ Nothing unreleased!
 
 - User message UI has been updated
 - Loading indicator has been improved and visually updated
-- Copy and attachment icons have been updated
-- Microphone voice capture animation has been updated
+- Icons have been updated
+- Dark theme is now the default
 
 ## [1.1.101] - 2024-05-14
 

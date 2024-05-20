@@ -1,8 +1,9 @@
 import { grey } from 'theme/palette';
 
-import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import { Box } from '@mui/material';
 import Backdrop from '@mui/material/Backdrop';
+
+import MicrophoneIcon from 'assets/microphone';
 
 interface Props {
   open?: boolean;
@@ -40,11 +41,11 @@ export default function RecordScreen({ open, isSpeaking }: Props) {
         >
           <circle r="120" cx="120" cy="120" fill={grey[50]} />
         </svg>
-        <KeyboardVoiceIcon
+        <MicrophoneIcon
           sx={{
             height: 87,
             width: 87,
-            color: '#ef4444',
+            color: 'primary.main',
             position: 'absolute',
             top: '50%',
             left: '50%',

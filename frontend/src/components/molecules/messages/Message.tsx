@@ -161,12 +161,12 @@ const Message = memo(
             <Box
               sx={{
                 position: 'absolute',
-                bottom: -10,
+                bottom: -5,
                 left: 0,
                 boxSizing: 'border-box',
                 mx: 'auto',
                 maxWidth: layoutMaxWidth,
-                px: 6,
+                px: 2,
                 display: 'flex',
                 flexDirection: 'column'
               }}

@@ -1,11 +1,11 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-
 import { GreyButton } from 'components/atoms/buttons/GreyButton';
 import { Translator } from 'components/i18n';
+
+import ChevronDownIcon from 'assets/chevronDown';
+import ChevronUpIcon from 'assets/chevronUp';
 
 import type { IStep } from 'client-types/';
 
@@ -71,7 +71,13 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
       color="primary"
       variant="contained"
       endIcon={
-        nested && tool ? opened ? <ExpandLess /> : <ExpandMore /> : undefined
+        nested && tool ? (
+          opened ? (
+            <ChevronUpIcon />
+          ) : (
+            <ChevronDownIcon />
+          )
+        ) : undefined
       }
       onClick={tool ? onClick : undefined}
     >

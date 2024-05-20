@@ -2,7 +2,7 @@ import { atom } from 'recoil';
 
 type ThemeVariant = 'dark' | 'light';
 
-const defaultTheme = 'light';
+const defaultTheme = 'dark';
 
 const preferredTheme = localStorage.getItem(
   'themeVariant'

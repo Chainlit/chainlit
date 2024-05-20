@@ -3,8 +3,6 @@ import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 import { grey } from 'theme';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';

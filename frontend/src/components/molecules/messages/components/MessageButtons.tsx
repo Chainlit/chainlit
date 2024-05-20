@@ -43,7 +43,7 @@ const MessageButtons = ({ message }: Props) => {
 
   return (
     <Stack
-      sx={{ marginLeft: '-8px !important' }}
+      sx={{ marginLeft: '-8px !important', mt: 0.5 }}
       alignItems="center"
       direction="row"
       color={isDark ? grey[400] : grey[600]}
