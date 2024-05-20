@@ -166,7 +166,7 @@ const Message = memo(
                 boxSizing: 'border-box',
                 mx: 'auto',
                 maxWidth: layoutMaxWidth,
-                px: 2,
+                px: 6,
                 display: 'flex',
                 flexDirection: 'column'
               }}

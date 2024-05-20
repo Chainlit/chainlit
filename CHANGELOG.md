@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.200] - 2024-05-21
+
+### Changed
+
+- User message UI has been updated
+- Loading indicator has been improved and visually updated
+- Copy and attachment icons have been updated
+- Microphone voice capture animation has been updated
+
 ## [1.1.101] - 2024-05-14
 
 ### Added
