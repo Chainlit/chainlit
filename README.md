@@ -6,6 +6,9 @@
 
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
 
+> [!NOTE]  
+> You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/)! Also available on the Discord `@Chainlit Help`. Proudly built with Chainlit!
+
 Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
 
 - ✅ ChatGPT-like application
