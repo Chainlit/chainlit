@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.201"
+version = "1.1.202"
 keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'openai', 'copilot', 'langchain', 'conversational ai']
 description = "Build Conversational AI."
 authors = ["Chainlit"]

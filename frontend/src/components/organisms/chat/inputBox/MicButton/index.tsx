@@ -51,7 +51,7 @@ const MicButton = ({ disabled }: Props) => {
     } = pSettings.features.audio;
 
     navigator.mediaDevices
-      .getUserMedia({ audio: { sampleRate: sample_rate } })
+      .getUserMedia({ audio: true })
       .then((stream) => {
         let spokeAtLeastOnce = false;
         let isSpeaking = false;
@@ -152,7 +152,7 @@ const MicButton = ({ disabled }: Props) => {
           }
           requestAnimationFrame(detectSound);
         };
-        requestAnimationFrame(detectSound);
+        detectSound();
 
         setTimeout(() => {
           if (!spokeAtLeastOnce) {
