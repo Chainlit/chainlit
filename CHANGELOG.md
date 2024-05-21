@@ -20,6 +20,7 @@ Nothing unreleased!
 ### Fixed
 
 - Scroll issues on mobile browsers
+- Github button now showing
 
 ## [1.1.101] - 2024-05-14
 
