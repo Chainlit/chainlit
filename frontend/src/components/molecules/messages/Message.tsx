@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
-import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
+import { Author } from './components/Author';
 import { DetailsButton } from './components/DetailsButton';
 import { MessageActions } from './components/MessageActions';
 import { MessageButtons } from './components/MessageButtons';
@@ -16,7 +16,7 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
-import BlinkingCursor from '../BlinkingCursor';
+import BlinkingCursor, { CURSOR_PLACEHOLDER } from '../BlinkingCursor';
 import { Messages } from './Messages';
 
 interface Props {
@@ -87,7 +87,6 @@ const Message = memo(
           <Stack
             id={`step-${message.id}`}
             direction="row"
-            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 12)}px` : 0}
             sx={{
               py: 2,
               borderBottom: (theme) =>
@@ -127,9 +126,33 @@ const Message = memo(
                   onClick={() => setShowDetails(!showDetails)}
                   loading={isRunning && isLast}
                 />
+                {message.steps && showDetails && (
+                  <Messages
+                    messages={message.steps}
+                    actions={actions}
+                    elements={elements}
+                    indent={indent + 1}
+                    isRunning={isRunning}
+                  />
+                )}
               </Box>
             ) : (
               <Author message={message} show={showAvatar}>
+                <DetailsButton
+                  message={message}
+                  opened={showDetails}
+                  onClick={() => setShowDetails(!showDetails)}
+                  loading={isRunning && isLast}
+                />
+                {message.steps && showDetails && (
+                  <Messages
+                    messages={message.steps}
+                    actions={actions}
+                    elements={elements}
+                    indent={indent + 1}
+                    isRunning={isRunning}
+                  />
+                )}
                 <Stack alignItems="flex-start" minWidth={150}>
                   <MessageContent
                     elements={elements}
@@ -139,12 +162,6 @@ const Message = memo(
                     }
                     allowHtml={allowHtml}
                     latex={latex}
-                  />
-                  <DetailsButton
-                    message={message}
-                    opened={showDetails}
-                    onClick={() => setShowDetails(!showDetails)}
-                    loading={isRunning && isLast}
                   />
                   {!isRunning && isLast && isAsk && (
                     <AskUploadButton onError={onError} />
@@ -157,33 +174,26 @@ const Message = memo(
               </Author>
             )}
           </Stack>
-          {isLast && isRunning && !message.streaming && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: -5,
-                left: 38,
-                boxSizing: 'border-box',
-                mx: 'auto',
-                maxWidth: layoutMaxWidth,
-                px: 2,
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <BlinkingCursor />
-            </Box>
-          )}
+          {isLast &&
+            isRunning &&
+            (!message.streaming || window.renderingCodeBlock) && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: -5,
+                  left: 38,
+                  boxSizing: 'border-box',
+                  mx: 'auto',
+                  maxWidth: layoutMaxWidth,
+                  px: 2,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <BlinkingCursor />
+              </Box>
+            )}
         </Box>
-        {message.steps && showDetails && (
-          <Messages
-            messages={message.steps}
-            actions={actions}
-            elements={elements}
-            indent={indent + 1}
-            isRunning={isRunning}
-          />
-        )}
       </Box>
     );
   }

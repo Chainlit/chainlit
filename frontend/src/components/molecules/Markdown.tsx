@@ -90,6 +90,8 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
     return rehypePlugins;
   }, [allowHtml, latex]);
 
+  window.renderingCodeBlock = false;
+
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
 
@@ -124,6 +126,7 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
           return <InlineCode {...props} />;
         },
         pre({ ...props }) {
+          window.renderingCodeBlock = true;
           return <Code {...props} />;
         },
         table({ children, ...props }) {

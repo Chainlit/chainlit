@@ -37,6 +37,7 @@ type ThemOverride = {
 
 declare global {
   interface Window {
+    renderingCodeBlock?: boolean;
     theme?: {
       light?: ThemOverride;
       dark?: ThemOverride;
