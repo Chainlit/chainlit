@@ -32,7 +32,7 @@ interface Props {
   children: string;
 }
 
-const customPlugin = () => {
+const cursorPlugin = () => {
   return (tree: any) => {
     visit(tree, 'text', (node: any, index, parent) => {
       const placeholderPattern = /\u200B/g;
@@ -91,7 +91,7 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
   }, [allowHtml, latex]);
 
   const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [customPlugin, remarkGfm as any];
+    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
 
     if (latex) {
       remarkPlugins = [...remarkPlugins, remarkMath as any];

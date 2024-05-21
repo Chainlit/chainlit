@@ -206,7 +206,7 @@ class Message(MessageBase):
     def __init__(
         self,
         content: Union[str, Dict],
-        author: str = config.ui.name,
+        author: Optional[str] = None,
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
@@ -243,7 +243,7 @@ class Message(MessageBase):
         self.metadata = metadata
         self.tags = tags
 
-        self.author = author
+        self.author = author or config.ui.name
         self.type = type
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
