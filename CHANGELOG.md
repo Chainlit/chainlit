@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.201] - 2024-05-21
+
+### Fixed
+
+- Intermediary steps button placement
+
 ## [1.1.200] - 2024-05-21
 
 ### Changed

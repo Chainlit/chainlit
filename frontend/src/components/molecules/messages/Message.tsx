@@ -16,7 +16,7 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
-import BlinkingCursor, { CURSOR_PLACEHOLDER } from '../BlinkingCursor';
+import BlinkingCursor from '../BlinkingCursor';
 import { Messages } from './Messages';
 
 interface Props {
