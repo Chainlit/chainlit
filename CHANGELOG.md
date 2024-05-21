@@ -17,6 +17,10 @@ Nothing unreleased!
 - Icons have been updated
 - Dark theme is now the default
 
+### Fixed
+
+- Scroll issues on mobile browsers
+
 ## [1.1.101] - 2024-05-14
 
 ### Added

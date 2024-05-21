@@ -1,5 +1,5 @@
 import hljs from 'highlight.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { grey } from 'theme/palette';
 
 import Box from '@mui/material/Box';
@@ -12,14 +12,17 @@ import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import 'highlight.js/styles/monokai-sublime.css';
 
+import BlinkingCursor, { CURSOR_PLACEHOLDER } from './BlinkingCursor';
+
 const CodeSnippet = ({
   language,
   children
 }: {
   language: string;
-  children: React.ReactNode;
+  children: string;
 }) => {
   const codeRef = useRef<HTMLElement>(null);
+  const [highlighted, setHighlighted] = useState(false);
 
   useEffect(() => {
     if (codeRef.current) {
@@ -27,9 +30,12 @@ const CodeSnippet = ({
         codeRef.current.getAttribute('data-highlighted') === 'yes';
       if (!highlighted) {
         hljs.highlightElement(codeRef.current);
+        setHighlighted(true);
       }
     }
   }, []);
+
+  const streaming = highlighted && children.includes(CURSOR_PLACEHOLDER);
 
   return (
     <pre style={{ margin: 0 }}>
@@ -43,7 +49,8 @@ const CodeSnippet = ({
         }}
         className={`language-${language}`}
       >
-        {children}
+        {children.replace(CURSOR_PLACEHOLDER, '')}
+        {streaming ? <BlinkingCursor /> : null}
       </code>
     </pre>
   );

@@ -162,7 +162,7 @@ const Message = memo(
               sx={{
                 position: 'absolute',
                 bottom: -5,
-                left: 0,
+                left: 38,
                 boxSizing: 'border-box',
                 mx: 'auto',
                 maxWidth: layoutMaxWidth,
