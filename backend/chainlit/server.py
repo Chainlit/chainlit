@@ -234,14 +234,16 @@ def get_html_template():
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
+    default_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
     url = config.ui.github or default_url
+    meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
 
     tags = f"""<title>{config.ui.name}</title>
     <meta name="description" content="{config.ui.description}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
-    <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
+    <meta property="og:image" content="{meta_image_url}">
     <meta property="og:url" content="{url}">"""
 
     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
