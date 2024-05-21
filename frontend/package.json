@@ -46,6 +46,7 @@
     "remark-math": "^6.0.0",
     "sonner": "^1.2.3",
     "swr": "^2.2.2",
+    "unist-util-visit": "^5.0.0",
     "usehooks-ts": "^2.9.1",
     "uuid": "^9.0.0",
     "yup": "^1.2.0"

@@ -3,10 +3,11 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
-import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { Translator } from 'components/i18n';
+
+import MicrophoneIcon from 'assets/microphone';
 
 import { attachmentsState } from 'state/chat';
 import { projectSettingsState } from 'state/project';
@@ -204,7 +205,7 @@ const MicButton = ({ disabled }: Props) => {
             size={size}
             onClick={startRecording}
           >
-            <KeyboardVoiceIcon fontSize={size} />
+            <MicrophoneIcon fontSize={size} />
           </IconButton>
         </span>
       </Tooltip>

@@ -1,6 +1,6 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
 
-const ChevronUpIcon = (props: SvgIconProps) => {
+const ChevronDownIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon>
       <svg
@@ -12,10 +12,10 @@ const ChevronUpIcon = (props: SvgIconProps) => {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="m18 15-6-6-6 6" />
+        <path d="m6 9 6 6 6-6" />
       </svg>
     </SvgIcon>
   );
 };
 
-export default ChevronUpIcon;
+export default ChevronDownIcon;

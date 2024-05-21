@@ -1,16 +1,17 @@
+import { useRecoilValue } from 'recoil';
+
 import { IconButton, IconButtonProps, Tooltip } from '@mui/material';
 
 import GithubIcon from 'assets/github';
 
-interface Props extends IconButtonProps {
-  href?: string;
-}
+import { projectSettingsState } from 'state/project';
 
-export default function GithubButton({ href, ...props }: Props) {
-  if (!href) {
-    return null;
-  }
+interface Props extends IconButtonProps {}
 
+export default function GithubButton({ ...props }: Props) {
+  const pSettings = useRecoilValue(projectSettingsState);
+  const href = pSettings?.ui.github;
+  if (!href) return null;
   return (
     <Tooltip title="See on Github">
       {/* @ts-expect-error href breaks IconButton props */}

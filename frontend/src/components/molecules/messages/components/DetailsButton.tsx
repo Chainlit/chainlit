@@ -1,12 +1,11 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
 
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import CircularProgress from '@mui/material/CircularProgress';
-
 import { GreyButton } from 'components/atoms/buttons/GreyButton';
 import { Translator } from 'components/i18n';
+
+import ChevronDownIcon from 'assets/chevronDown';
+import ChevronUpIcon from 'assets/chevronUp';
 
 import type { IStep } from 'client-types/';
 
@@ -19,7 +18,6 @@ interface Props {
 
 const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
   const messageContext = useContext(MessageContext);
-
   const nestedCount = message.steps?.length;
   const nested = !!nestedCount && !messageContext.hideCot;
 
@@ -27,14 +25,7 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
 
   const tool = lastStep ? lastStep.name : undefined;
 
-  const content = message.output;
-
-  const showDefaultLoader =
-    loading && (!content || (messageContext.hideCot && !message.streaming));
-
-  const show = tool || showDefaultLoader;
-
-  if (!show) {
+  if (!tool) {
     return null;
   }
 
@@ -46,14 +37,9 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
   const text = (
     <span>
       {loading ? (
-        tool ? (
-          <>
-            <Translator path="components.molecules.detailsButton.using" />{' '}
-            {tool}
-          </>
-        ) : (
-          <Translator path="components.molecules.detailsButton.running" />
-        )
+        <>
+          <Translator path="components.molecules.detailsButton.using" /> {tool}
+        </>
       ) : (
         <>
           <Translator
@@ -81,14 +67,17 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
     <GreyButton
       size="small"
       id={id}
-      sx={{ marginTop: 1 }}
+      sx={{ marginTop: 1, mr: 'auto' }}
       color="primary"
-      startIcon={
-        loading ? <CircularProgress color="inherit" size={16} /> : undefined
-      }
       variant="contained"
       endIcon={
-        nested && tool ? opened ? <ExpandLess /> : <ExpandMore /> : undefined
+        nested && tool ? (
+          opened ? (
+            <ChevronUpIcon />
+          ) : (
+            <ChevronDownIcon />
+          )
+        ) : undefined
       }
       onClick={tool ? onClick : undefined}
     >

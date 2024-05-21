@@ -1,5 +1,5 @@
 import hljs from 'highlight.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { grey } from 'theme/palette';
 
 import Box from '@mui/material/Box';
@@ -12,14 +12,17 @@ import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
 import 'highlight.js/styles/monokai-sublime.css';
 
+import BlinkingCursor, { CURSOR_PLACEHOLDER } from './BlinkingCursor';
+
 const CodeSnippet = ({
   language,
   children
 }: {
   language: string;
-  children: React.ReactNode;
+  children: string;
 }) => {
   const codeRef = useRef<HTMLElement>(null);
+  const [highlighted, setHighlighted] = useState(false);
 
   useEffect(() => {
     if (codeRef.current) {
@@ -27,23 +30,27 @@ const CodeSnippet = ({
         codeRef.current.getAttribute('data-highlighted') === 'yes';
       if (!highlighted) {
         hljs.highlightElement(codeRef.current);
+        setHighlighted(true);
       }
     }
   }, []);
+
+  const streaming = highlighted && children.includes(CURSOR_PLACEHOLDER);
 
   return (
     <pre style={{ margin: 0 }}>
       <code
         ref={codeRef}
         style={{
-          borderBottomLeftRadius: '4px',
-          borderBottomRightRadius: '4px',
+          borderBottomLeftRadius: '0.7rem',
+          borderBottomRightRadius: '0.7rem',
           fontFamily: 'monospace',
           fontSize: '14px'
         }}
         className={`language-${language}`}
       >
-        {children}
+        {children.replace(CURSOR_PLACEHOLDER, '')}
+        {streaming ? <BlinkingCursor /> : null}
       </code>
     </pre>
   );
@@ -66,7 +73,7 @@ const Code = ({ children, ...props }: any) => {
     <Box
       sx={{
         background: isDarkMode ? grey[900] : grey[200],
-        borderRadius: '4px',
+        borderRadius: '0.7rem',
         padding: (theme) => theme.spacing(1),
         paddingRight: '2.5em',
         minHeight: '20px',
@@ -97,8 +104,8 @@ const Code = ({ children, ...props }: any) => {
         sx={{
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTopLeftRadius: '4px',
-          borderTopRightRadius: '4px',
+          borderTopLeftRadius: '0.7rem',
+          borderTopRightRadius: '0.7rem',
           color: 'text.secondary',
           background: isDarkMode ? grey[900] : grey[200]
         }}

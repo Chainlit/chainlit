@@ -3,12 +3,13 @@ import { OrderedSet } from 'immutable';
 import { useEffect, useState } from 'react';
 import { grey } from 'theme';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
+
+import ChevronDownIcon from 'assets/chevronDown';
+import ChevronUpIcon from 'assets/chevronUp';
 
 import 'draft-js/dist/Draft.css';
 
@@ -97,7 +98,7 @@ export default function Completion({ completion, chatMode }: Props) {
           Completion
         </Typography>
         <IconButton onClick={() => setCompletionOpen(!isCompletionOpen)}>
-          {isCompletionOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {isCompletionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </IconButton>
       </Stack>
       <Box

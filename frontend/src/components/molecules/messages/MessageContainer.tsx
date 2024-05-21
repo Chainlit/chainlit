@@ -29,10 +29,12 @@ const MessageContainer = memo(
     const ref = useRef<HTMLDivElement>();
 
     useEffect(() => {
-      if (!ref.current || !autoScroll) {
-        return;
-      }
-      ref.current.scrollTop = ref.current.scrollHeight;
+      setTimeout(() => {
+        if (!ref.current || !autoScroll) {
+          return;
+        }
+        ref.current.scrollTop = ref.current.scrollHeight;
+      }, 0);
     }, [messages, autoScroll]);
 
     const handleScroll = () => {

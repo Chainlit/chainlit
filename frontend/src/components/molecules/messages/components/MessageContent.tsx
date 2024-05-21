@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import { Collapse } from 'components/atoms/Collapse';
 import { InlinedElements } from 'components/atoms/elements/InlinedElements';
+import { CURSOR_PLACEHOLDER } from 'components/molecules/BlinkingCursor';
 import { Markdown } from 'components/molecules/Markdown';
 
 import type { IMessageElement, IStep } from 'client-types/';
@@ -25,10 +26,12 @@ export interface Props {
 
 const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
-    const isUser = 'role' in message && message.role === 'user';
-
     let lineCount = 0;
     let contentLength = 0;
+
+    const content = message.streaming
+      ? message.output + CURSOR_PLACEHOLDER
+      : message.output;
 
     const {
       preparedContent: output,
@@ -37,7 +40,7 @@ const MessageContent = memo(
     } = prepareContent({
       elements,
       id: message.id,
-      content: message.output,
+      content: content,
       language: message.language
     });
 
@@ -88,8 +91,7 @@ const MessageContent = memo(
           width: '100%',
           minHeight: '20px',
           fontSize: '1rem',
-          fontFamily: (theme) => theme.typography.fontFamily,
-          fontWeight: isUser ? 500 : 300
+          fontFamily: (theme) => theme.typography.fontFamily
         }}
         component="div"
       >
@@ -110,7 +112,7 @@ const MessageContent = memo(
 
     return (
       <Stack width="100%" direction="row">
-        <Box width="100%" sx={{ minWidth: '100px' }}>
+        <Box width="100%">
           {output ? messageContent : null}
           <InlinedElements elements={outputInlinedElements} />
         </Box>
