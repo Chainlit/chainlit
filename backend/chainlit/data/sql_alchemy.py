@@ -595,6 +595,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         size=element.get("element_size"),
                         language=element.get("element_language"),
                         autoPlay=element.get("element_autoPlay"),
+                        playerConfig=element.get("element_playerconfig"),
                         page=element.get("element_page"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),

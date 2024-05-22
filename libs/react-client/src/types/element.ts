@@ -58,6 +58,13 @@ export interface IAudioElement extends TMessageElement<'audio'> {
 
 export interface IVideoElement extends TMessageElement<'video'> {
   size?: IElementSize;
+
+  /**
+   * Override settings for each type of player in ReactPlayer
+   * https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
+   * @type {object}
+   */
+  playerConfig?: object;
 }
 
 export interface IFileElement extends TMessageElement<'file'> {

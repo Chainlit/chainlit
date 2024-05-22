@@ -35,6 +35,7 @@
     "react-i18next": "^14.0.0",
     "react-markdown": "^9.0.1",
     "react-password-checklist": "^1.5.0",
+    "react-player": "^2.16.0",
     "react-plotly.js": "^2.6.0",
     "react-resizable": "^3.0.5",
     "react-router-dom": "^6.15.0",
