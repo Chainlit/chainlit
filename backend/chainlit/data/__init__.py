@@ -157,7 +157,6 @@ class ChainlitDataLayer(BaseDataLayer):
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
             "autoPlay": metadata.get("autoPlay", None),
-            "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
