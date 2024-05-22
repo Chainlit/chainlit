@@ -67,7 +67,7 @@ const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
     <GreyButton
       size="small"
       id={id}
-      sx={{ marginBottom: 1, mr: 'auto' }}
+      sx={{ my: 1, mr: 'auto' }}
       color="primary"
       variant="contained"
       endIcon={

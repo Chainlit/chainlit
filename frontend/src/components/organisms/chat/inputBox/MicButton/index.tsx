@@ -45,7 +45,6 @@ const MicButton = ({ disabled }: Props) => {
       min_decibels,
       silence_timeout,
       initial_silence_timeout,
-      sample_rate,
       chunk_duration,
       max_duration
     } = pSettings.features.audio;
