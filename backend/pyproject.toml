@@ -1,20 +1,24 @@
 [tool.poetry]
 name = "chainlit"
 version = "1.1.202"
-keywords = ['LLM', 'Agents', 'gen ai', 'chat ui', 'chatbot ui', 'openai', 'copilot', 'langchain', 'conversational ai']
+keywords = [
+    'LLM',
+    'Agents',
+    'gen ai',
+    'chat ui',
+    'chatbot ui',
+    'openai',
+    'copilot',
+    'langchain',
+    'conversational ai',
+]
 description = "Build Conversational AI."
 authors = ["Chainlit"]
 license = "Apache-2.0 license"
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
-exclude = [
-    "**/frontend/**/*",
-    "**/copilot/**/**/",
-]
-include = [
-    "**/frontend/dist/**/*",
-    "**/copilot/dist/**/*",
-]
+exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
+include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
@@ -38,7 +42,7 @@ tomli = "^2.0.1"
 pydantic = ">=1,<3"
 python-dotenv = "^1.0.0"
 uptrace = "^1.22.0"
-watchfiles="^0.20.0"
+watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
@@ -56,6 +60,9 @@ transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
 plotly = "^5.18.0"
+slack_bolt = "^1.18.1"
+discord = "^2.3.2"
+
 
 [tool.poetry.group.mypy]
 optional = true
@@ -78,7 +85,7 @@ module = [
     "haystack.*",
     "langflow",
     "lazify",
-    "matplotlib.*",  # remove when 3.8.0 is out, it should export types
+    "matplotlib.*",                       # remove when 3.8.0 is out, it should export types
     "plotly.*",
     "nest_asyncio",
     "socketio.*",
@@ -86,7 +93,7 @@ module = [
     "syncer",
     "vertexai.language_models",
     "vertexai.preview.generative_models",
-    "google.cloud"
+    "google.cloud",
 ]
 ignore_missing_imports = true
 
@@ -99,12 +106,6 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
-
-[tool.poetry.group.slack.dependencies]
-slack_bolt = "^1.18.1"
-
-[tool.poetry.group.discord.dependencies]
-discord = "^2.3.2"
 
 
 [build-system]

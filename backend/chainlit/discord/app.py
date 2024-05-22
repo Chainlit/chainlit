@@ -315,8 +315,9 @@ async def on_message(message: discord.Message):
     elif isinstance(message.channel, discord.GroupChannel):
         thread_name = f"{message.channel.name}"
     elif isinstance(message.channel, discord.TextChannel):
+        # Discord limits thread names to 100 characters.
         channel = await message.channel.create_thread(
-            name=clean_content(message), message=message
+            name=clean_content(message)[:100], message=message
         )
         thread_name = f"{channel.name}"
     else:
