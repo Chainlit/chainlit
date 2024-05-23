@@ -38,8 +38,8 @@ def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
 
-    ssl_certfile = os.environ.get("SSL_CERT", None)
-    ssl_keyfile = os.environ.get("SSL_KEY", None)
+    ssl_certfile = os.environ.get("CHAINLIT_SSL_CERT", None)
+    ssl_keyfile = os.environ.get("CHAINLIT_SSL_KEY", None)
 
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
