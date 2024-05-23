@@ -1,11 +1,11 @@
 import json
+import mimetypes
 import uuid
 from enum import Enum
 from io import BytesIO
 from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
 
 import filetype
-import mimetypes
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -21,7 +21,7 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -170,7 +170,7 @@ class Element:
             )
             if not self.mime and self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
-            
+
         await self._create()
 
         if not self.url and not self.chainlit_key:
@@ -188,14 +188,6 @@ class Image(Element):
     type: ClassVar[ElementType] = "image"
 
     size: ElementSize = "medium"
-
-
-@dataclass
-class Avatar(Element):
-    type: ClassVar[ElementType] = "avatar"
-
-    async def send(self):
-        await super().send(for_id="")
 
 
 @dataclass

@@ -234,7 +234,9 @@ def get_html_template():
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
-    default_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+    default_meta_image_url = (
+        "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+    )
     url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
 
@@ -565,6 +567,12 @@ async def project_settings(
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
 
+    debug_url = None
+    data_layer = get_data_layer()
+
+    if data_layer and config.run.debug:
+        debug_url = await data_layer.build_debug_url()
+
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
@@ -574,6 +582,7 @@ async def project_settings(
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
+            "debugUrl": debug_url,
         }
     )
 
@@ -810,6 +819,22 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
+
+
+@app.get("/avatars/{avatar_id}")
+async def get_avatar(avatar_id: str):
+    avatar_id = avatar_id.strip().replace(" ", "_")
+
+    avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
+
+    files = glob.glob(avatar_path)
+
+    if files:
+        avatar_path = files[0]
+        media_type, _ = mimetypes.guess_type(avatar_path)
+        return FileResponse(avatar_path, media_type=media_type)
+    else:
+        return await get_favicon()
 
 
 @app.head("/")

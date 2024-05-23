@@ -36,7 +36,7 @@ const Messages = ({
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { idToResume } = useChatSession();
 
-  const { elements, askUser, avatars, loading, actions } = useChatData();
+  const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const setMessages = useSetRecoilState(messagesState);
@@ -101,7 +101,7 @@ const Messages = ({
       try {
         toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
           loading: 'Updating',
-          success: (res) => {
+          success: (_) => {
             setMessages((prev) =>
               updateMessageById(prev, message.id, {
                 ...message,
@@ -140,7 +140,6 @@ const Messages = ({
 
   return (
     <MessageContainer
-      avatars={avatars}
       loading={loading}
       askUser={askUser}
       actions={actions}

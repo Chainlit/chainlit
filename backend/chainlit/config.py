@@ -4,7 +4,7 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Literal
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
 from chainlit.logger import logger
@@ -136,6 +136,7 @@ hide_cot = false
 # custom_build = "./public/build"
 
 [UI.theme]
+    default = "dark"
     #layout = "wide"
     #font_family = "Inter, sans-serif"
 # Override default MUI light theme. (Check theme.ts)
@@ -192,10 +193,12 @@ class PaletteOptions(DataClassJsonMixin):
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
+
 @dataclass()
 class TextOptions(DataClassJsonMixin):
     primary: Optional[str] = ""
     secondary: Optional[str] = ""
+
 
 @dataclass()
 class Palette(DataClassJsonMixin):
@@ -208,6 +211,7 @@ class Palette(DataClassJsonMixin):
 @dataclass()
 class Theme(DataClassJsonMixin):
     font_family: Optional[str] = None
+    default: Optional[Literal["light", "dark"]] = "dark"
     layout: Optional[Literal["default", "wide"]] = "default"
     light: Optional[Palette] = None
     dark: Optional[Palette] = None

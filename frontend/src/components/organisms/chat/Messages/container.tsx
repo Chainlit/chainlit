@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import {
   IAction,
   IAsk,
-  IAvatarElement,
   IFeedback,
   IFunction,
   IMessageElement,
@@ -28,7 +27,6 @@ interface Props {
   loading: boolean;
   actions: IAction[];
   elements: IMessageElement[];
-  avatars: IAvatarElement[];
   messages: IStep[];
   askUser?: IAsk;
   autoScroll?: boolean;
@@ -50,7 +48,6 @@ const MessageContainer = memo(
   ({
     askUser,
     loading,
-    avatars,
     actions,
     autoScroll,
     elements,
@@ -160,10 +157,7 @@ const MessageContainer = memo(
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
         latex: projectSettings?.features?.latex,
-        avatars,
         defaultCollapseContent: appSettings.defaultCollapseContent,
-        expandAll: appSettings.expandAll,
-        hideCot: appSettings.hideCot,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
@@ -176,10 +170,7 @@ const MessageContainer = memo(
       };
     }, [
       appSettings.defaultCollapseContent,
-      appSettings.expandAll,
-      appSettings.hideCot,
       askUser,
-      avatars,
       enableFeedback,
       highlightedMessage,
       loading,

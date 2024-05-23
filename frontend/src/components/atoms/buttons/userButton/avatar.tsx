@@ -34,7 +34,9 @@ export default function UserAvatar(props: ButtonProps) {
       }
       {...props}
     >
-      <Typography noWrap>{user ? user.identifier : 'Settings'}</Typography>
+      <Typography variant="inherit" noWrap>
+        {user ? user.identifier : 'Settings'}
+      </Typography>
     </Button>
   );
 }

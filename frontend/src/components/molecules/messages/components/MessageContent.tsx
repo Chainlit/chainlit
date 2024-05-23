@@ -29,9 +29,10 @@ const MessageContent = memo(
     let lineCount = 0;
     let contentLength = 0;
 
-    const content = message.streaming
-      ? message.output + CURSOR_PLACEHOLDER
-      : message.output;
+    const content =
+      message.streaming && message.output
+        ? message.output + CURSOR_PLACEHOLDER
+        : message.output;
 
     const {
       preparedContent: output,

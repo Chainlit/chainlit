@@ -173,21 +173,21 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
-
-        if not self.streaming:
-            self.streaming = True
-            step_dict = self.to_dict()
-            await context.emitter.stream_start(step_dict)
-
         if is_sequence:
             self.content = token
         else:
             self.content += token
 
         assert self.id
-        await context.emitter.send_token(
-            id=self.id, token=token, is_sequence=is_sequence
-        )
+
+        if not self.streaming:
+            self.streaming = True
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
+        else:
+            await context.emitter.send_token(
+                id=self.id, token=token, is_sequence=is_sequence
+            )
 
 
 class Message(MessageBase):
@@ -357,7 +357,7 @@ class AskUserMessage(AskMessageBase):
         content: str,
         author: str = config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
+        disable_feedback: bool = True,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
@@ -425,7 +425,7 @@ class AskFileMessage(AskMessageBase):
         max_files=1,
         author=config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
+        disable_feedback: bool = True,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -501,7 +501,7 @@ class AskActionMessage(AskMessageBase):
         content: str,
         actions: List[Action],
         author=config.ui.name,
-        disable_feedback=False,
+        disable_feedback=True,
         timeout=90,
         raise_on_timeout=False,
     ):

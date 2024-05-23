@@ -5,7 +5,6 @@ import { IMessageContext } from 'types/messageContext';
 const defaultMessageContext = {
   avatars: [],
   defaultCollapseContent: false,
-  expandAll: false,
   hideCot: false,
   highlightedMessage: null,
   loading: false,

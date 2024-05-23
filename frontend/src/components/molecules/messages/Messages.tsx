@@ -18,7 +18,6 @@ const Messages = memo(
     const messageContext = useContext(MessageContext);
 
     const isRoot = indent === 0;
-    let previousAuthor = '';
 
     const filtered = messages.filter((m, i) => {
       const content = m.output;
@@ -26,7 +25,7 @@ const Messages = memo(
       const hasInlinedElement = elements.find(
         (el) => el.display === 'inline' && el.forId === m.id
       );
-      const hasChildren = !!m.steps?.length && !messageContext.hideCot;
+      const hasChildren = !!m.steps?.length;
       const isLast = i === messages.length - 1;
       const messageRunning =
         isRunning === undefined
@@ -43,23 +42,17 @@ const Messages = memo(
     return (
       <>
         {filtered.map((m, i) => {
-          const author = m.name;
           const isLast = filtered.length - 1 === i;
           let messageRunning =
             isRunning === undefined ? messageContext.loading : isRunning;
           if (isRoot) {
             messageRunning = messageRunning && isLast;
           }
-          const showAvatar = author !== previousAuthor;
-          const showBorder = false;
-          previousAuthor = author;
           return (
             <Message
               message={m}
               elements={elements}
               actions={actions}
-              showAvatar={showAvatar}
-              showBorder={showBorder}
               key={m.id}
               indent={indent}
               isRunning={messageRunning}

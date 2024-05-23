@@ -6,11 +6,9 @@ import { toast } from 'sonner';
 import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
 import { highlightMessage } from '@chainlit/app/src/state/project';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
-import { settingsState } from '@chainlit/app/src/state/settings';
 import {
   IAction,
   IAsk,
-  IAvatarElement,
   IFeedback,
   IMessageElement,
   IStep,
@@ -22,7 +20,6 @@ interface Props {
   loading: boolean;
   actions: IAction[];
   elements: IMessageElement[];
-  avatars: IAvatarElement[];
   messages: IStep[];
   askUser?: IAsk;
   autoScroll?: boolean;
@@ -44,7 +41,6 @@ const MessageContainer = memo(
   ({
     askUser,
     loading,
-    avatars,
     actions,
     autoScroll,
     elements,
@@ -56,7 +52,6 @@ const MessageContainer = memo(
   }: Props) => {
     const { apiClient } = useContext(WidgetContext);
     const projectSettings = useRecoilValue(projectSettingsState);
-    const { hideCot } = useRecoilValue(settingsState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
@@ -108,10 +103,7 @@ const MessageContainer = memo(
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
         latex: projectSettings?.features?.latex,
-        avatars,
         defaultCollapseContent: true,
-        expandAll: false,
-        hideCot: hideCot,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
@@ -124,7 +116,6 @@ const MessageContainer = memo(
       };
     }, [
       askUser,
-      avatars,
       enableFeedback,
       highlightedMessage,
       loading,

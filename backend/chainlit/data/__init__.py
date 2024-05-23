@@ -139,6 +139,9 @@ class BaseDataLayer:
     async def delete_user_session(self, id: str) -> bool:
         return True
 
+    async def build_debug_url(self) -> str:
+        return ""
+
 
 _data_layer: Optional[BaseDataLayer] = None
 
@@ -224,6 +227,14 @@ class ChainlitDataLayer(BaseDataLayer):
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
+
+    async def build_debug_url(self) -> str:
+        try:
+            project_id = await self.client.api.get_my_project_id()
+            return f"{self.client.api.url}/projects/{project_id}/threads?threadId=[thread_id]&currentStepId=[step_id]"
+        except Exception as e:
+            logger.error(f"Error building debug url: {e}")
+            return ""
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         user = await self.client.api.get_user(identifier=identifier)

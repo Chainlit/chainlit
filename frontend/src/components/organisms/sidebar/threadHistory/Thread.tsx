@@ -190,7 +190,6 @@ const Thread = ({ thread, error, isLoading }: Props) => {
       </Box>
       <MessageContainer
         loading={false}
-        avatars={[]}
         actions={actions}
         elements={(elements || []) as IMessageElement[]}
         onFeedbackUpdated={onFeedbackUpdated}

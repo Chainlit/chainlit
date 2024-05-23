@@ -49,8 +49,6 @@ describe('Message', () => {
     elements: [],
     actions: [],
     indent: 0,
-    showAvatar: true,
-    showBorder: true,
     isRunning: false,
     isLast: true
   };

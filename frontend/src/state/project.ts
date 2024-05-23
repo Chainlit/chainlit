@@ -44,6 +44,7 @@ export interface IProjectSettings {
     unsafe_allow_html?: boolean;
     latex?: boolean;
   };
+  debugUrl?: string;
   userEnv: string[];
   dataPersistence: boolean;
   threadResumable: boolean;

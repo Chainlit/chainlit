@@ -385,10 +385,10 @@ class Step:
             self.streaming = True
             step_dict = self.to_dict()
             await context.emitter.stream_start(step_dict)
-
-        await context.emitter.send_token(
-            id=self.id, token=token, is_sequence=is_sequence
-        )
+        else:
+            await context.emitter.send_token(
+                id=self.id, token=token, is_sequence=is_sequence
+            )
 
     # Handle parameter less decorator
     def __call__(self, func):

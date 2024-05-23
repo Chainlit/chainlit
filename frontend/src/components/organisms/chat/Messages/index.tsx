@@ -34,7 +34,7 @@ const Messages = ({
   projectSettings,
   setAutoScroll
 }: MessagesProps): JSX.Element => {
-  const { elements, askUser, avatars, loading, actions } = useChatData();
+  const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const { idToResume } = useChatSession();
@@ -146,7 +146,6 @@ const Messages = ({
     />
   ) : (
     <MessageContainer
-      avatars={avatars}
       loading={loading}
       askUser={askUser}
       actions={actions}

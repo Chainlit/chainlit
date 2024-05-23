@@ -1,6 +1,3 @@
-import { MessageContext } from 'contexts/MessageContext';
-import { useContext } from 'react';
-
 import { GreyButton } from 'components/atoms/buttons/GreyButton';
 import { Translator } from 'components/i18n';
 
@@ -17,9 +14,8 @@ interface Props {
 }
 
 const DetailsButton = ({ message, opened, onClick, loading }: Props) => {
-  const messageContext = useContext(MessageContext);
   const nestedCount = message.steps?.length;
-  const nested = !!nestedCount && !messageContext.hideCot;
+  const nested = !!nestedCount;
 
   const lastStep = nested ? message.steps![nestedCount - 1] : undefined;
 
