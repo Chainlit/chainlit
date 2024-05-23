@@ -1,11 +1,11 @@
 import json
+import mimetypes
 import uuid
 from enum import Enum
 from io import BytesIO
 from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
 
 import filetype
-import mimetypes
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -152,7 +152,7 @@ class Element:
         trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
         if data_layer and self.persisted:
-            await data_layer.delete_element(self.id)
+            await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):
@@ -170,7 +170,7 @@ class Element:
             )
             if not self.mime and self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
-            
+
         await self._create()
 
         if not self.url and not self.chainlit_key:

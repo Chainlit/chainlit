@@ -94,7 +94,7 @@ class BaseDataLayer:
         pass
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         pass
 
     @queue_until_user_message()
@@ -341,7 +341,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return self.attachment_to_element_dict(attachment)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         await self.client.api.delete_attachment(id=element_id)
 
     @queue_until_user_message()
