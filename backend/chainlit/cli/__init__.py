@@ -140,7 +140,7 @@ def run_chainlit(target: str):
 @click.option(
     "--ssl-key",
     default=None,
-    envvar="SSL_KEY",
+    envvar="CHAINLIT_SSL_KEY",
     help="Specify the file path for the SSL key",
 )
 @click.option("--host", help="Specify a different host to run the server on")
