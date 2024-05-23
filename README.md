@@ -19,7 +19,9 @@ Chainlit is an open-source async Python framework which allows developers to bui
 
 Full documentation is available [here](https://docs.chainlit.io).
 
-Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to Literal AI, our product to evaluate and monitor LLM applications.
+> [!NOTE]  
+> Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support**.
+> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 
 https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 
