@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +32,7 @@ import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 
 const Chat = () => {
+  const { user } = useAuth();
   const { idToResume } = useChatSession();
 
   const projectSettings = useRecoilValue(projectSettingsState);
@@ -162,6 +164,7 @@ const Chat = () => {
   useEffect(() => {
     const currentPage = new URL(window.location.href);
     if (
+      user &&
       projectSettings?.dataPersistence &&
       threadId &&
       currentPage.pathname === '/'

@@ -183,7 +183,7 @@ const Chat = () => {
           height: '100%'
         }}
       >
-        {error && (
+        {error ? (
           <Box
             sx={{
               width: '100%',
@@ -195,6 +195,8 @@ const Chat = () => {
               Could not reach the server.
             </Alert>
           </Box>
+        ) : (
+          <Box mt={1} />
         )}
         <ChatSettingsModal />
         <TaskList isMobile={true} />

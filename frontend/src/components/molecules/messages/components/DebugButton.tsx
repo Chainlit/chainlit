@@ -11,6 +11,9 @@ interface Props {
 }
 
 const DebugButton = ({ step, debugUrl }: Props) => {
+  if (step.id.startsWith('wrap_')) {
+    return null;
+  }
   const href = debugUrl
     .replace('[thread_id]', step.threadId!)
     .replace('[step_id]', step.id);

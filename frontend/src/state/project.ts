@@ -15,9 +15,7 @@ export interface IProjectSettings {
     name: string;
     show_readme_as_default?: boolean;
     description?: string;
-    hide_cot?: boolean;
     default_collapse_content?: boolean;
-    default_expand_messages?: boolean;
     github?: string;
     theme: any;
     custom_css?: string;

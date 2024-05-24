@@ -45,11 +45,9 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
-          data.ui.hide_cot = config.showCot ? data.ui.hide_cot : true;
           setSettings((old) => ({
             ...old,
-            theme: config.theme ? config.theme : old.theme,
-            hideCot: data.ui.hide_cot!
+            theme: config.theme ? config.theme : old.theme
           }));
 
           const _theme = overrideTheme(

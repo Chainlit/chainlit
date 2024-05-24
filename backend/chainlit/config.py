@@ -107,9 +107,6 @@ show_readme_as_default = true
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
 
-# The default value for the expand messages settings.
-default_expand_messages = false
-
 # Hide the chain of thought details from the user in the UI.
 hide_cot = false
 
@@ -254,7 +251,6 @@ class UISettings(DataClassJsonMixin):
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
-    default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI

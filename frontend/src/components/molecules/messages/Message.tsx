@@ -16,6 +16,7 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import BlinkingCursor from '../BlinkingCursor';
+import ToolCalls from './ToolCalls';
 
 interface Props {
   message: IStep;
@@ -42,7 +43,6 @@ const Message = memo(
 
     const forceDisplayCursor =
       isLast && isRunning && (!message.streaming || window.renderingCodeBlock);
-
     return (
       <Box
         sx={{
@@ -107,6 +107,7 @@ const Message = memo(
               <Stack direction="row" gap="1.5rem" width="100%">
                 <MessageAvatar author={message.name} />
                 <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
+                  <ToolCalls message={message} />
                   <MessageContent
                     elements={elements}
                     message={message}
