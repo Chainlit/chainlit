@@ -47,8 +47,6 @@ def run_chainlit(target: str):
         "yes",
     ]  # Convert to boolean
 
-    log_config_env = os.environ.get("LOG_CONFIG", uvicorn.config.LOGGING_CONFIG)
-
     config.run.host = host
     config.run.port = port
 
@@ -68,6 +66,7 @@ def run_chainlit(target: str):
     init_lc_cache()
 
     log_level = "debug" if config.run.debug else "error"
+    log_config = config.run.log_config
 
     # Start the server
     async def start():
@@ -75,7 +74,7 @@ def run_chainlit(target: str):
             app,
             host=host,
             port=port,
-            log_config=log_config_env,
+            log_config=log_config,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
         )
@@ -117,7 +116,7 @@ def run_chainlit(target: str):
 @click.option(
     "-l",
     "--log-config",
-    default=None,
+    default=uvicorn.config.LOGGING_CONFIG,
     is_flag=False,
     envvar="LOG_CONFIG",
     help="Set the Uvicorn log config file path. Supported formats: .ini, .json, .yaml.",
@@ -144,8 +143,6 @@ def chainlit_run(target, watch, headless, debug, log_config, ci, no_cache, host,
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
-    if log_config:
-        os.environ["LOG_CONFIG"] = log_config
     if ci:
         logger.info("Running in CI mode")
 
@@ -163,6 +160,7 @@ def chainlit_run(target, watch, headless, debug, log_config, ci, no_cache, host,
     config.run.no_cache = no_cache
     config.run.ci = ci
     config.run.watch = watch
+    config.run.log_config = log_config
 
     run_chainlit(target)
 
