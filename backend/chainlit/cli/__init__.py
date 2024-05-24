@@ -47,7 +47,7 @@ def run_chainlit(target: str):
         "yes",
     ]  # Convert to boolean
 
-    uvicorn_log_config_env = os.environ.get("UVICORN_LOG_CONFIG", uvicorn.config.LOGGING_CONFIG)
+    log_config_env = os.environ.get("LOG_CONFIG", uvicorn.config.LOGGING_CONFIG)
 
     config.run.host = host
     config.run.port = port
@@ -75,7 +75,7 @@ def run_chainlit(target: str):
             app,
             host=host,
             port=port,
-            log_config=uvicorn_log_config_env,
+            log_config=log_config_env,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
         )
@@ -115,6 +115,14 @@ def run_chainlit(target: str):
     help="Set the log level to debug",
 )
 @click.option(
+    "-l",
+    "--log-config",
+    default=None,
+    is_flag=False,
+    envvar="LOG_CONFIG",
+    help="Set the Uvicorn log config file path. Supported formats: .ini, .json, .yaml.",
+)
+@click.option(
     "-c",
     "--ci",
     default=False,
@@ -131,11 +139,13 @@ def run_chainlit(target: str):
 )
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+def chainlit_run(target, watch, headless, debug, log_config, ci, no_cache, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
+    if log_config:
+        os.environ["LOG_CONFIG"] = log_config
     if ci:
         logger.info("Running in CI mode")
 
@@ -143,7 +153,7 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-        # This is required for authenticationt tests
+        # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
     else:
         trace_event("chainlit run")
