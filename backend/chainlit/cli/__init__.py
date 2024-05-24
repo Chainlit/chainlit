@@ -55,8 +55,6 @@ def run_chainlit(target: str):
     ws_protocol = os.environ.get(
         "UVICORN_WS_PROTOCOL", "auto"
     )
-    log_config_env = os.environ.get("LOG_CONFIG", uvicorn.config.LOGGING_CONFIG)
-
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path
@@ -75,6 +73,7 @@ def run_chainlit(target: str):
     init_lc_cache()
 
     log_level = "debug" if config.run.debug else "error"
+    log_config = config.run.log_config
 
     # Start the server
     async def start():
@@ -83,7 +82,7 @@ def run_chainlit(target: str):
             host=host,
             port=port,
             ws=ws_protocol,
-            log_config=log_config_env,
+            log_config=log_config,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
             ssl_keyfile=ssl_keyfile,
@@ -127,7 +126,7 @@ def run_chainlit(target: str):
 @click.option(
     "-l",
     "--log-config",
-    default=None,
+    default=uvicorn.config.LOGGING_CONFIG,
     is_flag=False,
     envvar="LOG_CONFIG",
     help="Set the Uvicorn log config file path. Supported formats: .ini, .json, .yaml.",
@@ -189,8 +188,6 @@ def chainlit_run(
         os.environ["CHAINLIT_SSL_KEY"] = ssl_key
     if root_path:
         os.environ["CHAINLIT_ROOT_PATH"] = root_path
-    if log_config:
-        os.environ["LOG_CONFIG"] = log_config
     if ci:
         logger.info("Running in CI mode")
 
@@ -210,6 +207,7 @@ def chainlit_run(
     config.run.watch = watch
     config.run.ssl_cert = ssl_cert
     config.run.ssl_key = ssl_key
+    config.run.log_config = log_config
 
     run_chainlit(target)
 

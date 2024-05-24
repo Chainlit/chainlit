@@ -182,6 +182,7 @@ class RunSettings:
     no_cache: bool = False
     debug: bool = False
     ci: bool = False
+    log_config: Optional[Union[dict, str]] = None
 
 
 @dataclass()
@@ -288,7 +289,6 @@ class CodeSettings:
     set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
         None
     )
-    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
 
 
 @dataclass()
