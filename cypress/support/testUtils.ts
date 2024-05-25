@@ -32,6 +32,7 @@ export function runTestServer(
 ) {
   const pathItems = Cypress.spec.absolute.split(sep);
   const testName = pathItems[pathItems.length - 2];
+  cy.log('Check previous values: ', { pathItems, testName });
   cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`, {
     env
   });

@@ -153,7 +153,7 @@ def get_build_dir(local_target: str, packaged_target: str):
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
 
     if config.ui.custom_build and os.path.exists(
-        os.path.join(APP_ROOT, config.ui.custom_build)
+        os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
     ):
         return os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
     elif os.path.exists(local_build_dir):
