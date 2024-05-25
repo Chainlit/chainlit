@@ -8,6 +8,7 @@ import ToolCall from './ToolCall';
 
 interface Props {
   message: IStep;
+  isRunning?: boolean;
 }
 
 function groupToolSteps(step: IStep) {
@@ -46,7 +47,7 @@ function groupToolSteps(step: IStep) {
   return groupedSteps;
 }
 
-export default function ToolCalls({ message }: Props) {
+export default function ToolCalls({ message, isRunning }: Props) {
   const toolCalls = useMemo(() => {
     return message.steps ? groupToolSteps(message) : [];
   }, [message]);
@@ -58,7 +59,7 @@ export default function ToolCalls({ message }: Props) {
   return (
     <Stack width="100%" direction="column" gap={1} mb={1}>
       {toolCalls.map((toolCall, index) => (
-        <ToolCall key={index} steps={toolCall} />
+        <ToolCall key={index} steps={toolCall} isRunning={isRunning} />
       ))}
     </Stack>
   );

@@ -66,6 +66,7 @@ const addMessage = (messages: IStep[], message: IStep): IStep[] => {
       ...messages,
       {
         ...message,
+        name: '',
         input: '',
         output: '',
         id: 'wrap_' + message.id,

@@ -6,11 +6,12 @@ import { apiClientState } from 'state/apiClient';
 
 interface Props {
   author: string;
+  hide?: boolean;
 }
 
-const MessageAvatar = ({ author }: Props) => {
+const MessageAvatar = ({ author, hide }: Props) => {
   const apiClient = useRecoilValue(apiClientState);
-  const url = apiClient?.buildEndpoint(`/avatars/${author}`);
+  const url = apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
 
   return (
     <span className={`message-avatar`}>
@@ -21,7 +22,7 @@ const MessageAvatar = ({ author }: Props) => {
           mt: '-2px',
           bgcolor: 'transparent'
         }}
-        src={url}
+        src={hide ? undefined : url}
       />
     </span>
   );

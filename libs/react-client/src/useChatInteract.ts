@@ -107,7 +107,15 @@ const useChatInteract = () => {
   );
 
   const stopTask = useCallback(() => {
+    setMessages((oldMessages) =>
+      oldMessages.map((m) => {
+        m.streaming = false;
+        return m;
+      })
+    );
+
     setLoading(false);
+
     session?.socket.emit('stop');
   }, [session?.socket]);
 

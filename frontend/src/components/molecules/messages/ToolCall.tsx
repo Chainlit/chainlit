@@ -15,17 +15,21 @@ import type { IStep } from 'client-types/';
 
 interface Props {
   steps: IStep[];
+  isRunning?: boolean;
 }
 
-export default function ToolCall({ steps }: Props) {
+export default function ToolCall({ steps, isRunning }: Props) {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const using = useMemo(() => {
-    return steps.find((step) => step.start && !step.end && !step.isError);
-  }, [steps]);
+    return (
+      isRunning &&
+      steps.find((step) => step.start && !step.end && !step.isError)
+    );
+  }, [steps, isRunning]);
 
   const hasOutput = steps.some((step) => step.output);
-  const isError = steps.some((step) => step.isError);
+  const isError = steps.length ? steps[steps.length - 1].isError : false;
 
   if (!steps.length) {
     return null;
@@ -85,7 +89,16 @@ export default function ToolCall({ steps }: Props) {
         ) : null}
       </Box>
       {open && (
-        <Stack width="100%" direction="column" gap={2}>
+        <Stack
+          width="100%"
+          direction="column"
+          gap={2}
+          sx={{
+            borderLeft: (theme) => `1px solid ${theme.palette.primary.main}`,
+            boxSizing: 'border-box',
+            pl: 1
+          }}
+        >
           {steps
             .filter((step) => step.output)
             .map((step) => (

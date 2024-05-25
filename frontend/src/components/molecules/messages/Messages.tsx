@@ -42,6 +42,14 @@ const Messages = memo(
     return (
       <>
         {filtered.map((m, i) => {
+          const previousMessage = i > 0 ? filtered[i - 1] : undefined;
+          const typeIsDifferent = previousMessage?.type !== m.type;
+          const authorIsDifferent =
+            !!m.name &&
+            !!previousMessage?.name &&
+            previousMessage.name !== m.name;
+          const showAvatar = typeIsDifferent || authorIsDifferent;
+
           const isLast = filtered.length - 1 === i;
           let messageRunning =
             isRunning === undefined ? messageContext.loading : isRunning;
@@ -51,6 +59,7 @@ const Messages = memo(
           return (
             <Message
               message={m}
+              showAvatar={showAvatar}
               elements={elements}
               actions={actions}
               key={m.id}

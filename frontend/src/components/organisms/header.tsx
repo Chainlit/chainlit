@@ -5,6 +5,7 @@ import { Box, Stack } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
+import UserButton from 'components/atoms/buttons/userButton';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import NewChatButton from 'components/molecules/newChatButton';
 
@@ -35,10 +36,13 @@ const Header = memo(() => {
       {isMobile ? (
         <Stack direction="row" alignItems="center">
           <NewChatButton />
-          <GithubButton />
+          <UserButton />
         </Stack>
-      ) : null}
-      {!isMobile ? <GithubButton sx={{ ml: 'auto' }} /> : null}
+      ) : (
+        <Box ml="auto">
+          <UserButton />
+        </Box>
+      )}
     </Box>
   );
 });

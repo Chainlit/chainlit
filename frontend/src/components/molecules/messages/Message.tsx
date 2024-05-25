@@ -20,6 +20,7 @@ import ToolCalls from './ToolCalls';
 
 interface Props {
   message: IStep;
+  showAvatar?: boolean;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -28,7 +29,7 @@ interface Props {
 }
 
 const Message = memo(
-  ({ message, elements, actions, isRunning, isLast }: Props) => {
+  ({ message, showAvatar, elements, actions, isRunning, isLast }: Props) => {
     const {
       highlightedMessage,
       defaultCollapseContent,
@@ -105,9 +106,9 @@ const Message = memo(
               </Box>
             ) : (
               <Stack direction="row" gap="1.5rem" width="100%">
-                <MessageAvatar author={message.name} />
+                <MessageAvatar author={message.name} hide={!showAvatar} />
                 <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
-                  <ToolCalls message={message} />
+                  <ToolCalls message={message} isRunning={isRunning} />
                   <MessageContent
                     elements={elements}
                     message={message}

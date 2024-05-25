@@ -823,7 +823,10 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 
 @app.get("/avatars/{avatar_id}")
 async def get_avatar(avatar_id: str):
-    avatar_id = avatar_id.strip().replace(" ", "_")
+    if avatar_id == "default":
+        avatar_id = config.ui.name
+        
+    avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
     avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
 

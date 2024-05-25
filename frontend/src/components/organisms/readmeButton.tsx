@@ -28,8 +28,8 @@ export default function ReadmeButton() {
     <>
       <Button
         onClick={() => setOpen(true)}
+        color="inherit"
         sx={{
-          color: 'text.secondary',
           textTransform: 'none',
           justifyContent: 'start'
         }}
