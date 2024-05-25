@@ -10,7 +10,6 @@ const defaultMessageContext = {
   loading: false,
   onElementRefClick: undefined,
   onFeedbackUpdated: undefined,
-  onPlaygroundButtonClick: undefined,
   showFeedbackButtons: true,
   onError: () => undefined,
   uiName: ''

@@ -30,6 +30,7 @@ import { projectSettingsState } from 'state/project';
 import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
+import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -231,11 +232,15 @@ const Chat = () => {
         ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
-            autoScroll={autoScroll}
-            projectSettings={projectSettings}
-            setAutoScroll={setAutoScroll}
-          />
+          <Box sx={{ overflowY: 'auto' }} flexGrow={1} position="relative">
+            <WelcomeScreen />
+            <Messages
+              autoScroll={autoScroll}
+              projectSettings={projectSettings}
+              setAutoScroll={setAutoScroll}
+            />
+          </Box>
+
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

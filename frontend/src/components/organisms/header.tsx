@@ -4,7 +4,6 @@ import { useRecoilValue } from 'recoil';
 import { Box, Stack } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import GithubButton from 'components/atoms/buttons/githubButton';
 import UserButton from 'components/atoms/buttons/userButton';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import NewChatButton from 'components/molecules/newChatButton';

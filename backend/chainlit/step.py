@@ -295,12 +295,8 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if not config.features.prompt_playground and "generation" in step_dict:
-            step_dict.pop("generation", None)
-
-        if config.ui.hide_cot and (self.parent_id):
-            step_dict["input"] = ""
-            step_dict["output"] = ""
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+            return True
 
         await context.emitter.update_step(step_dict)
 
@@ -353,12 +349,8 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if not config.features.prompt_playground and "generation" in step_dict:
-            step_dict.pop("generation", None)
-
-        if config.ui.hide_cot and self.parent_id:
-            step_dict["input"] = ""
-            step_dict["output"] = ""
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+            return self
 
         await context.emitter.send_step(step_dict)
 
@@ -376,7 +368,7 @@ class Step:
 
         assert self.id
 
-        if config.ui.hide_cot and self.parent_id:
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
             return
 
         if not self.streaming:

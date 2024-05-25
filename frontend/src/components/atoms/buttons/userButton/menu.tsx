@@ -46,7 +46,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   );
 
   const themeItem = (
-    <ListItem sx={{ display: 'flex', gap: 1 }}>
+    <ListItem key="theme" sx={{ display: 'flex', gap: 1 }}>
       <ListItemIcon>
         <DarkModeOutlined />
       </ListItemIcon>

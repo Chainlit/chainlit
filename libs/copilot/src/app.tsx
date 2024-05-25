@@ -45,9 +45,10 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
+          config.theme = config.theme || data.ui.theme.default;
           setSettings((old) => ({
             ...old,
-            theme: config.theme ? config.theme : old.theme
+            theme: config.theme!
           }));
 
           const _theme = overrideTheme(

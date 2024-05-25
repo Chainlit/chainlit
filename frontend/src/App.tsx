@@ -12,7 +12,6 @@ import { Theme, ThemeProvider } from '@mui/material/styles';
 import { useChatSession } from '@chainlit/react-client';
 
 import ChatSettingsModal from 'components/organisms/chat/settings';
-import PromptPlayground from 'components/organisms/playground';
 
 import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
@@ -149,7 +148,6 @@ function App() {
         width="100vw"
         sx={{ overflowX: 'hidden' }}
       >
-        <PromptPlayground />
         <ChatSettingsModal />
         <RouterProvider router={router} />
       </Box>

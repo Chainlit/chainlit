@@ -17,17 +17,5 @@ describe('Llama Index Callback', () => {
       .find('.element-link')
       .eq(0)
       .should('contain', 'Source 0');
-
-    cy.get('.playground-button').eq(0).should('exist').click();
-
-    cy.get('.formatted-editor [contenteditable]')
-      .should('exist')
-      .should('contain', 'This is the LLM prompt');
-
-    cy.get('.completion-editor [contenteditable]')
-      .should('exist')
-      .should('contain', 'This is the LLM response');
-
-    cy.get('#close-playground').should('exist').click();
   });
 });

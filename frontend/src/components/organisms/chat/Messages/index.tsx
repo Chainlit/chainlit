@@ -11,8 +11,7 @@ import {
   updateMessageById,
   useChatData,
   useChatInteract,
-  useChatMessages,
-  useChatSession
+  useChatMessages
 } from '@chainlit/react-client';
 
 import { useTranslation } from 'components/i18n/Translator';
@@ -21,7 +20,6 @@ import { apiClientState } from 'state/apiClient';
 import { IProjectSettings } from 'state/project';
 
 import MessageContainer from './container';
-import WelcomeScreen from './welcomeScreen';
 
 interface MessagesProps {
   autoScroll: boolean;
@@ -31,13 +29,11 @@ interface MessagesProps {
 
 const Messages = ({
   autoScroll,
-  projectSettings,
   setAutoScroll
 }: MessagesProps): JSX.Element => {
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
-  const { idToResume } = useChatSession();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
   const apiClient = useRecoilValue(apiClientState);
@@ -135,16 +131,7 @@ const Messages = ({
     []
   );
 
-  return !idToResume &&
-    !messages.length &&
-    projectSettings?.ui.show_readme_as_default ? (
-    <WelcomeScreen
-      variant="app"
-      markdown={projectSettings?.markdown}
-      allowHtml={projectSettings?.features?.unsafe_allow_html}
-      latex={projectSettings?.features?.latex}
-    />
-  ) : (
+  return (
     <MessageContainer
       loading={loading}
       askUser={askUser}

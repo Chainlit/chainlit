@@ -1,6 +1,6 @@
 import { useAuth } from 'api/auth';
 
-import { Avatar, IconButton, IconButtonProps, Typography } from '@mui/material';
+import { Avatar, IconButton, IconButtonProps } from '@mui/material';
 
 import UserIcon from 'assets/user';
 

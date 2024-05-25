@@ -17,7 +17,6 @@ import { type IStep } from 'client-types/';
 
 import { DebugButton } from './DebugButton';
 import { FeedbackButtons } from './FeedbackButtons';
-import { PlaygroundButton } from './PlaygroundButton';
 
 interface Props {
   message: IStep;
@@ -29,7 +28,6 @@ const MessageButtons = ({ message }: Props) => {
   const pSettings = useRecoilValue(projectSettingsState);
   const { firstInteraction } = useChatMessages();
 
-  const showPlaygroundButton = !!message.generation;
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
@@ -46,11 +44,7 @@ const MessageButtons = ({ message }: Props) => {
   const showDebugButton =
     !!pSettings?.debugUrl && !!message.threadId && !!firstInteraction;
 
-  const show =
-    showCopyButton ||
-    showDebugButton ||
-    showPlaygroundButton ||
-    showFeedbackButtons;
+  const show = showCopyButton || showDebugButton || showFeedbackButtons;
 
   if (!show) {
     return null;
@@ -68,7 +62,6 @@ const MessageButtons = ({ message }: Props) => {
       {showDebugButton ? (
         <DebugButton debugUrl={pSettings.debugUrl!} step={message} />
       ) : null}
-      {showPlaygroundButton ? <PlaygroundButton step={message} /> : null}
     </Stack>
   );
 };

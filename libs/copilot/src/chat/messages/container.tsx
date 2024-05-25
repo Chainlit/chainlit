@@ -65,8 +65,6 @@ const MessageContainer = memo(
 
     const enableFeedback = !!projectSettings?.dataPersistence;
 
-    const onPlaygroundButtonClick = useCallback(() => null, []);
-
     const onElementRefClick = useCallback(
       (element: IMessageElement) => {
         if (element.display === 'side') {
@@ -111,8 +109,7 @@ const MessageContainer = memo(
         onElementRefClick,
         onError,
         onFeedbackUpdated,
-        onFeedbackDeleted,
-        onPlaygroundButtonClick
+        onFeedbackDeleted
       };
     }, [
       askUser,
@@ -123,8 +120,7 @@ const MessageContainer = memo(
       projectSettings?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
-      onFeedbackUpdated,
-      onPlaygroundButtonClick
+      onFeedbackUpdated
     ]);
 
     return (

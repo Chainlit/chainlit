@@ -8,9 +8,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { Translator } from 'components/i18n';
-import WelcomeScreen from 'components/organisms/chat/Messages/welcomeScreen';
 
 import { projectSettingsState } from 'state/project';
+
+import Readme from './readme';
 
 export default function ReadmeButton() {
   const [open, setOpen] = useState(false);
@@ -54,8 +55,7 @@ export default function ReadmeButton() {
           <Translator path="components.organisms.header.readme" />
         </DialogTitle>
         <DialogContent dividers>
-          <WelcomeScreen
-            variant="app"
+          <Readme
             markdown={projectSettings?.markdown}
             allowHtml={projectSettings?.features?.unsafe_allow_html}
             latex={projectSettings?.features?.latex}

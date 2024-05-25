@@ -467,11 +467,10 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if not config.features.prompt_playground and step.generation:
-                    step.generation = None
-                if config.ui.hide_cot and step.parent_id:
-                    step.input = ""
-                    step.output = ""
+                if config.ui.hide_cot and (
+                    step.parent_id or "message" not in step.type
+                ):
+                    continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
                 steps.append(self.step_to_step_dict(step))

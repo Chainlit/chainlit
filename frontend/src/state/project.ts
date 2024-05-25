@@ -2,18 +2,24 @@ import { atom } from 'recoil';
 
 import { IStep } from '@chainlit/react-client';
 
+export interface IStarter {
+  title: string;
+  message: string;
+  icon?: string;
+}
+
 export interface ChatProfile {
   default: boolean;
-  icon: string;
+  icon?: string;
   name: string;
   markdown_description: string;
+  starters?: IStarter[];
 }
 
 export interface IProjectSettings {
   markdown?: string;
   ui: {
     name: string;
-    show_readme_as_default?: boolean;
     description?: string;
     default_collapse_content?: boolean;
     github?: string;
@@ -47,6 +53,7 @@ export interface IProjectSettings {
   dataPersistence: boolean;
   threadResumable: boolean;
   chatProfiles: ChatProfile[];
+  starters?: IStarter[];
   translation: object;
 }
 

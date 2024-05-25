@@ -11,12 +11,13 @@ interface Props {
 }
 
 const DebugButton = ({ step, debugUrl }: Props) => {
-  if (step.id.startsWith('wrap_')) {
-    return null;
+  let stepId = step.id;
+  if (stepId.startsWith('wrap_')) {
+    stepId = stepId.replace('wrap_', '');
   }
   const href = debugUrl
     .replace('[thread_id]', step.threadId!)
-    .replace('[step_id]', step.id);
+    .replace('[step_id]', stepId);
   return (
     <Tooltip title="Debug in Literal">
       <IconButton

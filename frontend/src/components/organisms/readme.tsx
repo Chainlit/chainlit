@@ -6,17 +6,15 @@ import { Markdown } from 'components/molecules/Markdown';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-const WelcomeScreen = memo(
+const Readme = memo(
   ({
     markdown,
     allowHtml,
-    latex,
-    variant
+    latex
   }: {
     markdown?: string;
     allowHtml?: boolean;
     latex?: boolean;
-    variant: 'app' | 'copilot';
   }) => {
     const layoutMaxWidth = useLayoutMaxWidth();
 
@@ -27,13 +25,11 @@ const WelcomeScreen = memo(
         <Box
           id="welcome-screen"
           sx={{
-            px: variant === 'app' ? 2.5 : 2,
             boxSizing: 'border-box',
             maxWidth: layoutMaxWidth,
             width: '100%',
             mx: 'auto',
             color: 'text.primary',
-            fontSize: variant === 'app' ? '1rem' : '0.9rem',
             fontFamily:
               '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji',
             display: 'flex',
@@ -49,4 +45,4 @@ const WelcomeScreen = memo(
   }
 );
 
-export default WelcomeScreen;
+export default Readme;

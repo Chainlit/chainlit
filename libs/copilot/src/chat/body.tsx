@@ -17,6 +17,7 @@ import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary'
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/welcomeScreen';
 import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
@@ -201,11 +202,14 @@ const Chat = () => {
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
-            autoScroll={autoScroll}
-            projectSettings={projectSettings}
-            setAutoScroll={setAutoScroll}
-          />
+          <Box sx={{ overflowY: 'auto' }} flexGrow={1} position="relative">
+            <WelcomeScreen hideLogo />
+            <Messages
+              autoScroll={autoScroll}
+              projectSettings={projectSettings}
+              setAutoScroll={setAutoScroll}
+            />
+          </Box>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

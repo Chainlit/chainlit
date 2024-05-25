@@ -19,7 +19,6 @@ interface IMessageContext {
   uiName: string;
   allowHtml?: boolean;
   latex?: boolean;
-  onPlaygroundButtonClick?: (step: IStep) => void;
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
     message: IStep,
