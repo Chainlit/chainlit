@@ -23,7 +23,7 @@ function feedback() {
 function threadQueue() {
   cy.get('.step').eq(1).should('contain', 'Create step counter: 0');
   cy.get('.step').eq(3).should('contain', 'Create step counter: 3');
-  cy.get('.step').eq(6).should('contain', 'Create step counter: 6');
+  cy.get('.step').eq(5).should('contain', 'Create step counter: 6');
 }
 
 function threadList() {
@@ -68,8 +68,6 @@ function resumeThread() {
 
   cy.get('.step').eq(0).should('contain', 'Hello');
   cy.get('.step').eq(5).should('contain', 'Welcome back to Hello');
-  // Because the Thread was closed, the metadata should have been updated automatically
-  cy.get('.step').eq(6).should('contain', 'metadata');
   cy.get('.step').eq(6).should('contain', 'chat_profile');
 }
 

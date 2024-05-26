@@ -7,8 +7,9 @@ import ChatBody from './body';
 
 export default function ChatWrapper() {
   const { apiClient, accessToken } = useContext(WidgetContext);
-  const { connect } = useChatSession();
+  const { connect, session } = useChatSession();
   useEffect(() => {
+    if (session?.socket?.connected) return;
     connect({
       client: apiClient,
       userEnv: {},

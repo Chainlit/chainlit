@@ -11,14 +11,15 @@ import { Translator } from 'components/i18n';
 import ChevronDownIcon from 'assets/chevronDown';
 import ChevronUpIcon from 'assets/chevronUp';
 
-import type { IStep } from 'client-types/';
+import type { IMessageElement, IStep } from 'client-types/';
 
 interface Props {
   steps: IStep[];
+  elements: IMessageElement[];
   isRunning?: boolean;
 }
 
-export default function ToolCall({ steps, isRunning }: Props) {
+export default function ToolCall({ steps, elements, isRunning }: Props) {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const using = useMemo(() => {
@@ -45,6 +46,7 @@ export default function ToolCall({ steps, isRunning }: Props) {
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
         onClick={() => setOpen(!open)}
+        id={`tool-call-${toolName}`}
       >
         <Box>
           <Typography
@@ -104,7 +106,7 @@ export default function ToolCall({ steps, isRunning }: Props) {
             .map((step) => (
               <MessageContent
                 key={step.id}
-                elements={[]}
+                elements={elements}
                 message={step}
                 preserveSize={true}
               />

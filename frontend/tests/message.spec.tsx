@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { MessageContext, defaultMessageContext } from 'contexts/MessageContext';
 import i18n from 'i18next';
 import { ComponentProps } from 'react';
@@ -33,7 +33,7 @@ describe('Message', () => {
           id: '2',
           threadId: '1',
           input: '',
-          type: 'llm',
+          type: 'tool',
           output: 'bar',
           name: 'bar',
           createdAt: '12/12/2002',
@@ -63,26 +63,6 @@ describe('Message', () => {
     const messageContent = getByText('Hello');
 
     expect(messageContent).toBeInTheDocument();
-  });
-
-  it('toggles the detail button', () => {
-    const theme = createTheme({});
-    const { getByRole } = render(
-      <ThemeProvider theme={theme}>
-        <Message {...defaultProps} />
-      </ThemeProvider>
-    );
-    let detailsButton = getByRole('button', {});
-
-    expect(detailsButton).toBeInTheDocument();
-    fireEvent.click(detailsButton);
-    const closeButton = getByRole('button', { name: 'Took 1 step' });
-
-    expect(closeButton).toBeInTheDocument();
-    fireEvent.click(closeButton);
-    detailsButton = getByRole('button', { name: 'Took 1 step' });
-
-    expect(detailsButton).toBeInTheDocument();
   });
 
   it('preserves the content size when message is streamed', () => {

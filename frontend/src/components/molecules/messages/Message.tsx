@@ -98,8 +98,7 @@ const Message = memo(
                   />
                 </Box>
                 {forceDisplayCursor && (
-                  <Box my={1} display="flex" gap="1.5rem">
-                    <Box width={30} />
+                  <Box my={1}>
                     <BlinkingCursor />
                   </Box>
                 )}
@@ -108,7 +107,11 @@ const Message = memo(
               <Stack direction="row" gap="1.5rem" width="100%">
                 <MessageAvatar author={message.name} hide={!showAvatar} />
                 <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
-                  <ToolCalls message={message} isRunning={isRunning} />
+                  <ToolCalls
+                    elements={elements}
+                    message={message}
+                    isRunning={isRunning}
+                  />
                   <MessageContent
                     elements={elements}
                     message={message}

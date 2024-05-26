@@ -112,7 +112,7 @@ const MessageContent = memo(
     );
 
     return (
-      <Stack width="100%" direction="row">
+      <Stack width="100%" direction="row" className="message-content">
         <Box width="100%">
           {output ? messageContent : null}
           <InlinedElements elements={outputInlinedElements} />

@@ -8,8 +8,6 @@ import { useChatMessages, useChatSession } from '@chainlit/react-client';
 
 import { Logo } from 'components/atoms/logo';
 
-import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
-
 import { projectSettingsState } from 'state/project';
 
 import Starter from './starter';
@@ -19,7 +17,6 @@ interface Props {
 }
 
 export default function WelcomeScreen({ hideLogo }: Props) {
-  const maxWidth = useLayoutMaxWidth();
   const { messages } = useChatMessages();
   const [show, setShow] = useState(true);
   const { chatProfile } = useChatSession();
@@ -85,7 +82,7 @@ export default function WelcomeScreen({ hideLogo }: Props) {
         left={0}
         right={0}
         sx={{ overflowY: 'auto' }}
-        maxWidth={maxWidth}
+        maxWidth="min(48rem, 80vw)"
         justifyContent={hideLogo ? 'end' : 'center'}
         alignItems="center"
         gap={6}
@@ -93,7 +90,7 @@ export default function WelcomeScreen({ hideLogo }: Props) {
         boxSizing={'border-box'}
       >
         {hideLogo ? null : <Stack>{logo}</Stack>}
-        <Grid container spacing={2} minHeight={200}>
+        <Grid container spacing={2} minHeight={100} justifyContent="center">
           {starters?.map((starter, i) => (
             <Fade in={show} timeout={i * 300}>
               <Grid item xs={6} sm={3} key={i}>

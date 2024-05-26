@@ -43,11 +43,13 @@ const addMessage = (messages: IStep[], message: IStep): IStep[] => {
     ? findMessageById(messages, message.parentId!)
     : undefined;
 
-  const shouldWrap = isRoot || parentMessage?.type == 'user_message';
+  const shouldWrap =
+    (isRoot || parentMessage?.type !== 'assistant_message') &&
+    message.type === 'tool';
 
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
-  } else if (message.type === 'tool' && shouldWrap) {
+  } else if (shouldWrap) {
     const lastMessage =
       messages.length > 0 ? messages[messages.length - 1] : undefined;
     const collapseTool =

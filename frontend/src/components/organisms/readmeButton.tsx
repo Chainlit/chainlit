@@ -28,6 +28,7 @@ export default function ReadmeButton() {
   return (
     <>
       <Button
+        id="readme-button"
         onClick={() => setOpen(true)}
         color="inherit"
         sx={{

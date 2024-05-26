@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 
 import Stack from '@mui/material/Stack';
 
-import type { IStep } from 'client-types/';
+import type { IMessageElement, IStep } from 'client-types/';
 
 import ToolCall from './ToolCall';
 
 interface Props {
   message: IStep;
+  elements: IMessageElement[];
   isRunning?: boolean;
 }
 
@@ -47,7 +48,7 @@ function groupToolSteps(step: IStep) {
   return groupedSteps;
 }
 
-export default function ToolCalls({ message, isRunning }: Props) {
+export default function ToolCalls({ message, elements, isRunning }: Props) {
   const toolCalls = useMemo(() => {
     return message.steps ? groupToolSteps(message) : [];
   }, [message]);
@@ -59,7 +60,12 @@ export default function ToolCalls({ message, isRunning }: Props) {
   return (
     <Stack width="100%" direction="column" gap={1} mb={1}>
       {toolCalls.map((toolCall, index) => (
-        <ToolCall key={index} steps={toolCall} isRunning={isRunning} />
+        <ToolCall
+          key={index}
+          steps={toolCall}
+          elements={elements}
+          isRunning={isRunning}
+        />
       ))}
     </Stack>
   );

@@ -22,6 +22,12 @@ interface Props {
   config: IWidgetConfig;
 }
 
+declare global {
+  interface Window {
+    cl_shadowRootElement: HTMLDivElement;
+  }
+}
+
 export default function App({ config }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { setAccessToken } = useAuth(apiClient);
@@ -63,6 +69,28 @@ export default function App({ config }: Props) {
               }
             })
           );
+          if (!_theme.components) {
+            _theme.components = {};
+          }
+          _theme.components = {
+            ..._theme.components,
+            MuiPopover: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            },
+            MuiPopper: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            },
+            MuiModal: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            }
+          };
+
           setTheme(_theme);
           setProjectSettings(data);
         })

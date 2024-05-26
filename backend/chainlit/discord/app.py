@@ -104,7 +104,6 @@ class DiscordEmitter(BaseChainlitEmitter):
         is_message = step_type in [
             "user_message",
             "assistant_message",
-            "system_message",
         ]
         is_chain_of_thought = bool(step_dict.get("parentId"))
         is_empty_output = not step_dict.get("output")

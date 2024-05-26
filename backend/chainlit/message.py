@@ -316,7 +316,7 @@ class ErrorMessage(MessageBase):
     ):
         self.content = content
         self.author = author
-        self.type = "system_message"
+        self.type = "assistant_message"
         self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
 
