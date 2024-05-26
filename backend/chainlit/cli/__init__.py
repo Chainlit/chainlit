@@ -66,6 +66,7 @@ def run_chainlit(target: str):
     init_lc_cache()
 
     log_level = "debug" if config.run.debug else "error"
+    log_config = config.run.log_config
 
     # Start the server
     async def start():
@@ -73,6 +74,7 @@ def run_chainlit(target: str):
             app,
             host=host,
             port=port,
+            log_config=log_config,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
         )
@@ -112,6 +114,14 @@ def run_chainlit(target: str):
     help="Set the log level to debug",
 )
 @click.option(
+    "-l",
+    "--log-config",
+    default=uvicorn.config.LOGGING_CONFIG,
+    is_flag=False,
+    envvar="LOG_CONFIG",
+    help="Set the Uvicorn log config file path. Supported formats: .ini, .json, .yaml.",
+)
+@click.option(
     "-c",
     "--ci",
     default=False,
@@ -128,7 +138,7 @@ def run_chainlit(target: str):
 )
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+def chainlit_run(target, watch, headless, debug, log_config, ci, no_cache, host, port):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
@@ -140,7 +150,7 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-        # This is required for authenticationt tests
+        # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
     else:
         trace_event("chainlit run")
@@ -150,6 +160,7 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     config.run.no_cache = no_cache
     config.run.ci = ci
     config.run.watch = watch
+    config.run.log_config = log_config
 
     run_chainlit(target)
 
