@@ -6,9 +6,6 @@
 
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
 
-> [!NOTE]  
-> You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/)! Also available on the Discord `@Chainlit Help`. Proudly built with Chainlit!
-
 Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
 
 - ✅ ChatGPT-like application
@@ -17,9 +14,11 @@ Chainlit is an open-source async Python framework which allows developers to bui
 - ✅ Custom frontend (build your own agentic experience)
 - ✅ API Endpoint
 
-Full documentation is available [here](https://docs.chainlit.io).
+Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
-Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to Literal AI, our product to evaluate and monitor LLM applications.
+> [!NOTE]  
+> Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support**.
+> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 
 https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
 

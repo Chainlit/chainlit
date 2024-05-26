@@ -152,7 +152,7 @@ class Element:
         trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
         if data_layer and self.persisted:
-            await data_layer.delete_element(self.id)
+            await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):

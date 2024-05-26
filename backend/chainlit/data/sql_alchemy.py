@@ -433,7 +433,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         if self.show_logger:
             logger.info(f"SQLAlchemy: delete_element, element_id={element_id}")
         query = """DELETE FROM elements WHERE "id" = :id"""

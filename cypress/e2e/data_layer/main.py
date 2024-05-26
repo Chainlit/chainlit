@@ -114,7 +114,7 @@ class TestDataLayer(cl_data.BaseDataLayer):
         return "admin"
 
     async def list_threads(
-        self, pagination: cl_data.Pagination, filter: cl_data.ThreadFilter
+        self, pagination: cl_data.Pagination, filters: cl_data.ThreadFilter
     ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
         return cl_data.PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
