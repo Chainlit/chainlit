@@ -1,4 +1,4 @@
-import { MouseEvent } from 'react';
+import { MouseEvent, useState } from 'react';
 import { grey, primary } from 'theme/index';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
@@ -58,6 +58,20 @@ const SelectInput = ({
 }: SelectInputProps): JSX.Element => {
   const isDarkMode = useIsDarkMode();
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuOpen = () => {
+    setMenuOpen(true);
+  };
+
+  const handleMenuClose = (event: React.SyntheticEvent) => {
+    setMenuOpen(false);
+
+    if (onClose) {
+      onClose(event);
+    }
+  };
+
   return (
     <InputStateHandler
       id={id}
@@ -70,7 +84,8 @@ const SelectInput = ({
       <MSelect
         {...rest}
         size={size}
-        onClose={onClose}
+        onClose={handleMenuClose}
+        onOpen={handleMenuOpen}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
@@ -142,8 +157,10 @@ const SelectInput = ({
             <MenuItem
               isDarkMode={isDarkMode}
               data-test={`select-item:${item.label}`}
-              onMouseEnter={(e) => onItemMouseEnter?.(e, item.label)}
-              onMouseLeave={(e) => onItemMouseLeave?.(e)}
+              onMouseEnter={(e) =>
+                menuOpen && onItemMouseEnter?.(e, item.label)
+              }
+              onMouseLeave={(e) => menuOpen && onItemMouseLeave?.(e)}
               item={item}
               selected={item.value === value}
               key={item.value}

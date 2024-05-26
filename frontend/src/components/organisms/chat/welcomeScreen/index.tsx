@@ -6,8 +6,7 @@ import Fade from '@mui/material/Fade';
 
 import { useChatMessages, useChatSession } from '@chainlit/react-client';
 
-import { Logo } from 'components/atoms/logo';
-
+import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
 
 import Starter from './starter';
@@ -21,6 +20,8 @@ export default function WelcomeScreen({ hideLogo }: Props) {
   const [show, setShow] = useState(true);
   const { chatProfile } = useChatSession();
   const pSettings = useRecoilValue(projectSettingsState);
+  const apiClient = useRecoilValue(apiClientState);
+  const defaultIconUrl = apiClient?.buildEndpoint(`/avatars/default`);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -30,30 +31,30 @@ export default function WelcomeScreen({ hideLogo }: Props) {
     }
   }, [messages]);
 
-  const logo = useMemo(() => {
-    if (chatProfile) {
-      const selectedChatProfile = pSettings?.chatProfiles.find(
-        (profile) => profile.name === chatProfile
-      );
-      if (selectedChatProfile?.icon) {
-        return (
-          <Stack gap={2} alignItems="center">
-            <Avatar
-              sx={{ height: 48, width: 48 }}
-              src={selectedChatProfile.icon}
-            />
-            <Typography
-              color="text.primary"
-              sx={{ fontSize: '1.1rem', fontWeight: 600 }}
-            >
-              {selectedChatProfile.name}
-            </Typography>
-          </Stack>
-        );
-      }
-    }
-    return <Logo style={{ width: 200 }} />;
+  const selectedChatProfile = useMemo(() => {
+    return pSettings?.chatProfiles.find(
+      (profile) => profile.name === chatProfile
+    );
   }, [pSettings, chatProfile]);
+
+  const logo = useMemo(() => {
+    const name = selectedChatProfile?.name;
+    const icon = selectedChatProfile?.icon || defaultIconUrl;
+
+    return (
+      <Stack gap={2} alignItems="center">
+        <Avatar sx={{ height: 48, width: 48 }} src={icon} />
+        {name ? (
+          <Typography
+            color="text.primary"
+            sx={{ fontSize: '1.1rem', fontWeight: 600 }}
+          >
+            {name}
+          </Typography>
+        ) : null}
+      </Stack>
+    );
+  }, [pSettings, chatProfile, selectedChatProfile]);
 
   const starters = useMemo(() => {
     if (chatProfile) {

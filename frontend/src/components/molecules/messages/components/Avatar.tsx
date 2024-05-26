@@ -17,9 +17,8 @@ const MessageAvatar = ({ author, hide }: Props) => {
     <span className={`message-avatar`}>
       <Avatar
         sx={{
-          width: 30,
-          height: 30,
-          mt: '-2px',
+          width: '1.6rem',
+          height: '1.6rem',
           bgcolor: 'transparent'
         }}
         src={hide ? undefined : url}

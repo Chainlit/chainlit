@@ -234,13 +234,13 @@ const Chat = () => {
         <ErrorBoundary>
           <Box sx={{ overflowY: 'auto' }} flexGrow={1} position="relative">
             <WelcomeScreen />
+            <Box py={2} />
             <Messages
               autoScroll={autoScroll}
               projectSettings={projectSettings}
               setAutoScroll={setAutoScroll}
             />
           </Box>
-
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

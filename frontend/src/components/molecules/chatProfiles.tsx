@@ -88,7 +88,8 @@ export default function ChatProfiles() {
             boxShadow: (theme) =>
               theme.palette.mode === 'light'
                 ? '0px 2px 4px 0px #0000000D'
-                : '0px 10px 10px 0px #0000000D'
+                : '0px 10px 10px 0px #0000000D',
+            ml: 2
           }
         }}
         sx={{
@@ -103,7 +104,6 @@ export default function ChatProfiles() {
           vertical: 'center',
           horizontal: 'left'
         }}
-        onClose={() => setAnchorEl(null)}
         disableRestoreFocus
       >
         <Box
@@ -139,8 +139,8 @@ export default function ChatProfiles() {
           } else {
             handleConfirm(newValue);
           }
-          setAnchorEl(null);
         }}
+        onClose={() => setAnchorEl(null)}
       />
       <NewChatDialog
         open={openDialog}

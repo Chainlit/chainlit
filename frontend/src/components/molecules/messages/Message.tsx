@@ -104,7 +104,7 @@ const Message = memo(
                 )}
               </Box>
             ) : (
-              <Stack direction="row" gap="1.5rem" width="100%">
+              <Stack direction="row" gap="1rem" width="100%">
                 <MessageAvatar author={message.name} hide={!showAvatar} />
                 <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
                   <ToolCalls

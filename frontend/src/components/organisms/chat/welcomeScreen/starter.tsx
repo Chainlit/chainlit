@@ -33,7 +33,7 @@ export default function Starter({ starter }: Props) {
 
   return (
     <Button
-      id={`starter-${starter.title.trim().toLowerCase().replace(' ', '-')}`}
+      id={`starter-${starter.title.trim().toLowerCase().replaceAll(' ', '-')}`}
       fullWidth
       disabled={loading}
       color="inherit"
