@@ -4,7 +4,7 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Literal
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
 from chainlit.logger import logger
@@ -171,6 +171,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -179,6 +180,7 @@ class RunSettings:
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False
@@ -192,10 +194,12 @@ class PaletteOptions(DataClassJsonMixin):
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
+
 @dataclass()
 class TextOptions(DataClassJsonMixin):
     primary: Optional[str] = ""
     secondary: Optional[str] = ""
+
 
 @dataclass()
 class Palette(DataClassJsonMixin):
