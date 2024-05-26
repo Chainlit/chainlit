@@ -31,6 +31,7 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
 
   const shadowContainer = container.attachShadow({ mode: 'open' });
   const shadowRootElement = document.createElement('div');
+  shadowRootElement.id = 'cl-shadow-root';
   shadowContainer.appendChild(shadowRootElement);
 
   const cache = createCache({
