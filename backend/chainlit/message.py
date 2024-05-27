@@ -196,7 +196,7 @@ class Message(MessageBase):
 
     Args:
         content (Union[str, Dict]): The content of the message.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
@@ -303,7 +303,7 @@ class ErrorMessage(MessageBase):
 
     Args:
         content (str): Text displayed above the upload button.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
         indent (int, optional): If positive, the message will be nested in the UI.
     """
@@ -346,7 +346,7 @@ class AskUserMessage(AskMessageBase):
 
     Args:
         content (str): The content of the prompt.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -411,7 +411,7 @@ class AskFileMessage(AskMessageBase):
         accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.

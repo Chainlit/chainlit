@@ -95,7 +95,7 @@ auto_tag_thread = true
 # Name of the assistant.
 name = "Assistant"
 
-# Description of the app and chatbot. This is used for HTML tags.
+# Description of the assistant. This is used for HTML tags.
 # description = ""
 
 # Large size content are by default collapsed for a cleaner ui

@@ -172,12 +172,12 @@ async def connection_successful(sid):
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
         if thread:
-            await config.code.on_chat_resume(thread)
             context.session.has_first_interaction = True
             await context.emitter.emit(
                 "first_interaction",
                 {"interaction": "resume", "thread_id": thread.get("id")},
             )
+            await config.code.on_chat_resume(thread)
             await context.emitter.resume_thread(thread)
             return
 
@@ -233,9 +233,7 @@ async def stop(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(
-           content="Task manually stopped.", disable_feedback=True
-        ).send()
+        await Message(content="Task manually stopped.", disable_feedback=True).send()
 
         if session.current_task:
             session.current_task.cancel()
