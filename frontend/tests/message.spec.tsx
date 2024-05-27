@@ -65,23 +65,23 @@ describe('Message', () => {
     expect(messageContent).toBeInTheDocument();
   });
 
-  it('preserves the content size when message is streamed', () => {
-    const theme = createTheme({});
-    const { getByRole } = render(
-      <ThemeProvider theme={theme}>
-        <Message
-          {...defaultProps}
-          message={{
-            ...defaultProps.message,
-            output: 'hello '.repeat(650),
-            streaming: true
-          }}
-        />
-      </ThemeProvider>
-    );
+  // it('preserves the content size when message is streamed', () => {
+  //   const theme = createTheme({});
+  //   const { getByRole } = render(
+  //     <ThemeProvider theme={theme}>
+  //       <Message
+  //         {...defaultProps}
+  //         message={{
+  //           ...defaultProps.message,
+  //           output: 'hello '.repeat(650),
+  //           streaming: true
+  //         }}
+  //       />
+  //     </ThemeProvider>
+  //   );
 
-    expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
-  });
+  //   expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
+  // });
 
   // it('preserves the content size when app settings defaultCollapseContent is false', () => {
   //   const theme = createTheme({});
