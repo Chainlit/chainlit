@@ -93,8 +93,8 @@ export default function WelcomeScreen({ hideLogo }: Props) {
         {hideLogo ? null : <Stack>{logo}</Stack>}
         <Grid container spacing={2} minHeight={100} justifyContent="center">
           {starters?.map((starter, i) => (
-            <Fade in={show} timeout={i * 300}>
-              <Grid item xs={6} sm={3} key={i}>
+            <Fade in={show} timeout={i * 300} key={i}>
+              <Grid item xs={6} sm={3}>
                 <Starter starter={starter} />
               </Grid>
             </Fade>

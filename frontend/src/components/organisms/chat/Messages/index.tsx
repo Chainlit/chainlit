@@ -17,20 +17,10 @@ import {
 import { useTranslation } from 'components/i18n/Translator';
 
 import { apiClientState } from 'state/apiClient';
-import { IProjectSettings } from 'state/project';
 
 import MessageContainer from './container';
 
-interface MessagesProps {
-  autoScroll: boolean;
-  projectSettings?: IProjectSettings;
-  setAutoScroll: (autoScroll: boolean) => void;
-}
-
-const Messages = ({
-  autoScroll,
-  setAutoScroll
-}: MessagesProps): JSX.Element => {
+const Messages = (): JSX.Element => {
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
@@ -138,11 +128,9 @@ const Messages = ({
       actions={actions}
       elements={elements}
       messages={messages}
-      autoScroll={autoScroll}
       onFeedbackUpdated={onFeedbackUpdated}
       onFeedbackDeleted={onFeedbackDeleted}
       callAction={callActionWithToast}
-      setAutoScroll={setAutoScroll}
     />
   );
 };

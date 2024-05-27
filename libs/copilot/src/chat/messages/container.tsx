@@ -22,7 +22,6 @@ interface Props {
   elements: IMessageElement[];
   messages: IStep[];
   askUser?: IAsk;
-  autoScroll?: boolean;
   onFeedbackUpdated: (
     message: IStep,
     onSuccess: () => void,
@@ -34,7 +33,6 @@ interface Props {
     feedbackId: string
   ) => void;
   callAction?: (action: IAction) => void;
-  setAutoScroll?: (autoScroll: boolean) => void;
 }
 
 const MessageContainer = memo(
@@ -42,13 +40,11 @@ const MessageContainer = memo(
     askUser,
     loading,
     actions,
-    autoScroll,
     elements,
     messages,
     onFeedbackUpdated,
     onFeedbackDeleted,
-    callAction,
-    setAutoScroll
+    callAction
   }: Props) => {
     const { apiClient } = useContext(WidgetContext);
     const projectSettings = useRecoilValue(projectSettingsState);
@@ -128,8 +124,6 @@ const MessageContainer = memo(
         actions={messageActions}
         elements={elements}
         messages={messages}
-        autoScroll={autoScroll}
-        setAutoScroll={setAutoScroll}
         context={memoizedContext}
       />
     );

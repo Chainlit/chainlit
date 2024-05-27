@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Alert, Box } from '@mui/material';
 
 import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
+import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
@@ -202,14 +203,13 @@ const Chat = () => {
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Box sx={{ overflowY: 'auto' }} flexGrow={1} position="relative">
+          <ScrollContainer
+            autoScroll={autoScroll}
+            setAutoScroll={setAutoScroll}
+          >
             <WelcomeScreen hideLogo />
-            <Messages
-              autoScroll={autoScroll}
-              projectSettings={projectSettings}
-              setAutoScroll={setAutoScroll}
-            />
-          </Box>
+            <Messages />
+          </ScrollContainer>{' '}
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

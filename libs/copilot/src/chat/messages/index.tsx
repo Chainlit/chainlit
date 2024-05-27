@@ -3,7 +3,6 @@ import { useCallback, useContext } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
-import { IProjectSettings } from '@chainlit/app/src/state/project';
 import {
   IAction,
   IFeedback,
@@ -17,16 +16,7 @@ import {
 
 import MessageContainer from './container';
 
-interface MessagesProps {
-  autoScroll: boolean;
-  projectSettings?: IProjectSettings;
-  setAutoScroll: (autoScroll: boolean) => void;
-}
-
-const Messages = ({
-  autoScroll,
-  setAutoScroll
-}: MessagesProps): JSX.Element => {
+const Messages = (): JSX.Element => {
   const { apiClient, accessToken } = useContext(WidgetContext);
 
   const { elements, askUser, loading, actions } = useChatData();
@@ -122,11 +112,9 @@ const Messages = ({
       actions={actions}
       elements={elements}
       messages={messages}
-      autoScroll={autoScroll}
       onFeedbackUpdated={onFeedbackUpdated}
       onFeedbackDeleted={onFeedbackDeleted}
       callAction={callActionWithToast}
-      setAutoScroll={setAutoScroll}
     />
   );
 };

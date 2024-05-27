@@ -19,6 +19,7 @@ import {
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
@@ -232,15 +233,14 @@ const Chat = () => {
         ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Box sx={{ overflowY: 'auto' }} flexGrow={1} position="relative">
+          <ScrollContainer
+            autoScroll={autoScroll}
+            setAutoScroll={setAutoScroll}
+          >
             <WelcomeScreen />
             <Box py={2} />
-            <Messages
-              autoScroll={autoScroll}
-              projectSettings={projectSettings}
-              setAutoScroll={setAutoScroll}
-            />
-          </Box>
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
