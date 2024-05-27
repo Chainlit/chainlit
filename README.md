@@ -23,7 +23,7 @@ Full documentation is available [here](https://docs.chainlit.io). You can ask Ch
 > Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 
 <p align="center">
-    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" width="70%" style="border-radius:50%" />
+    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" width="80%" />
 </p>
 
 ## Installation
@@ -47,8 +47,10 @@ Create a new file `demo.py` with the following code:
 import chainlit as cl
 
 
-@cl.step
-def tool():
+@cl.step(type="tool")
+async def tool():
+    # Fake tool
+    await cl.sleep(2)
     return "Response from the tool!"
 
 
@@ -65,11 +67,12 @@ async def main(message: cl.Message):
         None.
     """
 
-    # Call the tool
-    tool()
+    final_answer = await cl.Message(content="").send()
 
-    # Send the final answer.
-    await cl.Message(content="This is the final answer").send()
+    # Call the tool
+    final_answer.content = await tool()
+
+    await final_answer.update()
 ```
 
 Now run it!
