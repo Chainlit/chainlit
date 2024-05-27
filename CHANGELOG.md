@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased!
+### Fix
+
+- Scroll flickering when streaming
 
 ## [1.1.300rc0] - 2024-05-27
 

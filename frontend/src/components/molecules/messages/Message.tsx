@@ -67,7 +67,7 @@ const Message = memo(
             id={`step-${message.id}`}
             direction="row"
             sx={{
-              py: 2,
+              pb: 2,
               animation:
                 message.id && highlightedMessage === message.id
                   ? `3s ease-in-out 0.1s ${flash}`
@@ -106,7 +106,12 @@ const Message = memo(
             ) : (
               <Stack direction="row" gap="1rem" width="100%">
                 <MessageAvatar author={message.name} hide={!showAvatar} />
-                <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
+                <Stack
+                  alignItems="flex-start"
+                  minWidth={150}
+                  flexGrow={1}
+                  position="relative"
+                >
                   <ToolCalls
                     elements={elements}
                     message={message}
@@ -124,8 +129,9 @@ const Message = memo(
                   {!isRunning && isLast && isAsk && (
                     <AskUploadButton onError={onError} />
                   )}
+                  <Box my={1} />
                   {forceDisplayCursor && (
-                    <Box my={1}>
+                    <Box position="absolute" bottom={0}>
                       <BlinkingCursor />
                     </Box>
                   )}

@@ -44,7 +44,7 @@ const Header = memo(() => {
       {isMobile ? (
         <OpenSideBarMobileButton />
       ) : isChatHistoryOpen ? null : (
-        <Logo style={{ width: '107px', marginLeft: '8px' }} />
+        <Logo style={{ maxHeight: '25px', marginLeft: '8px' }} />
       )}
       <Box />
       <Stack direction="row" alignItems="center">
