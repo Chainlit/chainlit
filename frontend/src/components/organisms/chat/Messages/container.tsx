@@ -145,8 +145,6 @@ const MessageContainer = memo(
         actions={messageActions}
         elements={elements}
         messages={messages}
-        autoScroll={autoScroll}
-        setAutoScroll={setAutoScroll}
         context={memoizedContext}
       />
     );
