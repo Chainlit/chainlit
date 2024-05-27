@@ -92,8 +92,8 @@ auto_tag_thread = true
     sample_rate = 44100
 
 [UI]
-# Name of the app and chatbot.
-name = "Chatbot"
+# Name of the assistant.
+name = "Assistant"
 
 # Description of the app and chatbot. This is used for HTML tags.
 # description = ""
