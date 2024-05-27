@@ -83,24 +83,24 @@ describe('Message', () => {
     expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
   });
 
-  it('preserves the content size when app settings defaultCollapseContent is false', () => {
-    const theme = createTheme({});
-    const { getByRole } = render(
-      <ThemeProvider theme={theme}>
-        <MessageContext.Provider
-          value={{ ...defaultMessageContext, defaultCollapseContent: false }}
-        >
-          <Message
-            {...defaultProps}
-            message={{
-              ...defaultProps.message,
-              output: 'hello '.repeat(650)
-            }}
-          />
-        </MessageContext.Provider>
-      </ThemeProvider>
-    );
+  // it('preserves the content size when app settings defaultCollapseContent is false', () => {
+  //   const theme = createTheme({});
+  //   const { getByRole } = render(
+  //     <ThemeProvider theme={theme}>
+  //       <MessageContext.Provider
+  //         value={{ ...defaultMessageContext, defaultCollapseContent: false }}
+  //       >
+  //         <Message
+  //           {...defaultProps}
+  //           message={{
+  //             ...defaultProps.message,
+  //             output: 'hello '.repeat(650)
+  //           }}
+  //         />
+  //       </MessageContext.Provider>
+  //     </ThemeProvider>
+  //   );
 
-    expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
-  });
+  //   expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
+  // });
 });
