@@ -209,7 +209,7 @@ const Chat = () => {
           >
             <WelcomeScreen hideLogo />
             <Messages />
-          </ScrollContainer>{' '}
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

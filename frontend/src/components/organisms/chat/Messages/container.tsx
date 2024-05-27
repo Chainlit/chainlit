@@ -26,7 +26,6 @@ interface Props {
   elements: IMessageElement[];
   messages: IStep[];
   askUser?: IAsk;
-  autoScroll?: boolean;
   onFeedbackUpdated: (
     message: IStep,
     onSuccess: () => void,
@@ -38,7 +37,6 @@ interface Props {
     feedback: string
   ) => void;
   callAction?: (action: IAction) => void;
-  setAutoScroll?: (autoScroll: boolean) => void;
 }
 
 const MessageContainer = memo(
@@ -46,13 +44,11 @@ const MessageContainer = memo(
     askUser,
     loading,
     actions,
-    autoScroll,
     elements,
     messages,
     onFeedbackUpdated,
     onFeedbackDeleted,
-    callAction,
-    setAutoScroll
+    callAction
   }: Props) => {
     const appSettings = useRecoilValue(settingsState);
     const projectSettings = useRecoilValue(projectSettingsState);
