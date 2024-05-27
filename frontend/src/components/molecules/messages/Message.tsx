@@ -1,13 +1,12 @@
 import { keyframes } from '@emotion/react';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
-import { Author } from './components/Author';
-import { DetailsButton } from './components/DetailsButton';
+import { MessageAvatar } from './components/Avatar';
 import { MessageActions } from './components/MessageActions';
 import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
@@ -17,33 +16,21 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import BlinkingCursor from '../BlinkingCursor';
-import { Messages } from './Messages';
+import ToolCalls from './ToolCalls';
 
 interface Props {
   message: IStep;
+  showAvatar?: boolean;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
-  showAvatar?: boolean;
-  showBorder?: boolean;
   isRunning?: boolean;
   isLast?: boolean;
 }
 
 const Message = memo(
-  ({
-    message,
-    elements,
-    actions,
-    indent,
-    showAvatar,
-    showBorder,
-    isRunning,
-    isLast
-  }: Props) => {
+  ({ message, showAvatar, elements, actions, isRunning, isLast }: Props) => {
     const {
-      expandAll,
-      hideCot,
       highlightedMessage,
       defaultCollapseContent,
       allowHtml,
@@ -52,19 +39,11 @@ const Message = memo(
     } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
 
-    const [showDetails, setShowDetails] = useState(expandAll);
-
-    useEffect(() => {
-      setShowDetails(expandAll);
-    }, [expandAll]);
-
-    if (hideCot && indent) {
-      return null;
-    }
-
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
 
+    const forceDisplayCursor =
+      isLast && isRunning && (!message.streaming || window.renderingCodeBlock);
     return (
       <Box
         sx={{
@@ -89,8 +68,6 @@ const Message = memo(
             direction="row"
             sx={{
               py: 2,
-              borderBottom: (theme) =>
-                showBorder ? `1px solid ${theme.palette.divider}` : 'none',
               animation:
                 message.id && highlightedMessage === message.id
                   ? `3s ease-in-out 0.1s ${flash}`
@@ -120,40 +97,21 @@ const Message = memo(
                     latex={latex}
                   />
                 </Box>
-                <DetailsButton
-                  message={message}
-                  opened={showDetails}
-                  onClick={() => setShowDetails(!showDetails)}
-                  loading={isRunning && isLast}
-                />
-                {message.steps && showDetails && (
-                  <Messages
-                    messages={message.steps}
-                    actions={actions}
-                    elements={elements}
-                    indent={indent + 1}
-                    isRunning={isRunning}
-                  />
+                {forceDisplayCursor && (
+                  <Box my={1}>
+                    <BlinkingCursor />
+                  </Box>
                 )}
               </Box>
             ) : (
-              <Author message={message} show={showAvatar}>
-                <DetailsButton
-                  message={message}
-                  opened={showDetails}
-                  onClick={() => setShowDetails(!showDetails)}
-                  loading={isRunning && isLast}
-                />
-                {message.steps && showDetails && (
-                  <Messages
-                    messages={message.steps}
-                    actions={actions}
+              <Stack direction="row" gap="1rem" width="100%">
+                <MessageAvatar author={message.name} hide={!showAvatar} />
+                <Stack alignItems="flex-start" minWidth={150} flexGrow={1}>
+                  <ToolCalls
                     elements={elements}
-                    indent={indent + 1}
+                    message={message}
                     isRunning={isRunning}
                   />
-                )}
-                <Stack alignItems="flex-start" minWidth={150}>
                   <MessageContent
                     elements={elements}
                     message={message}
@@ -166,33 +124,19 @@ const Message = memo(
                   {!isRunning && isLast && isAsk && (
                     <AskUploadButton onError={onError} />
                   )}
+                  {forceDisplayCursor && (
+                    <Box my={1}>
+                      <BlinkingCursor />
+                    </Box>
+                  )}
                   {actions?.length ? (
                     <MessageActions message={message} actions={actions} />
                   ) : null}
                   <MessageButtons message={message} />
                 </Stack>
-              </Author>
+              </Stack>
             )}
           </Stack>
-          {isLast &&
-            isRunning &&
-            (!message.streaming || window.renderingCodeBlock) && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: -5,
-                  left: 38,
-                  boxSizing: 'border-box',
-                  mx: 'auto',
-                  maxWidth: layoutMaxWidth,
-                  px: 2,
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                <BlinkingCursor />
-              </Box>
-            )}
         </Box>
       </Box>
     );

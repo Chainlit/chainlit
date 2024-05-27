@@ -4,7 +4,8 @@ import { useRecoilValue } from 'recoil';
 import { Box, Stack } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import GithubButton from 'components/atoms/buttons/githubButton';
+import UserButton from 'components/atoms/buttons/userButton';
+import { Logo } from 'components/atoms/logo';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import NewChatButton from 'components/molecules/newChatButton';
 
@@ -24,21 +25,32 @@ const Header = memo(() => {
       height="45px"
       alignItems="center"
       flexDirection="row"
-      justifyContent={isMobile ? 'space-between' : 'initial'}
+      justifyContent="space-between"
       color="text.primary"
       gap={2}
       id="header"
+      position="relative"
     >
-      {isMobile ? <OpenSideBarMobileButton /> : null}
-      {!isMobile && !isChatHistoryOpen ? <NewChatButton /> : null}
-      <ChatProfiles />
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+      >
+        <ChatProfiles />
+      </Box>
       {isMobile ? (
-        <Stack direction="row" alignItems="center">
-          <NewChatButton />
-          <GithubButton />
-        </Stack>
-      ) : null}
-      {!isMobile ? <GithubButton sx={{ ml: 'auto' }} /> : null}
+        <OpenSideBarMobileButton />
+      ) : isChatHistoryOpen ? null : (
+        <Logo style={{ width: '107px', marginLeft: '8px' }} />
+      )}
+      <Box />
+      <Stack direction="row" alignItems="center">
+        <NewChatButton />
+        <UserButton />
+      </Stack>
     </Box>
   );
 });

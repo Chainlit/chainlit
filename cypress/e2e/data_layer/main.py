@@ -150,7 +150,7 @@ async def handle_message():
     # Wait for queue to be flushed
     await cl.sleep(2)
     await send_count()
-    async with cl.Step(root=True, disable_feedback=True) as step:
+    async with cl.Step(type="tool", name="thinking") as step:
         step.output = "Thinking..."
     await cl.Message("Ok!").send()
     await send_count()

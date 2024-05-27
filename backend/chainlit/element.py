@@ -21,7 +21,7 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -188,14 +188,6 @@ class Image(Element):
     type: ClassVar[ElementType] = "image"
 
     size: ElementSize = "medium"
-
-
-@dataclass
-class Avatar(Element):
-    type: ClassVar[ElementType] = "avatar"
-
-    async def send(self):
-        await super().send(for_id="")
 
 
 @dataclass

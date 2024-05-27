@@ -1,17 +1,22 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
+import { useRecoilValue } from 'recoil';
 import { grey } from 'theme/palette';
 
 import Stack from '@mui/material/Stack';
+
+import { useChatMessages } from '@chainlit/react-client';
 
 import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import type { IStep } from 'client-types/';
+import { projectSettingsState } from 'state/project';
 
+import { type IStep } from 'client-types/';
+
+import { DebugButton } from './DebugButton';
 import { FeedbackButtons } from './FeedbackButtons';
-import { PlaygroundButton } from './PlaygroundButton';
 
 interface Props {
   message: IStep;
@@ -20,8 +25,9 @@ interface Props {
 const MessageButtons = ({ message }: Props) => {
   const isDark = useIsDarkMode();
   const { showFeedbackButtons: showFbButtons } = useContext(MessageContext);
+  const pSettings = useRecoilValue(projectSettingsState);
+  const { firstInteraction } = useChatMessages();
 
-  const showPlaygroundButton = !!message.generation;
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
@@ -35,7 +41,10 @@ const MessageButtons = ({ message }: Props) => {
     !isAsk &&
     hasContent;
 
-  const show = showCopyButton || showPlaygroundButton || showFeedbackButtons;
+  const showDebugButton =
+    !!pSettings?.debugUrl && !!message.threadId && !!firstInteraction;
+
+  const show = showCopyButton || showDebugButton || showFeedbackButtons;
 
   if (!show) {
     return null;
@@ -50,7 +59,9 @@ const MessageButtons = ({ message }: Props) => {
     >
       {showCopyButton ? <ClipboardCopy value={message.output} /> : null}
       {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}
-      {showPlaygroundButton ? <PlaygroundButton step={message} /> : null}
+      {showDebugButton ? (
+        <DebugButton debugUrl={pSettings.debugUrl!} step={message} />
+      ) : null}
     </Stack>
   );
 };

@@ -20,7 +20,6 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/lab": "^5.0.0-alpha.122",
     "@mui/material": "^5.14.10",
-    "draft-js": "^0.11.7",
     "formik": "^2.4.3",
     "highlight.js": "^11.9.0",
     "i18next": "^23.7.16",

@@ -1,7 +1,8 @@
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { Backdrop, Stack, Typography } from '@mui/material';
 
 import { Translator } from 'components/i18n';
+
+import ImageIcon from 'assets/Image';
 
 export default function DropScreen() {
   return (
@@ -12,8 +13,8 @@ export default function DropScreen() {
       }}
     >
       <Stack alignItems="center" gap={2} color="grey.400">
-        <InsertDriveFileIcon sx={{ width: '100px', height: '100px' }} />
-        <Typography fontWeight={700} fontSize="1.5rem">
+        <ImageIcon sx={{ width: '100px', height: '100px' }} />
+        <Typography fontWeight={600} fontSize="1.5rem">
           <Translator path="components.organisms.chat.dropScreen.dropYourFilesHere" />
         </Typography>
       </Stack>

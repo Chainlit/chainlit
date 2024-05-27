@@ -18,6 +18,7 @@ import {
 } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
@@ -188,16 +189,16 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           .
         </Alert>
       </Box>
-      <MessageContainer
-        loading={false}
-        avatars={[]}
-        actions={actions}
-        elements={(elements || []) as IMessageElement[]}
-        onFeedbackUpdated={onFeedbackUpdated}
-        onFeedbackDeleted={onFeedbackDeleted}
-        messages={messages}
-        autoScroll={true}
-      />
+      <ScrollContainer autoScroll={true}>
+        <MessageContainer
+          loading={false}
+          actions={actions}
+          elements={(elements || []) as IMessageElement[]}
+          onFeedbackUpdated={onFeedbackUpdated}
+          onFeedbackDeleted={onFeedbackDeleted}
+          messages={messages}
+        />
+      </ScrollContainer>
     </Stack>
   );
 };

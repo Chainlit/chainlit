@@ -156,7 +156,6 @@ const Input = memo(
           <TextField
             inputRef={ref}
             id="copilot-chat-input"
-            autoFocus
             multiline
             variant="standard"
             autoComplete="false"

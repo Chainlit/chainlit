@@ -4,7 +4,6 @@ import {
   accessTokenState,
   actionState,
   askUserState,
-  avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
   currentThreadIdState,
@@ -38,7 +37,6 @@ const useChatInteract = () => {
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
   const setElements = useSetRecoilState(elementState);
-  const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
@@ -54,7 +52,6 @@ const useChatInteract = () => {
     setFirstUserInteraction(undefined);
     setMessages([]);
     setElements([]);
-    setAvatars([]);
     setTasklists([]);
     setActions([]);
     setTokenCount(0);
@@ -110,7 +107,15 @@ const useChatInteract = () => {
   );
 
   const stopTask = useCallback(() => {
+    setMessages((oldMessages) =>
+      oldMessages.map((m) => {
+        m.streaming = false;
+        return m;
+      })
+    );
+
     setLoading(false);
+
     session?.socket.emit('stop');
   }, [session?.socket]);
 

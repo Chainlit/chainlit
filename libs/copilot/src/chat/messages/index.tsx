@@ -1,13 +1,8 @@
 import { WidgetContext } from 'context';
 import { useCallback, useContext } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
-import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/Messages/welcomeScreen';
-import {
-  IProjectSettings,
-  projectSettingsState
-} from '@chainlit/app/src/state/project';
 import {
   IAction,
   IFeedback,
@@ -16,27 +11,15 @@ import {
   updateMessageById,
   useChatData,
   useChatInteract,
-  useChatMessages,
-  useChatSession
+  useChatMessages
 } from '@chainlit/react-client';
 
 import MessageContainer from './container';
 
-interface MessagesProps {
-  autoScroll: boolean;
-  projectSettings?: IProjectSettings;
-  setAutoScroll: (autoScroll: boolean) => void;
-}
-
-const Messages = ({
-  autoScroll,
-  setAutoScroll
-}: MessagesProps): JSX.Element => {
-  const projectSettings = useRecoilValue(projectSettingsState);
+const Messages = (): JSX.Element => {
   const { apiClient, accessToken } = useContext(WidgetContext);
-  const { idToResume } = useChatSession();
 
-  const { elements, askUser, avatars, loading, actions } = useChatData();
+  const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const setMessages = useSetRecoilState(messagesState);
@@ -101,7 +84,7 @@ const Messages = ({
       try {
         toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
           loading: 'Updating',
-          success: (res) => {
+          success: (_) => {
             setMessages((prev) =>
               updateMessageById(prev, message.id, {
                 ...message,
@@ -122,35 +105,16 @@ const Messages = ({
     []
   );
 
-  const showWelcomeScreen =
-    !idToResume &&
-    !messages.length &&
-    projectSettings?.ui.show_readme_as_default;
-
-  if (showWelcomeScreen) {
-    return (
-      <WelcomeScreen
-        variant="copilot"
-        markdown={projectSettings?.markdown}
-        allowHtml={projectSettings?.features?.unsafe_allow_html}
-        latex={projectSettings?.features?.latex}
-      />
-    );
-  }
-
   return (
     <MessageContainer
-      avatars={avatars}
       loading={loading}
       askUser={askUser}
       actions={actions}
       elements={elements}
       messages={messages}
-      autoScroll={autoScroll}
       onFeedbackUpdated={onFeedbackUpdated}
       onFeedbackDeleted={onFeedbackDeleted}
       callAction={callActionWithToast}
-      setAutoScroll={setAutoScroll}
     />
   );
 };

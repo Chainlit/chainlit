@@ -1,5 +1,6 @@
 .markdown-body {
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .markdown-body img {

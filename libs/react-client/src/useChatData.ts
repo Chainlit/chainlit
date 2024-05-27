@@ -3,7 +3,6 @@ import { useRecoilValue } from 'recoil';
 import {
   actionState,
   askUserState,
-  avatarState,
   chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
   chatSettingsValueState,
@@ -22,7 +21,6 @@ export interface IToken {
 const useChatData = () => {
   const loading = useRecoilValue(loadingState);
   const elements = useRecoilValue(elementState);
-  const avatars = useRecoilValue(avatarState);
   const tasklists = useRecoilValue(tasklistState);
   const actions = useRecoilValue(actionState);
   const session = useRecoilValue(sessionState);
@@ -43,7 +41,6 @@ const useChatData = () => {
   return {
     actions,
     askUser,
-    avatars,
     chatSettingsDefaultValue,
     chatSettingsInputs,
     chatSettingsValue,

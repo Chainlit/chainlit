@@ -11,10 +11,7 @@ import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { useChatSession } from '@chainlit/react-client';
 
-import Hotkeys from 'components/Hotkeys';
-import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
-import PromptPlayground from 'components/organisms/playground';
 
 import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
@@ -45,6 +42,7 @@ declare global {
   interface Window {
     renderingCodeBlock?: boolean;
     theme?: {
+      default: string;
       light?: ThemOverride;
       dark?: ThemOverride;
     };
@@ -150,10 +148,7 @@ function App() {
         width="100vw"
         sx={{ overflowX: 'hidden' }}
       >
-        <PromptPlayground />
         <ChatSettingsModal />
-        <Hotkeys />
-        <SettingsModal />
         <RouterProvider router={router} />
       </Box>
     </ThemeProvider>

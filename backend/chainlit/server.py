@@ -33,7 +33,6 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
-from chainlit.playground.config import get_llm_providers
 from chainlit.telemetry import trace_event
 from chainlit.types import (
     DeleteFeedbackRequest,
@@ -234,7 +233,9 @@ def get_html_template():
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
-    default_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+    default_meta_image_url = (
+        "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+    )
     url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
 
@@ -496,40 +497,6 @@ async def oauth_callback(
     return response
 
 
-@app.post("/generation")
-async def generation(
-    request: GenerationRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
-):
-    """Handle a completion request from the prompt playground."""
-
-    providers = get_llm_providers()
-
-    try:
-        provider = [p for p in providers if p.id == request.generation.provider][0]
-    except IndexError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"LLM provider '{request.generation.provider}' not found",
-        )
-
-    trace_event("pp_create_completion")
-    response = await provider.create_completion(request)
-
-    return response
-
-
-@app.get("/project/llm-providers")
-async def get_providers(
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)]
-):
-    """List the providers."""
-    trace_event("pp_get_llm_providers")
-    providers = get_llm_providers()
-    providers = [p.to_dict() for p in providers]
-    return JSONResponse(content={"providers": providers})
-
-
 @app.get("/project/translations")
 async def project_translations(
     language: str = Query(default="en-US", description="Language code"),
@@ -562,8 +529,20 @@ async def project_settings(
         if chat_profiles:
             profiles = [p.to_dict() for p in chat_profiles]
 
+    starters = []
+    if config.code.set_starters:
+        starters = await config.code.set_starters(current_user)
+        if starters:
+            starters = [s.to_dict() for s in starters]
+
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
+
+    debug_url = None
+    data_layer = get_data_layer()
+
+    if data_layer and config.run.debug:
+        debug_url = await data_layer.build_debug_url()
 
     return JSONResponse(
         content={
@@ -574,6 +553,8 @@ async def project_settings(
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
+            "starters": starters,
+            "debugUrl": debug_url,
         }
     )
 
@@ -810,6 +791,25 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
+
+
+@app.get("/avatars/{avatar_id}")
+async def get_avatar(avatar_id: str):
+    if avatar_id == "default":
+        avatar_id = config.ui.name
+
+    avatar_id = avatar_id.strip().lower().replace(" ", "_")
+
+    avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
+
+    files = glob.glob(avatar_path)
+
+    if files:
+        avatar_path = files[0]
+        media_type, _ = mimetypes.guess_type(avatar_path)
+        return FileResponse(avatar_path, media_type=media_type)
+    else:
+        return await get_favicon()
 
 
 @app.head("/")

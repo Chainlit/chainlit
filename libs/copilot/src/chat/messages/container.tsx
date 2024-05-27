@@ -6,11 +6,9 @@ import { toast } from 'sonner';
 import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
 import { highlightMessage } from '@chainlit/app/src/state/project';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
-import { settingsState } from '@chainlit/app/src/state/settings';
 import {
   IAction,
   IAsk,
-  IAvatarElement,
   IFeedback,
   IMessageElement,
   IStep,
@@ -22,10 +20,8 @@ interface Props {
   loading: boolean;
   actions: IAction[];
   elements: IMessageElement[];
-  avatars: IAvatarElement[];
   messages: IStep[];
   askUser?: IAsk;
-  autoScroll?: boolean;
   onFeedbackUpdated: (
     message: IStep,
     onSuccess: () => void,
@@ -37,26 +33,21 @@ interface Props {
     feedbackId: string
   ) => void;
   callAction?: (action: IAction) => void;
-  setAutoScroll?: (autoScroll: boolean) => void;
 }
 
 const MessageContainer = memo(
   ({
     askUser,
     loading,
-    avatars,
     actions,
-    autoScroll,
     elements,
     messages,
     onFeedbackUpdated,
     onFeedbackDeleted,
-    callAction,
-    setAutoScroll
+    callAction
   }: Props) => {
     const { apiClient } = useContext(WidgetContext);
     const projectSettings = useRecoilValue(projectSettingsState);
-    const { hideCot } = useRecoilValue(settingsState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
@@ -69,8 +60,6 @@ const MessageContainer = memo(
     );
 
     const enableFeedback = !!projectSettings?.dataPersistence;
-
-    const onPlaygroundButtonClick = useCallback(() => null, []);
 
     const onElementRefClick = useCallback(
       (element: IMessageElement) => {
@@ -108,10 +97,7 @@ const MessageContainer = memo(
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
         latex: projectSettings?.features?.latex,
-        avatars,
         defaultCollapseContent: true,
-        expandAll: false,
-        hideCot: hideCot,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
@@ -119,12 +105,10 @@ const MessageContainer = memo(
         onElementRefClick,
         onError,
         onFeedbackUpdated,
-        onFeedbackDeleted,
-        onPlaygroundButtonClick
+        onFeedbackDeleted
       };
     }, [
       askUser,
-      avatars,
       enableFeedback,
       highlightedMessage,
       loading,
@@ -132,8 +116,7 @@ const MessageContainer = memo(
       projectSettings?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
-      onFeedbackUpdated,
-      onPlaygroundButtonClick
+      onFeedbackUpdated
     ]);
 
     return (
@@ -141,8 +124,6 @@ const MessageContainer = memo(
         actions={messageActions}
         elements={elements}
         messages={messages}
-        autoScroll={autoScroll}
-        setAutoScroll={setAutoScroll}
         context={memoizedContext}
       />
     );
