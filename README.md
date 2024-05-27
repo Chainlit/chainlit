@@ -2,6 +2,8 @@
 
 [![](https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat)](https://discord.gg/k73SQ3FyUh)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io)](https://twitter.com/chainlit_io)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/chainlit)
+[![GitHub Contributors](https://img.shields.io/github/contributors/chainlit/chainlit)](https://github.com/chainlit/chainlit/graphs/contributors)
 [![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
 
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
@@ -20,7 +22,9 @@ Full documentation is available [here](https://docs.chainlit.io). You can ask Ch
 > Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support**.
 > Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 
-https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
+<p align="center">
+    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" width="70%" style="border-radius:50%" />
+</p>
 
 ## Installation
 
