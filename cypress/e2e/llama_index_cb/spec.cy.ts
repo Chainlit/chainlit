@@ -8,26 +8,16 @@ describe('Llama Index Callback', () => {
   it('should be able to send messages to the UI with prompts and elements', () => {
     cy.get('.step').should('have.length', 1);
 
-    cy.get('#llm-done').should('exist').click();
+    const toolCall = cy.get('#tool-call-retrieve');
 
-    cy.get('.step').should('have.length', 3);
+    toolCall.should('exist').click();
 
-    cy.get('.step')
-      .eq(1)
-      .find('.element-link')
+    const toolCallContent = toolCall.get('.message-content').eq(0);
+
+    toolCallContent
+      .should('exist')
+      .get('.element-link')
       .eq(0)
       .should('contain', 'Source 0');
-
-    cy.get('.playground-button').eq(0).should('exist').click();
-
-    cy.get('.formatted-editor [contenteditable]')
-      .should('exist')
-      .should('contain', 'This is the LLM prompt');
-
-    cy.get('.completion-editor [contenteditable]')
-      .should('exist')
-      .should('contain', 'This is the LLM response');
-
-    cy.get('#close-playground').should('exist').click();
   });
 });

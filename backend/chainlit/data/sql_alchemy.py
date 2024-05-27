@@ -9,7 +9,7 @@ import aiofiles
 import aiohttp
 from chainlit.context import context
 from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
-from chainlit.element import Avatar, ElementDict
+from chainlit.element import ElementDict
 from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.types import (
@@ -64,6 +64,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.warn(
                 "SQLAlchemyDataLayer storage client is not initialized and elements will not be persisted!"
             )
+
+    async def build_debug_url(self) -> str:
+        return ""
 
     ###### SQL Helpers ######
     async def execute_sql(
@@ -373,8 +376,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
         if not getattr(context.session.user, "id", None):
             raise ValueError("No authenticated user in context")
-        if isinstance(element, Avatar):  # Skip creating elements of type avatar
-            return
         if not self.storage_provider:
             logger.warn(
                 f"SQLAlchemy: create_element error. No blob_storage_client is configured!"

@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +19,7 @@ import {
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
@@ -29,8 +31,10 @@ import { projectSettingsState } from 'state/project';
 import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
+import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
+  const { user } = useAuth();
   const { idToResume } = useChatSession();
 
   const projectSettings = useRecoilValue(projectSettingsState);
@@ -162,6 +166,7 @@ const Chat = () => {
   useEffect(() => {
     const currentPage = new URL(window.location.href);
     if (
+      user &&
       projectSettings?.dataPersistence &&
       threadId &&
       currentPage.pathname === '/'
@@ -228,11 +233,14 @@ const Chat = () => {
         ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen />
+            <Box py={2} />
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

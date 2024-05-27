@@ -1,11 +1,12 @@
 import { useAuth } from 'api/auth';
 import { Link } from 'react-router-dom';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import KeyIcon from '@mui/icons-material/Key';
 import LogoutIcon from '@mui/icons-material/Logout';
-import SettingsIcon from '@mui/icons-material/Settings';
 import {
+  Box,
   Divider,
   ListItem,
   ListItemIcon,
@@ -15,6 +16,7 @@ import {
   Typography
 } from '@mui/material';
 
+import { SwitchInput } from 'components/atoms/inputs/SwitchInput';
 import { Translator } from 'components/i18n';
 
 import { projectSettingsState } from 'state/project';
@@ -28,8 +30,8 @@ interface Props {
 
 export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   const { user, logout } = useAuth();
+  const [settings, setSettings] = useRecoilState(settingsState);
   const pSettings = useRecoilValue(projectSettingsState);
-  const setAppSettings = useSetRecoilState(settingsState);
   const requiredKeys = !!pSettings?.userEnv?.length;
 
   const userNameItem = user && (
@@ -43,24 +45,32 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     </ListItem>
   );
 
-  const settingsItem = (
-    <MenuItem
-      key="settings"
-      onClick={() => {
-        setAppSettings((old) => ({ ...old, open: true }));
-        handleClose();
-      }}
-    >
+  const themeItem = (
+    <ListItem key="theme" sx={{ display: 'flex', gap: 1 }}>
       <ListItemIcon>
-        <SettingsIcon fontSize="small" />
+        <DarkModeOutlined />
       </ListItemIcon>
-      <ListItemText>
-        <Translator path="components.atoms.buttons.userButton.menu.settings" />
-      </ListItemText>
-      <Typography variant="body2" color="text.secondary">
-        <Translator path="components.atoms.buttons.userButton.menu.settingsKey" />
-      </Typography>
-    </MenuItem>
+      <ListItemText
+        id="switch-theme"
+        secondary={
+          <Translator path="components.molecules.settingsModal.darkMode" />
+        }
+      />
+      <Box>
+        <SwitchInput
+          id="switch-theme"
+          onChange={() => {
+            const variant = settings.theme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('themeVariant', variant);
+            setSettings((old) => ({ ...old, theme: variant }));
+          }}
+          checked={settings.theme === 'dark'}
+          inputProps={{
+            'aria-labelledby': 'switch-theme'
+          }}
+        />
+      </Box>
+    </ListItem>
   );
 
   const apiKeysItem = requiredKeys && (
@@ -87,12 +97,9 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     </MenuItem>
   );
 
-  const menuItems = [
-    userNameItem,
-    settingsItem,
-    apiKeysItem,
-    logoutItem
-  ].filter((i) => !!i);
+  const menuItems = [userNameItem, themeItem, apiKeysItem, logoutItem].filter(
+    (i) => !!i
+  );
 
   const itemsWithDivider = menuItems.reduce((acc, curr, i) => {
     if (i === menuItems.length - 1) {
@@ -138,8 +145,8 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
           }
         }
       }}
-      transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
-      anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
+      transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+      anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
     >
       {itemsWithDivider}
     </Menu>

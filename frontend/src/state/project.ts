@@ -2,22 +2,26 @@ import { atom } from 'recoil';
 
 import { IStep } from '@chainlit/react-client';
 
+export interface IStarter {
+  label: string;
+  message: string;
+  icon?: string;
+}
+
 export interface ChatProfile {
   default: boolean;
-  icon: string;
+  icon?: string;
   name: string;
   markdown_description: string;
+  starters?: IStarter[];
 }
 
 export interface IProjectSettings {
   markdown?: string;
   ui: {
     name: string;
-    show_readme_as_default?: boolean;
     description?: string;
-    hide_cot?: boolean;
     default_collapse_content?: boolean;
-    default_expand_messages?: boolean;
     github?: string;
     theme: any;
     custom_css?: string;
@@ -44,10 +48,12 @@ export interface IProjectSettings {
     unsafe_allow_html?: boolean;
     latex?: boolean;
   };
+  debugUrl?: string;
   userEnv: string[];
   dataPersistence: boolean;
   threadResumable: boolean;
   chatProfiles: ChatProfile[];
+  starters?: IStarter[];
   translation: object;
 }
 

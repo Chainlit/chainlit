@@ -29,9 +29,10 @@ const MessageContent = memo(
     let lineCount = 0;
     let contentLength = 0;
 
-    const content = message.streaming
-      ? message.output + CURSOR_PLACEHOLDER
-      : message.output;
+    const content =
+      message.streaming && message.output
+        ? message.output + CURSOR_PLACEHOLDER
+        : message.output;
 
     const {
       preparedContent: output,
@@ -102,8 +103,8 @@ const MessageContent = memo(
     );
 
     const collapse =
-      lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH;
-
+      !message.type.includes('message') &&
+      (lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH);
     const messageContent = collapse ? (
       <Collapse defaultExpandAll={preserveSize}>{markdownContent}</Collapse>
     ) : (
@@ -111,7 +112,7 @@ const MessageContent = memo(
     );
 
     return (
-      <Stack width="100%" direction="row">
+      <Stack width="100%" direction="row" className="message-content">
         <Box width="100%">
           {output ? messageContent : null}
           <InlinedElements elements={outputInlinedElements} />

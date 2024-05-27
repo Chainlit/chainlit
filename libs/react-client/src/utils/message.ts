@@ -31,8 +31,51 @@ const isLastMessage = (messages: IStep[], index: number) => {
 // Nested messages utils
 
 const addMessage = (messages: IStep[], message: IStep): IStep[] => {
+  const validRootTypes = ['assistant_message', 'user_message', 'tool'];
+  const isValidRootType = validRootTypes.includes(message.type);
+  const isRoot = !message.parentId;
+
+  if (isRoot && !isValidRootType) {
+    return messages;
+  }
+
+  const parentMessage = !isRoot
+    ? findMessageById(messages, message.parentId!)
+    : undefined;
+
+  const shouldWrap =
+    (isRoot || parentMessage?.type !== 'assistant_message') &&
+    message.type === 'tool';
+
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
+  } else if (shouldWrap) {
+    const lastMessage =
+      messages.length > 0 ? messages[messages.length - 1] : undefined;
+    const collapseTool =
+      lastMessage?.type === 'assistant_message' &&
+      lastMessage?.id.startsWith('wrap_');
+    if (lastMessage && collapseTool) {
+      return [
+        ...messages.slice(0, messages.length - 1),
+        {
+          ...lastMessage,
+          steps: [...(lastMessage.steps || []), message]
+        }
+      ];
+    }
+    return [
+      ...messages,
+      {
+        ...message,
+        name: '',
+        input: '',
+        output: '',
+        id: 'wrap_' + message.id,
+        type: 'assistant_message',
+        steps: [message]
+      }
+    ];
   } else if ('parentId' in message && message.parentId) {
     return addMessageToParent(messages, message.parentId, message);
   } else if ('indent' in message && message.indent && message.indent > 0) {
@@ -98,17 +141,25 @@ const addMessageToParent = (
   return nextMessages;
 };
 
-const hasMessageById = (messages: IStep[], messageId: string) => {
+const findMessageById = (
+  messages: IStep[],
+  messageId: string
+): IStep | undefined => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
-      return true;
+      return message;
     } else if (message.steps && message.steps.length > 0) {
-      if (hasMessageById(message.steps, messageId)) {
-        return true;
+      const foundMessage = findMessageById(message.steps, messageId);
+      if (foundMessage) {
+        return foundMessage;
       }
     }
   }
-  return false;
+  return undefined;
+};
+
+const hasMessageById = (messages: IStep[], messageId: string): boolean => {
+  return findMessageById(messages, messageId) !== undefined;
 };
 
 const updateMessageById = (

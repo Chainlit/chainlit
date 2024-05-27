@@ -22,6 +22,12 @@ interface Props {
   config: IWidgetConfig;
 }
 
+declare global {
+  interface Window {
+    cl_shadowRootElement: HTMLDivElement;
+  }
+}
+
 export default function App({ config }: Props) {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { setAccessToken } = useAuth(apiClient);
@@ -45,11 +51,10 @@ export default function App({ config }: Props) {
         .then((res) => res.json())
         .then((data: IProjectSettings) => {
           window.theme = data.ui.theme;
-          data.ui.hide_cot = config.showCot ? data.ui.hide_cot : true;
+          config.theme = config.theme || data.ui.theme.default;
           setSettings((old) => ({
             ...old,
-            theme: config.theme ? config.theme : old.theme,
-            hideCot: data.ui.hide_cot!
+            theme: config.theme!
           }));
 
           const _theme = overrideTheme(
@@ -64,6 +69,28 @@ export default function App({ config }: Props) {
               }
             })
           );
+          if (!_theme.components) {
+            _theme.components = {};
+          }
+          _theme.components = {
+            ..._theme.components,
+            MuiPopover: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            },
+            MuiPopper: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            },
+            MuiModal: {
+              defaultProps: {
+                container: window.cl_shadowRootElement
+              }
+            }
+          };
+
           setTheme(_theme);
           setProjectSettings(data);
         })

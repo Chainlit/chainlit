@@ -8,7 +8,7 @@ import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import UserButton from 'components/atoms/buttons/userButton';
+import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
 import NewChatButton from 'components/molecules/newChatButton';
 import ReadmeButton from 'components/organisms/readmeButton';
@@ -88,10 +88,10 @@ const SideBar = () => {
             <Alert severity="info">Conversations are not persisted.</Alert>
           </Box>
         )}
-        <ReadmeButton />
-        <Box mb={2}>
-          <UserButton />
-        </Box>
+        <Stack mb={2}>
+          <ReadmeButton />
+          <GithubButton />
+        </Stack>
       </Drawer>
       {!isMobile ? (
         <Box

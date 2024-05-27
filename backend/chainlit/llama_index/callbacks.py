@@ -73,9 +73,9 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
         step_type: StepType = "undefined"
         if event_type == CBEventType.RETRIEVE:
-            step_type = "retrieval"
+            step_type = "tool"
         elif event_type == CBEventType.QUERY:
-            step_type = "retrieval"
+            step_type = "tool"
         elif event_type == CBEventType.LLM:
             step_type = "llm"
         else:

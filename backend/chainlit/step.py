@@ -50,7 +50,6 @@ def step(
     id: Optional[str] = None,
     tags: Optional[List[str]] = None,
     disable_feedback: bool = True,
-    root: bool = False,
     language: Optional[str] = None,
     show_input: Union[bool, str] = False,
 ):
@@ -72,7 +71,6 @@ def step(
                     name=name,
                     id=id,
                     disable_feedback=disable_feedback,
-                    root=root,
                     tags=tags,
                     language=language,
                     show_input=show_input,
@@ -85,8 +83,9 @@ def step(
                     try:
                         if result and not step.output:
                             step.output = result
-                    except:
-                        pass
+                    except Exception as e:
+                        step.is_error = True
+                        step.output = str(e)
                     return result
 
             return async_wrapper
@@ -99,7 +98,6 @@ def step(
                     name=name,
                     id=id,
                     disable_feedback=disable_feedback,
-                    root=root,
                     tags=tags,
                     language=language,
                     show_input=show_input,
@@ -113,7 +111,8 @@ def step(
                         if result and not step.output:
                             step.output = result
                     except:
-                        pass
+                        step.is_error = True
+                        step.output = str(e)
                     return result
 
             return sync_wrapper
@@ -136,7 +135,6 @@ class Step:
     streaming: bool
     persisted: bool
 
-    root: bool
     show_input: Union[bool, str]
 
     is_error: Optional[bool]
@@ -161,7 +159,6 @@ class Step:
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         disable_feedback: bool = True,
-        root: bool = False,
         language: Optional[str] = None,
         show_input: Union[bool, str] = False,
     ):
@@ -179,7 +176,6 @@ class Step:
         self.is_error = False
         self.show_input = show_input
         self.parent_id = parent_id
-        self.root = root
 
         self.language = language
         self.generation = None
@@ -299,11 +295,8 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or not self.root):
-            return
-
-        if not config.features.prompt_playground and "generation" in step_dict:
-            step_dict.pop("generation", None)
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+            return True
 
         await context.emitter.update_step(step_dict)
 
@@ -356,11 +349,8 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or not self.root):
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
             return self
-
-        if not config.features.prompt_playground and "generation" in step_dict:
-            step_dict.pop("generation", None)
 
         await context.emitter.send_step(step_dict)
 
@@ -378,17 +368,17 @@ class Step:
 
         assert self.id
 
-        if config.ui.hide_cot and (self.parent_id or not self.root):
+        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
             return
 
         if not self.streaming:
             self.streaming = True
             step_dict = self.to_dict()
             await context.emitter.stream_start(step_dict)
-
-        await context.emitter.send_token(
-            id=self.id, token=token, is_sequence=is_sequence
-        )
+        else:
+            await context.emitter.send_token(
+                id=self.id, token=token, is_sequence=is_sequence
+            )
 
     # Handle parameter less decorator
     def __call__(self, func):
@@ -408,7 +398,7 @@ class Step:
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
 
-        if not self.parent_id and not self.root:
+        if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
             elif context.session.root_message:
@@ -420,6 +410,10 @@ class Step:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.end = utc_now()
+
+        if exc_type:
+            self.output = str(exc_val)
+            self.is_error = True
 
         if self in context.active_steps:
             context.active_steps.remove(self)
@@ -437,7 +431,7 @@ class Step:
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
 
-        if not self.parent_id and not self.root:
+        if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
             elif context.session.root_message:
@@ -450,6 +444,11 @@ class Step:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.end = utc_now()
+
+        if exc_type:
+            self.output = str(exc_val)
+            self.is_error = True
+
         if self in context.active_steps:
             context.active_steps.remove(self)
 

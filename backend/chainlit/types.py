@@ -227,6 +227,15 @@ class Theme(str, Enum):
 
 
 @dataclass
+class Starter(DataClassJsonMixin):
+    """Specification for a starter that can be chosen by the user at the thread start."""
+
+    label: str
+    message: str
+    icon: Optional[str] = None
+
+
+@dataclass
 class ChatProfile(DataClassJsonMixin):
     """Specification for a chat profile that can be chosen by the user at the thread start."""
 
@@ -234,6 +243,7 @@ class ChatProfile(DataClassJsonMixin):
     markdown_description: str
     icon: Optional[str] = None
     default: bool = False
+    starters: Optional[List[Starter]] = None
 
 
 FeedbackStrategy = Literal["BINARY"]

@@ -8,6 +8,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.300rc0] - 2024-05-27
+
+### Added
+
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
+- `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
+- `default` theme config in `config.toml`
+- If only one OAuth provider is set, automatically redirect the user to it
+
+### Changed
+
+- **[BREAKING]** Avatars have been reworked. `cl.Avatar` has been removed, instead place your avatars by name in `/public/avatars/*`
+- **[BREAKING]** The `running`, `took_one` and `took_other` translations have been replaced by `used`.
+- **[BREAKING]** `root` attribute of `cl.Step` has been removed. Use `cl.Message` to send root level messages.
+- Chain of Thought has been reworked. Only steps of type `tool` will be displayed if `hide_cot` is false
+- The `show_readme_as_default` config has been removed
+- No longer collapse root level messages
+
+### Fixed
+
+- The Chat Profile description should now disappear when not hovered.
+- Error handling of steps has been improved
+- No longer stream the first token twice
+- Copilot should now work as expected even if the user is closing/reopening it
+- Copilot CSS should no longer leak/be impacted by the host website CSS
+- Fix various `cl.Context` errors
+
 ## [1.1.202] - 2024-05-22
 
 ### Added

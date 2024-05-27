@@ -14,9 +14,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Alert, Box } from '@mui/material';
 
 import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
+import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/welcomeScreen';
 import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
@@ -183,7 +185,7 @@ const Chat = () => {
           height: '100%'
         }}
       >
-        {error && (
+        {error ? (
           <Box
             sx={{
               width: '100%',
@@ -195,15 +197,19 @@ const Chat = () => {
               Could not reach the server.
             </Alert>
           </Box>
+        ) : (
+          <Box mt={1} />
         )}
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen hideLogo />
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

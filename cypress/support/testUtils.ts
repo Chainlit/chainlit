@@ -10,10 +10,11 @@ export function submitMessage(message: string) {
 
 export function submitMessageCopilot(message: string) {
   cy.wait(1000);
-  cy.get(`#copilot-chat-input`).should('not.be.disabled');
-  cy.get(`#copilot-chat-input`).type(`${message}{enter}`, {
-    scrollBehavior: false
-  });
+  cy.get(`#copilot-chat-input`, { includeShadowDom: true })
+    .should('not.be.disabled')
+    .type(`${message}{enter}`, {
+      scrollBehavior: false
+    });
 }
 
 export function openHistory() {

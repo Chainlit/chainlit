@@ -28,7 +28,6 @@ from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
-    Avatar,
     File,
     Image,
     Pdf,
@@ -52,7 +51,7 @@ from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import AudioChunk, ChatProfile, ThreadDict
+from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
@@ -209,6 +208,22 @@ def set_chat_profiles(
 
 
 @trace
+def set_starters(func: Callable[[Optional["User"]], List["Starter"]]) -> Callable:
+    """
+    Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
+
+    Args:
+        func (Callable[[Optional["User"]], List["Starter"]]): The function declaring the starters.
+
+    Returns:
+        Callable[[Optional["User"]], List["Starter"]]: The decorated function.
+    """
+
+    config.code.set_starters = wrap_user_function(func)
+    return func
+
+
+@trace
 def on_chat_end(func: Callable) -> Callable:
     """
     Hook to react to the user websocket disconnect event.
@@ -348,6 +363,8 @@ __getattr__ = make_module_getattr(
 )
 
 __all__ = [
+    "ChatProfile",
+    "Starter",
     "user_session",
     "CopilotFunction",
     "AudioChunk",
@@ -359,7 +376,6 @@ __all__ = [
     "Plotly",
     "Image",
     "Text",
-    "Avatar",
     "Pyplot",
     "File",
     "Task",
