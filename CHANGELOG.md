@@ -12,7 +12,7 @@ Nothing unreleased!
 
 ### Added
 
-- Debug mode when starting with `-d`. Only available if the data layer supports it
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
 - `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
 - `default` theme config in `config.toml`
 - If only one OAuth provider is set, automatically redirect the user to it
@@ -28,6 +28,7 @@ Nothing unreleased!
 
 ### Fixed
 
+- The Chat Profile description should now disappear when not hovered.
 - Error handling of steps has been improved
 - No longer stream the first token twice
 - Copilot should now work as expected even if the user is closing/reopening it
