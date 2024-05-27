@@ -4,12 +4,12 @@ import chainlit as cl
 
 starters = [
     cl.Starter(
-        title="Say hi",
+        label="Say hi",
         message="Start a conversation with a greeting",
         icon="https://picsum.photos/300",
     ),
     cl.Starter(
-        title="Ask for help",
+        label="Ask for help",
         message="Ask for help with something",
         icon="https://picsum.photos/350",
     ),

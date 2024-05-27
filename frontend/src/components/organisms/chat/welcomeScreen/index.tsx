@@ -39,7 +39,11 @@ export default function WelcomeScreen({ hideLogo }: Props) {
 
   const logo = useMemo(() => {
     const name = selectedChatProfile?.name;
-    const icon = selectedChatProfile?.icon || defaultIconUrl;
+    let icon = selectedChatProfile?.icon || defaultIconUrl;
+
+    if (icon?.startsWith('/public')) {
+      icon = apiClient.buildEndpoint(icon);
+    }
 
     return (
       <Stack gap={2} alignItems="center">

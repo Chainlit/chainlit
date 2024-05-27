@@ -230,7 +230,7 @@ class Theme(str, Enum):
 class Starter(DataClassJsonMixin):
     """Specification for a starter that can be chosen by the user at the thread start."""
 
-    title: str
+    label: str
     message: str
     icon: Optional[str] = None
 

@@ -3,7 +3,7 @@ import { atom } from 'recoil';
 import { IStep } from '@chainlit/react-client';
 
 export interface IStarter {
-  title: string;
+  label: string;
   message: string;
   icon?: string;
 }

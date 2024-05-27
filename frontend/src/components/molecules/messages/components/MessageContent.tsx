@@ -103,9 +103,8 @@ const MessageContent = memo(
     );
 
     const collapse =
-      (!message.type.includes('message') && lineCount > COLLAPSE_MIN_LINES) ||
-      contentLength > COLLAPSE_MIN_LENGTH;
-
+      !message.type.includes('message') &&
+      (lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH);
     const messageContent = collapse ? (
       <Collapse defaultExpandAll={preserveSize}>{markdownContent}</Collapse>
     ) : (

@@ -4,9 +4,9 @@ import chainlit as cl
 @cl.set_starters
 async def starters():
     return [
-        cl.Starter(title="test1", message="Running starter 1"),
-        cl.Starter(title="test2", message="Running starter 2"),
-        cl.Starter(title="test3", message="Running starter 3"),
+        cl.Starter(label="test1", message="Running starter 1"),
+        cl.Starter(label="test2", message="Running starter 2"),
+        cl.Starter(label="test3", message="Running starter 3"),
     ]
 
 

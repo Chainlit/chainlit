@@ -14,11 +14,13 @@ import {
 import { SelectInput } from 'components/atoms/inputs';
 import { Markdown } from 'components/molecules/Markdown';
 
+import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
 
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
+  const apiClient = useRecoilValue(apiClientState);
   const pSettings = useRecoilValue(projectSettingsState);
   const { chatProfile, setChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
@@ -60,22 +62,27 @@ export default function ChatProfiles() {
 
   const popoverOpen = Boolean(anchorEl);
 
-  const items = pSettings.chatProfiles.map((item) => ({
-    label: item.name,
-    value: item.name,
-    icon: item.icon ? (
-      <img
-        src={item.icon}
-        className="chat-profile-icon"
-        style={{
-          width: '24px',
-          height: '24px',
-          borderRadius: '50%',
-          objectFit: 'cover'
-        }}
-      />
-    ) : undefined
-  }));
+  const items = pSettings.chatProfiles.map((item) => {
+    const icon = item.icon?.startsWith('/public')
+      ? apiClient.buildEndpoint(item.icon)
+      : item.icon;
+    return {
+      label: item.name,
+      value: item.name,
+      icon: icon ? (
+        <img
+          src={icon}
+          className="chat-profile-icon"
+          style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            objectFit: 'cover'
+          }}
+        />
+      ) : undefined
+    };
+  });
 
   return (
     <>

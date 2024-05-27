@@ -1,5 +1,6 @@
 import { useAuth } from 'api/auth';
 import { useCallback } from 'react';
+import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Box, Button, Stack, Typography } from '@mui/material';
@@ -7,6 +8,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { IStep, useChatData } from '@chainlit/react-client';
 import { useChatInteract } from '@chainlit/react-client';
 
+import { apiClientState } from 'state/apiClient';
 import type { IStarter } from 'state/project';
 
 interface Props {
@@ -14,6 +16,7 @@ interface Props {
 }
 
 export default function Starter({ starter }: Props) {
+  const apiClient = useRecoilValue(apiClientState);
   const { sendMessage } = useChatInteract();
   const { loading } = useChatData();
   const { user } = useAuth();
@@ -33,7 +36,7 @@ export default function Starter({ starter }: Props) {
 
   return (
     <Button
-      id={`starter-${starter.title.trim().toLowerCase().replaceAll(' ', '-')}`}
+      id={`starter-${starter.label.trim().toLowerCase().replaceAll(' ', '-')}`}
       fullWidth
       disabled={loading}
       color="inherit"
@@ -51,8 +54,12 @@ export default function Starter({ starter }: Props) {
         {starter.icon ? (
           <img
             style={{ borderRadius: '50%' }}
-            src={starter.icon}
-            alt={starter.title}
+            src={
+              starter.icon?.startsWith('/public')
+                ? apiClient.buildEndpoint(starter.icon)
+                : starter.icon
+            }
+            alt={starter.label}
             height={20}
             width={20}
           />
@@ -71,7 +78,7 @@ export default function Starter({ starter }: Props) {
           color="text.secondary"
           align="left"
         >
-          {starter.title}
+          {starter.label}
         </Typography>
       </Stack>
     </Button>
