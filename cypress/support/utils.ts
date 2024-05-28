@@ -1,4 +1,4 @@
-import { execFileSync } from 'child_process';
+import { execSync } from 'child_process';
 import { join } from 'path';
 
 const ROOT = process.cwd();
@@ -11,18 +11,22 @@ export enum ExecutionMode {
   Sync = 'sync'
 }
 
-export async function runTests(matchName: string) {
-  // Run Chainlit before running tests to pass the healthcheck
-  runCommand(['pnpm', 'exec', 'ts-node', './cypress/support/run.ts', 'action']);
+export async function runTests(matchName) {
+  // Sanitize matchName to prevent injection by replacing all non-alphanumeric characters with underscores
+  matchName = matchName.replace(/[^a-zA-Z0-9]/g, '_');
+  // Cypress requires a healthcheck on the server at startup so let's run
+  // Chainlit before running tests to pass the healthcheck
+  runCommand('pnpm exec ts-node ./cypress/support/run.ts action');
 
-  // Command and arguments are passed as an array to prevent injection
-  return runCommand([
-    'pnpm', 'exec', 'cypress', 'run', '--record', 'false', '--spec', `cypress/e2e/${matchName}/spec.cy.ts`
-  ]);
+  // Recording the cypress run is time consuming. Disabled by default.
+  // const recordOptions = ` --record --key ${process.env.CYPRESS_RECORD_KEY} `;
+  return runCommand(
+    `pnpm exec cypress run --record false --spec "cypress/e2e/${matchName}/spec.cy.ts"`
+  );
 }
 
-export function runCommand(args: string[], cwd = ROOT) {
-  return execFileSync(args[0], args.slice(1), {
+export function runCommand(command: string, cwd = ROOT) {
+  return execSync(command, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
