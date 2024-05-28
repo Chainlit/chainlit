@@ -120,7 +120,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         _logger.info("DynamoDB: create_user user.identifier=%s", user.identifier)
 
         ts = self._get_current_timestamp()
-        metadata: Dict[Any, Any] = user.metadata  # type: ignore unknown, meant to be arbitrary
+        metadata: Dict[Any, Any] = user.metadata  # type: ignore
 
         item = {
             "PK": f"USER#{user.identifier}",
@@ -318,8 +318,9 @@ class DynamoDBDataLayer(BaseDataLayer):
         item = dict(step_dict)
         item.update(
             {
-                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore - dynamo needs these
-                "SK": f"STEP#{step_dict['id']}",  # type: ignore - fail if None
+                # ignore type, dynamo needs these so we want to fail if not set
+                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore
+                "SK": f"STEP#{step_dict['id']}",  # type: ignore
             }
         )
 
@@ -339,8 +340,9 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         self._update_item(
             key={
-                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore - dynamo needs these
-                "SK": f"STEP#{step_dict['id']}",  # type: ignore - fail if None
+                # ignore type, dynamo needs these so we want to fail if not set
+                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore
+                "SK": f"STEP#{step_dict['id']}",  # type: ignore
             },
             updates=step_dict,  # type: ignore
         )
