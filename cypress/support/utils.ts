@@ -24,7 +24,8 @@ export async function runTests(matchName) {
 }
 
 export function runCommand(command: string, cwd = ROOT) {
-  return execSync(command, {
+  const [cmd, ...args] = command.split(' ');
+  return execSync(cmd, args, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
