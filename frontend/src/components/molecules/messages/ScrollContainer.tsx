@@ -24,12 +24,10 @@ export default function ScrollContainer({
   }, [session?.socket.id]);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (!ref.current || !autoScroll) {
-        return;
-      }
-      ref.current.scrollTop = ref.current.scrollHeight;
-    }, 0);
+    if (!ref.current || !autoScroll) {
+      return;
+    }
+    ref.current.scrollTop = ref.current.scrollHeight;
   }, [messages, autoScroll]);
 
   const handleScroll = () => {

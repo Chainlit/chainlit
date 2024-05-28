@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+Nothing unreleased!
+
+## [1.1.300rc1] - 2024-05-28
+
 ### Fix
 
 - Scroll flickering when streaming
+- Logo max height
 
 ## [1.1.300rc0] - 2024-05-27
 
