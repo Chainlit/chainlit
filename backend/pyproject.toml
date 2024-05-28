@@ -48,6 +48,11 @@ lazify = "^0.4.0"
 packaging = "^23.1"
 python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
+# Fix https://stackoverflow.com/questions/77582651/why-doesnt-numpy-support-pep517-builds
+numpy = [
+    { version = "^1.26", python = ">=3.9" },
+    { version = "^1.24.4", python = "<3.9" }
+]
 
 [tool.poetry.group.tests]
 optional = true

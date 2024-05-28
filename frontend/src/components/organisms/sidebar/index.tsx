@@ -10,7 +10,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
-import NewChatButton from 'components/molecules/newChatButton';
 import ReadmeButton from 'components/organisms/readmeButton';
 
 import { projectSettingsState } from 'state/project';
@@ -75,11 +74,11 @@ const SideBar = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mt: 1.5
+            height: '45px',
+            mt: 1
           }}
         >
           <Logo style={{ maxHeight: '25px' }} />
-          <NewChatButton edge="end" />
         </Stack>
         {enableHistory ? (
           <ThreadHistory />
