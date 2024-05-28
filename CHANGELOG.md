@@ -14,6 +14,7 @@ Nothing unreleased!
 
 - Scroll flickering when streaming
 - Logo max height
+- Remove duplicate new chat button in the sidebar
 
 ## [1.1.300rc0] - 2024-05-27
 
