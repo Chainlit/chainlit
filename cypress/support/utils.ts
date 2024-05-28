@@ -22,7 +22,7 @@ export async function runTests(matchName: string) {
 }
 
 export function runCommand(args: string[], cwd = ROOT) {
-  return execFileSync(args[0], args.slice(1), {
+  return execSync(args[0], args.slice(1), {
     encoding: 'utf-8',
     cwd,
     env: process.env,
