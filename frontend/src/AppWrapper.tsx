@@ -3,6 +3,7 @@ import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import getRouterBasename from 'utils/router';
 
 import { useApi } from '@chainlit/react-client';
 
@@ -41,10 +42,10 @@ export default function AppWrapper() {
   if (
     isReady &&
     !isAuthenticated &&
-    window.location.pathname !== '/login' &&
-    window.location.pathname !== '/login/callback'
+    window.location.pathname !== getRouterBasename() + '/login' &&
+    window.location.pathname !== getRouterBasename() + '/login/callback'
   ) {
-    window.location.href = '/login';
+    window.location.href = getRouterBasename() + '/login';
   }
 
   useEffect(() => {
