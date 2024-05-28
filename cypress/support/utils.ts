@@ -12,6 +12,10 @@ export enum ExecutionMode {
 }
 
 export async function runTests(matchName) {
+  // Ensure matchName is a simple alphanumeric string to prevent injection
+  if (!/^[a-zA-Z0-9\-_]+$/.test(matchName)) {
+    throw new Error('Invalid matchName provided');
+  }
   // Cypress requires a healthcheck on the server at startup so let's run
   // Chainlit before running tests to pass the healthcheck
   runCommand('pnpm exec ts-node ./cypress/support/run.ts action');
@@ -24,8 +28,7 @@ export async function runTests(matchName) {
 }
 
 export function runCommand(command: string, cwd = ROOT) {
-  const [cmd, ...args] = command.split(' ');
-  return execSync(cmd, args, {
+  return execSync(command, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
