@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { join } from 'path';
 
 const ROOT = process.cwd();
@@ -22,7 +22,7 @@ export async function runTests(matchName: string) {
 }
 
 export function runCommand(args: string[], cwd = ROOT) {
-  return execSync(args[0], args.slice(1), {
+  return execFileSync(args[0], args.slice(1), {
     encoding: 'utf-8',
     cwd,
     env: process.env,
