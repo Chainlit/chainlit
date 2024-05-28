@@ -46,13 +46,13 @@ const MessageButtons = ({ message }: Props) => {
 
   const show = showCopyButton || showDebugButton || showFeedbackButtons;
 
-  if (!show) {
+  if (!show || message.streaming) {
     return null;
   }
 
   return (
     <Stack
-      sx={{ marginLeft: '-8px !important', mt: 0.5 }}
+      sx={{ marginLeft: '-8px !important' }}
       alignItems="center"
       direction="row"
       color={isDark ? grey[400] : grey[600]}
