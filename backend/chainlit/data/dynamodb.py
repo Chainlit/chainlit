@@ -426,7 +426,7 @@ class DynamoDBDataLayer(BaseDataLayer):
     async def list_threads(
         self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
-        _logger.info("DynamoDB: get_thread_author filters.userId=%s", filters.userId)
+        _logger.info("DynamoDB: list_threads filters.userId=%s", filters.userId)
 
         if filters.feedback:
             _logger.warning("DynamoDB: filters on feedback not supported")
@@ -554,12 +554,8 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         ts = self._get_current_timestamp()
 
-        if not user_id:
-            user_id = "ANONYMOUS"
-
         item = {
             # GSI: UserThread
-            "UserThreadPK": f"USER#{user_id}",
             "UserThreadSK": f"TS#{ts}",
             #
             "id": thread_id,
@@ -570,6 +566,10 @@ class DynamoDBDataLayer(BaseDataLayer):
             "tags": tags,
             "metadata": metadata,
         }
+
+        if user_id:
+            # user_id may be None on subsequent calls, don't update UserThreadPK to "USER#{None}"
+            item["UserThreadPK"] = f"USER#{user_id}"
 
         self._update_item(
             key={
