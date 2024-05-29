@@ -351,9 +351,20 @@ class Plotly(Element):
 
         super().__post_init__()
 
-
 @dataclass
 class ECharts(Element):
-    """Useful to send a echarts to the UI."""
 
     type: ClassVar[ElementType] = "echarts"
+    content: str = ""
+
+    def __post_init__(self) -> None:
+        # Validate that the content is a valid JSON string
+        try:
+            json.loads(self.content)
+        except json.JSONDecodeError:
+            raise ValueError("Invalid JSON content for ECharts")
+
+        # Set MIME type for ECharts
+        self.mime = "application/json"
+
+        super().__post_init__()
