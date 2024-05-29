@@ -23,9 +23,7 @@ const _EChartsElement = ({ element }: Props) => {
 
   let options;
 
-  console.log('lxy deubg');
   if (data) {
-    console.log('Fetched data:', data);
     options = data;
   } else {
     return null;
