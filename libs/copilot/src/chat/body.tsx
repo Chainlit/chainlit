@@ -208,6 +208,7 @@ const Chat = () => {
             setAutoScroll={setAutoScroll}
           >
             <WelcomeScreen hideLogo />
+            <Box my={1} />
             <Messages />
           </ScrollContainer>
           <InputBox
