@@ -6,7 +6,8 @@ export type IElement =
   | IAudioElement
   | IVideoElement
   | IFileElement
-  | IPlotlyElement;
+  | IPlotlyElement
+  | IEChartsElement;
 
 export type IMessageElement =
   | IImageElement
@@ -15,7 +16,8 @@ export type IMessageElement =
   | IAudioElement
   | IVideoElement
   | IFileElement
-  | IPlotlyElement;
+  | IPlotlyElement
+  | IEChartsElement;
 
 export type ElementType = IElement['type'];
 export type IElementSize = 'small' | 'medium' | 'large';
@@ -67,5 +69,7 @@ export interface IFileElement extends TMessageElement<'file'> {
 }
 
 export interface IPlotlyElement extends TMessageElement<'plotly'> {}
+
+export interface IEChartsElement extends TMessageElement<'echarts'> {}
 
 export interface ITasklistElement extends TElement<'tasklist'> {}

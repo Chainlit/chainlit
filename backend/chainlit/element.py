@@ -18,10 +18,11 @@ mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
     "plotly": "application/json",
+    "echarts": "application/json",
 }
 
 ElementType = Literal[
-    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "echarts"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -349,3 +350,10 @@ class Plotly(Element):
         self.mime = "application/json"
 
         super().__post_init__()
+
+
+@dataclass
+class ECharts(Element):
+    """Useful to send a echarts to the UI."""
+
+    type: ClassVar[ElementType] = "echarts"
