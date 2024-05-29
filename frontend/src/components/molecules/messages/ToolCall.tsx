@@ -29,7 +29,7 @@ export default function ToolCall({ steps, elements, isRunning }: Props) {
     );
   }, [steps, isRunning]);
 
-  const hasOutput = steps.some((step) => step.output);
+  const hasOutput = steps.some((step) => step.output || step.input);
   const isError = steps.length ? steps[steps.length - 1].isError : false;
 
   if (!steps.length) {
@@ -102,7 +102,7 @@ export default function ToolCall({ steps, elements, isRunning }: Props) {
           }}
         >
           {steps
-            .filter((step) => step.output)
+            .filter((step) => step.output || step.input)
             .map((step) => (
               <MessageContent
                 key={step.id}

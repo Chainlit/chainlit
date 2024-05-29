@@ -51,7 +51,7 @@ def step(
     tags: Optional[List[str]] = None,
     disable_feedback: bool = True,
     language: Optional[str] = None,
-    show_input: Union[bool, str] = False,
+    show_input: Union[bool, str] = "json",
 ):
     """Step decorator for async and sync functions."""
 
@@ -160,7 +160,7 @@ class Step:
         tags: Optional[List[str]] = None,
         disable_feedback: bool = True,
         language: Optional[str] = None,
-        show_input: Union[bool, str] = False,
+        show_input: Union[bool, str] = "json",
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
@@ -356,15 +356,21 @@ class Step:
 
         return self
 
-    async def stream_token(self, token: str, is_sequence=False):
+    async def stream_token(self, token: str, is_sequence=False, is_input=False):
         """
         Sends a token to the UI.
         Once all tokens have been streamed, call .send() to end the stream and persist the step if persistence is enabled.
         """
         if is_sequence:
-            self.output = token
+            if is_input:
+                self.input = token
+            else:
+                self.output = token
         else:
-            self.output += token
+            if is_input:
+                self.input += token
+            else:
+                self.output += token
 
         assert self.id
 
@@ -377,7 +383,7 @@ class Step:
             await context.emitter.stream_start(step_dict)
         else:
             await context.emitter.send_token(
-                id=self.id, token=token, is_sequence=is_sequence
+                id=self.id, token=token, is_sequence=is_sequence, is_input=is_input
             )
 
     # Handle parameter less decorator
