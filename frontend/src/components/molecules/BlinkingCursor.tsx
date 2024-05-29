@@ -16,7 +16,11 @@ const blink = keyframes`
 
 export const CURSOR_PLACEHOLDER = '\u200B';
 
-export default function BlinkingCursor() {
+interface Props {
+  whitespace?: boolean;
+}
+
+export default function BlinkingCursor({ whitespace }: Props) {
   return (
     <Box
       component="span"
@@ -26,7 +30,8 @@ export default function BlinkingCursor() {
         height: '12px',
         backgroundColor: 'text.primary',
         borderRadius: '50%',
-        animation: `1s ease-in-out 0.1s ${blink} infinite`
+        animation: `1s ease-in-out 0.1s ${blink} infinite`,
+        ml: whitespace ? '0.5em' : 0
       }}
     />
   );

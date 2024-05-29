@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 import uuid
+from urllib.parse import unquote
 from typing import Any, Dict, Literal
 
 from chainlit.action import Action
@@ -138,6 +139,8 @@ async def connect(sid, environ, auth):
 
     client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
     http_referer = environ.get("HTTP_REFERER")
+    url_encoded_chat_profile = environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE")
+    chat_profile = unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
 
     ws_session = WebsocketSession(
         id=session_id,
@@ -148,7 +151,7 @@ async def connect(sid, environ, auth):
         user_env=user_env,
         user=user,
         token=token,
-        chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
+        chat_profile=chat_profile,
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,

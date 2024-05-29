@@ -63,7 +63,6 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
-
   const _connect = useCallback(
     ({
       client,
@@ -86,7 +85,9 @@ const useChatSession = () => {
           'X-Chainlit-Session-Id': sessionId,
           'X-Chainlit-Thread-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
-          'X-Chainlit-Chat-Profile': chatProfile || ''
+          'X-Chainlit-Chat-Profile': chatProfile
+            ? encodeURIComponent(chatProfile)
+            : ''
         }
       });
       setSession((old) => {

@@ -58,7 +58,7 @@ export default function ToolCalls({ message, elements, isRunning }: Props) {
   }
 
   return (
-    <Stack width="100%" direction="column" gap={1} mb={1}>
+    <Stack width="100%" direction="column" gap={1}>
       {toolCalls.map((toolCall, index) => (
         <ToolCall
           key={index}
