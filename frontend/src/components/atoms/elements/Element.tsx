@@ -1,13 +1,13 @@
 import type { IMessageElement } from 'client-types/';
 
 import { AudioElement } from './Audio';
-import { EChartsElement } from './ECharts';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { PDFElement } from './PDF';
 import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
 import { VideoElement } from './Video';
+import { EChartsElement } from './ECharts';
 
 interface ElementProps {
   element?: IMessageElement;
