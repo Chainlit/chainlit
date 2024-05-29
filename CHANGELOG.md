@@ -17,6 +17,7 @@ Nothing unreleased!
 ### Fix
 
 - Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
 
 ## [1.1.300rc1] - 2024-05-28
 
