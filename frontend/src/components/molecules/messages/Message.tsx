@@ -102,7 +102,12 @@ const Message = memo(
                 )}
               </Box>
             ) : (
-              <Stack direction="row" gap="1rem" width="100%">
+              <Stack
+                direction="row"
+                gap="1rem"
+                width="100%"
+                className="ai-message"
+              >
                 <MessageAvatar author={message.name} hide={!showAvatar} />
                 <Stack
                   alignItems="flex-start"
