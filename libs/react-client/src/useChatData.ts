@@ -16,6 +16,7 @@ export interface IToken {
   id: number | string;
   token: string;
   isSequence: boolean;
+  isInput: boolean;
 }
 
 const useChatData = () => {

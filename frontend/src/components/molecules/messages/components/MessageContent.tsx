@@ -29,7 +29,7 @@ const MessageContent = memo(
     let lineCount = 0;
     let contentLength = 0;
 
-    const content =
+    const outputContent =
       message.streaming && message.output
         ? message.output + CURSOR_PLACEHOLDER
         : message.output;
@@ -41,7 +41,7 @@ const MessageContent = memo(
     } = prepareContent({
       elements,
       id: message.id,
-      content: content,
+      content: outputContent,
       language: message.language
     });
 
@@ -61,11 +61,15 @@ const MessageContent = memo(
     let inputMarkdown;
 
     if (message.input && message.showInput) {
+      const inputContent =
+        message.streaming && message.input
+          ? message.input + CURSOR_PLACEHOLDER
+          : message.input;
       const { preparedContent: input, refElements: inputRefElements } =
         prepareContent({
           elements,
           id: message.id,
-          content: message.input,
+          content: inputContent,
           language:
             typeof message.showInput === 'string'
               ? message.showInput
@@ -114,7 +118,7 @@ const MessageContent = memo(
     return (
       <Stack width="100%" direction="row" className="message-content">
         <Box width="100%">
-          {output ? messageContent : null}
+          {!!inputMarkdown || output ? messageContent : null}
           <InlinedElements elements={outputInlinedElements} />
         </Box>
       </Stack>

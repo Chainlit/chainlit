@@ -168,11 +168,20 @@ const useChatSession = () => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
-        setMessages((oldMessages) =>
-          updateMessageContentById(oldMessages, id, token, isSequence)
-        );
-      });
+      socket.on(
+        'stream_token',
+        ({ id, token, isSequence, isInput }: IToken) => {
+          setMessages((oldMessages) =>
+            updateMessageContentById(
+              oldMessages,
+              id,
+              token,
+              isSequence,
+              isInput
+            )
+          );
+        }
+      );
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback });
