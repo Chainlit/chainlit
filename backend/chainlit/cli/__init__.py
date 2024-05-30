@@ -14,6 +14,7 @@ from chainlit.config import (
     BACKEND_ROOT,
     DEFAULT_HOST,
     DEFAULT_PORT,
+    DEFAULT_ROOT_PATH,
     config,
     init_config,
     lint_translations,
@@ -37,6 +38,7 @@ def cli():
 def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
 
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
@@ -49,6 +51,7 @@ def run_chainlit(target: str):
 
     config.run.host = host
     config.run.port = port
+    config.run.root_path = root_path
 
     check_file(target)
     # Load the module provided by the user
@@ -128,11 +131,14 @@ def run_chainlit(target: str):
 )
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+@click.option("--root_path", help="Specify a different root path to run the server on")
+def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port, root_path):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
+    if root_path:
+        os.environ["CHAINLIT_ROOT_PATH"] = root_path
     if ci:
         logger.info("Running in CI mode")
 

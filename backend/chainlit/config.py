@@ -163,6 +163,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -171,6 +172,7 @@ class RunSettings:
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False

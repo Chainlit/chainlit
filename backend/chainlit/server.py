@@ -67,11 +67,12 @@ from watchfiles import awatch
 async def lifespan(app: FastAPI):
     host = config.run.host
     port = config.run.port
+    root_path = config.run.root_path
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}"
+        url = f"http://localhost:{port}{root_path}"
     else:
-        url = f"http://{host}:{port}"
+        url = f"http://{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -167,7 +168,7 @@ build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path=config.run.root_path)
 
 app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
 app.mount(
@@ -245,7 +246,8 @@ def get_html_template():
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="{meta_image_url}">
-    <meta property="og:url" content="{url}">"""
+    <meta property="og:url" content="{url}">
+    <meta property="og:root_path" content="{config.run.root_path}">"""
 
     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
