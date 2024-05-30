@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.300rc3"
+version = "1.1.300rc4"
 keywords = [
     'LLM',
     'Agents',
@@ -27,7 +27,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.602"
+literalai = "0.0.604"
 dataclasses_json = "^0.5.7"
 fastapi = "^0.110.1"
 starlette = "^0.37.2"

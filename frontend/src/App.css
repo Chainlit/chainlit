@@ -10,3 +10,7 @@
 .markdown-body p {
   white-space: break-spaces;
 }
+
+.ai-message .markdown-body > :first-child {
+  margin-top: 0;
+}
