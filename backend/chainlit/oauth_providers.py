@@ -160,7 +160,7 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
+            "scope": "https://graph.microsoft.com/User.Read",
             "response_mode": "query",
         }
 
@@ -529,9 +529,14 @@ class AWSCognitoOAuthProvider(OAuthProvider):
             )
             return (cognito_user, user)
 
+
 class GitlabOAuthProvider(OAuthProvider):
     id = "gitlab"
-    env = ["OAUTH_GITLAB_CLIENT_ID", "OAUTH_GITLAB_CLIENT_SECRET", "OAUTH_GITLAB_DOMAIN"]
+    env = [
+        "OAUTH_GITLAB_CLIENT_ID",
+        "OAUTH_GITLAB_CLIENT_SECRET",
+        "OAUTH_GITLAB_DOMAIN",
+    ]
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_GITLAB_CLIENT_ID")
@@ -584,6 +589,7 @@ class GitlabOAuthProvider(OAuthProvider):
                 },
             )
             return (gitlab_user, user)
+
 
 providers = [
     GithubOAuthProvider(),
