@@ -473,7 +473,7 @@ async def oauth_callback(
 
 
 # specific route for azure ad hybrid flow
-@app.post("/auth/oauth/azure-ad/callback")
+@app.post("/auth/oauth/azure-ad-hybrid/callback")
 async def oauth_azure_hf_callback(
     request: Request,
     error: Optional[str] = None,
@@ -481,7 +481,7 @@ async def oauth_azure_hf_callback(
     id_token: Annotated[Optional[str], Form()] = None,
 ):
     print(request, error, code, id_token)
-    provider_id = "azure-ad"
+    provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

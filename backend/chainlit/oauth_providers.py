@@ -157,9 +157,61 @@ class AzureADOAuthProvider(OAuthProvider):
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_AZURE_AD_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_AZURE_AD_CLIENT_SECRET")
-        nonce = random_secret(16)
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
+            "response_type": "code",
+            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
+            "response_mode": "query",
+        }
+
+    async def get_token(self, code: str, url: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": url,
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                self.token_url,
+                data=payload,
+            )
+            response.raise_for_status()
+            json = response.json()
+
+            token = json["access_token"]
+            if not token:
+                raise HTTPException(
+                    status_code=400, detail="Failed to get the access token"
+                )
+            return token
+
+
+class AzureADHybridOAuthProvider(OAuthProvider):
+    id = "azure-ad-hybrid"
+    env = [
+        "OAUTH_AZURE_AD_HYBRID_CLIENT_ID",
+        "OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET",
+        "OAUTH_AZURE_AD_HYBRID_TENANT_ID",
+    ]
+    authorize_url = (
+        f"https://login.microsoftonline.com/{os.environ.get('OAUTH_AZURE_AD_HYBRID_TENANT_ID', '')}/oauth2/v2.0/authorize"
+        if os.environ.get("OAUTH_AZURE_AD_HYBRID_ENABLE_SINGLE_TENANT")
+        else "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+    )
+    token_url = (
+        f"https://login.microsoftonline.com/{os.environ.get('OAUTH_AZURE_AD_HYBRID_TENANT_ID', '')}/oauth2/v2.0/token"
+        if os.environ.get("OAUTH_AZURE_AD_HYBRID_ENABLE_SINGLE_TENANT")
+        else "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    )
+
+    def __init__(self):
+        self.client_id = os.environ.get("OAUTH_AZURE_AD_HYBRID_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET")
+        nonce = random_secret(16)
+        self.authorize_params = {
+            "tenant": os.environ.get("OAUTH_AZURE_AD_HYBRID_TENANT_ID"),
             "response_type": "code id_token",
             "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
             "response_mode": "form_post",
@@ -482,6 +534,7 @@ providers = [
     GithubOAuthProvider(),
     GoogleOAuthProvider(),
     AzureADOAuthProvider(),
+    AzureADHybridOAuthProvider(),
     OktaOAuthProvider(),
     Auth0OAuthProvider(),
     DescopeOAuthProvider(),
