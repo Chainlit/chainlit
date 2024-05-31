@@ -3,7 +3,7 @@ import base64
 import mimetypes
 import os
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, Literal
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 
 import filetype
 
@@ -84,10 +84,15 @@ class TeamsEmitter(BaseChainlitEmitter):
         if not self.enabled:
             return
 
+        step_type = step_dict.get("type")
+        is_message = step_type in [
+            "user_message",
+            "assistant_message",
+        ]
         is_chain_of_thought = bool(step_dict.get("parentId"))
         is_empty_output = not step_dict.get("output")
 
-        if is_chain_of_thought or is_empty_output:
+        if is_chain_of_thought or is_empty_output or not is_message:
             return
         else:
             reply = MessageFactory.text(step_dict["output"])
@@ -283,13 +288,32 @@ async def handle_message(turn_context: TurnContext):
             turn_context.activity.text == "like"
             or turn_context.activity.text == "dislike"
         ):
-            feedback_value: Literal[0, 1] = 0 if turn_context.activity.text == "dislike" else 1
+            feedback_value: Literal[0, 1] = (
+                0 if turn_context.activity.text == "dislike" else 1
+            )
             step_id = turn_context.activity.value.get("step_id")
             if data_layer := get_data_layer():
                 await data_layer.upsert_feedback(
                     Feedback(forId=step_id, value=feedback_value)
                 )
+            updated_text = "👍" if turn_context.activity.text == "like" else "👎"
+            # Update the existing message to remove the buttons
+            updated_message = Activity(
+                type=ActivityTypes.message,
+                id=turn_context.activity.reply_to_id,
+                text=updated_text,
+                attachments=[],
+            )
+            await turn_context.update_activity(updated_message)
         else:
+            # Send typing activity
+            typing_activity = Activity(
+                type=ActivityTypes.typing,
+                from_property=turn_context.activity.recipient,
+                recipient=turn_context.activity.from_property,
+                conversation=turn_context.activity.conversation,
+            )
+            await turn_context.send_activity(typing_activity)
             thread_name = f"{turn_context.activity.from_property.name} Teams DM"
             await process_teams_message(turn_context, thread_name)
 
