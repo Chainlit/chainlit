@@ -283,7 +283,7 @@ async def handle_message(turn_context: TurnContext):
             turn_context.activity.text == "like"
             or turn_context.activity.text == "dislike"
         ):
-            feedback_value = 1 if turn_context.activity.text == "like" else 0
+            feedback_value = 0 if turn_context.activity.text == "dislike" else 1
             step_id = turn_context.activity.value.get("step_id")
             if data_layer := get_data_layer():
                 await data_layer.upsert_feedback(

@@ -88,6 +88,7 @@ module = [
     "boto3.dynamodb.types",
     "huggingface_hub.inference_api",
     "fastapi_socketio",
+    "botbuilder",
     "filetype",
     "haystack.*",
     "langflow",
