@@ -41,6 +41,9 @@ def run_chainlit(target: str):
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
     )
+    timeout_keep_alive = os.environ.get(
+        "UVICORN_TIMEOUT_KEEP_ALIVE", 5
+    )
     ws_per_message_deflate = ws_per_message_deflate_env.lower() in [
         "true",
         "1",
@@ -75,6 +78,7 @@ def run_chainlit(target: str):
             port=port,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
+            timeout_keep_alive=timeout_keep_alive
         )
         server = uvicorn.Server(config)
         await server.serve()
