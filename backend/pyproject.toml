@@ -67,7 +67,7 @@ farm-haystack = "^1.18.0"
 plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
 discord = "^2.3.2"
-
+botbuilder-core = "^4.15.0"
 
 [tool.poetry.group.mypy]
 optional = true
