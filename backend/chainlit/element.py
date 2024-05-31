@@ -1,4 +1,5 @@
 import json
+import mimetypes
 import uuid
 from enum import Enum
 from io import BytesIO
@@ -20,7 +21,7 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -38,6 +39,8 @@ class ElementDict(TypedDict):
     size: Optional[ElementSize]
     language: Optional[str]
     page: Optional[int]
+    autoPlay: Optional[bool]
+    playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
 
@@ -61,7 +64,7 @@ class Element:
     # The byte content of the element.
     content: Optional[Union[bytes, str]] = None
     # Controls how the image element should be displayed in the UI. Choices are “side” (default), “inline”, or “page”.
-    display: ElementDisplay = Field(default="side")
+    display: ElementDisplay = Field(default="inline")
     # Controls element size
     size: Optional[ElementSize] = None
     # The ID of the message this element is associated with.
@@ -93,6 +96,8 @@ class Element:
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
                 "page": getattr(self, "page", None),
+                "autoPlay": getattr(self, "auto_play", None),
+                "playerConfig": getattr(self, "player_config", None),
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
@@ -147,7 +152,7 @@ class Element:
         trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
         if data_layer and self.persisted:
-            await data_layer.delete_element(self.id)
+            await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):
@@ -163,6 +168,8 @@ class Element:
                 if self.type in mime_types
                 else filetype.guess_mime(self.path or self.content)
             )
+            if not self.mime and self.url:
+                self.mime = mimetypes.guess_type(self.url)[0]
 
         await self._create()
 
@@ -170,7 +177,7 @@ class Element:
             raise ValueError("Must provide url or chainlit key to send element")
 
         trace_event(f"send {self.__class__.__name__}")
-        await context.emitter.emit("element", self.to_dict())
+        await context.emitter.send_element(self.to_dict())
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)
@@ -181,14 +188,6 @@ class Image(Element):
     type: ClassVar[ElementType] = "image"
 
     size: ElementSize = "medium"
-
-
-@dataclass
-class Avatar(Element):
-    type: ClassVar[ElementType] = "avatar"
-
-    async def send(self):
-        await super().send(for_id="")
 
 
 @dataclass
@@ -306,6 +305,7 @@ class TaskList(Element):
 @dataclass
 class Audio(Element):
     type: ClassVar[ElementType] = "audio"
+    auto_play: bool = False
 
 
 @dataclass
@@ -313,6 +313,9 @@ class Video(Element):
     type: ClassVar[ElementType] = "video"
 
     size: ElementSize = "medium"
+    # Override settings for each type of player in ReactPlayer
+    # https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
+    player_config: Optional[dict] = None
 
 
 @dataclass

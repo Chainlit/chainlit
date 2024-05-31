@@ -11,10 +11,7 @@ import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { useChatSession } from '@chainlit/react-client';
 
-import Hotkeys from 'components/Hotkeys';
-import SettingsModal from 'components/molecules/settingsModal';
 import ChatSettingsModal from 'components/organisms/chat/settings';
-import PromptPlayground from 'components/organisms/playground';
 
 import { apiClientState } from 'state/apiClient';
 import { projectSettingsState } from 'state/project';
@@ -29,15 +26,22 @@ type Primary = {
   main?: string;
 };
 
+type Text = {
+  primary?: string;
+  secondary?: string;
+};
+
 type ThemOverride = {
   primary?: Primary;
   background?: string;
   paper?: string;
+  text?: Text;
 };
 
 declare global {
   interface Window {
     theme?: {
+      default: string;
       light?: ThemOverride;
       dark?: ThemOverride;
     };
@@ -61,6 +65,12 @@ export function overrideTheme(theme: Theme) {
   }
   if (variantOverride?.primary?.light) {
     theme.palette.primary.light = variantOverride.primary.light;
+  }
+  if (variantOverride?.text?.primary) {
+    theme.palette.text.primary = variantOverride.text.primary;
+  }
+  if (variantOverride?.text?.secondary) {
+    theme.palette.text.secondary = variantOverride.text.secondary;
   }
 
   return theme;
@@ -133,13 +143,11 @@ function App() {
       <Box
         display="flex"
         height="100vh"
+        maxHeight="-webkit-fill-available"
         width="100vw"
         sx={{ overflowX: 'hidden' }}
       >
-        <PromptPlayground />
         <ChatSettingsModal />
-        <Hotkeys />
-        <SettingsModal />
         <RouterProvider router={router} />
       </Box>
     </ThemeProvider>

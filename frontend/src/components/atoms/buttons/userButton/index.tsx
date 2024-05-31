@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-import { IconButton } from '@mui/material';
-
 import UserAvatar from './avatar';
 import UserMenu from './menu';
 
@@ -16,18 +14,14 @@ export default function UserButton() {
   };
 
   return (
-    <div>
-      <IconButton
-        edge="end"
+    <>
+      <UserAvatar
         onClick={handleClick}
-        size="small"
         aria-controls={open ? 'account-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
-      >
-        <UserAvatar />
-      </IconButton>
+      />
       <UserMenu open={open} anchorEl={anchorEl} handleClose={handleClose} />
-    </div>
+    </>
   );
 }

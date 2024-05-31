@@ -14,9 +14,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Alert, Box } from '@mui/material';
 
 import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
+import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/welcomeScreen';
 import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import { projectSettingsState } from '@chainlit/app/src/state/project';
@@ -38,7 +40,6 @@ const Chat = () => {
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
-
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
@@ -46,9 +47,13 @@ const Chat = () => {
 
   const fileSpec = useMemo(
     () => ({
-      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
-      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
-      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+      max_size_mb:
+        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files:
+        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
+        '*/*'
+      ]
     }),
     [projectSettings]
   );
@@ -150,7 +155,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal?.enabled;
+    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box
@@ -180,11 +185,10 @@ const Chat = () => {
           height: '100%'
         }}
       >
-        {error && (
+        {error ? (
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
               mx: 'auto',
               my: 2
             }}
@@ -193,15 +197,20 @@ const Chat = () => {
               Could not reach the server.
             </Alert>
           </Box>
+        ) : (
+          <Box mt={1} />
         )}
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen hideLogo />
+            <Box my={1} />
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}

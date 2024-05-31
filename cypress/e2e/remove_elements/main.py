@@ -10,7 +10,7 @@ async def start():
         name="image1", display="inline", path="../../fixtures/cat.jpeg"
     )
 
-    async with cl.Step() as step:
+    async with cl.Step(type="tool", name="tool1") as step:
         step.elements = [
             step_image,
             cl.Image(name="image2", display="inline", path="../../fixtures/cat.jpeg"),

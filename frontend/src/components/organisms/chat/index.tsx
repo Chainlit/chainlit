@@ -1,3 +1,4 @@
+import { useAuth } from 'api/auth';
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -5,7 +6,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 
 import {
   threadHistoryState,
@@ -14,14 +15,14 @@ import {
   useChatMessages,
   useChatSession
 } from '@chainlit/react-client';
-import { sideViewState } from '@chainlit/react-client';
 
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
-import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
-import ChatProfiles from 'components/molecules/chatProfiles';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
+
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import { apiClientState } from 'state/apiClient';
 import { IAttachment, attachmentsState } from 'state/chat';
@@ -30,14 +31,15 @@ import { projectSettingsState } from 'state/project';
 import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
+import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
+  const { user } = useAuth();
   const { idToResume } = useChatSession();
 
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
-  const sideViewElement = useRecoilValue(sideViewState);
   const apiClient = useRecoilValue(apiClientState);
 
   const [autoScroll, setAutoScroll] = useState(true);
@@ -48,14 +50,19 @@ const Chat = () => {
 
   const fileSpec = useMemo(
     () => ({
-      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
-      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
-      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+      max_size_mb:
+        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files:
+        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
+        '*/*'
+      ]
     }),
     [projectSettings]
   );
 
   const { t } = useTranslation();
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -159,6 +166,7 @@ const Chat = () => {
   useEffect(() => {
     const currentPage = new URL(window.location.href);
     if (
+      user &&
       projectSettings?.dataPersistence &&
       threadId &&
       currentPage.pathname === '/'
@@ -173,7 +181,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal?.enabled;
+    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box
@@ -194,13 +202,12 @@ const Chat = () => {
           {upload?.isDragActive ? <DropScreen /> : null}
         </>
       ) : null}
-      <SideView>
-        <Box my={1} />
+      <Stack width="100%">
         {error ? (
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
+              maxWidth: layoutMaxWidth,
               mx: 'auto',
               my: 2
             }}
@@ -214,7 +221,7 @@ const Chat = () => {
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
+              maxWidth: layoutMaxWidth,
               mx: 'auto',
               my: 2
             }}
@@ -226,12 +233,14 @@ const Chat = () => {
         ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <ChatProfiles />
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen />
+            <Box py={2} />
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
@@ -241,8 +250,7 @@ const Chat = () => {
             projectSettings={projectSettings}
           />
         </ErrorBoundary>
-      </SideView>
-      {sideViewElement ? null : <TaskList isMobile={false} />}
+      </Stack>
     </Box>
   );
 };

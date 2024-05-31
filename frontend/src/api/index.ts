@@ -19,4 +19,9 @@ const onError = (error: ClientError) => {
   toast.error(error.toString());
 };
 
-export const apiClient = new ChainlitAPI(httpEndpoint, 'app', on401, onError);
+export const apiClient = new ChainlitAPI(
+  httpEndpoint,
+  'webapp',
+  on401,
+  onError
+);

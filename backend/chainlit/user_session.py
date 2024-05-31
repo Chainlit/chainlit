@@ -1,6 +1,6 @@
 from typing import Dict
 
-from chainlit.context import context
+from chainlit.context import WebsocketSession, context
 
 user_sessions: Dict[str, Dict] = {}
 
@@ -27,7 +27,11 @@ class UserSession:
         user_session["chat_settings"] = context.session.chat_settings
         user_session["user"] = context.session.user
         user_session["chat_profile"] = context.session.chat_profile
-        user_session["languages"] = context.session.languages
+        user_session["http_referer"] = context.session.http_referer
+        user_session["client_type"] = context.session.client_type
+
+        if isinstance(context.session, WebsocketSession):
+            user_session["languages"] = context.session.languages
 
         if context.session.root_message:
             user_session["root_message"] = context.session.root_message

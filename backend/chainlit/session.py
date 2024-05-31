@@ -1,3 +1,4 @@
+import asyncio
 import json
 import mimetypes
 import shutil
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from chainlit.types import FileDict, FileReference
     from chainlit.user import PersistedUser, User
 
-ClientType = Literal["app", "copilot", "teams", "slack"]
+ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
@@ -34,10 +35,20 @@ class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
             return None
 
 
-def clean_metadata(metadata: Dict):
-    return json.loads(
+
+def clean_metadata(metadata: Dict, max_size: int = 1048576):
+    cleaned_metadata = json.loads(
         json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
     )
+
+    metadata_size = len(json.dumps(cleaned_metadata).encode('utf-8'))
+    if metadata_size > max_size:
+        # Redact the metadata if it exceeds the maximum size
+        cleaned_metadata = {
+            'message': f'Metadata size exceeds the limit of {max_size} bytes. Redacted.'
+        }
+
+    return cleaned_metadata
 
 
 class BaseSession:
@@ -45,6 +56,7 @@ class BaseSession:
 
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
+    current_task: Optional[asyncio.Task] = None
 
     def __init__(
         self,
@@ -63,6 +75,8 @@ class BaseSession:
         root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Origin of the request
+        http_referer: Optional[str] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -74,123 +88,13 @@ class BaseSession:
         self.has_first_interaction = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
+        self.http_referer = http_referer
+
+        self.files = {}  # type: Dict[str, "FileDict"]
 
         self.id = id
 
         self.chat_settings: Dict[str, Any] = {}
-
-    async def persist_file(
-        self,
-        name: str,
-        mime: str,
-        path: Optional[str] = None,
-        content: Optional[Union[bytes, str]] = None,
-    ):
-        return None
-
-    def to_persistable(self) -> Dict:
-        from chainlit.user_session import user_sessions
-
-        user_session = user_sessions.get(self.id) or {}  # type: Dict
-        user_session["chat_settings"] = self.chat_settings
-        user_session["chat_profile"] = self.chat_profile
-        metadata = clean_metadata(user_session)
-        return metadata
-
-
-class HTTPSession(BaseSession):
-    """Internal HTTP session object. Used to consume Chainlit through API (no websocket)."""
-
-    def __init__(
-        self,
-        # Id of the session
-        id: str,
-        client_type: ClientType,
-        # Thread id
-        thread_id: Optional[str] = None,
-        # Logged-in user informations
-        user: Optional[Union["User", "PersistedUser"]] = None,
-        # Logged-in user token
-        token: Optional[str] = None,
-        user_env: Optional[Dict[str, str]] = None,
-        # Last message at the root of the chat
-        root_message: Optional["Message"] = None,
-        # User specific environment variables. Empty if no user environment variables are required.
-    ):
-        super().__init__(
-            id=id,
-            thread_id=thread_id,
-            user=user,
-            token=token,
-            client_type=client_type,
-            user_env=user_env,
-            root_message=root_message,
-        )
-
-
-class WebsocketSession(BaseSession):
-    """Internal web socket session object.
-
-    A socket id is an ephemeral id that can't be used as a session id
-    (as it is for instance regenerated after each reconnection).
-
-    The Session object store an internal mapping between socket id and
-    a server generated session id, allowing to persists session
-    between socket reconnection but also retrieving a session by
-    socket id for convenience.
-    """
-
-    def __init__(
-        self,
-        # Id from the session cookie
-        id: str,
-        # Associated socket id
-        socket_id: str,
-        # Function to emit to the client
-        emit: Callable[[str, Any], None],
-        # Function to emit to the client and wait for a response
-        emit_call: Callable[[Literal["ask", "call_fn"], Any, Optional[int]], Any],
-        # User specific environment variables. Empty if no user environment variables are required.
-        user_env: Dict[str, str],
-        client_type: ClientType,
-        # Thread id
-        thread_id: Optional[str] = None,
-        # Logged-in user informations
-        user: Optional[Union["User", "PersistedUser"]] = None,
-        # Logged-in user token
-        token: Optional[str] = None,
-        # Last message at the root of the chat
-        root_message: Optional["Message"] = None,
-        # Chat profile selected before the session was created
-        chat_profile: Optional[str] = None,
-        # Languages of the user's browser
-        languages: Optional[str] = None,
-    ):
-        super().__init__(
-            id=id,
-            thread_id=thread_id,
-            user=user,
-            token=token,
-            user_env=user_env,
-            client_type=client_type,
-            root_message=root_message,
-            chat_profile=chat_profile,
-        )
-
-        self.socket_id = socket_id
-        self.emit_call = emit_call
-        self.emit = emit
-
-        self.should_stop = False
-        self.restored = False
-
-        self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
-        self.files = {}  # type: Dict[str, "FileDict"]
-
-        ws_sessions_id[self.id] = self
-        ws_sessions_sid[socket_id] = self
-
-        self.languages = languages
 
     @property
     def files_dir(self):
@@ -217,6 +121,7 @@ class WebsocketSession(BaseSession):
         file_path = self.files_dir / file_id
 
         file_extension = mimetypes.guess_extension(mime)
+
         if file_extension:
             file_path = file_path.with_suffix(file_extension)
 
@@ -245,6 +150,122 @@ class WebsocketSession(BaseSession):
         }
 
         return {"id": file_id}
+
+    def to_persistable(self) -> Dict:
+        from chainlit.user_session import user_sessions
+
+        user_session = user_sessions.get(self.id) or {}  # type: Dict
+        user_session["chat_settings"] = self.chat_settings
+        user_session["chat_profile"] = self.chat_profile
+        user_session["http_referer"] = self.http_referer
+        user_session["client_type"] = self.client_type
+        metadata = clean_metadata(user_session)
+        return metadata
+
+
+class HTTPSession(BaseSession):
+    """Internal HTTP session object. Used to consume Chainlit through API (no websocket)."""
+
+    def __init__(
+        self,
+        # Id of the session
+        id: str,
+        client_type: ClientType,
+        # Thread id
+        thread_id: Optional[str] = None,
+        # Logged-in user informations
+        user: Optional[Union["User", "PersistedUser"]] = None,
+        # Logged-in user token
+        token: Optional[str] = None,
+        user_env: Optional[Dict[str, str]] = None,
+        # Last message at the root of the chat
+        root_message: Optional["Message"] = None,
+        # Origin of the request
+        http_referer: Optional[str] = None,
+    ):
+        super().__init__(
+            id=id,
+            thread_id=thread_id,
+            user=user,
+            token=token,
+            client_type=client_type,
+            user_env=user_env,
+            root_message=root_message,
+            http_referer=http_referer,
+        )
+
+    def delete(self):
+        """Delete the session."""
+        if self.files_dir.is_dir():
+            shutil.rmtree(self.files_dir)
+
+
+class WebsocketSession(BaseSession):
+    """Internal web socket session object.
+
+    A socket id is an ephemeral id that can't be used as a session id
+    (as it is for instance regenerated after each reconnection).
+
+    The Session object store an internal mapping between socket id and
+    a server generated session id, allowing to persists session
+    between socket reconnection but also retrieving a session by
+    socket id for convenience.
+    """
+
+    to_clear: bool = False
+
+    def __init__(
+        self,
+        # Id from the session cookie
+        id: str,
+        # Associated socket id
+        socket_id: str,
+        # Function to emit to the client
+        emit: Callable[[str, Any], None],
+        # Function to emit to the client and wait for a response
+        emit_call: Callable[[Literal["ask", "call_fn"], Any, Optional[int]], Any],
+        # User specific environment variables. Empty if no user environment variables are required.
+        user_env: Dict[str, str],
+        client_type: ClientType,
+        # Thread id
+        thread_id: Optional[str] = None,
+        # Logged-in user informations
+        user: Optional[Union["User", "PersistedUser"]] = None,
+        # Logged-in user token
+        token: Optional[str] = None,
+        # Last message at the root of the chat
+        root_message: Optional["Message"] = None,
+        # Chat profile selected before the session was created
+        chat_profile: Optional[str] = None,
+        # Languages of the user's browser
+        languages: Optional[str] = None,
+        # Origin of the request
+        http_referer: Optional[str] = None,
+    ):
+        super().__init__(
+            id=id,
+            thread_id=thread_id,
+            user=user,
+            token=token,
+            user_env=user_env,
+            client_type=client_type,
+            root_message=root_message,
+            chat_profile=chat_profile,
+            http_referer=http_referer,
+        )
+
+        self.socket_id = socket_id
+        self.emit_call = emit_call
+        self.emit = emit
+
+        self.restored = False
+
+        self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
+
+        ws_sessions_id[self.id] = self
+        ws_sessions_sid[socket_id] = self
+
+        self.languages = languages
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""

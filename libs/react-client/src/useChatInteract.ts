@@ -4,7 +4,6 @@ import {
   accessTokenState,
   actionState,
   askUserState,
-  avatarState,
   chatSettingsInputsState,
   chatSettingsValueState,
   currentThreadIdState,
@@ -38,7 +37,6 @@ const useChatInteract = () => {
   const setLoading = useSetRecoilState(loadingState);
   const setMessages = useSetRecoilState(messagesState);
   const setElements = useSetRecoilState(elementState);
-  const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setTokenCount = useSetRecoilState(tokenCountState);
@@ -54,7 +52,6 @@ const useChatInteract = () => {
     setFirstUserInteraction(undefined);
     setMessages([]);
     setElements([]);
-    setAvatars([]);
     setTasklists([]);
     setActions([]);
     setTokenCount(0);
@@ -69,6 +66,25 @@ const useChatInteract = () => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
       session?.socket.emit('ui_message', { message, fileReferences });
+    },
+    [session?.socket]
+  );
+
+  const sendAudioChunk = useCallback(
+    (isStart: boolean, mimeType: string, elapsedTime: number, data: Blob) => {
+      session?.socket.emit('audio_chunk', {
+        isStart,
+        mimeType,
+        elapsedTime,
+        data
+      });
+    },
+    [session?.socket]
+  );
+
+  const endAudioStream = useCallback(
+    (fileReferences?: IFileRef[]) => {
+      session?.socket.emit('audio_end', { fileReferences });
     },
     [session?.socket]
   );
@@ -91,7 +107,15 @@ const useChatInteract = () => {
   );
 
   const stopTask = useCallback(() => {
+    setMessages((oldMessages) =>
+      oldMessages.map((m) => {
+        m.streaming = false;
+        return m;
+      })
+    );
+
     setLoading(false);
+
     session?.socket.emit('stop');
   }, [session?.socket]);
 
@@ -138,6 +162,8 @@ const useChatInteract = () => {
     clear,
     replyMessage,
     sendMessage,
+    sendAudioChunk,
+    endAudioStream,
     stopTask,
     setIdToResume,
     updateChatSettings

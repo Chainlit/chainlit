@@ -1,6 +1,7 @@
 import functools
 import importlib
 import inspect
+from asyncio import CancelledError
 from typing import Callable
 
 from chainlit.context import context
@@ -39,13 +40,14 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return await user_function(**params_values)
             else:
                 return user_function(**params_values)
-        except InterruptedError:
+        except CancelledError:
             pass
         except Exception as e:
             logger.exception(e)
-            await ErrorMessage(
-                content=str(e) or e.__class__.__name__, author="Error"
-            ).send()
+            if with_task:
+                await ErrorMessage(
+                    content=str(e) or e.__class__.__name__, author="Error"
+                ).send()
         finally:
             if with_task:
                 await context.emitter.task_end()

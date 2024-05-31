@@ -1,14 +1,14 @@
 import { useAuth } from 'api/auth';
 
-import { Avatar, Box } from '@mui/material';
+import { Avatar, IconButton, IconButtonProps } from '@mui/material';
 
 import UserIcon from 'assets/user';
 
-export default function UserAvatar() {
+export default function UserAvatar(props: IconButtonProps) {
   const { user } = useAuth();
 
-  if (user) {
-    return (
+  return (
+    <IconButton {...props}>
       <Avatar
         sx={{
           width: 32,
@@ -16,25 +16,14 @@ export default function UserAvatar() {
           bgcolor: 'primary.main',
           color: 'primary.contrastText'
         }}
-        src={user.metadata?.image || undefined}
+        src={user?.metadata?.image || undefined}
       >
-        {user.identifier?.[0]?.toUpperCase()}
+        {user ? (
+          user.identifier?.[0]?.toUpperCase()
+        ) : (
+          <UserIcon sx={{ height: 20, width: 20 }} />
+        )}
       </Avatar>
-    );
-  } else {
-    return (
-      <Box>
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText'
-          }}
-        >
-          <UserIcon sx={{ width: 20 }} />
-        </Avatar>
-      </Box>
-    );
-  }
+    </IconButton>
+  );
 }

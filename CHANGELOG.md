@@ -8,6 +8,126 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.300rc3] - 2024-05-28
+
+### Added
+
+- Input streaming for tool calls
+
+## [1.1.300rc2] - 2024-05-28
+
+### Added
+
+- Expand copilot button
+
+### Fix
+
+- Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
+
+## [1.1.300rc1] - 2024-05-28
+
+### Fix
+
+- Scroll flickering when streaming
+- Logo max height
+- Remove duplicate new chat button in the sidebar
+
+## [1.1.300rc0] - 2024-05-27
+
+### Added
+
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
+- `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
+- `default` theme config in `config.toml`
+- If only one OAuth provider is set, automatically redirect the user to it
+
+### Changed
+
+- **[BREAKING]** Avatars have been reworked. `cl.Avatar` has been removed, instead place your avatars by name in `/public/avatars/*`
+- **[BREAKING]** The `running`, `took_one` and `took_other` translations have been replaced by `used`.
+- **[BREAKING]** `root` attribute of `cl.Step` has been removed. Use `cl.Message` to send root level messages.
+- Chain of Thought has been reworked. Only steps of type `tool` will be displayed if `hide_cot` is false
+- The `show_readme_as_default` config has been removed
+- No longer collapse root level messages
+
+### Fixed
+
+- The Chat Profile description should now disappear when not hovered.
+- Error handling of steps has been improved
+- No longer stream the first token twice
+- Copilot should now work as expected even if the user is closing/reopening it
+- Copilot CSS should no longer leak/be impacted by the host website CSS
+- Fix various `cl.Context` errors
+
+## [1.1.202] - 2024-05-22
+
+### Added
+
+- Support for video players like youtube or vimeo
+
+### Fixed
+
+- Fix audio capture on windows browsers
+
+## [1.1.201] - 2024-05-21
+
+### Fixed
+
+- Intermediary steps button placement
+
+## [1.1.200] - 2024-05-21
+
+### Changed
+
+- User message UI has been updated
+- Loading indicator has been improved and visually updated
+- Icons have been updated
+- Dark theme is now the default
+
+### Fixed
+
+- Scroll issues on mobile browsers
+- Github button now showing
+
+## [1.1.101] - 2024-05-14
+
+### Added
+
+- The discord bot now shows "typing" while responding
+
+### Fixed
+
+- Discord and Slack bots should no longer fail to respond if the data layer fails
+
+## [1.1.0] - 2024-05-13
+
+### Added
+
+- You can know serve your Chainlit app as a Slack bot
+- You can know serve your Chainlit app as a Discord bot
+- `cl.on_audio_chunk` decorator to process incoming the user incoming audio stream
+- `cl.on_audio_end` decorator to react to the end of the user audio stream
+- The `cl.Audio` element now has an `auto_play` property
+- `layout` theme config, wide or default
+- `http_referer` is now available in `cl.user_session`
+
+### Changed
+
+- The UI has been revamped, especially the navigation
+- The arrow up button has been removed from the input bar, however pressing the arrow up key still opens the last inputs menu
+- The user session will no longer be persisted as metadata if > 1mb
+- **[breaking]** the `send()` method on `cl.Message` now returns the message instead of the message id
+- **[breaking]** The `multi_modal` feature has been renamed `spontaneous_file_upload` in the config
+- Element display property now defaults to `inline` instead of `side`
+- The SQL Alchemy data layer logging has been improved
+
+### Fixed
+
+- Fixed a bug disconnecting the user when loading the chat history
+- Elements based on an URL should now have a mime type
+- Stopping a task should now work better (using asyncio task.cancel)
+
 ## [1.0.506] - 2024-04-30
 
 ### Added

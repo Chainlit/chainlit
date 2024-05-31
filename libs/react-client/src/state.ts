@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   IAction,
   IAsk,
-  IAvatarElement,
   ICallFn,
   IMessageElement,
   IStep,
@@ -105,11 +104,6 @@ export const chatSettingsValueState = atom({
 
 export const elementState = atom<IMessageElement[]>({
   key: 'DisplayElements',
-  default: []
-});
-
-export const avatarState = atom<IAvatarElement[]>({
-  key: 'AvatarElements',
   default: []
 });
 

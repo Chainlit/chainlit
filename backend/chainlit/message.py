@@ -166,28 +166,28 @@ class MessageBase(ABC):
         step_dict = await self._create()
         await context.emitter.send_step(step_dict)
 
-        return self.id
+        return self
 
     async def stream_token(self, token: str, is_sequence=False):
         """
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
-
-        if not self.streaming:
-            self.streaming = True
-            step_dict = self.to_dict()
-            await context.emitter.stream_start(step_dict)
-
         if is_sequence:
             self.content = token
         else:
             self.content += token
 
         assert self.id
-        await context.emitter.send_token(
-            id=self.id, token=token, is_sequence=is_sequence
-        )
+
+        if not self.streaming:
+            self.streaming = True
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
+        else:
+            await context.emitter.send_token(
+                id=self.id, token=token, is_sequence=is_sequence
+            )
 
 
 class Message(MessageBase):
@@ -196,7 +196,7 @@ class Message(MessageBase):
 
     Args:
         content (Union[str, Dict]): The content of the message.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
@@ -206,7 +206,7 @@ class Message(MessageBase):
     def __init__(
         self,
         content: Union[str, Dict],
-        author: str = config.ui.name,
+        author: Optional[str] = None,
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
@@ -243,7 +243,7 @@ class Message(MessageBase):
         self.metadata = metadata
         self.tags = tags
 
-        self.author = author
+        self.author = author or config.ui.name
         self.type = type
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
@@ -251,7 +251,7 @@ class Message(MessageBase):
 
         super().__post_init__()
 
-    async def send(self) -> str:
+    async def send(self):
         """
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
@@ -268,7 +268,7 @@ class Message(MessageBase):
         # Run all tasks concurrently
         await asyncio.gather(*tasks)
 
-        return self.id
+        return self
 
     async def update(self):
         """
@@ -303,7 +303,7 @@ class ErrorMessage(MessageBase):
 
     Args:
         content (str): Text displayed above the upload button.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
         indent (int, optional): If positive, the message will be nested in the UI.
     """
@@ -316,7 +316,7 @@ class ErrorMessage(MessageBase):
     ):
         self.content = content
         self.author = author
-        self.type = "system_message"
+        self.type = "assistant_message"
         self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
 
@@ -346,7 +346,7 @@ class AskUserMessage(AskMessageBase):
 
     Args:
         content (str): The content of the prompt.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -357,7 +357,7 @@ class AskUserMessage(AskMessageBase):
         content: str,
         author: str = config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
+        disable_feedback: bool = True,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
@@ -411,7 +411,7 @@ class AskFileMessage(AskMessageBase):
         accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
@@ -425,7 +425,7 @@ class AskFileMessage(AskMessageBase):
         max_files=1,
         author=config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
+        disable_feedback: bool = True,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -501,7 +501,7 @@ class AskActionMessage(AskMessageBase):
         content: str,
         actions: List[Action],
         author=config.ui.name,
-        disable_feedback=False,
+        disable_feedback=True,
         timeout=90,
         raise_on_timeout=False,
     ):

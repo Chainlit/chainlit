@@ -9,6 +9,8 @@ import { FileSpec, IStep, useChatInteract } from '@chainlit/react-client';
 
 import ScrollDownButton from 'components/atoms/buttons/scrollDownButton';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { IAttachment } from 'state/chat';
 import { IProjectSettings } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
@@ -34,6 +36,7 @@ const InputBox = memo(
     autoScroll,
     projectSettings
   }: Props) => {
+    const layoutMaxWidth = useLayoutMaxWidth();
     const setInputHistory = useSetRecoilState(inputHistoryState);
 
     const { user } = useAuth();
@@ -101,11 +104,12 @@ const InputBox = memo(
         position="relative"
         flexDirection="column"
         gap={1}
-        p={2}
+        pb={2}
+        px={2}
         sx={{
           boxSizing: 'border-box',
           width: '100%',
-          maxWidth: '60rem',
+          maxWidth: layoutMaxWidth,
           m: 'auto',
           justifyContent: 'center'
         }}

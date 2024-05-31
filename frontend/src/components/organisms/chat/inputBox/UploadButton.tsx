@@ -1,12 +1,13 @@
 import { useUpload } from 'hooks';
 import { useRecoilValue } from 'recoil';
 
-import AttachFile from '@mui/icons-material/AttachFile';
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
 import { FileSpec } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
+
+import AttachmentIcon from 'assets/attachment';
 
 import { projectSettingsState } from 'state/project';
 
@@ -36,7 +37,8 @@ const UploadButton = ({
     ? 'small'
     : 'medium';
 
-  if (!upload || !pSettings?.features?.multi_modal?.enabled) return null;
+  if (!upload || !pSettings?.features?.spontaneous_file_upload?.enabled)
+    return null;
   const { getRootProps, getInputProps } = upload;
 
   return (
@@ -54,7 +56,7 @@ const UploadButton = ({
           size={size}
           {...getRootProps({ className: 'dropzone' })}
         >
-          <AttachFile fontSize={size} />
+          <AttachmentIcon fontSize={size} />
         </IconButton>
       </span>
     </Tooltip>

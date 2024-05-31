@@ -3,24 +3,21 @@ from chainlit.context import context
 import chainlit as cl
 
 
-@cl.step
+@cl.step(type="tool")
 async def gen_img():
-    if current_step := context.current_step:
-        current_step.elements = [
-            cl.Image(path="./cat.jpeg", name="image1", display="inline")
-        ]
-    return "Here is a cat!"
+
+    return cl.Image(path="./cat.jpeg", name="image1", display="inline")
 
 
 @cl.on_chat_start
 async def start():
+
+    img = await gen_img()
+
     # Element should not be inlined or referenced
     await cl.Message(
-        content="Here is image1, a nice image of a cat! As well as text1 and text2!",
+        content="Here is image1, a nice image of a cat!", elements=[img]
     ).send()
-
-    # Step should be able to have elements
-    await gen_img()
 
     # Image should be inlined even if not referenced
     await cl.Message(

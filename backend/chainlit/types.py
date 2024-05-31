@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -144,13 +145,32 @@ class FileReference(TypedDict):
 class FileDict(TypedDict):
     id: str
     name: str
-    path: str
+    path: Path
     size: int
     type: str
 
 
 class UIMessagePayload(TypedDict):
     message: "StepDict"
+    fileReferences: Optional[List[FileReference]]
+
+
+class AudioChunkPayload(TypedDict):
+    isStart: bool
+    mimeType: str
+    elapsedTime: float
+    data: bytes
+
+
+@dataclass
+class AudioChunk:
+    isStart: bool
+    mimeType: str
+    elapsedTime: float
+    data: bytes
+
+
+class AudioEndPayload(TypedDict):
     fileReferences: Optional[List[FileReference]]
 
 
@@ -207,6 +227,15 @@ class Theme(str, Enum):
 
 
 @dataclass
+class Starter(DataClassJsonMixin):
+    """Specification for a starter that can be chosen by the user at the thread start."""
+
+    label: str
+    message: str
+    icon: Optional[str] = None
+
+
+@dataclass
 class ChatProfile(DataClassJsonMixin):
     """Specification for a chat profile that can be chosen by the user at the thread start."""
 
@@ -214,6 +243,7 @@ class ChatProfile(DataClassJsonMixin):
     markdown_description: str
     icon: Optional[str] = None
     default: bool = False
+    starters: Optional[List[Starter]] = None
 
 
 FeedbackStrategy = Literal["BINARY"]
@@ -229,6 +259,7 @@ class FeedbackDict(TypedDict):
 @dataclass
 class Feedback:
     forId: str
+    threadId: Optional[str]
     value: Literal[0, 1]
     id: Optional[str] = None
     comment: Optional[str] = None

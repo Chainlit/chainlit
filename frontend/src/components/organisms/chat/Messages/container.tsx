@@ -6,12 +6,9 @@ import { toast } from 'sonner';
 import {
   IAction,
   IAsk,
-  IAvatarElement,
   IFeedback,
-  IFunction,
   IMessageElement,
   IStep,
-  ITool,
   useChatInteract
 } from '@chainlit/react-client';
 import { sideViewState } from '@chainlit/react-client';
@@ -19,7 +16,6 @@ import { sideViewState } from '@chainlit/react-client';
 import { MessageContainer as CMessageContainer } from 'components/molecules/messages/MessageContainer';
 
 import { apiClientState } from 'state/apiClient';
-import { playgroundState } from 'state/playground';
 import { highlightMessage } from 'state/project';
 import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
@@ -28,10 +24,8 @@ interface Props {
   loading: boolean;
   actions: IAction[];
   elements: IMessageElement[];
-  avatars: IAvatarElement[];
   messages: IStep[];
   askUser?: IAsk;
-  autoScroll?: boolean;
   onFeedbackUpdated: (
     message: IStep,
     onSuccess: () => void,
@@ -43,26 +37,21 @@ interface Props {
     feedback: string
   ) => void;
   callAction?: (action: IAction) => void;
-  setAutoScroll?: (autoScroll: boolean) => void;
 }
 
 const MessageContainer = memo(
   ({
     askUser,
     loading,
-    avatars,
     actions,
-    autoScroll,
     elements,
     messages,
     onFeedbackUpdated,
     onFeedbackDeleted,
-    callAction,
-    setAutoScroll
+    callAction
   }: Props) => {
     const appSettings = useRecoilValue(settingsState);
     const projectSettings = useRecoilValue(projectSettingsState);
-    const setPlayground = useSetRecoilState(playgroundState);
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
@@ -78,42 +67,6 @@ const MessageContainer = memo(
     const enableFeedback = !!projectSettings?.dataPersistence;
 
     const navigate = useNavigate();
-
-    const onPlaygroundButtonClick = useCallback(
-      (message: IStep) => {
-        setPlayground((old) => {
-          const generation = message.generation;
-          let functions =
-            (generation?.settings?.functions as unknown as IFunction[]) || [];
-          const tools =
-            (generation?.settings?.tools as unknown as ITool[]) || [];
-          if (tools.length) {
-            functions = [
-              ...functions,
-              ...tools
-                .filter((t) => t.type === 'function')
-                .map((t) => t.function)
-            ];
-          }
-          return {
-            ...old,
-            generation: generation
-              ? {
-                  ...generation,
-                  functions
-                }
-              : undefined,
-            originalGeneration: generation
-              ? {
-                  ...generation,
-                  functions
-                }
-              : undefined
-          };
-        });
-      },
-      [setPlayground]
-    );
 
     const onElementRefClick = useCallback(
       (element: IMessageElement) => {
@@ -160,10 +113,7 @@ const MessageContainer = memo(
         askUser,
         allowHtml: projectSettings?.features?.unsafe_allow_html,
         latex: projectSettings?.features?.latex,
-        avatars,
         defaultCollapseContent: appSettings.defaultCollapseContent,
-        expandAll: appSettings.expandAll,
-        hideCot: appSettings.hideCot,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
@@ -171,15 +121,11 @@ const MessageContainer = memo(
         onElementRefClick,
         onError,
         onFeedbackUpdated,
-        onFeedbackDeleted,
-        onPlaygroundButtonClick
+        onFeedbackDeleted
       };
     }, [
       appSettings.defaultCollapseContent,
-      appSettings.expandAll,
-      appSettings.hideCot,
       askUser,
-      avatars,
       enableFeedback,
       highlightedMessage,
       loading,
@@ -187,8 +133,7 @@ const MessageContainer = memo(
       projectSettings?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
-      onFeedbackUpdated,
-      onPlaygroundButtonClick
+      onFeedbackUpdated
     ]);
 
     return (
@@ -196,8 +141,6 @@ const MessageContainer = memo(
         actions={messageActions}
         elements={elements}
         messages={messages}
-        autoScroll={autoScroll}
-        setAutoScroll={setAutoScroll}
         context={memoizedContext}
       />
     );
