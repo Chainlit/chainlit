@@ -46,6 +46,7 @@ from chainlit.user import PersistedUser, User
 from fastapi import (
     Depends,
     FastAPI,
+    Form,
     HTTPException,
     Query,
     Request,
@@ -509,6 +510,85 @@ async def oauth_callback(
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
         url=f"/login/callback?{params}",
+    )
+    response.delete_cookie("oauth_state")
+    return response
+
+
+# specific route for azure ad hybrid flow
+@app.post("/auth/oauth/azure-ad-hybrid/callback")
+async def oauth_azure_hf_callback(
+    request: Request,
+    error: Optional[str] = None,
+    code: Annotated[Optional[str], Form()] = None,
+    id_token: Annotated[Optional[str], Form()] = None,
+):
+    print(request, error, code, id_token)
+    provider_id = "azure-ad-hybrid"
+    if config.code.oauth_callback is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
+        )
+
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    if error:
+        params = urllib.parse.urlencode(
+            {
+                "error": error,
+            }
+        )
+        response = RedirectResponse(
+            # FIXME: redirect to the right frontend base url to improve the dev environment
+            url=f"/login?{params}",
+        )
+        return response
+
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing code",
+        )
+
+    url = get_user_facing_url(request.url)
+    token = await provider.get_token(code, url)
+
+    (raw_user_data, default_user) = await provider.get_user_info(token)
+
+    user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_user, id_token
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(user)
+
+    if data_layer := get_data_layer():
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+
+    params = urllib.parse.urlencode(
+        {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+    )
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"/login/callback?{params}",
+        status_code=302,
     )
     response.delete_cookie("oauth_state")
     return response
