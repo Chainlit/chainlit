@@ -213,8 +213,25 @@ if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
     from chainlit.slack.app import slack_app_handler
 
     @app.post("/slack/events")
-    async def endpoint(req: Request):
+    async def slack_endpoint(req: Request):
         return await slack_app_handler.handle(req)
+
+
+# -------------------------------------------------------------------------------
+#                               TEAMS HANDLER
+# -------------------------------------------------------------------------------
+
+if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
+    from botbuilder.schema import Activity
+    from chainlit.teams.app import adapter, bot
+
+    @app.post("/teams/events")
+    async def teams_endpoint(req: Request):
+        body = await req.json()
+        activity = Activity().deserialize(body)
+        auth_header = req.headers.get("Authorization", "")
+        response = await adapter.process_activity(activity, auth_header, bot.on_turn)
+        return response
 
 
 # -------------------------------------------------------------------------------
