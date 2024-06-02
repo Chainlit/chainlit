@@ -1,4 +1,4 @@
-import { grey, primary } from 'theme/index';
+import { grey } from 'theme/index';
 
 import MMenuItem, {
   MenuItemProps as MMenuItemProps
@@ -32,13 +32,14 @@ const MenuItem = ({
       justifyContent: 'space-between',
       fontWeight: 500,
       fontSize: '14px',
-      color: (isDarkMode && grey[400]) || (selected ? primary[500] : grey[700]),
+      color:
+        (isDarkMode && grey[400]) || (selected ? 'primary.main' : grey[700]),
       '&:hover': {
-        backgroundColor: isDarkMode ? grey[800] : primary[50],
-        color: isDarkMode ? grey[400] : primary[500],
+        backgroundColor: isDarkMode ? grey[800] : 'primary.light',
+        color: isDarkMode ? grey[400] : 'primary.main',
         '& .notification-count': {
-          backgroundColor: isDarkMode ? grey[850] : primary[100],
-          color: isDarkMode ? grey[400] : primary[500]
+          backgroundColor: isDarkMode ? grey[850] : 'primary.light',
+          color: isDarkMode ? grey[400] : 'primary.main'
         }
       }
     }}
