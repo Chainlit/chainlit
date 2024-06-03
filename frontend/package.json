@@ -20,6 +20,8 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/lab": "^5.0.0-alpha.122",
     "@mui/material": "^5.14.10",
+    "echarts": "^5.5.0",
+    "echarts-for-react": "^3.0.2",
     "formik": "^2.4.3",
     "highlight.js": "^11.9.0",
     "i18next": "^23.7.16",

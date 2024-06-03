@@ -7,6 +7,7 @@ import { PDFElement } from './PDF';
 import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
 import { VideoElement } from './Video';
+import { EChartsElement } from './ECharts';
 
 interface ElementProps {
   element?: IMessageElement;
@@ -28,6 +29,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <VideoElement element={element} />;
     case 'plotly':
       return <PlotlyElement element={element} />;
+    case 'echarts':
+      return <EChartsElement element={element} />;
     default:
       return null;
   }

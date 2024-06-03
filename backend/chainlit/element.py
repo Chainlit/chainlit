@@ -18,10 +18,11 @@ mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
     "plotly": "application/json",
+    "echarts": "application/json",
 }
 
 ElementType = Literal[
-    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "echarts"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -346,6 +347,24 @@ class Plotly(Element):
         self.figure.layout.width = None
         self.figure.layout.height = None
         self.content = pio.to_json(self.figure, validate=True)
+        self.mime = "application/json"
+
+        super().__post_init__()
+
+@dataclass
+class ECharts(Element):
+
+    type: ClassVar[ElementType] = "echarts"
+    content: str = ""
+
+    def __post_init__(self) -> None:
+        # Validate that the content is a valid JSON string
+        try:
+            json.loads(self.content)
+        except json.JSONDecodeError:
+            raise ValueError("Invalid JSON content for ECharts")
+
+        # Set MIME type for ECharts
         self.mime = "application/json"
 
         super().__post_init__()
