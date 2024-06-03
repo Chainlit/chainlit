@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 
+import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 
 import { useChatSession } from '@chainlit/react-client';
@@ -35,14 +36,16 @@ const MessageAvatar = ({ author, hide }: Props) => {
 
   return (
     <span className={`message-avatar`}>
-      <Avatar
-        sx={{
-          width: '1.6rem',
-          height: '1.6rem',
-          bgcolor: 'transparent'
-        }}
-        src={hide ? undefined : avatarUrl}
-      />
+      <Tooltip title={author}>
+        <Avatar
+          sx={{
+            width: '1.6rem',
+            height: '1.6rem',
+            bgcolor: 'transparent'
+          }}
+          src={hide ? undefined : avatarUrl}
+        />
+      </Tooltip>
     </span>
   );
 };

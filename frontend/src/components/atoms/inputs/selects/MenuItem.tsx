@@ -32,11 +32,10 @@ const MenuItem = ({
       justifyContent: 'space-between',
       fontWeight: 500,
       fontSize: '14px',
-      color:
-        (isDarkMode && grey[400]) || (selected ? 'primary.main' : grey[700]),
+      color: selected ? 'primary.main' : isDarkMode ? grey[400] : grey[700],
       '&:hover': {
         backgroundColor: isDarkMode ? grey[800] : 'primary.light',
-        color: isDarkMode ? grey[400] : 'primary.main',
+        color: 'primary.main',
         '& .notification-count': {
           backgroundColor: isDarkMode ? grey[850] : 'primary.light',
           color: isDarkMode ? grey[400] : 'primary.main'
