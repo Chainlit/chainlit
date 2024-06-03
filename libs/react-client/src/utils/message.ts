@@ -211,7 +211,8 @@ const updateMessageContentById = (
   isInput: boolean
 ): IStep[] => {
   const nextMessages = [...messages];
-  for (let index = 0; index < nextMessages.length; index++) {
+  let changed = false;
+  for (let index = nextMessages.length - 1; index >=0; index--) {
     const msg = nextMessages[index];
 
     if (isEqual(msg.id, messageId)) {
@@ -240,19 +241,25 @@ const updateMessageContentById = (
       }
 
       nextMessages[index] = { ...msg };
-    } else if (msg.steps) {
-      msg.steps = updateMessageContentById(
+      changed = true;
+      break;
+    } else if (msg.steps && msg.steps.length > 0) {
+      const newSteps = updateMessageContentById(
         msg.steps,
         messageId,
         updatedContent,
         isSequence,
         isInput
       );
-      nextMessages[index] = { ...msg };
+      if (newSteps !== msg.steps) {
+        nextMessages[index] = { ...msg };
+        changed = true;
+        break;
+      }
     }
   }
 
-  return nextMessages;
+  return changed?nextMessages:messages;
 };
 
 export {
