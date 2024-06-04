@@ -37,6 +37,7 @@ def cli():
 def run_chainlit(target: str):
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    debug = bool(os.environ.get("CHAINLIT_DEBUG", False))
 
     ssl_certfile = os.environ.get("CHAINLIT_SSL_CERT", None)
     ssl_keyfile = os.environ.get("CHAINLIT_SSL_KEY", None)
@@ -52,6 +53,7 @@ def run_chainlit(target: str):
 
     config.run.host = host
     config.run.port = port
+    config.run.debug = debug
 
     check_file(target)
     # Load the module provided by the user
