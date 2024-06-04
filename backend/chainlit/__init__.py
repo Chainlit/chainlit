@@ -101,6 +101,23 @@ def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
     config.code.header_auth_callback = wrap_user_function(func)
     return func
 
+@trace
+def token_query_param_auth_callback(func: Callable[[str], Optional[User]]) -> Callable:
+    """
+    Framework agnostic decorator to authenticate the user via a signed token as query parameter
+    
+    Args:
+        func (Callable[[str], Optional[User]]): The authentication callback to execute.
+    
+    Example:
+        @cl.token_query_param_auth_callback
+        async def token_query_param_auth_callback(path_with_query_params: str) -> Optional[User]:
+    
+    Returns:
+        Callable[[str], Optional[User]]: The decorated authentication callback.
+    """
+    config.code.token_query_param_auth_callback = wrap_user_function(func)
+    return func
 
 @trace
 def oauth_callback(

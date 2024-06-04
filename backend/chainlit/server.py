@@ -361,6 +361,34 @@ async def logout(request: Request, response: Response):
     return {"success": True}
 
 
+@app.post("/auth/token")
+async def token_query_param_auth(request: Request):
+    if not config.code.token_query_param_auth_callback:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No token_query_param_auth_callback defined",
+        )
+    
+    user = await config.code.token_query_param_auth_callback(request.url)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+    
+    access_token = create_jwt(user)
+    if data_layer := get_data_layer():
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
 @app.post("/auth/header")
 async def header_auth(request: Request):
     if not config.code.header_auth_callback:
