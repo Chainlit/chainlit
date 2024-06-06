@@ -49,9 +49,9 @@ const Page = ({ children }: Props) => {
         </Alert>
       ) : (
         <Stack direction="row" height="100%" width="100%">
-          <SideBar />
+          {/* <SideBar /> */}
           <Stack flexGrow={1}>
-            <Header />
+            {/* <Header /> */}
             <Stack direction="row" flexGrow={1} overflow="auto">
               {children}
             </Stack>

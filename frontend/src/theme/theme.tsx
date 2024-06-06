@@ -53,7 +53,7 @@ const error = {
   contrastText: white
 };
 
-const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
+const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palette?: any) =>
   createTheme({
     typography: fontFamily ? { fontFamily } : typography,
     components,
@@ -68,10 +68,10 @@ const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
         paper: grey[900]
       },
       primary: {
-        main: '#F80061',
-        dark: primary[800],
-        light: '#FFE7EB',
-        contrastText: white
+        main: palette?.primary?.main ?? '#F80061',
+        dark: palette?.primary?.dark ?? primary[800],
+        light: palette?.primary?.light ?? '#FFE7EB',
+        contrastText: palette?.primary?.contrastText ?? white
       },
       secondary: {
         main: '#9757D7',
@@ -87,7 +87,7 @@ const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
     }
   });
 
-const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
+const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palette?: any) =>
   createTheme({
     typography: fontFamily ? { fontFamily } : typography,
     components,
@@ -102,10 +102,10 @@ const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
         paper: white
       },
       primary: {
-        main: '#F80061',
-        dark: primary[800],
-        light: '#FFE7EB',
-        contrastText: white
+        main: palette?.primary?.main ?? '#F80061',
+        dark: palette?.primary?.dark ?? primary[800],
+        light: palette?.primary?.light ?? '#FFE7EB',
+        contrastText: palette?.primary?.contrastText ?? white
       },
       secondary: {
         main: '#9757D7',
@@ -124,11 +124,12 @@ const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
 const makeTheme = (
   variant: 'dark' | 'light',
   fontFamily?: string,
-  breakpoints?: BreakpointsOptions
+  breakpoints?: BreakpointsOptions,
+  palette?: any,
 ) =>
   variant === 'dark'
-    ? darkTheme(fontFamily, breakpoints)
-    : lightTheme(fontFamily, breakpoints);
+    ? darkTheme(fontFamily, breakpoints, palette)
+    : lightTheme(fontFamily, breakpoints, palette);
 
 const darkGreyButtonTheme = createTheme({
   typography,

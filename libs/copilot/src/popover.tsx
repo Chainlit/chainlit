@@ -5,6 +5,7 @@ import Fade from '@mui/material/Fade';
 import Popper from '@mui/material/Popper';
 
 import Header from 'components/Header';
+import EvoyaHeader from 'evoya/EvoyaHeader';
 
 interface Props {
   anchorEl?: HTMLElement | null;
@@ -28,7 +29,7 @@ export default function PopOver({ anchorEl }: Props) {
         background: (theme) => theme.palette.background.default,
         boxShadow:
           '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important',
-        zIndex: 1000
+        zIndex: 9999
       }}
     >
       <Fade in={!!anchorEl}>
@@ -40,7 +41,8 @@ export default function PopOver({ anchorEl }: Props) {
             width: '100%'
           }}
         >
-          <Header />
+          {/* <Header /> */}
+          <EvoyaHeader showClose={false} noShow={true} />
           <Chat />
         </Box>
       </Fade>

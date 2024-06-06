@@ -5,7 +5,24 @@ import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Box, IconButton, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, InputLabel, MenuItem, FormControl, Select, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Button,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select,
+  Alert,
+  CircularProgress,
+  Unstable_Grid2 as Grid
+} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { Translator } from '@chainlit/app/src/components/i18n';
@@ -179,6 +196,8 @@ export default function ShareSessionButton({ sessionUuid }: Props) {
         onClose={handleClose}
         aria-labelledby="share-alert-dialog-title"
         aria-describedby="share-alert-dialog-description"
+        maxWidth="md"
+        fullWidth
       >
         <DialogTitle id="share-alert-dialog-title">
           <Translator path="components.molecules.shareSession.openButton" />
@@ -190,85 +209,103 @@ export default function ShareSessionButton({ sessionUuid }: Props) {
             </Box>
           ) : (
             <DialogContentText id="share-alert-dialog-description">
-              <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
-                <ContentCopy sx={{ width: 20, height: 20 }} />
-                <Box sx={{ flexGrow: '1', marginLeft: 1, marginRight: 2 }}>
-                  <Translator path="components.molecules.shareSession.types.static" />
-                </Box>
-                <Box sx={{ marginRight: 2 }}>
-                  <FormControl size="small" sx={{ width: '150px'}}>
-                    <InputLabel id="expirein-label" sx={{ marginLeft: 0 }}>
-                      <Translator path="components.molecules.shareSession.expire.expiresIn" />
-                    </InputLabel>
-                    <Select
-                      labelId="expirein-label"
-                      id="expirein-label-select"
-                      value={expireTime}
-                      label={t('components.molecules.shareSession.expire.expiresIn')}
-                      onChange={(e: SelectChangeEvent) => setExpireTime(parseInt(e.target.value))}
-                    >
-                      <MenuItem value={7}>
-                        <Translator path="components.molecules.shareSession.expire.7days" />
-                      </MenuItem>
-                      <MenuItem value={31}>
-                        <Translator path="components.molecules.shareSession.expire.30days" />
-                      </MenuItem>
-                      <MenuItem value={0}>
-                        <Translator path="components.molecules.shareSession.expire.never" />
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-                {shareLink.type === 'STATIC' ? (
-                  <LoadingButton variant="contained" loading={isCreatingStatic} loadingPosition="center" onClick={() => handleCopyShareLink('STATIC', expireTime)}>
-                    <Translator path="components.molecules.shareSession.copyUpdateButton" />
-                  </LoadingButton>
-                ) : (
-                  <LoadingButton variant="contained" loading={isCreatingStatic} loadingPosition="center" onClick={() => handleCopyShareLink('STATIC', expireTime)}>
-                    <Translator path="components.molecules.shareSession.copyButton" />
-                  </LoadingButton>
-                )}
+              <Box sx={{ width: '100%', marginTop: 1, marginBottom: 3 }}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid xs={12} sm={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ContentCopy sx={{ width: 20, height: 20, marginRight: 1 }} />
+                      <Translator path="components.molecules.shareSession.types.static" />
+                    </Box>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2}>
+                    <Box>
+                      <FormControl size="small" sx={{ width: '100%'}}>
+                        <InputLabel id="expirein-label" sx={{ marginLeft: 0 }}>
+                          <Translator path="components.molecules.shareSession.expire.expiresIn" />
+                        </InputLabel>
+                        <Select
+                          labelId="expirein-label"
+                          id="expirein-label-select"
+                          value={expireTime}
+                          label={t('components.molecules.shareSession.expire.expiresIn')}
+                          onChange={(e: SelectChangeEvent) => setExpireTime(parseInt(e.target.value))}
+                        >
+                          <MenuItem value={7}>
+                            <Translator path="components.molecules.shareSession.expire.7days" />
+                          </MenuItem>
+                          <MenuItem value={31}>
+                            <Translator path="components.molecules.shareSession.expire.30days" />
+                          </MenuItem>
+                          <MenuItem value={0}>
+                            <Translator path="components.molecules.shareSession.expire.never" />
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={4}>
+                    {shareLink.type === 'STATIC' ? (
+                      <LoadingButton variant="contained" loading={isCreatingStatic} loadingPosition="center" onClick={() => handleCopyShareLink('STATIC', expireTime)} fullWidth>
+                        <Translator path="components.molecules.shareSession.copyUpdateButton" />
+                      </LoadingButton>
+                    ) : (
+                      <LoadingButton variant="contained" loading={isCreatingStatic} loadingPosition="center" onClick={() => handleCopyShareLink('STATIC', expireTime)} fullWidth>
+                        <Translator path="components.molecules.shareSession.copyButton" />
+                      </LoadingButton>
+                    )}
+                  </Grid>
+                </Grid>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 3 }}>
-                <Language sx={{ width: 20, height: 20 }} />
-                <Box sx={{ flexGrow: '1', marginLeft: 1, marginRight: 3 }}>
-                  <Translator path="components.molecules.shareSession.types.dynamic" />
-                </Box>
-                <Box sx={{ marginRight: 2 }}>
-                  <FormControl size="small" sx={{ width: '150px'}}>
-                    <InputLabel id="expirein-label" sx={{ marginLeft: 0 }}>
-                      <Translator path="components.molecules.shareSession.expire.expiresIn" />
-                    </InputLabel>
-                    <Select
-                      labelId="expirein-label"
-                      id="expirein-label-select"
-                      value={expireTimeDynamic}
-                      label={t('components.molecules.shareSession.expire.expiresIn')}
-                      onChange={(e: SelectChangeEvent) => setExpireTimeDynamic(parseInt(e.target.value))}
-                    >
-                      <MenuItem value={7}>
-                        <Translator path="components.molecules.shareSession.expire.7days" />
-                      </MenuItem>
-                      <MenuItem value={31}>
-                        <Translator path="components.molecules.shareSession.expire.30days" />
-                      </MenuItem>
-                      <MenuItem value={0}>
-                        <Translator path="components.molecules.shareSession.expire.never" />
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-                <LoadingButton variant="contained" loading={isCreatingDynamic} loadingPosition="center" onClick={() => handleCopyShareLink('DYNAMIC', expireTimeDynamic)}>
-                  <Translator path="components.molecules.shareSession.copyButton" />
-                </LoadingButton>
+
+              <Box sx={{ width: '100%' }}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid xs={12} sm={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ContentCopy sx={{ width: 20, height: 20, marginRight: 1 }} />
+                      <Translator path="components.molecules.shareSession.types.dynamic" />
+                    </Box>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2}>
+                    <Box>
+                      <FormControl size="small" sx={{ width: '100%'}}>
+                        <InputLabel id="expirein-label" sx={{ marginLeft: 0 }}>
+                          <Translator path="components.molecules.shareSession.expire.expiresIn" />
+                        </InputLabel>
+                        <Select
+                          labelId="expirein-label"
+                          id="expirein-label-select"
+                          value={expireTimeDynamic}
+                          label={t('components.molecules.shareSession.expire.expiresIn')}
+                          onChange={(e: SelectChangeEvent) => setExpireTimeDynamic(parseInt(e.target.value))}
+                        >
+                          <MenuItem value={7}>
+                            <Translator path="components.molecules.shareSession.expire.7days" />
+                          </MenuItem>
+                          <MenuItem value={31}>
+                            <Translator path="components.molecules.shareSession.expire.30days" />
+                          </MenuItem>
+                          <MenuItem value={0}>
+                            <Translator path="components.molecules.shareSession.expire.never" />
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={4}>
+                    <LoadingButton variant="contained" loading={isCreatingDynamic} loadingPosition="center" onClick={() => handleCopyShareLink('DYNAMIC', expireTimeDynamic)} fullWidth>
+                      <Translator path="components.molecules.shareSession.copyButton" />
+                    </LoadingButton>
+                  </Grid>
+                </Grid>
               </Box>
+
               {shareLink.url && (
                 <Box sx={{ marginTop: 3 }}>
                   <Alert
-                    severity="info"
+                    severity="info" icon={false}
                     sx={{ alignItems: 'center' }}
                     action={
-                      <Button variant="outlined" size="small" onClick={() => handleRevokeShareLink(shareLink)}>
+                      <Button variant="outlined" size="small" onClick={() => handleRevokeShareLink(shareLink)} sx={{ whiteSpace: 'nowrap', textTransform: 'none' }}>
                         <Translator path="components.molecules.shareSession.revokeLinkButton" />
                       </Button>
                     }

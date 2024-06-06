@@ -67,10 +67,17 @@ export default function App({ config, evoya }: Props) {
               // Force mobile view
               values: {
                 xs: 0,
-                sm: 10000,
-                md: 10000,
-                lg: 10000,
-                xl: 10000
+                sm: 600,
+                md: 900,
+                lg: 1200,
+                xl: 1536
+              }
+            }, {
+              primary: {
+                main: config.button?.style?.bgcolor ?? '#ff2e4e',
+                dark: config.button?.style?.bgcolorHover ?? '#ff4764',
+                // light: '#ff7d91',
+                contrastText: config.button?.style?.color ?? '#ffffff'
               }
             })
           );

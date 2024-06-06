@@ -4,7 +4,9 @@ import Chat from 'chat';
 
 import EvoyaHeader from 'evoya/EvoyaHeader';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+
+import { WidgetContext } from 'context';
 
 const style = {
   display: 'flex',
@@ -31,6 +33,7 @@ const styleOpen = {
 };
 
 export default function WidgetEmbedded() {
+  const { evoya } = useContext(WidgetContext);
   const [open, setOpen] = useState(false);
   const [visualViewportHeight, setVisualViewportHeight] = useState(window.innerHeight);
   const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0);
@@ -47,12 +50,14 @@ export default function WidgetEmbedded() {
       window.visualViewport.addEventListener("resize", viewportHandler);
       window.visualViewport.addEventListener("scroll", viewportHandler);
     }
-    window.addEventListener('chainlit-close-modal', () => {
-      setOpen(false)
-    });
-    window.addEventListener('chainlit-open-modal', () => {
-      setOpen(true)
-    });
+    if (evoya?.type !== 'dashboard') {
+      window.addEventListener('chainlit-close-modal', () => {
+        setOpen(false)
+      });
+      window.addEventListener('chainlit-open-modal', () => {
+        setOpen(true)
+      });
+    }
     return () => {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", viewportHandler);
@@ -81,7 +86,7 @@ export default function WidgetEmbedded() {
           : style
         }
       >
-        <EvoyaHeader showClose={open} />
+        <EvoyaHeader showClose={open} noShow={false} />
         <Chat />
       </Box>
     </Box>

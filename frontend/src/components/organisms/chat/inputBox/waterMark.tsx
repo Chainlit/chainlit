@@ -4,9 +4,9 @@ import { Stack, Typography } from '@mui/material';
 
 import { Translator } from 'components/i18n';
 
-import 'assets/evoya_light.svg';
+// import 'assets/evoya_light.svg';
 import LogoDark from 'assets/evoya_light.svg?react';
-import 'assets/evoya_light.svg';
+// import 'assets/evoya_light.svg';
 import LogoLight from 'assets/evoya_light.svg?react';
 
 import { settingsState } from 'state/settings';

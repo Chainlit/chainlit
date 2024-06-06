@@ -162,46 +162,62 @@ const Input = memo(
               <Attachments />
             </Box>
           ) : null}
-          <TextField
-            inputRef={ref}
-            id="copilot-chat-input"
-            autoFocus
-            multiline
-            variant="standard"
-            autoComplete="false"
-            placeholder={t(
-              'components.organisms.chat.inputBox.input.placeholder'
-            )}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={() => setIsComposing(false)}
-            { ...(evoya?.type !== 'default' ? { onClick: inputFocusHandler} : {})}
-            value={value}
-            fullWidth
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                pl: 0,
-                width: '100%'
-              },
-              endAdornment: (
-                <Box sx={{ mr: -2 }}>
-                  <SubmitButton
-                    onSubmit={submit}
-                    disabled={disabled || (!loading && !value)}
-                  />
-                </Box>
-              )
-            }}
-          />
+          <Stack
+            direction="row"
+            alignItems="center"
+          >
+            <Stack
+              color="text.secondary"
+              marginLeft={-1}
+            >
+              <UploadButton
+                disabled={disabled}
+                fileSpec={fileSpec}
+                onFileUploadError={onFileUploadError}
+                onFileUpload={onFileUpload}
+              />
+            </Stack>
+            <TextField
+              inputRef={ref}
+              id="copilot-chat-input"
+              autoFocus
+              multiline
+              variant="standard"
+              autoComplete="false"
+              placeholder={t(
+                'components.organisms.chat.inputBox.input.placeholder'
+              )}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => setIsComposing(true)}
+              onCompositionEnd={() => setIsComposing(false)}
+              { ...(evoya?.type !== 'default' ? { onClick: inputFocusHandler} : {})}
+              value={value}
+              fullWidth
+              InputProps={{
+                disableUnderline: true,
+                sx: {
+                  pl: 1,
+                  width: '100%'
+                },
+                endAdornment: (
+                  <Box sx={{ mr: -2 }}>
+                    <SubmitButton
+                      onSubmit={submit}
+                      disabled={disabled || (!loading && !value)}
+                    />
+                  </Box>
+                )
+              }}
+            />
+          </Stack>
           <Stack
             direction="row"
             alignItems="center"
             color="text.secondary"
-            justifyContent="space-between"
+            justifyContent="center"
           >
-            <Stack direction="row" alignItems="center" marginLeft={-1}>
+            {/* <Stack direction="row" alignItems="center" marginLeft={-1}>
               <UploadButton
                 disabled={disabled}
                 fileSpec={fileSpec}
@@ -220,7 +236,7 @@ const Input = memo(
                 </IconButton>
               )}
               <MicButton disabled={disabled} />
-            </Stack>
+            </Stack> */}
             <Box>
               <WaterMark />
             </Box>

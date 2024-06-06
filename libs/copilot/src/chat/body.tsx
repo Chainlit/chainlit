@@ -28,12 +28,13 @@ import {
 import { sideViewState } from '@chainlit/react-client';
 
 import { ElementSideView } from 'components/ElementSideView';
-import { InputBox } from 'components/InputBox';
+import { InputBox as InputBoxDefault } from 'components/InputBox';
+import InputBox from '@chainlit/app/src/components/organisms/chat/inputBox';
 
 import Messages from './messages';
 
 const Chat = () => {
-  const { apiClient } = useContext(WidgetContext);
+  const { apiClient, evoya } = useContext(WidgetContext);
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
@@ -204,14 +205,25 @@ const Chat = () => {
             projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
           />
-          <InputBox
-            fileSpec={fileSpec}
-            onFileUpload={onFileUpload}
-            onFileUploadError={onFileUploadError}
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
-            projectSettings={projectSettings}
-          />
+          {evoya?.type === 'default' ? (
+            <InputBoxDefault
+              fileSpec={fileSpec}
+              onFileUpload={onFileUpload}
+              onFileUploadError={onFileUploadError}
+              autoScroll={autoScroll}
+              setAutoScroll={setAutoScroll}
+              projectSettings={projectSettings}
+            />
+          ) : (
+            <InputBox
+              fileSpec={fileSpec}
+              onFileUpload={onFileUpload}
+              onFileUploadError={onFileUploadError}
+              autoScroll={autoScroll}
+              setAutoScroll={setAutoScroll}
+              projectSettings={projectSettings}
+            />
+          )}
         </ErrorBoundary>
       </Box>
       <ElementSideView

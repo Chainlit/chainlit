@@ -3,6 +3,7 @@ import { Stack } from '@mui/material';
 import { Logo } from '@chainlit/app/src/components/atoms/logo';
 
 import NewChatButton from './NewChatButton';
+import DashboardSidebarButton from './DashboardSidebarButton';
 import CloseModalButton from './CloseModalButton';
 import MaximizeButton from './MaximizeButton';
 import ShareSessionButton from './ShareSessionButton';
@@ -18,9 +19,10 @@ const sessionTokenKey = 'session_token';
 
 interface Props {
   showClose: boolean;
+  noShow: boolean;
 }
 
-const Header = ({ showClose }: Props): JSX.Element => {
+const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
   const { evoya, apiClient, accessToken } = useContext(WidgetContext);
   const firstUserInt = useRecoilValue(firstUserInteraction);
   const [sessionUuid, setSessionUuid] = useState(evoya?.session_uuid ?? '');
@@ -43,7 +45,11 @@ const Header = ({ showClose }: Props): JSX.Element => {
     if (!sessionUuid && firstUserInt && !loading) {
       getSessionUuid();
     }
-  }, [firstUserInt, loading])
+  }, [firstUserInt, loading]);
+
+  if (noShow) {
+    return (<></>);
+  }
 
   return (
     <Stack
@@ -54,11 +60,14 @@ const Header = ({ showClose }: Props): JSX.Element => {
       justifyContent="space-between"
       bgcolor="background.paper"
     >
-      {evoya?.type === 'dashboard' ? (
-        <div></div>
-      ) : (
-        <Logo style={{ maxHeight: '25px' }} />
-      )}
+      <Stack direction="row" alignItems="center" spacing={2}>
+        {evoya?.type === 'dashboard' &&
+          <>
+            <DashboardSidebarButton />
+            <NewChatButton />
+          </>
+        }
+      </Stack>
       <Stack direction="row" alignItems="center" spacing={2}>
         {(evoya?.type === 'dashboard' && sessionUuid) && (
           <>
@@ -66,11 +75,12 @@ const Header = ({ showClose }: Props): JSX.Element => {
             <ShareSessionButton sessionUuid={sessionUuid} />
           </>
         )}
-        {evoya?.type !== 'dashboard' &&
-          <NewChatButton chat_uuid={evoya?.chat_uuid} />
-        }
-        {!showClose && <MaximizeButton />}
-        {showClose && <CloseModalButton />}
+        {evoya?.type !== 'dashboard' && (
+          <>
+            {!showClose && <MaximizeButton />}
+            {showClose && <CloseModalButton />}
+          </>
+        )}
       </Stack>
     </Stack>
   );

@@ -7,6 +7,23 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr()],
+  build: {
+    emptyOutDir: true,
+    rollupOptions: {
+      // input: {
+      //   copilot: path.resolve(__dirname, 'index.tsx')
+      // },
+      output: [
+        {
+          name: 'chatpage',
+          dir: '../../avaia-chat/src/avaia_chat/public/chatpage/frontend/dist',
+          format: 'iife',
+          entryFileNames: 'assets/index.js',
+          inlineDynamicImports: true,
+        }
+      ]
+    }
+  },
   resolve: {
     alias: {
       // To prevent conflicts with packages in @chainlit/react-components, we need to specify the resolution paths for these dependencies.

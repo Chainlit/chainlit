@@ -1,33 +1,11 @@
-import { useState } from 'react';
+import { Box, Tooltip, Button } from '@mui/material';
+import Add from '@mui/icons-material/Add';
 
-import { Box, IconButton, Tooltip } from '@mui/material';
-
-import SquarePenIcon from '@chainlit/app/src/assets/squarePen';
 import { Translator } from '@chainlit/app/src/components/i18n';
-import NewChatDialog from '@chainlit/app/src/components/molecules/newChatDialog';
-import { useChatInteract, useAuth } from '@chainlit/react-client';
 
-interface Props {
-  chat_uuid: string | undefined;
-}
-
-export default function NewChatButton({ chat_uuid }: Props) {
-  const [open, setOpen] = useState(false);
-  const { clear } = useChatInteract();
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleConfirm = async () => {
-    // @ts-expect-error is not a valid prop
-    // const newToken = await window.getEvoyaAccessToken(chat_uuid);
-    clear();
-    handleClose();
+export default function NewChatButton() {
+  const handleClick = () => {
+    window.dispatchEvent(new CustomEvent('copilot-new-session'));
   };
 
   return (
@@ -35,15 +13,10 @@ export default function NewChatButton({ chat_uuid }: Props) {
       <Tooltip
         title={<Translator path="components.molecules.newChatButton.newChat" />}
       >
-        <IconButton edge="end" id="new-chat-button" onClick={handleClickOpen}>
-          <SquarePenIcon sx={{ width: 20, height: 20 }} />
-        </IconButton>
+        <Button variant="outlined" startIcon={<Add />} onClick={handleClick}>
+          <Translator path="components.molecules.newChatButton.newChatSession" />
+        </Button>
       </Tooltip>
-      <NewChatDialog
-        open={open}
-        handleClose={handleClose}
-        handleConfirm={handleConfirm}
-      />
     </Box>
   );
 }
