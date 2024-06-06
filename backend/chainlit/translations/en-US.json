@@ -20,7 +20,7 @@
         "TaskList": {
           "title": "🗒️ Task List",
           "loading": "Loading...",
-          "error": "An error occured"
+          "error": "An error occurred"
         }
       },
       "attachments": {
