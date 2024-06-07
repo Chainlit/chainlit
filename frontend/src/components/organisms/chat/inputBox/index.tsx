@@ -16,6 +16,7 @@ import { inputHistoryState } from 'state/userInputHistory';
 
 import Input from './input';
 import WaterMark from './waterMark';
+import {toast} from "sonner";
 
 interface Props {
   fileSpec: FileSpec;
@@ -35,13 +36,29 @@ const InputBox = memo(
   }: Props) => {
     const layoutMaxWidth = useLayoutMaxWidth();
     const setInputHistory = useSetRecoilState(inputHistoryState);
+    const maxMessageLength = 9000;
 
     const { user } = useAuth();
     const { sendMessage, replyMessage } = useChatInteract();
     // const tokenCount = useRecoilValue(tokenCountState);
 
+    const validateMessage = (msg: string): boolean => {
+      if (msg && msg.length > maxMessageLength) {
+        const errorMsg = `The message is too long, please reduce to ` +
+          `${maxMessageLength} characters.`;
+        toast.error(errorMsg);
+        return false;
+      }
+
+      return true;
+    }
+
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
+        if (!validateMessage(msg)) {
+          return
+        }
+
         const message: IStep = {
           threadId: '',
           id: uuidv4(),
@@ -80,6 +97,10 @@ const InputBox = memo(
 
     const onReply = useCallback(
       async (msg: string) => {
+        if (!validateMessage(msg)) {
+          return
+        }
+
         const message: IStep = {
           threadId: '',
           id: uuidv4(),
