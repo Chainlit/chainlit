@@ -25,12 +25,12 @@ export async function runTests(matchName) {
 
 export function runCommand(command: string, cwd = ROOT) {
   const [cmd, ...args] = command.split(' ');
-  return execSync(cmd, {
+  const fullCommand = [cmd, ...args].join(' ');
+  return execSync(fullCommand, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
     stdio: 'inherit',
-    shell: true,
-    args
+    shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/sh',
   });
 }
