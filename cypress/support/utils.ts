@@ -11,10 +11,7 @@ export enum ExecutionMode {
   Sync = 'sync'
 }
 
-export async function runTests(matchName: string) {
-  // Sanitize matchName to prevent injection by escaping potentially dangerous characters
-  matchName = sanitizeMatchName(matchName);
-
+export async function runTests(matchName) {
   // Cypress requires a healthcheck on the server at startup so let's run
   // Chainlit before running tests to pass the healthcheck
   runCommand('pnpm exec ts-node ./cypress/support/run.ts action');
@@ -27,19 +24,13 @@ export async function runTests(matchName: string) {
 }
 
 export function runCommand(command: string, cwd = ROOT) {
-  return execSync(command, {
+  const [cmd, ...args] = command.split(' ');
+  return execSync(cmd, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: true,
+    args
   });
-}
-
-function sanitizeMatchName(input: string): string {
-  // Escape shell metacharacters
-  const shellMetaChars = ['$', '&', '|', ';', '>', '<', '`', '\\', '"', "'", ' ', '(', ')', '{', '}'];
-  shellMetaChars.forEach(char => {
-    input = input.replace(new RegExp(`\\${char}`, 'g'), `\\${char}`);
-  });
-  return input;
 }
