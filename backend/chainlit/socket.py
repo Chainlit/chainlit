@@ -2,8 +2,8 @@ import asyncio
 import json
 import time
 import uuid
-from urllib.parse import unquote
 from typing import Any, Dict, Literal
+from urllib.parse import unquote
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
@@ -23,6 +23,8 @@ from chainlit.types import (
     UIMessagePayload,
 )
 from chainlit.user_session import user_sessions
+
+MAX_UI_MESSAGE_LENGTH = 9000
 
 
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
@@ -267,9 +269,23 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
         await context.emitter.task_end()
 
 
+def is_ui_message_valid(payload: UIMessagePayload) -> bool:
+    content = payload.get('message', {}).get('output', '')
+
+    if len(content) > MAX_UI_MESSAGE_LENGTH:
+        logger.error("Message of length {} sent to socket".format(len(content)))
+        return False
+
+    return True
+
+
 @socket.on("ui_message")
 async def message(sid, payload: UIMessagePayload):
     """Handle a message sent by the User."""
+
+    if not is_ui_message_valid(payload):
+        return
+
     session = WebsocketSession.require(sid)
 
     task = asyncio.create_task(process_message(session, payload))
