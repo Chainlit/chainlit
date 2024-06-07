@@ -12,8 +12,7 @@ import {
   threadHistoryState,
   useChatData,
   useChatInteract,
-  useChatMessages,
-  useChatSession
+  useChatMessages
 } from '@chainlit/react-client';
 
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
@@ -35,7 +34,6 @@ import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
-  const { idToResume } = useChatSession();
 
   const projectSettings = useRecoilValue(projectSettingsState);
   const setAttachments = useSetRecoilState(attachmentsState);
@@ -214,20 +212,6 @@ const Chat = () => {
           >
             <Alert sx={{ mx: 2 }} id="session-error" severity="error">
               <Translator path="components.organisms.chat.index.couldNotReachServer" />
-            </Alert>
-          </Box>
-        ) : null}
-        {idToResume ? (
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: layoutMaxWidth,
-              mx: 'auto',
-              my: 2
-            }}
-          >
-            <Alert sx={{ mx: 2 }} severity="info">
-              <Translator path="components.organisms.chat.index.continuingChat" />
             </Alert>
           </Box>
         ) : null}

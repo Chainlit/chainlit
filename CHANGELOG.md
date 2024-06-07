@@ -6,43 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added
+Nothing unreleased.
 
-- Teams integration
-
-## [1.1.300rc3] - 2024-05-28
+## [1.1.300] - 2024-06-07
 
 ### Added
 
-- Input streaming for tool calls
-
-## [1.1.300rc2] - 2024-05-28
-
-### Added
-
-- Expand copilot button
-
-### Fix
-
-- Reworked message padding and spacing
-- Chat profile should now support non-ASCII characters (like chinese)
-
-## [1.1.300rc1] - 2024-05-28
-
-### Fix
-
-- Scroll flickering when streaming
-- Logo max height
-- Remove duplicate new chat button in the sidebar
-
-## [1.1.300rc0] - 2024-05-27
-
-### Added
-
-- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
 - `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
+- Teams integration
+- Expand copilot button
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
 - `default` theme config in `config.toml`
 - If only one OAuth provider is set, automatically redirect the user to it
+- Input streaming for tool calls
 
 ### Changed
 
@@ -53,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The `show_readme_as_default` config has been removed
 - No longer collapse root level messages
 
-### Fixed
+### Fix
 
 - The Chat Profile description should now disappear when not hovered.
 - Error handling of steps has been improved
@@ -61,6 +37,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Copilot should now work as expected even if the user is closing/reopening it
 - Copilot CSS should no longer leak/be impacted by the host website CSS
 - Fix various `cl.Context` errors
+- Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
 
 ## [1.1.202] - 2024-05-22
 

@@ -162,13 +162,11 @@ class Element:
         self.for_id = for_id
 
         if not self.mime:
-            # Only guess the mime type when the content is binary
-            self.mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.path or self.content)
-            )
-            if not self.mime and self.url:
+            if self.type in mime_types:
+                self.mime = mime_types[self.type]
+            elif self.path or isinstance(self.content, (bytes, bytearray)):
+                self.mime = filetype.guess(self.path or self.content)
+            elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
         await self._create()
