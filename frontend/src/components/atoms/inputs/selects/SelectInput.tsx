@@ -1,5 +1,5 @@
 import { MouseEvent, useState } from 'react';
-import { grey, primary } from 'theme/index';
+import { grey } from 'theme/index';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { Stack, type SxProps } from '@mui/material';
@@ -130,7 +130,7 @@ const SelectInput = ({
                   ? '0px 2px 4px 0px #0000000D'
                   : '0px 10px 10px 0px #0000000D',
               '&& .Mui-selected, .Mui-selected.Mui-selected:hover': {
-                backgroundColor: isDarkMode ? grey[800] : primary[50]
+                backgroundColor: isDarkMode ? grey[800] : 'primary.light'
               }
             }
           },

@@ -3,7 +3,8 @@ export type AuthProvider =
   | 'header'
   | 'github'
   | 'google'
-  | 'azure-ad';
+  | 'azure-ad'
+  | 'azure-ad-hybrid';
 
 export interface IUserMetadata extends Record<string, any> {
   tags?: string[];
