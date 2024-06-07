@@ -63,7 +63,6 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
-
   const _connect = useCallback(
     ({
       client,
@@ -86,7 +85,9 @@ const useChatSession = () => {
           'X-Chainlit-Session-Id': sessionId,
           'X-Chainlit-Thread-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
-          'X-Chainlit-Chat-Profile': chatProfile || ''
+          'X-Chainlit-Chat-Profile': chatProfile
+            ? encodeURIComponent(chatProfile)
+            : ''
         }
       });
       setSession((old) => {
@@ -167,11 +168,20 @@ const useChatSession = () => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
-        setMessages((oldMessages) =>
-          updateMessageContentById(oldMessages, id, token, isSequence)
-        );
-      });
+      socket.on(
+        'stream_token',
+        ({ id, token, isSequence, isInput }: IToken) => {
+          setMessages((oldMessages) =>
+            updateMessageContentById(
+              oldMessages,
+              id,
+              token,
+              isSequence,
+              isInput
+            )
+          );
+        }
+      );
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback });

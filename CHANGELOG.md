@@ -6,7 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased!
+### Added
+
+- Teams integration
+
+## [1.1.300rc3] - 2024-05-28
+
+### Added
+
+- Input streaming for tool calls
+
+## [1.1.300rc2] - 2024-05-28
+
+### Added
+
+- Expand copilot button
+
+### Fix
+
+- Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
 
 ## [1.1.300rc1] - 2024-05-28
 

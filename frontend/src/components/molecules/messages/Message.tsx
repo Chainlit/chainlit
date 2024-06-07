@@ -42,8 +42,7 @@ const Message = memo(
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
 
-    const forceDisplayCursor =
-      isLast && isRunning && (!message.streaming || window.renderingCodeBlock);
+    const forceDisplayCursor = isLast && isRunning && !message.streaming;
     return (
       <Box
         sx={{
@@ -80,10 +79,9 @@ const Message = memo(
                 <Box
                   sx={{
                     px: 2.5,
-                    py: 1,
                     borderRadius: '1.5rem',
                     backgroundColor: 'background.paper',
-                    maxWidth: '90%',
+                    maxWidth: '70%',
                     ml: 'auto'
                   }}
                 >
@@ -98,13 +96,18 @@ const Message = memo(
                   />
                 </Box>
                 {forceDisplayCursor && (
-                  <Box my={1}>
+                  <Box mt={1}>
                     <BlinkingCursor />
                   </Box>
                 )}
               </Box>
             ) : (
-              <Stack direction="row" gap="1rem" width="100%">
+              <Stack
+                direction="row"
+                gap="1rem"
+                width="100%"
+                className="ai-message"
+              >
                 <MessageAvatar author={message.name} hide={!showAvatar} />
                 <Stack
                   alignItems="flex-start"
@@ -129,16 +132,15 @@ const Message = memo(
                   {!isRunning && isLast && isAsk && (
                     <AskUploadButton onError={onError} />
                   )}
-                  <Box my={1} />
-                  {forceDisplayCursor && (
-                    <Box position="absolute" bottom={0}>
-                      <BlinkingCursor />
-                    </Box>
-                  )}
                   {actions?.length ? (
                     <MessageActions message={message} actions={actions} />
                   ) : null}
                   <MessageButtons message={message} />
+                  {forceDisplayCursor && (
+                    <Box my={0.5}>
+                      <BlinkingCursor />
+                    </Box>
+                  )}
                 </Stack>
               </Stack>
             )}

@@ -171,6 +171,8 @@ class RunSettings:
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
+    ssl_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
     headless: bool = False
     watch: bool = False
     no_cache: bool = False

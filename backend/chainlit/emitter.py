@@ -105,7 +105,7 @@ class BaseChainlitEmitter:
         """Stub method to send a stream start signal to the UI."""
         pass
 
-    async def send_token(self, id: str, token: str, is_sequence=False):
+    async def send_token(self, id: str, token: str, is_sequence=False, is_input=False):
         """Stub method to send a message token to the UI."""
         pass
 
@@ -353,10 +353,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
             step_dict,
         )
 
-    def send_token(self, id: str, token: str, is_sequence=False):
+    def send_token(self, id: str, token: str, is_sequence=False, is_input=False):
         """Send a message token to the UI."""
         return self.emit(
-            "stream_token", {"id": id, "token": token, "isSequence": is_sequence}
+            "stream_token",
+            {"id": id, "token": token, "isSequence": is_sequence, "isInput": is_input},
         )
 
     def set_chat_settings(self, settings: Dict[str, Any]):

@@ -4,7 +4,15 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 
 Provider = Literal[
-    "credentials", "header", "github", "google", "azure-ad", "okta", "auth0", "descope"
+    "credentials",
+    "header",
+    "github",
+    "google",
+    "azure-ad",
+    "azure-ad-hybrid",
+    "okta",
+    "auth0",
+    "descope",
 ]
 
 
