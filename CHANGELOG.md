@@ -28,6 +28,7 @@ Nothing unreleased.
 - Chain of Thought has been reworked. Only steps of type `tool` will be displayed if `hide_cot` is false
 - The `show_readme_as_default` config has been removed
 - No longer collapse root level messages
+- The blue alert "Continuing chat" has been removed.
 
 ### Fix
 

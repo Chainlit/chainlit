@@ -165,7 +165,9 @@ class Element:
             if self.type in mime_types:
                 self.mime = mime_types[self.type]
             elif self.path or isinstance(self.content, (bytes, bytearray)):
-                self.mime = filetype.guess(self.path or self.content)
+                file_type = filetype.guess(self.path or self.content)
+                if file_type:
+                    self.mime = file_type.mime
             elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
