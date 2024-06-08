@@ -20,10 +20,12 @@ let root: ReactDOM.Root | null = null;
 declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
+    mountChainlitWidget: (config: IWidgetConfig) => void;
+    unmountChainlitWidget: () => void;
+    sendChainlitEvent: (data: any) => void;
   }
 }
 
-// @ts-expect-error is not a valid prop
 window.mountChainlitWidget = (config: IWidgetConfig) => {
   const container = document.createElement('div');
   container.id = id;
@@ -57,7 +59,10 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
   );
 };
 
-// @ts-expect-error is not a valid prop
 window.unmountChainlitWidget = () => {
   root?.unmount();
+};
+
+window.sendChainlitEvent = () => {
+  console.info('Copilot is not active. Please check if the widget is mounted.');
 };

@@ -1,13 +1,14 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect } from 'react';
 
-import { useChatSession } from '@chainlit/react-client';
+import { useChatInteract, useChatSession } from '@chainlit/react-client';
 
 import ChatBody from './body';
 
 export default function ChatWrapper() {
   const { apiClient, accessToken } = useContext(WidgetContext);
   const { connect, session } = useChatSession();
+  const { sendCopilotEvent } = useChatInteract();
   useEffect(() => {
     if (session?.socket?.connected) return;
     connect({
@@ -16,6 +17,11 @@ export default function ChatWrapper() {
       accessToken: `Bearer ${accessToken}`
     });
   }, [connect, accessToken, apiClient]);
+
+  useEffect(() => {
+    // @ts-expect-error is not a valid prop
+    window.sendChainlitEvent = sendCopilotEvent;
+  }, [sendCopilotEvent]);
 
   return <ChatBody />;
 }

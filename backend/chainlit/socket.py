@@ -2,8 +2,8 @@ import asyncio
 import json
 import time
 import uuid
-from urllib.parse import unquote
 from typing import Any, Dict, Literal
+from urllib.parse import unquote
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
@@ -140,7 +140,9 @@ async def connect(sid, environ, auth):
     client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
     http_referer = environ.get("HTTP_REFERER")
     url_encoded_chat_profile = environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE")
-    chat_profile = unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
+    chat_profile = (
+        unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
+    )
 
     ws_session = WebsocketSession(
         id=session_id,
@@ -274,6 +276,17 @@ async def message(sid, payload: UIMessagePayload):
 
     task = asyncio.create_task(process_message(session, payload))
     session.current_task = task
+
+
+@socket.on("copilot_event")
+async def copilot_event(sid, payload: Any):
+    """Handle a message sent by the User."""
+    session = WebsocketSession.require(sid)
+
+    init_ws_context(session)
+
+    if config.code.on_copilot_event:
+        await config.code.on_copilot_event(payload)
 
 
 @socket.on("audio_chunk")

@@ -14,6 +14,7 @@ Nothing unreleased.
 
 - `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
 - Teams integration
+- Copilot can now send events to the chainlit app with `@cl.on_copilot_event`
 - Expand copilot button
 - Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
 - `default` theme config in `config.toml`

@@ -190,6 +190,22 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
 
 
 @trace
+def on_copilot_event(func: Callable[[ThreadDict], Any]) -> Callable:
+    """
+    Hook to react to an event sent by the copilot.
+
+    Args:
+        func (Callable[], Any]): The hook to execute.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_copilot_event = wrap_user_function(func)
+    return func
+
+
+@trace
 def set_chat_profiles(
     func: Callable[[Optional["User"]], List["ChatProfile"]]
 ) -> Callable:
@@ -398,6 +414,7 @@ __all__ = [
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",
+    "on_copilot_event",
     "on_stop",
     "action_callback",
     "author_rename",

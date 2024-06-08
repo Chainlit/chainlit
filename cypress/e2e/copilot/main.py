@@ -12,3 +12,8 @@ async def on_message(msg: cl.Message):
         fn = cl.CopilotFunction(name="test", args={"msg": msg.content})
         res = await fn.acall()
         await cl.Message(content=res).send()
+
+
+@cl.on_copilot_event
+async def on_copilot_event(data):
+    await cl.Message(content=f"Event received: {data}").send()

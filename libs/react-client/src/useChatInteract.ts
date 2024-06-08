@@ -61,6 +61,13 @@ const useChatInteract = () => {
     setCurrentThreadId(undefined);
   }, [session]);
 
+  const sendCopilotEvent = useCallback(
+    (data: any) => {
+      session?.socket.emit('copilot_event', data);
+    },
+    [session?.socket]
+  );
+
   const sendMessage = useCallback(
     (message: IStep, fileReferences?: IFileRef[]) => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
@@ -166,7 +173,8 @@ const useChatInteract = () => {
     endAudioStream,
     stopTask,
     setIdToResume,
-    updateChatSettings
+    updateChatSettings,
+    sendCopilotEvent
   };
 };
 

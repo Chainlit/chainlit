@@ -20,6 +20,8 @@ describe('Copilot', () => {
 
         win.addEventListener('chainlit-call-fn', (e) => {
           // @ts-expect-error is not a valid prop
+          win.sendChainlitEvent('Test event sent!');
+          // @ts-expect-error is not a valid prop
           const { name, args, callback } = e.detail;
           if (name === 'test') {
             callback('Function called with: ' + args.msg);
@@ -41,8 +43,11 @@ describe('Copilot', () => {
 
     submitMessageCopilot('Call func!');
     cy.get('#chainlit-copilot-popover', opts).within(() => {
-      cy.get('.step', opts).should('have.length', 3);
+      cy.get('.step', opts).should('have.length', 4);
       cy.contains('.step', 'Function called with: Call func!', opts).should(
+        'be.visible'
+      );
+      cy.contains('.step', 'Event received: Test event sent!', opts).should(
         'be.visible'
       );
     });
