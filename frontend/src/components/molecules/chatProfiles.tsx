@@ -63,7 +63,7 @@ export default function ChatProfiles() {
   const popoverOpen = Boolean(anchorEl);
 
   const items = pSettings.chatProfiles.map((item) => {
-    const icon = item.icon?.startsWith('/public')
+    const icon = item.icon?.includes('/public')
       ? apiClient.buildEndpoint(item.icon)
       : item.icon;
     return {

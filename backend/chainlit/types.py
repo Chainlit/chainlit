@@ -193,21 +193,6 @@ class AskActionResponse(TypedDict):
     collapsed: bool
 
 
-class GenerationRequest(BaseModel):
-    chatGeneration: Optional[ChatGeneration] = None
-    completionGeneration: Optional[CompletionGeneration] = None
-    userEnv: Dict[str, str]
-
-    @property
-    def generation(self):
-        if self.chatGeneration:
-            return self.chatGeneration
-        return self.completionGeneration
-
-    def is_chat(self):
-        return self.chatGeneration is not None
-
-
 class DeleteThreadRequest(BaseModel):
     threadId: str
 

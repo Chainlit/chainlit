@@ -23,6 +23,7 @@ Nothing unreleased.
 
 ### Changed
 
+- **[BREAKING]** Custom endpoints have been reworked. You should now mount your Chainlit app as a FastAPI subapp.
 - **[BREAKING]** Avatars have been reworked. `cl.Avatar` has been removed, instead place your avatars by name in `/public/avatars/*`
 - **[BREAKING]** The `running`, `took_one` and `took_other` translations have been replaced by `used`.
 - **[BREAKING]** `root` attribute of `cl.Step` has been removed. Use `cl.Message` to send root level messages.

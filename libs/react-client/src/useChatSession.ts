@@ -73,12 +73,15 @@ const useChatSession = () => {
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
-      const pathname = new URL(client.httpEndpoint).pathname;
-      const socketPath = pathname.endsWith('/')
-        ? 'ws/socket.io'
-        : '/ws/socket.io';
-      const socket = io(client.httpEndpoint, {
-        path: `${pathname}${socketPath}`,
+      const { protocol, host, pathname } = new URL(client.httpEndpoint);
+      const uri = `${protocol}//${host}`;
+      const path =
+        pathname && pathname !== '/'
+          ? `/ws${pathname}/socket.io`
+          : '/ws/socket.io';
+
+      const socket = io(uri, {
+        path,
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Client-Type': client.type,

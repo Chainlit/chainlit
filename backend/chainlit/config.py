@@ -163,6 +163,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -173,6 +174,7 @@ class RunSettings:
     port: int = DEFAULT_PORT
     ssl_cert: Optional[str] = None
     ssl_key: Optional[str] = None
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False

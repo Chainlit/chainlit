@@ -33,17 +33,16 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
-from chainlit.telemetry import trace_event
 from chainlit.types import (
     DeleteFeedbackRequest,
     DeleteThreadRequest,
-    GenerationRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
 from fastapi import (
+    APIRouter,
     Depends,
     FastAPI,
     Form,
@@ -63,6 +62,8 @@ from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
 
+ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,9 +71,9 @@ async def lifespan(app: FastAPI):
     port = config.run.port
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}"
+        url = f"http://localhost:{port}{ROOT_PATH}"
     else:
-        url = f"http://{host}:{port}"
+        url = f"http://{host}:{port}{ROOT_PATH}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -167,12 +168,17 @@ def get_build_dir(local_target: str, packaged_target: str):
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-
 app = FastAPI(lifespan=lifespan)
+router = APIRouter(prefix=ROOT_PATH)
 
-app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
 app.mount(
-    "/assets",
+    f"{ROOT_PATH}/public",
+    StaticFiles(directory="public", check_dir=False),
+    name="public",
+)
+
+app.mount(
+    f"{ROOT_PATH}/assets",
     StaticFiles(
         packages=[("chainlit", os.path.join(build_dir, "assets"))],
         follow_symlink=config.project.follow_symlink,
@@ -181,14 +187,13 @@ app.mount(
 )
 
 app.mount(
-    "/copilot",
+    f"{ROOT_PATH}/copilot",
     StaticFiles(
         packages=[("chainlit", copilot_build_dir)],
         follow_symlink=config.project.follow_symlink,
     ),
     name="copilot",
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -197,12 +202,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 socket = SocketManager(
     app,
     cors_allowed_origins=[],
     async_mode="asgi",
-    socketio_path="/ws/socket.io",
+    socketio_path=f"/ws{ROOT_PATH}/socket.io" if ROOT_PATH else "/ws/socket.io",
 )
 
 
@@ -213,7 +217,7 @@ socket = SocketManager(
 if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
     from chainlit.slack.app import slack_app_handler
 
-    @app.post("/slack/events")
+    @router.post("/slack/events")
     async def slack_endpoint(req: Request):
         return await slack_app_handler.handle(req)
 
@@ -226,7 +230,7 @@ if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
     from botbuilder.schema import Activity
     from chainlit.teams.app import adapter, bot
 
-    @app.post("/teams/events")
+    @router.post("/teams/events")
     async def teams_endpoint(req: Request):
         body = await req.json()
         activity = Activity().deserialize(body)
@@ -256,14 +260,17 @@ def get_html_template():
     )
     url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
+    favicon_path = ROOT_PATH + "/favicon" if ROOT_PATH else "/favicon"
 
     tags = f"""<title>{config.ui.name}</title>
+    <link rel="icon" href="{favicon_path}" />
     <meta name="description" content="{config.ui.description}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="{meta_image_url}">
-    <meta property="og:url" content="{url}">"""
+    <meta property="og:url" content="{url}">
+    <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
@@ -293,6 +300,9 @@ def get_html_template():
             content = replace_between_tags(
                 content, "<!-- FONT START -->", "<!-- FONT END -->", font
             )
+        if ROOT_PATH:
+            content = content.replace('href="/', f'href="{ROOT_PATH}/')
+            content = content.replace('src="/', f'src="{ROOT_PATH}/')
         return content
 
 
@@ -320,12 +330,12 @@ def get_user_facing_url(url: URL):
     return config_url.__str__() + url.path
 
 
-@app.get("/auth/config")
+@router.get("/auth/config")
 async def auth(request: Request):
     return get_configuration()
 
 
-@app.post("/login")
+@router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not config.code.password_auth_callback:
         raise HTTPException(
@@ -354,14 +364,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@app.post("/logout")
+@router.post("/logout")
 async def logout(request: Request, response: Response):
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
     return {"success": True}
 
 
-@app.post("/auth/header")
+@router.post("/auth/header")
 async def header_auth(request: Request):
     if not config.code.header_auth_callback:
         raise HTTPException(
@@ -390,7 +400,7 @@ async def header_auth(request: Request):
     }
 
 
-@app.get("/auth/oauth/{provider_id}")
+@router.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -431,7 +441,7 @@ async def oauth_login(provider_id: str, request: Request):
     return response
 
 
-@app.get("/auth/oauth/{provider_id}/callback")
+@router.get("/auth/oauth/{provider_id}/callback")
 async def oauth_callback(
     provider_id: str,
     request: Request,
@@ -516,14 +526,13 @@ async def oauth_callback(
 
 
 # specific route for azure ad hybrid flow
-@app.post("/auth/oauth/azure-ad-hybrid/callback")
+@router.post("/auth/oauth/azure-ad-hybrid/callback")
 async def oauth_azure_hf_callback(
     request: Request,
     error: Optional[str] = None,
     code: Annotated[Optional[str], Form()] = None,
     id_token: Annotated[Optional[str], Form()] = None,
 ):
-    print(request, error, code, id_token)
     provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -594,7 +603,7 @@ async def oauth_azure_hf_callback(
     return response
 
 
-@app.get("/project/translations")
+@router.get("/project/translations")
 async def project_translations(
     language: str = Query(default="en-US", description="Language code"),
 ):
@@ -610,7 +619,7 @@ async def project_translations(
     )
 
 
-@app.get("/project/settings")
+@router.get("/project/settings")
 async def project_settings(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
     language: str = Query(default="en-US", description="Language code"),
@@ -656,7 +665,7 @@ async def project_settings(
     )
 
 
-@app.put("/feedback")
+@router.put("/feedback")
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
@@ -675,7 +684,7 @@ async def update_feedback(
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
 
-@app.delete("/feedback")
+@router.delete("/feedback")
 async def delete_feedback(
     request: Request,
     payload: DeleteFeedbackRequest,
@@ -694,7 +703,7 @@ async def delete_feedback(
     return JSONResponse(content={"success": True})
 
 
-@app.post("/project/threads")
+@router.post("/project/threads")
 async def get_user_threads(
     request: Request,
     payload: GetThreadsRequest,
@@ -719,7 +728,7 @@ async def get_user_threads(
     return JSONResponse(content=res.to_dict())
 
 
-@app.get("/project/thread/{thread_id}")
+@router.get("/project/thread/{thread_id}")
 async def get_thread(
     request: Request,
     thread_id: str,
@@ -737,7 +746,7 @@ async def get_thread(
     return JSONResponse(content=res)
 
 
-@app.get("/project/thread/{thread_id}/element/{element_id}")
+@router.get("/project/thread/{thread_id}/element/{element_id}")
 async def get_thread_element(
     request: Request,
     thread_id: str,
@@ -756,7 +765,7 @@ async def get_thread_element(
     return JSONResponse(content=res)
 
 
-@app.delete("/project/thread")
+@router.delete("/project/thread")
 async def delete_thread(
     request: Request,
     payload: DeleteThreadRequest,
@@ -777,7 +786,7 @@ async def delete_thread(
     return JSONResponse(content={"success": True})
 
 
-@app.post("/project/file")
+@router.post("/project/file")
 async def upload_file(
     session_id: str,
     file: UploadFile,
@@ -813,7 +822,7 @@ async def upload_file(
     return JSONResponse(file_response)
 
 
-@app.get("/project/file/{file_id}")
+@router.get("/project/file/{file_id}")
 async def get_file(
     file_id: str,
     session_id: Optional[str] = None,
@@ -835,7 +844,7 @@ async def get_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/files/{filename:path}")
+@router.get("/files/{filename:path}")
 async def serve_file(
     filename: str,
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
@@ -853,7 +862,7 @@ async def serve_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/favicon")
+@router.get("/favicon")
 async def get_favicon():
     custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
     files = glob.glob(custom_favicon_path)
@@ -868,7 +877,7 @@ async def get_favicon():
     return FileResponse(favicon_path, media_type=media_type)
 
 
-@app.get("/logo")
+@router.get("/logo")
 async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     theme_value = theme.value if theme else Theme.light.value
     logo_path = None
@@ -890,7 +899,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     return FileResponse(logo_path, media_type=media_type)
 
 
-@app.get("/avatars/{avatar_id}")
+@router.get("/avatars/{avatar_id}")
 async def get_avatar(avatar_id: str):
     if avatar_id == "default":
         avatar_id = config.ui.name
@@ -909,19 +918,20 @@ async def get_avatar(avatar_id: str):
         return await get_favicon()
 
 
-@app.head("/")
+@router.head("/")
 def status_check():
     return {"message": "Site is operational"}
 
 
-def register_wildcard_route_handler():
-    @app.get("/{path:path}")
-    async def serve(request: Request, path: str):
-        html_template = get_html_template()
-        """Serve the UI files."""
-        response = HTMLResponse(content=html_template, status_code=200)
+@router.get("/{full_path:path}")
+async def serve():
+    html_template = get_html_template()
+    """Serve the UI files."""
+    response = HTMLResponse(content=html_template, status_code=200)
 
-        return response
+    return response
 
+
+app.include_router(router)
 
 import chainlit.socket  # noqa
