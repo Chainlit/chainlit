@@ -150,9 +150,14 @@ class FileDict(TypedDict):
     type: str
 
 
-class UIMessagePayload(TypedDict):
+class UserMessagePayload(TypedDict):
     message: "StepDict"
     fileReferences: Optional[List[FileReference]]
+
+
+class SystemMessagePayload(TypedDict):
+    content: str
+    metadata: Optional[Dict[str, Any]]
 
 
 class AudioChunkPayload(TypedDict):

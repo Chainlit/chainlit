@@ -20,7 +20,8 @@ from chainlit.types import (
     AudioChunk,
     AudioChunkPayload,
     AudioEndPayload,
-    UIMessagePayload,
+    SystemMessagePayload,
+    UserMessagePayload,
 )
 from chainlit.user_session import user_sessions
 
@@ -247,7 +248,7 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: WebsocketSession, payload: UIMessagePayload):
+async def process_message(session: WebsocketSession, payload: UserMessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
@@ -269,8 +270,8 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
         await context.emitter.task_end()
 
 
-@socket.on("ui_message")
-async def message(sid, payload: UIMessagePayload):
+@socket.on("user_message")
+async def message(sid, payload: UserMessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
 
@@ -278,15 +279,21 @@ async def message(sid, payload: UIMessagePayload):
     session.current_task = task
 
 
-@socket.on("copilot_event")
-async def copilot_event(sid, payload: Any):
+@socket.on("system_message")
+async def on_system_message(sid, payload: SystemMessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
 
     init_ws_context(session)
+    message = Message(
+        type="system_message",
+        content=payload["content"],
+        metadata=payload.get("metadata"),
+    )
+    asyncio.create_task(message._create())
 
-    if config.code.on_copilot_event:
-        await config.code.on_copilot_event(payload)
+    if config.code.on_system_message:
+        await config.code.on_system_message(message)
 
 
 @socket.on("audio_chunk")

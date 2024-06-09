@@ -203,15 +203,6 @@ const useChatSession = () => {
       });
 
       socket.on('call_fn', ({ name, args }, callback) => {
-        const event = new CustomEvent('chainlit-call-fn', {
-          detail: {
-            name,
-            args,
-            callback
-          }
-        });
-        window.dispatchEvent(event);
-
         setCallFn({ name, args, callback });
       });
 

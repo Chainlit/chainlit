@@ -41,7 +41,7 @@ const Chat = () => {
   const setThreads = useSetRecoilState(threadHistoryState);
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
   const [autoScroll, setAutoScroll] = useState(true);
-  const { error, disabled } = useChatData();
+  const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
@@ -57,6 +57,15 @@ const Chat = () => {
     }),
     [projectSettings]
   );
+
+  useEffect(() => {
+    if (callFn) {
+      const event = new CustomEvent('chainlit-call-fn', {
+        detail: callFn
+      });
+      window.dispatchEvent(event);
+    }
+  }, [callFn]);
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;

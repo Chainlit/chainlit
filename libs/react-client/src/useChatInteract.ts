@@ -23,6 +23,11 @@ import { addMessage } from 'src/utils/message';
 
 import { ChainlitAPI } from './api';
 
+export interface ISystemMessage {
+  content: string;
+  metadata?: Record<string, any>;
+}
+
 const useChatInteract = () => {
   const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
@@ -61,9 +66,9 @@ const useChatInteract = () => {
     setCurrentThreadId(undefined);
   }, [session]);
 
-  const sendCopilotEvent = useCallback(
-    (data: any) => {
-      session?.socket.emit('copilot_event', data);
+  const sendSystemMessage = useCallback(
+    (message: ISystemMessage) => {
+      session?.socket.emit('system_message', message);
     },
     [session?.socket]
   );
@@ -72,7 +77,7 @@ const useChatInteract = () => {
     (message: IStep, fileReferences?: IFileRef[]) => {
       setMessages((oldMessages) => addMessage(oldMessages, message));
 
-      session?.socket.emit('ui_message', { message, fileReferences });
+      session?.socket.emit('user_message', { message, fileReferences });
     },
     [session?.socket]
   );
@@ -174,7 +179,7 @@ const useChatInteract = () => {
     stopTask,
     setIdToResume,
     updateChatSettings,
-    sendCopilotEvent
+    sendSystemMessage
   };
 };
 

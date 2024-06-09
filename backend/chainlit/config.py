@@ -279,7 +279,7 @@ class CodeSettings:
     on_message: Optional[Callable[["Message"], Any]] = None
     on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
-    on_copilot_event: Optional[Callable[[Any], Any]] = None
+    on_system_message: Optional[Callable[["Message"], Any]] = None
 
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None

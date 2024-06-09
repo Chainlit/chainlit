@@ -14,6 +14,6 @@ async def on_message(msg: cl.Message):
         await cl.Message(content=res).send()
 
 
-@cl.on_copilot_event
-async def on_copilot_event(data):
-    await cl.Message(content=f"Event received: {data}").send()
+@cl.on_system_message
+async def on_system_message(msg: cl.Message):
+    await cl.Message(content=f"System message received: {msg.content}").send()
