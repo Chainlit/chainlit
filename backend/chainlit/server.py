@@ -20,6 +20,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import socketio
+from chainlit.auth import (
+    create_jwt,
+    get_configuration,
+    get_current_user,
+    reuseable_oauth,
+)
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
