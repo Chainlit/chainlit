@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.300rc4"
+version = "1.1.300rc6"
 keywords = [
     'LLM',
     'Agents',
@@ -53,6 +53,7 @@ numpy = [
     { version = "^1.26", python = ">=3.9" },
     { version = "^1.24.4", python = "<3.9" }
 ]
+cachetools = "^5.3.3"
 
 [tool.poetry.group.tests]
 optional = true
@@ -104,6 +105,7 @@ module = [
     "google.cloud",
 ]
 ignore_missing_imports = true
+
 
 [tool.poetry.group.custom-data]
 optional = true
