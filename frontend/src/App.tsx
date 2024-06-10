@@ -1,4 +1,3 @@
-import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
@@ -9,12 +8,10 @@ import { makeTheme } from 'theme';
 import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider } from '@mui/material/styles';
 
-import { useChatSession } from '@chainlit/react-client';
+import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
 import ChatSettingsModal from 'components/organisms/chat/settings';
 
-import { apiClientState } from 'state/apiClient';
-import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
 
@@ -78,19 +75,19 @@ export function overrideTheme(theme: Theme) {
 
 function App() {
   const { theme: themeVariant } = useRecoilValue(settingsState);
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
+
   // @ts-expect-error custom property
   const fontFamily = window.theme?.font_family;
   const theme = overrideTheme(makeTheme(themeVariant, fontFamily));
   const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
-  const apiClient = useRecoilValue(apiClientState);
 
-  const pSettingsLoaded = !!pSettings;
+  const configLoaded = !!config;
 
-  const chatProfileOk = pSettingsLoaded
-    ? pSettings.chatProfiles.length
+  const chatProfileOk = configLoaded
+    ? config.chatProfiles.length
       ? !!chatProfile
       : true
     : false;
@@ -102,22 +99,21 @@ function App() {
       return;
     } else {
       connect({
-        client: apiClient,
         userEnv,
         accessToken
       });
     }
   }, [userEnv, accessToken, isAuthenticated, connect, chatProfileOk]);
 
-  if (pSettingsLoaded && pSettings.chatProfiles.length && !chatProfile) {
+  if (configLoaded && config.chatProfiles.length && !chatProfile) {
     // Autoselect the first default chat profile
-    const defaultChatProfile = pSettings.chatProfiles.find(
+    const defaultChatProfile = config.chatProfiles.find(
       (profile) => profile.default
     );
     if (defaultChatProfile) {
       setChatProfile(defaultChatProfile.name);
     } else {
-      setChatProfile(pSettings.chatProfiles[0].name);
+      setChatProfile(config.chatProfiles[0].name);
     }
   }
 

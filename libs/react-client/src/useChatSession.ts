@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -40,10 +40,11 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
-import { ChainlitAPI } from './api';
+import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
 const useChatSession = () => {
+  const client = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
 
   const [session, setSession] = useRecoilState(sessionState);
@@ -65,11 +66,9 @@ const useChatSession = () => {
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
   const _connect = useCallback(
     ({
-      client,
       userEnv,
       accessToken
     }: {
-      client: ChainlitAPI;
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
@@ -77,7 +76,7 @@ const useChatSession = () => {
       const uri = `${protocol}//${host}`;
       const path =
         pathname && pathname !== '/'
-          ? `/ws${pathname}/socket.io`
+          ? `${pathname}/ws/socket.io`
           : '/ws/socket.io';
 
       const socket = io(uri, {

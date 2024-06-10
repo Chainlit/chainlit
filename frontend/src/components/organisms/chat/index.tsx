@@ -1,8 +1,7 @@
-import { useAuth } from 'api/auth';
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,9 +9,11 @@ import { Alert, Box, Stack } from '@mui/material';
 
 import {
   threadHistoryState,
+  useAuth,
   useChatData,
   useChatInteract,
-  useChatMessages
+  useChatMessages,
+  useConfig
 } from '@chainlit/react-client';
 
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
@@ -23,9 +24,7 @@ import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-import { apiClientState } from 'state/apiClient';
 import { IAttachment, attachmentsState } from 'state/chat';
-import { projectSettingsState } from 'state/project';
 
 import Messages from './Messages';
 import DropScreen from './dropScreen';
@@ -34,11 +33,9 @@ import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
-
-  const projectSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
-  const apiClient = useRecoilValue(apiClientState);
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
@@ -49,14 +46,11 @@ const Chat = () => {
   const fileSpec = useMemo(
     () => ({
       max_size_mb:
-        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
-      max_files:
-        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
-      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
-        '*/*'
-      ]
+        config?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: config?.features?.spontaneous_file_upload?.accept || ['*/*']
     }),
-    [projectSettings]
+    [config]
   );
 
   const { t } = useTranslation();
@@ -71,23 +65,19 @@ const Chat = () => {
       const attachements: IAttachment[] = payloads.map((file) => {
         const id = uuidv4();
 
-        const { xhr, promise } = uploadFileRef.current(
-          apiClient,
-          file,
-          (progress) => {
-            setAttachments((prev) =>
-              prev.map((attachment) => {
-                if (attachment.id === id) {
-                  return {
-                    ...attachment,
-                    uploadProgress: progress
-                  };
-                }
-                return attachment;
-              })
-            );
-          }
-        );
+        const { xhr, promise } = uploadFileRef.current(file, (progress) => {
+          setAttachments((prev) =>
+            prev.map((attachment) => {
+              if (attachment.id === id) {
+                return {
+                  ...attachment,
+                  uploadProgress: progress
+                };
+              }
+              return attachment;
+            })
+          );
+        });
 
         promise
           .then((res) => {
@@ -165,7 +155,7 @@ const Chat = () => {
     const currentPage = new URL(window.location.href);
     if (
       user &&
-      projectSettings?.dataPersistence &&
+      config?.dataPersistence &&
       threadId &&
       currentPage.pathname === '/'
     ) {
@@ -179,7 +169,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
+    !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box
@@ -231,7 +221,6 @@ const Chat = () => {
             onFileUploadError={onFileUploadError}
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
-            projectSettings={projectSettings}
           />
         </ErrorBoundary>
       </Stack>

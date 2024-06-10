@@ -18,6 +18,7 @@ import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import socketio
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -56,7 +57,6 @@ from fastapi import (
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi_socketio import SocketManager
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
@@ -169,6 +169,15 @@ build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
+
+sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
+
+combined_asgi_app = socketio.ASGIApp(
+    sio,
+    app,
+    socketio_path=f"{ROOT_PATH}/ws/socket.io" if ROOT_PATH else "/ws/socket.io",
+)
+
 router = APIRouter(prefix=ROOT_PATH)
 
 app.mount(
@@ -201,12 +210,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-socket = SocketManager(
-    app,
-    cors_allowed_origins=[],
-    async_mode="asgi",
-    socketio_path=f"/ws{ROOT_PATH}/socket.io" if ROOT_PATH else "/ws/socket.io",
 )
 
 

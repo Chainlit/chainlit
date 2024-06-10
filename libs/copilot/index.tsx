@@ -54,7 +54,7 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
           {hljsStyles}
           {sonnerCss}
         </style>
-        <AppWrapper config={config} />
+        <AppWrapper widgetConfig={config} />
       </CacheProvider>
     </React.StrictMode>
   );

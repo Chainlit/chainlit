@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
+  ChainlitContext,
   IAction,
   IFeedback,
   IStep,
@@ -16,17 +17,15 @@ import {
 
 import { useTranslation } from 'components/i18n/Translator';
 
-import { apiClientState } from 'state/apiClient';
-
 import MessageContainer from './container';
 
 const Messages = (): JSX.Element => {
+  const apiClient = useContext(ChainlitContext);
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
-  const apiClient = useRecoilValue(apiClientState);
 
   const { t } = useTranslation();
 

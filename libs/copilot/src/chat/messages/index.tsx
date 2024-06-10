@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
+  ChainlitContext,
   IAction,
   IFeedback,
   IStep,
@@ -17,7 +18,8 @@ import {
 import MessageContainer from './container';
 
 const Messages = (): JSX.Element => {
-  const { apiClient, accessToken } = useContext(WidgetContext);
+  const apiClient = useContext(ChainlitContext);
+  const { accessToken } = useContext(WidgetContext);
 
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();

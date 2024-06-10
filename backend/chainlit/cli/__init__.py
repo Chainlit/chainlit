@@ -34,7 +34,7 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
-    from chainlit.server import app
+    from chainlit.server import combined_asgi_app as app
 
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))

@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useContext, useMemo } from 'react';
 
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 
-import { useChatSession } from '@chainlit/react-client';
-
-import { apiClientState } from 'state/apiClient';
-import { projectSettingsState } from 'state/project';
+import {
+  ChainlitContext,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 interface Props {
   author: string;
@@ -15,24 +15,21 @@ interface Props {
 }
 
 const MessageAvatar = ({ author, hide }: Props) => {
+  const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
 
   const selectedChatProfile = useMemo(() => {
-    return pSettings?.chatProfiles.find(
-      (profile) => profile.name === chatProfile
-    );
-  }, [pSettings, chatProfile]);
-
-  const apiClient = useRecoilValue(apiClientState);
+    return config?.chatProfiles.find((profile) => profile.name === chatProfile);
+  }, [config, chatProfile]);
 
   const avatarUrl = useMemo(() => {
-    const isAssistant = !author || author === pSettings?.ui.name;
+    const isAssistant = !author || author === config?.ui.name;
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;
     }
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
-  }, [apiClient, selectedChatProfile, pSettings, author]);
+  }, [apiClient, selectedChatProfile, config, author]);
 
   return (
     <span className={`message-avatar`}>

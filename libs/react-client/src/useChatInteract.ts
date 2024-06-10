@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   accessTokenState,
@@ -21,7 +21,7 @@ import {
 import { IAction, IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
 
-import { ChainlitAPI } from './api';
+import { ChainlitContext } from './context';
 
 export interface ISystemMessage {
   content: string;
@@ -29,6 +29,7 @@ export interface ISystemMessage {
 }
 
 const useChatInteract = () => {
+  const client = useContext(ChainlitContext);
   const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
@@ -158,11 +159,7 @@ const useChatInteract = () => {
   );
 
   const uploadFile = useCallback(
-    (
-      client: ChainlitAPI,
-      file: File,
-      onProgress: (progress: number) => void
-    ) => {
+    (file: File, onProgress: (progress: number) => void) => {
       return client.uploadFile(file, onProgress, sessionId, accessToken);
     },
     [sessionId, accessToken]

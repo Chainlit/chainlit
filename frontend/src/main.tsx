@@ -1,7 +1,10 @@
 import AppWrapper from 'AppWrapper';
+import { apiClient } from 'api';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RecoilRoot } from 'recoil';
+
+import { ChainlitContext } from '@chainlit/react-client';
 
 import './index.css';
 
@@ -11,8 +14,10 @@ i18nSetupLocalization();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <RecoilRoot>
-      <AppWrapper />
-    </RecoilRoot>
+    <ChainlitContext.Provider value={apiClient}>
+      <RecoilRoot>
+        <AppWrapper />
+      </RecoilRoot>
+    </ChainlitContext.Provider>
   </React.StrictMode>
 );

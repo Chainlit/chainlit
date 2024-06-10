@@ -467,9 +467,12 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if config.ui.hide_cot and (
-                    step.parent_id or "message" not in step.type
-                ):
+                if step.type == "system_message":
+                    continue
+                if config.ui.hide_cot and step.type not in [
+                    "user_message",
+                    "assistant_message",
+                ]:
                     continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
