@@ -149,8 +149,8 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async logout() {
-    const res = await this.post(`/logout`, {});
+  async logout(accessToken?: string) {
+    const res = await this.post(`/logout`, {}, accessToken);
     return res.json();
   }
 
