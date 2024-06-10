@@ -19,7 +19,12 @@ import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.auth import (
+    create_jwt,
+    get_configuration,
+    get_current_user,
+    reuseable_oauth,
+)
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -34,11 +39,9 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
-from chainlit.telemetry import trace_event
 from chainlit.types import (
     DeleteFeedbackRequest,
     DeleteThreadRequest,
-    GenerationRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
@@ -168,7 +171,6 @@ def get_build_dir(local_target: str, packaged_target: str):
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-
 app = FastAPI(lifespan=lifespan)
 
 app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
@@ -190,7 +192,6 @@ app.mount(
     name="copilot",
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.project.allow_origins,
@@ -205,7 +206,6 @@ socket = SocketManager(
     async_mode="asgi",
     socketio_path="/ws/socket.io",
 )
-
 
 # -------------------------------------------------------------------------------
 #                               SLACK HANDLER
@@ -356,12 +356,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @app.post("/logout")
-async def logout(request: Request, response: Response):
-    auth_header = request.headers.get("Authorization")
-
-    if auth_header:
-        _, token = auth_header.split()
-        jwt_blacklist[token] = True
+async def logout(
+    request: Request, response: Response, token: str = Depends(reuseable_oauth)
+):
+    jwt_blacklist[token] = True
 
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
