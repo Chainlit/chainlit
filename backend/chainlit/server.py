@@ -6,6 +6,7 @@ import shutil
 import urllib.parse
 from typing import Any, Optional, Union
 
+from chainlit.auth_ext import jwt_blacklist
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 
@@ -356,6 +357,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.post("/logout")
 async def logout(request: Request, response: Response):
+    auth_header = request.headers.get("Authorization")
+
+    if auth_header:
+        _, token = auth_header.split()
+        jwt_blacklist[token] = True
+
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
     return {"success": True}
