@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
+from chainlit.auth_ext import jwt_blacklist
 from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.oauth_providers import get_configured_oauth_providers
@@ -42,9 +43,9 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": get_configured_oauth_providers()
-        if is_oauth_enabled()
-        else [],
+        "oauthProviders": (
+            get_configured_oauth_providers() if is_oauth_enabled() else []
+        ),
     }
 
 
@@ -52,7 +53,8 @@ def create_jwt(data: User) -> str:
     to_encode = data.to_dict()  # type: Dict[str, Any]
     to_encode.update(
         {
-            "exp": datetime.utcnow() + timedelta(seconds=config.project.user_session_timeout),
+            "exp": datetime.utcnow()
+            + timedelta(seconds=config.project.user_session_timeout),
         }
     )
     encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
@@ -71,6 +73,12 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         user = User(**dict)
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+    if token in jwt_blacklist:
+        raise HTTPException(status_code=401, detail="Invalid authentication token")
+    else:
+        return user
+
     if data_layer := get_data_layer():
         try:
             persisted_user = await data_layer.get_user(user.identifier)
