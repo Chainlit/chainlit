@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
-import { askUserState, useAudio } from '@chainlit/react-client';
+import { askUserState, useAudio, useConfig } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 
@@ -21,14 +21,14 @@ interface Props {
 
 const MicButton = ({ disabled }: Props) => {
   const askUser = useRecoilValue(askUserState);
+  const { config } = useConfig();
   const {
     startRecording: _startRecording,
     isRecording,
     isSpeaking,
     isRecordingFinished,
-    error,
-    isReady
-  } = useAudio();
+    error
+  } = useAudio(config?.features.audio);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
 
   disabled = disabled || !!askUser;
@@ -58,8 +58,6 @@ const MicButton = ({ disabled }: Props) => {
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
     : 'medium';
-
-  if (!isReady) return null;
 
   return (
     <>

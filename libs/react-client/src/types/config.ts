@@ -12,6 +12,15 @@ export interface ChatProfile {
   starters?: IStarter[];
 }
 
+export interface IAudioConfig {
+  enabled: boolean;
+  min_decibels: number;
+  initial_silence_timeout: number;
+  silence_timeout: number;
+  chunk_duration: number;
+  max_duration: number;
+}
+
 export interface IChainlitConfig {
   markdown?: string;
   ui: {
@@ -32,15 +41,7 @@ export interface IChainlitConfig {
       max_files?: number;
       accept?: string[] | Record<string, string[]>;
     };
-    audio: {
-      enabled: boolean;
-      min_decibels: number;
-      initial_silence_timeout: number;
-      silence_timeout: number;
-      sample_rate: number;
-      chunk_duration: number;
-      max_duration: number;
-    };
+    audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     latex?: boolean;
   };

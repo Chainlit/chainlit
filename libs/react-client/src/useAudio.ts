@@ -1,11 +1,18 @@
 import { useCallback, useRef, useState } from 'react';
 
-import { IFileRef } from './types';
+import { IAudioConfig, IFileRef } from './types';
 import { useChatInteract } from './useChatInteract';
-import { useConfig } from './useConfig';
 
-const useAudio = () => {
-  const { config } = useConfig();
+const defaultConfig: IAudioConfig = {
+  enabled: true,
+  min_decibels: -45,
+  initial_silence_timeout: 3000,
+  silence_timeout: 1500,
+  max_duration: 15000,
+  chunk_duration: 1000
+};
+
+const useAudio = (config = defaultConfig) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const cancelling = useRef(false);
   const { sendAudioChunk, endAudioStream } = useChatInteract();
@@ -14,8 +21,6 @@ const useAudio = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isRecordingFinished, setIsRecordingFinished] = useState(false);
-
-  const isReady = !!config?.features.audio.enabled;
 
   const cancelRecording = useCallback(() => {
     if (!isRecording || !mediaRecorderRef.current) {
@@ -48,7 +53,7 @@ const useAudio = () => {
         initial_silence_timeout,
         chunk_duration,
         max_duration
-      } = config.features.audio;
+      } = config;
 
       navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -185,8 +190,7 @@ const useAudio = () => {
     isRecording,
     isSpeaking,
     isRecordingFinished,
-    error,
-    isReady
+    error
   };
 };
 
