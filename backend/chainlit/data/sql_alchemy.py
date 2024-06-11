@@ -331,7 +331,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         # Delete feedbacks/elements/steps
         feedbacks_query = """DELETE FROM feedbacks WHERE "forId" = :id"""
         elements_query = """DELETE FROM elements WHERE "forId" = :id"""
-        steps_query = """DELETE FROM steps WHERE "forId" = :id"""
+        steps_query = """DELETE FROM steps WHERE "id" = :id"""
         parameters = {"id": step_id}
         await self.execute_sql(query=feedbacks_query, parameters=parameters)
         await self.execute_sql(query=elements_query, parameters=parameters)
