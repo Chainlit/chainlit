@@ -129,7 +129,6 @@ function App() {
         }}
       />
       <Toaster
-        className="toast"
         position="top-right"
         toastOptions={{
           style: {

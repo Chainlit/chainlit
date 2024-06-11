@@ -1,6 +1,7 @@
 import { useAuth } from 'api/auth';
 import { memo, useCallback } from 'react';
 import { useSetRecoilState } from 'recoil';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Box } from '@mui/material';
@@ -17,7 +18,6 @@ import { inputHistoryState } from 'state/userInputHistory';
 
 import Input from './input';
 import WaterMark from './waterMark';
-import {toast} from "sonner";
 
 interface Props {
   fileSpec: FileSpec;
@@ -45,21 +45,17 @@ const InputBox = memo(
     const { sendMessage, replyMessage } = useChatInteract();
     // const tokenCount = useRecoilValue(tokenCountState);
 
-    const validateMessage = (msg: string): boolean => {
-      if (msg && msg.length > maxMessageLength) {
-        const errorMsg = `The message is too long, please reduce to ` +
-          `${maxMessageLength} characters.`;
-        toast.error(errorMsg);
-        return false;
-      }
-
-      return true;
-    }
+    const isMessageValid = (msg: string) =>
+      msg && msg.length <= maxMessageLength;
 
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
-        if (!validateMessage(msg)) {
-          return
+        if (!isMessageValid(msg)) {
+          const errorMsg =
+            `The message is too long, please reduce to ` +
+            `${maxMessageLength} characters.`;
+          toast.error(errorMsg);
+          return;
         }
 
         const message: IStep = {
@@ -100,8 +96,8 @@ const InputBox = memo(
 
     const onReply = useCallback(
       async (msg: string) => {
-        if (!validateMessage(msg)) {
-          return
+        if (!isMessageValid(msg)) {
+          return;
         }
 
         const message: IStep = {
