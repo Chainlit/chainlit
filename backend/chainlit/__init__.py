@@ -28,6 +28,7 @@ from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
+    Component,
     File,
     Image,
     Pdf,
@@ -186,6 +187,22 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     """
 
     config.code.on_chat_resume = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
+def on_system_message(func: Callable) -> Callable:
+    """
+    Hook to react to a system message sent by the copilot.
+
+    Args:
+        func (Callable[], Any]): The hook to execute.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_system_message = wrap_user_function(func)
     return func
 
 
@@ -376,6 +393,7 @@ __all__ = [
     "Plotly",
     "Image",
     "Text",
+    "Component",
     "Pyplot",
     "File",
     "Task",
@@ -398,6 +416,7 @@ __all__ = [
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",
+    "on_system_message",
     "on_stop",
     "action_callback",
     "author_rename",

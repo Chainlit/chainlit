@@ -1,18 +1,17 @@
 import size from 'lodash/size';
 import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
 
 import { SelectInput } from '@chainlit/app/src/components/atoms/inputs';
 import NewChatDialog from '@chainlit/app/src/components/molecules/newChatDialog';
-import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
   useChatInteract,
   useChatMessages,
-  useChatSession
+  useChatSession,
+  useConfig
 } from '@chainlit/react-client';
 
 export default function ChatProfiles() {
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const { chatProfile, setChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
   const { clear } = useChatInteract();
@@ -36,15 +35,15 @@ export default function ChatProfiles() {
     handleClose();
   };
 
-  if (!chatProfile && size(pSettings?.chatProfiles) > 0) {
-    setChatProfile(pSettings?.chatProfiles[0].name);
+  if (!chatProfile && size(config?.chatProfiles) > 0) {
+    setChatProfile(config?.chatProfiles[0].name);
   }
 
-  if (typeof pSettings === 'undefined' || pSettings.chatProfiles.length <= 1) {
+  if (typeof config === 'undefined' || config.chatProfiles.length <= 1) {
     return null;
   }
 
-  const items = pSettings.chatProfiles.map((item) => ({
+  const items = config.chatProfiles.map((item) => ({
     label: item.name,
     value: item.name,
     icon: item.icon ? (

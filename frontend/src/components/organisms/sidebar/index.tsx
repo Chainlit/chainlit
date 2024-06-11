@@ -1,6 +1,5 @@
-import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import { Alert } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -8,11 +7,12 @@ import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import { useAuth, useConfig } from '@chainlit/react-client';
+
 import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
 import ReadmeButton from 'components/organisms/readmeButton';
 
-import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
 import TriggerButton from './OpenSideBarButton';
@@ -25,8 +25,8 @@ const SideBar = () => {
   const isMobile = useMediaQuery('(max-width:66rem)');
 
   const [settings, setSettings] = useRecoilState(settingsState);
-  const pSettings = useRecoilValue(projectSettingsState);
-  const enableHistory = !!user.accessToken && !!pSettings?.dataPersistence;
+  const { config } = useConfig();
+  const enableHistory = !!user.accessToken && !!config?.dataPersistence;
 
   useEffect(() => {
     if (isMobile) {

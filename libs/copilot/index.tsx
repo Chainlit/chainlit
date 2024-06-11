@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 
 // @ts-expect-error inlined
 import clStyles from '@chainlit/app/src/App.css?inline';
+import type { ISystemMessage } from '@chainlit/react-client/src/useChatInteract';
 
 // @ts-expect-error inlined
 import sonnerCss from './sonner.css?inline';
@@ -20,10 +21,12 @@ let root: ReactDOM.Root | null = null;
 declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
+    mountChainlitWidget: (config: IWidgetConfig) => void;
+    unmountChainlitWidget: () => void;
+    sendChainlitSystemMessage: (message: ISystemMessage) => void;
   }
 }
 
-// @ts-expect-error is not a valid prop
 window.mountChainlitWidget = (config: IWidgetConfig) => {
   const container = document.createElement('div');
   container.id = id;
@@ -51,13 +54,16 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
           {hljsStyles}
           {sonnerCss}
         </style>
-        <AppWrapper config={config} />
+        <AppWrapper widgetConfig={config} />
       </CacheProvider>
     </React.StrictMode>
   );
 };
 
-// @ts-expect-error is not a valid prop
 window.unmountChainlitWidget = () => {
   root?.unmount();
+};
+
+window.sendChainlitSystemMessage = () => {
+  console.info('Copilot is not active. Please check if the widget is mounted.');
 };

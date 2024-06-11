@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
 from chainlit.config import config
-from chainlit.context import context
+from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import ElementBased
 from chainlit.logger import logger
@@ -21,7 +21,6 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai import BaseGeneration
 from literalai.helper import utc_now
 from literalai.step import MessageStepType
 
@@ -38,16 +37,21 @@ class MessageBase(ABC):
     fail_on_persist_error: bool = False
     persisted = False
     is_error = False
+    parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
     wait_for_answer = False
     indent: Optional[int] = None
-    generation: Optional[BaseGeneration] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.thread_id = context.session.thread_id
+
+        previous_steps = local_steps.get() or []
+        parent_step = previous_steps[-1] if previous_steps else None
+        if parent_step:
+            self.parent_id = parent_step.id
 
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
@@ -57,6 +61,7 @@ class MessageBase(ABC):
         type = _dict.get("type", "assistant_message")
         message = Message(
             id=_dict["id"],
+            parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
@@ -71,6 +76,7 @@ class MessageBase(ABC):
         _dict: StepDict = {
             "id": self.id,
             "threadId": self.thread_id,
+            "parentId": self.parent_id,
             "createdAt": self.created_at,
             "start": self.created_at,
             "end": self.created_at,
@@ -84,7 +90,6 @@ class MessageBase(ABC):
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
-            "generation": self.generation.to_dict() if self.generation else None,
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
@@ -212,15 +217,14 @@ class Message(MessageBase):
         elements: Optional[List[ElementBased]] = None,
         disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
-        generation: Optional[BaseGeneration] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         id: Optional[str] = None,
+        parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
         self.language = language
-        self.generation = generation
         if isinstance(content, dict):
             try:
                 self.content = json.dumps(content, indent=4, ensure_ascii=False)
@@ -236,6 +240,9 @@ class Message(MessageBase):
 
         if id:
             self.id = str(id)
+
+        if parent_id:
+            self.parent_id = str(parent_id)
 
         if created_at:
             self.created_at = created_at
@@ -304,8 +311,6 @@ class ErrorMessage(MessageBase):
     Args:
         content (str): Text displayed above the upload button.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
-        parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
-        indent (int, optional): If positive, the message will be nested in the UI.
     """
 
     def __init__(

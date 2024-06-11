@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.300rc4"
+version = "1.1.300rc5"
 keywords = [
     'LLM',
     'Agents',
@@ -32,7 +32,7 @@ dataclasses_json = "^0.5.7"
 fastapi = "^0.110.1"
 starlette = "^0.37.2"
 uvicorn = "^0.25.0"
-fastapi-socketio = "^0.0.10"
+python-socketio = "^5.11.0"
 aiofiles = "^23.1.0"
 syncer = "^2.0.3"
 asyncer = "^0.0.2"

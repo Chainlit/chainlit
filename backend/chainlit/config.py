@@ -163,6 +163,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -173,6 +174,7 @@ class RunSettings:
     port: int = DEFAULT_PORT
     ssl_cert: Optional[str] = None
     ssl_key: Optional[str] = None
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False
@@ -277,6 +279,7 @@ class CodeSettings:
     on_message: Optional[Callable[["Message"], Any]] = None
     on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
+    on_system_message: Optional[Callable[["Message"], Any]] = None
 
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None

@@ -20,7 +20,6 @@ export const defaultSettingsState = {
 
 export const settingsState = atom<{
   open: boolean;
-  defaultCollapseContent: boolean;
   theme: ThemeVariant;
   isChatHistoryOpen: boolean;
   language: string;

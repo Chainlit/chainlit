@@ -1,15 +1,12 @@
 import { useUpload } from 'hooks';
-import { useRecoilValue } from 'recoil';
 
 import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
 
-import { FileSpec } from '@chainlit/react-client';
+import { FileSpec, useConfig } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 
 import AttachmentIcon from 'assets/attachment';
-
-import { projectSettingsState } from 'state/project';
 
 type Props = {
   disabled?: boolean;
@@ -24,8 +21,7 @@ const UploadButton = ({
   onFileUpload,
   onFileUploadError
 }: Props) => {
-  const pSettings = useRecoilValue(projectSettingsState);
-
+  const { config } = useConfig();
   const upload = useUpload({
     spec: fileSpec,
     onResolved: (payloads: File[]) => onFileUpload(payloads),
@@ -37,7 +33,7 @@ const UploadButton = ({
     ? 'small'
     : 'medium';
 
-  if (!upload || !pSettings?.features?.spontaneous_file_upload?.enabled)
+  if (!upload || !config?.features?.spontaneous_file_upload?.enabled)
     return null;
   const { getRootProps, getInputProps } = upload;
 

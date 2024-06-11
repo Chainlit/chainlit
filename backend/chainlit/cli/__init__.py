@@ -7,13 +7,12 @@ import uvicorn
 
 nest_asyncio.apply()
 
-from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
-from chainlit.cli.utils import check_file
 from chainlit.config import (
     BACKEND_ROOT,
     DEFAULT_HOST,
     DEFAULT_PORT,
+    DEFAULT_ROOT_PATH,
     config,
     init_config,
     lint_translations,
@@ -22,8 +21,8 @@ from chainlit.config import (
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
-from chainlit.server import app, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
+from chainlit.utils import check_file, ensure_jwt_secret
 
 
 # Create the main command group for Chainlit CLI
@@ -35,8 +34,11 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
+    from chainlit.server import combined_asgi_app as app
+
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
 
     ssl_certfile = os.environ.get("CHAINLIT_SSL_CERT", None)
     ssl_keyfile = os.environ.get("CHAINLIT_SSL_KEY", None)
@@ -52,6 +54,7 @@ def run_chainlit(target: str):
 
     config.run.host = host
     config.run.port = port
+    config.run.root_path = root_path
 
     check_file(target)
     # Load the module provided by the user
@@ -59,8 +62,6 @@ def run_chainlit(target: str):
     load_module(config.run.module_name)
 
     ensure_jwt_secret()
-
-    register_wildcard_route_handler()
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
@@ -145,8 +146,19 @@ def run_chainlit(target: str):
 )
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
+@click.option("--root-path", help="Specify a different root path to run the server on")
 def chainlit_run(
-    target, watch, headless, debug, ci, no_cache, ssl_cert, ssl_key, host, port
+    target,
+    watch,
+    headless,
+    debug,
+    ci,
+    no_cache,
+    ssl_cert,
+    ssl_key,
+    host,
+    port,
+    root_path,
 ):
     if host:
         os.environ["CHAINLIT_HOST"] = host
@@ -159,6 +171,8 @@ def chainlit_run(
     if ssl_cert:
         os.environ["CHAINLIT_SSL_CERT"] = ssl_cert
         os.environ["CHAINLIT_SSL_KEY"] = ssl_key
+    if root_path:
+        os.environ["CHAINLIT_ROOT_PATH"] = root_path
     if ci:
         logger.info("Running in CI mode")
 

@@ -295,7 +295,10 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+        if config.ui.hide_cot and self.type not in [
+            "user_message",
+            "assistant_message",
+        ]:
             return True
 
         await context.emitter.update_step(step_dict)
@@ -349,7 +352,10 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+        if config.ui.hide_cot and self.type not in [
+            "user_message",
+            "assistant_message",
+        ]:
             return self
 
         await context.emitter.send_step(step_dict)
@@ -374,7 +380,10 @@ class Step:
 
         assert self.id
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+        if config.ui.hide_cot and self.type not in [
+            "user_message",
+            "assistant_message",
+        ]:
             return
 
         if not self.streaming:
