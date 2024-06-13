@@ -20,8 +20,8 @@ from chainlit.types import (
     AudioChunk,
     AudioChunkPayload,
     AudioEndPayload,
+    MessagePayload,
     SystemMessagePayload,
-    UserMessagePayload,
 )
 from chainlit.user_session import user_sessions
 
@@ -248,12 +248,12 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: WebsocketSession, payload: UserMessagePayload):
+async def process_message(session: WebsocketSession, payload: MessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
         await context.emitter.task_start()
-        message = await context.emitter.process_user_message(payload)
+        message = await context.emitter.process_message(payload)
 
         if config.code.on_message:
             # Sleep 1ms to make sure any children step starts after the message step start
@@ -270,30 +270,13 @@ async def process_message(session: WebsocketSession, payload: UserMessagePayload
         await context.emitter.task_end()
 
 
-@sio.on("user_message")
-async def message(sid, payload: UserMessagePayload):
+@sio.on("client_message")
+async def message(sid, payload: MessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
 
     task = asyncio.create_task(process_message(session, payload))
     session.current_task = task
-
-
-@sio.on("system_message")
-async def on_system_message(sid, payload: SystemMessagePayload):
-    """Handle a message sent by the User."""
-    session = WebsocketSession.require(sid)
-
-    init_ws_context(session)
-    message = Message(
-        type="system_message",
-        content=payload["content"],
-        metadata=payload.get("metadata"),
-    )
-    asyncio.create_task(message._create())
-
-    if config.code.on_system_message:
-        await config.code.on_system_message(message)
 
 
 @sio.on("audio_chunk")

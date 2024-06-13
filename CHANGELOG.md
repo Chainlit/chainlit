@@ -8,13 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
-## [1.1.300rc5] - 2024-06-11
+## [1.1.300] - 2024-06-13
 
 ### Added
 
 - `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
 - Teams integration
-- Copilot can now send system_message to the chainlit server
 - Expand copilot button
 - Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
 - `default` theme config in `config.toml`

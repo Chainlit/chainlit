@@ -8,7 +8,7 @@ import ChatBody from './body';
 export default function ChatWrapper() {
   const { accessToken } = useContext(WidgetContext);
   const { connect, session } = useChatSession();
-  const { sendSystemMessage } = useChatInteract();
+  const { sendMessage } = useChatInteract();
   useEffect(() => {
     if (session?.socket?.connected) return;
     connect({
@@ -19,8 +19,8 @@ export default function ChatWrapper() {
 
   useEffect(() => {
     // @ts-expect-error is not a valid prop
-    window.sendChainlitSystemMessage = sendSystemMessage;
-  }, [sendSystemMessage]);
+    window.sendChainlitMessage = sendMessage;
+  }, [sendMessage]);
 
   return <ChatBody />;
 }
