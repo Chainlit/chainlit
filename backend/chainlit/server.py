@@ -63,6 +63,7 @@ from typing_extensions import Annotated
 from watchfiles import awatch
 
 ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
 
 
 @asynccontextmanager
@@ -114,7 +115,7 @@ async def lifespan(app: FastAPI):
                                 logger.error(f"Error reloading module: {e}")
 
                         await asyncio.sleep(1)
-                        await socket.emit("reload", {})
+                        await sio.emit("reload", {})
 
                         break
 
@@ -170,20 +171,22 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
+sio = socketio.AsyncServer(
+    cors_allowed_origins=[] if IS_SUBMOUNT else "*", async_mode="asgi"
+)
+
+combined_asgi_app = socketio.ASGIApp(
+    sio,
+    app,
+    socketio_path=f"{ROOT_PATH}/ws/socket.io" if ROOT_PATH else "/ws/socket.io",
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.project.allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-
-sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
-
-combined_asgi_app = socketio.ASGIApp(
-    sio,
-    app,
-    socketio_path=f"{ROOT_PATH}/ws/socket.io" if ROOT_PATH else "/ws/socket.io",
 )
 
 router = APIRouter(prefix=ROOT_PATH)
