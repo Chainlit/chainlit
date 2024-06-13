@@ -59,6 +59,8 @@ const MicButton = ({ disabled }: Props) => {
     ? 'small'
     : 'medium';
 
+  if (!config?.features.audio.enabled) return null;
+
   return (
     <>
       <RecordScreen open={isRecording} isSpeaking={isSpeaking} />

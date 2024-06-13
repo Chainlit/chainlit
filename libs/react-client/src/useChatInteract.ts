@@ -20,13 +20,11 @@ import {
 } from 'src/state';
 import { IAction, IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ChainlitContext } from './context';
 
-export interface ISystemMessage {
-  content: string;
-  metadata?: Record<string, any>;
-}
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 const useChatInteract = () => {
   const client = useContext(ChainlitContext);
@@ -67,18 +65,20 @@ const useChatInteract = () => {
     setCurrentThreadId(undefined);
   }, [session]);
 
-  const sendSystemMessage = useCallback(
-    (message: ISystemMessage) => {
-      session?.socket.emit('system_message', message);
-    },
-    [session?.socket]
-  );
-
   const sendMessage = useCallback(
-    (message: IStep, fileReferences?: IFileRef[]) => {
-      setMessages((oldMessages) => addMessage(oldMessages, message));
+    (
+      message: PartialBy<IStep, 'createdAt' | 'id'>,
+      fileReferences: IFileRef[] = []
+    ) => {
+      if (!message.id) {
+        message.id = uuidv4();
+      }
+      if (!message.createdAt) {
+        message.createdAt = new Date().toISOString();
+      }
+      setMessages((oldMessages) => addMessage(oldMessages, message as IStep));
 
-      session?.socket.emit('user_message', { message, fileReferences });
+      session?.socket.emit('client_message', { message, fileReferences });
     },
     [session?.socket]
   );
@@ -175,8 +175,7 @@ const useChatInteract = () => {
     endAudioStream,
     stopTask,
     setIdToResume,
-    updateChatSettings,
-    sendSystemMessage
+    updateChatSettings
   };
 };
 

@@ -150,7 +150,7 @@ class FileDict(TypedDict):
     type: str
 
 
-class UserMessagePayload(TypedDict):
+class MessagePayload(TypedDict):
     message: "StepDict"
     fileReferences: Optional[List[FileReference]]
 

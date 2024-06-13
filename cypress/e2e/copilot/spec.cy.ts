@@ -20,8 +20,9 @@ describe('Copilot', () => {
 
         win.addEventListener('chainlit-call-fn', (e) => {
           // @ts-expect-error is not a valid prop
-          win.sendChainlitSystemMessage({
-            content: 'Hello World!'
+          win.sendChainlitMessage({
+            type: 'system_message',
+            output: 'Hello World!'
           });
           // @ts-expect-error is not a valid prop
           const { name, args, callback } = e.detail;

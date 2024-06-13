@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client';
 
 // @ts-expect-error inlined
 import clStyles from '@chainlit/app/src/App.css?inline';
-import type { ISystemMessage } from '@chainlit/react-client/src/useChatInteract';
+import { IStep } from '@chainlit/react-client';
 
 // @ts-expect-error inlined
 import sonnerCss from './sonner.css?inline';
@@ -23,7 +23,7 @@ declare global {
     cl_shadowRootElement: HTMLDivElement;
     mountChainlitWidget: (config: IWidgetConfig) => void;
     unmountChainlitWidget: () => void;
-    sendChainlitSystemMessage: (message: ISystemMessage) => void;
+    sendChainlitMessage: (message: IStep) => void;
   }
 }
 
@@ -64,6 +64,6 @@ window.unmountChainlitWidget = () => {
   root?.unmount();
 };
 
-window.sendChainlitSystemMessage = () => {
+window.sendChainlitMessage = () => {
   console.info('Copilot is not active. Please check if the widget is mounted.');
 };
