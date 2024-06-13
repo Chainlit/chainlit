@@ -170,7 +170,15 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
-sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.project.allow_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
 combined_asgi_app = socketio.ASGIApp(
     sio,
@@ -202,14 +210,6 @@ app.mount(
         follow_symlink=config.project.follow_symlink,
     ),
     name="copilot",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=config.project.allow_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 
