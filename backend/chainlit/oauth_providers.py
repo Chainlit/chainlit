@@ -187,6 +187,36 @@ class AzureADOAuthProvider(OAuthProvider):
                 )
             return token
 
+    async def get_user_info(self, token: str):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://graph.microsoft.com/v1.0/me",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            response.raise_for_status()
+
+            azure_user = response.json()
+
+            try:
+                photo_response = await client.get(
+                    "https://graph.microsoft.com/v1.0/me/photos/48x48/$value",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                photo_data = await photo_response.aread()
+                base64_image = base64.b64encode(photo_data)
+                azure_user["image"] = (
+                    f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
+                )
+            except Exception as e:
+                # Ignore errors getting the photo
+                pass
+
+            user = User(
+                identifier=azure_user["userPrincipalName"],
+                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
+            )
+            return (azure_user, user)
+
 
 class AzureADHybridOAuthProvider(OAuthProvider):
     id = "azure-ad-hybrid"
@@ -258,9 +288,9 @@ class AzureADHybridOAuthProvider(OAuthProvider):
                 )
                 photo_data = await photo_response.aread()
                 base64_image = base64.b64encode(photo_data)
-                azure_user[
-                    "image"
-                ] = f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
+                azure_user["image"] = (
+                    f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
+                )
             except Exception as e:
                 # Ignore errors getting the photo
                 pass
