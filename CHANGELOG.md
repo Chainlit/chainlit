@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
+## [1.1.301] - 2024-06-14
+
+### Fixed
+
+- Azure AD oauth get_user_info not implemented error
+
 ## [1.1.300] - 2024-06-13
 
 ### Added
