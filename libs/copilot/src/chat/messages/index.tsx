@@ -28,26 +28,7 @@ const Messages = (): JSX.Element => {
 
   const callActionWithToast = useCallback(
     (action: IAction) => {
-      const promise = callAction(action);
-      if (promise) {
-        toast.promise(promise, {
-          loading: `Running ${action.name}`,
-          success: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} executed successfully`;
-            }
-          },
-          error: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} failed`;
-            }
-          }
-        });
-      }
+      callAction(action);
     },
     [callAction]
   );

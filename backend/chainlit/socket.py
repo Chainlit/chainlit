@@ -21,7 +21,6 @@ from chainlit.types import (
     AudioChunkPayload,
     AudioEndPayload,
     MessagePayload,
-    SystemMessagePayload,
 )
 from chainlit.user_session import user_sessions
 

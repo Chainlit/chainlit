@@ -155,11 +155,6 @@ class MessagePayload(TypedDict):
     fileReferences: Optional[List[FileReference]]
 
 
-class SystemMessagePayload(TypedDict):
-    content: str
-    metadata: Optional[Dict[str, Any]]
-
-
 class AudioChunkPayload(TypedDict):
     isStart: bool
     mimeType: str
