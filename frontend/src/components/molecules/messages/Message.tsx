@@ -3,6 +3,7 @@ import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
@@ -96,9 +97,20 @@ const Message = memo(
                   />
                 </Box>
                 {forceDisplayCursor && (
-                  <Box mt={1}>
+                  <Stack
+                    direction="row"
+                    gap="1rem"
+                    alignItems="center"
+                    my={0.5}
+                    width="100%"
+                  >
+                    <Skeleton
+                      variant="circular"
+                      width="1.6rem"
+                      height="1.6rem"
+                    />
                     <BlinkingCursor />
-                  </Box>
+                  </Stack>
                 )}
               </Box>
             ) : (
