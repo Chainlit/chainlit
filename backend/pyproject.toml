@@ -60,7 +60,7 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 openai = "^1.11.1"
 langchain = "^0.1.5"
-llama-index = "^1.16.0"
+llama-index = "^0.10.45"
 transformers = "^4.30.1"
 matplotlib = "3.7.1"
 farm-haystack = "^1.18.0"
