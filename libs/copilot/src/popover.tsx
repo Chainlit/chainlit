@@ -9,9 +9,10 @@ import Header from 'components/Header';
 
 interface Props {
   anchorEl?: HTMLElement | null;
+  buttonHeight: string;
 }
 
-export default function PopOver({ anchorEl }: Props) {
+export default function PopOver({ anchorEl, buttonHeight }: Props) {
   const [expanded, setExpanded] = useState(false);
   return (
     <Popper
@@ -23,7 +24,7 @@ export default function PopOver({ anchorEl }: Props) {
         display: 'flex',
         flexDirection: 'column',
         inset: 'auto auto 14px -24px !important',
-        height: 'min(730px, calc(100vh - 100px))',
+        height: `min(730px, calc(100vh - ${buttonHeight} - 48px))`,
         width: expanded ? '80vw' : 'min(400px, 80vw)',
         overflow: 'hidden',
         borderRadius: '12px',

@@ -1,9 +1,10 @@
 import size from 'lodash/size';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import { SelectInput } from '@chainlit/app/src/components/atoms/inputs';
 import NewChatDialog from '@chainlit/app/src/components/molecules/newChatDialog';
 import {
+  ChainlitContext,
   useChatInteract,
   useChatMessages,
   useChatSession,
@@ -11,6 +12,7 @@ import {
 } from '@chainlit/react-client';
 
 export default function ChatProfiles() {
+  const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const { chatProfile, setChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
@@ -43,22 +45,27 @@ export default function ChatProfiles() {
     return null;
   }
 
-  const items = config.chatProfiles.map((item) => ({
-    label: item.name,
-    value: item.name,
-    icon: item.icon ? (
-      <img
-        src={item.icon}
-        className="chat-profile-icon"
-        style={{
-          width: '24px',
-          height: '24px',
-          borderRadius: '50%',
-          objectFit: 'cover'
-        }}
-      />
-    ) : undefined
-  }));
+  const items = config.chatProfiles.map((item) => {
+    const icon = item.icon?.includes('/public')
+      ? apiClient.buildEndpoint(item.icon)
+      : item.icon;
+    return {
+      label: item.name,
+      value: item.name,
+      icon: icon ? (
+        <img
+          src={icon}
+          className="chat-profile-icon"
+          style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            objectFit: 'cover'
+          }}
+        />
+      ) : undefined
+    };
+  });
 
   return (
     <>

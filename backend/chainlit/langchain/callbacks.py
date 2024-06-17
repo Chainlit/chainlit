@@ -462,7 +462,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         elif run.run_type == "embedding":
             step_type = "embedding"
 
-        if not self.steps:
+        if not self.steps and step_type != "llm":
             step_type = "run"
 
         disable_feedback = not self._is_annotable(run)

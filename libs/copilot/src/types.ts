@@ -9,6 +9,8 @@ export interface IWidgetConfig {
     imageUrl?: string;
     style?: {
       size?: string;
+      width?: string;
+      height?: string;
       bgcolor?: string;
       color?: string;
       bgcolorHover?: string;

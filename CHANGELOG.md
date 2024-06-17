@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
+## [1.1.302] - 2024-06-16
+
+### Added
+
+- Width and height option for the copilot bubble
+
+### Fixed
+
+- Chat profile icon in copilot should load
+
+### Removed
+
+- Running toast when an action is running
+
 ## [1.1.301] - 2024-06-14
 
 ### Fixed
