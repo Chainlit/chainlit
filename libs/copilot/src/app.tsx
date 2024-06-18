@@ -40,7 +40,7 @@ export default function App({ widgetConfig }: Props) {
   useEffect(() => {
     if (!config) return;
     const themeVariant = widgetConfig.theme || config.ui.theme.default;
-    window.theme = themeVariant;
+    window.theme = config.ui.theme;
     widgetConfig.theme = themeVariant;
     setSettings((old) => ({
       ...old,

@@ -17,6 +17,7 @@ Nothing unreleased.
 ### Fixed
 
 - Chat profile icon in copilot should load
+- Theme should work with Copilot
 
 ### Removed
 
