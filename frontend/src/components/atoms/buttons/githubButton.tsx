@@ -1,16 +1,14 @@
-import { useRecoilValue } from 'recoil';
-
 import { Button, ButtonProps } from '@mui/material';
 
 import GithubIcon from 'assets/github';
 
-import { projectSettingsState } from 'state/project';
+import { useConfig } from 'client-types/*';
 
 interface Props extends ButtonProps {}
 
 export default function GithubButton({ ...props }: Props) {
-  const pSettings = useRecoilValue(projectSettingsState);
-  const href = pSettings?.ui.github;
+  const { config } = useConfig();
+  const href = config?.ui.github;
   if (!href) return null;
   return (
     //@ts-expect-error href is not a valid prop for Button

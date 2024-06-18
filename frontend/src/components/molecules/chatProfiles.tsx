@@ -1,27 +1,25 @@
 import size from 'lodash/size';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import { Box, Popover } from '@mui/material';
 
 import {
+  ChainlitContext,
   useChatInteract,
   useChatMessages,
-  useChatSession
+  useChatSession,
+  useConfig
 } from '@chainlit/react-client';
 
 import { SelectInput } from 'components/atoms/inputs';
 import { Markdown } from 'components/molecules/Markdown';
 
-import { apiClientState } from 'state/apiClient';
-import { projectSettingsState } from 'state/project';
-
 import NewChatDialog from './newChatDialog';
 
 export default function ChatProfiles() {
-  const apiClient = useRecoilValue(apiClientState);
-  const pSettings = useRecoilValue(projectSettingsState);
+  const apiClient = useContext(ChainlitContext);
+  const { config } = useConfig();
   const { chatProfile, setChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -49,21 +47,21 @@ export default function ChatProfiles() {
     handleClose();
   };
 
-  if (!chatProfile && size(pSettings?.chatProfiles) > 0) {
-    setChatProfile(pSettings?.chatProfiles[0].name);
+  if (!chatProfile && size(config?.chatProfiles) > 0) {
+    setChatProfile(config?.chatProfiles[0].name);
   }
 
-  if (typeof pSettings === 'undefined' || pSettings.chatProfiles.length <= 1) {
+  if (typeof config === 'undefined' || config.chatProfiles.length <= 1) {
     return null;
   }
 
-  const allowHtml = pSettings?.features?.unsafe_allow_html;
-  const latex = pSettings?.features?.latex;
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
 
   const popoverOpen = Boolean(anchorEl);
 
-  const items = pSettings.chatProfiles.map((item) => {
-    const icon = item.icon?.startsWith('/public')
+  const items = config.chatProfiles.map((item) => {
+    const icon = item.icon?.includes('/public')
       ? apiClient.buildEndpoint(item.icon)
       : item.icon;
     return {
@@ -130,7 +128,7 @@ export default function ChatProfiles() {
         items={items}
         id="chat-profile-selector"
         onItemMouseEnter={(event, itemName) => {
-          const item = pSettings.chatProfiles.find(
+          const item = config.chatProfiles.find(
             (item) => item.name === itemName
           );
           if (!item) return;

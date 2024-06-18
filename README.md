@@ -90,7 +90,7 @@ Full documentation is available [here](https://docs.chainlit.io). Key features:
 - [💬 Multi Modal chats](https://docs.chainlit.io/advanced-features/multi-modal)
 - [💭 Chain of Thought visualisation](https://docs.chainlit.io/concepts/step)
 - [💾 Data persistence + human feedback](https://docs.chainlit.io/data-persistence/overview)
-- [🛝 In context Prompt Playground](https://docs.chainlit.io/advanced-features/prompt-playground/overview)
+- [🐛 Debug Mode](https://docs.chainlit.io/data-persistence/enterprise#debug-mode)
 - [👤 Authentication](https://docs.chainlit.io/authentication/overview)
 
 Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:

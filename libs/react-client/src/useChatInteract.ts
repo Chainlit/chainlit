@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   accessTokenState,
@@ -20,10 +20,14 @@ import {
 } from 'src/state';
 import { IAction, IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
+import { v4 as uuidv4 } from 'uuid';
 
-import { ChainlitAPI } from './api';
+import { ChainlitContext } from './context';
+
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 const useChatInteract = () => {
+  const client = useContext(ChainlitContext);
   const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
@@ -62,10 +66,19 @@ const useChatInteract = () => {
   }, [session]);
 
   const sendMessage = useCallback(
-    (message: IStep, fileReferences?: IFileRef[]) => {
-      setMessages((oldMessages) => addMessage(oldMessages, message));
+    (
+      message: PartialBy<IStep, 'createdAt' | 'id'>,
+      fileReferences: IFileRef[] = []
+    ) => {
+      if (!message.id) {
+        message.id = uuidv4();
+      }
+      if (!message.createdAt) {
+        message.createdAt = new Date().toISOString();
+      }
+      setMessages((oldMessages) => addMessage(oldMessages, message as IStep));
 
-      session?.socket.emit('ui_message', { message, fileReferences });
+      session?.socket.emit('client_message', { message, fileReferences });
     },
     [session?.socket]
   );
@@ -146,11 +159,7 @@ const useChatInteract = () => {
   );
 
   const uploadFile = useCallback(
-    (
-      client: ChainlitAPI,
-      file: File,
-      onProgress: (progress: number) => void
-    ) => {
+    (file: File, onProgress: (progress: number) => void) => {
       return client.uploadFile(file, onProgress, sessionId, accessToken);
     },
     [sessionId, accessToken]

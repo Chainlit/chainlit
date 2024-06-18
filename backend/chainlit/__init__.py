@@ -28,6 +28,7 @@ from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
+    Component,
     File,
     Image,
     Pdf,
@@ -393,6 +394,7 @@ __all__ = [
     "Plotly",
     "Image",
     "Text",
+    "Component",
     "Pyplot",
     "File",
     "Task",

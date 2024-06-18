@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
 import { grey } from 'theme';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
@@ -7,8 +6,6 @@ import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 import { useApi, useChatData } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
-
-import { apiClientState } from 'state/apiClient';
 
 import { ITaskList, Task } from './Task';
 
@@ -62,7 +59,6 @@ const taskListContainerStyles = (theme: Theme) => ({
 const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const theme = useTheme();
   const { tasklists } = useChatData();
-  const apiClient = useRecoilValue(apiClientState);
 
   const tasklist = tasklists[tasklists.length - 1];
 
@@ -74,13 +70,9 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
     return parsedUrl.pathname + parsedUrl.search;
   }, [tasklist?.url]);
 
-  const { isLoading, error, data } = useApi<ITaskList>(
-    apiClient,
-    url ? url : null,
-    {
-      keepPreviousData: true
-    }
-  );
+  const { isLoading, error, data } = useApi<ITaskList>(url ? url : null, {
+    keepPreviousData: true
+  });
 
   if (!url) return null;
 

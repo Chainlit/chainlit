@@ -31,7 +31,9 @@ const isLastMessage = (messages: IStep[], index: number) => {
 // Nested messages utils
 
 const addMessage = (messages: IStep[], message: IStep): IStep[] => {
-  const validRootTypes = ['assistant_message', 'user_message', 'tool'];
+  const messageTypes = ['assistant_message', 'user_message'];
+  const validRootTypes = [...messageTypes, 'tool'];
+  const isMessageType = messageTypes.includes(message.type);
   const isValidRootType = validRootTypes.includes(message.type);
   const isRoot = !message.parentId;
 
@@ -76,7 +78,7 @@ const addMessage = (messages: IStep[], message: IStep): IStep[] => {
         steps: [message]
       }
     ];
-  } else if ('parentId' in message && message.parentId) {
+  } else if (!isMessageType && 'parentId' in message && message.parentId) {
     return addMessageToParent(messages, message.parentId, message);
   } else if ('indent' in message && message.indent && message.indent > 0) {
     return addIndentMessage(messages, message.indent, message);

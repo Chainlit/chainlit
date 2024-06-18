@@ -3,7 +3,17 @@ import mimetypes
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
 import filetype
 from chainlit.context import context
@@ -21,7 +31,7 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "component"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -162,13 +172,13 @@ class Element:
         self.for_id = for_id
 
         if not self.mime:
-            # Only guess the mime type when the content is binary
-            self.mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.path or self.content)
-            )
-            if not self.mime and self.url:
+            if self.type in mime_types:
+                self.mime = mime_types[self.type]
+            elif self.path or isinstance(self.content, (bytes, bytearray)):
+                file_type = filetype.guess(self.path or self.content)
+                if file_type:
+                    self.mime = file_type.mime
+            elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
         await self._create()
@@ -347,5 +357,19 @@ class Plotly(Element):
         self.figure.layout.height = None
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
+
+        super().__post_init__()
+
+
+@dataclass
+class Component(Element):
+    """Useful to send a custom component to the UI."""
+
+    type: ClassVar[ElementType] = "component"
+    mime: str = "application/json"
+    props: Dict = Field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.content = json.dumps(self.props)
 
         super().__post_init__()

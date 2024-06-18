@@ -176,8 +176,8 @@ async def get_user(slack_user_id: str):
     slack_user = await slack_app.client.users_info(user=slack_user_id)
     slack_user_profile = slack_user["user"]["profile"]
 
-    user_email = slack_user_profile.get("email")
-    user = User(identifier=USER_PREFIX + user_email, metadata=slack_user_profile)
+    user_identifier = slack_user_profile.get("email") or slack_user_id
+    user = User(identifier=USER_PREFIX + user_identifier, metadata=slack_user_profile)
 
     users_by_slack_id[slack_user_id] = user
 

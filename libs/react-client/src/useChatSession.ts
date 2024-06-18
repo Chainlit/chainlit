@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -40,10 +40,11 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
-import { ChainlitAPI } from './api';
+import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
 const useChatSession = () => {
+  const client = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
 
   const [session, setSession] = useRecoilState(sessionState);
@@ -65,20 +66,21 @@ const useChatSession = () => {
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
   const _connect = useCallback(
     ({
-      client,
       userEnv,
       accessToken
     }: {
-      client: ChainlitAPI;
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
-      const pathname = new URL(client.httpEndpoint).pathname;
-      const socketPath = pathname.endsWith('/')
-        ? 'ws/socket.io'
-        : '/ws/socket.io';
-      const socket = io(client.httpEndpoint, {
-        path: `${pathname}${socketPath}`,
+      const { protocol, host, pathname } = new URL(client.httpEndpoint);
+      const uri = `${protocol}//${host}`;
+      const path =
+        pathname && pathname !== '/'
+          ? `${pathname}/ws/socket.io`
+          : '/ws/socket.io';
+
+      const socket = io(uri, {
+        path,
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Client-Type': client.type,
@@ -200,15 +202,6 @@ const useChatSession = () => {
       });
 
       socket.on('call_fn', ({ name, args }, callback) => {
-        const event = new CustomEvent('chainlit-call-fn', {
-          detail: {
-            name,
-            args,
-            callback
-          }
-        });
-        window.dispatchEvent(event);
-
         setCallFn({ name, args, callback });
       });
 

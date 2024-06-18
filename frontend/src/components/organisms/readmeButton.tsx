@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Button from '@mui/material/Button';
@@ -7,17 +6,17 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { Translator } from 'components/i18n';
+import { useConfig } from '@chainlit/react-client';
 
-import { projectSettingsState } from 'state/project';
+import { Translator } from 'components/i18n';
 
 import Readme from './readme';
 
 export default function ReadmeButton() {
+  const { config } = useConfig();
   const [open, setOpen] = useState(false);
-  const projectSettings = useRecoilValue(projectSettingsState);
 
-  if (!projectSettings?.markdown) {
+  if (!config?.markdown) {
     return null;
   }
 
@@ -57,9 +56,9 @@ export default function ReadmeButton() {
         </DialogTitle>
         <DialogContent dividers>
           <Readme
-            markdown={projectSettings?.markdown}
-            allowHtml={projectSettings?.features?.unsafe_allow_html}
-            latex={projectSettings?.features?.latex}
+            markdown={config?.markdown}
+            allowHtml={config?.features?.unsafe_allow_html}
+            latex={config?.features?.latex}
           />
         </DialogContent>
       </Dialog>

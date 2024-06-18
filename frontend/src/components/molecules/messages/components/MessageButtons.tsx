@@ -1,17 +1,14 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext } from 'react';
-import { useRecoilValue } from 'recoil';
 import { grey } from 'theme/palette';
 
 import Stack from '@mui/material/Stack';
 
-import { useChatMessages } from '@chainlit/react-client';
+import { useChatMessages, useConfig } from '@chainlit/react-client';
 
 import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
-
-import { projectSettingsState } from 'state/project';
 
 import { type IStep } from 'client-types/';
 
@@ -25,7 +22,7 @@ interface Props {
 const MessageButtons = ({ message }: Props) => {
   const isDark = useIsDarkMode();
   const { showFeedbackButtons: showFbButtons } = useContext(MessageContext);
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const { firstInteraction } = useChatMessages();
 
   const isUser = message.type === 'user_message';
@@ -42,7 +39,7 @@ const MessageButtons = ({ message }: Props) => {
     hasContent;
 
   const showDebugButton =
-    !!pSettings?.debugUrl && !!message.threadId && !!firstInteraction;
+    !!config?.debugUrl && !!message.threadId && !!firstInteraction;
 
   const show = showCopyButton || showDebugButton || showFeedbackButtons;
 
@@ -60,7 +57,7 @@ const MessageButtons = ({ message }: Props) => {
       {showCopyButton ? <ClipboardCopy value={message.output} /> : null}
       {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}
       {showDebugButton ? (
-        <DebugButton debugUrl={pSettings.debugUrl!} step={message} />
+        <DebugButton debugUrl={config.debugUrl!} step={message} />
       ) : null}
     </Stack>
   );

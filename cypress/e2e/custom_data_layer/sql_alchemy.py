@@ -1,9 +1,8 @@
-from typing import List, Optional
+from typing import Optional
 
 import chainlit.data as cl_data
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.data.storage_clients import AzureStorageClient
-from literalai.helper import utc_now
 
 import chainlit as cl
 

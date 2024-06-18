@@ -2,7 +2,7 @@ import json
 import ssl
 import uuid
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
@@ -149,7 +149,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         query = """SELECT "userIdentifier" FROM threads WHERE "id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
-        if isinstance(result, list) and result[0]:
+        if isinstance(result, list) and result:
             author_identifier = result[0].get("userIdentifier")
             if author_identifier is not None:
                 return author_identifier
@@ -331,7 +331,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         # Delete feedbacks/elements/steps
         feedbacks_query = """DELETE FROM feedbacks WHERE "forId" = :id"""
         elements_query = """DELETE FROM elements WHERE "forId" = :id"""
-        steps_query = """DELETE FROM steps WHERE "forId" = :id"""
+        steps_query = """DELETE FROM steps WHERE "id" = :id"""
         parameters = {"id": step_id}
         await self.execute_sql(query=feedbacks_query, parameters=parameters)
         await self.execute_sql(query=elements_query, parameters=parameters)

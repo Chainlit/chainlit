@@ -69,6 +69,8 @@ def init_http_context(
     user_env: Optional[Dict[str, str]] = None,
     client_type: ClientType = "webapp",
 ) -> ChainlitContext:
+    from chainlit.data import get_data_layer
+
     session_id = str(uuid.uuid4())
     thread_id = thread_id or str(uuid.uuid4())
     session = HTTPSession(
@@ -81,6 +83,13 @@ def init_http_context(
     )
     context = ChainlitContext(session)
     context_var.set(context)
+
+    if data_layer := get_data_layer():
+        if user_id := getattr(user, "id", None):
+            asyncio.create_task(
+                data_layer.update_thread(thread_id=thread_id, user_id=user_id)
+            )
+
     return context
 
 

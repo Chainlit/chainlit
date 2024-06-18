@@ -1,6 +1,5 @@
-import { useAuth } from 'api/auth';
 import { Link } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import KeyIcon from '@mui/icons-material/Key';
@@ -16,10 +15,11 @@ import {
   Typography
 } from '@mui/material';
 
+import { useAuth, useConfig } from '@chainlit/react-client';
+
 import { SwitchInput } from 'components/atoms/inputs/SwitchInput';
 import { Translator } from 'components/i18n';
 
-import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
 interface Props {
@@ -31,8 +31,8 @@ interface Props {
 export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   const { user, logout } = useAuth();
   const [settings, setSettings] = useRecoilState(settingsState);
-  const pSettings = useRecoilValue(projectSettingsState);
-  const requiredKeys = !!pSettings?.userEnv?.length;
+  const { config } = useConfig();
+  const requiredKeys = !!config?.userEnv?.length;
 
   const userNameItem = user && (
     <ListItem key="user-name" sx={{ display: 'flex', flexDirection: 'column' }}>

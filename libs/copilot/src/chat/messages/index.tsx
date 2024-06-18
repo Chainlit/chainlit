@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
+  ChainlitContext,
   IAction,
   IFeedback,
   IStep,
@@ -17,7 +18,8 @@ import {
 import MessageContainer from './container';
 
 const Messages = (): JSX.Element => {
-  const { apiClient, accessToken } = useContext(WidgetContext);
+  const apiClient = useContext(ChainlitContext);
+  const { accessToken } = useContext(WidgetContext);
 
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
@@ -26,26 +28,7 @@ const Messages = (): JSX.Element => {
 
   const callActionWithToast = useCallback(
     (action: IAction) => {
-      const promise = callAction(action);
-      if (promise) {
-        toast.promise(promise, {
-          loading: `Running ${action.name}`,
-          success: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} executed successfully`;
-            }
-          },
-          error: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} failed`;
-            }
-          }
-        });
-      }
+      callAction(action);
     },
     [callAction]
   );

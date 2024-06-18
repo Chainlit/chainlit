@@ -1,6 +1,6 @@
-import { useAuth } from 'api/auth';
-
 import { Avatar, IconButton, IconButtonProps } from '@mui/material';
+
+import { useAuth } from '@chainlit/react-client';
 
 import UserIcon from 'assets/user';
 
