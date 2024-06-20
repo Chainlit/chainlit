@@ -334,17 +334,6 @@ def get_user_facing_url(url: URL):
     if config_url.path.endswith("/"):
         config_url = config_url.replace(path=config_url.path[:-1])
 
-    # Add ROOT_PATH to the final URL if it exists
-    if ROOT_PATH:
-        # Ensure ROOT_PATH starts with a slash
-        if not ROOT_PATH.startswith("/"):
-            ROOT_PATH = "/" + ROOT_PATH
-        # Ensure ROOT_PATH does not end with a slash
-        if ROOT_PATH.endswith("/"):
-            ROOT_PATH = ROOT_PATH[:-1]
-
-        return config_url.__str__() + ROOT_PATH + url.path
-
     return config_url.__str__() + url.path
 
 

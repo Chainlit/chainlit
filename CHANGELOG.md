@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
+## [1.1.303] - 2024-06-20
+
+### Fixed
+
+- OAuth URL redirection should be correctly formed when using CHAINLIT_URL + submounted chainlit app
+
 ## [1.1.302] - 2024-06-16
 
 ### Added
