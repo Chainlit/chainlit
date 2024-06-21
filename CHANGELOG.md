@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
+## [1.1.304] - 2024-06-21
+
+### Fixed
+
+- OAuth final redirection should account for root path if provided
+
 ## [1.1.303] - 2024-06-20
 
 ### Fixed

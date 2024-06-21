@@ -317,8 +317,6 @@ def get_user_facing_url(url: URL):
     Return the user facing URL for a given URL.
     Handles deployment with proxies (like cloud run).
     """
-
-    ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
     chainlit_url = os.environ.get("CHAINLIT_URL")
 
     # No config, we keep the URL as is
@@ -524,9 +522,12 @@ async def oauth_callback(
             "token_type": "bearer",
         }
     )
+
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login/callback?{params}",
+        url=f"{root_path}/login/callback?{params}",
     )
     response.delete_cookie("oauth_state")
     return response
@@ -601,9 +602,12 @@ async def oauth_azure_hf_callback(
             "token_type": "bearer",
         }
     )
+
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login/callback?{params}",
+        url=f"{root_path}/login/callback?{params}",
         status_code=302,
     )
     response.delete_cookie("oauth_state")
