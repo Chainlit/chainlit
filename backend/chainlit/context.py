@@ -1,15 +1,15 @@
 import asyncio
 import uuid
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Dict, Optional, Union, List
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from chainlit.session import HTTPSession, WebsocketSession
+from chainlit.session import ClientType, HTTPSession, WebsocketSession
 from lazify import LazyProxy
 
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
-    from chainlit.user import PersistedUser, User
     from chainlit.step import Step
+    from chainlit.user import PersistedUser, User
 
 
 class ChainlitContextException(Exception):
@@ -28,13 +28,20 @@ class ChainlitContext:
         if self.active_steps:
             return self.active_steps[-1]
 
-    def __init__(self, session: Union["HTTPSession", "WebsocketSession"]):
+    def __init__(
+        self,
+        session: Union["HTTPSession", "WebsocketSession"],
+        emitter: Optional["BaseChainlitEmitter"] = None,
+    ):
         from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
 
         self.loop = asyncio.get_running_loop()
         self.session = session
         self.active_steps = []
-        if isinstance(self.session, HTTPSession):
+
+        if emitter:
+            self.emitter = emitter
+        elif isinstance(self.session, HTTPSession):
             self.emitter = BaseChainlitEmitter(self.session)
         elif isinstance(self.session, WebsocketSession):
             self.emitter = ChainlitEmitter(self.session)
@@ -56,19 +63,33 @@ def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitCon
 
 
 def init_http_context(
+    thread_id: Optional[str] = None,
     user: Optional[Union["User", "PersistedUser"]] = None,
     auth_token: Optional[str] = None,
     user_env: Optional[Dict[str, str]] = None,
+    client_type: ClientType = "webapp",
 ) -> ChainlitContext:
+    from chainlit.data import get_data_layer
+
+    session_id = str(uuid.uuid4())
+    thread_id = thread_id or str(uuid.uuid4())
     session = HTTPSession(
-        id=str(uuid.uuid4()),
+        id=session_id,
+        thread_id=thread_id,
         token=auth_token,
         user=user,
-        client_type="app",
+        client_type=client_type,
         user_env=user_env,
     )
     context = ChainlitContext(session)
     context_var.set(context)
+
+    if data_layer := get_data_layer():
+        if user_id := getattr(user, "id", None):
+            asyncio.create_task(
+                data_layer.update_thread(thread_id=thread_id, user_id=user_id)
+            )
+
     return context
 
 

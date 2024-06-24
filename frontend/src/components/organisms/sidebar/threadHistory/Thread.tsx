@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Alert, Box, Button, Skeleton, Stack } from '@mui/material';
 
 import {
+  ChainlitContext,
   IAction,
   IFeedback,
   IMessageElement,
@@ -18,9 +19,10 @@ import {
 } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import MessageContainer from 'components/organisms/chat/Messages/container';
 
-import { apiClientState } from 'state/apiClient';
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 type Props = {
   thread?: IThread;
@@ -31,9 +33,10 @@ type Props = {
 const Thread = ({ thread, error, isLoading }: Props) => {
   const accessToken = useRecoilValue(accessTokenState);
   const [steps, setSteps] = useState<IStep[]>([]);
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
   const { t } = useTranslation();
   const { threadId } = useChatMessages();
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   useEffect(() => {
     if (!thread) return;
@@ -130,7 +133,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
             <Skeleton
               variant="rounded"
               sx={{
-                maxWidth: '48rem',
+                maxWidth: layoutMaxWidth,
                 width: '100%',
                 height: 100
               }}
@@ -154,7 +157,7 @@ const Thread = ({ thread, error, isLoading }: Props) => {
       <Box
         sx={{
           width: '100%',
-          maxWidth: '48rem',
+          maxWidth: layoutMaxWidth,
           mx: 'auto',
           my: 2
         }}
@@ -185,16 +188,16 @@ const Thread = ({ thread, error, isLoading }: Props) => {
           .
         </Alert>
       </Box>
-      <MessageContainer
-        loading={false}
-        avatars={[]}
-        actions={actions}
-        elements={(elements || []) as IMessageElement[]}
-        onFeedbackUpdated={onFeedbackUpdated}
-        onFeedbackDeleted={onFeedbackDeleted}
-        messages={messages}
-        autoScroll={true}
-      />
+      <ScrollContainer autoScroll={true}>
+        <MessageContainer
+          loading={false}
+          actions={actions}
+          elements={(elements || []) as IMessageElement[]}
+          onFeedbackUpdated={onFeedbackUpdated}
+          onFeedbackDeleted={onFeedbackDeleted}
+          messages={messages}
+        />
+      </ScrollContainer>
     </Stack>
   );
 };

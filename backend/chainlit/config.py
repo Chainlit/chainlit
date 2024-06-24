@@ -4,7 +4,7 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
 from chainlit.logger import logger
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.element import ElementBased
     from chainlit.message import Message
-    from chainlit.types import AudioChunk, ChatProfile, ThreadDict
+    from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -61,9 +61,6 @@ allow_origins = ["*"]
 # follow_symlink = false
 
 [features]
-# Show the prompt playground
-prompt_playground = true
-
 # Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
 unsafe_allow_html = false
 
@@ -95,20 +92,14 @@ auto_tag_thread = true
     sample_rate = 44100
 
 [UI]
-# Name of the app and chatbot.
-name = "Chatbot"
+# Name of the assistant.
+name = "Assistant"
 
-# Show the readme while the thread is empty.
-show_readme_as_default = true
-
-# Description of the app and chatbot. This is used for HTML tags.
+# Description of the assistant. This is used for HTML tags.
 # description = ""
 
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
-
-# The default value for the expand messages settings.
-default_expand_messages = false
 
 # Hide the chain of thought details from the user in the UI.
 hide_cot = false
@@ -127,14 +118,19 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
+# Specify a custom meta image url.
+# custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
-# Override default MUI light theme. (Check theme.ts)
 [UI.theme]
+    default = "dark"
+    #layout = "wide"
     #font_family = "Inter, sans-serif"
+# Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -143,6 +139,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
+    [UI.theme.light.text]
+        #primary = "#212121"
+        #secondary = "#616161"
 
 # Override default MUI dark theme. (Check theme.ts)
 [UI.theme.dark]
@@ -153,7 +152,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
-
+    [UI.theme.dark.text]
+        #primary = "#EEEEEE"
+        #secondary = "#BDBDBD"
 
 [meta]
 generated_by = "{__version__}"
@@ -162,6 +163,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -170,6 +172,9 @@ class RunSettings:
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
+    ssl_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False
@@ -185,15 +190,24 @@ class PaletteOptions(DataClassJsonMixin):
 
 
 @dataclass()
+class TextOptions(DataClassJsonMixin):
+    primary: Optional[str] = ""
+    secondary: Optional[str] = ""
+
+
+@dataclass()
 class Palette(DataClassJsonMixin):
     primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
+    text: Optional[TextOptions] = None
 
 
 @dataclass()
 class Theme(DataClassJsonMixin):
     font_family: Optional[str] = None
+    default: Optional[Literal["light", "dark"]] = "dark"
+    layout: Optional[Literal["default", "wide"]] = "default"
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 
@@ -219,7 +233,6 @@ class AudioFeature(DataClassJsonMixin):
 
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
-    prompt_playground: bool = True
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     latex: bool = False
@@ -230,18 +243,19 @@ class FeaturesSettings(DataClassJsonMixin):
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
-    show_readme_as_default: bool = True
     description: str = ""
     hide_cot: bool = False
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
-    default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
     custom_font: Optional[str] = None
+    # Optional custom meta tag for image preview
+    custom_meta_image_url: Optional[str] = None
+    # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
 
 
@@ -271,6 +285,7 @@ class CodeSettings:
     set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
         None
     )
+    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
 
 
 @dataclass()

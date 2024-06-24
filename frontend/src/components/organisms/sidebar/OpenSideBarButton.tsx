@@ -32,6 +32,7 @@ const OpenSideBarButton = ({ onClick, open }: Props): JSX.Element => {
       placement="right"
     >
       <Box
+        id="open-sidebar-button"
         sx={{
           display: 'flex',
           flexDirection: 'column',

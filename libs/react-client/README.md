@@ -17,11 +17,19 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RecoilRoot } from 'recoil';
 
+import { ChainlitAPI, ChainlitContext } from '@chainlit/react-client';
+
+const CHAINLIT_SERVER_URL = 'http://localhost:8000';
+
+const apiClient = new ChainlitAPI(CHAINLIT_SERVER_URL, 'webapp');
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <RecoilRoot>
-      <MyApp />
-    </RecoilRoot>
+    <ChainlitContext.Provider value={apiClient}>
+      <RecoilRoot>
+        <MyApp />
+      </RecoilRoot>
+    </ChainlitContext.Provider>
   </React.StrictMode>
 );
 ```
@@ -41,11 +49,7 @@ This hook is responsible for managing the chat session's connection to the WebSo
 #### Example
 
 ```jsx
-import { ChainlitAPI, useChatSession } from '@chainlit/react-client';
-
-const CHAINLIT_SERVER_URL = 'http://localhost:8000';
-
-const apiClient = new ChainlitAPI(CHAINLIT_SERVER_URL, 'app');
+import { useChatSession } from '@chainlit/react-client';
 
 const ChatComponent = () => {
   const { connect, disconnect, chatProfile, setChatProfile } = useChatSession();
@@ -53,7 +57,6 @@ const ChatComponent = () => {
   // Connect to the WebSocket server
   useEffect(() => {
     connect({
-      client: apiClient,
       userEnv: {
         /* user environment variables */
       },
@@ -63,7 +66,7 @@ const ChatComponent = () => {
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+  }, []);
 
   // Rest of your component logic
 };

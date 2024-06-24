@@ -6,7 +6,7 @@ async def main():
     msg = cl.Message(content="Hello!")
     await msg.send()
 
-    async with cl.Step() as step:
+    async with cl.Step(type="tool", name="tool1") as step:
         step.output = "Foo"
 
     await cl.sleep(1)

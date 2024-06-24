@@ -1,20 +1,21 @@
 import jwt_decode from 'jwt-decode';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
+import { ChainlitContext } from 'src/context';
 import { accessTokenState, threadHistoryState, userState } from 'src/state';
 import { IUser } from 'src/types';
 import { getToken, removeToken, setToken } from 'src/utils/token';
 
-import { ChainlitAPI } from '..';
 import { useApi } from './api';
 
-export const useAuth = (apiClient: ChainlitAPI) => {
+export const useAuth = () => {
+  const apiClient = useContext(ChainlitContext);
   const { data, isLoading } = useApi<{
     requireLogin: boolean;
     passwordAuth: boolean;
     headerAuth: boolean;
     oauthProviders: string[];
-  }>(apiClient, '/auth/config');
+  }>('/auth/config');
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setThreadHistory = useSetRecoilState(threadHistoryState);
   const [user, setUser] = useRecoilState(userState);

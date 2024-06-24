@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from chainlit.types import FileDict, FileReference
     from chainlit.user import PersistedUser, User
 
-ClientType = Literal["app", "copilot", "teams", "slack"]
+ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
@@ -35,10 +35,20 @@ class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
             return None
 
 
-def clean_metadata(metadata: Dict):
-    return json.loads(
+
+def clean_metadata(metadata: Dict, max_size: int = 1048576):
+    cleaned_metadata = json.loads(
         json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
     )
+
+    metadata_size = len(json.dumps(cleaned_metadata).encode('utf-8'))
+    if metadata_size > max_size:
+        # Redact the metadata if it exceeds the maximum size
+        cleaned_metadata = {
+            'message': f'Metadata size exceeds the limit of {max_size} bytes. Redacted.'
+        }
+
+    return cleaned_metadata
 
 
 class BaseSession:
@@ -80,9 +90,17 @@ class BaseSession:
         self.chat_profile = chat_profile
         self.http_referer = http_referer
 
+        self.files = {}  # type: Dict[str, "FileDict"]
+
         self.id = id
 
         self.chat_settings: Dict[str, Any] = {}
+
+    @property
+    def files_dir(self):
+        from chainlit.config import FILES_DIRECTORY
+
+        return FILES_DIRECTORY / self.id
 
     async def persist_file(
         self,
@@ -90,8 +108,48 @@ class BaseSession:
         mime: str,
         path: Optional[str] = None,
         content: Optional[Union[bytes, str]] = None,
-    ):
-        return None
+    ) -> "FileReference":
+        if not path and not content:
+            raise ValueError(
+                "Either path or content must be provided to persist a file"
+            )
+
+        self.files_dir.mkdir(exist_ok=True)
+
+        file_id = str(uuid.uuid4())
+
+        file_path = self.files_dir / file_id
+
+        file_extension = mimetypes.guess_extension(mime)
+
+        if file_extension:
+            file_path = file_path.with_suffix(file_extension)
+
+        if path:
+            # Copy the file from the given path
+            async with aiofiles.open(path, "rb") as src, aiofiles.open(
+                file_path, "wb"
+            ) as dst:
+                await dst.write(await src.read())
+        elif content:
+            # Write the provided content to the file
+            async with aiofiles.open(file_path, "wb") as buffer:
+                if isinstance(content, str):
+                    content = content.encode("utf-8")
+                await buffer.write(content)
+
+        # Get the file size
+        file_size = file_path.stat().st_size
+        # Store the file content in memory
+        self.files[file_id] = {
+            "id": file_id,
+            "path": file_path,
+            "name": name,
+            "type": mime,
+            "size": file_size,
+        }
+
+        return {"id": file_id}
 
     def to_persistable(self) -> Dict:
         from chainlit.user_session import user_sessions
@@ -99,6 +157,8 @@ class BaseSession:
         user_session = user_sessions.get(self.id) or {}  # type: Dict
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
+        user_session["http_referer"] = self.http_referer
+        user_session["client_type"] = self.client_type
         metadata = clean_metadata(user_session)
         return metadata
 
@@ -133,6 +193,11 @@ class HTTPSession(BaseSession):
             root_message=root_message,
             http_referer=http_referer,
         )
+
+    def delete(self):
+        """Delete the session."""
+        if self.files_dir.is_dir():
+            shutil.rmtree(self.files_dir)
 
 
 class WebsocketSession(BaseSession):
@@ -196,67 +261,11 @@ class WebsocketSession(BaseSession):
         self.restored = False
 
         self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
-        self.files = {}  # type: Dict[str, "FileDict"]
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
 
         self.languages = languages
-
-    @property
-    def files_dir(self):
-        from chainlit.config import FILES_DIRECTORY
-
-        return FILES_DIRECTORY / self.id
-
-    async def persist_file(
-        self,
-        name: str,
-        mime: str,
-        path: Optional[str] = None,
-        content: Optional[Union[bytes, str]] = None,
-    ) -> "FileReference":
-        if not path and not content:
-            raise ValueError(
-                "Either path or content must be provided to persist a file"
-            )
-
-        self.files_dir.mkdir(exist_ok=True)
-
-        file_id = str(uuid.uuid4())
-
-        file_path = self.files_dir / file_id
-
-        file_extension = mimetypes.guess_extension(mime)
-
-        if file_extension:
-            file_path = file_path.with_suffix(file_extension)
-
-        if path:
-            # Copy the file from the given path
-            async with aiofiles.open(path, "rb") as src, aiofiles.open(
-                file_path, "wb"
-            ) as dst:
-                await dst.write(await src.read())
-        elif content:
-            # Write the provided content to the file
-            async with aiofiles.open(file_path, "wb") as buffer:
-                if isinstance(content, str):
-                    content = content.encode("utf-8")
-                await buffer.write(content)
-
-        # Get the file size
-        file_size = file_path.stat().st_size
-        # Store the file content in memory
-        self.files[file_id] = {
-            "id": file_id,
-            "path": file_path,
-            "name": name,
-            "type": mime,
-            "size": file_size,
-        }
-
-        return {"id": file_id}
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""

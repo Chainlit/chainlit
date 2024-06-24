@@ -67,7 +67,7 @@ export const prepareContent = ({
     });
   }
 
-  if (language) {
+  if (language && preparedContent) {
     const prefix = `\`\`\`${language}`;
     const suffix = '```';
     if (!preparedContent.startsWith('```')) {

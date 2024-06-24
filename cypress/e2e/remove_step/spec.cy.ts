@@ -9,11 +9,11 @@ describe('Remove Step', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).should('contain', 'Message 1');
 
-    cy.get('#chatbot-loading').should('exist');
-    cy.get('#chatbot-loading').click();
-    cy.get('.step').eq(1).should('contain', 'Child 1');
+    cy.get('#tool-call-tool1').should('exist');
+    cy.get('#tool-call-tool1').click();
+    cy.get('.message-content').eq(0).should('contain', 'Child 1');
 
-    cy.get('.step').should('have.length', 2);
+    cy.get('#tool-call-tool1').should('not.exist');
 
     cy.get('.step').eq(1).should('contain', 'Message 2');
     cy.get('.step').should('have.length', 1);

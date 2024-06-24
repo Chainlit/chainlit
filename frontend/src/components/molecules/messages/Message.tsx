@@ -1,69 +1,54 @@
 import { keyframes } from '@emotion/react';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
-import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
-import { DetailsButton } from './components/DetailsButton';
+import { MessageAvatar } from './components/Avatar';
 import { MessageActions } from './components/MessageActions';
 import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
-import { Messages } from './Messages';
+import BlinkingCursor from '../BlinkingCursor';
+import ToolCalls from './ToolCalls';
 
 interface Props {
   message: IStep;
+  showAvatar?: boolean;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
-  showAvatar?: boolean;
-  showBorder?: boolean;
   isRunning?: boolean;
   isLast?: boolean;
 }
 
 const Message = memo(
-  ({
-    message,
-    elements,
-    actions,
-    indent,
-    showAvatar,
-    showBorder,
-    isRunning,
-    isLast
-  }: Props) => {
+  ({ message, showAvatar, elements, actions, isRunning, isLast }: Props) => {
     const {
-      expandAll,
-      hideCot,
       highlightedMessage,
       defaultCollapseContent,
       allowHtml,
       latex,
       onError
     } = useContext(MessageContext);
-
-    const [showDetails, setShowDetails] = useState(expandAll);
-
-    useEffect(() => {
-      setShowDetails(expandAll);
-    }, [expandAll]);
-
-    if (hideCot && indent) {
-      return null;
-    }
+    const layoutMaxWidth = useLayoutMaxWidth();
 
     const isAsk = message.waitForAnswer;
+    const isUserMessage = message.type === 'user_message';
 
+    const forceDisplayCursor = isLast && isRunning && !message.streaming;
     return (
       <Box
         sx={{
-          color: 'text.primary'
+          color: 'text.primary',
+          position: 'relative'
         }}
         className="step"
       >
@@ -71,7 +56,7 @@ const Message = memo(
           sx={{
             boxSizing: 'border-box',
             mx: 'auto',
-            maxWidth: '48rem',
+            maxWidth: layoutMaxWidth,
             px: 2,
             display: 'flex',
             flexDirection: 'column',
@@ -81,11 +66,8 @@ const Message = memo(
           <Stack
             id={`step-${message.id}`}
             direction="row"
-            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 12)}px` : 0}
             sx={{
-              py: 2,
-              borderBottom: (theme) =>
-                showBorder ? `1px solid ${theme.palette.divider}` : 'none',
+              pb: 2,
               animation:
                 message.id && highlightedMessage === message.id
                   ? `3s ease-in-out 0.1s ${flash}`
@@ -93,41 +75,89 @@ const Message = memo(
               overflowX: 'auto'
             }}
           >
-            <Author message={message} show={showAvatar}>
-              <Stack alignItems="flex-start" minWidth={150}>
-                <MessageContent
-                  elements={elements}
-                  message={message}
-                  preserveSize={!!message.streaming || !defaultCollapseContent}
-                  allowHtml={allowHtml}
-                  latex={latex}
-                />
-                <DetailsButton
-                  message={message}
-                  opened={showDetails}
-                  onClick={() => setShowDetails(!showDetails)}
-                  loading={isRunning && isLast}
-                />
-                {!isRunning && isLast && isAsk && (
-                  <AskUploadButton onError={onError} />
+            {isUserMessage ? (
+              <Box display="flex" flexDirection="column" width="100%">
+                <Box
+                  sx={{
+                    px: 2.5,
+                    borderRadius: '1.5rem',
+                    backgroundColor: 'background.paper',
+                    maxWidth: '70%',
+                    ml: 'auto'
+                  }}
+                >
+                  <MessageContent
+                    elements={elements}
+                    message={message}
+                    preserveSize={
+                      !!message.streaming || !defaultCollapseContent
+                    }
+                    allowHtml={allowHtml}
+                    latex={latex}
+                  />
+                </Box>
+                {forceDisplayCursor && (
+                  <Stack
+                    direction="row"
+                    gap="1rem"
+                    alignItems="center"
+                    my={0.5}
+                    width="100%"
+                  >
+                    <Skeleton
+                      variant="circular"
+                      width="1.6rem"
+                      height="1.6rem"
+                    />
+                    <BlinkingCursor />
+                  </Stack>
                 )}
-                {actions?.length ? (
-                  <MessageActions message={message} actions={actions} />
-                ) : null}
-                <MessageButtons message={message} />
+              </Box>
+            ) : (
+              <Stack
+                direction="row"
+                gap="1rem"
+                width="100%"
+                className="ai-message"
+              >
+                <MessageAvatar author={message.name} hide={!showAvatar} />
+                <Stack
+                  alignItems="flex-start"
+                  minWidth={150}
+                  flexGrow={1}
+                  position="relative"
+                >
+                  <ToolCalls
+                    elements={elements}
+                    message={message}
+                    isRunning={isRunning}
+                  />
+                  <MessageContent
+                    elements={elements}
+                    message={message}
+                    preserveSize={
+                      !!message.streaming || !defaultCollapseContent
+                    }
+                    allowHtml={allowHtml}
+                    latex={latex}
+                  />
+                  {!isRunning && isLast && isAsk && (
+                    <AskUploadButton onError={onError} />
+                  )}
+                  {actions?.length ? (
+                    <MessageActions message={message} actions={actions} />
+                  ) : null}
+                  <MessageButtons message={message} />
+                  {forceDisplayCursor && (
+                    <Box my={0.5}>
+                      <BlinkingCursor />
+                    </Box>
+                  )}
+                </Stack>
               </Stack>
-            </Author>
+            )}
           </Stack>
         </Box>
-        {message.steps && showDetails && (
-          <Messages
-            messages={message.steps}
-            actions={actions}
-            elements={elements}
-            indent={indent + 1}
-            isRunning={isRunning}
-          />
-        )}
       </Box>
     );
   }

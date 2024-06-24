@@ -1,4 +1,4 @@
-import { IGeneration, IThread } from 'src/types';
+import { IThread } from 'src/types';
 import { removeToken } from 'src/utils/token';
 
 import { IFeedback } from 'src/types/feedback';
@@ -43,7 +43,7 @@ type Payload = FormData | any;
 export class APIBase {
   constructor(
     public httpEndpoint: string,
-    public type: 'app' | 'copilot' | 'teams' | 'slack',
+    public type: 'webapp' | 'copilot' | 'teams' | 'slack' | 'discord',
     public on401?: () => void,
     public onError?: (error: ClientError) => void
   ) {}
@@ -152,57 +152,6 @@ export class ChainlitAPI extends APIBase {
   async logout() {
     const res = await this.post(`/logout`, {});
     return res.json();
-  }
-
-  async getGeneration(
-    generation: IGeneration,
-    userEnv = {},
-    controller: AbortController,
-    accessToken?: string,
-    tokenCb?: (done: boolean, token: string) => void
-  ) {
-    const payload = { userEnv };
-    if (generation.type === 'CHAT') {
-      payload['chatGeneration'] = generation;
-    } else {
-      payload['completionGeneration'] = generation;
-    }
-    const response = await this.post(
-      `/generation`,
-      payload,
-      accessToken,
-      controller.signal
-    );
-
-    const reader = response?.body?.getReader();
-
-    const stream = new ReadableStream({
-      start(controller) {
-        function push() {
-          reader!
-            .read()
-            .then(({ done, value }) => {
-              if (done) {
-                controller.close();
-                tokenCb && tokenCb(done, '');
-                return;
-              }
-              const string = new TextDecoder('utf-8').decode(value);
-              tokenCb && tokenCb(done, string);
-              controller.enqueue(value);
-              push();
-            })
-            .catch((err) => {
-              controller.close();
-              tokenCb && tokenCb(true, '');
-              console.error(err);
-            });
-        }
-        push();
-      }
-    });
-
-    return stream;
   }
 
   async setFeedback(

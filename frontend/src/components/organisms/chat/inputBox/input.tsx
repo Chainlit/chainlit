@@ -172,16 +172,15 @@ const Input = memo(
       <Stack
         sx={{
           backgroundColor: 'background.paper',
-          borderRadius: 1,
-          border: (theme) => `1px solid ${theme.palette.divider}`,
+          borderRadius: '1.5rem',
           boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
           textarea: {
             height: '34px',
             maxHeight: '30vh',
             overflowY: 'auto !important',
             resize: 'none',
-            paddingBottom: '0.75rem',
-            paddingTop: '0.75rem',
+            paddingBottom: '0.7rem',
+            paddingTop: '0.7rem',
             color: 'text.primary',
             lineHeight: '24px'
           }

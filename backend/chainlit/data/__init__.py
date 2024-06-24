@@ -94,7 +94,7 @@ class BaseDataLayer:
         pass
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         pass
 
     @queue_until_user_message()
@@ -139,6 +139,9 @@ class BaseDataLayer:
     async def delete_user_session(self, id: str) -> bool:
         return True
 
+    async def build_debug_url(self) -> str:
+        return ""
+
 
 _data_layer: Optional[BaseDataLayer] = None
 
@@ -157,6 +160,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
             "autoPlay": metadata.get("autoPlay", None),
+            "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
@@ -223,6 +227,14 @@ class ChainlitDataLayer(BaseDataLayer):
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
+
+    async def build_debug_url(self) -> str:
+        try:
+            project_id = await self.client.api.get_my_project_id()
+            return f"{self.client.api.url}/projects/{project_id}/threads?threadId=[thread_id]&currentStepId=[step_id]"
+        except Exception as e:
+            logger.error(f"Error building debug url: {e}")
+            return ""
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         user = await self.client.api.get_user(identifier=identifier)
@@ -340,7 +352,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return self.attachment_to_element_dict(attachment)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         await self.client.api.delete_attachment(id=element_id)
 
     @queue_until_user_message()
@@ -455,12 +467,15 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if config.ui.hide_cot and step.parent_id:
+                if step.type == "system_message":
+                    continue
+                if config.ui.hide_cot and step.type not in [
+                    "user_message",
+                    "assistant_message",
+                ]:
                     continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
-                if not config.features.prompt_playground and step.generation:
-                    step.generation = None
                 steps.append(self.step_to_step_dict(step))
 
         return {

@@ -31,9 +31,54 @@ const isLastMessage = (messages: IStep[], index: number) => {
 // Nested messages utils
 
 const addMessage = (messages: IStep[], message: IStep): IStep[] => {
+  const messageTypes = ['assistant_message', 'user_message'];
+  const validRootTypes = [...messageTypes, 'tool'];
+  const isMessageType = messageTypes.includes(message.type);
+  const isValidRootType = validRootTypes.includes(message.type);
+  const isRoot = !message.parentId;
+
+  if (isRoot && !isValidRootType) {
+    return messages;
+  }
+
+  const parentMessage = !isRoot
+    ? findMessageById(messages, message.parentId!)
+    : undefined;
+
+  const shouldWrap =
+    (isRoot || parentMessage?.type !== 'assistant_message') &&
+    message.type === 'tool';
+
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
-  } else if ('parentId' in message && message.parentId) {
+  } else if (shouldWrap) {
+    const lastMessage =
+      messages.length > 0 ? messages[messages.length - 1] : undefined;
+    const collapseTool =
+      lastMessage?.type === 'assistant_message' &&
+      lastMessage?.id.startsWith('wrap_');
+    if (lastMessage && collapseTool) {
+      return [
+        ...messages.slice(0, messages.length - 1),
+        {
+          ...lastMessage,
+          steps: [...(lastMessage.steps || []), message]
+        }
+      ];
+    }
+    return [
+      ...messages,
+      {
+        ...message,
+        name: '',
+        input: '',
+        output: '',
+        id: 'wrap_' + message.id,
+        type: 'assistant_message',
+        steps: [message]
+      }
+    ];
+  } else if (!isMessageType && 'parentId' in message && message.parentId) {
     return addMessageToParent(messages, message.parentId, message);
   } else if ('indent' in message && message.indent && message.indent > 0) {
     return addIndentMessage(messages, message.indent, message);
@@ -98,17 +143,25 @@ const addMessageToParent = (
   return nextMessages;
 };
 
-const hasMessageById = (messages: IStep[], messageId: string) => {
+const findMessageById = (
+  messages: IStep[],
+  messageId: string
+): IStep | undefined => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
-      return true;
+      return message;
     } else if (message.steps && message.steps.length > 0) {
-      if (hasMessageById(message.steps, messageId)) {
-        return true;
+      const foundMessage = findMessageById(message.steps, messageId);
+      if (foundMessage) {
+        return foundMessage;
       }
     }
   }
-  return false;
+  return undefined;
+};
+
+const hasMessageById = (messages: IStep[], messageId: string): boolean => {
+  return findMessageById(messages, messageId) !== undefined;
 };
 
 const updateMessageById = (
@@ -156,10 +209,10 @@ const updateMessageContentById = (
   messages: IStep[],
   messageId: number | string,
   updatedContent: string,
-  isSequence: boolean
+  isSequence: boolean,
+  isInput: boolean
 ): IStep[] => {
   const nextMessages = [...messages];
-
   for (let index = 0; index < nextMessages.length; index++) {
     const msg = nextMessages[index];
 
@@ -169,6 +222,14 @@ const updateMessageContentById = (
           msg.content = updatedContent;
         } else {
           msg.content += updatedContent;
+        }
+      } else if (isInput) {
+        if ('input' in msg && msg.input !== undefined) {
+          if (isSequence) {
+            msg.input = updatedContent;
+          } else {
+            msg.input += updatedContent;
+          }
         }
       } else {
         if ('output' in msg && msg.output !== undefined) {
@@ -186,7 +247,8 @@ const updateMessageContentById = (
         msg.steps,
         messageId,
         updatedContent,
-        isSequence
+        isSequence,
+        isInput
       );
       nextMessages[index] = { ...msg };
     }
