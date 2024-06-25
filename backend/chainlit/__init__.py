@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     )
     from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
     from chainlit.openai import instrument_openai
+    from chainlit.mistralai import instrument_mistralai
+
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
@@ -57,7 +60,6 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
-from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 if env_found:
     logger.info("Loaded .env file")
@@ -360,6 +362,7 @@ __getattr__ = make_module_getattr(
         "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
         "HaystackAgentCallbackHandler": "chainlit.haystack.callbacks",
         "instrument_openai": "chainlit.openai",
+        "instrument_mistralai": "chainlit.mistralai",
     }
 )
 
@@ -416,6 +419,7 @@ __all__ = [
     "LlamaIndexCallbackHandler",
     "HaystackAgentCallbackHandler",
     "instrument_openai",
+    "instrument_mistralai",
 ]
 
 
