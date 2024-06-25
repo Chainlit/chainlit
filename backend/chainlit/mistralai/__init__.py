@@ -10,11 +10,6 @@ from chainlit.utils import check_module_version
 
 
 def instrument_mistralai():
-    if not check_module_version("mistralai", "0.2.0"):
-        raise ValueError(
-            "Expected Mistral AI version >= 0.2.0. Run `pip install mistralai --upgrade`"
-        )
-
     from literalai.instrumentation.mistralai import instrument_mistralai
 
     def on_new_generation(
