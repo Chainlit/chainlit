@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased.
 
+## [1.1.305] - 2024-06-26
+
+### Added
+
+- Mistral AI instrumentation
+
 ## [1.1.304] - 2024-06-21
 
 ### Fixed
