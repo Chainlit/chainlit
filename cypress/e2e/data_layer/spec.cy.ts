@@ -92,7 +92,7 @@ function continueThread() {
 
   // Verify that new step counter messages have been added
   cy.get('.step').eq(9).should('contain', 'Create step counter: 11');
-  cy.get('.step').eq(12).should('contain', 'Create step counter: 14');
+  cy.get('.step').eq(11).should('contain', 'Create step counter: 14');
 }
 
 function newThread() {
