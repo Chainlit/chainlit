@@ -44,6 +44,7 @@ export interface IChainlitConfig {
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     latex?: boolean;
+    edit_message?: boolean;
   };
   debugUrl?: string;
   userEnv: string[];

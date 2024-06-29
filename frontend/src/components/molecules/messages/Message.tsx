@@ -18,6 +18,7 @@ import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import BlinkingCursor from '../BlinkingCursor';
 import ToolCalls from './ToolCalls';
+import UserMessage from './UserMessage';
 
 interface Props {
   message: IStep;
@@ -77,15 +78,7 @@ const Message = memo(
           >
             {isUserMessage ? (
               <Box display="flex" flexDirection="column" width="100%">
-                <Box
-                  sx={{
-                    px: 2.5,
-                    borderRadius: '1.5rem',
-                    backgroundColor: 'background.paper',
-                    maxWidth: '70%',
-                    ml: 'auto'
-                  }}
-                >
+                <UserMessage message={message}>
                   <MessageContent
                     elements={elements}
                     message={message}
@@ -95,7 +88,7 @@ const Message = memo(
                     allowHtml={allowHtml}
                     latex={latex}
                   />
-                </Box>
+                </UserMessage>
                 {forceDisplayCursor && (
                   <Stack
                     direction="row"
