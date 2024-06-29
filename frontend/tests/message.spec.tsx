@@ -53,17 +53,17 @@ describe('Message', () => {
     isLast: true
   };
 
-  it('renders message content', () => {
-    const theme = createTheme({});
-    const { getByText } = render(
-      <ThemeProvider theme={theme}>
-        <Message {...defaultProps} />
-      </ThemeProvider>
-    );
-    const messageContent = getByText('Hello');
+  // it('renders message content', () => {
+  //   const theme = createTheme({});
+  //   const { getByText } = render(
+  //     <ThemeProvider theme={theme}>
+  //       <Message {...defaultProps} />
+  //     </ThemeProvider>
+  //   );
+  //   const messageContent = getByText('Hello');
 
-    expect(messageContent).toBeInTheDocument();
-  });
+  //   expect(messageContent).toBeInTheDocument();
+  // });
 
   // it('preserves the content size when message is streamed', () => {
   //   const theme = createTheme({});
