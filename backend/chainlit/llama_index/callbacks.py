@@ -45,6 +45,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             root_message = context_var.get().session.root_message
             if root_message:
                 return root_message.id
+            return None
         else:
             return None
 
