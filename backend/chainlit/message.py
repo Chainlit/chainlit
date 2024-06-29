@@ -6,6 +6,7 @@ from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
+from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
@@ -127,7 +128,7 @@ class MessageBase(ABC):
         Remove a message already sent to the UI.
         """
         trace_event("remove_message")
-
+        chat_context.remove(self)
         step_dict = self.to_dict()
         data_layer = get_data_layer()
         if data_layer:
@@ -169,6 +170,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = await self._create()
+        chat_context.add(self)
         await context.emitter.send_step(step_dict)
 
         return self

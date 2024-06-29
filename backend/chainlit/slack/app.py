@@ -332,7 +332,7 @@ async def handle_app_mentions(event, say):
 async def handle_message(message, say):
     user = await get_user(message["user"])
     thread_name = f"{user.identifier} Slack DM"
-    await process_slack_message(message, say, thread_name)
+    await process_slack_message(message, say, thread_name, True)
 
 
 @slack_app.block_action("thumbdown")
@@ -341,8 +341,7 @@ async def thumb_down(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        thread_id = context_var.get().session.thread_id
-        feedback = Feedback(forId=step_id, threadId=thread_id, value=0)
+        feedback = Feedback(forId=step_id, value=0)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
@@ -368,8 +367,7 @@ async def thumb_up(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        thread_id = context_var.get().session.thread_id
-        feedback = Feedback(forId=step_id, threadId=thread_id, value=1)
+        feedback = Feedback(forId=step_id, value=1)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]

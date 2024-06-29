@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased.
+### Added
+
+- `cl.chat_context` to help keeping track of the messages of the current thread
 
 ## [1.1.305] - 2024-06-26
 
