@@ -21,11 +21,10 @@ if TYPE_CHECKING:
     from chainlit.openai import instrument_openai
     from chainlit.mistralai import instrument_mistralai
 
-from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
-
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
+from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
@@ -60,6 +59,7 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
 from chainlit.version import __version__
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 if env_found:
     logger.info("Loaded .env file")
@@ -370,6 +370,7 @@ __all__ = [
     "ChatProfile",
     "Starter",
     "user_session",
+    "chat_context",
     "CopilotFunction",
     "AudioChunk",
     "Action",

@@ -2,12 +2,13 @@ import asyncio
 import uuid
 from typing import Any, Dict, List, Literal, Optional, Union, cast
 
+from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict, File
 from chainlit.logger import logger
 from chainlit.message import Message
-from chainlit.session import BaseSession, HTTPSession, WebsocketSession
+from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
 from chainlit.types import (
     AskActionResponse,
@@ -220,6 +221,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
         message = Message.from_dict(step_dict)
         # Overwrite the created_at timestamp with the current time
         message.created_at = utc_now()
+        chat_context.add(message)
 
         asyncio.create_task(message._create())
 

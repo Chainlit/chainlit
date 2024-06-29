@@ -9,6 +9,7 @@ from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.config import config
 from chainlit.context import init_ws_context
+from chainlit.chat_context import chat_context
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
@@ -183,6 +184,11 @@ async def connection_successful(sid):
                 {"interaction": "resume", "thread_id": thread.get("id")},
             )
             await config.code.on_chat_resume(thread)
+            
+            for step in thread.get("steps", []):
+                if "message" in step["type"]:
+                    chat_context.add(Message.from_dict(step))
+                    
             await context.emitter.resume_thread(thread)
             return
 
