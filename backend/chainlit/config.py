@@ -91,6 +91,8 @@ auto_tag_thread = true
     # Sample rate of the audio
     sample_rate = 44100
 
+edit_message = true
+
 [UI]
 # Name of the assistant.
 name = "Assistant"
@@ -238,6 +240,7 @@ class FeaturesSettings(DataClassJsonMixin):
     latex: bool = False
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
+    edit_message:bool = True
 
 
 @dataclass()

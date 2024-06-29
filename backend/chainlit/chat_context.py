@@ -17,9 +17,9 @@ class ChatContext:
             # Create a new chat context
             chat_contexts[context.session.id] = []
 
-        return chat_contexts[context.session.id]
+        return chat_contexts[context.session.id].copy()
 
-    def add(self, message: "Message") -> None:
+    def add(self, message: "Message"):
         if not context.session:
             return
 
@@ -27,6 +27,8 @@ class ChatContext:
             chat_contexts[context.session.id] = []
 
         chat_contexts[context.session.id].append(message)
+        
+        return message
 
     def remove(self, message: "Message") -> bool:
         if not context.session:
