@@ -42,7 +42,9 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         elif context_var.get().current_step:
             return context_var.get().current_step.id
         elif context_var.get().session.root_message:
-            return context_var.get().session.root_message.id
+            root_message = context_var.get().session.root_message
+            if root_message:
+                return root_message.id
         else:
             return None
 
