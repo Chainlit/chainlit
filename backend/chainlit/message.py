@@ -109,6 +109,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = self.to_dict()
+        chat_context.add(self)
 
         data_layer = get_data_layer()
         if data_layer:

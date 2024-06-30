@@ -1,9 +1,15 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useRef, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 import { Box, IconButton, Stack, TextField } from '@mui/material';
 
-import { IStep, useChatInteract, useConfig } from '@chainlit/react-client';
+import {
+  IStep,
+  messagesState,
+  useChatInteract,
+  useConfig
+} from '@chainlit/react-client';
 
 import { AccentButton, RegularButton } from 'components/atoms/buttons';
 import { Translator } from 'components/i18n';
@@ -21,6 +27,7 @@ export default function UserMessage({
   const config = useConfig();
   const { askUser, loading } = useContext(MessageContext);
   const { editMessage } = useChatInteract();
+  const setMessages = useSetRecoilState(messagesState);
   const disabled = loading || !!askUser;
   const [isEditing, setIsEditing] = useState(false);
   const textFieldRef = useRef<HTMLInputElement>(null);
@@ -30,6 +37,13 @@ export default function UserMessage({
   const handleEdit = () => {
     if (textFieldRef.current) {
       const newOutput = textFieldRef.current.value;
+      setMessages((prev) => {
+        const index = prev.findIndex((m) => m.id === message.id);
+        if (index === -1) {
+          return prev;
+        }
+        return prev.slice(0, index + 1);
+      });
       setIsEditing(false);
       editMessage({ ...message, output: newOutput });
     }

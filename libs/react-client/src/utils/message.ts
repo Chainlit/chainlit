@@ -191,7 +191,7 @@ const deleteMessageById = (messages: IStep[], messageId: string) => {
   for (let index = 0; index < nextMessages.length; index++) {
     const msg = nextMessages[index];
 
-    if (msg.id === messageId) {
+    if (msg.id === messageId || msg.id === 'wrap_' + messageId) {
       nextMessages = [
         ...nextMessages.slice(0, index),
         ...nextMessages.slice(index + 1)
