@@ -25,8 +25,9 @@ class ChatContext:
 
         if context.session.id not in chat_contexts:
             chat_contexts[context.session.id] = []
-
-        chat_contexts[context.session.id].append(message)
+            
+        if message not in chat_contexts[context.session.id]:
+            chat_contexts[context.session.id].append(message)
         
         return message
 
