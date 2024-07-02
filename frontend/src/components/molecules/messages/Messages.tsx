@@ -36,7 +36,7 @@ const Messages = memo(
         (!hasContent && messageRunning)
       );
     });
-    console.log(messages);
+
     return (
       <>
         {filtered.map((m, i) => {
