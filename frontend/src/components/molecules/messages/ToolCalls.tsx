@@ -12,12 +12,11 @@ interface Props {
   isRunning?: boolean;
 }
 
-function groupToolSteps(step: IStep) {
+function groupToolSteps(step: IStep): IStep[][] {
   const groupedSteps: IStep[][] = [];
-
   let currentGroup: IStep[] = [];
 
-  function traverseAndGroup(currentStep: IStep) {
+  function processStep(currentStep: IStep) {
     if (currentStep.type === 'tool') {
       if (
         currentGroup.length === 0 ||
@@ -26,19 +25,19 @@ function groupToolSteps(step: IStep) {
         currentGroup.push(currentStep);
       } else {
         groupedSteps.push(currentGroup);
-
         currentGroup = [currentStep];
       }
-    }
-
-    if (currentStep.steps) {
-      for (const childStep of currentStep.steps) {
-        traverseAndGroup(childStep);
+    } else if (currentStep.steps) {
+      // If we haven't found any tools yet, recurse into the steps
+      if (groupedSteps.length === 0 && currentGroup.length === 0) {
+        for (const childStep of currentStep.steps) {
+          processStep(childStep);
+        }
       }
     }
   }
 
-  traverseAndGroup(step);
+  processStep(step);
 
   // Push the last group if it exists
   if (currentGroup.length > 0) {
@@ -59,10 +58,10 @@ export default function ToolCalls({ message, elements, isRunning }: Props) {
 
   return (
     <Stack width="100%" direction="column" gap={1}>
-      {toolCalls.map((toolCall, index) => (
+      {toolCalls.map((toolCalls, index) => (
         <ToolCall
           key={index}
-          steps={toolCall}
+          steps={toolCalls}
           elements={elements}
           isRunning={isRunning}
         />

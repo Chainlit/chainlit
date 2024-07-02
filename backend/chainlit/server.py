@@ -332,7 +332,7 @@ def get_user_facing_url(url: URL):
     if config_url.path.endswith("/"):
         config_url = config_url.replace(path=config_url.path[:-1])
 
-    return config_url.__str__() + url.path
+    return config_url.__str__()
 
 
 @router.get("/auth/config")

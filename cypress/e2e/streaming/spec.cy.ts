@@ -36,8 +36,6 @@ describe('Streaming', () => {
 
     toolStream('tool1');
 
-    toolStream('tool2');
-
     cy.get('.step').should('have.length', 3);
   });
 });

@@ -28,6 +28,28 @@ const isLastMessage = (messages: IStep[], index: number) => {
   return true;
 };
 
+const addToolMessage = (messages: IStep[], toolMessage: IStep): IStep[] => {
+  const parentMessage = toolMessage.parentId
+    ? findMessageById(messages, toolMessage.parentId)
+    : undefined;
+  if (parentMessage && parentMessage.type !== 'user_message') {
+    return addMessageToParent(messages, parentMessage.id, toolMessage);
+  }
+
+  return [
+    ...messages,
+    {
+      ...toolMessage,
+      name: '',
+      input: '',
+      output: '',
+      id: 'wrap_' + toolMessage.id,
+      type: 'assistant_message',
+      steps: [toolMessage]
+    }
+  ];
+};
+
 // Nested messages utils
 
 const addMessage = (messages: IStep[], message: IStep): IStep[] => {
@@ -41,43 +63,10 @@ const addMessage = (messages: IStep[], message: IStep): IStep[] => {
     return messages;
   }
 
-  const parentMessage = !isRoot
-    ? findMessageById(messages, message.parentId!)
-    : undefined;
-
-  const shouldWrap =
-    (isRoot || parentMessage?.type !== 'assistant_message') &&
-    message.type === 'tool';
-
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
-  } else if (shouldWrap) {
-    const lastMessage =
-      messages.length > 0 ? messages[messages.length - 1] : undefined;
-    const collapseTool =
-      lastMessage?.type === 'assistant_message' &&
-      lastMessage?.id.startsWith('wrap_');
-    if (lastMessage && collapseTool) {
-      return [
-        ...messages.slice(0, messages.length - 1),
-        {
-          ...lastMessage,
-          steps: [...(lastMessage.steps || []), message]
-        }
-      ];
-    }
-    return [
-      ...messages,
-      {
-        ...message,
-        name: '',
-        input: '',
-        output: '',
-        id: 'wrap_' + message.id,
-        type: 'assistant_message',
-        steps: [message]
-      }
-    ];
+  } else if (message.type === 'tool') {
+    return addToolMessage(messages, message);
   } else if (!isMessageType && 'parentId' in message && message.parentId) {
     return addMessageToParent(messages, message.parentId, message);
   } else if ('indent' in message && message.indent && message.indent > 0) {
@@ -150,7 +139,11 @@ const findMessageById = (
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
       return message;
-    } else if (message.steps && message.steps.length > 0) {
+    } else if (
+      message.steps &&
+      message.type !== 'user_message' &&
+      message.steps.length > 0
+    ) {
       const foundMessage = findMessageById(message.steps, messageId);
       if (foundMessage) {
         return foundMessage;
@@ -191,7 +184,7 @@ const deleteMessageById = (messages: IStep[], messageId: string) => {
   for (let index = 0; index < nextMessages.length; index++) {
     const msg = nextMessages[index];
 
-    if (msg.id === messageId || msg.id === 'wrap_' + messageId) {
+    if (msg.id === messageId) {
       nextMessages = [
         ...nextMessages.slice(0, index),
         ...nextMessages.slice(index + 1)
