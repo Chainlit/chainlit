@@ -1,7 +1,7 @@
 import Share from '@mui/icons-material/Share';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Language from '@mui/icons-material/Language';
-import { toast } from 'sonner';
+import toast from 'evoya/toast';
 import { useCopyToClipboard } from 'usehooks-ts';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -124,11 +124,11 @@ export default function ShareSessionButton({ sessionUuid }: Props) {
         }
         await shareResponse.json();
 
-        toast.success(<Translator path="components.molecules.shareSession.messages.successRemove" />);
+        toast.success(t("components.molecules.shareSession.messages.successRemove"));
         setShareLink({});
       } catch(e) {
         console.error(e);
-        toast.error(<Translator path="components.molecules.shareSession.messages.error" />);
+        toast.error(t("components.molecules.shareSession.messages.error"));
       }
     }
   }
@@ -166,15 +166,15 @@ export default function ShareSessionButton({ sessionUuid }: Props) {
           const shareUrl = shareData.data.link;
 
           await copyToClipboard(shareUrl);
-          toast.success(<Translator path="components.molecules.shareSession.messages.success" />);
+          toast.success(t("components.molecules.shareSession.messages.success"));
           shareConfig.url = shareUrl;
           setShareLink(shareConfig);
         } else {
-          toast.error(<Translator path="components.molecules.shareSession.messages.error" />);
+          toast.error(t("components.molecules.shareSession.messages.error"));
         }
       } catch(e) {
         console.error(e);
-        toast.error(<Translator path="components.molecules.shareSession.messages.error" />);
+        toast.error(t("components.molecules.shareSession.messages.error"));
       } finally {
         setIsCreatingStatic(false);
         setIsCreatingDynamic(false);

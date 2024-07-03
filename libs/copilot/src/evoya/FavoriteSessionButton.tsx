@@ -1,18 +1,20 @@
 import StarOutline from '@mui/icons-material/StarOutline';
 import Star from '@mui/icons-material/Star';
-import { toast } from 'sonner';
+import toast from 'evoya/toast';
 
 import { Box, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import { Translator } from '@chainlit/app/src/components/i18n';
 
 import { WidgetContext } from 'context';
 import { useContext, useState } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 interface Props {
   sessionUuid: string;
 }
 
 export default function FavoriteSessionButton({ sessionUuid } : Props) {
+  const { t } = useTranslation();
   const { evoya, accessToken } = useContext(WidgetContext);
   const [isFavorite, setIsFavorite] = useState<boolean>(!!evoya?.api?.favorite?.is_favorite);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,11 +37,11 @@ export default function FavoriteSessionButton({ sessionUuid } : Props) {
           if (!response.ok) {
             throw new Error(response.statusText);
           }
-          toast.success(<Translator path="components.molecules.favoriteSession.messages.successRemove" />);
+          toast.success(t("components.molecules.favoriteSession.messages.successRemove"));
           setIsFavorite(false);
           window.dispatchEvent(new CustomEvent('reload-chat-sidebar'));
         } catch(e) {
-          toast.error(<Translator path="components.molecules.favoriteSession.messages.error" />);
+          toast.error(t("components.molecules.favoriteSession.messages.error"));
         } finally {
           setIsLoading(false);
         }
@@ -58,11 +60,11 @@ export default function FavoriteSessionButton({ sessionUuid } : Props) {
           if (!response.ok) {
             throw new Error(response.statusText);
           }
-          toast.success(<Translator path="components.molecules.favoriteSession.messages.success" />);
+          toast.success(t("components.molecules.favoriteSession.messages.success"));
           setIsFavorite(true);
           window.dispatchEvent(new CustomEvent('reload-chat-sidebar'));
         } catch(e) {
-          toast.error(<Translator path="components.molecules.favoriteSession.messages.error" />);
+          toast.error(t("components.molecules.favoriteSession.messages.error"));
         } finally {
           setIsLoading(false);
         }

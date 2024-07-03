@@ -50,14 +50,12 @@ export default function WidgetEmbedded() {
       window.visualViewport.addEventListener("resize", viewportHandler);
       window.visualViewport.addEventListener("scroll", viewportHandler);
     }
-    if (evoya?.type !== 'dashboard') {
-      window.addEventListener('chainlit-close-modal', () => {
-        setOpen(false)
-      });
-      window.addEventListener('chainlit-open-modal', () => {
-        setOpen(true)
-      });
-    }
+    window.addEventListener('copilot-close-modal', () => {
+      setOpen(false)
+    });
+    window.addEventListener('copilot-open-modal', () => {
+      setOpen(true)
+    });
     return () => {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", viewportHandler);
@@ -77,7 +75,7 @@ export default function WidgetEmbedded() {
     >
       <Box
         sx={
-          open ?
+          (open && evoya?.type !== 'dashboard') ?
           {
             ...styleOpen,
             top: `${visualViewportOffsetTop + 10}px`,

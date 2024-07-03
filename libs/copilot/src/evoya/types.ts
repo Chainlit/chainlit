@@ -6,6 +6,8 @@ export interface EvoyaConfig {
   type: string; // options: 'default' | 'container' | 'dashboard'
   getEvoyaAccessToken: (chat_uuid: string, session_uuid: string | undefined) => string | undefined;
   api?: EvoyaApiConfig;
+  logo?: string | null;
+  hideWaterMark?: boolean;
 }
 
 export interface EvoyaFavoriteApiConfig {

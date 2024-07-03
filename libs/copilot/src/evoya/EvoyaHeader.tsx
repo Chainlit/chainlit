@@ -1,6 +1,7 @@
 import { Stack } from '@mui/material';
 
-import { Logo } from '@chainlit/app/src/components/atoms/logo';
+// import { Logo } from '@chainlit/app/src/components/atoms/logo';
+import AvaiaLogo from 'assets/logo-avaia-full-white.svg?react';
 
 import NewChatButton from './NewChatButton';
 import DashboardSidebarButton from './DashboardSidebarButton';
@@ -23,7 +24,7 @@ interface Props {
 }
 
 const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
-  const { evoya, apiClient, accessToken } = useContext(WidgetContext);
+  const { evoya, apiClient, accessToken, config } = useContext(WidgetContext);
   const firstUserInt = useRecoilValue(firstUserInteraction);
   const [sessionUuid, setSessionUuid] = useState(evoya?.session_uuid ?? '');
   const sessionId = useRecoilValue(sessionIdState);
@@ -53,20 +54,24 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
 
   return (
     <Stack
-      px={3}
+      pl={2}
+      pr={3}
       py={1.5}
       direction="row"
       alignItems="center"
       justifyContent="space-between"
-      bgcolor="background.paper"
+      bgcolor={evoya?.type === 'dashboard' ? 'background.paper' : config?.button?.style?.bgcolor}
     >
+
       <Stack direction="row" alignItems="center" spacing={2}>
-        {evoya?.type === 'dashboard' &&
+        {evoya?.type === 'dashboard' ? (
           <>
             <DashboardSidebarButton />
             <NewChatButton />
           </>
-        }
+        ) : (
+          evoya?.logo ? <img src={evoya.logo} style={{ height: '25px', width: 'auto' }} /> : <AvaiaLogo style={{ height: '25px', width: 'auto' }} />
+        )}
       </Stack>
       <Stack direction="row" alignItems="center" spacing={2}>
         {(evoya?.type === 'dashboard' && sessionUuid) && (
@@ -75,12 +80,17 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
             <ShareSessionButton sessionUuid={sessionUuid} />
           </>
         )}
-        {evoya?.type !== 'dashboard' && (
+        {['container', 'dashboard'].includes(evoya?.type ?? '') &&
           <>
             {!showClose && <MaximizeButton />}
             {showClose && <CloseModalButton />}
           </>
-        )}
+        }
+        {evoya?.type === 'default' &&
+          <>
+            {showClose && <CloseModalButton />}
+          </>
+        }
       </Stack>
     </Stack>
   );

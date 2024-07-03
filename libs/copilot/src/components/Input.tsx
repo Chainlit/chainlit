@@ -131,7 +131,7 @@ const Input = memo(
 
     const inputFocusHandler = () => {
       if (window.innerWidth < 1024) {
-        window.dispatchEvent(new CustomEvent('chainlit-open-modal'));
+        window.dispatchEvent(new CustomEvent('copilot-open-modal'));
       }
     }
 
@@ -211,36 +211,38 @@ const Input = memo(
               }}
             />
           </Stack>
-          <Stack
-            direction="row"
-            alignItems="center"
-            color="text.secondary"
-            justifyContent="center"
-          >
-            {/* <Stack direction="row" alignItems="center" marginLeft={-1}>
-              <UploadButton
-                disabled={disabled}
-                fileSpec={fileSpec}
-                onFileUploadError={onFileUploadError}
-                onFileUpload={onFileUpload}
-              />
-              {chatSettingsInputs.length > 0 && (
-                <IconButton
-                  id="chat-settings-open-modal"
+          {!(evoya?.hideWaterMark === true) &&
+            <Stack
+              direction="row"
+              alignItems="center"
+              color="text.secondary"
+              justifyContent="center"
+            >
+              {/* <Stack direction="row" alignItems="center" marginLeft={-1}>
+                <UploadButton
                   disabled={disabled}
-                  color="inherit"
-                  onClick={() => setChatSettingsOpen(true)}
-                  size="small"
-                >
-                  <TuneIcon fontSize="small" />
-                </IconButton>
-              )}
-              <MicButton disabled={disabled} />
-            </Stack> */}
-            <Box>
-              <WaterMark />
-            </Box>
-          </Stack>
+                  fileSpec={fileSpec}
+                  onFileUploadError={onFileUploadError}
+                  onFileUpload={onFileUpload}
+                />
+                {chatSettingsInputs.length > 0 && (
+                  <IconButton
+                    id="chat-settings-open-modal"
+                    disabled={disabled}
+                    color="inherit"
+                    onClick={() => setChatSettingsOpen(true)}
+                    size="small"
+                  >
+                    <TuneIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <MicButton disabled={disabled} />
+              </Stack> */}
+              <Box>
+                <WaterMark />
+              </Box>
+            </Stack>
+          }
         </Stack>
       </>
     );
