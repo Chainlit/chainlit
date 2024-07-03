@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
-## [1.1.306] - 2024-07-02
+## [1.1.306] - 2024-07-03
 
 ### Added
 
@@ -19,6 +19,8 @@ Nothing unreleased!
 ### Fixed
 
 - Message are now collapsible if too long
+- Only first level tool calls are displayed
+- OAuth redirection when mounting Chainlit on a FastAPI app should now work
 - The Langchain callback handler should better capture chain runs
 - The Llama Index callback handler should now work with other decorators
 

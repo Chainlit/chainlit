@@ -12,45 +12,9 @@ interface Props {
   isRunning?: boolean;
 }
 
-function groupToolSteps(step: IStep) {
-  const groupedSteps: IStep[][] = [];
-
-  let currentGroup: IStep[] = [];
-
-  function traverseAndGroup(currentStep: IStep) {
-    if (currentStep.type === 'tool') {
-      if (
-        currentGroup.length === 0 ||
-        currentGroup[0].name === currentStep.name
-      ) {
-        currentGroup.push(currentStep);
-      } else {
-        groupedSteps.push(currentGroup);
-
-        currentGroup = [currentStep];
-      }
-    }
-
-    if (currentStep.steps) {
-      for (const childStep of currentStep.steps) {
-        traverseAndGroup(childStep);
-      }
-    }
-  }
-
-  traverseAndGroup(step);
-
-  // Push the last group if it exists
-  if (currentGroup.length > 0) {
-    groupedSteps.push(currentGroup);
-  }
-
-  return groupedSteps;
-}
-
 export default function ToolCalls({ message, elements, isRunning }: Props) {
   const toolCalls = useMemo(() => {
-    return message.steps ? groupToolSteps(message) : [];
+    return message.steps ? message.steps.filter((s) => s.type === 'tool') : [];
   }, [message]);
 
   if (!toolCalls.length) {
@@ -59,14 +23,7 @@ export default function ToolCalls({ message, elements, isRunning }: Props) {
 
   return (
     <Stack width="100%" direction="column" gap={1}>
-      {toolCalls.map((toolCall, index) => (
-        <ToolCall
-          key={index}
-          steps={toolCall}
-          elements={elements}
-          isRunning={isRunning}
-        />
-      ))}
+      <ToolCall steps={toolCalls} elements={elements} isRunning={isRunning} />
     </Stack>
   );
 }

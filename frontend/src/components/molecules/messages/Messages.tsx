@@ -17,8 +17,6 @@ const Messages = memo(
   ({ messages, elements, actions, indent, isRunning }: Props) => {
     const messageContext = useContext(MessageContext);
 
-    const isRoot = indent === 0;
-
     const filtered = messages.filter((m, i) => {
       const content = m.output;
       const hasContent = !!content;
@@ -51,11 +49,9 @@ const Messages = memo(
           const showAvatar = typeIsDifferent || authorIsDifferent;
 
           const isLast = filtered.length - 1 === i;
-          let messageRunning =
+          const messageRunning =
             isRunning === undefined ? messageContext.loading : isRunning;
-          if (isRoot) {
-            messageRunning = messageRunning && isLast;
-          }
+
           return (
             <Message
               message={m}

@@ -3,7 +3,6 @@ import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
@@ -40,7 +39,6 @@ const Message = memo(
       onError
     } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
-
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
 
@@ -94,14 +92,10 @@ const Message = memo(
                     direction="row"
                     gap="1rem"
                     alignItems="center"
-                    my={0.5}
+                    my={2}
                     width="100%"
                   >
-                    <Skeleton
-                      variant="circular"
-                      width="1.6rem"
-                      height="1.6rem"
-                    />
+                    <MessageAvatar />
                     <BlinkingCursor />
                   </Stack>
                 )}
