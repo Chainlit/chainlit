@@ -600,7 +600,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output, _ = process_content(output)
+            current_step.output, _ = output
             current_step.end = utc_now()
             self._run_sync(current_step.update())
 
