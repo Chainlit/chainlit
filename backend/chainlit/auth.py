@@ -25,7 +25,6 @@ def ensure_jwt_secret():
 
 
 def is_oauth_enabled():
-    print("is oauth enabled")
     return config.code.oauth_callback and len(get_configured_oauth_providers()) > 0
 
 
