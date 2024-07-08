@@ -51,10 +51,7 @@ def run_chainlit(target: str):
         "1",
         "yes",
     ]  # Convert to boolean
-
-    ws_protocol = os.environ.get(
-        "UVICORN_WS_PROTOCOL", "auto"
-    )
+    ws_protocol = os.environ.get("UVICORN_WS_PROTOCOL", "auto")
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path

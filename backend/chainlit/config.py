@@ -241,7 +241,7 @@ class FeaturesSettings(DataClassJsonMixin):
     latex: bool = False
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
-    edit_message:bool = True
+    edit_message: bool = True
 
 
 @dataclass()
@@ -289,6 +289,7 @@ class CodeSettings:
     set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
         None
     )
+    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
 
 
 @dataclass()
