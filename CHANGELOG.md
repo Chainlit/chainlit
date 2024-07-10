@@ -6,7 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased.
+Nothing unreleased!
+
+## [1.1.306] - 2024-07-03
+
+### Added
+
+- Messages are now editable. You can disable this feature with `config.features.edit_message = false`
+- `cl.chat_context` to help keeping track of the messages of the current thread
+- You can now enable debug_mode when mounting Chainlit as a sub app by setting the `CHAINLIT_DEBUG` to `true`.
+
+### Fixed
+
+- Message are now collapsible if too long
+- Only first level tool calls are displayed
+- OAuth redirection when mounting Chainlit on a FastAPI app should now work
+- The Langchain callback handler should better capture chain runs
+- The Llama Index callback handler should now work with other decorators
 
 ## [1.1.305] - 2024-06-26
 

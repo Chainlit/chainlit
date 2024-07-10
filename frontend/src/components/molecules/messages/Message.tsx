@@ -3,7 +3,6 @@ import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 
 import { AskUploadButton } from './components/AskUploadButton';
@@ -18,6 +17,7 @@ import type { IAction, IMessageElement, IStep } from 'client-types/';
 
 import BlinkingCursor from '../BlinkingCursor';
 import ToolCalls from './ToolCalls';
+import UserMessage from './UserMessage';
 
 interface Props {
   message: IStep;
@@ -39,7 +39,6 @@ const Message = memo(
       onError
     } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
-
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
 
@@ -77,15 +76,7 @@ const Message = memo(
           >
             {isUserMessage ? (
               <Box display="flex" flexDirection="column" width="100%">
-                <Box
-                  sx={{
-                    px: 2.5,
-                    borderRadius: '1.5rem',
-                    backgroundColor: 'background.paper',
-                    maxWidth: '70%',
-                    ml: 'auto'
-                  }}
-                >
+                <UserMessage message={message}>
                   <MessageContent
                     elements={elements}
                     message={message}
@@ -95,20 +86,16 @@ const Message = memo(
                     allowHtml={allowHtml}
                     latex={latex}
                   />
-                </Box>
+                </UserMessage>
                 {forceDisplayCursor && (
                   <Stack
                     direction="row"
                     gap="1rem"
                     alignItems="center"
-                    my={0.5}
+                    my={2}
                     width="100%"
                   >
-                    <Skeleton
-                      variant="circular"
-                      width="1.6rem"
-                      height="1.6rem"
-                    />
+                    <MessageAvatar />
                     <BlinkingCursor />
                   </Stack>
                 )}

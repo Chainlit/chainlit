@@ -10,7 +10,7 @@ import {
 } from '@chainlit/react-client';
 
 interface Props {
-  author: string;
+  author?: string;
   hide?: boolean;
 }
 

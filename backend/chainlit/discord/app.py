@@ -34,8 +34,7 @@ class FeedbackView(View):
     async def thumbs_down(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
             try:
-                thread_id = context_var.get().session.thread_id
-                feedback = Feedback(forId=self.step_id, threadId=thread_id, value=0)
+                feedback = Feedback(forId=self.step_id, value=0)
                 await data_layer.upsert_feedback(feedback)
             except Exception as e:
                 logger.error(f"Error upserting feedback: {e}")
@@ -47,8 +46,7 @@ class FeedbackView(View):
     async def thumbs_up(self, interaction: discord.Interaction, button: Button):
         if data_layer := get_data_layer():
             try:
-                thread_id = context_var.get().session.thread_id
-                feedback = Feedback(forId=self.step_id, threadId=thread_id, value=1)
+                feedback = Feedback(forId=self.step_id, value=1)
                 await data_layer.upsert_feedback(feedback)
             except Exception as e:
                 logger.error(f"Error upserting feedback: {e}")

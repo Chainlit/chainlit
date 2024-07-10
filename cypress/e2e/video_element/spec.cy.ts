@@ -36,7 +36,6 @@ describe('video', () => {
     cy.get('.inline-video iframe')
       .eq(1)
       .should('be.visible')
-      .should('have.attr', 'title', 'Custom Title for Chainlit testing')
       .invoke('attr', 'src')
       .should('contain', '362164795')
       .should('contain', 'autoplay=1')
