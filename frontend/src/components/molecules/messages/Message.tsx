@@ -15,8 +15,8 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import type { IAction, IMessageElement, IStep } from 'client-types/';
 
-import BlinkingCursor from '../BlinkingCursor';
-import ToolCalls from './ToolCalls';
+import { Messages } from './Messages';
+import Step from './Step';
 import UserMessage from './UserMessage';
 
 interface Props {
@@ -26,11 +26,19 @@ interface Props {
   actions: IAction[];
   indent: number;
   isRunning?: boolean;
-  isLast?: boolean;
+  scorableRun?: IStep;
 }
 
 const Message = memo(
-  ({ message, showAvatar, elements, actions, isRunning, isLast }: Props) => {
+  ({
+    message,
+    showAvatar,
+    elements,
+    actions,
+    isRunning,
+    indent,
+    scorableRun
+  }: Props) => {
     const {
       highlightedMessage,
       defaultCollapseContent,
@@ -41,111 +49,131 @@ const Message = memo(
     const layoutMaxWidth = useLayoutMaxWidth();
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
+    const isAssistantMessage = message.type === 'assistant_message';
+    const isStep = !isAssistantMessage && !isUserMessage;
 
-    const forceDisplayCursor = isLast && isRunning && !message.streaming;
     return (
-      <Box
-        sx={{
-          color: 'text.primary',
-          position: 'relative'
-        }}
-        className="step"
-      >
+      <>
         <Box
           sx={{
-            boxSizing: 'border-box',
-            mx: 'auto',
-            maxWidth: layoutMaxWidth,
-            px: 2,
-            display: 'flex',
-            flexDirection: 'column',
+            color: 'text.primary',
             position: 'relative'
           }}
+          className="step"
         >
-          <Stack
-            id={`step-${message.id}`}
-            direction="row"
+          <Box
             sx={{
-              pb: 2,
-              animation:
-                message.id && highlightedMessage === message.id
-                  ? `3s ease-in-out 0.1s ${flash}`
-                  : 'none',
-              overflowX: 'auto'
+              boxSizing: 'border-box',
+              mx: 'auto',
+              width: '100%',
+              maxWidth: indent ? '100%' : layoutMaxWidth,
+              px: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative'
             }}
           >
-            {isUserMessage ? (
-              <Box display="flex" flexDirection="column" width="100%">
-                <UserMessage message={message}>
-                  <MessageContent
-                    elements={elements}
-                    message={message}
-                    preserveSize={
-                      !!message.streaming || !defaultCollapseContent
-                    }
-                    allowHtml={allowHtml}
-                    latex={latex}
-                  />
-                </UserMessage>
-                {forceDisplayCursor && (
-                  <Stack
-                    direction="row"
-                    gap="1rem"
-                    alignItems="center"
-                    my={2}
-                    width="100%"
-                  >
-                    <MessageAvatar />
-                    <BlinkingCursor />
-                  </Stack>
-                )}
-              </Box>
-            ) : (
-              <Stack
-                direction="row"
-                gap="1rem"
-                width="100%"
-                className="ai-message"
-              >
-                <MessageAvatar author={message.name} hide={!showAvatar} />
+            <Stack
+              id={`step-${message.id}`}
+              direction="row"
+              sx={{
+                pb: isStep ? 1 : 2,
+                flexGrow: 1,
+                animation:
+                  message.id && highlightedMessage === message.id
+                    ? `3s ease-in-out 0.1s ${flash}`
+                    : 'none'
+              }}
+            >
+              {isUserMessage ? (
+                <Box display="flex" flexDirection="column" flexGrow={1}>
+                  <UserMessage message={message}>
+                    <MessageContent
+                      elements={elements}
+                      message={message}
+                      preserveSize={
+                        !!message.streaming || !defaultCollapseContent
+                      }
+                      allowHtml={allowHtml}
+                      latex={latex}
+                    />
+                  </UserMessage>
+                </Box>
+              ) : (
                 <Stack
-                  alignItems="flex-start"
-                  minWidth={150}
-                  flexGrow={1}
-                  position="relative"
+                  direction="row"
+                  gap="1rem"
+                  width="100%"
+                  className="ai-message"
                 >
-                  <ToolCalls
-                    elements={elements}
-                    message={message}
-                    isRunning={isRunning}
-                  />
-                  <MessageContent
-                    elements={elements}
-                    message={message}
-                    preserveSize={
-                      !!message.streaming || !defaultCollapseContent
-                    }
-                    allowHtml={allowHtml}
-                    latex={latex}
-                  />
-                  {!isRunning && isLast && isAsk && (
-                    <AskUploadButton onError={onError} />
-                  )}
-                  {actions?.length ? (
-                    <MessageActions message={message} actions={actions} />
+                  {!indent ? (
+                    <MessageAvatar author={message.name} hide={!showAvatar} />
                   ) : null}
-                  <MessageButtons message={message} />
-                  {forceDisplayCursor && (
-                    <Box my={0.5}>
-                      <BlinkingCursor />
-                    </Box>
+                  {isStep ? (
+                    <Step step={message} isRunning={isRunning}>
+                      {message.steps ? (
+                        <Messages
+                          messages={message.steps}
+                          elements={elements}
+                          actions={actions}
+                          indent={indent + 1}
+                          isRunning={isRunning}
+                        />
+                      ) : null}
+                      <MessageContent
+                        elements={elements}
+                        message={message}
+                        preserveSize={
+                          !!message.streaming || !defaultCollapseContent
+                        }
+                        allowHtml={allowHtml}
+                        latex={latex}
+                      />
+                      {actions?.length ? (
+                        <MessageActions message={message} actions={actions} />
+                      ) : null}
+                      <MessageButtons message={message} />
+                    </Step>
+                  ) : (
+                    <Stack
+                      alignItems="flex-start"
+                      minWidth={150}
+                      flexGrow={1}
+                      position="relative"
+                    >
+                      <MessageContent
+                        elements={elements}
+                        message={message}
+                        preserveSize={
+                          !!message.streaming || !defaultCollapseContent
+                        }
+                        allowHtml={allowHtml}
+                        latex={latex}
+                      />
+                      {!isRunning && isAsk && (
+                        <AskUploadButton onError={onError} />
+                      )}
+                      {actions?.length ? (
+                        <MessageActions message={message} actions={actions} />
+                      ) : null}
+                      <MessageButtons message={message} run={scorableRun} />
+                    </Stack>
                   )}
                 </Stack>
-              </Stack>
-            )}
-          </Stack>
+              )}
+            </Stack>
+          </Box>
         </Box>
-      </Box>
+        {message.steps && !isStep ? (
+          <Messages
+            messages={message.steps}
+            elements={elements}
+            actions={actions}
+            indent={isUserMessage ? indent : indent + 1}
+            isRunning={isRunning}
+          />
+        ) : null}
+      </>
     );
   }
 );

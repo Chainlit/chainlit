@@ -7,9 +7,9 @@ from urllib.parse import unquote
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
+from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import init_ws_context
-from chainlit.chat_context import chat_context
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
@@ -184,11 +184,11 @@ async def connection_successful(sid):
                 {"interaction": "resume", "thread_id": thread.get("id")},
             )
             await config.code.on_chat_resume(thread)
-            
+
             for step in thread.get("steps", []):
                 if "message" in step["type"]:
                     chat_context.add(Message.from_dict(step))
-                    
+
             await context.emitter.resume_thread(thread)
             return
 
@@ -244,7 +244,7 @@ async def stop(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(content="Task manually stopped.", disable_feedback=True).send()
+        await Message(content="Task manually stopped.").send()
 
         if session.current_task:
             session.current_task.cancel()
@@ -282,18 +282,18 @@ async def edit_message(sid, payload: MessagePayload):
     context = init_ws_context(session)
 
     messages = chat_context.get()
-    
+
     orig_message = None
-    
+
     for message in messages:
         if orig_message:
-            await message.remove() 
-             
+            await message.remove()
+
         if message.id == payload["message"]["id"]:
             message.content = payload["message"]["output"]
             await message.update()
             orig_message = message
-            
+
     await context.emitter.task_start()
 
     if config.code.on_message:
@@ -303,7 +303,7 @@ async def edit_message(sid, payload: MessagePayload):
             pass
         finally:
             await context.emitter.task_end()
-            
+
 
 @sio.on("client_message")
 async def message(sid, payload: MessagePayload):

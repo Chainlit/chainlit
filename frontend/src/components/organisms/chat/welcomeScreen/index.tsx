@@ -5,6 +5,7 @@ import Fade from '@mui/material/Fade';
 
 import {
   ChainlitContext,
+  IStep,
   useChatMessages,
   useChatSession,
   useConfig
@@ -16,6 +17,14 @@ interface Props {
   hideLogo?: boolean;
 }
 
+const hasMessage = (messages: IStep[]): boolean => {
+  const validTypes = ['user_message', 'assistant_message'];
+  return messages.some(
+    (message) =>
+      validTypes.includes(message.type) || hasMessage(message.steps || [])
+  );
+};
+
 export default function WelcomeScreen({ hideLogo }: Props) {
   const { messages } = useChatMessages();
   const [show, setShow] = useState(true);
@@ -25,11 +34,7 @@ export default function WelcomeScreen({ hideLogo }: Props) {
   const defaultIconUrl = apiClient?.buildEndpoint(`/avatars/default`);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setShow(false);
-    } else {
-      setShow(true);
-    }
+    setShow(!hasMessage(messages));
   }, [messages]);
 
   const selectedChatProfile = useMemo(() => {

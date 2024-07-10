@@ -2,6 +2,7 @@ import asyncio
 import mimetypes
 import re
 import uuid
+from datetime import datetime
 from io import BytesIO
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
@@ -12,7 +13,7 @@ import discord
 import filetype
 import httpx
 from chainlit.config import config
-from chainlit.context import ChainlitContext, HTTPSession, context_var
+from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
@@ -109,11 +110,15 @@ class DiscordEmitter(BaseChainlitEmitter):
         if is_chain_of_thought or is_empty_output or not is_message:
             return
         else:
-            enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+            enable_feedback = get_data_layer()
             message = await self.channel.send(step_dict["output"])
 
             if enable_feedback:
-                view = FeedbackView(step_dict.get("id", ""))
+                current_run = context.current_run
+                scorable_id = current_run.id if current_run else step_dict.get("id")
+                if not scorable_id:
+                    return
+                view = FeedbackView(scorable_id)
                 await message.edit(view=view)
 
     async def update_step(self, step_dict: StepDict):
@@ -218,13 +223,12 @@ def clean_content(message: discord.Message):
 
 async def process_discord_message(
     message: discord.Message,
+    thread_id: str,
     thread_name: str,
     channel: "MessageableChannel",
     bind_thread_to_user=False,
 ):
     user = await get_user(message.author)
-
-    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(channel.id)))
 
     text = clean_content(message)
     discord_files = message.attachments
@@ -299,21 +303,44 @@ async def on_message(message: discord.Message):
         return
 
     thread_name: str = ""
+    thread_id: str = ""
     bind_thread_to_user = False
     channel = message.channel
 
     if isinstance(message.channel, discord.Thread):
         thread_name = f"{message.channel.name}"
+        thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(channel.id)))
     elif isinstance(message.channel, discord.ForumChannel):
         thread_name = f"{message.channel.name}"
+        thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(channel.id)))
     elif isinstance(message.channel, discord.DMChannel):
-        thread_name = f"{message.author} Discord DM"
+        thread_id = str(
+            uuid.uuid5(
+                uuid.NAMESPACE_DNS,
+                str(channel.id) + datetime.today().strftime("%Y-%m-%d"),
+            )
+        )
+        thread_name = (
+            f"{message.author} Discord DM {datetime.today().strftime('%Y-%m-%d')}"
+        )
         bind_thread_to_user = True
     elif isinstance(message.channel, discord.GroupChannel):
+        thread_id = str(
+            uuid.uuid5(
+                uuid.NAMESPACE_DNS,
+                str(channel.id) + datetime.today().strftime("%Y-%m-%d"),
+            )
+        )
         thread_name = f"{message.channel.name}"
     elif isinstance(message.channel, discord.TextChannel):
         # Discord limits thread names to 100 characters and does not create
         # threads from empty messages.
+        thread_id = str(
+            uuid.uuid5(
+                uuid.NAMESPACE_DNS,
+                str(channel.id) + datetime.today().strftime("%Y-%m-%d"),
+            )
+        )
         discord_thread_name = clean_content(message)[:100] or "Untitled"
         channel = await message.channel.create_thread(
             name=discord_thread_name, message=message
@@ -325,6 +352,7 @@ async def on_message(message: discord.Message):
 
     await process_discord_message(
         message=message,
+        thread_id=thread_id,
         thread_name=thread_name,
         channel=channel,
         bind_thread_to_user=bind_thread_to_user,

@@ -244,8 +244,6 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
             asyncio.create_task(send_elements())
 
-        self.session.root_message = message
-
         return message
 
     async def send_ask_user(

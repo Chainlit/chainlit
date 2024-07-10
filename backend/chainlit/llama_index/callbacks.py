@@ -41,11 +41,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             return event_parent_id
         elif context_var.get().current_step:
             return context_var.get().current_step.id
-        elif context_var.get().session.root_message:
-            root_message = context_var.get().session.root_message
-            if root_message:
-                return root_message.id
-            return None
         else:
             return None
 
@@ -73,7 +68,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             type=step_type,
             parent_id=self._get_parent_id(parent_id),
             id=event_id,
-            disable_feedback=True,
         )
 
         self.steps[event_id] = step

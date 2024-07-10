@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from chainlit.step import Step
     from chainlit.user import PersistedUser, User
 
+CL_RUN_NAMES = ["on_chat_start", "on_message", "on_audio_end"]
+
 
 class ChainlitContextException(Exception):
     def __init__(self, msg="Chainlit context not found", *args, **kwargs):
@@ -27,6 +29,13 @@ class ChainlitContext:
     def current_step(self):
         if self.active_steps:
             return self.active_steps[-1]
+
+    @property
+    def current_run(self):
+        if self.active_steps:
+            return next(
+                (step for step in self.active_steps if step.name in CL_RUN_NAMES), None
+            )
 
     def __init__(
         self,

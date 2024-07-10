@@ -134,14 +134,12 @@ cl_data._data_layer = TestDataLayer()
 
 
 async def send_count():
-    await cl.Message(
-        f"Create step counter: {create_step_counter}", disable_feedback=True
-    ).send()
+    await cl.Message(f"Create step counter: {create_step_counter}").send()
 
 
 @cl.on_chat_start
 async def main():
-    await cl.Message("Hello, send me a message!", disable_feedback=True).send()
+    await cl.Message("Hello, send me a message!").send()
     await send_count()
 
 

@@ -26,6 +26,7 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
+    cot: 'hide' | 'tool_call' | 'full';
     default_collapse_content?: boolean;
     github?: string;
     theme: any;
