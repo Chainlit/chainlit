@@ -14,16 +14,16 @@ function feedback() {
     // starts with /thread/
     expect(loc).to.match(/^\/thread\//);
   });
-  cy.get('.negative-feedback-off').should('have.length', 1);
-  cy.get('.positive-feedback-off').should('have.length', 1).click();
+  cy.get('.negative-feedback-off').should('have.length', 3);
+  cy.get('.positive-feedback-off').should('have.length', 3).eq(0).click();
   cy.get('#feedbackSubmit').click();
   cy.get('.positive-feedback-on').should('have.length', 1);
 }
 
 function threadQueue() {
   cy.get('.step').eq(1).should('contain', 'Create step counter: 0');
-  cy.get('.step').eq(3).should('contain', 'Create step counter: 3');
-  cy.get('.step').eq(5).should('contain', 'Create step counter: 6');
+  cy.get('.step').eq(3).should('contain', 'Create step counter: 5');
+  cy.get('.step').eq(6).should('contain', 'Create step counter: 8');
 }
 
 function threadList() {
@@ -64,11 +64,11 @@ function resumeThread() {
   cy.get('#resumeThread').click();
   cy.get(`#chat-input`).should('exist');
 
-  cy.get('.step').should('have.length', 8);
+  cy.get('.step').should('have.length', 10);
 
   cy.get('.step').eq(0).should('contain', 'Hello');
-  cy.get('.step').eq(5).should('contain', 'Welcome back to Hello');
-  cy.get('.step').eq(6).should('contain', 'chat_profile');
+  cy.get('.step').eq(7).should('contain', 'Welcome back to Hello');
+  cy.get('.step').eq(8).should('contain', 'chat_profile');
 }
 
 describe('Data Layer', () => {

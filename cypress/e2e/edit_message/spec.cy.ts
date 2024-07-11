@@ -1,6 +1,6 @@
 import { runTestServer, submitMessage } from '../../support/testUtils';
 
-describe('Chat Context', () => {
+describe('Edit Message', () => {
   before(() => {
     runTestServer();
   });

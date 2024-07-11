@@ -1,3 +1,4 @@
+import inspect
 import os
 
 from dotenv import load_dotenv
@@ -159,7 +160,10 @@ def on_message(func: Callable) -> Callable:
     async def with_parent_id(message: Message):
         async with Step(name="on_message", type="run", parent_id=message.id) as s:
             s.input = message.content
-            await func(message)
+            if len(inspect.signature(func).parameters) > 0:
+                await func(message)
+            else:
+                await func()
 
     config.code.on_message = wrap_user_function(with_parent_id)
     return func

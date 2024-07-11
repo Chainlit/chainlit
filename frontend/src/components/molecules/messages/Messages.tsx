@@ -22,15 +22,7 @@ const Messages = memo(
     const messageContext = useContext(MessageContext);
     return (
       <>
-        {messages.map((m, i) => {
-          const previousMessage = i > 0 ? messages[i - 1] : undefined;
-          const typeIsDifferent = previousMessage?.type !== m.type;
-          const authorIsDifferent =
-            !!m.name &&
-            !!previousMessage?.name &&
-            previousMessage.name !== m.name;
-          const showAvatar = typeIsDifferent || authorIsDifferent;
-
+        {messages.map((m) => {
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
             return (
@@ -42,7 +34,9 @@ const Messages = memo(
                     actions={actions}
                     indent={indent}
                     isRunning={isRunning}
-                    scorableRun={!isRunning ? m : undefined}
+                    scorableRun={
+                      !isRunning && m.name !== 'on_chat_start' ? m : undefined
+                    }
                   />
                 ) : null}
                 <MessageLoader show={!m.steps?.length && isRunning} />
@@ -52,7 +46,6 @@ const Messages = memo(
             return (
               <Message
                 message={m}
-                showAvatar={showAvatar}
                 elements={elements}
                 actions={actions}
                 key={m.id}

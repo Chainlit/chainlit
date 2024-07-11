@@ -190,13 +190,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     self.session.chat_profile and config.features.auto_tag_thread
                 )
                 tags = [self.session.chat_profile] if should_tag_thread else None
-                asyncio.create_task(
-                    data_layer.update_thread(
-                        thread_id=self.session.thread_id,
-                        name=interaction,
-                        user_id=user_id,
-                        tags=tags,
-                    )
+                await data_layer.update_thread(
+                    thread_id=self.session.thread_id,
+                    name=interaction,
+                    user_id=user_id,
+                    tags=tags,
                 )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")

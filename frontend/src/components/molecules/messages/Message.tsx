@@ -32,7 +32,7 @@ interface Props {
 const Message = memo(
   ({
     message,
-    showAvatar,
+    showAvatar = true,
     elements,
     actions,
     isRunning,
@@ -49,8 +49,7 @@ const Message = memo(
     const layoutMaxWidth = useLayoutMaxWidth();
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
-    const isAssistantMessage = message.type === 'assistant_message';
-    const isStep = !isAssistantMessage && !isUserMessage;
+    const isStep = !message.type.includes('message');
 
     return (
       <>
@@ -77,7 +76,7 @@ const Message = memo(
               id={`step-${message.id}`}
               direction="row"
               sx={{
-                pb: isStep ? 1 : 2,
+                pb: indent ? 1 : 2,
                 flexGrow: 1,
                 animation:
                   message.id && highlightedMessage === message.id
@@ -106,7 +105,7 @@ const Message = memo(
                   width="100%"
                   className="ai-message"
                 >
-                  {!indent ? (
+                  {!isStep || !indent ? (
                     <MessageAvatar author={message.name} hide={!showAvatar} />
                   ) : null}
                   {isStep ? (
@@ -156,7 +155,9 @@ const Message = memo(
                       {actions?.length ? (
                         <MessageActions message={message} actions={actions} />
                       ) : null}
-                      <MessageButtons message={message} run={scorableRun} />
+                      {scorableRun ? (
+                        <MessageButtons message={message} run={scorableRun} />
+                      ) : null}
                     </Stack>
                   )}
                 </Stack>

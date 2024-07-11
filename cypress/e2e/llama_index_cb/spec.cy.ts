@@ -6,9 +6,9 @@ describe('Llama Index Callback', () => {
   });
 
   it('should be able to send messages to the UI with prompts and elements', () => {
-    cy.get('.step').should('have.length', 1);
+    cy.get('.step').should('have.length', 3);
 
-    const toolCall = cy.get('#tool-call-retrieve');
+    const toolCall = cy.get('#step-retrieve');
 
     toolCall.should('exist').click();
 
