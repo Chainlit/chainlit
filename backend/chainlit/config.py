@@ -247,7 +247,7 @@ class FeaturesSettings(DataClassJsonMixin):
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
-    cot: Literal["hidden", "tool_call", "full"] = "tool_call"
+    cot: Literal["hidden", "tool_call", "full"] = "full"
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
     github: Optional[str] = None
