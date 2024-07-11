@@ -5,6 +5,8 @@ import { memo, useContext } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
+import { useConfig } from '@chainlit/react-client';
+
 import { AskUploadButton } from './components/AskUploadButton';
 import { MessageAvatar } from './components/Avatar';
 import { MessageActions } from './components/MessageActions';
@@ -13,7 +15,7 @@ import { MessageContent } from './components/MessageContent';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-import type { IAction, IMessageElement, IStep } from 'client-types/';
+import { type IAction, type IMessageElement, type IStep } from 'client-types/';
 
 import { Messages } from './Messages';
 import Step from './Step';
@@ -46,10 +48,28 @@ const Message = memo(
       latex,
       onError
     } = useContext(MessageContext);
+    const { config } = useConfig();
     const layoutMaxWidth = useLayoutMaxWidth();
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
+    const skip =
+      isStep && config?.ui.cot === 'tool_call' && message.type !== 'tool';
+
+    if (skip) {
+      if (!message.steps) {
+        return null;
+      }
+      return (
+        <Messages
+          messages={message.steps}
+          elements={elements}
+          actions={actions}
+          indent={indent}
+          isRunning={isRunning}
+        />
+      );
+    }
 
     return (
       <>

@@ -24,7 +24,7 @@ def check_add_step_in_cot(step: "Step"):
         "assistant_message",
     ]
     is_cl_run = step.name in CL_RUN_NAMES and step.type == "run"
-    if config.ui.cot == "hide" and not is_message and not is_cl_run:
+    if config.ui.cot == "hidden" and not is_message and not is_cl_run:
         return False
     return True
 

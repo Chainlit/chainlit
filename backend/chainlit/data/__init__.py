@@ -467,7 +467,7 @@ class ChainlitDataLayer(BaseDataLayer):
             for step in thread.steps:
                 if step.type == "system_message":
                     continue
-                if config.ui.cot == "hide" and step.type not in [
+                if config.ui.cot == "hidden" and step.type not in [
                     "user_message",
                     "assistant_message",
                 ]:

@@ -103,7 +103,7 @@ name = "Assistant"
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
 
-# Chain of Thought (CoT) display mode. Can be "hide", "tool_call" or "full".
+# Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "tool_call
 
 # Link to your github repo. This will add a github button in the UI's header.
@@ -247,7 +247,7 @@ class FeaturesSettings(DataClassJsonMixin):
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
-    cot: Literal["hide", "tool_call", "full"] = "tool_call"
+    cot: Literal["hidden", "tool_call", "full"] = "tool_call"
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
     github: Optional[str] = None
