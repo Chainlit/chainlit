@@ -104,7 +104,7 @@ name = "Assistant"
 default_collapse_content = true
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
-cot = "tool_call
+cot = "full"
 
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
