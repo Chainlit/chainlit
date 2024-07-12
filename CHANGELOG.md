@@ -8,7 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
-## [1.1.306] - 2024-07-03
+## [1.1.400] - 2024-07-03
+
+### Changed
+
+- hide_cot becomes cot and has three possible values: hide, tool_call, full
+- User feedback are now scoring an entire run instead of a specific message
+- Slack/Teams/Discord DM threads are now split by day
+- Avatars are always displayed at the root level of the conversation
+
+### Removed
+
+- disable_feedback has been removed
+- root_message has been removed
 
 ### Added
 

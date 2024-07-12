@@ -10,7 +10,7 @@ function messageStream(index: number) {
 }
 
 function toolStream(tool: string) {
-  const toolCall = cy.get(`#tool-call-${tool}`);
+  const toolCall = cy.get(`#step-${tool}`);
   toolCall.click();
   for (const token of tokenList) {
     toolCall.parent().should('contain', token);

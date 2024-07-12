@@ -103,8 +103,8 @@ name = "Assistant"
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
 
-# Hide the chain of thought details from the user in the UI.
-hide_cot = false
+# Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
+cot = "full"
 
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
@@ -240,14 +240,14 @@ class FeaturesSettings(DataClassJsonMixin):
     latex: bool = False
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
-    edit_message:bool = True
+    edit_message: bool = True
 
 
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
-    hide_cot: bool = False
+    cot: Literal["hidden", "tool_call", "full"] = "full"
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
     github: Optional[str] = None

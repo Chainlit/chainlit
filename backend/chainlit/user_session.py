@@ -33,9 +33,6 @@ class UserSession:
         if isinstance(context.session, WebsocketSession):
             user_session["languages"] = context.session.languages
 
-        if context.session.root_message:
-            user_session["root_message"] = context.session.root_message
-
         return user_session.get(key, default)
 
     def set(self, key, value):

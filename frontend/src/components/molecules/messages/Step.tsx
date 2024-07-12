@@ -1,52 +1,48 @@
-import { useMemo, useState } from 'react';
+import { PropsWithChildren, useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { MessageContent } from './components/MessageContent';
 import { Translator } from 'components/i18n';
 
 import ChevronDownIcon from 'assets/chevronDown';
 import ChevronUpIcon from 'assets/chevronUp';
 
-import type { IMessageElement, IStep } from 'client-types/';
+import type { IStep } from 'client-types/';
 
 interface Props {
-  steps: IStep[];
-  elements: IMessageElement[];
+  step: IStep;
   isRunning?: boolean;
 }
 
-export default function ToolCall({ steps, elements, isRunning }: Props) {
+export default function Step({
+  step,
+  children,
+  isRunning
+}: PropsWithChildren<Props>) {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const using = useMemo(() => {
-    return (
-      isRunning &&
-      steps.find((step) => step.start && !step.end && !step.isError)
-    );
-  }, [steps, isRunning]);
+    return isRunning && step.start && !step.end && !step.isError;
+  }, [step, isRunning]);
 
-  const hasOutput = steps.some((step) => step.output || step.input);
-  const isError = steps.length ? steps[steps.length - 1].isError : false;
+  const hasOutput = step.output || step.steps?.length;
+  const isError = step.isError;
 
-  if (!steps.length) {
-    return null;
-  }
-
-  const toolName = steps[0].name;
+  const stepName = step.name;
 
   return (
-    <Stack width="100%" direction="column" alignItems="start" gap={1}>
+    <Stack flexGrow={1} direction="column" gap={1} width={0}>
       <Box
         display="flex"
+        position="relative"
         alignItems="center"
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
         onClick={() => setOpen(!open)}
-        id={`tool-call-${toolName}`}
+        id={`step-${stepName}`}
       >
         <Box>
           <Typography
@@ -65,12 +61,12 @@ export default function ToolCall({ steps, elements, isRunning }: Props) {
             {using ? (
               <>
                 <Translator path="components.molecules.detailsButton.using" />{' '}
-                {toolName}
+                {stepName}
               </>
             ) : (
               <>
                 <Translator path="components.molecules.detailsButton.used" />{' '}
-                {toolName}
+                {stepName}
               </>
             )}
           </Typography>{' '}
@@ -81,7 +77,6 @@ export default function ToolCall({ steps, elements, isRunning }: Props) {
             />
           )}
         </Box>
-
         {hasOutput && (hover || open) ? (
           open ? (
             <ChevronUpIcon sx={{ height: 18, with: 18, cursor: 'pointer' }} />
@@ -91,27 +86,17 @@ export default function ToolCall({ steps, elements, isRunning }: Props) {
         ) : null}
       </Box>
       {open && (
-        <Stack
-          width="100%"
-          direction="column"
-          gap={2}
+        <Box
+          flexGrow={1}
+          pl={1}
           sx={{
-            borderLeft: (theme) => `1px solid ${theme.palette.primary.main}`,
-            boxSizing: 'border-box',
-            pl: 1
+            borderBottomLeftRadius: '10px',
+            borderLeft: (theme) => `2px solid ${theme.palette.text.secondary}`,
+            borderBottom: (theme) => `2px solid ${theme.palette.text.secondary}`
           }}
         >
-          {steps
-            .filter((step) => step.output || step.input)
-            .map((step) => (
-              <MessageContent
-                key={step.id}
-                elements={elements}
-                message={step}
-                preserveSize={true}
-              />
-            ))}
-        </Stack>
+          {children}
+        </Box>
       )}
     </Stack>
   );

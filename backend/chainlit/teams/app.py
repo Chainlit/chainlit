@@ -3,6 +3,7 @@ import base64
 import mimetypes
 import os
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 
 import filetype
@@ -28,7 +29,7 @@ from botbuilder.schema import (
     HeroCard,
 )
 from chainlit.config import config
-from chainlit.context import ChainlitContext, HTTPSession, context_var
+from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
@@ -96,19 +97,21 @@ class TeamsEmitter(BaseChainlitEmitter):
             return
         else:
             reply = MessageFactory.text(step_dict["output"])
-            enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+            enable_feedback = get_data_layer()
             if enable_feedback:
+                current_run = context.current_run
+                scorable_id = current_run.id if current_run else step_dict["id"]
                 like_button = CardAction(
                     type=ActionTypes.message_back,
                     title="👍",
                     text="like",
-                    value={"feedback": "like", "step_id": step_dict["id"]},
+                    value={"feedback": "like", "step_id": scorable_id},
                 )
                 dislike_button = CardAction(
                     type=ActionTypes.message_back,
                     title="👎",
                     text="dislike",
-                    value={"feedback": "dislike", "step_id": step_dict["id"]},
+                    value={"feedback": "dislike", "step_id": scorable_id},
                 )
                 card = HeroCard(buttons=[like_button, dislike_button])
                 attachment = Attachment(
@@ -225,7 +228,13 @@ async def process_teams_message(
     user = await get_user(turn_context.activity.from_property)
 
     thread_id = str(
-        uuid.uuid5(uuid.NAMESPACE_DNS, str(turn_context.activity.conversation.id))
+        uuid.uuid5(
+            uuid.NAMESPACE_DNS,
+            str(
+                turn_context.activity.conversation.id
+                + datetime.today().strftime("%Y-%m-%d")
+            ),
+        )
     )
 
     text = clean_content(turn_context.activity)
@@ -314,7 +323,7 @@ async def handle_message(turn_context: TurnContext):
                 conversation=turn_context.activity.conversation,
             )
             await turn_context.send_activity(typing_activity)
-            thread_name = f"{turn_context.activity.from_property.name} Teams DM"
+            thread_name = f"{turn_context.activity.from_property.name} Teams DM {datetime.today().strftime('%Y-%m-%d')}"
             await process_teams_message(turn_context, thread_name)
 
 

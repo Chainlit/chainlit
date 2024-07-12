@@ -21,7 +21,11 @@ const Collapse = ({
   const [expandAll, toggleExpandAll] = useToggle(defaultExpandAll);
 
   const content = (
-    <Box height={expandAll ? 'auto' : 100} position="relative">
+    <Box
+      height={expandAll ? 'auto' : 200}
+      position="relative"
+      overflow="hidden"
+    >
       <Box
         position={expandAll ? 'relative' : 'absolute'}
         top={0}
@@ -31,12 +35,26 @@ const Collapse = ({
       >
         {children}
       </Box>
+      {!expandAll && (
+        <Box
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          height={60}
+          sx={{
+            background: (theme) =>
+              `linear-gradient(to bottom, rgba(255,255,255,0) 0%, ${theme.palette.background.default} 100%)`,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
     </Box>
   );
 
   return (
     <Box>
-      <MCollapse in={expandAll} collapsedSize={100} timeout={0}>
+      <MCollapse in={expandAll} collapsedSize={200} timeout={0}>
         {content}
       </MCollapse>
       <Stack direction="row" justifyContent="end">

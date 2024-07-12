@@ -124,7 +124,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str):
-        return next((t for t in thread_history if t["id"] == thread_id), None)
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
+        if not thread:
+            return None
+        thread["steps"] = sorted(thread["steps"], key=lambda x: x["createdAt"])
+        return thread
 
     async def delete_thread(self, thread_id: str):
         deleted_thread_ids.append(thread_id)
@@ -134,14 +138,12 @@ cl_data._data_layer = TestDataLayer()
 
 
 async def send_count():
-    await cl.Message(
-        f"Create step counter: {create_step_counter}", disable_feedback=True
-    ).send()
+    await cl.Message(f"Create step counter: {create_step_counter}").send()
 
 
 @cl.on_chat_start
 async def main():
-    await cl.Message("Hello, send me a message!", disable_feedback=True).send()
+    await cl.Message("Hello, send me a message!").send()
     await send_count()
 
 
