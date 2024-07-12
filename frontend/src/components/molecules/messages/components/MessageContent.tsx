@@ -47,13 +47,18 @@ const MessageContent = memo(
     lineCount += output.split('\n').length;
     contentLength += output.length;
 
+    const isMessage = message.type.includes('message');
+
     const outputMarkdown = (
       <Markdown
         allowHtml={allowHtml}
         latex={latex}
         refElements={outputRefElements}
       >
-        {output}
+        {isMessage
+          ? output
+          : `#### Output:     
+${output}`}
       </Markdown>
     );
 
@@ -84,7 +89,8 @@ const MessageContent = memo(
           latex={latex}
           refElements={inputRefElements}
         >
-          {input}
+          {`#### Input:  
+${input}`}
         </Markdown>
       );
     }

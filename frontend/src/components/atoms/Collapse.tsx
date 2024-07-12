@@ -41,7 +41,7 @@ const Collapse = ({
           bottom={0}
           left={0}
           right={0}
-          height={60}
+          height={40}
           sx={{
             background: (theme) =>
               `linear-gradient(to bottom, rgba(255,255,255,0) 0%, ${theme.palette.background.default} 100%)`,

@@ -91,8 +91,8 @@ export default function Step({
           pl={1}
           sx={{
             borderBottomLeftRadius: '10px',
-            borderLeft: (theme) => `2px solid ${theme.palette.text.secondary}`,
-            borderBottom: (theme) => `2px solid ${theme.palette.text.secondary}`
+            borderLeft: (theme) => `1px solid ${theme.palette.text.secondary}`,
+            borderBottom: (theme) => `1px solid ${theme.palette.text.secondary}`
           }}
         >
           {children}
