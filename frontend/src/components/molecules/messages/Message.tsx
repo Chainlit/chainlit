@@ -55,6 +55,7 @@ const Message = memo(
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
+    // Only keep tool calls if Chain of Thought is tool_call
     const skip =
       isStep && config?.ui.cot === 'tool_call' && message.type !== 'tool';
 
@@ -106,6 +107,7 @@ const Message = memo(
                     : 'none'
               }}
             >
+              {/* User message is displayed differently */}
               {isUserMessage ? (
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <UserMessage message={message}>
@@ -130,11 +132,14 @@ const Message = memo(
                   {!isStep || !indent ? (
                     <MessageAvatar author={message.name} hide={!showAvatar} />
                   ) : null}
+                  {/* Display the step and its children */}
                   {isStep ? (
                     <Step step={message} isRunning={isRunning}>
                       {message.steps ? (
                         <Messages
-                          messages={message.steps}
+                          messages={message.steps.filter(
+                            (s) => !s.type.includes('message')
+                          )}
                           elements={elements}
                           actions={actions}
                           indent={indent + 1}
@@ -156,6 +161,7 @@ const Message = memo(
                       <MessageButtons message={message} />
                     </Step>
                   ) : (
+                    // Display an assistant message
                     <Stack
                       alignItems="flex-start"
                       minWidth={150}
@@ -187,6 +193,18 @@ const Message = memo(
             </Stack>
           </Box>
         </Box>
+        {/* Make sure the child assistant messages of a step are displayed at the root level. */}
+        {message.steps && isStep ? (
+          <Messages
+            messages={message.steps.filter((s) => s.type.includes('message'))}
+            elements={elements}
+            actions={actions}
+            indent={0}
+            isRunning={isRunning}
+            scorableRun={scorableRun}
+          />
+        ) : null}
+        {/* Display the child steps if the message is not a step (usually a user message). */}
         {message.steps && !isStep ? (
           <Messages
             messages={message.steps}

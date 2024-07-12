@@ -33,13 +33,15 @@ const Messages = memo(
     const { config } = useConfig();
     return (
       <>
-        {messages.map((m, mIndex) => {
+        {messages.map((m) => {
+          // Handle chainlit runs
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
-            const showLoader =
-              config?.ui.cot === 'tool_call'
-                ? isRunning && !hasToolStep(m)
-                : !m.steps?.length && isRunning;
+            const isToolCallCoT = config?.ui.cot === 'tool_call';
+            const showLoader = isToolCallCoT
+              ? isRunning && !hasToolStep(m)
+              : !m.steps?.length && isRunning;
+            // Ignore on_chat_start for scorable run
             const scorableRun =
               !isRunning && m.name !== 'on_chat_start' ? m : undefined;
             return (
@@ -58,12 +60,14 @@ const Messages = memo(
               </>
             );
           } else {
+            // Score the current run
+            const _scorableRun = m.type === 'run' ? m : scorableRun;
+            // The message is scorable if it is the last assistant message of the run
             const isScorable =
-              mIndex ===
-              scorableRun?.steps?.findLastIndex(
+              m ===
+              _scorableRun?.steps?.findLast(
                 (_m) => _m.type === 'assistant_message'
               );
-
             return (
               <Message
                 message={m}
@@ -72,7 +76,7 @@ const Messages = memo(
                 key={m.id}
                 indent={indent}
                 isRunning={isRunning}
-                scorableRun={scorableRun}
+                scorableRun={_scorableRun}
                 isScorable={isScorable}
               />
             );
