@@ -5,7 +5,7 @@ describe('Edit Message', () => {
     runTestServer();
   });
 
-  it('should be able to store data related per user session', () => {
+  it('should be able to edit a message', () => {
     submitMessage('Hello 1');
     submitMessage('Hello 2');
 
