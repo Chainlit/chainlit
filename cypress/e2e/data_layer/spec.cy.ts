@@ -14,8 +14,8 @@ function feedback() {
     // starts with /thread/
     expect(loc).to.match(/^\/thread\//);
   });
-  cy.get('.negative-feedback-off').should('have.length', 3);
-  cy.get('.positive-feedback-off').should('have.length', 3).eq(0).click();
+  cy.get('.negative-feedback-off').should('have.length', 1);
+  cy.get('.positive-feedback-off').should('have.length', 1).eq(0).click();
   cy.get('#feedbackSubmit').click();
   cy.get('.positive-feedback-on').should('have.length', 1);
 }
