@@ -22,6 +22,8 @@ Nothing unreleased!
 - disable_feedback has been removed
 - root_message has been removed
 
+## [1.1.306] - 2024-07-03
+
 ### Added
 
 - Messages are now editable. You can disable this feature with `config.features.edit_message = false`

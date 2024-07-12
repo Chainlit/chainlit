@@ -33,13 +33,15 @@ const Messages = memo(
     const { config } = useConfig();
     return (
       <>
-        {messages.map((m) => {
+        {messages.map((m, mIndex) => {
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
             const showLoader =
               config?.ui.cot === 'tool_call'
                 ? isRunning && !hasToolStep(m)
                 : !m.steps?.length && isRunning;
+            const scorableRun =
+              !isRunning && m.name !== 'on_chat_start' ? m : undefined;
             return (
               <>
                 {m.steps?.length ? (
@@ -49,15 +51,19 @@ const Messages = memo(
                     actions={actions}
                     indent={indent}
                     isRunning={isRunning}
-                    scorableRun={
-                      !isRunning && m.name !== 'on_chat_start' ? m : undefined
-                    }
+                    scorableRun={scorableRun}
                   />
                 ) : null}
                 <MessageLoader show={showLoader} />
               </>
             );
           } else {
+            const isScorable =
+              mIndex ===
+              scorableRun?.steps?.findLastIndex(
+                (_m) => _m.type === 'assistant_message'
+              );
+
             return (
               <Message
                 message={m}
@@ -67,6 +73,7 @@ const Messages = memo(
                 indent={indent}
                 isRunning={isRunning}
                 scorableRun={scorableRun}
+                isScorable={isScorable}
               />
             );
           }

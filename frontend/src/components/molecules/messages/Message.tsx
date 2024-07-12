@@ -28,6 +28,7 @@ interface Props {
   actions: IAction[];
   indent: number;
   isRunning?: boolean;
+  isScorable?: boolean;
   scorableRun?: IStep;
 }
 
@@ -39,6 +40,7 @@ const Message = memo(
     actions,
     isRunning,
     indent,
+    isScorable,
     scorableRun
   }: Props) => {
     const {
@@ -175,7 +177,7 @@ const Message = memo(
                       {actions?.length ? (
                         <MessageActions message={message} actions={actions} />
                       ) : null}
-                      {scorableRun ? (
+                      {scorableRun && isScorable ? (
                         <MessageButtons message={message} run={scorableRun} />
                       ) : null}
                     </Stack>
