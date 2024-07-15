@@ -156,16 +156,14 @@ cl_data._data_layer = TestDataLayer()
 
 async def send_count():
     create_step_counter = cl.user_session.get("create_step_counter")
-    await cl.Message(
-        f"Create step counter: {create_step_counter}", disable_feedback=True
-    ).send()
+    await cl.Message(f"Create step counter: {create_step_counter}").send()
 
 
 @cl.on_chat_start
 async def main():
     # Add step counter to session so that it is saved in thread metadata
     cl.user_session.set("create_step_counter", 0)
-    await cl.Message("Hello, send me a message!", disable_feedback=True).send()
+    await cl.Message("Hello, send me a message!").send()
     await send_count()
 
 
