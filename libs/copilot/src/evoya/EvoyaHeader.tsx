@@ -45,6 +45,7 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
   useEffect(() => {
     if (!sessionUuid && firstUserInt && !loading) {
       getSessionUuid();
+      window.dispatchEvent(new CustomEvent('reload-chat-sidebar'));
     }
   }, [firstUserInt, loading]);
 
