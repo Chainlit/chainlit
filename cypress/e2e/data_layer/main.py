@@ -141,7 +141,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str):
-        return next((t for t in thread_history if t["id"] == thread_id), None)
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
+        if not thread:
+            return None
+        thread["steps"] = sorted(thread["steps"], key=lambda x: x["createdAt"])
+        return thread
 
     async def delete_thread(self, thread_id: str):
         deleted_thread_ids.append(thread_id)

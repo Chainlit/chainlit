@@ -267,8 +267,6 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
 
         if self.context.current_step:
             self.root_parent_id = self.context.current_step.id
-        elif self.context.session.root_message:
-            self.root_parent_id = self.context.session.root_message.id
         else:
             self.root_parent_id = None
 
@@ -431,9 +429,6 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 self.ignored_runs.add(str(run.id))
             return ignore, parent_id
 
-    def _is_annotable(self, run: Run):
-        return run.run_type in ["retriever", "llm"]
-
     def _start_trace(self, run: Run) -> None:
         super()._start_trace(run)
         context_var.set(self.context)
@@ -452,7 +447,8 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if run.run_type == "agent":
             step_type = "run"
         elif run.run_type == "chain":
-            pass
+            if not self.steps:
+                step_type = "run"
         elif run.run_type == "llm":
             step_type = "llm"
         elif run.run_type == "retriever":
@@ -462,17 +458,11 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         elif run.run_type == "embedding":
             step_type = "embedding"
 
-        if not self.steps and step_type != "llm":
-            step_type = "run"
-
-        disable_feedback = not self._is_annotable(run)
-
         step = Step(
             id=str(run.id),
             name=run.name,
             type=step_type,
             parent_id=parent_id,
-            disable_feedback=disable_feedback,
         )
         step.start = utc_now()
         step.input = run.inputs

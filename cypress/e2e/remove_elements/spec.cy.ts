@@ -6,9 +6,9 @@ describe('remove_elements', () => {
   });
 
   it('should be able to remove elements', () => {
-    cy.get('#tool-call-tool1').should('exist');
-    cy.get('#tool-call-tool1').click();
-    cy.get('#tool-call-tool1')
+    cy.get('#step-tool1').should('exist');
+    cy.get('#step-tool1').click();
+    cy.get('#step-tool1')
       .parent()
       .find('.inline-image')
       .should('have.length', 1);

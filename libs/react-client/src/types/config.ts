@@ -21,11 +21,19 @@ export interface IAudioConfig {
   max_duration: number;
 }
 
+export interface IAuthConfig {
+  requireLogin: boolean;
+  passwordAuth: boolean;
+  headerAuth: boolean;
+  oauthProviders: string[];
+}
+
 export interface IChainlitConfig {
   markdown?: string;
   ui: {
     name: string;
     description?: string;
+    cot: 'hidden' | 'tool_call' | 'full';
     default_collapse_content?: boolean;
     github?: string;
     theme: any;
@@ -44,6 +52,7 @@ export interface IChainlitConfig {
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     latex?: boolean;
+    edit_message?: boolean;
   };
   debugUrl?: string;
   userEnv: string[];

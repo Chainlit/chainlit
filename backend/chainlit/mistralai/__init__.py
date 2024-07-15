@@ -8,13 +8,8 @@ from literalai import ChatGeneration, CompletionGeneration
 from literalai.helper import timestamp_utc
 
 
-def instrument_openai():
-    if not check_module_version("openai", "1.0.0"):
-        raise ValueError(
-            "Expected OpenAI version >= 1.0.0. Run `pip install openai --upgrade`"
-        )
-
-    from literalai.instrumentation.openai import instrument_openai
+def instrument_mistralai():
+    from literalai.instrumentation.mistralai import instrument_mistralai
 
     def on_new_generation(
         generation: Union["ChatGeneration", "CompletionGeneration"], timing
@@ -52,4 +47,4 @@ def instrument_openai():
 
         asyncio.create_task(step.send())
 
-    instrument_openai(None, on_new_generation)
+    instrument_mistralai(None, on_new_generation)

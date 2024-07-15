@@ -35,17 +35,16 @@ class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
             return None
 
 
-
 def clean_metadata(metadata: Dict, max_size: int = 1048576):
     cleaned_metadata = json.loads(
         json.dumps(metadata, cls=JSONEncoderIgnoreNonSerializable, ensure_ascii=False)
     )
 
-    metadata_size = len(json.dumps(cleaned_metadata).encode('utf-8'))
+    metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
         cleaned_metadata = {
-            'message': f'Metadata size exceeds the limit of {max_size} bytes. Redacted.'
+            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted."
         }
 
     return cleaned_metadata
@@ -71,8 +70,6 @@ class BaseSession:
         token: Optional[str],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Optional[Dict[str, str]],
-        # Last message at the root of the chat
-        root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
         # Origin of the request
@@ -84,7 +81,6 @@ class BaseSession:
         self.user = user
         self.client_type = client_type
         self.token = token
-        self.root_message = root_message
         self.has_first_interaction = False
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
@@ -178,8 +174,6 @@ class HTTPSession(BaseSession):
         # Logged-in user token
         token: Optional[str] = None,
         user_env: Optional[Dict[str, str]] = None,
-        # Last message at the root of the chat
-        root_message: Optional["Message"] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
     ):
@@ -190,7 +184,6 @@ class HTTPSession(BaseSession):
             token=token,
             client_type=client_type,
             user_env=user_env,
-            root_message=root_message,
             http_referer=http_referer,
         )
 
@@ -233,8 +226,6 @@ class WebsocketSession(BaseSession):
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
-        # Last message at the root of the chat
-        root_message: Optional["Message"] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
         # Languages of the user's browser
@@ -249,7 +240,6 @@ class WebsocketSession(BaseSession):
             token=token,
             user_env=user_env,
             client_type=client_type,
-            root_message=root_message,
             chat_profile=chat_profile,
             http_referer=http_referer,
         )

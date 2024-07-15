@@ -26,7 +26,6 @@ export interface IStep {
   createdAt: number | string;
   start?: number | string;
   end?: number | string;
-  disableFeedback?: boolean;
   feedback?: IFeedback;
   language?: string;
   streaming?: boolean;

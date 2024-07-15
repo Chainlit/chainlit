@@ -221,7 +221,6 @@ class ChainlitDataLayer(BaseDataLayer):
             "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
-            "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
             "language": metadata.get("language"),
             "isError": bool(step.error),
@@ -231,7 +230,7 @@ class ChainlitDataLayer(BaseDataLayer):
     async def build_debug_url(self) -> str:
         try:
             project_id = await self.client.api.get_my_project_id()
-            return f"{self.client.api.url}/projects/{project_id}/threads?threadId=[thread_id]&currentStepId=[step_id]"
+            return f"{self.client.api.url}/projects/{project_id}/threads/[thread_id]?currentStepId=[step_id]"
         except Exception as e:
             logger.error(f"Error building debug url: {e}")
             return ""
@@ -360,7 +359,6 @@ class ChainlitDataLayer(BaseDataLayer):
         metadata = dict(
             step_dict.get("metadata", {}),
             **{
-                "disableFeedback": step_dict.get("disableFeedback"),
                 "waitForAnswer": step_dict.get("waitForAnswer"),
                 "language": step_dict.get("language"),
                 "showInput": step_dict.get("showInput"),
@@ -469,7 +467,7 @@ class ChainlitDataLayer(BaseDataLayer):
             for step in thread.steps:
                 if step.type == "system_message":
                     continue
-                if config.ui.hide_cot and step.type not in [
+                if config.ui.cot == "hidden" and step.type not in [
                     "user_message",
                     "assistant_message",
                 ]:

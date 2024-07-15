@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 
 import {
   ChainlitContext,
-  IAction,
   IFeedback,
   IStep,
   accessTokenState,
@@ -28,38 +27,6 @@ const Messages = (): JSX.Element => {
   const setMessages = useSetRecoilState(messagesState);
 
   const { t } = useTranslation();
-
-  const callActionWithToast = useCallback(
-    (action: IAction) => {
-      const promise = callAction(action);
-      if (promise) {
-        toast.promise(promise, {
-          loading: `${t('components.organisms.chat.Messages.index.running')} ${
-            action.name
-          }`,
-          success: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} ${t(
-                'components.organisms.chat.Messages.index.executedSuccessfully'
-              )}`;
-            }
-          },
-          error: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} ${t(
-                'components.organisms.chat.Messages.index.failed'
-              )}`;
-            }
-          }
-        });
-      }
-    },
-    [callAction]
-  );
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
@@ -129,7 +96,7 @@ const Messages = (): JSX.Element => {
       messages={messages}
       onFeedbackUpdated={onFeedbackUpdated}
       onFeedbackDeleted={onFeedbackDeleted}
-      callAction={callActionWithToast}
+      callAction={callAction}
     />
   );
 };
