@@ -7,9 +7,9 @@ from urllib.parse import unquote
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
+from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import init_ws_context
-from chainlit.chat_context import chat_context
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
@@ -246,7 +246,7 @@ async def stop(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(content="Task manually stopped.", disable_feedback=True).send()
+        await Message(content="Task manually stopped.").send()
 
         if session.current_task:
             session.current_task.cancel()
@@ -308,7 +308,7 @@ async def edit_message(sid, payload: MessagePayload):
 
 
 def is_ui_message_valid(payload: MessagePayload) -> bool:
-    content = payload.get('message', {}).get('output', '')
+    content = payload.get("message", {}).get("output", "")
 
     if len(content) > MAX_UI_MESSAGE_LENGTH:
         logger.error("Message of length {} sent to socket".format(len(content)))

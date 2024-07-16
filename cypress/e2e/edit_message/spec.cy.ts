@@ -1,11 +1,11 @@
 import { runTestServer, submitMessage } from '../../support/testUtils';
 
-describe('Chat Context', () => {
+describe('Edit Message', () => {
   before(() => {
     runTestServer();
   });
 
-  it('should be able to store data related per user session', () => {
+  it('should be able to edit a message', () => {
     submitMessage('Hello 1');
     submitMessage('Hello 2');
 

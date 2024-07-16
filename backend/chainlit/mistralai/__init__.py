@@ -1,12 +1,11 @@
 import asyncio
 from typing import Union
 
-from literalai import ChatGeneration, CompletionGeneration
-from literalai.helper import timestamp_utc
-
 from chainlit.context import get_context
 from chainlit.step import Step
 from chainlit.utils import check_module_version
+from literalai import ChatGeneration, CompletionGeneration
+from literalai.helper import timestamp_utc
 
 
 def instrument_mistralai():
@@ -20,8 +19,6 @@ def instrument_mistralai():
         parent_id = None
         if context.current_step:
             parent_id = context.current_step.id
-        elif context.session.root_message:
-            parent_id = context.session.root_message.id
 
         step = Step(
             name=generation.model if generation.model else generation.provider,

@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   IAction,
   IAsk,
+  IAuthConfig,
   ICallFn,
   IChainlitConfig,
   IMessageElement,
@@ -130,6 +131,11 @@ export const userState = atom<IUser | null>({
 
 export const configState = atom<IChainlitConfig | undefined>({
   key: 'ChainlitConfig',
+  default: undefined
+});
+
+export const authState = atom<IAuthConfig | undefined>({
+  key: 'AuthConfig',
   default: undefined
 });
 

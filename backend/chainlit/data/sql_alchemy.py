@@ -489,7 +489,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."type" AS step_type,
                 s."threadId" AS step_threadid,
                 s."parentId" AS step_parentid,
-                s."disableFeedback" AS step_disablefeedback,
                 s."streaming" AS step_streaming,
                 s."waitForAnswer" AS step_waitforanswer,
                 s."isError" AS step_iserror,
@@ -568,9 +567,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         type=step_feedback["step_type"],
                         threadId=thread_id,
                         parentId=step_feedback.get("step_parentid"),
-                        disableFeedback=step_feedback.get(
-                            "step_disablefeedback", False
-                        ),
                         streaming=step_feedback.get("step_streaming", False),
                         waitForAnswer=step_feedback.get("step_waitforanswer"),
                         isError=step_feedback.get("step_iserror"),
