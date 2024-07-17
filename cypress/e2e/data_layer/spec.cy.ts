@@ -86,13 +86,13 @@ function restartServer(
 }
 
 function continueThread() {
-  cy.get('.step').eq(5).should('contain', 'Welcome back to Hello');
+  cy.get('.step').eq(7).should('contain', 'Welcome back to Hello');
 
   submitMessage('Hello after restart');
 
   // Verify that new step counter messages have been added
-  cy.get('.step').eq(9).should('contain', 'Create step counter: 11');
   cy.get('.step').eq(11).should('contain', 'Create step counter: 14');
+  cy.get('.step').eq(14).should('contain', 'Create step counter: 17');
 }
 
 function newThread() {
