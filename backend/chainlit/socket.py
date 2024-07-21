@@ -314,6 +314,17 @@ async def message(sid, payload: MessagePayload):
     session.current_task = task
 
 
+@sio.on("window_message")
+async def window_message(sid, data):
+    """Handle a message send by the host window."""
+    session = WebsocketSession.require(sid)
+
+    init_ws_context(session)
+
+    if config.code.on_window_message:
+        await config.code.on_window_message(data)
+
+
 @sio.on("audio_chunk")
 async def audio_chunk(sid, payload: AudioChunkPayload):
     """Handle an audio chunk sent by the user."""
