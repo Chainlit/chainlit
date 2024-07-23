@@ -4,7 +4,7 @@ import mimetypes
 import re
 import shutil
 import urllib.parse
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
