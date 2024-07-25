@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+from decimal import Decimal
 from dataclasses import asdict
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -71,6 +72,32 @@ class DynamoDBDataLayer(BaseDataLayer):
             for key, value in item.items()
         }
 
+    def _convert_floats_to_decimal(self, obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if isinstance(value, float):
+                    obj[key] = Decimal(str(value))
+                elif isinstance(value, dict):
+                    self._convert_floats_to_decimal(value)
+                elif isinstance(value, list):
+                    obj[key] = [self._convert_floats_to_decimal(i) for i in value]
+        elif isinstance(obj, list):
+            return [self._convert_floats_to_decimal(i) for i in obj]
+        return obj
+    
+    def _convert_decimal_to_floats(self, obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if isinstance(value, Decimal):
+                    obj[key] = float(value)
+                elif isinstance(value, dict):
+                    self._convert_decimal_to_floats(value)
+                elif isinstance(value, list):
+                    obj[key] = [self._convert_decimal_to_floats(i) for i in value]
+        elif isinstance(obj, list):
+            return [self._convert_decimal_to_floats(i) for i in obj]
+        return obj
+
     def _update_item(self, key: Dict[str, Any], updates: Dict[str, Any]):
         update_expr: List[str] = []
         expression_attribute_names = {}
@@ -83,6 +110,8 @@ class DynamoDBDataLayer(BaseDataLayer):
             k, v = f"#{index}", f":{index}"
             update_expr.append(f"{k} = {v}")
             expression_attribute_names[k] = attr
+            if isinstance(value, dict):
+                value = self._convert_floats_to_decimal(value)
             expression_attribute_values[v] = value
 
         self.client.update_item(
@@ -510,6 +539,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         steps = []
         elements = []
 
+        thread_items = self._convert_decimal_to_floats(thread_items)
         for item in thread_items:
             if item["SK"] == "THREAD":
                 thread_dict = item
