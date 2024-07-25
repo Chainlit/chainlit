@@ -110,7 +110,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             k, v = f"#{index}", f":{index}"
             update_expr.append(f"{k} = {v}")
             expression_attribute_names[k] = attr
-            if isinstance(value, dict):
+            if isinstance(value, (dict, list)):
                 value = self._convert_floats_to_decimal(value)
             expression_attribute_values[v] = value
 
