@@ -29,6 +29,18 @@ def check_add_step_in_cot(step: "Step"):
     return True
 
 
+def stub_step(step: "Step"):
+    return {
+        "type": step.type,
+        "name": step.name,
+        "id": step.id,
+        "parentId": step.parent_id,
+        "threadId": step.thread_id,
+        "input": "",
+        "output": "",
+    }
+
+
 class StepDict(TypedDict, total=False):
     name: str
     type: StepType
@@ -302,9 +314,9 @@ class Step:
         await asyncio.gather(*tasks)
 
         if not check_add_step_in_cot(self):
-            return True
-
-        await context.emitter.update_step(step_dict)
+            await context.emitter.update_step(stub_step(self))
+        else:
+            await context.emitter.update_step(step_dict)
 
         return True
 
@@ -356,9 +368,9 @@ class Step:
         await asyncio.gather(*tasks)
 
         if not check_add_step_in_cot(self):
-            return self
-
-        await context.emitter.send_step(step_dict)
+            await context.emitter.send_step(stub_step(self))
+        else:
+            await context.emitter.send_step(step_dict)
 
         return self
 
@@ -381,6 +393,7 @@ class Step:
         assert self.id
 
         if not check_add_step_in_cot(self):
+            await context.emitter.send_step(stub_step(self))
             return
 
         if not self.streaming:

@@ -15,6 +15,7 @@ Nothing unreleased!
 - hide_cot becomes cot and has three possible values: hidden, tool_call, full
 - User feedback are now scoring an entire run instead of a specific message
 - Slack/Teams/Discord DM threads are now split by day
+- Slack DM now also use threads
 - Avatars are always displayed at the root level of the conversation
 
 ### Removed
