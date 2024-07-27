@@ -29,18 +29,16 @@ class SlackEmitter(BaseChainlitEmitter):
         app: AsyncApp,
         channel_id: str,
         say,
-        enabled=False,
         thread_ts: Optional[str] = None,
     ):
         super().__init__(session)
         self.app = app
         self.channel_id = channel_id
         self.say = say
-        self.enabled = enabled
         self.thread_ts = thread_ts
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled or element_dict.get("display") != "inline":
+        if element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")
@@ -65,17 +63,11 @@ class SlackEmitter(BaseChainlitEmitter):
         )
 
     async def send_step(self, step_dict: StepDict):
-        if not self.enabled:
-            return
-
         step_type = step_dict.get("type")
-        is_message = step_type in [
-            "user_message",
-            "assistant_message",
-        ]
+        is_assistant_message = step_type == "assistant_message"
         is_empty_output = not step_dict.get("output")
 
-        if is_empty_output or not is_message:
+        if is_empty_output or not is_assistant_message:
             return
 
         enable_feedback = get_data_layer()
@@ -120,7 +112,9 @@ class SlackEmitter(BaseChainlitEmitter):
         )
 
     async def update_step(self, step_dict: StepDict):
-        if not self.enabled:
+        is_assistant_message = step_dict["type"] == "assistant_message"
+
+        if not is_assistant_message:
             return
 
         await self.send_step(step_dict)
@@ -281,6 +275,9 @@ async def process_slack_message(
         session, slack_files, slack_app.client.token
     )
 
+    if on_chat_start := config.code.on_chat_start:
+        await on_chat_start()
+
     msg = Message(
         content=clean_content(text),
         elements=file_elements,
@@ -289,11 +286,6 @@ async def process_slack_message(
     )
 
     await msg.send()
-
-    ctx.emitter.enabled = True
-
-    if on_chat_start := config.code.on_chat_start:
-        await on_chat_start()
 
     if on_message := config.code.on_message:
         await on_message(msg)

@@ -57,15 +57,12 @@ class FeedbackView(View):
 
 
 class DiscordEmitter(BaseChainlitEmitter):
-    def __init__(
-        self, session: HTTPSession, channel: "MessageableChannel", enabled=False
-    ):
+    def __init__(self, session: HTTPSession, channel: "MessageableChannel"):
         super().__init__(session)
         self.channel = channel
-        self.enabled = enabled
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled or element_dict.get("display") != "inline":
+        if element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")
@@ -96,7 +93,7 @@ class DiscordEmitter(BaseChainlitEmitter):
         await self.channel.send(file=file_obj)
 
     async def send_step(self, step_dict: StepDict):
-        if not self.enabled:
+        if not step_dict["type"] == "assistant_message":
             return
 
         step_type = step_dict.get("type")
@@ -121,7 +118,7 @@ class DiscordEmitter(BaseChainlitEmitter):
                 await message.edit(view=view)
 
     async def update_step(self, step_dict: StepDict):
-        if not self.enabled:
+        if not step_dict["type"] == "assistant_message":
             return
 
         await self.send_step(step_dict)
@@ -248,6 +245,9 @@ async def process_discord_message(
 
     file_elements = await download_discord_files(session, discord_files)
 
+    if on_chat_start := config.code.on_chat_start:
+        await on_chat_start()
+
     msg = Message(
         content=text,
         elements=file_elements,
@@ -256,11 +256,6 @@ async def process_discord_message(
     )
 
     await msg.send()
-
-    ctx.emitter.enabled = True
-
-    if on_chat_start := config.code.on_chat_start:
-        await on_chat_start()
 
     if on_message := config.code.on_message:
         async with channel.typing():
