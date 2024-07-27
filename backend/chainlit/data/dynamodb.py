@@ -73,16 +73,20 @@ class DynamoDBDataLayer(BaseDataLayer):
         }
 
     def _convert_floats_to_decimal(self, obj):
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                if isinstance(value, float):
-                    obj[key] = Decimal(str(value))
-                elif isinstance(value, dict):
-                    self._convert_floats_to_decimal(value)
-                elif isinstance(value, list):
-                    obj[key] = [self._convert_floats_to_decimal(i) for i in value]
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             return [self._convert_floats_to_decimal(i) for i in obj]
+
+        if not isinstance(obj, dict):
+            return obj
+
+        for key, value in obj.items():
+            if isinstance(value, float):
+                obj[key] = Decimal(str(value))
+            elif isinstance(value, dict):
+                self._convert_floats_to_decimal(value)
+            elif isinstance(value, list):
+                obj[key] = [self._convert_floats_to_decimal(i) for i in value]
+
         return obj
     
     def _convert_decimal_to_floats(self, obj):
