@@ -61,17 +61,6 @@ class DynamoDBDataLayer(BaseDataLayer):
     def _get_current_timestamp(self) -> str:
         return datetime.now().isoformat() + "Z"
 
-    def _serialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            key: self._type_serializer.serialize(value) for key, value in item.items()
-        }
-
-    def _deserialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            key: self._type_deserializer.deserialize(value)
-            for key, value in item.items()
-        }
-
     def _convert_floats_to_decimal(self, obj):
         if isinstance(obj, list):
             return [self._convert_floats_to_decimal(i) for i in obj]
@@ -104,6 +93,21 @@ class DynamoDBDataLayer(BaseDataLayer):
             elif isinstance(value, list):
                 obj[key] = [self._convert_decimal_to_floats(i) for i in value]
 
+    def _serialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+        item = self._convert_floats_to_decimal(item)
+        return {
+            key: self._type_serializer.serialize(value) 
+            for key, value in item.items()
+        }
+
+    def _deserialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+        item = self._convert_decimal_to_floats(item)
+        return {
+            key: self._type_deserializer.deserialize(value)
+            for key, value in item.items()
+        }
+
+
         return obj
 
     def _update_item(self, key: Dict[str, Any], updates: Dict[str, Any]):
@@ -118,8 +122,6 @@ class DynamoDBDataLayer(BaseDataLayer):
             k, v = f"#{index}", f":{index}"
             update_expr.append(f"{k} = {v}")
             expression_attribute_names[k] = attr
-            if isinstance(value, (dict, list)):
-                value = self._convert_floats_to_decimal(value)
             expression_attribute_values[v] = value
 
         self.client.update_item(
@@ -547,7 +549,6 @@ class DynamoDBDataLayer(BaseDataLayer):
         steps = []
         elements = []
 
-        thread_items = self._convert_decimal_to_floats(thread_items)
         for item in thread_items:
             if item["SK"] == "THREAD":
                 thread_dict = item
