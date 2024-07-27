@@ -104,10 +104,9 @@ class DiscordEmitter(BaseChainlitEmitter):
             "user_message",
             "assistant_message",
         ]
-        is_chain_of_thought = bool(step_dict.get("parentId"))
         is_empty_output = not step_dict.get("output")
 
-        if is_chain_of_thought or is_empty_output or not is_message:
+        if is_empty_output or not is_message:
             return
         else:
             enable_feedback = get_data_layer()
