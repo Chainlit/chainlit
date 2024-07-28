@@ -326,22 +326,21 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
-    user = await get_user(message["user"])
     thread_id = str(
         uuid.uuid5(
             uuid.NAMESPACE_DNS,
             message["channel"] + datetime.today().strftime("%Y-%m-%d"),
         )
     )
-    thread_name = f"{user.identifier} Slack DM {datetime.today().strftime('%Y-%m-%d')}"
-    ts = message.get("thread_ts", message["ts"])
+    thread_ts = message.get("thread_ts", message["ts"])
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
+
     await process_slack_message(
         event=message,
         say=say,
         thread_id=thread_id,
-        thread_name=thread_name,
         bind_thread_to_user=True,
-        thread_ts=ts,
+        thread_ts=thread_ts,
     )
 
 
