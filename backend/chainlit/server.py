@@ -266,7 +266,7 @@ def get_html_template():
     )
     url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
-    favicon_path = ROOT_PATH + "/favicon" if ROOT_PATH else "/favicon"
+    favicon_path = "/favicon"
 
     tags = f"""<title>{config.ui.name}</title>
     <link rel="icon" href="{favicon_path}" />
