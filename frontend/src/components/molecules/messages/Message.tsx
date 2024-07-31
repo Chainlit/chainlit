@@ -55,9 +55,14 @@ const Message = memo(
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
+
     // Only keep tool calls if Chain of Thought is tool_call
-    const skip =
+    const toolCallSkip =
       isStep && config?.ui.cot === 'tool_call' && message.type !== 'tool';
+
+    const hiddenSkip = isStep && config?.ui.cot === 'hidden';
+
+    const skip = toolCallSkip || hiddenSkip;
 
     if (skip) {
       if (!message.steps) {
@@ -70,6 +75,7 @@ const Message = memo(
           actions={actions}
           indent={indent}
           isRunning={isRunning}
+          scorableRun={scorableRun}
         />
       );
     }

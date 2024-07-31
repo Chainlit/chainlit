@@ -1,11 +1,8 @@
 import json
 import time
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 from uuid import UUID
 
-from chainlit.context import context_var
-from chainlit.message import Message
-from chainlit.step import Step
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import BaseMessage
@@ -14,6 +11,10 @@ from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
 from literalai.step import TrueStepType
+
+from chainlit.context import context_var
+from chainlit.message import Message
+from chainlit.step import Step
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
@@ -229,7 +230,24 @@ class GenerationHelper:
         return provider, model, tools, settings
 
 
-DEFAULT_TO_IGNORE = ["Runnable", "<lambda>"]
+def process_content(content: Any) -> Tuple[Dict, Optional[str]]:
+    if content is None:
+        return {}, None
+    if isinstance(content, dict):
+        return content, "json"
+    elif isinstance(content, str):
+        return {"content": content}, "text"
+    else:
+        return {"content": str(content)}, "text"
+
+
+DEFAULT_TO_IGNORE = [
+    "RunnableSequence",
+    "RunnableParallel",
+    "RunnableAssign",
+    "RunnableLambda",
+    "<lambda>",
+]
 DEFAULT_TO_KEEP = ["retriever", "llm", "agent", "chain", "tool"]
 
 
@@ -465,7 +483,11 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
         )
         step.start = utc_now()
-        step.input = run.inputs
+        step.input, language = process_content(run.inputs)
+        if language is not None:
+            if step.metadata is None:
+                step.metadata = {}
+            step.metadata["language"] = language
 
         self.steps[str(run.id)] = step
 
@@ -489,6 +511,9 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             generations = (run.outputs or {}).get("generations", [])
             generation = generations[0][0]
             variables = self.generation_inputs.get(str(run.parent_run_id), {})
+            variables = {
+                k: process_content(v) for k, v in variables.items() if v is not None
+            }
             if message := generation.get("message"):
                 chat_start = self.chat_generations[str(run.id)]
                 duration = time.time() - chat_start["start"]
@@ -519,7 +544,11 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                             "prompt_id"
                         ]
                         if custom_variables := m.additional_kwargs.get("variables"):
-                            current_step.generation.variables = custom_variables
+                            current_step.generation.variables = {
+                                k: process_content(v)
+                                for k, v in custom_variables.items()
+                                if v is not None
+                            }
                     break
 
                 current_step.language = "json"
@@ -563,7 +592,7 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output = output
+            current_step.output, _ = output
             current_step.end = utc_now()
             self._run_sync(current_step.update())
 

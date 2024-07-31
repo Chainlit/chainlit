@@ -15,7 +15,6 @@ from typing import (
 )
 
 import aiofiles
-from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
@@ -230,7 +229,7 @@ class ChainlitDataLayer(BaseDataLayer):
     async def build_debug_url(self) -> str:
         try:
             project_id = await self.client.api.get_my_project_id()
-            return f"{self.client.api.url}/projects/{project_id}/threads/[thread_id]?currentStepId=[step_id]"
+            return f"{self.client.api.url}/projects/{project_id}/logs/threads/[thread_id]?currentStepId=[step_id]"
         except Exception as e:
             logger.error(f"Error building debug url: {e}")
             return ""
@@ -458,6 +457,8 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
+        from chainlit.step import check_add_step_in_cot, stub_step
+
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
@@ -465,16 +466,13 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if step.type == "system_message":
-                    continue
-                if config.ui.cot == "hidden" and step.type not in [
-                    "user_message",
-                    "assistant_message",
-                ]:
-                    continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
-                steps.append(self.step_to_step_dict(step))
+
+                if check_add_step_in_cot(step):
+                    steps.append(self.step_to_step_dict(step))
+                else:
+                    steps.append(stub_step(step))
 
         return {
             "createdAt": thread.created_at or "",
