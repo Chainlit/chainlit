@@ -3,6 +3,7 @@ import inspect
 import json
 import time
 import uuid
+from copy import deepcopy
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
@@ -64,6 +65,13 @@ class StepDict(TypedDict, total=False):
     feedback: Optional[FeedbackDict]
 
 
+def flatten_args_kwargs(func, *args, **kwargs):
+    signature = inspect.signature(func)
+    bound_arguments = signature.bind(*args, **kwargs)
+    bound_arguments.apply_defaults()
+    return {k: deepcopy(v) for k, v in bound_arguments.arguments.items()}
+
+
 def step(
     original_function: Optional[Callable] = None,
     *,
@@ -98,7 +106,7 @@ def step(
                     show_input=show_input,
                 ) as step:
                     try:
-                        step.input = {"args": args, "kwargs": kwargs}
+                        step.input = flatten_args_kwargs(func, args, kwargs)
                     except:
                         pass
                     result = await func(*args, **kwargs)
@@ -125,7 +133,7 @@ def step(
                     show_input=show_input,
                 ) as step:
                     try:
-                        step.input = {"args": args, "kwargs": kwargs}
+                        step.input = flatten_args_kwargs(func, args, kwargs)
                     except:
                         pass
                     result = func(*args, **kwargs)

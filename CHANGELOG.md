@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.401] - 2024-08-02
+
+### Changed
+
+- Directly log step input args by name instead of wrapping them in "args" for readability.
+
+### Fixed
+
+- Langchain Callback handler ValueError('not enough values to unpack (expected 2, got 0)')
+
 ## [1.1.400] - 2024-07-29
 
 ### Changed
