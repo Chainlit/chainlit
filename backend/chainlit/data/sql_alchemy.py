@@ -504,6 +504,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."language" AS step_language,
                 s."indent" AS step_indent,
                 f."value" AS feedback_value,
+                f."id" AS feedback_id,
                 f."comment" AS feedback_comment
             FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
             WHERE s."threadId" IN {thread_ids}
