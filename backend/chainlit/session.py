@@ -74,6 +74,8 @@ class BaseSession:
         chat_profile: Optional[str] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -85,6 +87,7 @@ class BaseSession:
         self.user_env = user_env or {}
         self.chat_profile = chat_profile
         self.http_referer = http_referer
+        self.http_forwarded_for = http_forwarded_for
 
         self.files = {}  # type: Dict[str, "FileDict"]
 
@@ -154,6 +157,7 @@ class BaseSession:
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
         user_session["http_referer"] = self.http_referer
+        user_session["http_forwarded_for"] = self.http_forwarded_for
         user_session["client_type"] = self.client_type
         metadata = clean_metadata(user_session)
         return metadata
@@ -176,6 +180,8 @@ class HTTPSession(BaseSession):
         user_env: Optional[Dict[str, str]] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -185,6 +191,7 @@ class HTTPSession(BaseSession):
             client_type=client_type,
             user_env=user_env,
             http_referer=http_referer,
+            http_forwarded_for=http_forwarded_for,
         )
 
     def delete(self):
@@ -232,6 +239,8 @@ class WebsocketSession(BaseSession):
         languages: Optional[str] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # Client IP
+        http_forwarded_for: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -242,6 +251,7 @@ class WebsocketSession(BaseSession):
             client_type=client_type,
             chat_profile=chat_profile,
             http_referer=http_referer,
+            http_forwarded_for=http_forwarded_for,
         )
 
         self.socket_id = socket_id
