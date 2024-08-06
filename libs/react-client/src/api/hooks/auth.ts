@@ -36,6 +36,7 @@ export const useAuth = () => {
     removeToken();
     setAccessToken('');
     setThreadHistory(undefined);
+    window.location.reload();
   };
 
   const saveAndSetToken = (token: string | null | undefined) => {
