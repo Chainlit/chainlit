@@ -497,12 +497,14 @@ class AskActionMessage(AskMessageBase):
         author=config.ui.name,
         timeout=90,
         raise_on_timeout=False,
+        include_content=False,
     ):
         self.content = content
         self.actions = actions
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
+        self.include_content = include_content
 
         super().__post_init__()
 
@@ -543,7 +545,12 @@ class AskActionMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {res["label"]}'
+            content = (
+                f'{self.content}\n**Selected:** {res["label"]}'
+                if self.include_content
+                else f'**Selected:** {res["label"]}'
+            )
+            self.content = content
 
         self.wait_for_answer = False
 
