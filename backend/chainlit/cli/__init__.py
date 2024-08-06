@@ -51,11 +51,7 @@ def run_chainlit(target: str):
         "1",
         "yes",
     ]  # Convert to boolean
-
-    ws_protocol = os.environ.get(
-        "UVICORN_WS_PROTOCOL", "auto"
-    )
-
+    ws_protocol = os.environ.get("UVICORN_WS_PROTOCOL", "auto")
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path
@@ -74,6 +70,7 @@ def run_chainlit(target: str):
     init_lc_cache()
 
     log_level = "debug" if config.run.debug else "error"
+    log_config = config.run.log_config
 
     # Start the server
     async def start():
@@ -82,6 +79,7 @@ def run_chainlit(target: str):
             host=host,
             port=port,
             ws=ws_protocol,
+            log_config=log_config,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
             ssl_keyfile=ssl_keyfile,
@@ -123,6 +121,14 @@ def run_chainlit(target: str):
     help="Set the log level to debug",
 )
 @click.option(
+    "-l",
+    "--log-config",
+    default=uvicorn.config.LOGGING_CONFIG,
+    is_flag=False,
+    envvar="LOG_CONFIG",
+    help="Set the Uvicorn log config file path. Supported formats: .ini, .json, .yaml.",
+)
+@click.option(
     "-c",
     "--ci",
     default=False,
@@ -157,6 +163,7 @@ def chainlit_run(
     watch,
     headless,
     debug,
+    log_config,
     ci,
     no_cache,
     ssl_cert,
@@ -185,7 +192,7 @@ def chainlit_run(
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-        # This is required for authenticationt tests
+        # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
     else:
         trace_event("chainlit run")
@@ -197,6 +204,7 @@ def chainlit_run(
     config.run.watch = watch
     config.run.ssl_cert = ssl_cert
     config.run.ssl_key = ssl_key
+    config.run.log_config = log_config
 
     run_chainlit(target)
 

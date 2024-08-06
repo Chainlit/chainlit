@@ -182,6 +182,7 @@ class RunSettings:
     no_cache: bool = False
     debug: bool = False
     ci: bool = False
+    log_config: Optional[Union[dict, str]] = None
 
 
 @dataclass()
