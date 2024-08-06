@@ -86,7 +86,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     <MenuItem
       key="logout"
       onClick={() => {
-        logout();
+        logout(true);
         handleClose();
       }}
     >

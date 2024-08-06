@@ -30,13 +30,15 @@ export const useAuth = () => {
 
   const isReady = !!(!isLoading && authConfig);
 
-  const logout = async () => {
+  const logout = async (reload = false) => {
     await apiClient.logout();
     setUser(null);
     removeToken();
     setAccessToken('');
     setThreadHistory(undefined);
-    window.location.reload();
+    if (reload) {
+      window.location.reload();
+    }
   };
 
   const saveAndSetToken = (token: string | null | undefined) => {
