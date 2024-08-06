@@ -24,10 +24,13 @@ export async function runTests(matchName) {
 }
 
 export function runCommand(command: string, cwd = ROOT) {
-  return execSync(command, {
+  const [cmd, ...args] = command.split(' ');
+  const fullCommand = [cmd, ...args].join(' ');
+  return execSync(fullCommand, {
     encoding: 'utf-8',
     cwd,
     env: process.env,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/sh',
   });
 }
