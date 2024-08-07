@@ -204,7 +204,7 @@ const ThreadList = ({
                             textOverflow: 'ellipsis'
                           }}
                         >
-                          {capitalize(thread.name || 'Unknown')}
+                          {thread.name || 'Unknown'}
                         </Typography>
                       </Stack>
                       {isSelected ? (
