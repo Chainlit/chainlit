@@ -1,3 +1,4 @@
+from importlib import metadata
 import json
 import ssl
 import uuid
@@ -115,7 +116,15 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         result = await self.execute_sql(query=query, parameters=parameters)
         if result and isinstance(result, list):
             user_data = result[0]
-            return PersistedUser(**user_data)
+            metadata = user_data.get("metadata") or {}
+            if metadata is not Dict:
+                metadata = json.loads(metadata)
+            return PersistedUser(
+                id=user_data.get("id"),
+                identifier=user_data.get("identifier"),
+                createdAt=user_data.get("createdAt"),
+                metadata=metadata,
+            )
         return None
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
