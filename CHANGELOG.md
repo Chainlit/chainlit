@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.402] - 2024-08-07
+
+### Added
+
+- The `User` class now has a `display_name` field. It will not be persisted by the data layer.
+- The logout button will now reload the page (needed for custom auth providers)
+
 ## [1.1.401] - 2024-08-02
 
 ### Changed
