@@ -7,8 +7,6 @@ dist
 
 *.files
 
-poetry.lock
-
 venv
 .venv
 .DS_Store
