@@ -25,7 +25,7 @@ include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
 chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0.0"
+python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.0.607"
 dataclasses_json = "^0.5.7"
