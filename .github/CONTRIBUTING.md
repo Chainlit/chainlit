@@ -78,10 +78,8 @@ pnpm install
 
 ```sh
 cd backend
-poetry install --with tests --with mypy
+poetry install --with tests --with mypy --with dev
 ```
-
-Make sure you have the Python code formatters `black` and `isort` installed as they are used in a pre-commit hook. Run `pip install black isort` if needed.
 
 ## Start the Chainlit server from source
 
