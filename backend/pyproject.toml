@@ -103,6 +103,7 @@ module = [
     "vertexai.language_models",
     "vertexai.preview.generative_models",
     "google.cloud",
+    "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
 
