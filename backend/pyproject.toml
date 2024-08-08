@@ -53,6 +53,7 @@ numpy = [
     { version = "^1.26", python = ">=3.9" },
     { version = "^1.24.4", python = "<3.9" },
 ]
+jinja2 = "^3.1.4"
 
 [tool.poetry.group.tests]
 optional = true
@@ -105,6 +106,7 @@ module = [
     "google.cloud",
 ]
 ignore_missing_imports = true
+
 
 [tool.poetry.group.custom-data]
 optional = true

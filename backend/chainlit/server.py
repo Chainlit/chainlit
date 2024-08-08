@@ -57,6 +57,7 @@ from fastapi import (
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
@@ -171,6 +172,8 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
+templates = Jinja2Templates(directory=build_dir)
+
 sio = socketio.AsyncServer(
     cors_allowed_origins=[] if IS_SUBMOUNT else "*", async_mode="asgi"
 )
@@ -255,11 +258,7 @@ def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: s
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
-def get_html_template():
-    PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
-    JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
-    CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
-
+def get_html_template(request: Request):
     default_url = "https://github.com/Chainlit/chainlit"
     default_meta_image_url = (
         "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -268,48 +267,20 @@ def get_html_template():
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
     favicon_path = "/favicon"
 
-    tags = f"""<title>{config.ui.name}</title>
-    <link rel="icon" href="{favicon_path}" />
-    <meta name="description" content="{config.ui.description}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="{config.ui.name}">
-    <meta property="og:description" content="{config.ui.description}">
-    <meta property="og:image" content="{meta_image_url}">
-    <meta property="og:url" content="{url}">
-    <meta property="og:root_path" content="{ROOT_PATH}">"""
+    context = {
+        "request": request,
+        "favicon_path": favicon_path,
+        "name": config.ui.name,
+        "description": config.ui.description,
+        "custom_font": config.ui.custom_font,
+        "custom_css": config.ui.custom_css,
+        "custom_js": config.ui.custom_js,
+        "theme": config.ui.theme.to_dict() if config.ui.theme else None,
+        "github": url,
+        "meta_image_url": meta_image_url,
+    }
 
-    js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
-
-    css = None
-    if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
-
-    if config.ui.custom_js:
-        js += f"""<script src="{config.ui.custom_js}" defer></script>"""
-
-    font = None
-    if config.ui.custom_font:
-        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
-
-    index_html_file_path = os.path.join(build_dir, "index.html")
-
-    with open(index_html_file_path, "r", encoding="utf-8") as f:
-        content = f.read()
-        content = content.replace(PLACEHOLDER, tags)
-        if js:
-            content = content.replace(JS_PLACEHOLDER, js)
-        if css:
-            content = content.replace(CSS_PLACEHOLDER, css)
-        if font:
-            content = replace_between_tags(
-                content, "<!-- FONT START -->", "<!-- FONT END -->", font
-            )
-        if ROOT_PATH:
-            content = content.replace('href="/', f'href="{ROOT_PATH}/')
-            content = content.replace('src="/', f'src="{ROOT_PATH}/')
-        return content
+    return templates.TemplateResponse("index.html", context)
 
 
 def get_user_facing_url(url: URL):
@@ -935,12 +906,9 @@ def status_check():
 
 
 @router.get("/{full_path:path}")
-async def serve():
-    html_template = get_html_template()
+async def serve(request: Request):
     """Serve the UI files."""
-    response = HTMLResponse(content=html_template, status_code=200)
-
-    return response
+    return get_html_template(request)
 
 
 app.include_router(router)
