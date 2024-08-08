@@ -70,6 +70,10 @@ slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+
 [tool.poetry.group.mypy]
 optional = true
 
