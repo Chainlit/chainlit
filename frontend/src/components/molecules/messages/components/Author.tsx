@@ -35,6 +35,7 @@ const Author = ({ message, show, children }: Props) => {
         element={avatarEl}
         author={author}
         bgColor={getColorForName(author, isUser, message.isError)}
+        classes={isUser ? 'user-avatar' : 'agent-avatar'}
       />
       {(!!message.indent || message.parentId) && (
         <Box
@@ -49,7 +50,7 @@ const Author = ({ message, show, children }: Props) => {
     <Box width={AUTHOR_BOX_WIDTH} />
   );
   const name = (
-    <Stack direction="row" gap={1} alignItems="center">
+    <Stack direction="row" gap={1} alignItems="center" className={`author-name ${isUser ? 'author-user' : 'author-agent'}`}>
       {show ? (
         <Typography
           noWrap

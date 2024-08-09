@@ -55,6 +55,7 @@ const MessageContainer = memo(
             overflowY: 'auto'
           }}
           onScroll={handleScroll}
+          className="messages-container"
         >
           <Messages
             indent={0}

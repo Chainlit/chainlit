@@ -62,6 +62,7 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
       alignItems="center"
       justifyContent="space-between"
       bgcolor={evoya?.type === 'dashboard' ? 'background.paper' : config?.button?.style?.bgcolor}
+      className="header-bar"
     >
 
       <Stack direction="row" alignItems="center" spacing={2}>

@@ -6,9 +6,10 @@ interface Props {
   author: string;
   bgColor?: string;
   element?: IAvatarElement;
+  classes?: string;
 }
 
-const AvatarElement = ({ element, author, bgColor }: Props) => {
+const AvatarElement = ({ element, author, bgColor, classes }: Props) => {
   let avatar: JSX.Element;
   const sx = {
     width: 26,
@@ -22,7 +23,7 @@ const AvatarElement = ({ element, author, bgColor }: Props) => {
   } else {
     avatar = <Avatar sx={sx}>{author[0]?.toUpperCase()}</Avatar>;
   }
-  return <span className={`message-avatar`}>{avatar}</span>;
+  return <span className={`message-avatar ${classes}`}>{avatar}</span>;
 };
 
 export { AvatarElement };

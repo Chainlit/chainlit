@@ -165,10 +165,12 @@ const Input = memo(
           <Stack
             direction="row"
             alignItems="center"
+            className="input-wrapper"
           >
             <Stack
               color="text.secondary"
               marginLeft={-1}
+              className="upload-wrapper"
             >
               <UploadButton
                 disabled={disabled}

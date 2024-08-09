@@ -21,6 +21,7 @@ const MessageActions = ({ message, actions }: Props) => {
 
   const displayedActions = scopedActions.filter((a) => !a.collapsed);
   const drawerActions = scopedActions.filter((a) => a.collapsed);
+  const isUser = message.type === 'user_message';
 
   const show = displayedActions.length || drawerActions.length;
 
@@ -35,6 +36,7 @@ const MessageActions = ({ message, actions }: Props) => {
       alignItems="start"
       justifyContent="space-between"
       width="100%"
+      className={`actions-buttons ${isUser ? 'user-actions' : 'agent-actions'}`}
     >
       <Box id="actions-list">
         {displayedActions.map((action) => (

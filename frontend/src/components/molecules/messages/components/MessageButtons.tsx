@@ -47,6 +47,7 @@ const MessageButtons = ({ message }: Props) => {
       alignItems="center"
       direction="row"
       color={isDark ? grey[400] : grey[600]}
+      className={`message-buttons ${isUser ? 'user-buttons' : 'agent-buttons'}`}
     >
       {showCopyButton ? <ClipboardCopy value={message.output} /> : null}
       {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}

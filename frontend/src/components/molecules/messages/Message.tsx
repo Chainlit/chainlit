@@ -62,13 +62,14 @@ const Message = memo(
     }
 
     const isAsk = message.waitForAnswer;
+    const isUser = message.type === 'user_message';
 
     return (
       <Box
         sx={{
           color: 'text.primary'
         }}
-        className="step"
+        className={`step ${isUser ? 'user-message' : 'agent-message'}`}
       >
         <Box
           sx={{
