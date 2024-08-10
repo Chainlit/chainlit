@@ -12,7 +12,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Typography
+  Typography,
+  Avatar
 } from '@mui/material';
 
 import { useAuth, useConfig } from '@chainlit/react-client';
@@ -35,11 +36,9 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
   const requiredKeys = !!config?.userEnv?.length;
 
   const userNameItem = user && (
-    <ListItem key="user-name" sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Typography width="100%" fontSize="14px" fontWeight={700}>
-        {user.id}
-      </Typography>
-      <Typography width="100%" fontSize="13px" fontWeight={400}>
+    <ListItem key="user-profile" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Avatar sx={{ width: 56, height: 56, mb: 1 }}> {/* User's profile picture can go here */} </Avatar>
+      <Typography width="100%" fontSize="16px" fontWeight={700}>
         {user.display_name || user.identifier}
       </Typography>
     </ListItem>
