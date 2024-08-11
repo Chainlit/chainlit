@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
@@ -12,8 +13,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Typography,
-  Avatar
+  Typography
 } from '@mui/material';
 
 import { useAuth, useConfig } from '@chainlit/react-client';
@@ -30,16 +30,34 @@ interface Props {
 }
 
 export default function UserMenu({ anchorEl, open, handleClose }: Props) {
+  console.log('Menu is changed');
   const { user, logout } = useAuth();
   const [settings, setSettings] = useRecoilState(settingsState);
   const { config } = useConfig();
   const requiredKeys = !!config?.userEnv?.length;
 
   const userNameItem = user && (
-    <ListItem key="user-profile" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Avatar sx={{ width: 56, height: 56, mb: 1 }}> {/* User's profile picture can go here */} </Avatar>
-      <Typography width="100%" fontSize="16px" fontWeight={700}>
+    <ListItem key="user-name" sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Typography width="100%" fontSize="14px" fontWeight={700}>
+        {user.id}
+      </Typography>
+      <Typography width="100%" fontSize="13px" fontWeight={400}>
         {user.display_name || user.identifier}
+      </Typography>
+    </ListItem>
+  );
+
+  // New profile item displaying a hardcoded ID
+  const profileItem = (
+    <ListItem
+      key="profile-id"
+      sx={{ display: 'flex', flexDirection: 'column' }}
+    >
+      <Typography width="100%" fontSize="14px" fontWeight={700}>
+        Profile ID
+      </Typography>
+      <Typography width="100%" fontSize="13px" fontWeight={400}>
+        123
       </Typography>
     </ListItem>
   );
@@ -96,9 +114,14 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     </MenuItem>
   );
 
-  const menuItems = [userNameItem, themeItem, apiKeysItem, logoutItem].filter(
-    (i) => !!i
-  );
+  // Include the new profile item in the menu items array
+  const menuItems = [
+    userNameItem,
+    profileItem, // Add the profile item here
+    themeItem,
+    apiKeysItem,
+    logoutItem
+  ].filter((i) => !!i);
 
   const itemsWithDivider = menuItems.reduce((acc, curr, i) => {
     if (i === menuItems.length - 1) {
