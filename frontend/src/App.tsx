@@ -142,6 +142,7 @@ function App() {
         maxHeight="-webkit-fill-available"
         width="100vw"
         sx={{ overflowX: 'hidden' }}
+        className={`theme-${themeVariant}`}
       >
         <ChatSettingsModal />
         <RouterProvider router={router} />
