@@ -65,9 +65,6 @@ class DynamoDBDataLayer(BaseDataLayer):
         if isinstance(obj, list):
             return [self._convert_floats_to_decimal(i) for i in obj]
 
-        if not isinstance(obj, dict):
-            return obj
-
         for key, value in obj.items():
             if isinstance(value, float):
                 obj[key] = Decimal(str(value))
@@ -82,9 +79,6 @@ class DynamoDBDataLayer(BaseDataLayer):
         if isinstance(obj, list):
             return [self._convert_decimal_to_floats(i) for i in obj]
 
-        if not isinstance(obj, dict):
-            return obj
-
         for key, value in obj.items():
             if isinstance(value, Decimal):
                 obj[key] = float(value)
@@ -92,6 +86,8 @@ class DynamoDBDataLayer(BaseDataLayer):
                 self._convert_decimal_to_floats(value)
             elif isinstance(value, list):
                 obj[key] = [self._convert_decimal_to_floats(i) for i in value]
+
+        return obj
 
     def _serialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
         item = self._convert_floats_to_decimal(item)
@@ -107,8 +103,6 @@ class DynamoDBDataLayer(BaseDataLayer):
             for key, value in item.items()
         }
 
-
-        return obj
 
     def _update_item(self, key: Dict[str, Any], updates: Dict[str, Any]):
         update_expr: List[str] = []
