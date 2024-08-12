@@ -1,8 +1,11 @@
 import json
 import time
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union,Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from uuid import UUID
 
+from chainlit.context import context_var
+from chainlit.message import Message
+from chainlit.step import Step
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import BaseMessage
@@ -11,10 +14,6 @@ from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
 from literalai.step import TrueStepType
-
-from chainlit.context import context_var
-from chainlit.message import Message
-from chainlit.step import Step
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
@@ -592,7 +591,9 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output = output[0] if isinstance(output, Sequence) else output
+            current_step.output = (
+                output[0] if isinstance(output, Sequence) and len(output) else output
+            )
             current_step.end = utc_now()
             self._run_sync(current_step.update())
 
