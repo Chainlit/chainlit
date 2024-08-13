@@ -130,6 +130,9 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     return [...acc, curr, <Divider sx={{ my: 1 }} key={`divider-${i}`} />];
   }, [] as React.ReactNode[]);
 
+  // Dummy change: Adding a comment
+  console.log('Dummy change added for demonstration purposes');
+
   return (
     <Menu
       anchorEl={anchorEl}
