@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.403rc0] - 2024-08-13
+
+### Fixed
+
+- Langchain Callback handler IndexError
+- Attempt to fix websocket issues
+
 ## [1.1.402] - 2024-08-07
 
 ### Added
