@@ -172,14 +172,17 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(
-    cors_allowed_origins=[] if IS_SUBMOUNT else "*", async_mode="asgi"
+    cors_allowed_origins=[], async_mode="asgi"
 )
 
-combined_asgi_app = socketio.ASGIApp(
-    sio,
-    app,
-    socketio_path=f"{ROOT_PATH}/ws/socket.io" if ROOT_PATH else "/ws/socket.io",
+sio_mount_location = f"{ROOT_PATH}/ws" if ROOT_PATH else "ws"
+
+asgi_app = socketio.ASGIApp(
+    socketio_server=sio,
+    socketio_path=f"{sio_mount_location}/socket.io",
 )
+
+app.mount(f"/{sio_mount_location}", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -266,6 +269,7 @@ def get_html_template():
     )
     url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
+    favicon_path = "/favicon"
 
     tags = f"""<title>{config.ui.name}</title>
     <link rel="icon" href="/favicon" />

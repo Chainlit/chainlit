@@ -27,6 +27,14 @@ const hasToolStep = (step: IStep): boolean => {
   );
 };
 
+const hasAssistantMessage = (step: IStep): boolean => {
+  return (
+    step.steps?.some(
+      (s) => s.type === 'assistant_message' || hasAssistantMessage(s)
+    ) || false
+  );
+};
+
 const Messages = memo(
   ({ messages, elements, actions, indent, isRunning, scorableRun }: Props) => {
     const messageContext = useContext(MessageContext);
@@ -38,9 +46,15 @@ const Messages = memo(
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
             const isToolCallCoT = config?.ui.cot === 'tool_call';
-            const showLoader = isToolCallCoT
+            const isHiddenCoT = config?.ui.cot === 'hidden';
+
+            const showToolCoTLoader = isToolCallCoT
               ? isRunning && !hasToolStep(m)
-              : !m.steps?.length && isRunning;
+              : false;
+
+            const showHiddenCoTLoader = isHiddenCoT
+              ? isRunning && !hasAssistantMessage(m)
+              : false;
             // Ignore on_chat_start for scorable run
             const scorableRun =
               !isRunning && m.name !== 'on_chat_start' ? m : undefined;
@@ -56,7 +70,9 @@ const Messages = memo(
                     scorableRun={scorableRun}
                   />
                 ) : null}
-                <MessageLoader show={showLoader} />
+                <MessageLoader
+                  show={showToolCoTLoader || showHiddenCoTLoader}
+                />
               </>
             );
           } else {
