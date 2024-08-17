@@ -90,7 +90,8 @@ export class APIBase {
         method,
         headers,
         signal,
-        body
+        body,
+        credentials: 'include'
       });
 
       if (!res.ok) {
