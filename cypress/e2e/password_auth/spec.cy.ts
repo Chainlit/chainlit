@@ -12,15 +12,17 @@ describe('Password Auth', () => {
     cy.get('.MuiAlert-message').should('exist');
   });
 
-  it('should be able to login with correct credentials', () => {
-    cy.visit('/');
+  it('should be able to login with correct credentials and read custom query parameter', () => {
+    cy.visit('/?q=test+value');
     cy.get("input[name='email']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('.step').eq(0).should('contain', 'Hello admin');
+    cy.get('.step').eq(0).should('contain', 'query param: test value');
 
     cy.reload();
     cy.get("input[name='email']").should('not.exist');
     cy.get('.step').eq(0).should('contain', 'Hello admin');
+    cy.get('.step').eq(0).should('contain', 'query param: test value');
   });
 });
