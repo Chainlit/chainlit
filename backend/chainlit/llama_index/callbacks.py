@@ -154,7 +154,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
             token_count = self.total_llm_token_count or None
             raw_response = response.raw if response else None
-            model = raw_response.get("model", None) if raw_response else None
+            model = raw_response.model if hasattr(raw_response, "model") else None
 
             if messages and isinstance(response, ChatResponse):
                 msg: ChatMessage = response.message
