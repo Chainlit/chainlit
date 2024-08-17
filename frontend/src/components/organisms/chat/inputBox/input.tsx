@@ -102,7 +102,7 @@ const Input = memo(
     }, [loading, disabled]);
 
     const submit = useCallback(() => {
-      if (value === '' || disabled) {
+      if disabled {
         return;
       }
       if (askUser) {
