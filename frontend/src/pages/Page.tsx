@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
@@ -31,12 +31,15 @@ const Page = ({ children }: Props) => {
   const apiClient = useContext(ChainlitContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (config?.userEnv) {
     for (const key of config.userEnv || []) {
       if (!userEnv[key]) return <Navigate to="/env" />;
     }
   }
+
+  const loginUrl = location.search ? `/login${location.search}` : '/login';
 
   useEffect(() => {
     if (appConfig && appConfig.requireLogin && !isAuthenticated) {
@@ -47,10 +50,10 @@ const Page = ({ children }: Props) => {
             setAccessToken(json.access_token);
           })
           .catch(() => {
-            navigate('/login');
+            navigate(loginUrl);
           });
       } else {
-        navigate('/login');
+        navigate(loginUrl);
       }
     }
   }, [appConfig, isAuthenticated]);

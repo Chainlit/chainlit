@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Logo } from 'components/atoms/logo';
 import { Translator } from 'components/i18n';
@@ -16,12 +16,15 @@ export default function Login() {
   const apiClient = useContext(ChainlitContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const homepageUrl = location.search ? `/${location.search}` : '/';
 
   const handleHeaderAuth = async () => {
     try {
       const json = await apiClient.headerAuth();
       setAccessToken(json.access_token);
-      navigate('/');
+      navigate(homepageUrl);
     } catch (error: any) {
       setError(error.message);
     }
@@ -54,13 +57,13 @@ export default function Login() {
       return;
     }
     if (!config.requireLogin) {
-      navigate('/');
+      navigate(homepageUrl);
     }
     if (config.headerAuth) {
       handleHeaderAuth();
     }
     if (user) {
-      navigate('/');
+      navigate(homepageUrl);
     }
   }, [config, user]);
 
@@ -68,7 +71,7 @@ export default function Login() {
     <AuthLogin
       title={<Translator path="components.molecules.auth.authLogin.title" />}
       error={error}
-      callbackUrl="/"
+      callbackUrl={homepageUrl}
       providers={config?.oauthProviders || []}
       onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
       onOAuthSignIn={async (provider: string) => {
