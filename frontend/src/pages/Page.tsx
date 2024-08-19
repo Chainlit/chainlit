@@ -39,7 +39,7 @@ const Page = ({ children }: Props) => {
     }
   }
 
-  const loginUrl = location.search ? `/login${location.search}` : '/login';
+  const loginPath = location.search ? `/login${location.search}` : '/login';
 
   useEffect(() => {
     if (appConfig && appConfig.requireLogin && !isAuthenticated) {
@@ -50,10 +50,10 @@ const Page = ({ children }: Props) => {
             setAccessToken(json.access_token);
           })
           .catch(() => {
-            navigate(loginUrl);
+            navigate(loginPath);
           });
       } else {
-        navigate(loginUrl);
+        navigate(loginPath);
       }
     }
   }, [appConfig, isAuthenticated]);

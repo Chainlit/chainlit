@@ -18,13 +18,13 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const homepageUrl = location.search ? `/${location.search}` : '/';
+  const homePath = location.search ? `/${location.search}` : '/';
 
   const handleHeaderAuth = async () => {
     try {
       const json = await apiClient.headerAuth();
       setAccessToken(json.access_token);
-      navigate(homepageUrl);
+      navigate(homePath);
     } catch (error: any) {
       setError(error.message);
     }
@@ -57,13 +57,13 @@ export default function Login() {
       return;
     }
     if (!config.requireLogin) {
-      navigate(homepageUrl);
+      navigate(homePath);
     }
     if (config.headerAuth) {
       handleHeaderAuth();
     }
     if (user) {
-      navigate(homepageUrl);
+      navigate(homePath);
     }
   }, [config, user]);
 
@@ -71,7 +71,7 @@ export default function Login() {
     <AuthLogin
       title={<Translator path="components.molecules.auth.authLogin.title" />}
       error={error}
-      callbackUrl={homepageUrl}
+      callbackUrl={homePath}
       providers={config?.oauthProviders || []}
       onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
       onOAuthSignIn={async (provider: string) => {
