@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import * as yup from 'yup';
@@ -23,6 +23,9 @@ export default function Env() {
   const layoutMaxWidth = useLayoutMaxWidth();
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const homePath = location.search ? `/${location.search}` : '/';
 
   const { t } = useTranslation();
 
@@ -45,12 +48,12 @@ export default function Env() {
       localStorage.setItem('userEnv', JSON.stringify(values));
       setUserEnv(values);
       toast.success(t('pages.Env.savedSuccessfully'));
-      return navigate('/');
+      return navigate(homePath);
     }
   });
 
   if (requiredKeys.length === 0) {
-    navigate('/');
+    navigate(homePath);
   }
 
   const renderInput = (key: string) => {

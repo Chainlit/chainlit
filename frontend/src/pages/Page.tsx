@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
@@ -34,8 +34,9 @@ const Page = ({ children }: Props) => {
   const location = useLocation();
 
   if (config?.userEnv) {
+    const envPath = location.search ? `/env${location.search}` : '/env';
     for (const key of config.userEnv || []) {
-      if (!userEnv[key]) return <Navigate to="/env" />;
+      if (!userEnv[key]) navigate(envPath);
     }
   }
 
