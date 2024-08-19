@@ -34,7 +34,7 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
-    from chainlit.server import combined_asgi_app as app
+    from chainlit.server import app
 
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
@@ -52,9 +52,7 @@ def run_chainlit(target: str):
         "yes",
     ]  # Convert to boolean
 
-    ws_protocol = os.environ.get(
-        "UVICORN_WS_PROTOCOL", "auto"
-    )
+    ws_protocol = os.environ.get("UVICORN_WS_PROTOCOL", "auto")
 
     config.run.host = host
     config.run.port = port

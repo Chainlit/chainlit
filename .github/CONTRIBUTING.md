@@ -25,7 +25,7 @@ I've copy/pasted the whole document there, without the previous two headings.
 
 ### Requirements
 
-1. Python >= `3.8`
+1. Python >= `3.9`
 2. Poetry ([See how to install](https://python-poetry.org/docs/#installation))
 3. NodeJS >= `16` ([See how to install](https://nodejs.org/en/download))
 4. Pnpm ([See how to install](https://pnpm.io/installation))
@@ -78,10 +78,8 @@ pnpm install
 
 ```sh
 cd backend
-poetry install --with tests --with mypy
+poetry install --with tests --with mypy --with dev
 ```
-
-Make sure you have the Python code formatters `black` and `isort` installed as they are used in a pre-commit hook. Run `pip install black isort` if needed.
 
 ## Start the Chainlit server from source
 
