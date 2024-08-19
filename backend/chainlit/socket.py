@@ -3,23 +3,25 @@ import json
 import time
 import uuid
 from typing import Any, Dict, Literal
+from urllib.parse import unquote
 
 from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
+from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
-from chainlit.server import socket
+from chainlit.server import sio
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
 from chainlit.types import (
     AudioChunk,
     AudioChunkPayload,
     AudioEndPayload,
-    UIMessagePayload,
+    MessagePayload,
 )
 from chainlit.user_session import user_sessions
 
@@ -52,7 +54,7 @@ async def resume_thread(session: WebsocketSession):
     user_is_author = author == session.user.identifier
 
     if user_is_author:
-        metadata = thread.get("metadata", {})
+        metadata = thread.get("metadata") or {}
         user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
@@ -97,8 +99,8 @@ def build_anon_user_identifier(environ):
         return str(uuid.uuid5(uuid.NAMESPACE_DNS, ip))
 
 
-@socket.on("connect")
-async def connect(sid, environ, auth):
+@sio.on("connect")
+async def connect(sid, environ):
     if (
         not config.code.on_chat_start
         and not config.code.on_message
@@ -124,11 +126,11 @@ async def connect(sid, environ, auth):
 
     # Session scoped function to emit to the client
     def emit_fn(event, data):
-        return socket.emit(event, data, to=sid)
+        return sio.emit(event, data, to=sid)
 
     # Session scoped function to emit to the client and wait for a response
     def emit_call_fn(event: Literal["ask", "call_fn"], data, timeout):
-        return socket.call(event, data, timeout=timeout, to=sid)
+        return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
@@ -139,6 +141,10 @@ async def connect(sid, environ, auth):
 
     client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
     http_referer = environ.get("HTTP_REFERER")
+    url_encoded_chat_profile = environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE")
+    chat_profile = (
+        unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
+    )
 
     # Get client IP
     scope = environ.get("asgi.scope", {})
@@ -154,7 +160,7 @@ async def connect(sid, environ, auth):
         user_env=user_env,
         user=user,
         token=token,
-        chat_profile=environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE"),
+        chat_profile=chat_profile,
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
@@ -165,7 +171,7 @@ async def connect(sid, environ, auth):
     return True
 
 
-@socket.on("connection_successful")
+@sio.on("connection_successful")
 async def connection_successful(sid):
     context = init_ws_context(sid)
 
@@ -185,6 +191,11 @@ async def connection_successful(sid):
                 {"interaction": "resume", "thread_id": thread.get("id")},
             )
             await config.code.on_chat_resume(thread)
+
+            for step in thread.get("steps", []):
+                if "message" in step["type"]:
+                    chat_context.add(Message.from_dict(step))
+
             await context.emitter.resume_thread(thread)
             return
 
@@ -193,14 +204,14 @@ async def connection_successful(sid):
         context.session.current_task = task
 
 
-@socket.on("clear_session")
+@sio.on("clear_session")
 async def clean_session(sid):
     session = WebsocketSession.get(sid)
     if session:
         session.to_clear = True
 
 
-@socket.on("disconnect")
+@sio.on("disconnect")
 async def disconnect(sid):
     session = WebsocketSession.get(sid)
 
@@ -234,15 +245,13 @@ async def disconnect(sid):
         asyncio.ensure_future(clear_on_timeout(sid))
 
 
-@socket.on("stop")
+@sio.on("stop")
 async def stop(sid):
     if session := WebsocketSession.get(sid):
         trace_event("stop_task")
 
         init_ws_context(session)
-        await Message(
-            author="System", content="Task manually stopped.", disable_feedback=True
-        ).send()
+        await Message(content="Task manually stopped.").send()
 
         if session.current_task:
             session.current_task.cancel()
@@ -251,12 +260,12 @@ async def stop(sid):
             await config.code.on_stop()
 
 
-async def process_message(session: WebsocketSession, payload: UIMessagePayload):
+async def process_message(session: WebsocketSession, payload: MessagePayload):
     """Process a message from the user."""
     try:
         context = init_ws_context(session)
         await context.emitter.task_start()
-        message = await context.emitter.process_user_message(payload)
+        message = await context.emitter.process_message(payload)
 
         if config.code.on_message:
             # Sleep 1ms to make sure any children step starts after the message step start
@@ -273,8 +282,38 @@ async def process_message(session: WebsocketSession, payload: UIMessagePayload):
         await context.emitter.task_end()
 
 
-@socket.on("ui_message")
-async def message(sid, payload: UIMessagePayload):
+@sio.on("edit_message")
+async def edit_message(sid, payload: MessagePayload):
+    """Handle a message sent by the User."""
+    session = WebsocketSession.require(sid)
+    context = init_ws_context(session)
+
+    messages = chat_context.get()
+
+    orig_message = None
+
+    for message in messages:
+        if orig_message:
+            await message.remove()
+
+        if message.id == payload["message"]["id"]:
+            message.content = payload["message"]["output"]
+            await message.update()
+            orig_message = message
+
+    await context.emitter.task_start()
+
+    if config.code.on_message:
+        try:
+            await config.code.on_message(orig_message)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            await context.emitter.task_end()
+
+
+@sio.on("client_message")
+async def message(sid, payload: MessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
 
@@ -282,7 +321,7 @@ async def message(sid, payload: UIMessagePayload):
     session.current_task = task
 
 
-@socket.on("audio_chunk")
+@sio.on("audio_chunk")
 async def audio_chunk(sid, payload: AudioChunkPayload):
     """Handle an audio chunk sent by the user."""
     session = WebsocketSession.require(sid)
@@ -293,7 +332,7 @@ async def audio_chunk(sid, payload: AudioChunkPayload):
         asyncio.create_task(config.code.on_audio_chunk(AudioChunk(**payload)))
 
 
-@socket.on("audio_end")
+@sio.on("audio_end")
 async def audio_end(sid, payload: AudioEndPayload):
     """Handle the end of the audio stream."""
     session = WebsocketSession.require(sid)
@@ -337,7 +376,7 @@ async def process_action(action: Action):
         logger.warning("No callback found for action %s", action.name)
 
 
-@socket.on("action_call")
+@sio.on("action_call")
 async def call_action(sid, action):
     """Handle an action call from the UI."""
     context = init_ws_context(sid)
@@ -364,7 +403,7 @@ async def call_action(sid, action):
         )
 
 
-@socket.on("chat_settings_change")
+@sio.on("chat_settings_change")
 async def change_settings(sid, settings: Dict[str, Any]):
     """Handle change settings submit from the UI."""
     context = init_ws_context(sid)

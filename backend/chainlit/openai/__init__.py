@@ -24,8 +24,6 @@ def instrument_openai():
         parent_id = None
         if context.current_step:
             parent_id = context.current_step.id
-        elif context.session.root_message:
-            parent_id = context.session.root_message.id
 
         step = Step(
             name=generation.model if generation.model else generation.provider,

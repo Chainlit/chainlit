@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -10,7 +10,6 @@ import io from 'socket.io-client';
 import {
   actionState,
   askUserState,
-  avatarState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
@@ -28,7 +27,6 @@ import {
 } from 'src/state';
 import {
   IAction,
-  IAvatarElement,
   IElement,
   IMessageElement,
   IStep,
@@ -42,10 +40,11 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
-import { ChainlitAPI } from './api';
+import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
 const useChatSession = () => {
+  const client = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
 
   const [session, setSession] = useRecoilState(sessionState);
@@ -58,7 +57,6 @@ const useChatSession = () => {
   const setCallFn = useSetRecoilState(callFnState);
 
   const setElements = useSetRecoilState(elementState);
-  const setAvatars = useSetRecoilState(avatarState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
   const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
@@ -66,30 +64,32 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
-
   const _connect = useCallback(
     ({
-      client,
       userEnv,
       accessToken
     }: {
-      client: ChainlitAPI;
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
-      const pathname = new URL(client.httpEndpoint).pathname;
-      const socketPath = pathname.endsWith('/')
-        ? 'ws/socket.io'
-        : '/ws/socket.io';
-      const socket = io(client.httpEndpoint, {
-        path: `${pathname}${socketPath}`,
+      const { protocol, host, pathname } = new URL(client.httpEndpoint);
+      const uri = `${protocol}//${host}`;
+      const path =
+        pathname && pathname !== '/'
+          ? `${pathname}/ws/socket.io`
+          : '/ws/socket.io';
+
+      const socket = io(uri, {
+        path,
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Client-Type': client.type,
           'X-Chainlit-Session-Id': sessionId,
           'X-Chainlit-Thread-Id': idToResume || '',
           'user-env': JSON.stringify(userEnv),
-          'X-Chainlit-Chat-Profile': chatProfile || ''
+          'X-Chainlit-Chat-Profile': chatProfile
+            ? encodeURIComponent(chatProfile)
+            : ''
         }
       });
       setSession((old) => {
@@ -132,9 +132,6 @@ const useChatSession = () => {
         }
         setMessages(messages);
         const elements = thread.elements || [];
-        setAvatars(
-          (elements as IAvatarElement[]).filter((e) => e.type === 'avatar')
-        );
         setTasklists(
           (elements as ITasklistElement[]).filter((e) => e.type === 'tasklist')
         );
@@ -173,11 +170,20 @@ const useChatSession = () => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
       });
 
-      socket.on('stream_token', ({ id, token, isSequence }: IToken) => {
-        setMessages((oldMessages) =>
-          updateMessageContentById(oldMessages, id, token, isSequence)
-        );
-      });
+      socket.on(
+        'stream_token',
+        ({ id, token, isSequence, isInput }: IToken) => {
+          setMessages((oldMessages) =>
+            updateMessageContentById(
+              oldMessages,
+              id,
+              token,
+              isSequence,
+              isInput
+            )
+          );
+        }
+      );
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback });
@@ -196,15 +202,6 @@ const useChatSession = () => {
       });
 
       socket.on('call_fn', ({ name, args }, callback) => {
-        const event = new CustomEvent('chainlit-call-fn', {
-          detail: {
-            name,
-            args,
-            callback
-          }
-        });
-        window.dispatchEvent(event);
-
         setCallFn({ name, args, callback });
       });
 
@@ -226,16 +223,7 @@ const useChatSession = () => {
           element.url = client.getElementUrl(element.chainlitKey, sessionId);
         }
 
-        if (element.type === 'avatar') {
-          setAvatars((old) => {
-            const index = old.findIndex((e) => e.id === element.id);
-            if (index === -1) {
-              return [...old, element];
-            } else {
-              return [...old.slice(0, index), element, ...old.slice(index + 1)];
-            }
-          });
-        } else if (element.type === 'tasklist') {
+        if (element.type === 'tasklist') {
           setTasklists((old) => {
             const index = old.findIndex((e) => e.id === element.id);
             if (index === -1) {
@@ -261,9 +249,6 @@ const useChatSession = () => {
           return old.filter((e) => e.id !== remove.id);
         });
         setTasklists((old) => {
-          return old.filter((e) => e.id !== remove.id);
-        });
-        setAvatars((old) => {
           return old.filter((e) => e.id !== remove.id);
         });
       });

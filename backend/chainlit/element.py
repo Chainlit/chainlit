@@ -1,11 +1,21 @@
 import json
+import mimetypes
 import uuid
 from enum import Enum
 from io import BytesIO
-from typing import Any, ClassVar, List, Literal, Optional, TypedDict, TypeVar, Union
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
 import filetype
-import mimetypes
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -21,7 +31,7 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "avatar", "text", "pdf", "tasklist", "audio", "video", "file", "plotly"
+    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "component"
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -40,6 +50,7 @@ class ElementDict(TypedDict):
     language: Optional[str]
     page: Optional[int]
     autoPlay: Optional[bool]
+    playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
 
@@ -96,6 +107,7 @@ class Element:
                 "size": getattr(self, "size", None),
                 "page": getattr(self, "page", None),
                 "autoPlay": getattr(self, "auto_play", None),
+                "playerConfig": getattr(self, "player_config", None),
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
@@ -150,7 +162,7 @@ class Element:
         trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
         if data_layer and self.persisted:
-            await data_layer.delete_element(self.id)
+            await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
     async def send(self, for_id: str):
@@ -160,15 +172,15 @@ class Element:
         self.for_id = for_id
 
         if not self.mime:
-            # Only guess the mime type when the content is binary
-            self.mime = (
-                mime_types[self.type]
-                if self.type in mime_types
-                else filetype.guess_mime(self.path or self.content)
-            )
-            if not self.mime and self.url:
+            if self.type in mime_types:
+                self.mime = mime_types[self.type]
+            elif self.path or isinstance(self.content, (bytes, bytearray)):
+                file_type = filetype.guess(self.path or self.content)
+                if file_type:
+                    self.mime = file_type.mime
+            elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
-            
+
         await self._create()
 
         if not self.url and not self.chainlit_key:
@@ -186,14 +198,6 @@ class Image(Element):
     type: ClassVar[ElementType] = "image"
 
     size: ElementSize = "medium"
-
-
-@dataclass
-class Avatar(Element):
-    type: ClassVar[ElementType] = "avatar"
-
-    async def send(self):
-        await super().send(for_id="")
 
 
 @dataclass
@@ -319,6 +323,9 @@ class Video(Element):
     type: ClassVar[ElementType] = "video"
 
     size: ElementSize = "medium"
+    # Override settings for each type of player in ReactPlayer
+    # https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
+    player_config: Optional[dict] = None
 
 
 @dataclass
@@ -350,5 +357,19 @@ class Plotly(Element):
         self.figure.layout.height = None
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
+
+        super().__post_init__()
+
+
+@dataclass
+class Component(Element):
+    """Useful to send a custom component to the UI."""
+
+    type: ClassVar[ElementType] = "component"
+    mime: str = "application/json"
+    props: Dict = Field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.content = json.dumps(self.props)
 
         super().__post_init__()

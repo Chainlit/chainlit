@@ -16,7 +16,6 @@ export default function UserButton() {
   return (
     <>
       <UserAvatar
-        fullWidth
         onClick={handleClick}
         aria-controls={open ? 'account-menu' : undefined}
         aria-haspopup="true"

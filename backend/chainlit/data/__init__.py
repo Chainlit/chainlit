@@ -15,7 +15,6 @@ from typing import (
 )
 
 import aiofiles
-from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
@@ -94,7 +93,7 @@ class BaseDataLayer:
         pass
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         pass
 
     @queue_until_user_message()
@@ -139,6 +138,9 @@ class BaseDataLayer:
     async def delete_user_session(self, id: str) -> bool:
         return True
 
+    async def build_debug_url(self) -> str:
+        return ""
+
 
 _data_layer: Optional[BaseDataLayer] = None
 
@@ -157,6 +159,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
             "autoPlay": metadata.get("autoPlay", None),
+            "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
@@ -217,12 +220,19 @@ class ChainlitDataLayer(BaseDataLayer):
             "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
-            "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
             "language": metadata.get("language"),
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
+
+    async def build_debug_url(self) -> str:
+        try:
+            project_id = await self.client.api.get_my_project_id()
+            return f"{self.client.api.url}/projects/{project_id}/logs/threads/[thread_id]?currentStepId=[step_id]"
+        except Exception as e:
+            logger.error(f"Error building debug url: {e}")
+            return ""
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         user = await self.client.api.get_user(identifier=identifier)
@@ -340,7 +350,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return self.attachment_to_element_dict(attachment)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         await self.client.api.delete_attachment(id=element_id)
 
     @queue_until_user_message()
@@ -348,7 +358,6 @@ class ChainlitDataLayer(BaseDataLayer):
         metadata = dict(
             step_dict.get("metadata", {}),
             **{
-                "disableFeedback": step_dict.get("disableFeedback"),
                 "waitForAnswer": step_dict.get("waitForAnswer"),
                 "language": step_dict.get("language"),
                 "showInput": step_dict.get("showInput"),
@@ -448,6 +457,8 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
+        from chainlit.step import check_add_step_in_cot, stub_step
+
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
@@ -455,13 +466,13 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if config.ui.hide_cot and step.parent_id:
-                    continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
-                if not config.features.prompt_playground and step.generation:
-                    step.generation = None
-                steps.append(self.step_to_step_dict(step))
+
+                if check_add_step_in_cot(step):
+                    steps.append(self.step_to_step_dict(step))
+                else:
+                    steps.append(stub_step(step))
 
         return {
             "createdAt": thread.created_at or "",

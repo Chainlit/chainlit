@@ -1,5 +1,4 @@
 export { AudioElement } from './Audio';
-export { AvatarElement } from './Avatar';
 export { Element } from './Element';
 export { ElementSideView } from './ElementSideView';
 export { ElementView } from './ElementView';

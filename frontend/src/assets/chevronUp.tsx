@@ -12,8 +12,7 @@ const ChevronUpIcon = (props: SvgIconProps) => {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="m17 11-5-5-5 5" />
-        <path d="m17 18-5-5-5 5" />
+        <path d="m18 15-6-6-6 6" />
       </svg>
     </SvgIcon>
   );

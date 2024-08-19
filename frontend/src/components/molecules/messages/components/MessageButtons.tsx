@@ -1,43 +1,39 @@
-import { MessageContext } from 'contexts/MessageContext';
-import { useContext } from 'react';
 import { grey } from 'theme/palette';
 
 import Stack from '@mui/material/Stack';
+
+import { useChatMessages, useConfig } from '@chainlit/react-client';
 
 import { ClipboardCopy } from 'components/atoms/ClipboardCopy';
 
 import { useIsDarkMode } from 'hooks/useIsDarkMode';
 
-import type { IStep } from 'client-types/';
+import { type IStep } from 'client-types/';
 
+import { DebugButton } from './DebugButton';
 import { FeedbackButtons } from './FeedbackButtons';
-import { PlaygroundButton } from './PlaygroundButton';
 
 interface Props {
   message: IStep;
+  run?: IStep;
 }
 
-const MessageButtons = ({ message }: Props) => {
+const MessageButtons = ({ message, run }: Props) => {
   const isDark = useIsDarkMode();
-  const { showFeedbackButtons: showFbButtons } = useContext(MessageContext);
+  const { config } = useConfig();
+  const { firstInteraction } = useChatMessages();
 
-  const showPlaygroundButton = !!message.generation;
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
-  const showCopyButton =
-    hasContent && !isUser && !isAsk && !message.disableFeedback;
+  const showCopyButton = hasContent && !isUser && !isAsk;
 
-  const showFeedbackButtons =
-    showFbButtons &&
-    !message.disableFeedback &&
-    !isUser &&
-    !isAsk &&
-    hasContent;
+  const showDebugButton =
+    !!config?.debugUrl && !!message.threadId && !!firstInteraction;
 
-  const show = showCopyButton || showPlaygroundButton || showFeedbackButtons;
+  const show = showCopyButton || showDebugButton;
 
-  if (!show) {
+  if (!show || message.streaming) {
     return null;
   }
 
@@ -49,8 +45,10 @@ const MessageButtons = ({ message }: Props) => {
       color={isDark ? grey[400] : grey[600]}
     >
       {showCopyButton ? <ClipboardCopy value={message.output} /> : null}
-      {showFeedbackButtons ? <FeedbackButtons message={message} /> : null}
-      {showPlaygroundButton ? <PlaygroundButton step={message} /> : null}
+      {run ? <FeedbackButtons message={run} /> : null}
+      {showDebugButton ? (
+        <DebugButton debugUrl={config.debugUrl!} step={message} />
+      ) : null}
     </Stack>
   );
 };

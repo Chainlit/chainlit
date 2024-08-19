@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from uuid import UUID
 
 from chainlit.context import context_var
@@ -229,7 +229,24 @@ class GenerationHelper:
         return provider, model, tools, settings
 
 
-DEFAULT_TO_IGNORE = ["Runnable", "<lambda>"]
+def process_content(content: Any) -> Tuple[Dict, Optional[str]]:
+    if content is None:
+        return {}, None
+    if isinstance(content, dict):
+        return content, "json"
+    elif isinstance(content, str):
+        return {"content": content}, "text"
+    else:
+        return {"content": str(content)}, "text"
+
+
+DEFAULT_TO_IGNORE = [
+    "RunnableSequence",
+    "RunnableParallel",
+    "RunnableAssign",
+    "RunnableLambda",
+    "<lambda>",
+]
 DEFAULT_TO_KEEP = ["retriever", "llm", "agent", "chain", "tool"]
 
 
@@ -267,8 +284,6 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
 
         if self.context.current_step:
             self.root_parent_id = self.context.current_step.id
-        elif self.context.session.root_message:
-            self.root_parent_id = self.context.session.root_message.id
         else:
             self.root_parent_id = None
 
@@ -431,9 +446,6 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                 self.ignored_runs.add(str(run.id))
             return ignore, parent_id
 
-    def _is_annotable(self, run: Run):
-        return run.run_type in ["retriever", "llm"]
-
     def _start_trace(self, run: Run) -> None:
         super()._start_trace(run)
         context_var.set(self.context)
@@ -452,30 +464,29 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         if run.run_type == "agent":
             step_type = "run"
         elif run.run_type == "chain":
-            pass
+            if not self.steps:
+                step_type = "run"
         elif run.run_type == "llm":
             step_type = "llm"
         elif run.run_type == "retriever":
-            step_type = "retrieval"
+            step_type = "tool"
         elif run.run_type == "tool":
             step_type = "tool"
         elif run.run_type == "embedding":
             step_type = "embedding"
-
-        if not self.steps:
-            step_type = "run"
-
-        disable_feedback = not self._is_annotable(run)
 
         step = Step(
             id=str(run.id),
             name=run.name,
             type=step_type,
             parent_id=parent_id,
-            disable_feedback=disable_feedback,
         )
         step.start = utc_now()
-        step.input = run.inputs
+        step.input, language = process_content(run.inputs)
+        if language is not None:
+            if step.metadata is None:
+                step.metadata = {}
+            step.metadata["language"] = language
 
         self.steps[str(run.id)] = step
 
@@ -499,6 +510,9 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             generations = (run.outputs or {}).get("generations", [])
             generation = generations[0][0]
             variables = self.generation_inputs.get(str(run.parent_run_id), {})
+            variables = {
+                k: process_content(v) for k, v in variables.items() if v is not None
+            }
             if message := generation.get("message"):
                 chat_start = self.chat_generations[str(run.id)]
                 duration = time.time() - chat_start["start"]
@@ -529,11 +543,17 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
                             "prompt_id"
                         ]
                         if custom_variables := m.additional_kwargs.get("variables"):
-                            current_step.generation.variables = custom_variables
+                            current_step.generation.variables = {
+                                k: process_content(v)
+                                for k, v in custom_variables.items()
+                                if v is not None
+                            }
                     break
 
                 current_step.language = "json"
-                current_step.output = json.dumps(message_completion, indent=4, ensure_ascii=False)
+                current_step.output = json.dumps(
+                    message_completion, indent=4, ensure_ascii=False
+                )
             else:
                 completion_start = self.completion_generations[str(run.id)]
                 completion = generation.get("text", "")
@@ -571,7 +591,9 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output = output
+            current_step.output = (
+                output[0] if isinstance(output, Sequence) and len(output) else output
+            )
             current_step.end = utc_now()
             self._run_sync(current_step.update())
 

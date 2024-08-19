@@ -1,7 +1,5 @@
-import { useAuth } from 'api/auth';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import { Logo } from 'components/atoms/logo';
 import { Translator } from 'components/i18n';
@@ -9,13 +7,13 @@ import { AuthLogin } from 'components/molecules/auth';
 
 import { useQuery } from 'hooks/query';
 
-import { apiClientState } from 'state/apiClient';
+import { ChainlitContext, useAuth } from 'client-types/*';
 
 export default function Login() {
   const query = useQuery();
   const { data: config, setAccessToken, user } = useAuth();
   const [error, setError] = useState('');
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
 
   const navigate = useNavigate();
 
