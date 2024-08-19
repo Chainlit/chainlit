@@ -25,7 +25,7 @@ include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
 chainlit = 'chainlit.cli:cli'
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0.0"
+python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.0.607"
 dataclasses_json = "^0.5.7"
@@ -69,6 +69,10 @@ plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
 
 [tool.poetry.group.mypy]
 optional = true
