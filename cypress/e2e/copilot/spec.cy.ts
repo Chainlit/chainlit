@@ -6,7 +6,7 @@ describe('Copilot', () => {
     cy.document().then((document) => {
       document.body.innerHTML = '<div id="root"><h1>Copilot test!</h1></div>';
       const script = document.createElement('script');
-      script.src = 'http://localhost:8000/copilot/index.js';
+      script.src = 'http://127.0.0.1:8000/copilot/index.js';
       document.body.appendChild(script);
     });
 
@@ -15,7 +15,7 @@ describe('Copilot', () => {
       cy.wait(1000).then(() => {
         // @ts-expect-error is not a valid prop
         win.mountChainlitWidget({
-          chainlitServer: 'http://localhost:8000'
+          chainlitServer: 'http://127.0.0.1:8000'
         });
 
         win.addEventListener('chainlit-call-fn', (e) => {
