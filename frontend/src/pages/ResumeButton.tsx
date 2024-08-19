@@ -1,18 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import { Box, Button } from '@mui/material';
 
-import { useChatInteract, useChatSession } from '@chainlit/react-client';
+import {
+  useChatInteract,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
-
-import { projectSettingsState } from 'state/project';
 
 interface Props {
   threadId?: string;
@@ -21,7 +22,7 @@ interface Props {
 export default function ResumeButton({ threadId }: Props) {
   const navigate = useNavigate();
   const layoutMaxWidth = useLayoutMaxWidth();
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const { clear, setIdToResume } = useChatInteract();
   const { session, idToResume } = useChatSession();
 
@@ -36,14 +37,14 @@ export default function ResumeButton({ threadId }: Props) {
     }
   }, [session, idToResume, threadId]);
 
-  if (!threadId || !pSettings?.threadResumable) {
+  if (!threadId || !config?.threadResumable) {
     return null;
   }
 
   const onClick = () => {
     clear();
     setIdToResume(threadId!);
-    if (!pSettings?.dataPersistence) {
+    if (!config?.dataPersistence) {
       navigate('/');
     }
   };

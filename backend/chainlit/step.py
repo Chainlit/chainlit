@@ -3,11 +3,12 @@ import inspect
 import json
 import time
 import uuid
+from copy import deepcopy
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
 from chainlit.config import config
-from chainlit.context import context, local_steps
+from chainlit.context import CL_RUN_NAMES, context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
@@ -18,13 +19,35 @@ from literalai.helper import utc_now
 from literalai.step import StepType, TrueStepType
 
 
+def check_add_step_in_cot(step: "Step"):
+    is_message = step.type in [
+        "user_message",
+        "assistant_message",
+    ]
+    is_cl_run = step.name in CL_RUN_NAMES and step.type == "run"
+    if config.ui.cot == "hidden" and not is_message and not is_cl_run:
+        return False
+    return True
+
+
+def stub_step(step: "Step"):
+    return {
+        "type": step.type,
+        "name": step.name,
+        "id": step.id,
+        "parentId": step.parent_id,
+        "threadId": step.thread_id,
+        "input": "",
+        "output": "",
+    }
+
+
 class StepDict(TypedDict, total=False):
     name: str
     type: StepType
     id: str
     threadId: str
     parentId: Optional[str]
-    disableFeedback: bool
     streaming: bool
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
@@ -42,14 +65,21 @@ class StepDict(TypedDict, total=False):
     feedback: Optional[FeedbackDict]
 
 
+def flatten_args_kwargs(func, *args, **kwargs):
+    signature = inspect.signature(func)
+    bound_arguments = signature.bind(*args, **kwargs)
+    bound_arguments.apply_defaults()
+    return {k: deepcopy(v) for k, v in bound_arguments.arguments.items()}
+
+
 def step(
     original_function: Optional[Callable] = None,
     *,
     name: Optional[str] = "",
     type: TrueStepType = "undefined",
     id: Optional[str] = None,
+    parent_id: Optional[str] = None,
     tags: Optional[List[str]] = None,
-    disable_feedback: bool = True,
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
 ):
@@ -70,13 +100,13 @@ def step(
                     type=type,
                     name=name,
                     id=id,
-                    disable_feedback=disable_feedback,
+                    parent_id=parent_id,
                     tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
                     try:
-                        step.input = {"args": args, "kwargs": kwargs}
+                        step.input = flatten_args_kwargs(func, args, kwargs)
                     except:
                         pass
                     result = await func(*args, **kwargs)
@@ -97,13 +127,13 @@ def step(
                     type=type,
                     name=name,
                     id=id,
-                    disable_feedback=disable_feedback,
+                    parent_id=parent_id,
                     tags=tags,
                     language=language,
                     show_input=show_input,
                 ) as step:
                     try:
-                        step.input = {"args": args, "kwargs": kwargs}
+                        step.input = flatten_args_kwargs(func, args, kwargs)
                     except:
                         pass
                     result = func(*args, **kwargs)
@@ -130,7 +160,6 @@ class Step:
     type: TrueStepType
     id: str
     parent_id: Optional[str]
-    disable_feedback: bool
 
     streaming: bool
     persisted: bool
@@ -158,7 +187,6 @@ class Step:
         elements: Optional[List[Element]] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
-        disable_feedback: bool = True,
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
     ):
@@ -170,7 +198,6 @@ class Step:
         self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
-        self.disable_feedback = disable_feedback
         self.metadata = metadata or {}
         self.tags = tags
         self.is_error = False
@@ -256,7 +283,6 @@ class Step:
             "id": self.id,
             "threadId": self.thread_id,
             "parentId": self.parent_id,
-            "disableFeedback": self.disable_feedback,
             "streaming": self.streaming,
             "metadata": self.metadata,
             "tags": self.tags,
@@ -295,10 +321,10 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
-            return True
-
-        await context.emitter.update_step(step_dict)
+        if not check_add_step_in_cot(self):
+            await context.emitter.update_step(stub_step(self))
+        else:
+            await context.emitter.update_step(step_dict)
 
         return True
 
@@ -349,10 +375,10 @@ class Step:
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
-            return self
-
-        await context.emitter.send_step(step_dict)
+        if not check_add_step_in_cot(self):
+            await context.emitter.send_step(stub_step(self))
+        else:
+            await context.emitter.send_step(step_dict)
 
         return self
 
@@ -374,7 +400,8 @@ class Step:
 
         assert self.id
 
-        if config.ui.hide_cot and (self.parent_id or "message" not in self.type):
+        if not check_add_step_in_cot(self):
+            await context.emitter.send_step(stub_step(self))
             return
 
         if not self.streaming:
@@ -395,7 +422,6 @@ class Step:
             id=self.id,
             parent_id=self.parent_id,
             thread_id=self.thread_id,
-            disable_feedback=self.disable_feedback,
         )
 
     # Handle Context Manager Protocol
@@ -407,8 +433,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-            elif context.session.root_message:
-                self.parent_id = context.session.root_message.id
         context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
         await self.send()
@@ -440,8 +464,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-            elif context.session.root_message:
-                self.parent_id = context.session.root_message.id
         context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
 

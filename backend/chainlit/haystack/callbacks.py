@@ -68,9 +68,7 @@ class HaystackAgentCallbackHandler:
             self.last_tokens: List[str] = []
             self.answer_reached = False
 
-        root_message = context.session.root_message
-        parent_id = root_message.id if root_message else None
-        run_step = Step(name=self.agent_name, type="run", parent_id=parent_id)
+        run_step = Step(name=self.agent_name, type="run")
         run_step.start = utc_now()
         run_step.input = kwargs
 

@@ -6,7 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   IAction,
   IAsk,
+  IAuthConfig,
   ICallFn,
+  IChainlitConfig,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -125,6 +127,16 @@ export const accessTokenState = atom<string | undefined>({
 export const userState = atom<IUser | null>({
   key: 'User',
   default: null
+});
+
+export const configState = atom<IChainlitConfig | undefined>({
+  key: 'ChainlitConfig',
+  default: undefined
+});
+
+export const authState = atom<IAuthConfig | undefined>({
+  key: 'AuthConfig',
+  default: undefined
 });
 
 export const threadHistoryState = atom<ThreadHistory | undefined>({

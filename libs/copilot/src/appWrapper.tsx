@@ -5,25 +5,27 @@ import { RecoilRoot } from 'recoil';
 import { IWidgetConfig } from 'types';
 
 import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
+import { ChainlitContext } from '@chainlit/react-client';
 
 i18nSetupLocalization();
 interface Props {
-  config: IWidgetConfig;
+  widgetConfig: IWidgetConfig;
 }
 
-export default function AppWrapper({ config }: Props) {
-  const apiClient = makeApiClient(config.chainlitServer);
+export default function AppWrapper({ widgetConfig }: Props) {
+  const apiClient = makeApiClient(widgetConfig.chainlitServer);
 
   return (
-    <RecoilRoot>
-      <WidgetContext.Provider
-        value={{
-          accessToken: config.accessToken,
-          apiClient
-        }}
-      >
-        <App config={config} />
-      </WidgetContext.Provider>
-    </RecoilRoot>
+    <ChainlitContext.Provider value={apiClient}>
+      <RecoilRoot>
+        <WidgetContext.Provider
+          value={{
+            accessToken: widgetConfig.accessToken
+          }}
+        >
+          <App widgetConfig={widgetConfig} />
+        </WidgetContext.Provider>
+      </RecoilRoot>
+    </ChainlitContext.Provider>
   );
 }

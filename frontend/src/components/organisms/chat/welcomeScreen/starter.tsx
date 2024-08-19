@@ -1,22 +1,23 @@
-import { useAuth } from 'api/auth';
-import { useCallback } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useCallback, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Box, Button, Stack, Typography } from '@mui/material';
 
-import { IStep, useChatData } from '@chainlit/react-client';
+import {
+  ChainlitContext,
+  IStarter,
+  IStep,
+  useAuth,
+  useChatData
+} from '@chainlit/react-client';
 import { useChatInteract } from '@chainlit/react-client';
-
-import { apiClientState } from 'state/apiClient';
-import type { IStarter } from 'state/project';
 
 interface Props {
   starter: IStarter;
 }
 
 export default function Starter({ starter }: Props) {
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
   const { sendMessage } = useChatInteract();
   const { loading } = useChatData();
   const { user } = useAuth();

@@ -91,6 +91,8 @@ auto_tag_thread = true
     # Sample rate of the audio
     sample_rate = 44100
 
+edit_message = true
+
 [UI]
 # Name of the assistant.
 name = "Assistant"
@@ -101,8 +103,8 @@ name = "Assistant"
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
 
-# Hide the chain of thought details from the user in the UI.
-hide_cot = false
+# Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
+cot = "full"
 
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
@@ -163,6 +165,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -173,6 +176,7 @@ class RunSettings:
     port: int = DEFAULT_PORT
     ssl_cert: Optional[str] = None
     ssl_key: Optional[str] = None
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False
@@ -236,13 +240,14 @@ class FeaturesSettings(DataClassJsonMixin):
     latex: bool = False
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
+    edit_message: bool = True
 
 
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
-    hide_cot: bool = False
+    cot: Literal["hidden", "tool_call", "full"] = "full"
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
     github: Optional[str] = None

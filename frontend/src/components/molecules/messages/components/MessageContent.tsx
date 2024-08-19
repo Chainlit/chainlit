@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import { prepareContent } from 'utils/message';
 
-import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -13,7 +12,7 @@ import { Markdown } from 'components/molecules/Markdown';
 
 import type { IMessageElement, IStep } from 'client-types/';
 
-const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
+const COLLAPSE_MIN_LINES = 50; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
 
 export interface Props {
@@ -48,13 +47,18 @@ const MessageContent = memo(
     lineCount += output.split('\n').length;
     contentLength += output.length;
 
+    const isMessage = message.type.includes('message');
+
     const outputMarkdown = (
       <Markdown
         allowHtml={allowHtml}
         latex={latex}
         refElements={outputRefElements}
       >
-        {output}
+        {isMessage
+          ? output
+          : `#### Output:     
+${output}`}
       </Markdown>
     );
 
@@ -85,7 +89,8 @@ const MessageContent = memo(
           latex={latex}
           refElements={inputRefElements}
         >
-          {input}
+          {`#### Input:  
+${input}`}
         </Markdown>
       );
     }
@@ -93,10 +98,10 @@ const MessageContent = memo(
     const markdownContent = (
       <Typography
         sx={{
-          width: '100%',
           minHeight: '20px',
           fontSize: '1rem',
-          fontFamily: (theme) => theme.typography.fontFamily
+          fontFamily: (theme) => theme.typography.fontFamily,
+          overflowX: 'auto'
         }}
         component="div"
       >
@@ -107,8 +112,7 @@ const MessageContent = memo(
     );
 
     const collapse =
-      !message.type.includes('message') &&
-      (lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH);
+      lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH;
     const messageContent = collapse ? (
       <Collapse defaultExpandAll={preserveSize}>{markdownContent}</Collapse>
     ) : (
@@ -116,11 +120,9 @@ const MessageContent = memo(
     );
 
     return (
-      <Stack width="100%" direction="row" className="message-content">
-        <Box width="100%">
-          {!!inputMarkdown || output ? messageContent : null}
-          <InlinedElements elements={outputInlinedElements} />
-        </Box>
+      <Stack className="message-content" width="100%">
+        {!!inputMarkdown || output ? messageContent : null}
+        <InlinedElements elements={outputInlinedElements} />
       </Stack>
     );
   }

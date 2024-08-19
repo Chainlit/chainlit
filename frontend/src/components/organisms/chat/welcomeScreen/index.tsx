@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { Avatar, Grid, Stack, Typography } from '@mui/material';
 import Fade from '@mui/material/Fade';
 
-import { useChatMessages, useChatSession } from '@chainlit/react-client';
-
-import { apiClientState } from 'state/apiClient';
-import { projectSettingsState } from 'state/project';
+import {
+  ChainlitContext,
+  IStep,
+  useChatMessages,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import Starter from './starter';
 
@@ -15,27 +17,29 @@ interface Props {
   hideLogo?: boolean;
 }
 
+const hasMessage = (messages: IStep[]): boolean => {
+  const validTypes = ['user_message', 'assistant_message'];
+  return messages.some(
+    (message) =>
+      validTypes.includes(message.type) || hasMessage(message.steps || [])
+  );
+};
+
 export default function WelcomeScreen({ hideLogo }: Props) {
   const { messages } = useChatMessages();
   const [show, setShow] = useState(true);
   const { chatProfile } = useChatSession();
-  const pSettings = useRecoilValue(projectSettingsState);
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
+  const { config } = useConfig();
   const defaultIconUrl = apiClient?.buildEndpoint(`/avatars/default`);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setShow(false);
-    } else {
-      setShow(true);
-    }
+    setShow(!hasMessage(messages));
   }, [messages]);
 
   const selectedChatProfile = useMemo(() => {
-    return pSettings?.chatProfiles.find(
-      (profile) => profile.name === chatProfile
-    );
-  }, [pSettings, chatProfile]);
+    return config?.chatProfiles.find((profile) => profile.name === chatProfile);
+  }, [config, chatProfile]);
 
   const logo = useMemo(() => {
     const name = selectedChatProfile?.name;
@@ -58,19 +62,19 @@ export default function WelcomeScreen({ hideLogo }: Props) {
         ) : null}
       </Stack>
     );
-  }, [pSettings, chatProfile, selectedChatProfile]);
+  }, [config, chatProfile, selectedChatProfile]);
 
   const starters = useMemo(() => {
     if (chatProfile) {
-      const selectedChatProfile = pSettings?.chatProfiles.find(
+      const selectedChatProfile = config?.chatProfiles.find(
         (profile) => profile.name === chatProfile
       );
       if (selectedChatProfile?.starters) {
         return selectedChatProfile.starters.slice(0, 4);
       }
     }
-    return pSettings?.starters;
-  }, [pSettings, chatProfile]);
+    return config?.starters;
+  }, [config, chatProfile]);
 
   if (!starters?.length) {
     return null;

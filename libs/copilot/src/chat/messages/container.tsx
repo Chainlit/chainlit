@@ -1,18 +1,17 @@
-import { WidgetContext } from 'context';
-import { memo, useCallback, useContext, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
 import { highlightMessage } from '@chainlit/app/src/state/project';
-import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
   IAction,
   IAsk,
   IFeedback,
   IMessageElement,
   IStep,
-  useChatInteract
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
 import { sideViewState } from '@chainlit/react-client';
 
@@ -46,20 +45,19 @@ const MessageContainer = memo(
     onFeedbackDeleted,
     callAction
   }: Props) => {
-    const { apiClient } = useContext(WidgetContext);
-    const projectSettings = useRecoilValue(projectSettingsState);
+    const { config } = useConfig();
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
 
     const uploadFile = useCallback(
       (file: File, onProgress: (progress: number) => void) => {
-        return _uploadFile(apiClient, file, onProgress);
+        return _uploadFile(file, onProgress);
       },
       [_uploadFile]
     );
 
-    const enableFeedback = !!projectSettings?.dataPersistence;
+    const enableFeedback = !!config?.dataPersistence;
 
     const onElementRefClick = useCallback(
       (element: IMessageElement) => {
@@ -95,13 +93,13 @@ const MessageContainer = memo(
       return {
         uploadFile,
         askUser,
-        allowHtml: projectSettings?.features?.unsafe_allow_html,
-        latex: projectSettings?.features?.latex,
+        allowHtml: config?.features?.unsafe_allow_html,
+        latex: config?.features?.latex,
         defaultCollapseContent: true,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
-        uiName: projectSettings?.ui?.name || '',
+        uiName: config?.ui?.name || '',
         onElementRefClick,
         onError,
         onFeedbackUpdated,
@@ -112,8 +110,8 @@ const MessageContainer = memo(
       enableFeedback,
       highlightedMessage,
       loading,
-      projectSettings?.ui?.name,
-      projectSettings?.features?.unsafe_allow_html,
+      config?.ui?.name,
+      config?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
       onFeedbackUpdated

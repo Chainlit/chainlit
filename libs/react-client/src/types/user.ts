@@ -15,5 +15,6 @@ export interface IUserMetadata extends Record<string, any> {
 export interface IUser {
   id: string;
   identifier: string;
+  display_name?: string;
   metadata: IUserMetadata;
 }

@@ -3,6 +3,7 @@ import { useRecoilValue } from 'recoil';
 import {
   actionState,
   askUserState,
+  callFnState,
   chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
   chatSettingsValueState,
@@ -26,6 +27,7 @@ const useChatData = () => {
   const actions = useRecoilValue(actionState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
+  const callFn = useRecoilValue(callFnState);
   const chatSettingsInputs = useRecoilValue(chatSettingsInputsState);
   const chatSettingsValue = useRecoilValue(chatSettingsValueState);
   const chatSettingsDefaultValue = useRecoilValue(
@@ -42,6 +44,7 @@ const useChatData = () => {
   return {
     actions,
     askUser,
+    callFn,
     chatSettingsDefaultValue,
     chatSettingsInputs,
     chatSettingsValue,

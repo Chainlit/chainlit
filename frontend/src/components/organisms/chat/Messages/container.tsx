@@ -9,16 +9,14 @@ import {
   IFeedback,
   IMessageElement,
   IStep,
-  useChatInteract
+  sideViewState,
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
-import { sideViewState } from '@chainlit/react-client';
 
 import { MessageContainer as CMessageContainer } from 'components/molecules/messages/MessageContainer';
 
-import { apiClientState } from 'state/apiClient';
 import { highlightMessage } from 'state/project';
-import { projectSettingsState } from 'state/project';
-import { settingsState } from 'state/settings';
 
 interface Props {
   loading: boolean;
@@ -50,21 +48,19 @@ const MessageContainer = memo(
     onFeedbackDeleted,
     callAction
   }: Props) => {
-    const appSettings = useRecoilValue(settingsState);
-    const projectSettings = useRecoilValue(projectSettingsState);
+    const { config } = useConfig();
     const setSideView = useSetRecoilState(sideViewState);
     const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
-    const apiClient = useRecoilValue(apiClientState);
 
     const uploadFile = useCallback(
       (file: File, onProgress: (progress: number) => void) => {
-        return _uploadFile(apiClient, file, onProgress);
+        return _uploadFile(file, onProgress);
       },
       [_uploadFile]
     );
 
-    const enableFeedback = !!projectSettings?.dataPersistence;
+    const enableFeedback = !!config?.dataPersistence;
 
     const navigate = useNavigate();
 
@@ -111,26 +107,25 @@ const MessageContainer = memo(
       return {
         uploadFile,
         askUser,
-        allowHtml: projectSettings?.features?.unsafe_allow_html,
-        latex: projectSettings?.features?.latex,
-        defaultCollapseContent: appSettings.defaultCollapseContent,
+        allowHtml: config?.features?.unsafe_allow_html,
+        latex: config?.features?.latex,
+        defaultCollapseContent: !!config?.ui.default_collapse_content,
         highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
-        uiName: projectSettings?.ui?.name || '',
+        uiName: config?.ui?.name || '',
         onElementRefClick,
         onError,
         onFeedbackUpdated,
         onFeedbackDeleted
       };
     }, [
-      appSettings.defaultCollapseContent,
       askUser,
       enableFeedback,
       highlightedMessage,
       loading,
-      projectSettings?.ui?.name,
-      projectSettings?.features?.unsafe_allow_html,
+      config?.ui?.name,
+      config?.features?.unsafe_allow_html,
       onElementRefClick,
       onError,
       onFeedbackUpdated

@@ -1,5 +1,7 @@
+import { useContext, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ChainlitAPI } from 'src/api';
+import { ChainlitContext } from 'src/context';
 import { accessTokenState } from 'src/state';
 import useSWR, { SWRConfiguration } from 'swr';
 
@@ -9,22 +11,31 @@ const fetcher = async (
   token?: string
 ) => {
   const res = await client.get(endpoint, token);
-
   return res?.json();
 };
 
 function useApi<T>(
-  client: ChainlitAPI,
   path?: string | null,
-  options?: SWRConfiguration
+  { token, ...swrConfig }: SWRConfiguration & { token?: string } = {}
 ) {
-  const accessToken = useRecoilValue(accessTokenState);
+  const client = useContext(ChainlitContext);
+  let accessToken = useRecoilValue(accessTokenState);
+  accessToken = token || accessToken;
 
-  return useSWR<T, Error>(
-    path ? [path, accessToken] : null,
-    ([url, token]: [url: string, token: string]) => fetcher(client, url, token),
-    options
+  // Memoize the fetcher function to avoid recreating it on every render
+  const memoizedFetcher = useMemo(
+    () =>
+      ([url, token]: [url: string, token: string]) =>
+        fetcher(client, url, token),
+    [client]
   );
+
+  // Use a stable key for useSWR
+  const swrKey = useMemo(() => {
+    return path ? [path, accessToken] : null;
+  }, [path, accessToken]);
+
+  return useSWR<T, Error>(swrKey, memoizedFetcher, swrConfig);
 }
 
 export { useApi, fetcher };

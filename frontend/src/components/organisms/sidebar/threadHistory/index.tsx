@@ -1,19 +1,19 @@
 import isEqual from 'lodash/isEqual';
 import uniqBy from 'lodash/uniqBy';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Box } from '@mui/material';
 
 import {
+  ChainlitContext,
   IThreadFilters,
   accessTokenState,
   threadHistoryState,
   useChatMessages
 } from '@chainlit/react-client';
 
-import { apiClientState } from 'state/apiClient';
 import { threadsFiltersState } from 'state/threads';
 
 import { ThreadList } from './ThreadList';
@@ -35,7 +35,7 @@ export function ThreadHistory() {
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
   const { firstInteraction, messages, threadId } = useChatMessages();
   const navigate = useNavigate();
 

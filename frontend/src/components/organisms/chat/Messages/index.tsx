@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
-  IAction,
+  ChainlitContext,
   IFeedback,
   IStep,
   accessTokenState,
@@ -16,51 +16,17 @@ import {
 
 import { useTranslation } from 'components/i18n/Translator';
 
-import { apiClientState } from 'state/apiClient';
-
 import MessageContainer from './container';
 
 const Messages = (): JSX.Element => {
+  const apiClient = useContext(ChainlitContext);
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
-  const apiClient = useRecoilValue(apiClientState);
 
   const { t } = useTranslation();
-
-  const callActionWithToast = useCallback(
-    (action: IAction) => {
-      const promise = callAction(action);
-      if (promise) {
-        toast.promise(promise, {
-          loading: `${t('components.organisms.chat.Messages.index.running')} ${
-            action.name
-          }`,
-          success: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} ${t(
-                'components.organisms.chat.Messages.index.executedSuccessfully'
-              )}`;
-            }
-          },
-          error: (res) => {
-            if (res.response) {
-              return res.response;
-            } else {
-              return `${action.name} ${t(
-                'components.organisms.chat.Messages.index.failed'
-              )}`;
-            }
-          }
-        });
-      }
-    },
-    [callAction]
-  );
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
@@ -130,7 +96,7 @@ const Messages = (): JSX.Element => {
       messages={messages}
       onFeedbackUpdated={onFeedbackUpdated}
       onFeedbackDeleted={onFeedbackDeleted}
-      callAction={callActionWithToast}
+      callAction={callAction}
     />
   );
 };
