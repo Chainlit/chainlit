@@ -42,7 +42,9 @@ export default function UserMessage({
         if (index === -1) {
           return prev;
         }
-        return prev.slice(0, index + 1);
+        const slice = prev.slice(0, index + 1);
+        slice[index].steps = [];
+        return slice;
       });
       setIsEditing(false);
       editMessage({ ...message, output: newOutput });

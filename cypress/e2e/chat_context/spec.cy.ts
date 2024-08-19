@@ -5,7 +5,7 @@ describe('Chat Context', () => {
     runTestServer();
   });
 
-  it('should be able to store data related per user session', () => {
+  it('should be able to current conversation chat history', () => {
     submitMessage('Hello 1');
 
     cy.get('.step').eq(1).should('contain', 'Chat context length: 1');

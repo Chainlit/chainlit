@@ -8,6 +8,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Nothing unreleased!
 
+## [1.1.403rc0] - 2024-08-13
+
+### Fixed
+
+- Langchain Callback handler IndexError
+- Attempt to fix websocket issues
+
+## [1.1.402] - 2024-08-07
+
+### Added
+
+- The `User` class now has a `display_name` field. It will not be persisted by the data layer.
+- The logout button will now reload the page (needed for custom auth providers)
+
+## [1.1.401] - 2024-08-02
+
+### Changed
+
+- Directly log step input args by name instead of wrapping them in "args" for readability.
+
+### Fixed
+
+- Langchain Callback handler ValueError('not enough values to unpack (expected 2, got 0)')
+
+## [1.1.400] - 2024-07-29
+
+### Changed
+
+- hide_cot becomes cot and has three possible values: hidden, tool_call, full
+- User feedback are now scoring an entire run instead of a specific message
+- Slack/Teams/Discord DM threads are now split by day
+- Slack DM now also use threads
+- Avatars are always displayed at the root level of the conversation
+
+### Removed
+
+- disable_feedback has been removed
+- root_message has been removed
+
 ## [1.1.306] - 2024-07-03
 
 ### Added

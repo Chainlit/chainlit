@@ -1,3 +1,4 @@
+import inspect
 import os
 
 from dotenv import load_dotenv
@@ -156,7 +157,15 @@ def on_message(func: Callable) -> Callable:
         Callable[[str], Any]: The decorated on_message function.
     """
 
-    config.code.on_message = wrap_user_function(func)
+    async def with_parent_id(message: Message):
+        async with Step(name="on_message", type="run", parent_id=message.id) as s:
+            s.input = message.content
+            if len(inspect.signature(func).parameters) > 0:
+                await func(message)
+            else:
+                await func()
+
+    config.code.on_message = wrap_user_function(with_parent_id)
     return func
 
 
@@ -172,7 +181,9 @@ def on_chat_start(func: Callable) -> Callable:
         Callable[], Any]: The decorated hook.
     """
 
-    config.code.on_chat_start = wrap_user_function(func, with_task=True)
+    config.code.on_chat_start = wrap_user_function(
+        step(func, name="on_chat_start", type="run"), with_task=True
+    )
     return func
 
 
@@ -270,7 +281,9 @@ def on_audio_end(func: Callable) -> Callable:
         Callable[], Any]: The decorated hook.
     """
 
-    config.code.on_audio_end = wrap_user_function(func, with_task=True)
+    config.code.on_audio_end = wrap_user_function(
+        step(func, name="on_audio_end", type="run"), with_task=True
+    )
     return func
 
 

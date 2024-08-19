@@ -32,7 +32,6 @@ class MessageBase(ABC):
     author: str
     content: str = ""
     type: MessageStepType = "assistant_message"
-    disable_feedback = False
     streaming = False
     created_at: Union[str, None] = None
     fail_on_persist_error: bool = False
@@ -67,7 +66,6 @@ class MessageBase(ABC):
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
             type=type,  # type: ignore
-            disable_feedback=_dict.get("disableFeedback", False),
             language=_dict.get("language"),
         )
 
@@ -87,7 +85,6 @@ class MessageBase(ABC):
             "createdAt": self.created_at,
             "language": self.language,
             "streaming": self.streaming,
-            "disableFeedback": self.disable_feedback,
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
@@ -208,7 +205,6 @@ class Message(MessageBase):
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
     """
 
     def __init__(
@@ -218,7 +214,6 @@ class Message(MessageBase):
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
-        disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
@@ -257,7 +252,6 @@ class Message(MessageBase):
         self.type = type
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
-        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -268,8 +262,6 @@ class Message(MessageBase):
         """
         trace_event("send_message")
         await super().send()
-
-        context.session.root_message = self
 
         # Create tasks for all actions and elements
         tasks = [action.send(for_id=self.id) for action in self.actions]
@@ -355,7 +347,6 @@ class AskUserMessage(AskMessageBase):
     Args:
         content (str): The content of the prompt.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -365,7 +356,6 @@ class AskUserMessage(AskMessageBase):
         content: str,
         author: str = config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = True,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
@@ -373,7 +363,6 @@ class AskUserMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.type = type
-        self.disable_feedback = disable_feedback
         self.raise_on_timeout = raise_on_timeout
 
         super().__post_init__()
@@ -420,7 +409,6 @@ class AskFileMessage(AskMessageBase):
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -433,7 +421,6 @@ class AskFileMessage(AskMessageBase):
         max_files=1,
         author=config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = True,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -445,7 +432,6 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
-        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -509,14 +495,12 @@ class AskActionMessage(AskMessageBase):
         content: str,
         actions: List[Action],
         author=config.ui.name,
-        disable_feedback=True,
         timeout=90,
         raise_on_timeout=False,
     ):
         self.content = content
         self.actions = actions
         self.author = author
-        self.disable_feedback = disable_feedback
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
 

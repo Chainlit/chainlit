@@ -3,6 +3,7 @@ import base64
 import mimetypes
 import os
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 
 import filetype
@@ -28,7 +29,7 @@ from botbuilder.schema import (
     HeroCard,
 )
 from chainlit.config import config
-from chainlit.context import ChainlitContext, HTTPSession, context_var
+from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
@@ -41,13 +42,12 @@ from chainlit.user_session import user_session
 
 
 class TeamsEmitter(BaseChainlitEmitter):
-    def __init__(self, session: HTTPSession, turn_context: TurnContext, enabled=False):
+    def __init__(self, session: HTTPSession, turn_context: TurnContext):
         super().__init__(session)
         self.turn_context = turn_context
-        self.enabled = enabled
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled or element_dict.get("display") != "inline":
+        if element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")
@@ -81,7 +81,7 @@ class TeamsEmitter(BaseChainlitEmitter):
         await self.turn_context.send_activity(Activity(attachments=[attachment]))
 
     async def send_step(self, step_dict: StepDict):
-        if not self.enabled:
+        if not step_dict["type"] == "assistant_message":
             return
 
         step_type = step_dict.get("type")
@@ -89,26 +89,27 @@ class TeamsEmitter(BaseChainlitEmitter):
             "user_message",
             "assistant_message",
         ]
-        is_chain_of_thought = bool(step_dict.get("parentId"))
         is_empty_output = not step_dict.get("output")
 
-        if is_chain_of_thought or is_empty_output or not is_message:
+        if is_empty_output or not is_message:
             return
         else:
             reply = MessageFactory.text(step_dict["output"])
-            enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+            enable_feedback = get_data_layer()
             if enable_feedback:
+                current_run = context.current_run
+                scorable_id = current_run.id if current_run else step_dict["id"]
                 like_button = CardAction(
                     type=ActionTypes.message_back,
                     title="👍",
                     text="like",
-                    value={"feedback": "like", "step_id": step_dict["id"]},
+                    value={"feedback": "like", "step_id": scorable_id},
                 )
                 dislike_button = CardAction(
                     type=ActionTypes.message_back,
                     title="👎",
                     text="dislike",
-                    value={"feedback": "dislike", "step_id": step_dict["id"]},
+                    value={"feedback": "dislike", "step_id": scorable_id},
                 )
                 card = HeroCard(buttons=[like_button, dislike_button])
                 attachment = Attachment(
@@ -119,7 +120,7 @@ class TeamsEmitter(BaseChainlitEmitter):
             await self.turn_context.send_activity(reply)
 
     async def update_step(self, step_dict: StepDict):
-        if not self.enabled:
+        if not step_dict["type"] == "assistant_message":
             return
 
         await self.send_step(step_dict)
@@ -225,7 +226,13 @@ async def process_teams_message(
     user = await get_user(turn_context.activity.from_property)
 
     thread_id = str(
-        uuid.uuid5(uuid.NAMESPACE_DNS, str(turn_context.activity.conversation.id))
+        uuid.uuid5(
+            uuid.NAMESPACE_DNS,
+            str(
+                turn_context.activity.conversation.id
+                + datetime.today().strftime("%Y-%m-%d")
+            ),
+        )
     )
 
     text = clean_content(turn_context.activity)
@@ -247,6 +254,9 @@ async def process_teams_message(
 
     file_elements = await download_teams_files(session, teams_files)
 
+    if on_chat_start := config.code.on_chat_start:
+        await on_chat_start()
+
     msg = Message(
         content=text,
         elements=file_elements,
@@ -255,11 +265,6 @@ async def process_teams_message(
     )
 
     await msg.send()
-
-    ctx.emitter.enabled = True
-
-    if on_chat_start := config.code.on_chat_start:
-        await on_chat_start()
 
     if on_message := config.code.on_message:
         await on_message(msg)
@@ -314,7 +319,7 @@ async def handle_message(turn_context: TurnContext):
                 conversation=turn_context.activity.conversation,
             )
             await turn_context.send_activity(typing_activity)
-            thread_name = f"{turn_context.activity.from_property.name} Teams DM"
+            thread_name = f"{turn_context.activity.from_property.name} Teams DM {datetime.today().strftime('%Y-%m-%d')}"
             await process_teams_message(turn_context, thread_name)
 
 
