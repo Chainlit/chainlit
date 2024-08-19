@@ -40,7 +40,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
         {user.id}
       </Typography>
       <Typography width="100%" fontSize="13px" fontWeight={400}>
-        {user.identifier}
+        {user.display_name || user.identifier}
       </Typography>
     </ListItem>
   );
@@ -86,7 +86,7 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
     <MenuItem
       key="logout"
       onClick={() => {
-        logout();
+        logout(true);
         handleClose();
       }}
     >
