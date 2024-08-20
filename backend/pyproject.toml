@@ -58,6 +58,9 @@ numpy = [
 optional = true
 
 [tool.poetry.group.tests.dependencies]
+pytest = "^8.3.2"
+pytest-asyncio = "^0.23.8"
+pytest-cov = "^5.0.0"
 openai = "^1.11.1"
 langchain = "^0.1.5"
 llama-index = "^0.10.45"
@@ -111,6 +114,7 @@ module = [
 ]
 ignore_missing_imports = true
 
+
 [tool.poetry.group.custom-data]
 optional = true
 
@@ -125,3 +129,8 @@ azure-storage-file-datalake = "^12.14.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
