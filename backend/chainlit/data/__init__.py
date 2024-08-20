@@ -27,6 +27,7 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+from httpx import HTTPStatusError, RequestError
 from literalai import Attachment
 from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
@@ -294,6 +295,14 @@ class ChainlitDataLayer(BaseDataLayer):
             )
             return created.id or ""
 
+    async def safely_send_steps(self, steps):
+        try:
+            await self.client.api.send_steps(steps)
+        except HTTPStatusError as e:
+            logger.error(f"HTTP Request: error sending steps: {e.response.status_code}")
+        except RequestError as e:
+            logger.error(f"HTTP Request: error for {e.request.url!r}.")
+
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         metadata = {
@@ -322,7 +331,7 @@ class ChainlitDataLayer(BaseDataLayer):
             )
             object_key = uploaded["object_key"]
 
-        await self.client.api.send_steps(
+        await self.safely_send_steps(
             [
                 {
                     "id": element.for_id,
@@ -384,7 +393,7 @@ class ChainlitDataLayer(BaseDataLayer):
         if step_dict.get("isError"):
             step["error"] = step_dict.get("output")
 
-        await self.client.api.send_steps([step])
+        await self.safely_send_steps([step])
 
     @queue_until_user_message()
     async def update_step(self, step_dict: "StepDict"):
