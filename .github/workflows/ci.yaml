@@ -8,16 +8,19 @@ on:
     branches: [main, dev]
 
 jobs:
+  pytest:
+    uses: ./.github/workflows/pytest.yaml
+    secrets: inherit
   mypy:
     uses: ./.github/workflows/mypy.yaml
     secrets: inherit
-  tests:
-    uses: ./.github/workflows/tests.yaml
+  e2e-tests:
+    uses: ./.github/workflows/e2e-tests.yaml
     secrets: inherit
   ci:
     runs-on: ubuntu-latest
     name: Run CI
-    needs: [mypy, tests]
+    needs: [mypy, pytest, e2e-tests]
     steps:
       - name: 'Done'
         run: echo "Done"
