@@ -62,7 +62,7 @@ langchain = "^0.1.5"
 llama-index = "^0.10.45"
 tenacity = "^8.4.1"
 transformers = "^4.38"
-matplotlib = "3.7.1"
+matplotlib = "^3.7.1"
 farm-haystack = "^1.18.0"
 plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
@@ -97,7 +97,6 @@ module = [
     "haystack.*",
     "langflow",
     "lazify",
-    "matplotlib.*",                       # remove when 3.8.0 is out, it should export types
     "plotly.*",
     "nest_asyncio",
     "socketio.*",
