@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **[BREAKING]** Drop Python 3.8 support. Minimum Python version is 3.9 now.
+
 Nothing unreleased!
 
 ## [1.1.403rc0] - 2024-08-13
