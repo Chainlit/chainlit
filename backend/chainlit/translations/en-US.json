@@ -16,6 +16,9 @@
       "newChatButton": {
         "newChat": "New Chat"
       },
+      "newAssistantButton": {
+        "newAssistant": "New Assistant"
+      },
       "tasklist": {
         "TaskList": {
           "title": "🗒️ Task List",
@@ -109,6 +112,9 @@
       }
     },
     "organisms": {
+      "assistantCreationModal": {
+        "title": "Create new assistant"
+      },
       "chat": {
         "history": {
           "index": {

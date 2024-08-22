@@ -104,6 +104,37 @@ export const chatSettingsValueState = atom({
   default: chatSettingsDefaultValueSelector
 });
 
+// assistants settings inputs
+export const assistantSettingsInputsState = atom<any>({
+  key: 'AssistantSettings',
+  default: []
+});
+
+// assistants settings default value
+export const assistantSettingsDefaultValueSelector = selector({
+  key: 'AssistantSettingsValue/Default',
+  get: ({ get }) => {
+    const assistantSettings = get(assistantSettingsInputsState);
+    return assistantSettings.reduce(
+      (form: { [key: string]: any }, input: any) => (
+        (form[input.id] = input.initial), form
+      ),
+      {}
+    );
+  }
+});
+
+export const selectedAssistantState = atom<string | undefined>({
+  key: 'SelectedAssistant',
+  default: undefined
+});
+
+// // assistant settings value
+// export const assistantSettingsValueState = atom({
+//   key: 'AssistantSettingsValue',
+//   default: assistantSettingsDefaultValueSelector
+// });
+
 export const elementState = atom<IMessageElement[]>({
   key: 'DisplayElements',
   default: []

@@ -3,6 +3,8 @@ import { useRecoilValue } from 'recoil';
 import {
   actionState,
   askUserState,
+  assistantSettingsDefaultValueSelector,
+  assistantSettingsInputsState,
   callFnState,
   chatSettingsDefaultValueSelector,
   chatSettingsInputsState,
@@ -34,6 +36,12 @@ const useChatData = () => {
     chatSettingsDefaultValueSelector
   );
 
+  // assistants-related
+  const assistantSettingsInputs = useRecoilValue(assistantSettingsInputsState);
+  const assistantSettingsDefaultValue = useRecoilValue(
+    assistantSettingsDefaultValueSelector
+  );
+
   const connected = session?.socket.connected && !session?.error;
   const disabled =
     !connected ||
@@ -53,7 +61,9 @@ const useChatData = () => {
     elements,
     error: session?.error,
     loading,
-    tasklists
+    tasklists,
+    assistantSettingsInputs,
+    assistantSettingsDefaultValue
   };
 };
 

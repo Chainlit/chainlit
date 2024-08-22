@@ -24,6 +24,10 @@ if TYPE_CHECKING:
 
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
+
+# import BaseAssistant
+from chainlit.assistant import BaseAssistant
+from chainlit.assistant_settings import AssistantSettings
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
@@ -64,6 +68,27 @@ from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 
 if env_found:
     logger.info("Loaded .env file")
+
+
+# assistant-related callbacks setters
+# ---------------------------------
+@trace
+def on_create_assistant(
+    func: Callable[[Optional[User], AssistantSettings], Any]
+) -> Callable[[Optional[User], AssistantSettings], Any]:
+    config.code.on_create_assistant = wrap_user_function(func)
+    return func
+
+
+@trace
+def on_list_assistants(
+    func: Callable[[Optional[User]], List[BaseAssistant]]
+) -> Callable[[Optional[User]], List[BaseAssistant]]:
+    config.code.on_list_assistants = wrap_user_function(func)
+    return func
+
+
+# ---------------------------------
 
 
 @trace
@@ -402,6 +427,9 @@ __all__ = [
     "TaskStatus",
     "Video",
     "ChatSettings",
+    "AssistantSettings",
+    # assistant
+    "BaseAssistant",
     "input_widget",
     "Message",
     "ErrorMessage",
@@ -421,6 +449,10 @@ __all__ = [
     "action_callback",
     "author_rename",
     "on_settings_update",
+    # assistant-related callbacks setters
+    "on_create_assistant",
+    "on_list_assistants",
+    # end of assistant-related callbacks setters
     "password_auth_callback",
     "header_auth_callback",
     "sleep",

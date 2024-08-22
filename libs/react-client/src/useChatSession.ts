@@ -10,6 +10,7 @@ import io from 'socket.io-client';
 import {
   actionState,
   askUserState,
+  assistantSettingsInputsState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
@@ -64,6 +65,10 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
+  const setAssistantSettingsInputs = useSetRecoilState(
+    assistantSettingsInputsState
+  );
+
   const _connect = useCallback(
     ({
       userEnv,
@@ -216,6 +221,10 @@ const useChatSession = () => {
       socket.on('chat_settings', (inputs: any) => {
         setChatSettingsInputs(inputs);
         resetChatSettingsValue();
+      });
+
+      socket.on('assistant_settings', (inputs: any) => {
+        setAssistantSettingsInputs(inputs);
       });
 
       socket.on('element', (element: IElement) => {

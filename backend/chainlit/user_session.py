@@ -30,6 +30,9 @@ class UserSession:
         user_session["http_referer"] = context.session.http_referer
         user_session["client_type"] = context.session.client_type
 
+        # store assistant selected by the user
+        user_session["selected_assistant"] = context.session.selected_assistant
+
         if isinstance(context.session, WebsocketSession):
             user_session["languages"] = context.session.languages
 

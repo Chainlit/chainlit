@@ -6,6 +6,7 @@ from typing import Any, Dict, Literal
 from urllib.parse import unquote
 
 from chainlit.action import Action
+from chainlit.assistant_settings import AssistantSettings
 from chainlit.auth import get_current_user, require_login
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -406,3 +407,29 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+# when signal "on_create_assistant" is received, call the callback with user and assistant
+@sio.on("on_create_assistant")
+async def on_create_assistant(sid, options):
+    context = init_ws_context(sid)
+    logger.info(f"Received request to create assistant with options: {options}")
+    if config.code.on_create_assistant:
+        await config.code.on_create_assistant(context.session.user, options)
+    logger.info("Assistant creation process completed")
+
+
+# when signal "on_list_assistants" is received, call the callback with user
+@sio.on("on_list_assistants")
+async def on_list_assistants(sid):
+    context = init_ws_context(sid)
+    if config.code.on_list_assistants:
+        return await config.code.on_list_assistants(context.session.user)
+
+
+@sio.on("select_assistant")
+async def select_assistant(sid, assistant_name: str):
+    # store the assistant name in the session
+    context = init_ws_context(sid)
+    context.session.selected_assistant = assistant_name
+    logger.info(f"Selected assistant: {assistant_name}")

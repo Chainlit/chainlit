@@ -21,7 +21,9 @@ if TYPE_CHECKING:
     from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
+    from chainlit.assistant import BaseAssistant
 
+from chainlit.assistant_settings import AssistantSettings
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -290,6 +292,12 @@ class CodeSettings:
         None
     )
     set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
+
+    # assistant-related callback function
+    on_create_assistant: Optional[Callable[[Optional["User"], Any], Any]] = None
+    on_list_assistants: Optional[
+        Callable[[Optional["User"]], List["AssistantSettings"]]
+    ] = None
 
 
 @dataclass()
