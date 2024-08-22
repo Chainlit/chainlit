@@ -1,18 +1,18 @@
 import { memo } from 'react';
 import { prepareContent } from 'utils/message';
 
-import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { Collapse } from 'components/atoms/Collapse';
 import { InlinedElements } from 'components/atoms/elements/InlinedElements';
+import { CURSOR_PLACEHOLDER } from 'components/molecules/BlinkingCursor';
 import { Markdown } from 'components/molecules/Markdown';
 
 import type { IMessageElement, IStep } from 'client-types/';
 
-const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
+const COLLAPSE_MIN_LINES = 50; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
 
 export interface Props {
@@ -25,10 +25,13 @@ export interface Props {
 
 const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
-    const isUser = 'role' in message && message.role === 'user';
-
     let lineCount = 0;
     let contentLength = 0;
+
+    const outputContent =
+      message.streaming && message.output
+        ? message.output + CURSOR_PLACEHOLDER
+        : message.output;
 
     const {
       preparedContent: output,
@@ -37,12 +40,14 @@ const MessageContent = memo(
     } = prepareContent({
       elements,
       id: message.id,
-      content: message.output,
+      content: outputContent,
       language: message.language
     });
 
     lineCount += output.split('\n').length;
     contentLength += output.length;
+
+    const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
       <Markdown
@@ -50,18 +55,25 @@ const MessageContent = memo(
         latex={latex}
         refElements={outputRefElements}
       >
-        {output}
+        {isMessage
+          ? output
+          : `#### Output:     
+${output}`}
       </Markdown>
     );
 
     let inputMarkdown;
 
     if (message.input && message.showInput) {
+      const inputContent =
+        message.streaming && message.input
+          ? message.input + CURSOR_PLACEHOLDER
+          : message.input;
       const { preparedContent: input, refElements: inputRefElements } =
         prepareContent({
           elements,
           id: message.id,
-          content: message.input,
+          content: inputContent,
           language:
             typeof message.showInput === 'string'
               ? message.showInput
@@ -77,7 +89,8 @@ const MessageContent = memo(
           latex={latex}
           refElements={inputRefElements}
         >
-          {input}
+          {`#### Input:  
+${input}`}
         </Markdown>
       );
     }
@@ -85,11 +98,10 @@ const MessageContent = memo(
     const markdownContent = (
       <Typography
         sx={{
-          width: '100%',
           minHeight: '20px',
           fontSize: '1rem',
           fontFamily: (theme) => theme.typography.fontFamily,
-          fontWeight: isUser ? 500 : 300
+          overflowX: 'auto'
         }}
         component="div"
       >
@@ -101,7 +113,6 @@ const MessageContent = memo(
 
     const collapse =
       lineCount > COLLAPSE_MIN_LINES || contentLength > COLLAPSE_MIN_LENGTH;
-
     const messageContent = collapse ? (
       <Collapse defaultExpandAll={preserveSize}>{markdownContent}</Collapse>
     ) : (
@@ -109,11 +120,9 @@ const MessageContent = memo(
     );
 
     return (
-      <Stack width="100%" direction="row">
-        <Box width="100%" sx={{ minWidth: '100px' }}>
-          {output ? messageContent : null}
-          <InlinedElements elements={outputInlinedElements} />
-        </Box>
+      <Stack className="message-content" width="100%">
+        {!!inputMarkdown || output ? messageContent : null}
+        <InlinedElements elements={outputInlinedElements} />
       </Stack>
     );
   }

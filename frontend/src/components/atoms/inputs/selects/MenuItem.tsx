@@ -1,18 +1,20 @@
-import { grey, primary } from 'theme/index';
+import { grey } from 'theme/index';
 
-import MMenuItem from '@mui/material/MenuItem';
+import MMenuItem, {
+  MenuItemProps as MMenuItemProps
+} from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 
 import { NotificationCount } from 'components/molecules/messages/components/NotificationCount';
 
 import { SelectItem } from './SelectInput';
 
-type MenuItemProps = {
+interface MenuItemProps extends MMenuItemProps {
   isDarkMode: boolean;
   item: SelectItem;
   selected: boolean;
   value: string | number;
-};
+}
 
 const MenuItem = ({
   item,
@@ -30,20 +32,20 @@ const MenuItem = ({
       justifyContent: 'space-between',
       fontWeight: 500,
       fontSize: '14px',
-      color: (isDarkMode && grey[400]) || (selected ? primary[500] : grey[700]),
+      color: selected ? 'primary.main' : isDarkMode ? grey[400] : grey[700],
       '&:hover': {
-        backgroundColor: isDarkMode ? grey[800] : primary[50],
-        color: isDarkMode ? grey[400] : primary[500],
+        backgroundColor: isDarkMode ? grey[800] : 'primary.light',
+        color: 'primary.main',
         '& .notification-count': {
-          backgroundColor: isDarkMode ? grey[850] : primary[100],
-          color: isDarkMode ? grey[400] : primary[500]
+          backgroundColor: isDarkMode ? grey[850] : 'primary.light',
+          color: isDarkMode ? grey[400] : 'primary.main'
         }
       }
     }}
   >
     <Stack direction="row" alignItems="center" spacing={1}>
       {item.icon ? item.icon : null}
-      <span>{item.value}</span>
+      <span>{item?.label || item.value}</span>
     </Stack>
     {item.notificationCount ? (
       <NotificationCount count={item.notificationCount} />

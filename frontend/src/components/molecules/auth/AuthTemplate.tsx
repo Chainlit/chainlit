@@ -29,8 +29,8 @@ const AuthTemplate = ({
           border: (theme) => `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
           padding: theme.spacing(5, 5),
-
           maxWidth: '400px',
+          width: '90%',
           height: 'auto',
           maxHeight: '90%',
 

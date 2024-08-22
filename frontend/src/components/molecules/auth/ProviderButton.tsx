@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import { Auth0 } from 'components/atoms/icons/Auth0';
 import { Cognito } from 'components/atoms/icons/Cognito';
 import { Descope } from 'components/atoms/icons/Descope';
+import { Gitlab } from 'components/atoms/icons/Gitlab';
 import { Okta } from 'components/atoms/icons/Okta';
 import { useTranslation } from 'components/i18n/Translator';
 
@@ -18,6 +19,7 @@ function capitalizeFirstLetter(string: string) {
 function getProviderName(provider: string) {
   switch (provider) {
     case 'azure-ad':
+    case 'azure-ad-hybrid':
       return 'Microsoft';
     case 'github':
       return 'GitHub';
@@ -39,6 +41,7 @@ function renderProviderIcon(provider: string) {
     case 'github':
       return <GitHub />;
     case 'azure-ad':
+    case 'azure-ad-hybrid':
       return <Microsoft />;
     case 'okta':
       return <Okta />;
@@ -48,6 +51,8 @@ function renderProviderIcon(provider: string) {
       return <Descope />;
     case 'aws-cognito':
       return <Cognito />;
+    case 'gitlab':
+      return <Gitlab />;
     default:
       return null;
   }

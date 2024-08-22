@@ -7,13 +7,12 @@ import uvicorn
 
 nest_asyncio.apply()
 
-from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
-from chainlit.cli.utils import check_file
 from chainlit.config import (
     BACKEND_ROOT,
     DEFAULT_HOST,
     DEFAULT_PORT,
+    DEFAULT_ROOT_PATH,
     config,
     init_config,
     lint_translations,
@@ -22,8 +21,8 @@ from chainlit.config import (
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
-from chainlit.server import app, register_wildcard_route_handler
 from chainlit.telemetry import trace_event
+from chainlit.utils import check_file, ensure_jwt_secret
 
 
 # Create the main command group for Chainlit CLI
@@ -35,8 +34,14 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
+    from chainlit.server import app
+
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
+
+    ssl_certfile = os.environ.get("CHAINLIT_SSL_CERT", None)
+    ssl_keyfile = os.environ.get("CHAINLIT_SSL_KEY", None)
 
     ws_per_message_deflate_env = os.environ.get(
         "UVICORN_WS_PER_MESSAGE_DEFLATE", "true"
@@ -47,8 +52,11 @@ def run_chainlit(target: str):
         "yes",
     ]  # Convert to boolean
 
+    ws_protocol = os.environ.get("UVICORN_WS_PROTOCOL", "auto")
+
     config.run.host = host
     config.run.port = port
+    config.run.root_path = root_path
 
     check_file(target)
     # Load the module provided by the user
@@ -56,8 +64,6 @@ def run_chainlit(target: str):
     load_module(config.run.module_name)
 
     ensure_jwt_secret()
-
-    register_wildcard_route_handler()
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)
@@ -73,8 +79,11 @@ def run_chainlit(target: str):
             app,
             host=host,
             port=port,
+            ws=ws_protocol,
             log_level=log_level,
             ws_per_message_deflate=ws_per_message_deflate,
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile,
         )
         server = uvicorn.Server(config)
         await server.serve()
@@ -126,13 +135,47 @@ def run_chainlit(target: str):
     envvar="NO_CACHE",
     help="Useful to disable third parties cache, such as langchain.",
 )
+@click.option(
+    "--ssl-cert",
+    default=None,
+    envvar="CHAINLIT_SSL_CERT",
+    help="Specify the file path for the SSL certificate.",
+)
+@click.option(
+    "--ssl-key",
+    default=None,
+    envvar="CHAINLIT_SSL_KEY",
+    help="Specify the file path for the SSL key",
+)
 @click.option("--host", help="Specify a different host to run the server on")
 @click.option("--port", help="Specify a different port to run the server on")
-def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
+@click.option("--root-path", help="Specify a different root path to run the server on")
+def chainlit_run(
+    target,
+    watch,
+    headless,
+    debug,
+    ci,
+    no_cache,
+    ssl_cert,
+    ssl_key,
+    host,
+    port,
+    root_path,
+):
     if host:
         os.environ["CHAINLIT_HOST"] = host
     if port:
         os.environ["CHAINLIT_PORT"] = port
+    if bool(ssl_cert) != bool(ssl_key):
+        raise click.UsageError(
+            "Both --ssl-cert and --ssl-key must be provided together."
+        )
+    if ssl_cert:
+        os.environ["CHAINLIT_SSL_CERT"] = ssl_cert
+        os.environ["CHAINLIT_SSL_KEY"] = ssl_key
+    if root_path:
+        os.environ["CHAINLIT_ROOT_PATH"] = root_path
     if ci:
         logger.info("Running in CI mode")
 
@@ -150,6 +193,8 @@ def chainlit_run(target, watch, headless, debug, ci, no_cache, host, port):
     config.run.no_cache = no_cache
     config.run.ci = ci
     config.run.watch = watch
+    config.run.ssl_cert = ssl_cert
+    config.run.ssl_key = ssl_key
 
     run_chainlit(target)
 
@@ -175,7 +220,7 @@ def chainlit_create_secret(args=None, **kwargs):
     trace_event("chainlit secret")
 
     print(
-        f"Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET={random_secret()}"
+        f'Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET="{random_secret()}"'
     )
 
 

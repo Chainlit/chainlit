@@ -17,7 +17,7 @@ const CodeSnippet = ({
   children
 }: {
   language: string;
-  children: React.ReactNode;
+  children: string;
 }) => {
   const codeRef = useRef<HTMLElement>(null);
 
@@ -36,8 +36,8 @@ const CodeSnippet = ({
       <code
         ref={codeRef}
         style={{
-          borderBottomLeftRadius: '4px',
-          borderBottomRightRadius: '4px',
+          borderBottomLeftRadius: '0.7rem',
+          borderBottomRightRadius: '0.7rem',
           fontFamily: 'monospace',
           fontSize: '14px'
         }}
@@ -66,7 +66,7 @@ const Code = ({ children, ...props }: any) => {
     <Box
       sx={{
         background: isDarkMode ? grey[900] : grey[200],
-        borderRadius: '4px',
+        borderRadius: '0.7rem',
         padding: (theme) => theme.spacing(1),
         paddingRight: '2.5em',
         minHeight: '20px',
@@ -92,13 +92,13 @@ const Code = ({ children, ...props }: any) => {
     >
       <Stack
         px={2}
-        py={0.5}
+        py={1}
         direction="row"
         sx={{
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTopLeftRadius: '4px',
-          borderTopRightRadius: '4px',
+          borderTopLeftRadius: '0.7rem',
+          borderTopRightRadius: '0.7rem',
           color: 'text.secondary',
           background: isDarkMode ? grey[900] : grey[200]
         }}

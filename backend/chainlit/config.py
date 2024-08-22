@@ -4,7 +4,7 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import tomli
 from chainlit.logger import logger
@@ -16,7 +16,9 @@ from starlette.datastructures import Headers
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.types import ChatProfile, ThreadDict
+    from chainlit.element import ElementBased
+    from chainlit.message import Message
+    from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -59,46 +61,51 @@ allow_origins = ["*"]
 # follow_symlink = false
 
 [features]
-# Show the prompt playground
-prompt_playground = true
-
 # Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
 unsafe_allow_html = false
 
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
-# Authorize users to upload files with messages
-[features.multi_modal]
+# Automatically tag threads with the current chat profile (if a chat profile is used)
+auto_tag_thread = true
+
+# Allow users to edit their own messages
+edit_message = true
+
+# Authorize users to spontaneously upload files with messages
+[features.spontaneous_file_upload]
     enabled = true
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
 
-# Allows user to use speech to text
-[features.speech_to_text]
-    enabled = false
-    # See all languages here https://github.com/JamesBrill/react-speech-recognition/blob/HEAD/docs/API.md#language-string
-    # language = "en-US"
+[features.audio]
+    # Threshold for audio recording
+    min_decibels = -45
+    # Delay for the user to start speaking in MS
+    initial_silence_timeout = 3000
+    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
+    silence_timeout = 1500
+    # Above this duration (MS), the recording will forcefully stop.
+    max_duration = 15000
+    # Duration of the audio chunks in MS
+    chunk_duration = 1000
+    # Sample rate of the audio
+    sample_rate = 44100
 
 [UI]
-# Name of the app and chatbot.
-name = "Chatbot"
+# Name of the assistant.
+name = "Assistant"
 
-# Show the readme while the thread is empty.
-show_readme_as_default = true
-
-# Description of the app and chatbot. This is used for HTML tags.
+# Description of the assistant. This is used for HTML tags.
 # description = ""
 
 # Large size content are by default collapsed for a cleaner ui
 default_collapse_content = true
 
-# The default value for the expand messages settings.
-default_expand_messages = false
-
-# Hide the chain of thought details from the user in the UI.
-hide_cot = false
+# Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
+cot = "full"
 
 # Link to your github repo. This will add a github button in the UI's header.
 # github = ""
@@ -114,14 +121,19 @@ hide_cot = false
 # Specify a custom font url.
 # custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
+# Specify a custom meta image url.
+# custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
-# Override default MUI light theme. (Check theme.ts)
 [UI.theme]
+    default = "dark"
+    #layout = "wide"
     #font_family = "Inter, sans-serif"
+# Override default MUI light theme. (Check theme.ts)
 [UI.theme.light]
     #background = "#FAFAFA"
     #paper = "#FFFFFF"
@@ -130,6 +142,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
+    [UI.theme.light.text]
+        #primary = "#212121"
+        #secondary = "#616161"
 
 # Override default MUI dark theme. (Check theme.ts)
 [UI.theme.dark]
@@ -140,7 +155,9 @@ hide_cot = false
         #main = "#F80061"
         #dark = "#980039"
         #light = "#FFE7EB"
-
+    [UI.theme.dark.text]
+        #primary = "#EEEEEE"
+        #secondary = "#BDBDBD"
 
 [meta]
 generated_by = "{__version__}"
@@ -149,6 +166,7 @@ generated_by = "{__version__}"
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
+DEFAULT_ROOT_PATH = ""
 
 
 @dataclass()
@@ -157,6 +175,9 @@ class RunSettings:
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
+    ssl_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
+    root_path: str = DEFAULT_ROOT_PATH
     headless: bool = False
     watch: bool = False
     no_cache: bool = False
@@ -172,57 +193,73 @@ class PaletteOptions(DataClassJsonMixin):
 
 
 @dataclass()
+class TextOptions(DataClassJsonMixin):
+    primary: Optional[str] = ""
+    secondary: Optional[str] = ""
+
+
+@dataclass()
 class Palette(DataClassJsonMixin):
     primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
+    text: Optional[TextOptions] = None
 
 
 @dataclass()
 class Theme(DataClassJsonMixin):
     font_family: Optional[str] = None
+    default: Optional[Literal["light", "dark"]] = "dark"
+    layout: Optional[Literal["default", "wide"]] = "default"
     light: Optional[Palette] = None
     dark: Optional[Palette] = None
 
 
 @dataclass
-class SpeechToTextFeature:
-    enabled: Optional[bool] = None
-    language: Optional[str] = None
-
-
-@dataclass
-class MultiModalFeature:
+class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None
     accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
 
 
+@dataclass
+class AudioFeature(DataClassJsonMixin):
+    min_decibels: int = -45
+    initial_silence_timeout: int = 2000
+    silence_timeout: int = 1500
+    chunk_duration: int = 1000
+    max_duration: int = 15000
+    sample_rate: int = 44100
+    enabled: bool = False
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
-    prompt_playground: bool = True
-    multi_modal: Optional[MultiModalFeature] = None
+    spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
+    audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     latex: bool = False
     unsafe_allow_html: bool = False
-    speech_to_text: Optional[SpeechToTextFeature] = None
+    auto_tag_thread: bool = True
+    edit_message: bool = True
 
 
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
-    show_readme_as_default: bool = True
     description: str = ""
-    hide_cot: bool = False
+    cot: Literal["hidden", "tool_call", "full"] = "full"
     # Large size content are by default collapsed for a cleaner ui
     default_collapse_content: bool = True
-    default_expand_messages: bool = False
     github: Optional[str] = None
     theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
     custom_font: Optional[str] = None
+    # Optional custom meta tag for image preview
+    custom_meta_image_url: Optional[str] = None
+    # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
 
 
@@ -243,12 +280,16 @@ class CodeSettings:
     on_chat_start: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
-    on_message: Optional[Callable[[str], Any]] = None
+    on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
+
     author_rename: Optional[Callable[[str], str]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[
-        Callable[[Optional["User"]], List["ChatProfile"]]
-    ] = None
+    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
+        None
+    )
+    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
 
 
 @dataclass()
@@ -409,11 +450,13 @@ def load_settings():
 
         ui_settings = UISettings(**ui_settings)
 
+        code_settings = CodeSettings(action_callbacks={})
+
         return {
             "features": features_settings,
             "ui": ui_settings,
             "project": project_settings,
-            "code": CodeSettings(action_callbacks={}),
+            "code": code_settings,
         }
 
 

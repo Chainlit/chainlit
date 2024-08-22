@@ -1,57 +1,60 @@
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 
 import {
   threadHistoryState,
+  useAuth,
   useChatData,
   useChatInteract,
-  useChatSession
+  useChatMessages,
+  useConfig
 } from '@chainlit/react-client';
 
 import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
-import SideView from 'components/atoms/element/sideView';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
-import ChatProfiles from 'components/molecules/chatProfiles';
+import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
-import { apiClientState } from 'state/apiClient';
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { IAttachment, attachmentsState } from 'state/chat';
-import { projectSettingsState, sideViewState } from 'state/project';
 
 import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
+import WelcomeScreen from './welcomeScreen';
 
 const Chat = () => {
-  const { idToResume } = useChatSession();
-
-  const projectSettings = useRecoilValue(projectSettingsState);
+  const { user } = useAuth();
+  const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
-  const sideViewElement = useRecoilValue(sideViewState);
-  const apiClient = useRecoilValue(apiClientState);
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
+  const navigate = useNavigate();
 
   const fileSpec = useMemo(
     () => ({
-      max_size_mb: projectSettings?.features?.multi_modal?.max_size_mb || 500,
-      max_files: projectSettings?.features?.multi_modal?.max_files || 20,
-      accept: projectSettings?.features?.multi_modal?.accept || ['*/*']
+      max_size_mb:
+        config?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: config?.features?.spontaneous_file_upload?.accept || ['*/*']
     }),
-    [projectSettings]
+    [config]
   );
 
   const { t } = useTranslation();
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -62,23 +65,19 @@ const Chat = () => {
       const attachements: IAttachment[] = payloads.map((file) => {
         const id = uuidv4();
 
-        const { xhr, promise } = uploadFileRef.current(
-          apiClient,
-          file,
-          (progress) => {
-            setAttachments((prev) =>
-              prev.map((attachment) => {
-                if (attachment.id === id) {
-                  return {
-                    ...attachment,
-                    uploadProgress: progress
-                  };
-                }
-                return attachment;
-              })
-            );
-          }
-        );
+        const { xhr, promise } = uploadFileRef.current(file, (progress) => {
+          setAttachments((prev) =>
+            prev.map((attachment) => {
+              if (attachment.id === id) {
+                return {
+                  ...attachment,
+                  uploadProgress: progress
+                };
+              }
+              return attachment;
+            })
+          );
+        });
 
         promise
           .then((res) => {
@@ -150,15 +149,27 @@ const Chat = () => {
     options: { noClick: true }
   });
 
+  const { threadId } = useChatMessages();
+
   useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
-      currentThreadId: undefined
-    }));
+    const currentPage = new URL(window.location.href);
+    if (
+      user &&
+      config?.dataPersistence &&
+      threadId &&
+      currentPage.pathname === '/'
+    ) {
+      navigate(`/thread/${threadId}`);
+    } else {
+      setThreads((prev) => ({
+        ...prev,
+        currentThreadId: threadId
+      }));
+    }
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.multi_modal?.enabled;
+    !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
   return (
     <Box
@@ -179,13 +190,12 @@ const Chat = () => {
           {upload?.isDragActive ? <DropScreen /> : null}
         </>
       ) : null}
-      <SideView>
-        <Box my={1} />
+      <Stack width="100%">
         {error ? (
           <Box
             sx={{
               width: '100%',
-              maxWidth: '60rem',
+              maxWidth: layoutMaxWidth,
               mx: 'auto',
               my: 2
             }}
@@ -195,39 +205,25 @@ const Chat = () => {
             </Alert>
           </Box>
         ) : null}
-        {idToResume ? (
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: '60rem',
-              mx: 'auto',
-              my: 2
-            }}
-          >
-            <Alert sx={{ mx: 2 }} severity="info">
-              <Translator path="components.organisms.chat.index.continuingChat" />
-            </Alert>
-          </Box>
-        ) : null}
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <ChatProfiles />
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen />
+            <Box py={2} />
+            <Messages />
+          </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
             onFileUploadError={onFileUploadError}
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
-            projectSettings={projectSettings}
           />
         </ErrorBoundary>
-      </SideView>
-      {sideViewElement ? null : <TaskList isMobile={false} />}
+      </Stack>
     </Box>
   );
 };

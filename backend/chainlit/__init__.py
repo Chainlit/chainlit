@@ -1,3 +1,4 @@
+import inspect
 import os
 
 from dotenv import load_dotenv
@@ -19,16 +20,18 @@ if TYPE_CHECKING:
     )
     from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
     from chainlit.openai import instrument_openai
+    from chainlit.mistralai import instrument_mistralai
 
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
+from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
-    Avatar,
+    Component,
     File,
     Image,
     Pdf,
@@ -52,7 +55,7 @@ from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.telemetry import trace
-from chainlit.types import ChatProfile, ThreadDict
+from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr, wrap_user_function
@@ -115,7 +118,7 @@ def oauth_callback(
 
     Example:
         @cl.oauth_callback
-        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: User) -> Optional[User]:
+        async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: User, id_token: Optional[str]) -> Optional[User]:
 
     Returns:
         Callable[[str, str, Dict[str, str], User], Optional[User]]: The decorated authentication callback.
@@ -154,7 +157,15 @@ def on_message(func: Callable) -> Callable:
         Callable[[str], Any]: The decorated on_message function.
     """
 
-    config.code.on_message = wrap_user_function(func)
+    async def with_parent_id(message: Message):
+        async with Step(name="on_message", type="run", parent_id=message.id) as s:
+            s.input = message.content
+            if len(inspect.signature(func).parameters) > 0:
+                await func(message)
+            else:
+                await func()
+
+    config.code.on_message = wrap_user_function(with_parent_id)
     return func
 
 
@@ -170,7 +181,9 @@ def on_chat_start(func: Callable) -> Callable:
         Callable[], Any]: The decorated hook.
     """
 
-    config.code.on_chat_start = wrap_user_function(func, with_task=True)
+    config.code.on_chat_start = wrap_user_function(
+        step(func, name="on_chat_start", type="run"), with_task=True
+    )
     return func
 
 
@@ -209,6 +222,22 @@ def set_chat_profiles(
 
 
 @trace
+def set_starters(func: Callable[[Optional["User"]], List["Starter"]]) -> Callable:
+    """
+    Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
+
+    Args:
+        func (Callable[[Optional["User"]], List["Starter"]]): The function declaring the starters.
+
+    Returns:
+        Callable[[Optional["User"]], List["Starter"]]: The decorated function.
+    """
+
+    config.code.set_starters = wrap_user_function(func)
+    return func
+
+
+@trace
 def on_chat_end(func: Callable) -> Callable:
     """
     Hook to react to the user websocket disconnect event.
@@ -221,6 +250,40 @@ def on_chat_end(func: Callable) -> Callable:
     """
 
     config.code.on_chat_end = wrap_user_function(func, with_task=True)
+    return func
+
+
+@trace
+def on_audio_chunk(func: Callable) -> Callable:
+    """
+    Hook to react to the audio chunks being sent.
+
+    Args:
+        chunk (AudioChunk): The audio chunk being sent.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_chunk = wrap_user_function(func, with_task=False)
+    return func
+
+
+@trace
+def on_audio_end(func: Callable) -> Callable:
+    """
+    Hook to react to the audio stream ending. This is called after the last audio chunk is sent.
+
+    Args:
+    elements ([List[Element]): The files that were uploaded before starting the audio stream (if any).
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_end = wrap_user_function(
+        step(func, name="on_audio_end", type="run"), with_task=True
+    )
     return func
 
 
@@ -312,12 +375,17 @@ __getattr__ = make_module_getattr(
         "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
         "HaystackAgentCallbackHandler": "chainlit.haystack.callbacks",
         "instrument_openai": "chainlit.openai",
+        "instrument_mistralai": "chainlit.mistralai",
     }
 )
 
 __all__ = [
+    "ChatProfile",
+    "Starter",
     "user_session",
+    "chat_context",
     "CopilotFunction",
+    "AudioChunk",
     "Action",
     "User",
     "PersistedUser",
@@ -326,7 +394,7 @@ __all__ = [
     "Plotly",
     "Image",
     "Text",
-    "Avatar",
+    "Component",
     "Pyplot",
     "File",
     "Task",
@@ -365,6 +433,7 @@ __all__ = [
     "LlamaIndexCallbackHandler",
     "HaystackAgentCallbackHandler",
     "instrument_openai",
+    "instrument_mistralai",
 ]
 
 

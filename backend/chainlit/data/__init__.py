@@ -2,16 +2,32 @@ import functools
 import json
 import os
 from collections import deque
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    Union,
+    cast,
+)
 
 import aiofiles
-from chainlit.config import config
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.session import WebsocketSession
-from chainlit.types import Feedback, Pagination, ThreadDict, ThreadFilter
-from chainlit.user import PersistedUser, User, UserDict
-from literalai import Attachment, PageInfo, PaginatedResponse
+from chainlit.types import (
+    Feedback,
+    PageInfo,
+    PaginatedResponse,
+    Pagination,
+    ThreadDict,
+    ThreadFilter,
+)
+from chainlit.user import PersistedUser, User
+from literalai import Attachment
 from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
 from literalai.filter import threads_filters as LiteralThreadsFilters
@@ -77,7 +93,7 @@ class BaseDataLayer:
         pass
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         pass
 
     @queue_until_user_message()
@@ -122,15 +138,18 @@ class BaseDataLayer:
     async def delete_user_session(self, id: str) -> bool:
         return True
 
+    async def build_debug_url(self) -> str:
+        return ""
+
 
 _data_layer: Optional[BaseDataLayer] = None
 
 
 class ChainlitDataLayer(BaseDataLayer):
     def __init__(self, api_key: str, server: Optional[str]):
-        from literalai import LiteralClient
+        from literalai import AsyncLiteralClient
 
-        self.client = LiteralClient(api_key=api_key, url=server)
+        self.client = AsyncLiteralClient(api_key=api_key, url=server)
         logger.info("Chainlit data layer initialized")
 
     def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
@@ -139,6 +158,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "chainlitKey": None,
             "display": metadata.get("display", "side"),
             "language": metadata.get("language"),
+            "autoPlay": metadata.get("autoPlay", None),
+            "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
@@ -199,12 +220,19 @@ class ChainlitDataLayer(BaseDataLayer):
             "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
-            "disableFeedback": metadata.get("disableFeedback", False),
             "indent": metadata.get("indent"),
             "language": metadata.get("language"),
-            "isError": metadata.get("isError", False),
+            "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
+
+    async def build_debug_url(self) -> str:
+        try:
+            project_id = await self.client.api.get_my_project_id()
+            return f"{self.client.api.url}/projects/{project_id}/logs/threads/[thread_id]?currentStepId=[step_id]"
+        except Exception as e:
+            logger.error(f"Error building debug url: {e}")
+            return ""
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         user = await self.client.api.get_user(identifier=identifier)
@@ -228,7 +256,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return PersistedUser(
             id=_user.id or "",
             identifier=_user.identifier or "",
-            metadata=_user.metadata,
+            metadata=user.metadata,
             createdAt=_user.created_at or "",
         )
 
@@ -322,18 +350,19 @@ class ChainlitDataLayer(BaseDataLayer):
         return self.attachment_to_element_dict(attachment)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         await self.client.api.delete_attachment(id=element_id)
 
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
-        metadata = {
-            "disableFeedback": step_dict.get("disableFeedback"),
-            "isError": step_dict.get("isError"),
-            "waitForAnswer": step_dict.get("waitForAnswer"),
-            "language": step_dict.get("language"),
-            "showInput": step_dict.get("showInput"),
-        }
+        metadata = dict(
+            step_dict.get("metadata", {}),
+            **{
+                "waitForAnswer": step_dict.get("waitForAnswer"),
+                "language": step_dict.get("language"),
+                "showInput": step_dict.get("showInput"),
+            },
+        )
 
         step: LiteralStepDict = {
             "createdAt": step_dict.get("createdAt"),
@@ -345,12 +374,15 @@ class ChainlitDataLayer(BaseDataLayer):
             "name": step_dict.get("name"),
             "threadId": step_dict.get("threadId"),
             "type": step_dict.get("type"),
+            "tags": step_dict.get("tags"),
             "metadata": metadata,
         }
         if step_dict.get("input"):
             step["input"] = {"content": step_dict.get("input")}
         if step_dict.get("output"):
             step["output"] = {"content": step_dict.get("output")}
+        if step_dict.get("isError"):
+            step["error"] = step_dict.get("output")
 
         await self.client.api.send_steps([step])
 
@@ -409,14 +441,24 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             )
 
-        return await self.client.api.list_threads(
+        literal_response = await self.client.api.list_threads(
             first=pagination.first,
             after=pagination.cursor,
             filters=literal_filters,
             order_by={"column": "createdAt", "direction": "DESC"},
         )
+        return PaginatedResponse(
+            pageInfo=PageInfo(
+                hasNextPage=literal_response.pageInfo.hasNextPage,
+                startCursor=literal_response.pageInfo.startCursor,
+                endCursor=literal_response.pageInfo.endCursor,
+            ),
+            data=literal_response.data,
+        )
 
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
+        from chainlit.step import check_add_step_in_cot, stub_step
+
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
@@ -424,13 +466,13 @@ class ChainlitDataLayer(BaseDataLayer):
         steps = []  # List[StepDict]
         if thread.steps:
             for step in thread.steps:
-                if config.ui.hide_cot and step.parent_id:
-                    continue
                 for attachment in step.attachments:
                     elements.append(self.attachment_to_element_dict(attachment))
-                if not config.features.prompt_playground and step.generation:
-                    step.generation = None
-                steps.append(self.step_to_step_dict(step))
+
+                if check_add_step_in_cot(step):
+                    steps.append(self.step_to_step_dict(step))
+                else:
+                    steps.append(stub_step(step))
 
         return {
             "createdAt": thread.created_at or "",
@@ -453,7 +495,7 @@ class ChainlitDataLayer(BaseDataLayer):
         tags: Optional[List[str]] = None,
     ):
         await self.client.api.upsert_thread(
-            thread_id=thread_id,
+            id=thread_id,
             name=name,
             participant_id=user_id,
             metadata=metadata,
@@ -461,8 +503,22 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
 
+class BaseStorageClient(Protocol):
+    """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
+
+    async def upload_file(
+        self,
+        object_key: str,
+        data: Union[bytes, str],
+        mime: str = "application/octet-stream",
+        overwrite: bool = True,
+    ) -> Dict[str, Any]:
+        pass
+
+
 if api_key := os.environ.get("LITERAL_API_KEY"):
-    server = os.environ.get("LITERAL_SERVER")
+    # support legacy LITERAL_SERVER variable as fallback
+    server = os.environ.get("LITERAL_API_URL") or os.environ.get("LITERAL_SERVER")
     _data_layer = ChainlitDataLayer(api_key=api_key, server=server)
 
 

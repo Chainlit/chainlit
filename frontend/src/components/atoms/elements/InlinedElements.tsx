@@ -42,7 +42,7 @@ const InlinedElements = ({ elements }: Props) => {
   );
 
   return (
-    <Stack gap={1} mt={1}>
+    <Stack gap={1} mb={2}>
       {elementsByType.image?.length ? (
         <InlinedImageList items={elementsByType.image} />
       ) : null}

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useCopyToClipboard } from 'usehooks-ts';
 
-import ContentPaste from '@mui/icons-material/ContentPaste';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+
+import CopyIcon from 'assets/copy';
 
 interface ClipboardCopyProps {
   value: string;
@@ -34,7 +35,7 @@ const ClipboardCopy = ({ value, edge }: ClipboardCopyProps): JSX.Element => {
       sx={{ zIndex: 2 }}
     >
       <IconButton color="inherit" edge={edge} onClick={handleCopy}>
-        <ContentPaste sx={{ height: 16, width: 16 }} />
+        <CopyIcon sx={{ height: 16, width: 16 }} />
       </IconButton>
     </Tooltip>
   );

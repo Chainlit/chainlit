@@ -1,141 +1,226 @@
 import { keyframes } from '@emotion/react';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
+import { useConfig } from '@chainlit/react-client';
+
 import { AskUploadButton } from './components/AskUploadButton';
-import { AUTHOR_BOX_WIDTH, Author } from './components/Author';
-import { DetailsButton } from './components/DetailsButton';
+import { MessageAvatar } from './components/Avatar';
 import { MessageActions } from './components/MessageActions';
 import { MessageButtons } from './components/MessageButtons';
 import { MessageContent } from './components/MessageContent';
 
-import type { IAction, IMessageElement, IStep } from 'client-types/';
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
+import { type IAction, type IMessageElement, type IStep } from 'client-types/';
 
 import { Messages } from './Messages';
+import Step from './Step';
+import UserMessage from './UserMessage';
 
 interface Props {
   message: IStep;
+  showAvatar?: boolean;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
-  showAvatar?: boolean;
-  showBorder?: boolean;
   isRunning?: boolean;
-  isLast?: boolean;
+  isScorable?: boolean;
+  scorableRun?: IStep;
 }
 
 const Message = memo(
   ({
     message,
+    showAvatar = true,
     elements,
     actions,
-    indent,
-    showAvatar,
-    showBorder,
     isRunning,
-    isLast
+    indent,
+    isScorable,
+    scorableRun
   }: Props) => {
     const {
-      expandAll,
-      hideCot,
       highlightedMessage,
       defaultCollapseContent,
       allowHtml,
       latex,
       onError
     } = useContext(MessageContext);
+    const { config } = useConfig();
+    const layoutMaxWidth = useLayoutMaxWidth();
+    const isAsk = message.waitForAnswer;
+    const isUserMessage = message.type === 'user_message';
+    const isStep = !message.type.includes('message');
 
-    const [showDetails, setShowDetails] = useState(expandAll);
+    // Only keep tool calls if Chain of Thought is tool_call
+    const toolCallSkip =
+      isStep && config?.ui.cot === 'tool_call' && message.type !== 'tool';
 
-    useEffect(() => {
-      setShowDetails(expandAll);
-    }, [expandAll]);
+    const hiddenSkip = isStep && config?.ui.cot === 'hidden';
 
-    if (hideCot && indent) {
-      return null;
+    const skip = toolCallSkip || hiddenSkip;
+
+    if (skip) {
+      if (!message.steps) {
+        return null;
+      }
+      return (
+        <Messages
+          messages={message.steps}
+          elements={elements}
+          actions={actions}
+          indent={indent}
+          isRunning={isRunning}
+          scorableRun={scorableRun}
+        />
+      );
     }
 
-    const isUser = message.type === 'user_message';
-    const isAsk = message.waitForAnswer;
-
     return (
-      <Box
-        sx={{
-          color: 'text.primary',
-          backgroundColor: (theme) =>
-            isUser
-              ? 'transparent'
-              : theme.palette.mode === 'dark'
-              ? theme.palette.grey[800]
-              : theme.palette.grey[100]
-        }}
-        className="step"
-      >
+      <>
         <Box
           sx={{
-            boxSizing: 'border-box',
-            mx: 'auto',
-            maxWidth: '60rem',
-            px: 2,
-            display: 'flex',
-            flexDirection: 'column',
+            color: 'text.primary',
             position: 'relative'
           }}
+          className="step"
         >
-          <Stack
-            id={`step-${message.id}`}
-            direction="row"
-            ml={indent ? `${indent * (AUTHOR_BOX_WIDTH + 12)}px` : 0}
+          <Box
             sx={{
-              py: 2,
-              borderBottom: (theme) =>
-                showBorder ? `1px solid ${theme.palette.divider}` : 'none',
-              animation:
-                message.id && highlightedMessage === message.id
-                  ? `3s ease-in-out 0.1s ${flash}`
-                  : 'none',
-              overflowX: 'auto'
+              boxSizing: 'border-box',
+              mx: 'auto',
+              width: '100%',
+              maxWidth: indent ? '100%' : layoutMaxWidth,
+              px: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative'
             }}
           >
-            <Author message={message} show={showAvatar}>
-              <Stack alignItems="flex-start" minWidth={150}>
-                <MessageContent
-                  elements={elements}
-                  message={message}
-                  preserveSize={!!message.streaming || !defaultCollapseContent}
-                  allowHtml={allowHtml}
-                  latex={latex}
-                />
-                <DetailsButton
-                  message={message}
-                  opened={showDetails}
-                  onClick={() => setShowDetails(!showDetails)}
-                  loading={isRunning && isLast}
-                />
-                {!isRunning && isLast && isAsk && (
-                  <AskUploadButton onError={onError} />
-                )}
-                {actions?.length ? (
-                  <MessageActions message={message} actions={actions} />
-                ) : null}
-                <MessageButtons message={message} />
-              </Stack>
-            </Author>
-          </Stack>
+            <Stack
+              id={`step-${message.id}`}
+              direction="row"
+              sx={{
+                pb: indent ? 1 : 2,
+                flexGrow: 1,
+                animation:
+                  message.id && highlightedMessage === message.id
+                    ? `3s ease-in-out 0.1s ${flash}`
+                    : 'none'
+              }}
+            >
+              {/* User message is displayed differently */}
+              {isUserMessage ? (
+                <Box display="flex" flexDirection="column" flexGrow={1}>
+                  <UserMessage message={message}>
+                    <MessageContent
+                      elements={elements}
+                      message={message}
+                      preserveSize={
+                        !!message.streaming || !defaultCollapseContent
+                      }
+                      allowHtml={allowHtml}
+                      latex={latex}
+                    />
+                  </UserMessage>
+                </Box>
+              ) : (
+                <Stack
+                  direction="row"
+                  gap="1rem"
+                  width="100%"
+                  className="ai-message"
+                >
+                  {!isStep || !indent ? (
+                    <MessageAvatar author={message.name} hide={!showAvatar} />
+                  ) : null}
+                  {/* Display the step and its children */}
+                  {isStep ? (
+                    <Step step={message} isRunning={isRunning}>
+                      {message.steps ? (
+                        <Messages
+                          messages={message.steps.filter(
+                            (s) => !s.type.includes('message')
+                          )}
+                          elements={elements}
+                          actions={actions}
+                          indent={indent + 1}
+                          isRunning={isRunning}
+                        />
+                      ) : null}
+                      <MessageContent
+                        elements={elements}
+                        message={message}
+                        preserveSize={
+                          !!message.streaming || !defaultCollapseContent
+                        }
+                        allowHtml={allowHtml}
+                        latex={latex}
+                      />
+                      {actions?.length ? (
+                        <MessageActions message={message} actions={actions} />
+                      ) : null}
+                      <MessageButtons message={message} />
+                    </Step>
+                  ) : (
+                    // Display an assistant message
+                    <Stack
+                      alignItems="flex-start"
+                      minWidth={150}
+                      flexGrow={1}
+                      position="relative"
+                    >
+                      <MessageContent
+                        elements={elements}
+                        message={message}
+                        preserveSize={
+                          !!message.streaming || !defaultCollapseContent
+                        }
+                        allowHtml={allowHtml}
+                        latex={latex}
+                      />
+                      {!isRunning && isAsk && (
+                        <AskUploadButton onError={onError} />
+                      )}
+                      {actions?.length ? (
+                        <MessageActions message={message} actions={actions} />
+                      ) : null}
+                      {scorableRun && isScorable ? (
+                        <MessageButtons message={message} run={scorableRun} />
+                      ) : null}
+                    </Stack>
+                  )}
+                </Stack>
+              )}
+            </Stack>
+          </Box>
         </Box>
-        {message.steps && showDetails && (
+        {/* Make sure the child assistant messages of a step are displayed at the root level. */}
+        {message.steps && isStep ? (
+          <Messages
+            messages={message.steps.filter((s) => s.type.includes('message'))}
+            elements={elements}
+            actions={actions}
+            indent={0}
+            isRunning={isRunning}
+            scorableRun={scorableRun}
+          />
+        ) : null}
+        {/* Display the child steps if the message is not a step (usually a user message). */}
+        {message.steps && !isStep ? (
           <Messages
             messages={message.steps}
-            actions={actions}
             elements={elements}
-            indent={indent + 1}
+            actions={actions}
+            indent={isUserMessage ? indent : indent + 1}
             isRunning={isRunning}
           />
-        )}
-      </Box>
+        ) : null}
+      </>
     );
   }
 );

@@ -1,10 +1,10 @@
 import Box from '@mui/material/Box';
 
+import { type ITextElement, useConfig } from '@chainlit/react-client';
+
 import { Markdown } from 'components/molecules/Markdown';
 
 import { useFetch } from 'hooks/useFetch';
-
-import { type ITextElement } from 'client-types/';
 
 interface Props {
   element: ITextElement;
@@ -12,6 +12,9 @@ interface Props {
 
 const TextElement = ({ element }: Props) => {
   const { data, error, isLoading } = useFetch(element.url || null);
+  const { config } = useConfig();
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
 
   let content = '';
 
@@ -29,7 +32,9 @@ const TextElement = ({ element }: Props) => {
 
   return (
     <Box sx={{ fontFamily: (theme) => theme.typography.fontFamily }}>
-      <Markdown>{content}</Markdown>
+      <Markdown allowHtml={allowHtml} latex={latex}>
+        {content}
+      </Markdown>
     </Box>
   );
 };

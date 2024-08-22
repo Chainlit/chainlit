@@ -2,7 +2,6 @@ export type IElement =
   | IImageElement
   | ITextElement
   | IPdfElement
-  | IAvatarElement
   | ITasklistElement
   | IAudioElement
   | IVideoElement
@@ -40,10 +39,6 @@ export interface IImageElement extends TMessageElement<'image'> {
   size?: IElementSize;
 }
 
-export interface IAvatarElement extends TElement<'avatar'> {
-  name: string;
-}
-
 export interface ITextElement extends TMessageElement<'text'> {
   language?: string;
 }
@@ -52,10 +47,19 @@ export interface IPdfElement extends TMessageElement<'pdf'> {
   page?: number;
 }
 
-export interface IAudioElement extends TMessageElement<'audio'> {}
+export interface IAudioElement extends TMessageElement<'audio'> {
+  autoPlay?: boolean;
+}
 
 export interface IVideoElement extends TMessageElement<'video'> {
   size?: IElementSize;
+
+  /**
+   * Override settings for each type of player in ReactPlayer
+   * https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
+   * @type {object}
+   */
+  playerConfig?: object;
 }
 
 export interface IFileElement extends TMessageElement<'file'> {

@@ -1,15 +1,19 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import { Box, Button } from '@mui/material';
 
-import { useChatInteract } from '@chainlit/react-client';
+import {
+  useChatInteract,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 import WaterMark from 'components/organisms/chat/inputBox/waterMark';
 
-import { projectSettingsState } from 'state/project';
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 interface Props {
   threadId?: string;
@@ -17,18 +21,32 @@ interface Props {
 
 export default function ResumeButton({ threadId }: Props) {
   const navigate = useNavigate();
-  const pSettings = useRecoilValue(projectSettingsState);
+  const layoutMaxWidth = useLayoutMaxWidth();
+  const { config } = useConfig();
   const { clear, setIdToResume } = useChatInteract();
+  const { session, idToResume } = useChatSession();
 
-  if (!threadId || !pSettings?.threadResumable) {
+  useEffect(() => {
+    if (threadId !== idToResume) {
+      return;
+    }
+    if (session?.socket.connected) {
+      toast.success('Chat resumed successfully');
+    } else if (session?.error) {
+      toast.error("Couldn't resume chat");
+    }
+  }, [session, idToResume, threadId]);
+
+  if (!threadId || !config?.threadResumable) {
     return null;
   }
 
   const onClick = () => {
     clear();
     setIdToResume(threadId!);
-    toast.success('Chat resumed!');
-    navigate('/');
+    if (!config?.dataPersistence) {
+      navigate('/');
+    }
   };
 
   return (
@@ -40,7 +58,7 @@ export default function ResumeButton({ threadId }: Props) {
       sx={{
         boxSizing: 'border-box',
         width: '100%',
-        maxWidth: '60rem',
+        maxWidth: layoutMaxWidth,
         m: 'auto',
         justifyContent: 'center'
       }}

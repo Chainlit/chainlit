@@ -2,6 +2,8 @@
 
 [![](https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat)](https://discord.gg/k73SQ3FyUh)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io)](https://twitter.com/chainlit_io)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/chainlit)
+[![GitHub Contributors](https://img.shields.io/github/contributors/chainlit/chainlit)](https://github.com/chainlit/chainlit/graphs/contributors)
 [![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
 
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
@@ -10,14 +12,19 @@ Chainlit is an open-source async Python framework which allows developers to bui
 
 - ✅ ChatGPT-like application
 - ✅ Embedded Chatbot & Software Copilot
+- ✅ Slack & Discord
 - ✅ Custom frontend (build your own agentic experience)
 - ✅ API Endpoint
 
-Full documentation is available [here](https://docs.chainlit.io).
+Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
-Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support** and to get early access to Literal AI, our product to evaluate and monitor LLM applications.
+> [!NOTE]  
+> Contact us [here](https://forms.gle/BX3UNBLmTF75KgZVA) for **Enterprise Support**.
+> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 
-https://github.com/Chainlit/chainlit/assets/13104895/8882af90-fdfa-4b24-8200-1ee96c6c7490
+<p align="center">
+    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" width="80%" />
+</p>
 
 ## Installation
 
@@ -40,8 +47,10 @@ Create a new file `demo.py` with the following code:
 import chainlit as cl
 
 
-@cl.step
-def tool():
+@cl.step(type="tool")
+async def tool():
+    # Fake tool
+    await cl.sleep(2)
     return "Response from the tool!"
 
 
@@ -58,11 +67,12 @@ async def main(message: cl.Message):
         None.
     """
 
-    # Call the tool
-    tool()
+    final_answer = await cl.Message(content="").send()
 
-    # Send the final answer.
-    await cl.Message(content="This is the final answer").send()
+    # Call the tool
+    final_answer.content = await tool()
+
+    await final_answer.update()
 ```
 
 Now run it!
@@ -72,6 +82,7 @@ $ chainlit run demo.py -w
 ```
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
+
 ## 🎉 Key Features and Integrations
 
 Full documentation is available [here](https://docs.chainlit.io). Key features:
@@ -79,7 +90,7 @@ Full documentation is available [here](https://docs.chainlit.io). Key features:
 - [💬 Multi Modal chats](https://docs.chainlit.io/advanced-features/multi-modal)
 - [💭 Chain of Thought visualisation](https://docs.chainlit.io/concepts/step)
 - [💾 Data persistence + human feedback](https://docs.chainlit.io/data-persistence/overview)
-- [🛝 In context Prompt Playground](https://docs.chainlit.io/advanced-features/prompt-playground/overview)
+- [🐛 Debug Mode](https://docs.chainlit.io/data-persistence/enterprise#debug-mode)
 - [👤 Authentication](https://docs.chainlit.io/authentication/overview)
 
 Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:

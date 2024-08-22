@@ -1,14 +1,16 @@
-import { useAuth } from 'api/auth';
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import { Alert, Box, Stack } from '@mui/material';
 
-import { Translator } from 'components/i18n';
-import { Header } from 'components/organisms/header';
-import { ThreadHistorySideBar } from 'components/organisms/threadHistory/sidebar';
+import { sideViewState, useAuth, useConfig } from '@chainlit/react-client';
 
-import { projectSettingsState } from 'state/project';
+import { ElementSideView } from 'components/atoms/elements';
+import { Translator } from 'components/i18n';
+import { TaskList } from 'components/molecules/tasklist/TaskList';
+import { Header } from 'components/organisms/header';
+import { SideBar } from 'components/organisms/sidebar';
+
 import { userEnvState } from 'state/user';
 
 type Props = {
@@ -17,11 +19,12 @@ type Props = {
 
 const Page = ({ children }: Props) => {
   const { isAuthenticated } = useAuth();
-  const projectSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const userEnv = useRecoilValue(userEnvState);
+  const sideViewElement = useRecoilValue(sideViewState);
 
-  if (projectSettings?.userEnv) {
-    for (const key of projectSettings.userEnv || []) {
+  if (config?.userEnv) {
+    for (const key of config.userEnv || []) {
       if (!userEnv[key]) return <Navigate to="/env" />;
     }
   }
@@ -38,15 +41,21 @@ const Page = ({ children }: Props) => {
         width: '100%'
       }}
     >
-      <Header projectSettings={projectSettings} />
       {!isAuthenticated ? (
         <Alert severity="error">
           <Translator path="pages.Page.notPartOfProject" />
         </Alert>
       ) : (
-        <Stack direction="row" height="100%" width="100%" overflow="auto">
-          <ThreadHistorySideBar />
-          {children}
+        <Stack direction="row" height="100%" width="100%">
+          <SideBar />
+          <Stack flexGrow={1}>
+            <Header />
+            <Stack direction="row" flexGrow={1} overflow="auto">
+              {children}
+            </Stack>
+          </Stack>
+          {sideViewElement ? null : <TaskList isMobile={false} />}
+          <ElementSideView />
         </Stack>
       )}
     </Box>

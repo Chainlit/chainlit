@@ -13,12 +13,12 @@ import { Attachments } from 'components/molecules/attachments';
 import HistoryButton from 'components/organisms/chat/history';
 
 import { IAttachment, attachmentsState } from 'state/chat';
-import { chatSettingsOpenState, projectSettingsState } from 'state/project';
+import { chatSettingsOpenState } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
+import MicButton from './MicButton';
 import { SubmitButton } from './SubmitButton';
 import UploadButton from './UploadButton';
-import SpeechButton from './speechButton';
 
 interface Props {
   fileSpec: FileSpec;
@@ -40,7 +40,6 @@ function getLineCount(el: HTMLDivElement) {
 const Input = memo(
   ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
     const [attachments, setAttachments] = useRecoilState(attachmentsState);
-    const [pSettings] = useRecoilState(projectSettingsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
@@ -57,14 +56,21 @@ const Input = memo(
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
 
-    const showTextToSpeech = pSettings?.features.speech_to_text?.enabled;
-
     const { t } = useTranslation();
 
     useEffect(() => {
       const pasteEvent = (event: ClipboardEvent) => {
         if (event.clipboardData && event.clipboardData.items) {
           const items = Array.from(event.clipboardData.items);
+
+          // Attempt to handle text data first
+          const textData = event.clipboardData.getData('text/plain');
+          if (textData) {
+            // Skip file handling if text data is present
+            return;
+          }
+
+          // If no text data, check for files (e.g., images)
           items.forEach((item) => {
             if (item.kind === 'file') {
               const file = item.getAsFile();
@@ -158,13 +164,7 @@ const Input = memo(
             <TuneIcon />
           </IconButton>
         )}
-        {showTextToSpeech ? (
-          <SpeechButton
-            onSpeech={(transcript) => setValue((text) => text + transcript)}
-            language={pSettings.features?.speech_to_text?.language}
-            disabled={disabled}
-          />
-        ) : null}
+        <MicButton disabled={disabled} />
       </>
     );
 
@@ -172,16 +172,15 @@ const Input = memo(
       <Stack
         sx={{
           backgroundColor: 'background.paper',
-          borderRadius: 1,
-          border: (theme) => `1px solid ${theme.palette.divider}`,
+          borderRadius: '1.5rem',
           boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
           textarea: {
             height: '34px',
             maxHeight: '30vh',
             overflowY: 'auto !important',
             resize: 'none',
-            paddingBottom: '0.75rem',
-            paddingTop: '0.75rem',
+            paddingBottom: '0.7rem',
+            paddingTop: '0.7rem',
             color: 'text.primary',
             lineHeight: '24px'
           }

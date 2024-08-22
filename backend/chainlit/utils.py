@@ -1,11 +1,16 @@
 import functools
 import importlib
 import inspect
+import os
+from asyncio import CancelledError
 from typing import Callable
 
+import click
+from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage
+from fastapi import FastAPI
 from packaging import version
 
 
@@ -39,13 +44,14 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
                 return await user_function(**params_values)
             else:
                 return user_function(**params_values)
-        except InterruptedError:
+        except CancelledError:
             pass
         except Exception as e:
             logger.exception(e)
-            await ErrorMessage(
-                content=str(e) or e.__class__.__name__, author="Error"
-            ).send()
+            if with_task:
+                await ErrorMessage(
+                    content=str(e) or e.__class__.__name__, author="Error"
+                ).send()
         finally:
             if with_task:
                 await context.emitter.task_end()
@@ -85,3 +91,43 @@ def check_module_version(name, required_version):
     except ModuleNotFoundError:
         return False
     return version.parse(module.__version__) >= version.parse(required_version)
+
+
+def check_file(target: str):
+    # Define accepted file extensions for Chainlit
+    ACCEPTED_FILE_EXTENSIONS = ("py", "py3")
+
+    _, extension = os.path.splitext(target)
+
+    # Check file extension
+    if extension[1:] not in ACCEPTED_FILE_EXTENSIONS:
+        if extension[1:] == "":
+            raise click.BadArgumentUsage(
+                "Chainlit requires raw Python (.py) files, but the provided file has no extension."
+            )
+        else:
+            raise click.BadArgumentUsage(
+                f"Chainlit requires raw Python (.py) files, not {extension}."
+            )
+
+    if not os.path.exists(target):
+        raise click.BadParameter(f"File does not exist: {target}")
+
+
+def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
+    os.environ["CHAINLIT_ROOT_PATH"] = path
+    os.environ["CHAINLIT_SUBMOUNT"] = "true"
+    from chainlit.config import config, load_module
+    from chainlit.server import app as chainlit_app
+
+    config.run.root_path = path
+    config.run.debug = os.environ.get("CHAINLIT_DEBUG", False)
+
+    check_file(target)
+    # Load the module provided by the user
+    config.run.module_name = target
+    load_module(config.run.module_name)
+
+    ensure_jwt_secret()
+
+    app.mount("/", chainlit_app)

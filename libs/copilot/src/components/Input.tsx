@@ -7,15 +7,12 @@ import { Box, IconButton, Stack, TextField } from '@mui/material';
 
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { Attachments } from '@chainlit/app/src/components/molecules/attachments';
+import MicButton from '@chainlit/app/src/components/organisms/chat/inputBox/MicButton';
 import { SubmitButton } from '@chainlit/app/src/components/organisms/chat/inputBox/SubmitButton';
 import UploadButton from '@chainlit/app/src/components/organisms/chat/inputBox/UploadButton';
-import SpeechButton from '@chainlit/app/src/components/organisms/chat/inputBox/speechButton';
 import WaterMark from '@chainlit/app/src/components/organisms/chat/inputBox/waterMark';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
-import {
-  chatSettingsOpenState,
-  projectSettingsState
-} from '@chainlit/app/src/state/project';
+import { chatSettingsOpenState } from '@chainlit/app/src/state/project';
 import { inputHistoryState } from '@chainlit/app/src/state/userInputHistory';
 import { FileSpec, useChatData } from '@chainlit/react-client';
 
@@ -39,7 +36,6 @@ function getLineCount(el: HTMLDivElement) {
 const Input = memo(
   ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
     const [attachments, setAttachments] = useRecoilState(attachmentsState);
-    const [pSettings] = useRecoilState(projectSettingsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
 
@@ -54,7 +50,6 @@ const Input = memo(
     const [value, setValue] = useState('');
     const [isComposing, setIsComposing] = useState(false);
 
-    const showTextToSpeech = pSettings?.features.speech_to_text?.enabled;
     const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
     const { t } = useTranslation();
@@ -161,7 +156,6 @@ const Input = memo(
           <TextField
             inputRef={ref}
             id="copilot-chat-input"
-            autoFocus
             multiline
             variant="standard"
             autoComplete="false"
@@ -215,17 +209,8 @@ const Input = memo(
                   <TuneIcon fontSize="small" />
                 </IconButton>
               )}
-              {showTextToSpeech ? (
-                <SpeechButton
-                  onSpeech={(transcript) =>
-                    setValue((text) => text + transcript)
-                  }
-                  language={pSettings.features?.speech_to_text?.language}
-                  disabled={disabled}
-                />
-              ) : null}
+              <MicButton disabled={disabled} />
             </Stack>
-
             <Box>
               <WaterMark />
             </Box>

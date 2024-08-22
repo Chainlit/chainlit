@@ -18,6 +18,7 @@ import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import socketio
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -33,20 +34,19 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
-from chainlit.playground.config import get_llm_providers
-from chainlit.telemetry import trace_event
 from chainlit.types import (
+    DeleteFeedbackRequest,
     DeleteThreadRequest,
-    GenerationRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
-    DeleteFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
 from fastapi import (
+    APIRouter,
     Depends,
     FastAPI,
+    Form,
     HTTPException,
     Query,
     Request,
@@ -54,15 +54,16 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi_socketio import SocketManager
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
+
+ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
 
 
 @asynccontextmanager
@@ -71,9 +72,9 @@ async def lifespan(app: FastAPI):
     port = config.run.port
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}"
+        url = f"http://localhost:{port}{ROOT_PATH}"
     else:
-        url = f"http://{host}:{port}"
+        url = f"http://{host}:{port}{ROOT_PATH}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -114,22 +115,33 @@ async def lifespan(app: FastAPI):
                                 logger.error(f"Error reloading module: {e}")
 
                         await asyncio.sleep(1)
-                        await socket.emit("reload", {})
+                        await sio.emit("reload", {})
 
                         break
 
         watch_task = asyncio.create_task(watch_files_for_changes())
 
+    discord_task = None
+
+    if discord_bot_token := os.environ.get("DISCORD_BOT_TOKEN"):
+        from chainlit.discord.app import client
+
+        discord_task = asyncio.create_task(client.start(discord_bot_token))
+
     try:
         yield
     finally:
-        if watch_task:
-            try:
+        try:
+            if watch_task:
                 stop_event.set()
                 watch_task.cancel()
                 await watch_task
-            except asyncio.exceptions.CancelledError:
-                pass
+
+            if discord_task:
+                discord_task.cancel()
+                await discord_task
+        except asyncio.exceptions.CancelledError:
+            pass
 
         if FILES_DIRECTORY.is_dir():
             shutil.rmtree(FILES_DIRECTORY)
@@ -143,9 +155,9 @@ def get_build_dir(local_target: str, packaged_target: str):
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
 
     if config.ui.custom_build and os.path.exists(
-        os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
+        os.path.join(APP_ROOT, config.ui.custom_build)
     ):
-        return os.path.join(APP_ROOT, config.ui.custom_build, packaged_target, "dist")
+        return os.path.join(APP_ROOT, config.ui.custom_build)
     elif os.path.exists(local_build_dir):
         return local_build_dir
     elif os.path.exists(packaged_build_dir):
@@ -157,28 +169,20 @@ def get_build_dir(local_target: str, packaged_target: str):
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/public", StaticFiles(directory="public", check_dir=False), name="public")
-app.mount(
-    "/assets",
-    StaticFiles(
-        packages=[("chainlit", os.path.join(build_dir, "assets"))],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="assets",
+sio = socketio.AsyncServer(
+    cors_allowed_origins=[], async_mode="asgi"
 )
 
-app.mount(
-    "/copilot",
-    StaticFiles(
-        packages=[("chainlit", copilot_build_dir)],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="copilot",
+sio_mount_location = f"{ROOT_PATH}/ws" if ROOT_PATH else "ws"
+
+asgi_app = socketio.ASGIApp(
+    socketio_server=sio,
+    socketio_path=f"{sio_mount_location}/socket.io",
 )
 
+app.mount(f"/{sio_mount_location}", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -188,13 +192,60 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(GZipMiddleware)
+router = APIRouter(prefix=ROOT_PATH)
 
-socket = SocketManager(
-    app,
-    cors_allowed_origins=[],
-    async_mode="asgi",
+app.mount(
+    f"{ROOT_PATH}/public",
+    StaticFiles(directory="public", check_dir=False),
+    name="public",
 )
+
+app.mount(
+    f"{ROOT_PATH}/assets",
+    StaticFiles(
+        packages=[("chainlit", os.path.join(build_dir, "assets"))],
+        follow_symlink=config.project.follow_symlink,
+    ),
+    name="assets",
+)
+
+app.mount(
+    f"{ROOT_PATH}/copilot",
+    StaticFiles(
+        packages=[("chainlit", copilot_build_dir)],
+        follow_symlink=config.project.follow_symlink,
+    ),
+    name="copilot",
+)
+
+
+# -------------------------------------------------------------------------------
+#                               SLACK HANDLER
+# -------------------------------------------------------------------------------
+
+if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
+    from chainlit.slack.app import slack_app_handler
+
+    @router.post("/slack/events")
+    async def slack_endpoint(req: Request):
+        return await slack_app_handler.handle(req)
+
+
+# -------------------------------------------------------------------------------
+#                               TEAMS HANDLER
+# -------------------------------------------------------------------------------
+
+if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
+    from botbuilder.schema import Activity
+    from chainlit.teams.app import adapter, bot
+
+    @router.post("/teams/events")
+    async def teams_endpoint(req: Request):
+        body = await req.json()
+        activity = Activity().deserialize(body)
+        auth_header = req.headers.get("Authorization", "")
+        response = await adapter.process_activity(activity, auth_header, bot.on_turn)
+        return response
 
 
 # -------------------------------------------------------------------------------
@@ -213,15 +264,22 @@ def get_html_template():
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
     default_url = "https://github.com/Chainlit/chainlit"
+    default_meta_image_url = (
+        "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+    )
     url = config.ui.github or default_url
+    meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
+    favicon_path = "/favicon"
 
     tags = f"""<title>{config.ui.name}</title>
+    <link rel="icon" href="{favicon_path}" />
     <meta name="description" content="{config.ui.description}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
-    <meta property="og:image" content="https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png">
-    <meta property="og:url" content="{url}">"""
+    <meta property="og:image" content="{meta_image_url}">
+    <meta property="og:url" content="{url}">
+    <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}</script>"""
 
@@ -251,6 +309,9 @@ def get_html_template():
             content = replace_between_tags(
                 content, "<!-- FONT START -->", "<!-- FONT END -->", font
             )
+        if ROOT_PATH:
+            content = content.replace('href="/', f'href="{ROOT_PATH}/')
+            content = content.replace('src="/', f'src="{ROOT_PATH}/')
         return content
 
 
@@ -259,7 +320,6 @@ def get_user_facing_url(url: URL):
     Return the user facing URL for a given URL.
     Handles deployment with proxies (like cloud run).
     """
-
     chainlit_url = os.environ.get("CHAINLIT_URL")
 
     # No config, we keep the URL as is
@@ -278,12 +338,12 @@ def get_user_facing_url(url: URL):
     return config_url.__str__() + url.path
 
 
-@app.get("/auth/config")
+@router.get("/auth/config")
 async def auth(request: Request):
     return get_configuration()
 
 
-@app.post("/login")
+@router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not config.code.password_auth_callback:
         raise HTTPException(
@@ -312,14 +372,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@app.post("/logout")
+@router.post("/logout")
 async def logout(request: Request, response: Response):
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
     return {"success": True}
 
 
-@app.post("/auth/header")
+@router.post("/auth/header")
 async def header_auth(request: Request):
     if not config.code.header_auth_callback:
         raise HTTPException(
@@ -348,7 +408,7 @@ async def header_auth(request: Request):
     }
 
 
-@app.get("/auth/oauth/{provider_id}")
+@router.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -389,7 +449,7 @@ async def oauth_login(provider_id: str, request: Request):
     return response
 
 
-@app.get("/auth/oauth/{provider_id}/callback")
+@router.get("/auth/oauth/{provider_id}/callback")
 async def oauth_callback(
     provider_id: str,
     request: Request,
@@ -465,49 +525,99 @@ async def oauth_callback(
             "token_type": "bearer",
         }
     )
+
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login/callback?{params}",
+        url=f"{root_path}/login/callback?{params}",
     )
     response.delete_cookie("oauth_state")
     return response
 
 
-@app.post("/generation")
-async def generation(
-    request: GenerationRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+# specific route for azure ad hybrid flow
+@router.post("/auth/oauth/azure-ad-hybrid/callback")
+async def oauth_azure_hf_callback(
+    request: Request,
+    error: Optional[str] = None,
+    code: Annotated[Optional[str], Form()] = None,
+    id_token: Annotated[Optional[str], Form()] = None,
 ):
-    """Handle a completion request from the prompt playground."""
-
-    providers = get_llm_providers()
-
-    try:
-        provider = [p for p in providers if p.id == request.generation.provider][0]
-    except IndexError:
+    provider_id = "azure-ad-hybrid"
+    if config.code.oauth_callback is None:
         raise HTTPException(
-            status_code=404,
-            detail=f"LLM provider '{request.generation.provider}' not found",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No oauth_callback defined",
         )
 
-    trace_event("pp_create_completion")
-    response = await provider.create_completion(request)
+    provider = get_oauth_provider(provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
 
+    if error:
+        params = urllib.parse.urlencode(
+            {
+                "error": error,
+            }
+        )
+        response = RedirectResponse(
+            # FIXME: redirect to the right frontend base url to improve the dev environment
+            url=f"/login?{params}",
+        )
+        return response
+
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing code",
+        )
+
+    url = get_user_facing_url(request.url)
+    token = await provider.get_token(code, url)
+
+    (raw_user_data, default_user) = await provider.get_user_info(token)
+
+    user = await config.code.oauth_callback(
+        provider_id, token, raw_user_data, default_user, id_token
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+
+    access_token = create_jwt(user)
+
+    if data_layer := get_data_layer():
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+
+    params = urllib.parse.urlencode(
+        {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+    )
+
+    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"{root_path}/login/callback?{params}",
+        status_code=302,
+    )
+    response.delete_cookie("oauth_state")
     return response
 
 
-@app.get("/project/llm-providers")
-async def get_providers(
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)]
-):
-    """List the providers."""
-    trace_event("pp_get_llm_providers")
-    providers = get_llm_providers()
-    providers = [p.to_dict() for p in providers]
-    return JSONResponse(content={"providers": providers})
-
-
-@app.get("/project/translations")
+@router.get("/project/translations")
 async def project_translations(
     language: str = Query(default="en-US", description="Language code"),
 ):
@@ -523,7 +633,7 @@ async def project_translations(
     )
 
 
-@app.get("/project/settings")
+@router.get("/project/settings")
 async def project_settings(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
     language: str = Query(default="en-US", description="Language code"),
@@ -538,6 +648,22 @@ async def project_settings(
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
             profiles = [p.to_dict() for p in chat_profiles]
+
+    starters = []
+    if config.code.set_starters:
+        starters = await config.code.set_starters(current_user)
+        if starters:
+            starters = [s.to_dict() for s in starters]
+
+    if config.code.on_audio_chunk:
+        config.features.audio.enabled = True
+
+    debug_url = None
+    data_layer = get_data_layer()
+
+    if data_layer and config.run.debug:
+        debug_url = await data_layer.build_debug_url()
+
     return JSONResponse(
         content={
             "ui": config.ui.to_dict(),
@@ -547,11 +673,13 @@ async def project_settings(
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
+            "starters": starters,
+            "debugUrl": debug_url,
         }
     )
 
 
-@app.put("/feedback")
+@router.put("/feedback")
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
@@ -569,7 +697,8 @@ async def update_feedback(
 
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
-@app.delete("/feedback")
+
+@router.delete("/feedback")
 async def delete_feedback(
     request: Request,
     payload: DeleteFeedbackRequest,
@@ -588,14 +717,13 @@ async def delete_feedback(
     return JSONResponse(content={"success": True})
 
 
-@app.post("/project/threads")
+@router.post("/project/threads")
 async def get_user_threads(
     request: Request,
     payload: GetThreadsRequest,
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get the threads page by page."""
-    # Only show the current user threads
 
     data_layer = get_data_layer()
 
@@ -603,15 +731,18 @@ async def get_user_threads(
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
     if not isinstance(current_user, PersistedUser):
-        raise HTTPException(status_code=400, detail="User not persisted")
-
-    payload.filter.userId = current_user.id
+        persisted_user = await data_layer.get_user(identifier=current_user.identifier)
+        if not persisted_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        payload.filter.userId = persisted_user.id
+    else:
+        payload.filter.userId = current_user.id
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
     return JSONResponse(content=res.to_dict())
 
 
-@app.get("/project/thread/{thread_id}")
+@router.get("/project/thread/{thread_id}")
 async def get_thread(
     request: Request,
     thread_id: str,
@@ -629,7 +760,7 @@ async def get_thread(
     return JSONResponse(content=res)
 
 
-@app.get("/project/thread/{thread_id}/element/{element_id}")
+@router.get("/project/thread/{thread_id}/element/{element_id}")
 async def get_thread_element(
     request: Request,
     thread_id: str,
@@ -648,7 +779,7 @@ async def get_thread_element(
     return JSONResponse(content=res)
 
 
-@app.delete("/project/thread")
+@router.delete("/project/thread")
 async def delete_thread(
     request: Request,
     payload: DeleteThreadRequest,
@@ -669,7 +800,7 @@ async def delete_thread(
     return JSONResponse(content={"success": True})
 
 
-@app.post("/project/file")
+@router.post("/project/file")
 async def upload_file(
     session_id: str,
     file: UploadFile,
@@ -705,7 +836,7 @@ async def upload_file(
     return JSONResponse(file_response)
 
 
-@app.get("/project/file/{file_id}")
+@router.get("/project/file/{file_id}")
 async def get_file(
     file_id: str,
     session_id: Optional[str] = None,
@@ -727,7 +858,7 @@ async def get_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/files/{filename:path}")
+@router.get("/files/{filename:path}")
 async def serve_file(
     filename: str,
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
@@ -745,7 +876,7 @@ async def serve_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/favicon")
+@router.get("/favicon")
 async def get_favicon():
     custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
     files = glob.glob(custom_favicon_path)
@@ -760,7 +891,7 @@ async def get_favicon():
     return FileResponse(favicon_path, media_type=media_type)
 
 
-@app.get("/logo")
+@router.get("/logo")
 async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     theme_value = theme.value if theme else Theme.light.value
     logo_path = None
@@ -782,19 +913,39 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
     return FileResponse(logo_path, media_type=media_type)
 
 
-@app.head('/')
+@router.get("/avatars/{avatar_id}")
+async def get_avatar(avatar_id: str):
+    if avatar_id == "default":
+        avatar_id = config.ui.name
+
+    avatar_id = avatar_id.strip().lower().replace(" ", "_")
+
+    avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
+
+    files = glob.glob(avatar_path)
+
+    if files:
+        avatar_path = files[0]
+        media_type, _ = mimetypes.guess_type(avatar_path)
+        return FileResponse(avatar_path, media_type=media_type)
+    else:
+        return await get_favicon()
+
+
+@router.head("/")
 def status_check():
     return {"message": "Site is operational"}
 
 
-def register_wildcard_route_handler():
-    @app.get("/{path:path}")
-    async def serve(request: Request, path: str):
-        html_template = get_html_template()
-        """Serve the UI files."""
-        response = HTMLResponse(content=html_template, status_code=200)
+@router.get("/{full_path:path}")
+async def serve():
+    html_template = get_html_template()
+    """Serve the UI files."""
+    response = HTMLResponse(content=html_template, status_code=200)
 
-        return response
+    return response
 
+
+app.include_router(router)
 
 import chainlit.socket  # noqa

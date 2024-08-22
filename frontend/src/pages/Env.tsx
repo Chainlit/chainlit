@@ -1,28 +1,32 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';
+
+import { useConfig } from '@chainlit/react-client';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
 import { Header } from 'components/organisms/header';
 
-import { projectSettingsState } from 'state/project';
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import { userEnvState } from 'state/user';
 
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
+  const layoutMaxWidth = useLayoutMaxWidth();
 
   const navigate = useNavigate();
 
   const { t } = useTranslation();
 
-  const requiredKeys = pSettings?.userEnv || [];
+  const requiredKeys = config?.userEnv || [];
 
   const initialValues: Record<string, string> = {};
   const _schema: Record<string, yup.StringSchema> = {};
@@ -84,7 +88,7 @@ export default function Env() {
         flexGrow={1}
         gap={2}
         sx={{
-          maxWidth: '60rem',
+          maxWidth: layoutMaxWidth,
           width: '100%',
           mx: 'auto'
         }}

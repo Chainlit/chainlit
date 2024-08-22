@@ -2,7 +2,7 @@ import { Backdrop, Stack, Typography } from '@mui/material';
 
 import { Translator } from 'components/i18n';
 
-import FileIcon from 'assets/file';
+import ImageIcon from 'assets/Image';
 
 export default function DropScreen() {
   return (
@@ -13,8 +13,10 @@ export default function DropScreen() {
       }}
     >
       <Stack alignItems="center" gap={2}>
-        <FileIcon sx={{ width: '100px', height: '100px' }} />
-        <Typography color="text.secondary" fontWeight={700} fontSize="1.5rem">
+        <ImageIcon
+          sx={{ width: '100px', height: '100px', color: 'grey.400' }}
+        />
+        <Typography color="grey.200" fontWeight={600} fontSize="1.5rem">
           <Translator path="components.organisms.chat.dropScreen.dropYourFilesHere" />
         </Typography>
       </Stack>

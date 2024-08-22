@@ -6,9 +6,285 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing is unreleased!
+Nothing unreleased!
 
-## [1.0.500] - 2023-04-02
+## [1.1.403rc0] - 2024-08-13
+
+### Fixed
+
+- Langchain Callback handler IndexError
+- Attempt to fix websocket issues
+
+## [1.1.402] - 2024-08-07
+
+### Added
+
+- The `User` class now has a `display_name` field. It will not be persisted by the data layer.
+- The logout button will now reload the page (needed for custom auth providers)
+
+## [1.1.401] - 2024-08-02
+
+### Changed
+
+- Directly log step input args by name instead of wrapping them in "args" for readability.
+
+### Fixed
+
+- Langchain Callback handler ValueError('not enough values to unpack (expected 2, got 0)')
+
+## [1.1.400] - 2024-07-29
+
+### Changed
+
+- hide_cot becomes cot and has three possible values: hidden, tool_call, full
+- User feedback are now scoring an entire run instead of a specific message
+- Slack/Teams/Discord DM threads are now split by day
+- Slack DM now also use threads
+- Avatars are always displayed at the root level of the conversation
+
+### Removed
+
+- disable_feedback has been removed
+- root_message has been removed
+
+## [1.1.306] - 2024-07-03
+
+### Added
+
+- Messages are now editable. You can disable this feature with `config.features.edit_message = false`
+- `cl.chat_context` to help keeping track of the messages of the current thread
+- You can now enable debug_mode when mounting Chainlit as a sub app by setting the `CHAINLIT_DEBUG` to `true`.
+
+### Fixed
+
+- Message are now collapsible if too long
+- Only first level tool calls are displayed
+- OAuth redirection when mounting Chainlit on a FastAPI app should now work
+- The Langchain callback handler should better capture chain runs
+- The Llama Index callback handler should now work with other decorators
+
+## [1.1.305] - 2024-06-26
+
+### Added
+
+- Mistral AI instrumentation
+
+## [1.1.304] - 2024-06-21
+
+### Fixed
+
+- OAuth final redirection should account for root path if provided
+
+## [1.1.303] - 2024-06-20
+
+### Fixed
+
+- OAuth URL redirection should be correctly formed when using CHAINLIT_URL + submounted chainlit app
+
+## [1.1.302] - 2024-06-16
+
+### Added
+
+- Width and height option for the copilot bubble
+
+### Fixed
+
+- Chat profile icon in copilot should load
+- Theme should work with Copilot
+
+### Removed
+
+- Running toast when an action is running
+
+## [1.1.301] - 2024-06-14
+
+### Fixed
+
+- Azure AD oauth get_user_info not implemented error
+
+## [1.1.300] - 2024-06-13
+
+### Added
+
+- `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
+- Teams integration
+- Expand copilot button
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
+- `default` theme config in `config.toml`
+- If only one OAuth provider is set, automatically redirect the user to it
+- Input streaming for tool calls
+
+### Changed
+
+- **[BREAKING]** Custom endpoints have been reworked. You should now mount your Chainlit app as a FastAPI subapp.
+- **[BREAKING]** Avatars have been reworked. `cl.Avatar` has been removed, instead place your avatars by name in `/public/avatars/*`
+- **[BREAKING]** The `running`, `took_one` and `took_other` translations have been replaced by `used`.
+- **[BREAKING]** `root` attribute of `cl.Step` has been removed. Use `cl.Message` to send root level messages.
+- Chain of Thought has been reworked. Only steps of type `tool` will be displayed if `hide_cot` is false
+- The `show_readme_as_default` config has been removed
+- No longer collapse root level messages
+- The blue alert "Continuing chat" has been removed.
+
+### Fix
+
+- The Chat Profile description should now disappear when not hovered.
+- Error handling of steps has been improved
+- No longer stream the first token twice
+- Copilot should now work as expected even if the user is closing/reopening it
+- Copilot CSS should no longer leak/be impacted by the host website CSS
+- Fix various `cl.Context` errors
+- Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
+
+## [1.1.202] - 2024-05-22
+
+### Added
+
+- Support for video players like youtube or vimeo
+
+### Fixed
+
+- Fix audio capture on windows browsers
+
+## [1.1.201] - 2024-05-21
+
+### Fixed
+
+- Intermediary steps button placement
+
+## [1.1.200] - 2024-05-21
+
+### Changed
+
+- User message UI has been updated
+- Loading indicator has been improved and visually updated
+- Icons have been updated
+- Dark theme is now the default
+
+### Fixed
+
+- Scroll issues on mobile browsers
+- Github button now showing
+
+## [1.1.101] - 2024-05-14
+
+### Added
+
+- The discord bot now shows "typing" while responding
+
+### Fixed
+
+- Discord and Slack bots should no longer fail to respond if the data layer fails
+
+## [1.1.0] - 2024-05-13
+
+### Added
+
+- You can know serve your Chainlit app as a Slack bot
+- You can know serve your Chainlit app as a Discord bot
+- `cl.on_audio_chunk` decorator to process incoming the user incoming audio stream
+- `cl.on_audio_end` decorator to react to the end of the user audio stream
+- The `cl.Audio` element now has an `auto_play` property
+- `layout` theme config, wide or default
+- `http_referer` is now available in `cl.user_session`
+
+### Changed
+
+- The UI has been revamped, especially the navigation
+- The arrow up button has been removed from the input bar, however pressing the arrow up key still opens the last inputs menu
+- The user session will no longer be persisted as metadata if > 1mb
+- **[breaking]** the `send()` method on `cl.Message` now returns the message instead of the message id
+- **[breaking]** The `multi_modal` feature has been renamed `spontaneous_file_upload` in the config
+- Element display property now defaults to `inline` instead of `side`
+- The SQL Alchemy data layer logging has been improved
+
+### Fixed
+
+- Fixed a bug disconnecting the user when loading the chat history
+- Elements based on an URL should now have a mime type
+- Stopping a task should now work better (using asyncio task.cancel)
+
+## [1.0.506] - 2024-04-30
+
+### Added
+
+- add support for multiline option in TextInput chat settings field - @kevinwmerritt
+
+### Changed
+
+- disable gzip middleware to prevent a compression issue on safari
+
+### Fixed
+
+- pasting from microsoft products generates text instead of an image
+- do not prevent thread history revalidation - @kevinwmerritt
+- display the label instead of the value for menu item - @kevinwmerritt
+
+### Added
+
+## [1.0.505] - 2024-04-23
+
+### Added
+
+- The user's browser language configuration is available in `cl.user_session.get("languages")`
+- Allow html in text elements - @jdb78
+- Allow for setting a ChatProfile default - @kevinwmerritt
+
+### Changed
+
+- The thread history refreshes right after a new thread is created.
+- The thread auto-tagging feature is now opt-in using `auto_tag_thread` in the config.toml file
+
+### Fixed
+
+- Fixed incorrect step ancestor in the OpenAI instrumentation
+- Enabled having a `storage_provider` set to `None` in SQLAlchemyDataLayer - @mohamedalani
+- Correctly serialize `generation` in SQLAlchemyDataLayer - @mohamedalani
+
+## [1.0.504] - 2024-04-16
+
+### Changed
+
+- Chainlit apps should function correctly even if the data layer is down
+
+## [1.0.503] - 2024-04-15
+
+### Added
+
+- Enable persisting threads using a Custom Data Layer (through SQLAlchemy) - @hayescode
+
+### Changed
+
+- React-client: Expose `sessionId` in `useChatSession`
+- Add chat profile as thread tag metadata
+
+### Fixed
+
+- Add quotes around the chainlit create-secret CLI output to avoid any issues with special characters
+
+## [1.0.502] - 2024-04-08
+
+### Added
+
+- Actions now trigger conversation persistence
+
+## [1.0.501] - 2024-04-08
+
+### Added
+
+- Messages and steps now accept tags and metadata (useful for the data layer)
+
+### Changed
+
+- The LLama Index callback handler should now show retrieved chunks in the intermadiary steps
+- Renamed the Literal environment variable to `LITERAL_API_URL` (it used to be `LITERAL_SERVER`)
+
+### Fixed
+
+- Starting a new conversation should close the element side bar
+- Resolved security issues by upgrading starlette dependency
+
+## [1.0.500] - 2024-04-02
 
 ### Added
 
@@ -22,6 +298,7 @@ Nothing is unreleased!
 
 - Translated will no longer flash at app load
 - Llama Index callback handler has been updated
+- File watcher should now properly refresh the app when the code changes
 - Markdown titles should now have the correct line height
 
 ### Changed
@@ -30,7 +307,7 @@ Nothing is unreleased!
 - Feedback no longer has a -1 value. Instead a delete_feedback method has been added to the data layer
 - ThreadDict no longer has the full User object. Instead it has user_id and user_identifier fields
 
-## [1.0.400] - 2023-03-06
+## [1.0.400] - 2024-03-06
 
 ### Added
 
@@ -45,7 +322,7 @@ Nothing is unreleased!
 
 - Enforce UTC DateTimes
 
-## [1.0.300] - 2023-02-19
+## [1.0.300] - 2024-02-19
 
 ### Added
 
@@ -56,7 +333,7 @@ Nothing is unreleased!
 
 - The `ChatGeneration` and `CompletionGeneration` has been reworked to better match the OpenAI semantics
 
-## [1.0.200] - 2023-01-22
+## [1.0.200] - 2024-01-22
 
 ### Added
 
@@ -68,7 +345,7 @@ Nothing is unreleased!
 
 - Tasklist flickering
 
-## [1.0.101] - 2023-01-12
+## [1.0.101] - 2024-01-12
 
 ### Fixed
 
@@ -76,7 +353,7 @@ Nothing is unreleased!
 - Toggling hide_cot parameter in the UI should correctly hide the `took n steps` buttons
 - `running` loading button should only be displayed once when `hide_cot` is true and a message is being streamed
 
-## [1.0.100] - 2023-01-10
+## [1.0.100] - 2024-01-10
 
 ### Added
 
@@ -93,7 +370,7 @@ Nothing is unreleased!
 - If `hide_cot` is set to `true`, the UI will never get the intermediary steps (but they will still be persisted)
 - Fixed a bug preventing to open past chats
 
-## [1.0.0] - 2023-01-08
+## [1.0.0] - 2024-01-08
 
 ### Added
 

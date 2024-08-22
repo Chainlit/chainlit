@@ -4,6 +4,8 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+
 import type { IMessageElement } from 'client-types/';
 
 import { Element } from './Element';
@@ -14,6 +16,8 @@ interface ElementViewProps {
 }
 
 const ElementView = ({ element, onGoBack }: ElementViewProps) => {
+  const layoutMaxWidth = useLayoutMaxWidth();
+
   return (
     <Box
       display="flex"
@@ -25,7 +29,7 @@ const ElementView = ({ element, onGoBack }: ElementViewProps) => {
       mx="auto"
       sx={{
         width: '100%',
-        maxWidth: '60rem',
+        maxWidth: layoutMaxWidth,
         color: 'text.primary'
       }}
       id="element-view"

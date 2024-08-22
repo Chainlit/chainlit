@@ -10,7 +10,6 @@ describe('Elements', () => {
     cy.get('.step').eq(0).find('.element-link').should('have.length', 0);
     cy.get('.step').eq(0).find('.inline-pdf').should('have.length', 0);
 
-    cy.get('#gen_img-done').should('exist').click();
     cy.get('.step').eq(1).find('.inline-image').should('have.length', 1);
 
     cy.get('.step').eq(2).find('.inline-image').should('have.length', 1);
