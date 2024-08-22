@@ -1,6 +1,6 @@
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
@@ -9,85 +9,93 @@ import { Theme, ThemeProvider } from '@mui/material/styles';
 
 import { overrideTheme } from '@chainlit/app/src/App';
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
-import { apiClientState } from '@chainlit/app/src/state/apiClient';
-import {
-  IProjectSettings,
-  projectSettingsState
-} from '@chainlit/app/src/state/project';
 import { settingsState } from '@chainlit/app/src/state/settings';
 import { makeTheme } from '@chainlit/app/src/theme';
-import { useAuth } from '@chainlit/react-client';
+import { ChainlitContext, useAuth, useConfig } from '@chainlit/react-client';
 
 interface Props {
-  config: IWidgetConfig;
+  widgetConfig: IWidgetConfig;
 }
 
-export default function App({ config }: Props) {
-  const { apiClient, accessToken } = useContext(WidgetContext);
-  const { setAccessToken } = useAuth(apiClient);
-  const [projectSettings, setProjectSettings] =
-    useRecoilState(projectSettingsState);
-  const setApiClient = useSetRecoilState(apiClientState);
+declare global {
+  interface Window {
+    cl_shadowRootElement: HTMLDivElement;
+  }
+}
+
+export default function App({ widgetConfig }: Props) {
+  const apiClient = useContext(ChainlitContext);
+  const { accessToken } = useContext(WidgetContext);
+  const { config } = useConfig(accessToken);
+  const { setAccessToken } = useAuth();
   const [settings, setSettings] = useRecoilState(settingsState);
   const [theme, setTheme] = useState<Theme | null>(null);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
 
   useEffect(() => {
-    setAccessToken(config.accessToken);
-  }, [config.accessToken]);
+    setAccessToken(widgetConfig.accessToken);
+  }, [widgetConfig.accessToken]);
 
   useEffect(() => {
-    setApiClient(apiClient);
-    if (!projectSettings) {
-      apiClient
-        .get(`/project/settings?language=${languageInUse}`, accessToken)
-        .then((res) => res.json())
-        .then((data: IProjectSettings) => {
-          window.theme = data.ui.theme;
-          data.ui.hide_cot = config.showCot ? data.ui.hide_cot : true;
-          setSettings((old) => ({
-            ...old,
-            theme: config.theme ? config.theme : old.theme,
-            hideCot: data.ui.hide_cot!
-          }));
+    if (!config) return;
+    const themeVariant = widgetConfig.theme || config.ui.theme.default;
+    window.theme = config.ui.theme;
+    widgetConfig.theme = themeVariant;
+    setSettings((old) => ({
+      ...old,
+      theme: themeVariant
+    }));
 
-          const _theme = overrideTheme(
-            makeTheme(config.theme || settings.theme, config.fontFamily, {
-              // Force mobile view
-              values: {
-                xs: 0,
-                sm: 10000,
-                md: 10000,
-                lg: 10000,
-                xl: 10000
-              }
-            })
-          );
-          setTheme(_theme);
-          setProjectSettings(data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-      apiClient
-        .get(`/project/translations?language=${languageInUse}`, accessToken)
-        .then((res) => res.json())
-        .then((data) => {
-          i18n.addResourceBundle(
-            languageInUse,
-            'translation',
-            data.translation
-          );
-          i18n.changeLanguage(languageInUse);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    const _theme = overrideTheme(
+      makeTheme(themeVariant || settings.theme, widgetConfig.fontFamily, {
+        // Force mobile view
+        values: {
+          xs: 0,
+          sm: 10000,
+          md: 10000,
+          lg: 10000,
+          xl: 10000
+        }
+      })
+    );
+    if (!_theme.components) {
+      _theme.components = {};
     }
-  }, []);
+    _theme.components = {
+      ..._theme.components,
+      MuiPopover: {
+        defaultProps: {
+          container: window.cl_shadowRootElement
+        }
+      },
+      MuiPopper: {
+        defaultProps: {
+          container: window.cl_shadowRootElement
+        }
+      },
+      MuiModal: {
+        defaultProps: {
+          container: window.cl_shadowRootElement
+        }
+      }
+    };
 
-  if (!projectSettings || !theme) {
+    setTheme(_theme);
+
+    apiClient
+      .get(`/project/translations?language=${languageInUse}`, accessToken)
+      .then((res) => res.json())
+      .then((data) => {
+        i18n.addResourceBundle(languageInUse, 'translation', data.translation);
+        i18n.changeLanguage(languageInUse);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [config]);
+
+  if (!config || !theme) {
     return null;
   }
 
@@ -105,7 +113,7 @@ export default function App({ config }: Props) {
           }
         }}
       />
-      <Widget config={config} />
+      <Widget config={widgetConfig} />
     </ThemeProvider>
   );
 }

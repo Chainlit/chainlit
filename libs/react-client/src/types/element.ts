@@ -2,7 +2,6 @@ export type IElement =
   | IImageElement
   | ITextElement
   | IPdfElement
-  | IAvatarElement
   | ITasklistElement
   | IAudioElement
   | IVideoElement
@@ -38,10 +37,6 @@ interface TMessageElement<T> extends TElement<T> {
 
 export interface IImageElement extends TMessageElement<'image'> {
   size?: IElementSize;
-}
-
-export interface IAvatarElement extends TElement<'avatar'> {
-  name: string;
 }
 
 export interface ITextElement extends TMessageElement<'text'> {

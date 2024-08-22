@@ -114,7 +114,7 @@ class TestDataLayer(cl_data.BaseDataLayer):
         return "admin"
 
     async def list_threads(
-        self, pagination: cl_data.Pagination, filter: cl_data.ThreadFilter
+        self, pagination: cl_data.Pagination, filters: cl_data.ThreadFilter
     ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
         return cl_data.PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
@@ -124,7 +124,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str):
-        return next((t for t in thread_history if t["id"] == thread_id), None)
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
+        if not thread:
+            return None
+        thread["steps"] = sorted(thread["steps"], key=lambda x: x["createdAt"])
+        return thread
 
     async def delete_thread(self, thread_id: str):
         deleted_thread_ids.append(thread_id)
@@ -134,14 +138,12 @@ cl_data._data_layer = TestDataLayer()
 
 
 async def send_count():
-    await cl.Message(
-        f"Create step counter: {create_step_counter}", disable_feedback=True
-    ).send()
+    await cl.Message(f"Create step counter: {create_step_counter}").send()
 
 
 @cl.on_chat_start
 async def main():
-    await cl.Message("Hello, send me a message!", disable_feedback=True).send()
+    await cl.Message("Hello, send me a message!").send()
     await send_count()
 
 
@@ -150,7 +152,7 @@ async def handle_message():
     # Wait for queue to be flushed
     await cl.sleep(2)
     await send_count()
-    async with cl.Step(root=True, disable_feedback=True) as step:
+    async with cl.Step(type="tool", name="thinking") as step:
         step.output = "Thinking..."
     await cl.Message("Ok!").send()
     await send_count()

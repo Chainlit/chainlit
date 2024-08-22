@@ -1,40 +1,29 @@
-import { useAuth } from 'api/auth';
+import { Avatar, IconButton, IconButtonProps } from '@mui/material';
 
-import SettingsIcon from '@mui/icons-material/Settings';
-import { Avatar, Button, ButtonProps, Typography } from '@mui/material';
+import { useAuth } from '@chainlit/react-client';
 
-export default function UserAvatar(props: ButtonProps) {
+import UserIcon from 'assets/user';
+
+export default function UserAvatar(props: IconButtonProps) {
   const { user } = useAuth();
-
+  const displayName = user?.display_name || user?.identifier;
   return (
-    <Button
-      sx={{
-        color: 'text.secondary',
-        textTransform: 'none',
-        justifyContent: 'start'
-      }}
-      startIcon={
-        user ? (
-          <Avatar
-            sx={{
-              width: 24,
-              height: 24,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText'
-            }}
-            src={user.metadata?.image || undefined}
-          >
-            <Typography variant="caption">
-              {user.identifier?.[0]?.toUpperCase()}
-            </Typography>
-          </Avatar>
+    <IconButton {...props}>
+      <Avatar
+        sx={{
+          width: 32,
+          height: 32,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText'
+        }}
+        src={user?.metadata?.image || undefined}
+      >
+        {user ? (
+          displayName?.[0]?.toUpperCase()
         ) : (
-          <SettingsIcon sx={{ height: 20, width: 20 }} />
-        )
-      }
-      {...props}
-    >
-      <Typography noWrap>{user ? user.identifier : 'Settings'}</Typography>
-    </Button>
+          <UserIcon sx={{ height: 20, width: 20 }} />
+        )}
+      </Avatar>
+    </IconButton>
   );
 }

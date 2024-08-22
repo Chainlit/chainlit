@@ -2,14 +2,14 @@ import json
 import ssl
 import uuid
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
 import aiohttp
 from chainlit.context import context
 from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
-from chainlit.element import Avatar, ElementDict
+from chainlit.element import ElementDict
 from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.types import (
@@ -57,12 +57,16 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self.async_session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)  # type: ignore
         if storage_provider:
             self.storage_provider: Optional[BaseStorageClient] = storage_provider
-            if self.show_logger: logger.info("SQLAlchemyDataLayer storage client initialized")
+            if self.show_logger:
+                logger.info("SQLAlchemyDataLayer storage client initialized")
         else:
             self.storage_provider = None
             logger.warn(
                 "SQLAlchemyDataLayer storage client is not initialized and elements will not be persisted!"
             )
+
+    async def build_debug_url(self) -> str:
+        return ""
 
     ###### SQL Helpers ######
     async def execute_sql(
@@ -104,7 +108,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     ###### User ######
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
-        if self.show_logger: logger.info(f"SQLAlchemy: get_user, identifier={identifier}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_user, identifier={identifier}")
         query = "SELECT * FROM users WHERE identifier = :identifier"
         parameters = {"identifier": identifier}
         result = await self.execute_sql(query=query, parameters=parameters)
@@ -114,20 +119,23 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return None
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
-        if self.show_logger: logger.info(f"SQLAlchemy: create_user, user_identifier={user.identifier}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: create_user, user_identifier={user.identifier}")
         existing_user: Optional["PersistedUser"] = await self.get_user(user.identifier)
         user_dict: Dict[str, Any] = {
             "identifier": str(user.identifier),
             "metadata": json.dumps(user.metadata) or {},
         }
         if not existing_user:  # create the user
-            if self.show_logger: logger.info("SQLAlchemy: create_user, creating the user")
+            if self.show_logger:
+                logger.info("SQLAlchemy: create_user, creating the user")
             user_dict["id"] = str(uuid.uuid4())
             user_dict["createdAt"] = await self.get_current_timestamp()
             query = """INSERT INTO users ("id", "identifier", "createdAt", "metadata") VALUES (:id, :identifier, :createdAt, :metadata)"""
             await self.execute_sql(query=query, parameters=user_dict)
         else:  # update the user
-            if self.show_logger: logger.info("SQLAlchemy: update user metadata")
+            if self.show_logger:
+                logger.info("SQLAlchemy: update user metadata")
             query = """UPDATE users SET "metadata" = :metadata WHERE "identifier" = :identifier"""
             await self.execute_sql(
                 query=query, parameters=user_dict
@@ -136,18 +144,20 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     ###### Threads ######
     async def get_thread_author(self, thread_id: str) -> str:
-        if self.show_logger: logger.info(f"SQLAlchemy: get_thread_author, thread_id={thread_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_thread_author, thread_id={thread_id}")
         query = """SELECT "userIdentifier" FROM threads WHERE "id" = :id"""
         parameters = {"id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
-        if isinstance(result, list) and result[0]:
+        if isinstance(result, list) and result:
             author_identifier = result[0].get("userIdentifier")
             if author_identifier is not None:
                 return author_identifier
         raise ValueError(f"Author not found for thread_id {thread_id}")
 
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
-        if self.show_logger: logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_thread, thread_id={thread_id}")
         user_threads: Optional[List[ThreadDict]] = await self.get_all_user_threads(
             thread_id=thread_id
         )
@@ -164,7 +174,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ):
-        if self.show_logger: logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
         if context.session.user is not None:
             user_identifier = context.session.user.identifier
         else:
@@ -201,7 +212,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         await self.execute_sql(query=query, parameters=parameters)
 
     async def delete_thread(self, thread_id: str):
-        if self.show_logger: logger.info(f"SQLAlchemy: delete_thread, thread_id={thread_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: delete_thread, thread_id={thread_id}")
         # Delete feedbacks/elements/steps/thread
         feedbacks_query = """DELETE FROM feedbacks WHERE "forId" IN (SELECT "id" FROM steps WHERE "threadId" = :id)"""
         elements_query = """DELETE FROM elements WHERE "threadId" = :id"""
@@ -216,9 +228,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def list_threads(
         self, pagination: Pagination, filters: ThreadFilter
     ) -> PaginatedResponse:
-        if self.show_logger: logger.info(
-            f"SQLAlchemy: list_threads, pagination={pagination}, filters={filters}"
-        )
+        if self.show_logger:
+            logger.info(
+                f"SQLAlchemy: list_threads, pagination={pagination}, filters={filters}"
+            )
         if not filters.userId:
             raise ValueError("userId is required")
         all_user_threads: List[ThreadDict] = (
@@ -276,7 +289,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Steps ######
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
-        if self.show_logger: logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
         if not getattr(context.session.user, "id", None):
             raise ValueError("No authenticated user in context")
         step_dict["showInput"] = (
@@ -306,16 +320,18 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def update_step(self, step_dict: "StepDict"):
-        if self.show_logger: logger.info(f"SQLAlchemy: update_step, step_id={step_dict.get('id')}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: update_step, step_id={step_dict.get('id')}")
         await self.create_step(step_dict)
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
-        if self.show_logger: logger.info(f"SQLAlchemy: delete_step, step_id={step_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: delete_step, step_id={step_id}")
         # Delete feedbacks/elements/steps
         feedbacks_query = """DELETE FROM feedbacks WHERE "forId" = :id"""
         elements_query = """DELETE FROM elements WHERE "forId" = :id"""
-        steps_query = """DELETE FROM steps WHERE "forId" = :id"""
+        steps_query = """DELETE FROM steps WHERE "id" = :id"""
         parameters = {"id": step_id}
         await self.execute_sql(query=feedbacks_query, parameters=parameters)
         await self.execute_sql(query=elements_query, parameters=parameters)
@@ -323,7 +339,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
-        if self.show_logger: logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: upsert_feedback, feedback_id={feedback.id}")
         feedback.id = feedback.id or str(uuid.uuid4())
         feedback_dict = asdict(feedback)
         parameters = {
@@ -345,7 +362,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return feedback.id
 
     async def delete_feedback(self, feedback_id: str) -> bool:
-        if self.show_logger: logger.info(f"SQLAlchemy: delete_feedback, feedback_id={feedback_id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: delete_feedback, feedback_id={feedback_id}")
         query = """DELETE FROM feedbacks WHERE "id" = :feedback_id"""
         parameters = {"feedback_id": feedback_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -354,11 +372,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Elements ######
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        if self.show_logger: logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
         if not getattr(context.session.user, "id", None):
             raise ValueError("No authenticated user in context")
-        if isinstance(element, Avatar):  # Skip creating elements of type avatar
-            return
         if not self.storage_provider:
             logger.warn(
                 f"SQLAlchemy: create_element error. No blob_storage_client is configured!"
@@ -416,8 +433,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
-    async def delete_element(self, element_id: str):
-        if self.show_logger: logger.info(f"SQLAlchemy: delete_element, element_id={element_id}")
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: delete_element, element_id={element_id}")
         query = """DELETE FROM elements WHERE "id" = :id"""
         parameters = {"id": element_id}
         await self.execute_sql(query=query, parameters=parameters)
@@ -429,7 +447,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self, user_id: Optional[str] = None, thread_id: Optional[str] = None
     ) -> Optional[List[ThreadDict]]:
         """Fetch all user threads up to self.user_thread_limit, or one thread by id if thread_id is provided."""
-        if self.show_logger: logger.info(f"SQLAlchemy: get_all_user_threads")
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
                 "id" AS thread_id,
@@ -470,7 +489,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."type" AS step_type,
                 s."threadId" AS step_threadid,
                 s."parentId" AS step_parentid,
-                s."disableFeedback" AS step_disablefeedback,
                 s."streaming" AS step_streaming,
                 s."waitForAnswer" AS step_waitforanswer,
                 s."isError" AS step_iserror,
@@ -549,9 +567,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         type=step_feedback["step_type"],
                         threadId=thread_id,
                         parentId=step_feedback.get("step_parentid"),
-                        disableFeedback=step_feedback.get(
-                            "step_disablefeedback", False
-                        ),
                         streaming=step_feedback.get("step_streaming", False),
                         waitForAnswer=step_feedback.get("step_waitforanswer"),
                         isError=step_feedback.get("step_iserror"),
@@ -563,7 +578,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
-                            if step_feedback["step_showinput"] == "true" 
+                            if step_feedback["step_showinput"] == "true"
                             else None
                         ),
                         output=step_feedback.get("step_output", ""),

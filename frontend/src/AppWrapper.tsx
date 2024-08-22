@@ -1,62 +1,32 @@
 import App from 'App';
-import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import getRouterBasename from 'utils/router';
 
-import { useApi } from '@chainlit/react-client';
-
-import { apiClientState } from 'state/apiClient';
-import { IProjectSettings, projectSettingsState } from 'state/project';
-import { settingsState } from 'state/settings';
+import { useApi, useAuth, useConfig } from '@chainlit/react-client';
 
 export default function AppWrapper() {
-  const apiClient = useRecoilValue(apiClientState);
-  const [projectSettings, setProjectSettings] =
-    useRecoilState(projectSettingsState);
-  const setAppSettings = useSetRecoilState(settingsState);
   const { isAuthenticated, isReady } = useAuth();
-
+  const { language: languageInUse } = useConfig();
   const { i18n } = useTranslation();
-
-  const languageInUse = navigator.language || 'en-US';
 
   function handleChangeLanguage(languageBundle: any): void {
     i18n.addResourceBundle(languageInUse, 'translation', languageBundle);
     i18n.changeLanguage(languageInUse);
   }
 
-  const { data } = useApi<IProjectSettings>(
-    apiClient,
-    projectSettings === undefined && isAuthenticated
-      ? `/project/settings?language=${languageInUse}`
-      : null
-  );
-
-  const { data: translations } = useApi<IProjectSettings>(
-    apiClient,
+  const { data: translations } = useApi<any>(
     `/project/translations?language=${languageInUse}`
   );
 
   if (
     isReady &&
     !isAuthenticated &&
-    window.location.pathname !== '/login' &&
-    window.location.pathname !== '/login/callback'
+    window.location.pathname !== getRouterBasename() + '/login' &&
+    window.location.pathname !== getRouterBasename() + '/login/callback'
   ) {
-    window.location.href = '/login';
+    window.location.href = getRouterBasename() + '/login';
   }
-
-  useEffect(() => {
-    if (!data) return;
-    setProjectSettings(data);
-    setAppSettings((prev) => ({
-      ...prev,
-      defaultCollapseContent: data.ui.default_collapse_content ?? true,
-      expandAll: !!data.ui.default_expand_messages,
-      hideCot: !!data.ui.hide_cot
-    }));
-  }, [data, setProjectSettings, setAppSettings]);
 
   useEffect(() => {
     if (!translations) return;

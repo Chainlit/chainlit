@@ -1,7 +1,9 @@
+import { useContext } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { apiClientState } from 'state/apiClient';
 import { settingsState } from 'state/settings';
+
+import { ChainlitContext } from 'client-types/*';
 
 interface Props {
   width?: number;
@@ -10,7 +12,7 @@ interface Props {
 
 export const Logo = ({ style }: Props) => {
   const { theme } = useRecoilValue(settingsState);
-  const apiClient = useRecoilValue(apiClientState);
+  const apiClient = useContext(ChainlitContext);
 
   return (
     <img src={apiClient.getLogoEndpoint(theme)} alt="logo" style={style} />
