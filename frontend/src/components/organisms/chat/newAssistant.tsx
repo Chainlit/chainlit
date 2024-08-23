@@ -17,7 +17,7 @@ import { AccentButton, RegularButton } from 'components/atoms/buttons';
 import { FormInput, TFormInputValue } from 'components/atoms/inputs';
 import { Translator } from 'components/i18n';
 
-import { Assistant, assistantsState } from 'state/project';
+import { BaseAssistant, assistantsState } from 'state/project';
 
 interface AssistantCreationModalProps {
   open: boolean;
@@ -44,7 +44,7 @@ export default function AssistantCreationModal({
       x !== '' ? x : null
     );
     await createAssistant(values);
-    const updatedAssistants = (await listAssistants()) as Assistant[];
+    const updatedAssistants = (await listAssistants()) as BaseAssistant[];
     setAssistants(updatedAssistants);
     formik.resetForm();
     handleClose();
