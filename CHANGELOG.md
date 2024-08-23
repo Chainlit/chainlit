@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing unreleased!
+### Changed
 
+- changing the default host from 0.0.0.0 to 127.0.0.1  
+  
 ## [1.1.403rc0] - 2024-08-13
 
 ### Fixed
