@@ -296,7 +296,7 @@ class CodeSettings:
     # assistant-related callback function
     on_create_assistant: Optional[Callable[[Optional["User"], Any], Any]] = None
     on_list_assistants: Optional[
-        Callable[[Optional["User"]], List["AssistantSettings"]]
+        Callable[[Optional["User"]], List["BaseAssistant"]]
     ] = None
 
 

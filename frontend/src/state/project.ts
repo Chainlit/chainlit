@@ -17,11 +17,13 @@ export const newAssistantOpenState = atom<boolean>({
   default: false
 });
 
-export interface Assistant {
+export interface BaseAssistant {
   name: string;
+  markdown_description: string;
+  icon: string;
 }
 
-export const assistantsState = atom<Assistant[]>({
+export const assistantsState = atom<BaseAssistant[]>({
   key: 'Assistants',
   default: []
 });

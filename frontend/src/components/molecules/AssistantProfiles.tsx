@@ -1,37 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
-import { Box } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
 
 import { useChatInteract, useConfig, useChatData } from '@chainlit/react-client';
 
-import { SelectInput } from 'components/atoms/inputs';
-
-import { Assistant, assistantsState } from 'state/project';
+import { BaseAssistant, assistantsState } from 'state/project';
 
 export default function AssistantProfiles() {
   const { config } = useConfig();
   const { listAssistants, setSelectedAssistant } = useChatInteract();
   const [assistants, setAssistants] = useRecoilState(assistantsState);
-  const [assistant, setAssistant] = useState<string>('');
   const { assistantSettingsInputs } = useChatData();
+  const [showAll, setShowAll] = useState(false);
 
   const fetchAssistants = useCallback(async () => {
     try {
-      const assistantsList = (await listAssistants()) as Assistant[];
+      const assistantsList = (await listAssistants()) as BaseAssistant[];
       setAssistants(assistantsList);
-
-      // Set initial assistant if available
-      if (assistantsList.length > 0 && !assistant) {
-        setAssistant(assistantsList[0].name);
-        setSelectedAssistant(assistantsList[0].name);
-      }
     } catch (error) {
       console.error('Error fetching assistants:', error);
       setAssistants([]);
     }
-  }, [listAssistants, setSelectedAssistant, assistant, setAssistants]);
+  }, [listAssistants, setAssistants]);
 
   useEffect(() => {
     fetchAssistants();
@@ -41,27 +32,53 @@ export default function AssistantProfiles() {
     return null;
   }
 
-  const items = assistants.map((assistant) => ({
-    label: assistant.name,
-    value: assistant.name
-  }));
-
-  const handleChange = (e: SelectChangeEvent) => {
-    setAssistant(e.target.value);
-    setSelectedAssistant(e.target.value);
+  const handleAssistantClick = (assistantName: string) => {
+    setSelectedAssistant(assistantName);
   };
+
+  const displayedAssistants = showAll ? assistants : assistants.slice(0, 5);
 
   return (
     <Box>
-      <SelectInput
-        value={assistant}
-        items={items}
-        id="assistant-selector"
-        onChange={handleChange}
-        disabled={assistants.length === 0}
-        placeholder="Select an assistant"
-        onOpen={fetchAssistants}
-      />
+      <List>
+        {displayedAssistants.map((assistant) => (
+          <ListItem key={assistant.name} disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              onClick={() => handleAssistantClick(assistant.name)}
+              sx={{
+                borderRadius: '12px',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+              }}
+            >
+              {assistant.icon && (
+                <ListItemIcon sx={{ minWidth: '36px' }}>
+                  <img
+                    src={assistant.icon}
+                    alt={assistant.name}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </ListItemIcon>
+              )}
+              <ListItemText primary={assistant.name} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      {assistants.length > 5 && (
+        <Button 
+          onClick={() => setShowAll(!showAll)}
+          sx={{ mt: 1, width: '100%' }}
+        >
+          {showAll ? 'Show Less' : 'Show More'}
+        </Button>
+      )}
     </Box>
   );
 }

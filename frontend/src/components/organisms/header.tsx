@@ -51,8 +51,8 @@ const Header = memo(() => {
       <Box />
       <Stack direction="row" alignItems="center">
         <NewChatButton />
-        <NewAssistantButton />
-        <AssistantProfiles />
+        {/* <NewAssistantButton />
+        <AssistantProfiles /> */}
         <UserButton />
       </Stack>
     </Box>

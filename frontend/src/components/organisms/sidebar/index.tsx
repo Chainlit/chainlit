@@ -12,6 +12,8 @@ import { useAuth, useConfig } from '@chainlit/react-client';
 import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
 import ReadmeButton from 'components/organisms/readmeButton';
+import NewAssistantButton from 'components/molecules/newAssistantButton';
+import AssistantProfiles from 'components/molecules/AssistantProfiles';
 
 import { settingsState } from 'state/settings';
 
@@ -32,9 +34,9 @@ const SideBar = () => {
     if (isMobile) {
       setChatHistoryOpen(false);
     } else {
-      setChatHistoryOpen(enableHistory);
+      setChatHistoryOpen(true);
     }
-  }, [enableHistory]);
+  }, [enableHistory, isMobile]);
 
   const setChatHistoryOpen = (open: boolean) =>
     setSettings((prev) => ({ ...prev, isChatHistoryOpen: open }));
@@ -80,6 +82,8 @@ const SideBar = () => {
         >
           <Logo style={{ maxHeight: '25px' }} />
         </Stack>
+        <NewAssistantButton />
+        <AssistantProfiles />
         {enableHistory ? (
           <ThreadHistory />
         ) : (
