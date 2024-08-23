@@ -23,8 +23,6 @@ if TYPE_CHECKING:
     from fastapi import Request, Response
     from chainlit.assistant import BaseAssistant
 
-from chainlit.assistant_settings import AssistantSettings
-
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
 TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
