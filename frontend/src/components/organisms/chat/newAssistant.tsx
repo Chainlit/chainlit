@@ -75,8 +75,8 @@ export default function AssistantCreationModal({
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            minWidth: '20vw',
-            maxHeight: '70vh',
+            minWidth: '30vw',
+            maxHeight: '90vh',
             gap: '15px'
           }}
         >
