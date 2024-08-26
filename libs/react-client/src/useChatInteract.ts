@@ -195,10 +195,17 @@ const useChatInteract = () => {
   );
 
   const uploadFile = useCallback(
-    (file: File, onProgress: (progress: number) => void) => {
-      return client.uploadFile(file, onProgress, sessionId, accessToken);
+    (file: File, onProgress: (progress: number) => void, endpoint?: string) => {
+      return client.uploadFile(file, onProgress, endpoint, sessionId, accessToken);
     },
     [sessionId, accessToken]
+  );
+
+  const uploadAssistantIcon = useCallback(
+    (file: File, onProgress: (progress: number) => void) => {
+      return client.uploadAssistantIcon(file, onProgress, accessToken);
+    },
+    [accessToken]
   );
 
   return {
@@ -215,7 +222,8 @@ const useChatInteract = () => {
     updateChatSettings,
     createAssistant,
     listAssistants,
-    setSelectedAssistant
+    setSelectedAssistant,
+    uploadAssistantIcon
   };
 };
 

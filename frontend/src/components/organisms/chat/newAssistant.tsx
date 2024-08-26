@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AccentButton, RegularButton } from 'components/atoms/buttons';
 import { FormInput, TFormInputValue } from 'components/atoms/inputs';
@@ -30,7 +31,7 @@ export default function AssistantCreationModal({
 }: AssistantCreationModalProps) {
   const { assistantSettingsInputs, assistantSettingsDefaultValue } =
     useChatData();
-  const { createAssistant, listAssistants } = useChatInteract();
+  const { createAssistant, listAssistants, uploadFile } = useChatInteract();
   const [, setAssistants] = useRecoilState(assistantsState);
 
   const formik = useFormik({
@@ -40,14 +41,39 @@ export default function AssistantCreationModal({
   });
 
   const handleConfirm = async () => {
-    const values = mapValues(formik.values, (x: TFormInputValue) =>
-      x !== '' ? x : null
-    );
-    await createAssistant(values);
-    const updatedAssistants = (await listAssistants()) as BaseAssistant[];
-    setAssistants(updatedAssistants);
-    formik.resetForm();
-    handleClose();
+    var values = mapValues(formik.values, (x: TFormInputValue, key: string) => {
+      if (x instanceof File) {
+        return x.name.split('.')[0]
+      }
+      return x !== '' ? x : null;
+    });
+
+    // Handle icon upload
+    if (formik.values.icon instanceof File) {
+      const newFileName = `${formik.values.icon.name}`;
+      const { promise } = uploadFile(
+        formik.values.icon,
+        () => {},
+        `/avatars/${newFileName}`
+      );
+      try {
+        await promise;
+      } catch (error) {
+        console.error('Failed to upload avatar:', error);
+        return;
+      }
+    }
+
+    try {
+      await createAssistant(values);
+      const updatedAssistants = (await listAssistants()) as BaseAssistant[];
+      setAssistants(updatedAssistants);
+      formik.resetForm();
+      handleClose(); // Close the modal after successful creation
+    } catch (error) {
+      console.error('Failed to create assistant:', error);
+      // Optionally, you can show an error message to the user here
+    }
   };
 
   const handleReset = () => {
@@ -75,9 +101,10 @@ export default function AssistantCreationModal({
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            minWidth: '30vw',
+            minWidth: '50vh',
             maxHeight: '90vh',
-            gap: '15px'
+            gap: '15px',
+            margin: '0, 20px'
           }}
         >
           {assistantSettingsInputs && assistantSettingsInputs.length > 0 ? (
@@ -87,8 +114,13 @@ export default function AssistantCreationModal({
                 element={{
                   ...input,
                   value: formik.values[input.id],
-                  onChange: formik.handleChange,
-                  setField: formik.setFieldValue
+                  onChange: input.id === 'icon' 
+                    ? (file: File | null) => {
+                        formik.setFieldValue(input.id, file);
+                      }
+                    : formik.handleChange,
+                  setField: formik.setFieldValue,
+                  type: input.id === 'icon' ? 'fileupload' : input.type
                 }}
               />
             ))

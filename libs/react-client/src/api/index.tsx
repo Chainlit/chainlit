@@ -196,7 +196,8 @@ export class ChainlitAPI extends APIBase {
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
-    sessionId: string,
+    endpoint: string = '/project/file',
+    sessionId?: string,
     token?: string
   ) {
     const xhr = new XMLHttpRequest();
@@ -205,9 +206,13 @@ export class ChainlitAPI extends APIBase {
       const formData = new FormData();
       formData.append('file', file);
 
+      const url = sessionId
+        ? `${endpoint}?session_id=${sessionId}`
+        : endpoint;
+
       xhr.open(
         'POST',
-        this.buildEndpoint(`/project/file?session_id=${sessionId}`),
+        this.buildEndpoint(url),
         true
       );
 
@@ -253,5 +258,52 @@ export class ChainlitAPI extends APIBase {
 
   getOAuthEndpoint(provider: string) {
     return this.buildEndpoint(`/auth/oauth/${provider}`);
+  }
+
+  uploadAssistantIcon(
+    file: File,
+    onProgress: (progress: number) => void,
+    token?: string
+  ) {
+    const xhr = new XMLHttpRequest();
+
+    const promise = new Promise<{ filePath: string }>((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      xhr.open(
+        'POST',
+        this.buildEndpoint(`/upload-assistant-icon`),
+        true
+      );
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', this.checkToken(token));
+      }
+
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          const percentage = (event.loaded / event.total) * 100;
+          onProgress(percentage);
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } else {
+          reject('Upload failed');
+        }
+      };
+
+      xhr.onerror = function () {
+        reject('Upload error');
+      };
+
+      xhr.send(formData);
+    });
+
+    return { xhr, promise };
   }
 }

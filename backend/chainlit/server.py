@@ -5,6 +5,8 @@ import re
 import shutil
 import urllib.parse
 from typing import Any, Optional, Union
+import uuid
+import os
 
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
@@ -194,11 +196,11 @@ app.add_middleware(
 
 router = APIRouter(prefix=ROOT_PATH)
 
-app.mount(
-    f"{ROOT_PATH}/public",
-    StaticFiles(directory="public", check_dir=False),
-    name="public",
-)
+# app.mount(
+#     f"{ROOT_PATH}/static",
+#     StaticFiles(directory="static", check_dir=False),
+#     name="static",
+# )
 
 app.mount(
     f"{ROOT_PATH}/assets",
@@ -217,7 +219,6 @@ app.mount(
     ),
     name="copilot",
 )
-
 
 # -------------------------------------------------------------------------------
 #                               SLACK HANDLER
@@ -921,7 +922,6 @@ async def get_avatar(avatar_id: str):
     avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
     avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
-
     files = glob.glob(avatar_path)
 
     if files:
@@ -930,6 +930,34 @@ async def get_avatar(avatar_id: str):
         return FileResponse(avatar_path, media_type=media_type)
     else:
         return await get_favicon()
+
+# post avatar/{avatar_id} (only for authenticated users)
+@router.post("/avatars/{avatar_id}")
+async def upload_avatar(
+    avatar_id: str,
+    file: UploadFile,
+    current_user: Annotated[
+        Union[None, User, PersistedUser], Depends(get_current_user)
+    ],
+):
+    # if not current_user:
+    #     raise HTTPException(status_code=401, detail="Not authenticated")
+
+    # Save the file to the avatars directory
+    try:
+        file_extension = os.path.splitext(file.filename)[1]
+        avatar_filename = f"{avatar_id}{file_extension}"
+        avatar_path = os.path.join(APP_ROOT, "public", "avatars", avatar_filename)
+
+        # Ensure the avatars directory exists
+        os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+        
+        with open(avatar_path, "wb") as f:
+            f.write(await file.read())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    return {"id": avatar_id}
 
 
 @router.head("/")
