@@ -35,7 +35,8 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
       const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
       const sessionJson = await sessionResponse.json();
       setSessionUuid(sessionJson.session_uuid);
-      localStorage.setItem(sessionTokenKey, sessionJson.session_uuid);
+      // localStorage.setItem(sessionTokenKey, sessionJson.session_uuid);
+      document.cookie = `${sessionTokenKey}=${sessionJson.session_uuid};path=/`;
       console.log('session_token', sessionJson.session_uuid);
     } catch (e) {
       return;
