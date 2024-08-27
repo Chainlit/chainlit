@@ -29,7 +29,7 @@ TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 
 
 # Get the directory the script is running from
-APP_ROOT = os.getcwd()
+APP_ROOT = os.getenv("CHAINLIT_APP_ROOT", os.getcwd())
 
 # Create the directory to store the uploaded files
 FILES_DIRECTORY = Path(APP_ROOT) / ".files"
