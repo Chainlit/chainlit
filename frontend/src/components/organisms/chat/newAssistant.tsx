@@ -1,6 +1,7 @@
 import { useFormik } from 'formik';
 import mapValues from 'lodash/mapValues';
 import { useRecoilState } from 'recoil';
+import { useState } from 'react';
 
 import {
   Box,
@@ -12,7 +13,6 @@ import {
 } from '@mui/material';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
-import { v4 as uuidv4 } from 'uuid';
 
 import { AccentButton, RegularButton } from 'components/atoms/buttons';
 import { FormInput, TFormInputValue } from 'components/atoms/inputs';
@@ -23,19 +23,23 @@ import { BaseAssistant, assistantsState } from 'state/project';
 interface AssistantCreationModalProps {
   open: boolean;
   handleClose: () => void;
+  startValues: Record<string, any> | null;
 }
 
 export default function AssistantCreationModal({
   open,
-  handleClose
+  handleClose,
+  startValues,
 }: AssistantCreationModalProps) {
   const { assistantSettingsInputs, assistantSettingsDefaultValue } =
     useChatData();
   const { createAssistant, listAssistants, uploadFile } = useChatInteract();
   const [, setAssistants] = useRecoilState(assistantsState);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formik = useFormik({
-    initialValues: assistantSettingsDefaultValue,
+    initialValues: startValues ? startValues : assistantSettingsDefaultValue,
+    // initialValues: { "name": 'toto', "markdown_description": 'toto', "icon": "pfp.png" },
     enableReinitialize: true,
     onSubmit: async () => undefined
   });
@@ -47,6 +51,16 @@ export default function AssistantCreationModal({
       }
       return x !== '' ? x : null;
     });
+
+    // Check for required fields
+    if (!values.name) {
+      setErrorMessage('Name is mandatory');
+      return;
+    }
+    if (!values.markdown_description) {
+      setErrorMessage('Description is mandatory');
+      return;
+    }
 
     // Handle icon upload
     if (formik.values.icon instanceof File) {
@@ -69,15 +83,18 @@ export default function AssistantCreationModal({
       const updatedAssistants = (await listAssistants()) as BaseAssistant[];
       setAssistants(updatedAssistants);
       formik.resetForm();
+      setErrorMessage(null);
       handleClose(); // Close the modal after successful creation
     } catch (error) {
       console.error('Failed to create assistant:', error);
-      // Optionally, you can show an error message to the user here
+      setErrorMessage('Failed to create assistant. Please try again.');
     }
+    console.log(assistantSettingsDefaultValue);
   };
 
   const handleReset = () => {
     formik.resetForm();
+    setErrorMessage(null);
   };
 
   return (
@@ -126,6 +143,19 @@ export default function AssistantCreationModal({
             ))
           ) : (
             <Typography>No assistant settings available.</Typography>
+          )}
+          {errorMessage && (
+            <Box
+              sx={{
+                backgroundColor: 'error.main',
+                color: 'error.contrastText',
+                padding: 2,
+                borderRadius: 1,
+                marginTop: 2
+              }}
+            >
+              {errorMessage}
+            </Box>
           )}
         </Box>
       </DialogContent>
