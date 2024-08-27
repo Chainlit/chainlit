@@ -16,7 +16,7 @@ from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
 from literalai import BaseGeneration
 from literalai.helper import utc_now
-from literalai.step import StepType, TrueStepType
+from literalai.observability.step import StepType, TrueStepType
 
 
 def check_add_step_in_cot(step: "Step"):

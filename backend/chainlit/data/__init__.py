@@ -31,8 +31,8 @@ from httpx import HTTPStatusError, RequestError
 from literalai import Attachment
 from literalai import Score as LiteralScore
 from literalai import Step as LiteralStep
-from literalai.filter import threads_filters as LiteralThreadsFilters
-from literalai.step import StepDict as LiteralStepDict
+from literalai.observability.filter import threads_filters as LiteralThreadsFilters
+from literalai.observability.step import StepDict as LiteralStepDict
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict

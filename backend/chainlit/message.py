@@ -23,7 +23,7 @@ from chainlit.types import (
     FileDict,
 )
 from literalai.helper import utc_now
-from literalai.step import MessageStepType
+from literalai.observability.step import MessageStepType
 
 
 class MessageBase(ABC):
