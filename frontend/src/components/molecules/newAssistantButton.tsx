@@ -55,6 +55,7 @@ export default function NewAssistantButton(props: ButtonProps) {
       <AssistantCreationModal
         open={newAssistantOpen}
         handleClose={handleClose}
+        startValues={null}
       />
     </Box>
   );

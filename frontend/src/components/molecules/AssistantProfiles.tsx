@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
-
-import { useChatInteract, useConfig, useChatData } from '@chainlit/react-client';
-
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button, IconButton, Avatar } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { useChatInteract, useChatData } from '@chainlit/react-client';
 import { BaseAssistant, assistantsState } from 'state/project';
+import AssistantCreationModal from 'components/organisms/chat/newAssistant';
+import AttachmentIcon from '@mui/icons-material/Attachment';
 
 export default function AssistantProfiles() {
-  const { config } = useConfig();
   const { listAssistants, setSelectedAssistant } = useChatInteract();
   const [assistants, setAssistants] = useRecoilState(assistantsState);
   const { assistantSettingsInputs } = useChatData();
   const [showAll, setShowAll] = useState(false);
+  const [newAssistantOpen, setNewAssistantOpen] = useState<boolean>(false);
+
+  // assistant to edit (set when clicking on the settings icon, just before opening the modal)
+  const [editAssistant, setEditAssistant] = useState<any | null>(null);
 
   const fetchAssistants = useCallback(async () => {
     try {
-      const assistantsList = (await listAssistants()) as BaseAssistant[];
+      const assistantsList = (await listAssistants()) as any[];
+      console.log(assistantsList)
+;
       setAssistants(assistantsList);
     } catch (error) {
       console.error('Error fetching assistants:', error);
@@ -28,12 +33,32 @@ export default function AssistantProfiles() {
     fetchAssistants();
   }, [fetchAssistants]);
 
-  if (typeof config === 'undefined' || !assistants || assistants.length === 0 || !assistantSettingsInputs || assistantSettingsInputs.length === 0) {
+  if (!assistants || assistants.length === 0 || !assistantSettingsInputs || assistantSettingsInputs.length === 0) {
     return null;
   }
 
   const handleAssistantClick = (assistantName: string) => {
     setSelectedAssistant(assistantName);
+  };
+
+  const handleEditAssistant = async (assistant: BaseAssistant) => {
+    try {
+      const assistantsList = await listAssistants() as any[];
+      const fullAssistant = assistantsList.find(a => a.name === assistant.name);
+      if (fullAssistant) {
+        console.log(fullAssistant)
+        setEditAssistant(fullAssistant);
+        setNewAssistantOpen(true);
+      } else {
+        console.error('Assistant not found in the list');
+      }
+    } catch (error) {
+      console.error('Error fetching assistants:', error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setNewAssistantOpen(false);
   };
 
   const displayedAssistants = showAll ? assistants : assistants.slice(0, 5);
@@ -52,21 +77,29 @@ export default function AssistantProfiles() {
                 },
               }}
             >
-              {assistant.icon && (
-                <ListItemIcon sx={{ minWidth: '36px' }}>
-                  <img
+              <ListItemIcon sx={{ minWidth: '36px' }}>
+                {assistant.icon ? (
+                  <Avatar
                     src={assistant.icon}
                     alt={assistant.name}
-                    style={{
+                    sx={{
                       width: '24px',
                       height: '24px',
-                      borderRadius: '50%',
-                      objectFit: 'cover'
                     }}
                   />
-                </ListItemIcon>
-              )}
+                ) : (
+                  <Avatar sx={{ width: '24px', height: '24px' }}>
+                    <AttachmentIcon />
+                  </Avatar>
+                )}
+              </ListItemIcon>
               <ListItemText primary={assistant.name} />
+              <IconButton onClick={(e) => {
+                e.stopPropagation();
+                handleEditAssistant(assistant);
+              }}>
+                <SettingsIcon />
+              </IconButton>
             </ListItemButton>
           </ListItem>
         ))}
@@ -79,6 +112,11 @@ export default function AssistantProfiles() {
           {showAll ? 'Show Less' : 'Show More'}
         </Button>
       )}
+      <AssistantCreationModal
+        open={newAssistantOpen}
+        handleClose={handleCloseModal}
+        startValues={editAssistant}
+      />
     </Box>
   );
 }
