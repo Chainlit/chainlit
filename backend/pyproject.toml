@@ -95,12 +95,11 @@ module = [
     "haystack.*",
     "langflow",
     "lazify",
-    "plotly",
     "nest_asyncio",
+    "plotly",
     "socketio.*",
-    "uptrace",
     "syncer",
-    "azure.storage.filedatalake",
+    "uptrace",
 ]
 ignore_missing_imports = true
 
