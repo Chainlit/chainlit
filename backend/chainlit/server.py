@@ -945,9 +945,9 @@ async def upload_avatar(
 
     # Save the file to the avatars directory
     try:
-        file_extension = os.path.splitext(file.filename)[1]
-        avatar_filename = f"{avatar_id}{file_extension}"
-        avatar_path = os.path.join(APP_ROOT, "public", "avatars", avatar_filename)
+        # file_extension = os.path.splitext(file.filename)[1]
+        # avatar_filename = f"{avatar_id}{file_extension}"
+        avatar_path = os.path.join(APP_ROOT, "public", "avatars", avatar_id)
 
         # Ensure the avatars directory exists
         os.makedirs(os.path.dirname(avatar_path), exist_ok=True)

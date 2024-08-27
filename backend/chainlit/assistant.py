@@ -4,6 +4,8 @@ from chainlit.input_widget import InputWidget
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 
+from chainlit.user import User
+
 
 @dataclass
 class BaseAssistant(DataClassJsonMixin):
@@ -14,8 +16,11 @@ class BaseAssistant(DataClassJsonMixin):
     name: str
     markdown_description: str
     icon: str
+    created_by: Optional[User]
+    id: Optional[str]
 
-    def __init__(self, name: str, markdown_description: str, icon: str):
+
+    def __init__(self, name: str, markdown_description: str, icon: str, created_by: User, id: str):
         """
         Initialize the BaseAssistant.
 
@@ -27,6 +32,8 @@ class BaseAssistant(DataClassJsonMixin):
         self.name = name
         self.markdown_description = markdown_description
         self.icon = icon
+        self.created_by = created_by
+        self.id = id
 
     async def run(self, *args, **kwargs):
         """
