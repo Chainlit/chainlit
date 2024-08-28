@@ -6,6 +6,7 @@ describe('Starters', () => {
   });
 
   it('should be able to use a starter', () => {
+    cy.wait(1000);
     cy.get('#starter-test1').should('exist').click();
     cy.get('.step').should('have.length', 2);
 

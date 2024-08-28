@@ -30,6 +30,9 @@ describe('Upload attachments', () => {
     cy.fixture('hello.cpp', 'utf-8').as('cppFile');
     cy.fixture('hello.py', 'utf-8').as('pyFile');
 
+    // Wait for the socket connection to be created
+    cy.wait(1000);
+
     /**
      * Should be able to upload file from D&D input
      */
