@@ -1,7 +1,7 @@
 import { useFormik } from 'formik';
 import mapValues from 'lodash/mapValues';
+import { useContext, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { useState } from 'react';
 
 import {
   Box,
@@ -12,6 +12,7 @@ import {
   Typography
 } from '@mui/material';
 
+import { ChainlitContext } from '@chainlit/react-client';
 import { useChatData, useChatInteract } from '@chainlit/react-client';
 
 import { AccentButton, RegularButton } from 'components/atoms/buttons';
@@ -29,8 +30,9 @@ interface AssistantCreationModalProps {
 export default function AssistantCreationModal({
   open,
   handleClose,
-  startValues,
+  startValues
 }: AssistantCreationModalProps) {
+  const apiClient = useContext(ChainlitContext);
   const { assistantSettingsInputs, assistantSettingsDefaultValue } =
     useChatData();
   const { createAssistant, listAssistants, uploadFile } = useChatInteract();
@@ -45,12 +47,15 @@ export default function AssistantCreationModal({
   });
 
   const handleConfirm = async () => {
-    var values = mapValues(formik.values, (x: TFormInputValue, key: string) => {
-      if (x instanceof File) {
-        return x.name.split('.')[0]
+    const values = mapValues(
+      formik.values,
+      (x: TFormInputValue, key: string) => {
+        if (key === 'icon') {
+          return x instanceof File ? x : null;
+        }
+        return x !== '' ? x : null;
       }
-      return x !== '' ? x : null;
-    });
+    );
 
     // Check for required fields
     if (!values.name) {
@@ -62,16 +67,18 @@ export default function AssistantCreationModal({
       return;
     }
 
-    // Handle icon upload
+    // Handle icon upload or removal
     if (formik.values.icon instanceof File) {
-      const newFileName = `avatars/${formik.values.icon.name}`;
+      const newFileName = `/avatars/${formik.values.icon.name}`;
       const { promise } = uploadFile(
         formik.values.icon,
         () => {},
-        `/${newFileName}`
+        `${newFileName}`
       );
       try {
         await promise;
+        // remove the .png from the file name (keep all characters before the last dot)
+        values.icon = newFileName.split('.').slice(0, -1).join('.');
       } catch (error) {
         console.error('Failed to upload avatar:', error);
         return;
@@ -135,13 +142,21 @@ export default function AssistantCreationModal({
                 element={{
                   ...input,
                   value: formik.values[input.id],
-                  onChange: input.id === 'icon' 
-                    ? (file: File | null) => {
-                        formik.setFieldValue(input.id, file);
-                      }
-                    : formik.handleChange,
+                  onChange:
+                    input.id === 'icon'
+                      ? (file: File | null) => {
+                          formik.setFieldValue(input.id, file);
+                        }
+                      : formik.handleChange,
                   setField: formik.setFieldValue,
-                  type: input.id === 'icon' ? 'fileupload' : input.type
+                  type: input.id === 'icon' ? 'fileupload' : input.type,
+                  initialPreview:
+                    input.id === 'icon' &&
+                    startValues?.icon &&
+                    startValues.icon != ''
+                      ? apiClient.buildEndpoint(`/avatars/${startValues.icon}`)
+                      : // else default avatar
+                        undefined
                 }}
               />
             ))

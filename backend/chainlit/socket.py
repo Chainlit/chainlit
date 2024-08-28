@@ -414,12 +414,12 @@ async def on_create_assistant(sid, options):
     context = init_ws_context(sid)
     logger.info(f"Received request to create assistant with options: {options}")
     if config.code.on_create_assistant:
+        settings_values = options["settings_values"]
         new_assistant = Assistant(
-            input_widgets=options['input_widgets'],
-            settings_values=options['settings_values']
+            input_widgets=options["input_widgets"], settings_values=settings_values
         )
         await config.code.on_create_assistant(context.session.user, new_assistant)
-        return new_assistant.to_dict()  # Return the dictionary representation
+        return new_assistant.to_dict()
     logger.info("Assistant creation process completed")
 
 
@@ -428,7 +428,7 @@ async def on_list_assistants(sid):
     context = init_ws_context(sid)
     if config.code.on_list_assistants:
         assistants = await config.code.on_list_assistants(context.session.user)
-        return [assistant.to_dict() for assistant in assistants]  # Convert each assistant to a dictionary
+        return [assistant.to_dict() for assistant in assistants]
 
 
 @sio.on("select_assistant")

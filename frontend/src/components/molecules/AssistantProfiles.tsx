@@ -1,16 +1,32 @@
-import { useCallback, useEffect, useState, useContext } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import {
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 
-import { useChatInteract, useConfig, useChatData, ChainlitContext } from '@chainlit/react-client';
+import {
+  ChainlitContext,
+  useChatData,
+  useChatInteract
+} from '@chainlit/react-client';
+
+import AssistantCreationModal from 'components/organisms/chat/newAssistant';
+
+import UserIcon from 'assets/user';
 
 import { Assistant, assistantsState } from 'state/project';
-import UserIcon from 'assets/user';
 
 export default function AssistantProfiles() {
   const apiClient = useContext(ChainlitContext);
-  const { config } = useConfig();
   const { listAssistants, setSelectedAssistant } = useChatInteract();
   const [assistants, setAssistants] = useRecoilState(assistantsState);
   const { assistantSettingsInputs } = useChatData();
@@ -34,7 +50,12 @@ export default function AssistantProfiles() {
     fetchAssistants();
   }, [fetchAssistants]);
 
-  if (!assistants || assistants.length === 0 || !assistantSettingsInputs || assistantSettingsInputs.length === 0) {
+  if (
+    !assistants ||
+    assistants.length === 0 ||
+    !assistantSettingsInputs ||
+    assistantSettingsInputs.length === 0
+  ) {
     return null;
   }
 
@@ -42,20 +63,24 @@ export default function AssistantProfiles() {
     setSelectedAssistant(assistantName);
   };
 
-  const handleEditAssistant = async (assistant: BaseAssistant) => {
-    try {
-      const assistantsList = await listAssistants() as any[];
-      const fullAssistant = assistantsList.find(a => a.name === assistant.name);
-      if (fullAssistant) {
-        console.log(fullAssistant)
-        setEditAssistant(fullAssistant);
-        setNewAssistantOpen(true);
-      } else {
-        console.error('Assistant not found in the list');
-      }
-    } catch (error) {
-      console.error('Error fetching assistants:', error);
+  const handleEditAssistant = async (assistant: Assistant) => {
+    console.log('assistant', assistant);
+    if (assistant.settings_values['icon'] == null) {
+      setEditAssistant(assistant);
+    } else {
+      const new_assistant_icon = apiClient.buildEndpoint(
+        `${assistant.settings_values['icon']}`
+      );
+      const new_assistant = {
+        ...assistant,
+        settings_values: {
+          ...assistant.settings_values,
+          icon: new_assistant_icon
+        }
+      };
+      setEditAssistant(new_assistant);
     }
+    setNewAssistantOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -68,37 +93,60 @@ export default function AssistantProfiles() {
     <Box>
       <List>
         {displayedAssistants.map((assistant: Assistant) => (
-          <ListItem key={assistant.settings_values['name']} disablePadding sx={{ mb: 1 }}>
+          <ListItem
+            key={assistant.settings_values['name']}
+            disablePadding
+            sx={{ mb: 1 }}
+          >
             <ListItemButton
-              onClick={() => handleAssistantClick(assistant.settings_values['name'])}
+              onClick={() =>
+                handleAssistantClick(assistant.settings_values['name'])
+              }
               sx={{
                 borderRadius: '12px',
                 '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
+                  backgroundColor: 'action.hover'
+                }
               }}
             >
               <ListItemIcon sx={{ minWidth: '36px' }}>
                 {assistant.settings_values['icon'] ? (
                   <img
-                    src={apiClient.buildEndpoint(`/avatars/${assistant.settings_values['icon']}`)}
+                    src={apiClient.buildEndpoint(
+                      `${assistant.settings_values['icon']}`
+                    )}
                     alt={assistant.settings_values['name']}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      borderRadius: '50%',
+                      width: '30px',
+                      height: '30px'
                     }}
                   />
                 ) : (
-                  <UserIcon sx={{ width: '24px', height: '24px', color: 'text.secondary' }} />
+                  <UserIcon
+                    sx={{
+                      width: '30px',
+                      height: '30px',
+                      color: 'text.secondary'
+                    }}
+                  />
                 )}
               </ListItemIcon>
               <ListItemText primary={assistant.settings_values['name']} />
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditAssistant(assistant);
+                }}
+              >
+                <SettingsIcon />
+              </IconButton>
             </ListItemButton>
           </ListItem>
         ))}
       </List>
       {assistants.length > 5 && (
-        <Button 
+        <Button
           onClick={() => setShowAll(!showAll)}
           sx={{ mt: 1, width: '100%' }}
         >
@@ -108,7 +156,7 @@ export default function AssistantProfiles() {
       <AssistantCreationModal
         open={newAssistantOpen}
         handleClose={handleCloseModal}
-        startValues={editAssistant}
+        startValues={editAssistant ? editAssistant.settings_values : {}}
       />
     </Box>
   );
