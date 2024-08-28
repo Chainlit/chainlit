@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import { useRecoilState } from 'recoil';
 
 import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
 
-import { useChatInteract, useConfig, useChatData } from '@chainlit/react-client';
+import { useChatInteract, useConfig, useChatData, ChainlitContext } from '@chainlit/react-client';
 
-import { BaseAssistant, assistantsState } from 'state/project';
+import { Assistant, assistantsState } from 'state/project';
+import UserIcon from 'assets/user';
 
 export default function AssistantProfiles() {
+  const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const { listAssistants, setSelectedAssistant } = useChatInteract();
   const [assistants, setAssistants] = useRecoilState(assistantsState);
@@ -16,7 +18,7 @@ export default function AssistantProfiles() {
 
   const fetchAssistants = useCallback(async () => {
     try {
-      const assistantsList = (await listAssistants()) as BaseAssistant[];
+      const assistantsList = (await listAssistants()) as Assistant[];
       setAssistants(assistantsList);
     } catch (error) {
       console.error('Error fetching assistants:', error);
@@ -41,10 +43,10 @@ export default function AssistantProfiles() {
   return (
     <Box>
       <List>
-        {displayedAssistants.map((assistant) => (
-          <ListItem key={assistant.name} disablePadding sx={{ mb: 1 }}>
+        {displayedAssistants.map((assistant: Assistant) => (
+          <ListItem key={assistant.settings_values['name']} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
-              onClick={() => handleAssistantClick(assistant.name)}
+              onClick={() => handleAssistantClick(assistant.settings_values['name'])}
               sx={{
                 borderRadius: '12px',
                 '&:hover': {
@@ -52,11 +54,11 @@ export default function AssistantProfiles() {
                 },
               }}
             >
-              {assistant.icon && (
-                <ListItemIcon sx={{ minWidth: '36px' }}>
+              <ListItemIcon sx={{ minWidth: '36px' }}>
+                {assistant.settings_values['icon'] ? (
                   <img
-                    src={assistant.icon}
-                    alt={assistant.name}
+                    src={apiClient.buildEndpoint(`/avatars/${assistant.settings_values['icon']}`)}
+                    alt={assistant.settings_values['name']}
                     style={{
                       width: '24px',
                       height: '24px',
@@ -64,9 +66,11 @@ export default function AssistantProfiles() {
                       objectFit: 'cover'
                     }}
                   />
-                </ListItemIcon>
-              )}
-              <ListItemText primary={assistant.name} />
+                ) : (
+                  <UserIcon sx={{ width: '24px', height: '24px', color: 'text.secondary' }} />
+                )}
+              </ListItemIcon>
+              <ListItemText primary={assistant.settings_values['name']} />
             </ListItemButton>
           </ListItem>
         ))}

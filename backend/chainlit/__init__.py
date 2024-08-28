@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 
-# import BaseAssistant
-from chainlit.assistant import BaseAssistant
+# import Assistant
+from chainlit.assistant import Assistant
 from chainlit.assistant_settings import AssistantSettings
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
@@ -82,8 +82,8 @@ def on_create_assistant(
 
 @trace
 def on_list_assistants(
-    func: Callable[[Optional[User]], List[BaseAssistant]]
-) -> Callable[[Optional[User]], List[BaseAssistant]]:
+    func: Callable[[Optional[User]], List[Assistant]]
+) -> Callable[[Optional[User]], List[Assistant]]:
     config.code.on_list_assistants = wrap_user_function(func)
     return func
 
@@ -429,7 +429,7 @@ __all__ = [
     "ChatSettings",
     "AssistantSettings",
     # assistant
-    "BaseAssistant",
+    "Assistant",
     "input_widget",
     "Message",
     "ErrorMessage",

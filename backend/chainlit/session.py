@@ -24,9 +24,6 @@ if TYPE_CHECKING:
     from chainlit.types import FileDict, FileReference
     from chainlit.user import PersistedUser, User
 
-# import the BaseAssistant class
-from chainlit.assistant import BaseAssistant
-
 ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 

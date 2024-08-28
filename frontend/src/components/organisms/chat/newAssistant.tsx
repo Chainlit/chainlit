@@ -18,7 +18,7 @@ import { AccentButton, RegularButton } from 'components/atoms/buttons';
 import { FormInput, TFormInputValue } from 'components/atoms/inputs';
 import { Translator } from 'components/i18n';
 
-import { BaseAssistant, assistantsState } from 'state/project';
+import { Assistant, assistantsState } from 'state/project';
 
 interface AssistantCreationModalProps {
   open: boolean;
@@ -64,11 +64,11 @@ export default function AssistantCreationModal({
 
     // Handle icon upload
     if (formik.values.icon instanceof File) {
-      const newFileName = `${formik.values.icon.name}`;
+      const newFileName = `avatars/${formik.values.icon.name}`;
       const { promise } = uploadFile(
         formik.values.icon,
         () => {},
-        `/avatars/${newFileName}`
+        `/${newFileName}`
       );
       try {
         await promise;
@@ -79,12 +79,16 @@ export default function AssistantCreationModal({
     }
 
     try {
-      await createAssistant(values);
-      const updatedAssistants = (await listAssistants()) as BaseAssistant[];
+      const newAssistant = {
+        input_widgets: assistantSettingsInputs,
+        settings_values: values
+      };
+      await createAssistant(newAssistant);
+      const updatedAssistants = (await listAssistants()) as Assistant[];
       setAssistants(updatedAssistants);
       formik.resetForm();
       setErrorMessage(null);
-      handleClose(); // Close the modal after successful creation
+      handleClose();
     } catch (error) {
       console.error('Failed to create assistant:', error);
       setErrorMessage('Failed to create assistant. Please try again.');

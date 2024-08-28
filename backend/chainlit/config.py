@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
-    from chainlit.assistant import BaseAssistant
+    from chainlit.assistant import Assistant
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -294,7 +294,7 @@ class CodeSettings:
     # assistant-related callback function
     on_create_assistant: Optional[Callable[[Optional["User"], Any], Any]] = None
     on_list_assistants: Optional[
-        Callable[[Optional["User"]], List["BaseAssistant"]]
+        Callable[[Optional["User"]], List["Assistant"]]
     ] = None
 
 
