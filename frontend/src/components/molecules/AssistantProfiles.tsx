@@ -59,8 +59,9 @@ export default function AssistantProfiles() {
     return null;
   }
 
-  const handleAssistantClick = (assistantName: string) => {
-    setSelectedAssistant(assistantName);
+  const handleAssistantClick = (assistant: any) => {
+    setSelectedAssistant(assistant);
+    // clear();
   };
 
   const handleEditAssistant = async (assistant: Assistant) => {
@@ -99,9 +100,7 @@ export default function AssistantProfiles() {
             sx={{ mb: 1 }}
           >
             <ListItemButton
-              onClick={() =>
-                handleAssistantClick(assistant.settings_values['name'])
-              }
+              onClick={() => handleAssistantClick(assistant)}
               sx={{
                 borderRadius: '12px',
                 '&:hover': {

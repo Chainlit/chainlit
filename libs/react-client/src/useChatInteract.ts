@@ -149,8 +149,8 @@ const useChatInteract = () => {
 
   // set the selected assistant (emit a message to the server with the assistant name)
   const setSelectedAssistant = useCallback(
-    (assistantName: string) => {
-      session?.socket.emit('select_assistant', assistantName);
+    (assistant: any) => {
+      session?.socket.emit('select_assistant', assistant);
     },
     [session?.socket]
   );
@@ -196,7 +196,13 @@ const useChatInteract = () => {
 
   const uploadFile = useCallback(
     (file: File, onProgress: (progress: number) => void, endpoint?: string) => {
-      return client.uploadFile(file, onProgress, endpoint, sessionId, accessToken);
+      return client.uploadFile(
+        file,
+        onProgress,
+        endpoint,
+        sessionId,
+        accessToken
+      );
     },
     [sessionId, accessToken]
   );

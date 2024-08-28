@@ -16,6 +16,7 @@ from typing import (
 )
 
 import aiofiles
+from chainlit.assistant import Assistant
 from chainlit.logger import logger
 
 if TYPE_CHECKING:
@@ -73,7 +74,7 @@ class BaseSession:
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
         # Selected assistant
-        selected_assistant: Optional[str] = None,
+        selected_assistant: Optional[Assistant] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
         # assistant settings
@@ -185,6 +186,8 @@ class HTTPSession(BaseSession):
         http_referer: Optional[str] = None,
         # assistant settings
         assistant_settings: Optional[Dict[str, Any]] = None,
+        # selected assistant
+        selected_assistant: Optional[Assistant] = None,
     ):
         super().__init__(
             id=id,
@@ -195,6 +198,7 @@ class HTTPSession(BaseSession):
             user_env=user_env,
             http_referer=http_referer,
             assistant_settings=assistant_settings,
+            selected_assistant=selected_assistant,
         )
 
     def delete(self):
@@ -239,7 +243,7 @@ class WebsocketSession(BaseSession):
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
         # Selected assistant
-        selected_assistant: Optional[str] = None,
+        selected_assistant: Optional[Assistant] = None,
         # Languages of the user's browser
         languages: Optional[str] = None,
         # Origin of the request

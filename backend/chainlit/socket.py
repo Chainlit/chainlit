@@ -432,7 +432,19 @@ async def on_list_assistants(sid):
 
 
 @sio.on("select_assistant")
-async def select_assistant(sid, assistant_name: str):
-    context = init_ws_context(sid)
-    context.session.selected_assistant = assistant_name
-    logger.info(f"Selected assistant: {assistant_name}")
+async def select_assistant(sid, selected_assistant: Dict):
+    session = WebsocketSession.require(sid)
+
+    new_assistant = Assistant(
+        input_widgets=selected_assistant.get("input_widgets", []),
+        settings_values=selected_assistant.get("settings_values", {}),
+    )
+
+    session.selected_assistant = new_assistant
+
+    user_identifier = session.user.identifier if session.user else "Anonymous user"
+    logger.info(
+        f"{user_identifier} selected assistant {new_assistant.settings_values.get('name', 'Unknown')} for session with id {session.id}"
+    )
+
+    return new_assistant.to_dict()

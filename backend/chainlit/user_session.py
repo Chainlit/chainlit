@@ -32,6 +32,7 @@ class UserSession:
 
         # store assistant selected by the user
         user_session["selected_assistant"] = context.session.selected_assistant
+        user_session["assistant_settings"] = context.session.assistant_settings
 
         if isinstance(context.session, WebsocketSession):
             user_session["languages"] = context.session.languages

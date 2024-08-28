@@ -47,7 +47,7 @@ export default function AssistantCreationModal({
   });
 
   const handleConfirm = async () => {
-    const values = mapValues(
+    const values: any = mapValues(
       formik.values,
       (x: TFormInputValue, key: string) => {
         if (key === 'icon') {
