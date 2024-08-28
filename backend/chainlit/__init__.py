@@ -47,6 +47,7 @@ from chainlit.element import (
     Text,
     Video,
 )
+from chainlit.assistant import BaseAssistant
 from chainlit.logger import logger
 from chainlit.message import (
     AskActionMessage,
