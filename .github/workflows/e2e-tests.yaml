@@ -8,34 +8,25 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+    env:
+      BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
           version: 8.6.9
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
+        with:
+          python-version: 3.9
+          poetry-version: 1.8.3
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
+          poetry-install-args: --with tests
       - name: Use Node.js 16.15.0
         uses: actions/setup-node@v3
         with:
           node-version: '16.15.0'
           cache: 'pnpm'
-      - name: cache poetry install
-        uses: actions/cache@v2
-        with:
-          path: ~/.local
-          key: poetry-1.8.3-0
-      - name: Install Poetry
-        run: pipx install poetry==1.8.3
-      - name: Set up Python
-        id: python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
-      - name: Set Poetry environment
-        run: poetry -C ./backend env use '${{ steps.python.outputs.python-path }}'
-      - name: Install Python dependencies
-        run: poetry -C ./backend install --with tests
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build UI
