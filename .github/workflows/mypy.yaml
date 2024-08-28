@@ -10,13 +10,17 @@ jobs:
         working-directory: ./backend
     steps:
       - uses: actions/checkout@v3
+      - name: Install Poetry
+        run: pipx install poetry
       - name: Set up Python
+        id: python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: Install Poetry
-        run: pip install poetry
+          python-version: 3.9
+          cache: poetry
+          cache-dependency-path: backend/poetry.lock
+      - name: Set Poetry environment
+        run: poetry env use '${{ steps.python.outputs.python-path }}'
       - name: Install dependencies
         run: poetry install --with tests --with mypy --with custom-data
       - name: Run Mypy

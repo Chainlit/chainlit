@@ -18,21 +18,30 @@ jobs:
         with:
           node-version: '16.15.0'
           cache: 'pnpm'
+      - name: cache poetry install
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: poetry-1.8.3-0
+      - name: Install Poetry
+        run: pipx install poetry==1.8.3
       - name: Set up Python
+        id: python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: Install Poetry
-        run: pip install poetry
+          python-version: 3.9
+          cache: poetry
+          cache-dependency-path: backend/poetry.lock
+      - name: Set Poetry environment
+        run: poetry -C ./backend env use '${{ steps.python.outputs.python-path }}'
+      - name: Install Python dependencies
+        run: poetry -C ./backend install --with tests
       - name: Install JS dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Build UI
         run: pnpm run buildUi
       - name: Lint UI
         run: pnpm run lintUi
-      - name: Install Python dependencies
-        run: poetry install -C ./backend --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
