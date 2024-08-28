@@ -12,7 +12,6 @@ describe('Chat profiles', () => {
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');
 
-    cy.wait(1000);
     cy.get('#starter-say-hi').should('exist').click();
 
     cy.get('.step')
@@ -37,7 +36,6 @@ describe('Chat profiles', () => {
     cy.get('[data-test="select-item:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.wait(1000);
     cy.get('#starter-ask-for-help').should('exist').click();
 
     cy.get('.step')
