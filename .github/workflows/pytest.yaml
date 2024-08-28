@@ -3,8 +3,11 @@ name: Pytest
 on: [workflow_call]
 
 jobs:
-  mypy:
+  pytest:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
     defaults:
       run:
         working-directory: ./backend
@@ -13,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Install Poetry
         run: pip install poetry
