@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import aiohttp
 from chainlit.context import context
-from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
+from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
 from chainlit.step import StepDict
@@ -54,7 +55,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self.engine: AsyncEngine = create_async_engine(
             self._conninfo, connect_args=ssl_args
         )
-        self.async_session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)  # type: ignore
+        self.async_session = sessionmaker(
+            bind=self.engine, expire_on_commit=False, class_=AsyncSession
+        )  # type: ignore
         if storage_provider:
             self.storage_provider: Optional[BaseStorageClient] = storage_provider
             if self.show_logger:
