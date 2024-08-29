@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from chainlit.data.utils import queue_until_user_message
 from chainlit.types import (
     Feedback,
-    PageInfo,
     PaginatedResponse,
     Pagination,
     ThreadDict,
@@ -107,9 +106,10 @@ class BaseDataLayer(ABC):
         pass
 
 
-class BaseStorageClient(Protocol):
+class BaseStorageClient(ABC):
     """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
 
+    @abstractmethod
     async def upload_file(
         self,
         object_key: str,
