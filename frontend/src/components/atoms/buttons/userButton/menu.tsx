@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
@@ -27,13 +28,12 @@ interface Props {
   open: boolean;
   handleClose: () => void;
 }
-
 export default function UserMenu({ anchorEl, open, handleClose }: Props) {
+  console.log('Menu is changed');
   const { user, logout } = useAuth();
   const [settings, setSettings] = useRecoilState(settingsState);
   const { config } = useConfig();
   const requiredKeys = !!config?.userEnv?.length;
-
   const userNameItem = user && (
     <ListItem key="user-name" sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography width="100%" fontSize="14px" fontWeight={700}>
@@ -44,7 +44,20 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       </Typography>
     </ListItem>
   );
-
+  // New profile item displaying a hardcoded ID
+  const profileItem = (
+    <ListItem
+      key="profile-id"
+      sx={{ display: 'flex', flexDirection: 'column' }}
+    >
+      <Typography width="100%" fontSize="14px" fontWeight={700}>
+        Profile ID
+      </Typography>
+      <Typography width="100%" fontSize="13px" fontWeight={400}>
+        123456789
+      </Typography>
+    </ListItem>
+  );
   const themeItem = (
     <ListItem key="theme" sx={{ display: 'flex', gap: 1 }}>
       <ListItemIcon>
@@ -72,7 +85,6 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       </Box>
     </ListItem>
   );
-
   const apiKeysItem = requiredKeys && (
     <MenuItem key="env" component={Link} to="/env">
       <ListItemIcon>
@@ -81,7 +93,6 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       <Translator path="components.atoms.buttons.userButton.menu.APIKeys" />
     </MenuItem>
   );
-
   const logoutItem = user && (
     <MenuItem
       key="logout"
@@ -96,18 +107,20 @@ export default function UserMenu({ anchorEl, open, handleClose }: Props) {
       <Translator path="components.atoms.buttons.userButton.menu.logout" />
     </MenuItem>
   );
-
-  const menuItems = [userNameItem, themeItem, apiKeysItem, logoutItem].filter(
-    (i) => !!i
-  );
-
+  // Include the new profile item in the menu items array
+  const menuItems = [
+    userNameItem,
+    profileItem, // Add the profile item here
+    themeItem,
+    apiKeysItem,
+    logoutItem
+  ].filter((i) => !!i);
   const itemsWithDivider = menuItems.reduce((acc, curr, i) => {
     if (i === menuItems.length - 1) {
       return [...acc, curr];
     }
     return [...acc, curr, <Divider sx={{ my: 1 }} key={`divider-${i}`} />];
   }, [] as React.ReactNode[]);
-
   return (
     <Menu
       anchorEl={anchorEl}

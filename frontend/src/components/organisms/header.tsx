@@ -17,6 +17,10 @@ const Header = memo(() => {
   const isMobile = useMediaQuery('(max-width: 66rem)');
   const { isChatHistoryOpen } = useRecoilValue(settingsState);
 
+  const handleLogoClick = () => {
+    window.location.href = 'https://courteasy.in/';
+  };
+
   return (
     <Box
       px={1}
@@ -44,7 +48,10 @@ const Header = memo(() => {
       {isMobile ? (
         <OpenSideBarMobileButton />
       ) : isChatHistoryOpen ? null : (
-        <Logo style={{ maxHeight: '25px', marginLeft: '8px' }} />
+        <Logo
+          style={{ maxHeight: '25px', marginLeft: '8px', cursor: 'pointer' }}
+          onClick={handleLogoClick}
+        />
       )}
       <Box />
       <Stack direction="row" alignItems="center">

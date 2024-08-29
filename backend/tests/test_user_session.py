@@ -1,10 +1,11 @@
-import pytest
-import pytest_asyncio
-from unittest.mock import Mock
 from contextlib import asynccontextmanager
-from chainlit.user_session import UserSession
+from unittest.mock import Mock
+
+import pytest
+import pytest_asyncio  # type: ignore
 from chainlit.context import ChainlitContext, context_var
 from chainlit.session import WebsocketSession
+from chainlit.user_session import UserSession
 
 
 @asynccontextmanager

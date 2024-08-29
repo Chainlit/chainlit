@@ -23,7 +23,6 @@ const DRAWER_WIDTH = 260;
 const SideBar = () => {
   const user = useAuth();
   const isMobile = useMediaQuery('(max-width:66rem)');
-
   const [settings, setSettings] = useRecoilState(settingsState);
   const { config } = useConfig();
   const enableHistory = !!user.accessToken && !!config?.dataPersistence;
@@ -38,6 +37,10 @@ const SideBar = () => {
 
   const setChatHistoryOpen = (open: boolean) =>
     setSettings((prev) => ({ ...prev, isChatHistoryOpen: open }));
+
+  const handleLogoClick = () => {
+    window.location.href = 'https://courteasy.in/';
+  };
 
   return (
     <Box display="flex" position="relative">
@@ -78,7 +81,10 @@ const SideBar = () => {
             mt: 1
           }}
         >
-          <Logo style={{ maxHeight: '25px' }} />
+          <Logo
+            style={{ maxHeight: '25px', cursor: 'pointer' }}
+            onClick={handleLogoClick}
+          />
         </Stack>
         {enableHistory ? (
           <ThreadHistory />
