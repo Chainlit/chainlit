@@ -51,7 +51,7 @@ export default function AssistantCreationModal({
       formik.values,
       (x: TFormInputValue, key: string) => {
         if (key === 'icon') {
-          return x instanceof File ? x : null;
+          return x instanceof File ? x : formik.values.icon;
         }
         return x !== '' ? x : null;
       }
@@ -156,7 +156,11 @@ export default function AssistantCreationModal({
                     startValues.icon != ''
                       ? apiClient.buildEndpoint(`/avatars/${startValues.icon}`)
                       : // else default avatar
-                        undefined
+                        undefined,
+                  currentFileName:
+                    input.id === 'icon' && startValues?.icon
+                      ? startValues.icon
+                      : undefined
                 }}
               />
             ))

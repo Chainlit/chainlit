@@ -412,11 +412,18 @@ async def change_settings(sid, settings: Dict[str, Any]):
 @sio.on("on_create_assistant")
 async def on_create_assistant(sid, options):
     context = init_ws_context(sid)
-    logger.info(f"Received request to create assistant with options: {options}")
+    logger.info(f"Received request to create assistant {options['settings_values']}")
+    if not options["settings_values"].get("id"):
+        options["settings_values"]["id"] = str(uuid.uuid4())
+    if not options["settings_values"].get("created_by"):
+        options["settings_values"]["created_by"] = context.session.user.identifier
+    logger.info(
+        f"Added id: {options['settings_values']['id']} and created_by: {options['settings_values']['created_by']} to the assistant options"
+    )
     if config.code.on_create_assistant:
-        settings_values = options["settings_values"]
         new_assistant = Assistant(
-            input_widgets=options["input_widgets"], settings_values=settings_values
+            input_widgets=options["input_widgets"],
+            settings_values=options["settings_values"],
         )
         await config.code.on_create_assistant(context.session.user, new_assistant)
         return new_assistant.to_dict()
