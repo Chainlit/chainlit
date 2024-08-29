@@ -1,19 +1,19 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from chainlit.data.utils import queue_until_user_message
-from chainlit.types import (
-    Feedback,
-    PaginatedResponse,
-    Pagination,
-    ThreadDict,
-    ThreadFilter,
-)
-from chainlit.user import PersistedUser, User
-
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
+    from chainlit.types import (
+        Feedback,
+        PaginatedResponse,
+        Pagination,
+        ThreadDict,
+        ThreadFilter,
+    )
+    from chainlit.user import PersistedUser, User
+
+    from .utils import queue_until_user_message
 
 
 class BaseDataLayer(ABC):
