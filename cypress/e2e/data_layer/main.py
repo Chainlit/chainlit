@@ -3,8 +3,19 @@ import pickle
 from typing import Dict, List, Optional
 
 import chainlit.data as cl_data
+from chainlit.data.utils import queue_until_user_message
+from chainlit.element import Element, ElementDict
 from chainlit.socket import persist_user_session
 from chainlit.step import StepDict
+from chainlit.types import (
+    Feedback,
+    PageInfo,
+    PaginatedResponse,
+    Pagination,
+    ThreadDict,
+    ThreadFilter,
+)
+from chainlit.user import PersistedUser, User
 from literalai.helper import utc_now
 
 import chainlit as cl
@@ -58,7 +69,7 @@ thread_history = [
             },
         ],
     },
-]  # type: List[cl_data.ThreadDict]
+]  # type: List[ThreadDict]
 deleted_thread_ids = []  # type: List[str]
 
 THREAD_HISTORY_PICKLE_PATH = os.getenv("THREAD_HISTORY_PICKLE_PATH")
@@ -131,13 +142,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
         return "admin"
 
     async def list_threads(
-        self, pagination: cl_data.Pagination, filters: cl_data.ThreadFilter
-    ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
-        return cl_data.PaginatedResponse(
+        self, pagination: Pagination, filters: ThreadFilter
+    ) -> PaginatedResponse[ThreadDict]:
+        return PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
-            pageInfo=cl_data.PageInfo(
-                hasNextPage=False, startCursor=None, endCursor=None
-            ),
+            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
         )
 
     async def get_thread(self, thread_id: str):
@@ -149,6 +158,42 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     async def delete_thread(self, thread_id: str):
         deleted_thread_ids.append(thread_id)
+
+    async def delete_feedback(
+        self,
+        feedback_id: str,
+    ) -> bool:
+        return True
+
+    async def upsert_feedback(
+        self,
+        feedback: Feedback,
+    ) -> str:
+        return ""
+
+    @queue_until_user_message()
+    async def create_element(self, element: "Element"):
+        pass
+
+    async def get_element(
+        self, thread_id: str, element_id: str
+    ) -> Optional["ElementDict"]:
+        pass
+
+    @queue_until_user_message()
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
+        pass
+
+    @queue_until_user_message()
+    async def update_step(self, step_dict: "StepDict"):
+        pass
+
+    @queue_until_user_message()
+    async def delete_step(self, step_id: str):
+        pass
+
+    async def build_debug_url(self) -> str:
+        return ""
 
 
 cl_data._data_layer = TestDataLayer()
@@ -189,7 +234,7 @@ def auth_callback(username: str, password: str) -> Optional[cl.User]:
 
 
 @cl.on_chat_resume
-async def on_chat_resume(thread: cl_data.ThreadDict):
+async def on_chat_resume(thread: ThreadDict):
     await cl.Message(f"Welcome back to {thread['name']}").send()
     if "metadata" in thread:
         await cl.Message(thread["metadata"], author="metadata", language="json").send()
