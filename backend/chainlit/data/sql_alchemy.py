@@ -381,7 +381,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             raise ValueError("No authenticated user in context")
         if not self.storage_provider:
             logger.warn(
-                f"SQLAlchemy: create_element error. No blob_storage_client is configured!"
+                "SQLAlchemy: create_element error. No blob_storage_client is configured!"
             )
             return
         if not element.for_id:
@@ -448,7 +448,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ) -> Optional[List[ThreadDict]]:
         """Fetch all user threads up to self.user_thread_limit, or one thread by id if thread_id is provided."""
         if self.show_logger:
-            logger.info(f"SQLAlchemy: get_all_user_threads")
+            logger.info("SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
                 "id" AS thread_id,
