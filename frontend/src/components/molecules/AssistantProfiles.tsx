@@ -30,6 +30,7 @@ export default function AssistantProfiles() {
   const { listAssistants, setSelectedAssistant } = useChatInteract();
   const [assistants, setAssistants] = useRecoilState(assistantsState);
   const { assistantSettingsInputs } = useChatData();
+  // const { clear } = useChatInteract();
   const [showAll, setShowAll] = useState(false);
   const [newAssistantOpen, setNewAssistantOpen] = useState<boolean>(false);
 
@@ -60,6 +61,7 @@ export default function AssistantProfiles() {
   }
 
   const handleAssistantClick = (assistant: any) => {
+    // clear()
     setSelectedAssistant(assistant);
     // clear();
   };

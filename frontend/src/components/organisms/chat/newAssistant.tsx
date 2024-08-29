@@ -24,7 +24,7 @@ import { Assistant, assistantsState } from 'state/project';
 interface AssistantCreationModalProps {
   open: boolean;
   handleClose: () => void;
-  startValues: Record<string, any> | null;
+  startValues: any;
 }
 
 export default function AssistantCreationModal({
@@ -51,6 +51,7 @@ export default function AssistantCreationModal({
       formik.values,
       (x: TFormInputValue, key: string) => {
         if (key === 'icon') {
+          // If x is a File, it's a new upload. Otherwise, keep the existing value.
           return x instanceof File ? x : formik.values.icon;
         }
         return x !== '' ? x : null;
@@ -67,7 +68,7 @@ export default function AssistantCreationModal({
       return;
     }
 
-    // Handle icon upload or removal
+    // Handle icon upload or preservation
     if (formik.values.icon instanceof File) {
       const newFileName = `/avatars/${formik.values.icon.name}`;
       const { promise } = uploadFile(
@@ -83,6 +84,9 @@ export default function AssistantCreationModal({
         console.error('Failed to upload avatar:', error);
         return;
       }
+    } else if (startValues && startValues.icon) {
+      // Preserve the existing icon if no new file was uploaded
+      values.icon = startValues.icon;
     }
 
     try {
@@ -100,7 +104,6 @@ export default function AssistantCreationModal({
       console.error('Failed to create assistant:', error);
       setErrorMessage('Failed to create assistant. Please try again.');
     }
-    console.log(assistantSettingsDefaultValue);
   };
 
   const handleReset = () => {
