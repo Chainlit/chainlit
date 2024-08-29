@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 _data_layer: Optional[BaseDataLayer] = None
 
 
-class ChainlitDataLayer(BaseDataLayer):
+class LiteralDataLayer(BaseDataLayer):
     def __init__(self, api_key: str, server: Optional[str]):
         from literalai import AsyncLiteralClient
 
