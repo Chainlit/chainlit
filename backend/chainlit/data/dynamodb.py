@@ -579,8 +579,5 @@ class DynamoDBDataLayer(BaseDataLayer):
             updates=item,
         )
 
-    async def delete_user_session(self, id: str) -> bool:
-        return True  # Not sure why documentation wants this
-
     async def build_debug_url(self) -> str:
         return ""

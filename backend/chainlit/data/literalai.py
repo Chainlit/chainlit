@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, cast
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
 from chainlit.data.base import BaseDataLayer
@@ -204,7 +204,7 @@ class ChainlitDataLayer(BaseDataLayer):
         if not element.url:
             if element.path:
                 async with aiofiles.open(element.path, "rb") as f:
-                    content = await f.read()  # type: Union[bytes, str]
+                    content: Union[bytes, str] = await f.read()
             elif element.content:
                 content = element.content
             else:

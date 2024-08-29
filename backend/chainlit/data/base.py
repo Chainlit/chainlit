@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, Union
 
 from chainlit.data.utils import queue_until_user_message
@@ -16,69 +17,81 @@ if TYPE_CHECKING:
     from chainlit.step import StepDict
 
 
-class BaseDataLayer:
+class BaseDataLayer(ABC):
     """Base class for data persistence."""
 
+    @abstractmethod
     async def get_user(self, identifier: str) -> Optional["PersistedUser"]:
-        return None
+        pass
 
+    @abstractmethod
     async def create_user(self, user: "User") -> Optional["PersistedUser"]:
         pass
 
+    @abstractmethod
     async def delete_feedback(
         self,
         feedback_id: str,
     ) -> bool:
-        return True
+        pass
 
+    @abstractmethod
     async def upsert_feedback(
         self,
         feedback: Feedback,
     ) -> str:
-        return ""
+        pass
 
     @queue_until_user_message()
+    @abstractmethod
     async def create_element(self, element: "Element"):
         pass
 
+    @abstractmethod
     async def get_element(
         self, thread_id: str, element_id: str
     ) -> Optional["ElementDict"]:
         pass
 
     @queue_until_user_message()
+    @abstractmethod
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         pass
 
     @queue_until_user_message()
+    @abstractmethod
     async def create_step(self, step_dict: "StepDict"):
         pass
 
     @queue_until_user_message()
+    @abstractmethod
     async def update_step(self, step_dict: "StepDict"):
         pass
 
     @queue_until_user_message()
+    @abstractmethod
     async def delete_step(self, step_id: str):
         pass
 
+    @abstractmethod
     async def get_thread_author(self, thread_id: str) -> str:
         return ""
 
+    @abstractmethod
     async def delete_thread(self, thread_id: str):
         pass
 
+    @abstractmethod
     async def list_threads(
         self, pagination: "Pagination", filters: "ThreadFilter"
     ) -> "PaginatedResponse[ThreadDict]":
-        return PaginatedResponse(
-            data=[],
-            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
-        )
+        pass
 
+    @abstractmethod
     async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
-        return None
+        pass
 
+    @abstractmethod
     async def update_thread(
         self,
         thread_id: str,
@@ -89,11 +102,9 @@ class BaseDataLayer:
     ):
         pass
 
-    async def delete_user_session(self, id: str) -> bool:
-        return True
-
+    @abstractmethod
     async def build_debug_url(self) -> str:
-        return ""
+        pass
 
 
 class BaseStorageClient(Protocol):

@@ -443,9 +443,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": element_id}
         await self.execute_sql(query=query, parameters=parameters)
 
-    async def delete_user_session(self, id: str) -> bool:
-        return False  # Not sure why documentation wants this
-
     async def get_all_user_threads(
         self, user_id: Optional[str] = None, thread_id: Optional[str] = None
     ) -> Optional[List[ThreadDict]]:
