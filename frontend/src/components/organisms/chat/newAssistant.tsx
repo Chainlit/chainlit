@@ -1,6 +1,7 @@
 import { useFormik } from 'formik';
 import mapValues from 'lodash/mapValues';
-import { useContext, useState } from 'react';
+// import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 import {
@@ -12,7 +13,7 @@ import {
   Typography
 } from '@mui/material';
 
-import { ChainlitContext } from '@chainlit/react-client';
+// import { ChainlitContext } from '@chainlit/react-client';
 import { useChatData, useChatInteract } from '@chainlit/react-client';
 
 import { AccentButton, RegularButton } from 'components/atoms/buttons';
@@ -32,7 +33,7 @@ export default function AssistantCreationModal({
   handleClose,
   startValues
 }: AssistantCreationModalProps) {
-  const apiClient = useContext(ChainlitContext);
+  // const apiClient = useContext(ChainlitContext);
   const { assistantSettingsInputs, assistantSettingsDefaultValue } =
     useChatData();
   const { createAssistant, listAssistants, uploadFile } = useChatInteract();
@@ -47,27 +48,23 @@ export default function AssistantCreationModal({
   });
 
   const handleConfirm = async () => {
-    const values: any = mapValues(
-      formik.values,
-      (x: TFormInputValue, key: string) => {
-        if (key === 'icon') {
-          // If x is a File, it's a new upload. Otherwise, keep the existing value.
-          return x instanceof File ? x : formik.values.icon;
-        }
-        return x !== '' ? x : null;
+    const values: any = mapValues(formik.values, (x: TFormInputValue) => {
+      if (typeof x === 'string') {
+        return x.trim();
       }
-    );
+      return x;
+    });
 
     // Check for required fields
-    if (!values.name) {
-      setErrorMessage('Name is mandatory');
-      return;
-    }
-    if (!values.markdown_description) {
-      setErrorMessage('Description is mandatory');
+    if (!values.name || !values.markdown_description) {
+      setErrorMessage('Name and description are required.');
       return;
     }
 
+    // // Preserve the existing icon if it exists
+    // if (startValues.icon && !(formik.values.icon instanceof File) && (formik.values.icon !== '')) {
+    //   values.icon = startValues.icon;
+    // }
     // Handle icon upload or preservation
     if (formik.values.icon instanceof File) {
       const newFileName = `/avatars/${formik.values.icon.name}`;
@@ -84,9 +81,6 @@ export default function AssistantCreationModal({
         console.error('Failed to upload avatar:', error);
         return;
       }
-    } else if (startValues && startValues.icon) {
-      // Preserve the existing icon if no new file was uploaded
-      values.icon = startValues.icon;
     }
 
     try {
@@ -151,19 +145,18 @@ export default function AssistantCreationModal({
                           formik.setFieldValue(input.id, file);
                         }
                       : formik.handleChange,
-                  setField: formik.setFieldValue,
-                  type: input.id === 'icon' ? 'fileupload' : input.type,
-                  initialPreview:
-                    input.id === 'icon' &&
-                    startValues?.icon &&
-                    startValues.icon != ''
-                      ? apiClient.buildEndpoint(`${startValues.icon}`)
-                      : // else default avatar
-                        undefined,
-                  currentFileName:
-                    input.id === 'icon' && startValues?.icon
-                      ? startValues.icon
-                      : undefined
+                  setField: formik.setFieldValue
+                  // type: input.id === 'icon' ? 'fileupload' : input.type,
+                  // initialPreview:
+                  //   input.id === 'icon' &&
+                  //   startValues?.icon &&
+                  //   startValues.icon != ''
+                  //     ? apiClient.buildEndpoint(`${startValues.icon}`)
+                  //     : undefined,
+                  // currentFileName:
+                  //   input.id === 'icon' && startValues?.icon
+                  //     ? startValues.icon
+                  //     : undefined
                 }}
               />
             ))

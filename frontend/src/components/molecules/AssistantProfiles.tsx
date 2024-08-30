@@ -15,6 +15,7 @@ import IconButton from '@mui/material/IconButton';
 
 import {
   ChainlitContext,
+  useAuth,
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
@@ -28,26 +29,19 @@ import { selectedAssistantState } from 'state/project';
 
 export default function AssistantProfiles() {
   const apiClient = useContext(ChainlitContext);
-  // interact with the backend
   const { listAssistants, setSelectedAssistant } = useChatInteract();
-  // store the assistants in the recoil state
   const [assistants, setAssistants] = useRecoilState(assistantsState);
-  // store the assistant settings inputs in the recoil state
   const { assistantSettingsInputs } = useChatData();
   const { resetMessages } = useChatInteract();
   const [showAll, setShowAll] = useState(false);
   const [newAssistantOpen, setNewAssistantOpen] = useState<boolean>(false);
-
-  // assistant to edit (set when clicking on the settings icon, just before opening the modal)
   const [editAssistant, setEditAssistant] = useState<any | null>(null);
-
-  // set the selected assistant in the frontend state
   const SetFrontSelectedAssistant = useSetRecoilState(selectedAssistantState);
+  const { user } = useAuth();
 
   const fetchAssistants = useCallback(async () => {
     try {
-      const assistantsList = (await listAssistants()) as Assistant[];
-      setAssistants(assistantsList);
+      setAssistants((await listAssistants()) as Assistant[]);
     } catch (error) {
       console.error('Error fetching assistants:', error);
       setAssistants([]);
@@ -56,6 +50,10 @@ export default function AssistantProfiles() {
 
   useEffect(() => {
     fetchAssistants();
+    if (assistants.length > 0) {
+      setSelectedAssistant(assistants[0]);
+      SetFrontSelectedAssistant(assistants[0]);
+    }
   }, [fetchAssistants]);
 
   if (
@@ -74,18 +72,22 @@ export default function AssistantProfiles() {
   };
 
   const handleEditAssistant = async (assistant: Assistant) => {
-    console.log('assistant', assistant);
+    if (assistant.settings_values['created_by'] !== user?.identifier) {
+      return; // Don't allow editing if the user is not the creator
+    }
+
     if (assistant.settings_values['icon'] == null) {
       setEditAssistant(assistant);
     } else {
-      const new_assistant_icon = apiClient.buildEndpoint(
-        `${assistant.settings_values['icon']}`
-      );
+      let icon = assistant.settings_values['icon'];
+      if (icon.startsWith('/')) {
+        icon = apiClient.buildEndpoint(icon);
+      }
       const new_assistant = {
         ...assistant,
         settings_values: {
           ...assistant.settings_values,
-          icon: new_assistant_icon
+          icon: icon
         }
       };
       setEditAssistant(new_assistant);
@@ -120,9 +122,13 @@ export default function AssistantProfiles() {
               <ListItemIcon sx={{ minWidth: '36px' }}>
                 {assistant.settings_values['icon'] ? (
                   <img
-                    src={apiClient.buildEndpoint(
-                      `${assistant.settings_values['icon']}`
-                    )}
+                    src={
+                      assistant.settings_values['icon'].startsWith('/')
+                        ? apiClient.buildEndpoint(
+                            assistant.settings_values['icon']
+                          )
+                        : assistant.settings_values['icon']
+                    }
                     alt={assistant.settings_values['name']}
                     style={{
                       borderRadius: '50%',
@@ -141,14 +147,16 @@ export default function AssistantProfiles() {
                 )}
               </ListItemIcon>
               <ListItemText primary={assistant.settings_values['name']} />
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditAssistant(assistant);
-                }}
-              >
-                <SettingsIcon />
-              </IconButton>
+              {assistant.settings_values['created_by'] === user?.identifier && (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditAssistant(assistant);
+                  }}
+                >
+                  <SettingsIcon />
+                </IconButton>
+              )}
             </ListItemButton>
           </ListItem>
         ))}

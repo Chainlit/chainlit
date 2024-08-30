@@ -207,13 +207,6 @@ const useChatInteract = () => {
     [sessionId, accessToken]
   );
 
-  const uploadAssistantIcon = useCallback(
-    (file: File, onProgress: (progress: number) => void) => {
-      return client.uploadAssistantIcon(file, onProgress, accessToken);
-    },
-    [accessToken]
-  );
-
   const resetMessages = useCallback(() => {
     setMessages([]);
     setElements([]);
@@ -239,8 +232,7 @@ const useChatInteract = () => {
     updateChatSettings,
     createAssistant,
     listAssistants,
-    setSelectedAssistant,
-    uploadAssistantIcon
+    setSelectedAssistant
   };
 };
 

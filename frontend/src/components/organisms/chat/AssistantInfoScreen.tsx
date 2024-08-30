@@ -1,10 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 
-import { Avatar, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Stack, Typography } from '@mui/material';
 import Fade from '@mui/material/Fade';
 
 import { IStep } from '@chainlit/react-client';
 import { ChainlitContext, useChatMessages } from '@chainlit/react-client';
+
+import { Markdown } from 'components/molecules/Markdown';
 
 interface Props {
   hideLogo?: boolean;
@@ -33,6 +35,7 @@ export default function AssistantInfoScreen({
 
   const logo = useMemo(() => {
     const name = selectedAssistant?.settings_values['name'];
+    const createdBy = selectedAssistant?.settings_values['created_by'];
     let icon = selectedAssistant?.settings_values['icon'] || null;
 
     if (icon?.startsWith('/avatars')) {
@@ -41,18 +44,26 @@ export default function AssistantInfoScreen({
 
     return (
       <Stack gap={2} alignItems="center">
-        <Avatar sx={{ height: 48, width: 48 }} src={icon} />
+        <Avatar sx={{ height: 96, width: 96 }} src={icon} />
         {name ? (
           <Typography
             color="text.primary"
-            sx={{ fontSize: '1.1rem', fontWeight: 600 }}
+            sx={{ fontSize: '1.3rem', fontWeight: 600 }}
           >
             {name}
           </Typography>
         ) : null}
+        {createdBy ? (
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography color="text.secondary" sx={{ fontSize: '0.9rem' }}>
+              by {createdBy}
+            </Typography>
+            <Avatar sx={{ width: 24, height: 24 }} />
+          </Stack>
+        ) : null}
       </Stack>
     );
-  }, [selectedAssistant]);
+  }, [selectedAssistant, apiClient]);
 
   if (!selectedAssistant) {
     return null;
@@ -75,8 +86,24 @@ export default function AssistantInfoScreen({
         gap={6}
         px={2}
         boxSizing={'border-box'}
+        color="text.primary"
       >
         {hideLogo ? null : <Stack>{logo}</Stack>}
+        {selectedAssistant.settings_values['markdown_description'] && (
+          <Box
+            sx={{
+              backgroundColor: 'background.paper',
+              borderRadius: '8px',
+              paddingLeft: '16px',
+              paddingRight: '16px'
+              // width: '100%'
+            }}
+          >
+            <Markdown allowHtml={false} latex={false}>
+              {selectedAssistant.settings_values['markdown_description']}
+            </Markdown>
+          </Box>
+        )}
       </Stack>
     </Fade>
   );
