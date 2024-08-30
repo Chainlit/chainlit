@@ -7,13 +7,13 @@ import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { useAuth, useConfig } from '@chainlit/react-client';
+import { useAuth, useChatData, useConfig } from '@chainlit/react-client';
 
 import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
-import ReadmeButton from 'components/organisms/readmeButton';
-import NewAssistantButton from 'components/molecules/newAssistantButton';
 import AssistantProfiles from 'components/molecules/AssistantProfiles';
+import NewAssistantButton from 'components/molecules/newAssistantButton';
+import ReadmeButton from 'components/organisms/readmeButton';
 
 import { settingsState } from 'state/settings';
 
@@ -25,9 +25,9 @@ const DRAWER_WIDTH = 260;
 const SideBar = () => {
   const user = useAuth();
   const isMobile = useMediaQuery('(max-width:66rem)');
-
   const [settings, setSettings] = useRecoilState(settingsState);
   const { config } = useConfig();
+  const { assistantSettingsInputs } = useChatData();
   const enableHistory = !!user.accessToken && !!config?.dataPersistence;
 
   useEffect(() => {
@@ -82,8 +82,12 @@ const SideBar = () => {
         >
           <Logo style={{ maxHeight: '25px' }} />
         </Stack>
-        <NewAssistantButton />
-        <AssistantProfiles />
+        {assistantSettingsInputs && (
+          <>
+            <NewAssistantButton />
+            <AssistantProfiles />
+          </>
+        )}
         {enableHistory ? (
           <ThreadHistory />
         ) : (

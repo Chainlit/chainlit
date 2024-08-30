@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import {
@@ -24,18 +24,25 @@ import AssistantCreationModal from 'components/organisms/chat/newAssistant';
 import UserIcon from 'assets/user';
 
 import { Assistant, assistantsState } from 'state/project';
+import { selectedAssistantState } from 'state/project';
 
 export default function AssistantProfiles() {
   const apiClient = useContext(ChainlitContext);
+  // interact with the backend
   const { listAssistants, setSelectedAssistant } = useChatInteract();
+  // store the assistants in the recoil state
   const [assistants, setAssistants] = useRecoilState(assistantsState);
+  // store the assistant settings inputs in the recoil state
   const { assistantSettingsInputs } = useChatData();
-  // const { clear } = useChatInteract();
+  const { resetMessages } = useChatInteract();
   const [showAll, setShowAll] = useState(false);
   const [newAssistantOpen, setNewAssistantOpen] = useState<boolean>(false);
 
   // assistant to edit (set when clicking on the settings icon, just before opening the modal)
   const [editAssistant, setEditAssistant] = useState<any | null>(null);
+
+  // set the selected assistant in the frontend state
+  const SetFrontSelectedAssistant = useSetRecoilState(selectedAssistantState);
 
   const fetchAssistants = useCallback(async () => {
     try {
@@ -60,10 +67,10 @@ export default function AssistantProfiles() {
     return null;
   }
 
-  const handleAssistantClick = (assistant: any) => {
-    // clear()
+  const handleAssistantClick = (assistant: Assistant) => {
+    resetMessages();
     setSelectedAssistant(assistant);
-    // clear();
+    SetFrontSelectedAssistant(assistant);
   };
 
   const handleEditAssistant = async (assistant: Assistant) => {

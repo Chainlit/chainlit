@@ -214,10 +214,21 @@ const useChatInteract = () => {
     [accessToken]
   );
 
+  const resetMessages = useCallback(() => {
+    setMessages([]);
+    setElements([]);
+    setTasklists([]);
+    setActions([]);
+    setTokenCount(0);
+    setSideView(undefined);
+    setCurrentThreadId(undefined);
+  }, []);
+
   return {
     uploadFile,
     callAction,
     clear,
+    resetMessages, // Add this line
     replyMessage,
     sendMessage,
     editMessage,

@@ -1,7 +1,7 @@
 import { useUpload } from 'hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,7 +25,9 @@ import { TaskList } from 'components/molecules/tasklist/TaskList';
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import { IAttachment, attachmentsState } from 'state/chat';
+import { selectedAssistantState } from 'state/project';
 
+import AssistantInfoScreen from './AssistantInfoScreen';
 import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
@@ -42,7 +44,7 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
   const navigate = useNavigate();
-
+  const selectedAssistant = useRecoilValue(selectedAssistantState);
   const fileSpec = useMemo(
     () => ({
       max_size_mb:
@@ -176,9 +178,6 @@ const Chat = () => {
       {...(enableMultiModalUpload
         ? upload?.getRootProps({ className: 'dropzone' })
         : {})}
-      // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
-      onBlur={undefined}
-      onFocus={undefined}
       display="flex"
       width="100%"
       flexGrow={1}
@@ -211,6 +210,7 @@ const Chat = () => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
+            <AssistantInfoScreen selectedAssistant={selectedAssistant} />
             <WelcomeScreen />
             <Box py={2} />
             <Messages />

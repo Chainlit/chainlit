@@ -124,7 +124,7 @@ export const assistantSettingsDefaultValueSelector = selector({
   }
 });
 
-export const selectedAssistantState = atom<string | undefined>({
+export const selectedAssistantState = atom<any | undefined>({
   key: 'SelectedAssistant',
   default: undefined
 });

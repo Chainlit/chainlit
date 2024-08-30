@@ -157,7 +157,7 @@ export default function AssistantCreationModal({
                     input.id === 'icon' &&
                     startValues?.icon &&
                     startValues.icon != ''
-                      ? apiClient.buildEndpoint(`/avatars/${startValues.icon}`)
+                      ? apiClient.buildEndpoint(`${startValues.icon}`)
                       : // else default avatar
                         undefined,
                   currentFileName:

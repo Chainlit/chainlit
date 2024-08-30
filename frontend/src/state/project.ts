@@ -19,10 +19,15 @@ export const newAssistantOpenState = atom<boolean>({
 
 export interface Assistant {
   input_widgets: any[];
-  settings_values: Record<string, any>;
+  settings_values: Record<any, any>;
 }
 
 export const assistantsState = atom<Assistant[]>({
   key: 'Assistants',
   default: []
+});
+
+export const selectedAssistantState = atom<Assistant | null>({
+  key: 'SelectedAssistant',
+  default: null
 });

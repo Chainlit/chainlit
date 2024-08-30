@@ -6,9 +6,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import UserButton from 'components/atoms/buttons/userButton';
 import { Logo } from 'components/atoms/logo';
-import AssistantProfiles from 'components/molecules/AssistantProfiles';
+import SelectedAssistantDisplay from 'components/molecules/SelectedAssistantDisplay';
 import ChatProfiles from 'components/molecules/chatProfiles';
-import NewAssistantButton from 'components/molecules/newAssistantButton';
 import NewChatButton from 'components/molecules/newChatButton';
 
 import { settingsState } from 'state/settings';
@@ -42,6 +41,7 @@ const Header = memo(() => {
         }}
       >
         <ChatProfiles />
+        <SelectedAssistantDisplay />
       </Box>
       {isMobile ? (
         <OpenSideBarMobileButton />
@@ -51,8 +51,6 @@ const Header = memo(() => {
       <Box />
       <Stack direction="row" alignItems="center">
         <NewChatButton />
-        {/* <NewAssistantButton />
-        <AssistantProfiles /> */}
         <UserButton />
       </Stack>
     </Box>
