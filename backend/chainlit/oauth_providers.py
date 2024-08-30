@@ -8,6 +8,8 @@ from chainlit.secret import random_secret
 from chainlit.user import User
 from fastapi import HTTPException
 
+from chainlit import config
+
 
 class OAuthProvider:
     id: str
@@ -621,17 +623,22 @@ class GitlabOAuthProvider(OAuthProvider):
             return (gitlab_user, user)
 
 
-providers = [
-    GithubOAuthProvider(),
-    GoogleOAuthProvider(),
-    AzureADOAuthProvider(),
-    AzureADHybridOAuthProvider(),
-    OktaOAuthProvider(),
-    Auth0OAuthProvider(),
-    DescopeOAuthProvider(),
-    AWSCognitoOAuthProvider(),
-    GitlabOAuthProvider(),
-]
+providers = (
+    [
+        GithubOAuthProvider(),
+        GoogleOAuthProvider(),
+        AzureADOAuthProvider(),
+        AzureADHybridOAuthProvider(),
+        OktaOAuthProvider(),
+        Auth0OAuthProvider(),
+        DescopeOAuthProvider(),
+        AWSCognitoOAuthProvider(),
+        GitlabOAuthProvider(),
+    ]
+    + [config.code.custom_oauth_provider()]
+    if config.code.custom_oauth_provider
+    else []
+)
 
 
 def get_oauth_provider(provider: str) -> Optional[OAuthProvider]:

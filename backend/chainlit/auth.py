@@ -88,4 +88,6 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
     if not require_login():
         return None
 
+    if config.code.custom_authenticate_user:
+        return await config.code.custom_authenticate_user(token)
     return await authenticate_user(token)
