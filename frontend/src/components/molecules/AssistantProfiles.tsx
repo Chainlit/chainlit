@@ -50,11 +50,14 @@ export default function AssistantProfiles() {
 
   useEffect(() => {
     fetchAssistants();
+  }, [fetchAssistants]);
+
+  useEffect(() => {
     if (assistants.length > 0) {
       setSelectedAssistant(assistants[0]);
       SetFrontSelectedAssistant(assistants[0]);
     }
-  }, [fetchAssistants]);
+  }, [assistants, setSelectedAssistant, SetFrontSelectedAssistant]);
 
   if (
     !assistants ||
