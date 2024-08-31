@@ -42,16 +42,12 @@ export default function AssistantCreationModal({
 
   const formik = useFormik({
     initialValues: startValues ? startValues : assistantSettingsDefaultValue,
-    // initialValues: { "name": 'toto', "markdown_description": 'toto', "icon": "pfp.png" },
     enableReinitialize: true,
     onSubmit: async () => undefined
   });
 
   const handleConfirm = async () => {
     const values: any = mapValues(formik.values, (x: TFormInputValue) => {
-      if (typeof x === 'string') {
-        return x.trim();
-      }
       return x;
     });
 
@@ -61,12 +57,10 @@ export default function AssistantCreationModal({
       return;
     }
 
-    // // Preserve the existing icon if it exists
-    // if (startValues.icon && !(formik.values.icon instanceof File) && (formik.values.icon !== '')) {
-    //   values.icon = startValues.icon;
-    // }
-    // Handle icon upload or preservation
-    if (formik.values.icon instanceof File) {
+    // Handle icon upload or deletion
+    if (values.icon === null || values.icon === '') {
+      values.icon = null;
+    } else if (formik.values.icon instanceof File) {
       const newFileName = `/avatars/${formik.values.icon.name}`;
       const { promise } = uploadFile(
         formik.values.icon,
@@ -88,6 +82,7 @@ export default function AssistantCreationModal({
         input_widgets: assistantSettingsInputs,
         settings_values: values
       };
+
       await createAssistant(newAssistant);
       const updatedAssistants = (await listAssistants()) as Assistant[];
       setAssistants(updatedAssistants);
@@ -143,20 +138,10 @@ export default function AssistantCreationModal({
                     input.id === 'icon'
                       ? (file: File | null) => {
                           formik.setFieldValue(input.id, file);
+                          console.log(file);
                         }
                       : formik.handleChange,
                   setField: formik.setFieldValue
-                  // type: input.id === 'icon' ? 'fileupload' : input.type,
-                  // initialPreview:
-                  //   input.id === 'icon' &&
-                  //   startValues?.icon &&
-                  //   startValues.icon != ''
-                  //     ? apiClient.buildEndpoint(`${startValues.icon}`)
-                  //     : undefined,
-                  // currentFileName:
-                  //   input.id === 'icon' && startValues?.icon
-                  //     ? startValues.icon
-                  //     : undefined
                 }}
               />
             ))
