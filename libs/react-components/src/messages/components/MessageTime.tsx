@@ -9,9 +9,9 @@ interface Props {
 const MessageTime = ({ timestamp }: Props) => {
   if (!timestamp) return null;
   const dateOptions: Intl.DateTimeFormatOptions = {
-  weekday: 'short',
-   // month: 'short',
-    //day: '2-digit',
+  //weekday: 'short',
+    month: 'short',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit'
   };
