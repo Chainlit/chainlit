@@ -54,8 +54,14 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         step_type: StepType = "undefined"
+        step_name: str = event_type.value
+        step_input: Dict[str, Any] = payload
         if event_type == CBEventType.FUNCTION_CALL:
             step_type = "tool"
+            print(payload)
+            metadata: ToolMetadata = payload.get(EventPayload.TOOL)
+            step_name = metadata.name
+            step_input = payload.get(EventPayload.FUNCTION_CALL)
         elif event_type == CBEventType.RETRIEVE:
             step_type = "tool"
         elif event_type == CBEventType.QUERY:
@@ -66,7 +72,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             return event_id
 
         step = Step(
-            name=event_type.value,
+            name=step_name,
             type=step_type,
             parent_id=self._get_parent_id(parent_id),
             id=event_id,
@@ -74,7 +80,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
         self.steps[event_id] = step
         step.start = utc_now()
-        step.input = payload or {}
+        step.input = step_input or {}
         context_var.get().loop.create_task(step.send())
         return event_id
 
