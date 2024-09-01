@@ -55,7 +55,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         """Run when an event starts and return id of event."""
         step_type: StepType = "undefined"
         step_name: str = event_type.value
-        step_input: Dict[str, Any] = payload
+        step_input: Optional[Dict[str, Any]] = payload
         if event_type == CBEventType.FUNCTION_CALL:
             step_type = "tool"
             if payload:
