@@ -99,7 +99,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                 step.output = f"{response}"
                 context_var.get().loop.create_task(step.update())
 
-        if event_type == CBEventType.QUERY:
+        elif event_type == CBEventType.QUERY:
             response = payload.get(EventPayload.RESPONSE)
             source_nodes = getattr(response, "source_nodes", None)
             if source_nodes:
