@@ -54,6 +54,8 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         step_type: StepType = "undefined"
+        if event_type == CBEventType.FUNCTION_CALL:
+            step_type = "tool"
         if event_type == CBEventType.RETRIEVE:
             step_type = "tool"
         elif event_type == CBEventType.QUERY:
@@ -90,6 +92,12 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             return
 
         step.end = utc_now()
+
+        if event_type == CBEventType.FUNCTION_CALL:
+            response = payload.get(EventPayload.FUNCTION_OUTPUT)
+            if response:
+                step.output = f"{response}"
+                context_var.get().loop.create_task(step.update())
 
         if event_type == CBEventType.QUERY:
             response = payload.get(EventPayload.RESPONSE)
