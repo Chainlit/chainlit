@@ -58,7 +58,6 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         step_input: Dict[str, Any] = payload
         if event_type == CBEventType.FUNCTION_CALL:
             step_type = "tool"
-            print(payload)
             metadata: ToolMetadata = payload.get(EventPayload.TOOL)
             step_name = metadata.name
             step_input = payload.get(EventPayload.FUNCTION_CALL)
