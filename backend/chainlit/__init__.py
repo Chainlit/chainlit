@@ -41,7 +41,7 @@ from chainlit.message import (
     ErrorMessage,
     Message,
 )
-from chainlit.oauth_providers.providers import get_configured_oauth_providers
+from chainlit.oauth.providers import get_configured_oauth_providers
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.types import AudioChunk, ChatProfile, Starter

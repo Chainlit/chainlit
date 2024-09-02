@@ -1,7 +1,7 @@
 import os
 
 import httpx
-from chainlit.oauth_providers.oauth_provider import OAuthProvider
+from chainlit.oauth.oauth_provider import OAuthProvider
 from chainlit.user import User
 from fastapi import HTTPException
 

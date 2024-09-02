@@ -8,7 +8,7 @@ import shutil
 import urllib.parse
 from typing import Any, Optional, Union
 
-from chainlit.oauth_providers.providers import get_oauth_provider
+from chainlit.oauth.providers import get_oauth_provider
 from chainlit.secret import random_secret
 
 mimetypes.add_type("application/javascript", ".js")
