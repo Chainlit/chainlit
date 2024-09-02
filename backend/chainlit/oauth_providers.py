@@ -4,11 +4,10 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
+from chainlit.config import config
 from chainlit.secret import random_secret
 from chainlit.user import User
 from fastapi import HTTPException
-
-from chainlit import config
 
 
 class OAuthProvider:
@@ -623,6 +622,7 @@ class GitlabOAuthProvider(OAuthProvider):
             return (gitlab_user, user)
 
 
+custom_oauth = config.code.custom_oauth_provider  # type: ignore
 providers = (
     [
         GithubOAuthProvider(),
@@ -635,8 +635,8 @@ providers = (
         AWSCognitoOAuthProvider(),
         GitlabOAuthProvider(),
     ]
-    + [config.code.custom_oauth_provider()]
-    if config.code.custom_oauth_provider
+    + [custom_oauth()]
+    if custom_oauth
     else []
 )
 
