@@ -4,7 +4,11 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from chainlit.action import Action
 from chainlit.config import config
 from chainlit.message import Message
-from chainlit.oauth_providers import get_configured_oauth_providers
+from chainlit.oauth_providers import (
+    OAuthProvider,
+    get_configured_oauth_providers,
+    providers,
+)
 from chainlit.step import Step, step
 from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
@@ -85,6 +89,38 @@ def oauth_callback(
 
     config.code.oauth_callback = wrap_user_function(func)
     return func
+
+
+@trace
+def custom_authenticate_user(func: Callable[[str], Awaitable[User]]) -> Callable:
+    """
+    A decorator to authenticate the user via custom token validation.
+
+    Args:
+        func (Callable[[str], Awaitable[User]]): The authentication callback to execute.
+
+    Returns:
+        Callable[[str], Awaitable[User]]: The decorated authentication callback.
+    """
+
+    if len(get_configured_oauth_providers()) == 0:
+        raise ValueError(
+            "You must set the environment variable for at least one oauth provider to use oauth authentication."
+        )
+
+    config.code.custom_authenticate_user = wrap_user_function(func)
+    return func
+
+
+def custom_oauth_provider(func: Callable[[], OAuthProvider]) -> None:
+    """
+    A decorator to integrate custom OAuth provider logic for user authentication.
+
+    Args:
+        func (Callable[[], OAuthProvider): A function that returns an instance of the OAuthProvider class, encapsulating the logic and details for the custom OAuth provider.
+    """
+
+    providers.append(func())
 
 
 @trace
