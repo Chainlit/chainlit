@@ -13,6 +13,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Type,
     Union,
 )
 
@@ -293,8 +294,8 @@ class CodeSettings:
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
     # Callbacks for authenticate mechanism
-    custom_authenticate_user: Optional[Callable[[str], "User"]]
-    custom_oauth_provider: Optional[OAuthProvider]
+    custom_authenticate_user: Optional[Callable[[str], Awaitable["User"]]] = None
+    custom_oauth_provider: Optional[Type[OAuthProvider]] = None
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
