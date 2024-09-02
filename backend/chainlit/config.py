@@ -19,7 +19,7 @@ from typing import (
 
 import tomli
 from chainlit.logger import logger
-from chainlit.oauth_providers import OAuthProvider
+from chainlit.oauth_providers.oauth_provider import OAuthProvider
 from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
