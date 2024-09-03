@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from chainlit.action import Action
 from chainlit.config import config
@@ -15,19 +15,21 @@ from starlette.datastructures import Headers
 
 
 @trace
-def password_auth_callback(func: Callable[[str, str], Optional[User]]) -> Callable:
+def password_auth_callback(
+    func: Callable[[str, str], Awaitable[Optional[User]]]
+) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
 
     Args:
-        func (Callable[[str, str], Optional[User]]): The authentication callback to execute. Takes the email and password as parameters.
+        func (Callable[[str, str], Awaitable[Optional[User]]]): The authentication callback to execute. Takes the email and password as parameters.
 
     Example:
         @cl.password_auth_callback
         async def password_auth_callback(username: str, password: str) -> Optional[User]:
 
     Returns:
-        Callable[[str, str], Optional[User]]: The decorated authentication callback.
+        Callable[[str, str], Awaitable[Optional[User]]]: The decorated authentication callback.
     """
 
     config.code.password_auth_callback = wrap_user_function(func)
@@ -35,19 +37,21 @@ def password_auth_callback(func: Callable[[str, str], Optional[User]]) -> Callab
 
 
 @trace
-def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
+def header_auth_callback(
+    func: Callable[[Headers], Awaitable[Optional[User]]]
+) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
 
     Args:
-        func (Callable[[Headers], Optional[User]]): The authentication callback to execute.
+        func (Callable[[Headers], Awaitable[Optional[User]]]): The authentication callback to execute.
 
     Example:
         @cl.header_auth_callback
         async def header_auth_callback(headers: Headers) -> Optional[User]:
 
     Returns:
-        Callable[[Headers], Optional[User]]: The decorated authentication callback.
+        Callable[[Headers], Awaitable[Optional[User]]]: The decorated authentication callback.
     """
 
     config.code.header_auth_callback = wrap_user_function(func)
@@ -56,20 +60,22 @@ def header_auth_callback(func: Callable[[Headers], Optional[User]]) -> Callable:
 
 @trace
 def oauth_callback(
-    func: Callable[[str, str, Dict[str, str], User], Optional[User]],
+    func: Callable[
+        [str, str, Dict[str, str], User, Optional[str]], Awaitable[Optional[User]]
+    ],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via oauth
 
     Args:
-        func (Callable[[str, str, Dict[str, str], User], Optional[User]]): The authentication callback to execute.
+        func (Callable[[str, str, Dict[str, str], User, Optional[str]], Awaitable[Optional[User]]]): The authentication callback to execute.
 
     Example:
         @cl.oauth_callback
         async def oauth_callback(provider_id: str, token: str, raw_user_data: Dict[str, str], default_app_user: User, id_token: Optional[str]) -> Optional[User]:
 
     Returns:
-        Callable[[str, str, Dict[str, str], User], Optional[User]]: The decorated authentication callback.
+        Callable[[str, str, Dict[str, str], User, Optional[str]], Awaitable[Optional[User]]]: The decorated authentication callback.
     """
 
     if len(get_configured_oauth_providers()) == 0:
@@ -153,16 +159,16 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
 
 @trace
 def set_chat_profiles(
-    func: Callable[[Optional["User"]], List["ChatProfile"]],
+    func: Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]],
 ) -> Callable:
     """
     Programmatic declaration of the available chat profiles (can depend on the User from the session if authentication is setup).
 
     Args:
-        func (Callable[[Optional["User"]], List["ChatProfile"]]): The function declaring the chat profiles.
+        func (Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]): The function declaring the chat profiles.
 
     Returns:
-        Callable[[Optional["User"]], List["ChatProfile"]]: The decorated function.
+        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]: The decorated function.
     """
 
     config.code.set_chat_profiles = wrap_user_function(func)
@@ -170,15 +176,17 @@ def set_chat_profiles(
 
 
 @trace
-def set_starters(func: Callable[[Optional["User"]], List["Starter"]]) -> Callable:
+def set_starters(
+    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+) -> Callable:
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
 
     Args:
-        func (Callable[[Optional["User"]], List["Starter"]]): The function declaring the starters.
+        func (Callable[[Optional["User"]], Awaitable[List["Starter"]]]): The function declaring the starters.
 
     Returns:
-        Callable[[Optional["User"]], List["Starter"]]: The decorated function.
+        Callable[[Optional["User"]], Awaitable[List["Starter"]]]: The decorated function.
     """
 
     config.code.set_starters = wrap_user_function(func)
@@ -236,14 +244,16 @@ def on_audio_end(func: Callable) -> Callable:
 
 
 @trace
-def author_rename(func: Callable[[str], str]) -> Callable[[str], str]:
+def author_rename(
+    func: Callable[[str], Awaitable[str]]
+) -> Callable[[str], Awaitable[str]]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
     Args:
-        func (Callable[[str], str]): The function to be called to rename an author. Takes the original author name as parameter.
+        func (Callable[[str], Awaitable[str]]): The function to be called to rename an author. Takes the original author name as parameter.
 
     Returns:
-        Callable[[Any, str], Any]: The decorated function.
+        Callable[[Any, str], Awaitable[Any]]: The decorated function.
     """
 
     config.code.author_rename = wrap_user_function(func)
