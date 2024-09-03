@@ -1,10 +1,11 @@
+from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock, Mock
+
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, Mock
-from contextlib import asynccontextmanager
-from chainlit.user_session import UserSession
 from chainlit.context import ChainlitContext, context_var
-from chainlit.session import WebsocketSession, HTTPSession
+from chainlit.session import HTTPSession, WebsocketSession
+from chainlit.user_session import UserSession
 
 
 @asynccontextmanager
@@ -18,6 +19,8 @@ async def create_chainlit_context():
     mock_session.http_referer = None
     mock_session.client_type = "webapp"
     mock_session.languages = ["en"]
+    mock_session.thread_id = "test_thread_id"
+    mock_session.emit = AsyncMock()
 
     context = ChainlitContext(mock_session)
     token = context_var.set(context)
