@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from chainlit.callbacks import password_auth_callback
 from chainlit.config import config
 from chainlit.user import User
