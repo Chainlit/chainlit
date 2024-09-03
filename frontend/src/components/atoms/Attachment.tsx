@@ -66,7 +66,8 @@ const Attachment = ({ name, mime, children }: Props) => {
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             fontWeight: 500,
-            fontSize: '0.8rem',
+            // fontSize: '0.8rem',
+            fontSize: 'theme.typography.caption.fontSize',
             width: '70%'
           }}
         >

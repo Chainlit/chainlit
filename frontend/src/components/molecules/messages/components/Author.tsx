@@ -55,7 +55,8 @@ const Author = ({ message, show, children }: Props) => {
         <Typography
           noWrap
           sx={{
-            fontSize: '1rem',
+            // fontSize: '1rem',
+            fontSize: 'theme.typography.body1.fontSize',
             fontWeight: 600,
             lineHeight: 'unset'
           }}

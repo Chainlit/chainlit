@@ -53,9 +53,18 @@ const error = {
   contrastText: white
 };
 
+const getHtmlComputedFontSize = () => {
+  const fs = window.getComputedStyle(document.documentElement).getPropertyValue('font-size');
+  const fsInt = parseInt(fs.substring(0, fs.length - 2));
+  return fsInt;
+}
+
 const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palette?: any) =>
   createTheme({
-    typography: fontFamily ? { fontFamily } : typography,
+    // typography: fontFamily ? { fontFamily } : typography,
+    typography: {
+      htmlFontSize: getHtmlComputedFontSize()
+    },
     components,
     shape,
     breakpoints: breakpoints,
@@ -89,7 +98,10 @@ const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palett
 
 const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palette?: any) =>
   createTheme({
-    typography: fontFamily ? { fontFamily } : typography,
+    // typography: fontFamily ? { fontFamily } : typography,
+    typography: {
+      htmlFontSize: getHtmlComputedFontSize()
+    },
     components,
     shape,
     breakpoints: breakpoints,
