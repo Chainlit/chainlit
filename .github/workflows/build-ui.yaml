@@ -20,5 +20,5 @@ jobs:
         with:
           name: ui_build
           path: |
-            frontend/
-            libs/
+            frontend
+            libs
