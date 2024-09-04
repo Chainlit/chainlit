@@ -24,7 +24,7 @@ runs:
   using: 'composite'
   steps:
     - name: Cache poetry install
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ~/.local
         key: poetry-${{ runner.os }}-${{ inputs.poetry-version }}-0
