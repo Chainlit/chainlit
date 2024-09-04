@@ -25,10 +25,11 @@ jobs:
           node-version: 22.7.0
           pnpm-version: 9.7.0
           pnpm-install-args: --no-frozen-lockfile
-      - name: Build UI
-        run: pnpm run buildUi
-      - name: Lint UI
-        run: pnpm run lintUi
+      - name: Download built UI
+        uses: actions/download-artifact@v4
+        with:
+          name: ui_build
+          path: frontend
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
