@@ -60,8 +60,9 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
         if event_type == CBEventType.FUNCTION_CALL:
             step_type = "tool"
             if payload:
-                metadata: ToolMetadata = payload.get(EventPayload.TOOL)
-                step_name = getattr(metadata, "name", step_name)
+                metadata: Optional[ToolMetadata] = payload.get(EventPayload.TOOL)
+                if metadata:
+                    step_name = getattr(metadata, "name", step_name)
                 step_input = payload.get(EventPayload.FUNCTION_CALL)
         elif event_type == CBEventType.RETRIEVE:
             step_type = "tool"
