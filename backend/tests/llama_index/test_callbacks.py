@@ -45,16 +45,17 @@ async def test_on_event_start_for_function_calls(mock_chainlit_context):
     async with mock_chainlit_context as context:
         handler = LlamaIndexCallbackHandler()
 
-        result = handler.on_event_start(
-            CBEventType.FUNCTION_CALL,
-            {
-                EventPayload.TOOL: ToolMetadata(
-                    name="test_tool", description="test_description"
-                ),
-                EventPayload.FUNCTION_CALL: {"arg1": "value1"},
-            },
-            TEST_EVENT_ID,
-        )
+        with patch.object(Step, "send") as mock_send:
+            result = handler.on_event_start(
+                CBEventType.FUNCTION_CALL,
+                {
+                    EventPayload.TOOL: ToolMetadata(
+                        name="test_tool", description="test_description"
+                    ),
+                    EventPayload.FUNCTION_CALL: {"arg1": "value1"},
+                },
+                TEST_EVENT_ID,
+            )
 
         assert result == TEST_EVENT_ID
         assert TEST_EVENT_ID in handler.steps
@@ -64,6 +65,7 @@ async def test_on_event_start_for_function_calls(mock_chainlit_context):
         assert step.type == "tool"
         assert step.id == TEST_EVENT_ID
         assert step.input == '{\n    "arg1": "value1"\n}'
+        mock_send.assert_called_once()
 
 
 async def test_on_event_end_for_function_calls(mock_chainlit_context):
@@ -74,11 +76,13 @@ async def test_on_event_end_for_function_calls(mock_chainlit_context):
         step = Step(name="test_tool", type="tool", id=TEST_EVENT_ID)
         handler.steps[TEST_EVENT_ID] = step
 
-        handler.on_event_end(
-            CBEventType.FUNCTION_CALL,
-            payload={EventPayload.FUNCTION_OUTPUT: "test_output"},
-            event_id=TEST_EVENT_ID,
-        )
+        with patch.object(step, "update") as mock_send:
+            handler.on_event_end(
+                CBEventType.FUNCTION_CALL,
+                payload={EventPayload.FUNCTION_OUTPUT: "test_output"},
+                event_id=TEST_EVENT_ID,
+            )
 
         assert step.output == "test_output"
         assert TEST_EVENT_ID not in handler.steps
+        mock_send.assert_called_once()
