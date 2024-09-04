@@ -24,14 +24,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
-      - uses: pnpm/action-setup@v2
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
         with:
-          version: 8.6.9
-      - name: Use Node.js 22.7.0
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.7.0'
-          cache: 'pnpm'
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
@@ -40,8 +38,6 @@ jobs:
           poetry-working-directory: ${{ env.BACKEND_DIR }}
       - name: Copy readme to backend
         run: cp README.md backend/
-      - name: Install JS dependencies
-        run: pnpm install --no-frozen-lockfile
       - name: Build chainlit
         run: pnpm run build
       - name: Publish package distributions to PyPI

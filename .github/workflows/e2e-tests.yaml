@@ -19,16 +19,12 @@ jobs:
           poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
         with:
-          version: 9.7.0
-      - name: Use Node.js 22.7.0
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.7.0'
-          cache: 'pnpm'
-      - name: Install JS dependencies
-        run: pnpm install --no-frozen-lockfile
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
       - name: Build UI
         run: pnpm run buildUi
       - name: Lint UI
