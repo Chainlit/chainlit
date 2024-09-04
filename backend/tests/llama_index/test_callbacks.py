@@ -42,7 +42,7 @@ async def mock_chainlit_context():
 
 async def test_on_event_start_for_function_calls(mock_chainlit_context):
     TEST_EVENT_ID = "test_event_id"
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         handler = LlamaIndexCallbackHandler()
 
         with patch.object(Step, "send") as mock_send:
@@ -70,7 +70,7 @@ async def test_on_event_start_for_function_calls(mock_chainlit_context):
 
 async def test_on_event_end_for_function_calls(mock_chainlit_context):
     TEST_EVENT_ID = "test_event_id"
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         handler = LlamaIndexCallbackHandler()
         # Pretend that we have started a step before.
         step = Step(name="test_tool", type="tool", id=TEST_EVENT_ID)
