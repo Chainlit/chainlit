@@ -67,10 +67,12 @@ const useChatSession = () => {
   const _connect = useCallback(
     ({
       userEnv,
-      accessToken
+      accessToken,
+      sendCookies
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
+      sendCookies?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -81,7 +83,7 @@ const useChatSession = () => {
 
       const socket = io(uri, {
         path,
-        withCredentials: true,
+        withCredentials: sendCookies,
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Client-Type': client.type,

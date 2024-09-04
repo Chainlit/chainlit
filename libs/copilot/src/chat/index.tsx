@@ -6,16 +6,17 @@ import { useChatInteract, useChatSession } from '@chainlit/react-client';
 import ChatBody from './body';
 
 export default function ChatWrapper() {
-  const { accessToken } = useContext(WidgetContext);
+  const { accessToken, sendCookies } = useContext(WidgetContext);
   const { connect, session } = useChatSession();
   const { sendMessage } = useChatInteract();
   useEffect(() => {
     if (session?.socket?.connected) return;
     connect({
       userEnv: {},
-      accessToken: `Bearer ${accessToken}`
+      accessToken: `Bearer ${accessToken}`,
+      sendCookies: sendCookies
     });
-  }, [connect, accessToken]);
+  }, [connect, accessToken, sendCookies]);
 
   useEffect(() => {
     // @ts-expect-error is not a valid prop
