@@ -16,6 +16,7 @@ jobs:
     env:
       name: pypi
       url: https://pypi.org/p/chainlit
+      BACKEND_DIR: ./backend
     permissions:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
@@ -31,12 +32,12 @@ jobs:
         with:
           node-version: '16.15.0'
           cache: 'pnpm'
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
         with:
-          python-version: '3.9'
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+          python-version: 3.9
+          poetry-version: 1.8.3
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
       - name: Copy readme to backend
         run: cp README.md backend/
       - name: Install JS dependencies
