@@ -27,10 +27,10 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8.6.9
-      - name: Use Node.js 16.15.0
+      - name: Use Node.js 22.7.0
         uses: actions/setup-node@v3
         with:
-          node-version: '16.15.0'
+          node-version: '22.7.0'
           cache: 'pnpm'
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
