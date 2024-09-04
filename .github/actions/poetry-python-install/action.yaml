@@ -16,10 +16,6 @@ inputs:
     description: 'Extra arguments for poetry install, e.g. --with tests.'
     required: false
 
-defaults:
-  run:
-    shell: bash
-
 runs:
   using: 'composite'
   steps:
