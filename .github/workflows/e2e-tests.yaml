@@ -12,9 +12,6 @@ jobs:
       BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.7.0
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
@@ -22,8 +19,11 @@ jobs:
           poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.7.0
       - name: Use Node.js 16.15.0
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '16.15.0'
           cache: 'pnpm'
