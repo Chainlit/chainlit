@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
-import pytest
 import pytest_asyncio
 from chainlit.context import ChainlitContext, context_var
 
@@ -9,7 +8,6 @@ from chainlit.context import ChainlitContext, context_var
 from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
 from chainlit.session import WebsocketSession
 from chainlit.step import Step
-from chainlit.user_session import UserSession
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.tools.types import ToolMetadata
 
