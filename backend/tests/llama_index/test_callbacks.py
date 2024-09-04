@@ -40,7 +40,7 @@ async def mock_chainlit_context():
     return create_chainlit_context()
 
 
-async def test_on_event_start(mock_chainlit_context):
+async def test_on_event_start_for_function_calls(mock_chainlit_context):
     TEST_EVENT_ID = "test_event_id"
     async with mock_chainlit_context as context:
         handler = LlamaIndexCallbackHandler()
@@ -64,3 +64,21 @@ async def test_on_event_start(mock_chainlit_context):
         assert step.type == "tool"
         assert step.id == TEST_EVENT_ID
         assert step.input == '{\n    "arg1": "value1"\n}'
+
+
+async def test_on_event_end_for_function_calls(mock_chainlit_context):
+    TEST_EVENT_ID = "test_event_id"
+    async with mock_chainlit_context as context:
+        handler = LlamaIndexCallbackHandler()
+        # Pretend that we have started a step before.
+        step = Step(name="test_tool", type="tool", id=TEST_EVENT_ID)
+        handler.steps[TEST_EVENT_ID] = step
+
+        handler.on_event_end(
+            CBEventType.FUNCTION_CALL,
+            payload={EventPayload.FUNCTION_OUTPUT: "test_output"},
+            event_id=TEST_EVENT_ID,
+        )
+
+        assert step.output == "test_output"
+        assert TEST_EVENT_ID not in handler.steps
