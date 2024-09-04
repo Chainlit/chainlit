@@ -1,0 +1,21 @@
+name: lintUi
+
+on: [workflow_call]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+        with:
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
+      - name: Download built UI
+        uses: actions/download-artifact@v4
+        with:
+          name: ui_build
+      - name: Lint UI
+        run: pnpm run lintUi

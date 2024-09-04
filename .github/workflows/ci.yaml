@@ -15,13 +15,15 @@ jobs:
   mypy:
     uses: ./.github/workflows/mypy.yaml
     secrets: inherit
+    needs: [pytest]
+  build-ui:
+    uses: ./.github/workflows/build-ui.yaml
+    secrets: inherit
+  lint-ui:
+    uses: ./.github/workflows/lint-ui.yaml
+    secrets: inherit
+    needs: [build-ui]
   e2e-tests:
     uses: ./.github/workflows/e2e-tests.yaml
     secrets: inherit
-  ci:
-    runs-on: ubuntu-latest
-    name: Run CI
-    needs: [mypy, pytest, e2e-tests]
-    steps:
-      - name: 'Done'
-        run: echo "Done"
+    needs: [pytest, mypy, lint-ui, build-ui]
