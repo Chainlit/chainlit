@@ -1,22 +1,15 @@
+import asyncio
 import glob
 import json
 import mimetypes
+import os
 import re
 import shutil
 import urllib.parse
-from typing import Any, Optional, Union
-
-from chainlit.oauth_providers import get_oauth_provider
-from chainlit.secret import random_secret
-
-mimetypes.add_type("application/javascript", ".js")
-mimetypes.add_type("text/css", ".css")
-
-import asyncio
-import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any, Optional, Union
 
 import socketio
 from chainlit.auth import create_jwt, get_configuration, get_current_user
@@ -34,6 +27,8 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
+from chainlit.oauth_providers import get_oauth_provider
+from chainlit.secret import random_secret
 from chainlit.types import (
     DeleteFeedbackRequest,
     DeleteThreadRequest,
@@ -61,6 +56,9 @@ from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
+
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
 
 ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
 IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
@@ -171,9 +169,7 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
-sio = socketio.AsyncServer(
-    cors_allowed_origins=[], async_mode="asgi"
-)
+sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
 sio_mount_location = f"{ROOT_PATH}/ws" if ROOT_PATH else "ws"
 
@@ -436,7 +432,7 @@ async def oauth_login(provider_id: str, request: Request):
     response = RedirectResponse(
         url=f"{provider.authorize_url}?{params}",
     )
-    samesite = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")  # type: Any
+    samesite: Any = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")
     secure = samesite.lower() == "none"
     response.set_cookie(
         "oauth_state",
