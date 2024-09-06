@@ -186,6 +186,17 @@ def on_window_message(func: Callable[[str], Any]) -> Callable:
 
 
 @trace
+def send_window_message(data: Any):
+    """
+    Send custom data to the host window via a window.postMessage event.
+
+    Args:
+        data (Any): The data to send with the event.
+    """
+    asyncio.create_task(context.emitter.send_window_message(data))
+
+
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -430,6 +441,8 @@ __all__ = [
     "CompletionGeneration",
     "GenerationMessage",
     "on_logout",
+    "on_window_message",
+    "send_window_message",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",

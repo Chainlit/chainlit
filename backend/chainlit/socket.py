@@ -317,10 +317,6 @@ async def message(sid, payload: MessagePayload):
 @sio.on("window_message")
 async def window_message(sid, data):
     """Handle a message send by the host window."""
-    session = WebsocketSession.require(sid)
-
-    init_ws_context(session)
-
     if config.code.on_window_message:
         await config.code.on_window_message(data)
 
