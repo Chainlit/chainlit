@@ -504,7 +504,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."language" AS step_language,
                 s."indent" AS step_indent,
                 f."value" AS feedback_value,
-                f."comment" AS feedback_comment
+                f."comment" AS feedback_comment,
+                f."id" AS feedback_id
             FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
             WHERE s."threadId" IN {thread_ids}
             ORDER BY s."createdAt" ASC
@@ -578,7 +579,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
-                            if step_feedback["step_showinput"] == "true"
+                            if step_feedback.get("step_showinput") not in [None, "false"]
                             else None
                         ),
                         output=step_feedback.get("step_output", ""),

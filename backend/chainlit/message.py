@@ -82,7 +82,6 @@ class MessageBase(ABC):
             "output": self.content,
             "name": self.author,
             "type": self.type,
-            "createdAt": self.created_at,
             "language": self.language,
             "streaming": self.streaming,
             "isError": self.is_error,

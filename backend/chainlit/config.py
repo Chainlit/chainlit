@@ -29,7 +29,7 @@ TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 
 
 # Get the directory the script is running from
-APP_ROOT = os.getcwd()
+APP_ROOT = os.getenv("CHAINLIT_APP_ROOT", os.getcwd())
 
 # Create the directory to store the uploaded files
 FILES_DIRECTORY = Path(APP_ROOT) / ".files"
@@ -70,6 +70,9 @@ latex = false
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
+# Allow users to edit their own messages
+edit_message = true
+
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
@@ -90,8 +93,6 @@ auto_tag_thread = true
     chunk_duration = 1000
     # Sample rate of the audio
     sample_rate = 44100
-
-edit_message = true
 
 [UI]
 # Name of the assistant.
@@ -163,7 +164,7 @@ generated_by = "{__version__}"
 """
 
 
-DEFAULT_HOST = "0.0.0.0"
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
 DEFAULT_ROOT_PATH = ""
 

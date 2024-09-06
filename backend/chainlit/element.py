@@ -235,14 +235,10 @@ class Pyplot(Element):
         if not isinstance(self.figure, Figure):
             raise TypeError("figure must be a matplotlib.figure.Figure")
 
-        options = {
-            "dpi": 200,
-            "bbox_inches": "tight",
-            "backend": "Agg",
-            "format": "png",
-        }
         image = BytesIO()
-        self.figure.savefig(image, **options)
+        self.figure.savefig(
+            image, dpi=200, bbox_inches="tight", backend="Agg", format="png"
+        )
         self.content = image.getvalue()
 
         super().__post_init__()
