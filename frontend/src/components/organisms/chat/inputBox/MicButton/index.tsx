@@ -53,13 +53,13 @@ const MicButton = ({ disabled }: Props) => {
     _startRecording(fileReferences);
   }, [_startRecording, fileReferences, disabled]);
 
-  useHotkeys('p', startRecording);
-
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
     : 'medium';
 
   if (!config?.features.audio.enabled) return null;
+
+  useHotkeys('p', startRecording);
 
   return (
     <>
