@@ -367,3 +367,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
         return self.emit(
             "action_response", {"id": id, "status": status, "response": response}
         )
+
+    def send_window_message(self, data: Any):
+        """Send custom data to the host window."""
+        return self.emit("window_message", data)

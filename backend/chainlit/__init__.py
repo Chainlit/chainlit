@@ -170,6 +170,33 @@ def on_message(func: Callable) -> Callable:
 
 
 @trace
+def on_window_message(func: Callable[[str], Any]) -> Callable:
+    """
+    Hook to react to javascript postMessage events coming from the UI.
+
+    Args:
+        func (Callable[[str], Any]): The function to be called when a window message is received.
+                                     Takes the message content as a string parameter.
+
+    Returns:
+        Callable[[str], Any]: The decorated on_window_message function.
+    """
+    config.code.on_window_message = wrap_user_function(func)
+    return func
+
+
+@trace
+def send_window_message(data: Any):
+    """
+    Send custom data to the host window via a window.postMessage event.
+
+    Args:
+        data (Any): The data to send with the event.
+    """
+    asyncio.create_task(context.emitter.send_window_message(data))
+
+
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -414,6 +441,8 @@ __all__ = [
     "CompletionGeneration",
     "GenerationMessage",
     "on_logout",
+    "on_window_message",
+    "send_window_message",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",
