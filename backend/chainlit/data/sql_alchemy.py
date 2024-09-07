@@ -71,6 +71,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def build_debug_url(self) -> str:
         return ""
 
+    @property
+    def context(self):
+        return context
+
     ###### SQL Helpers ######
     async def execute_sql(
         self, query: str, parameters: dict
@@ -179,8 +183,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ):
         if self.show_logger:
             logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
-        if context.session.user is not None:
-            user_identifier = context.session.user.identifier
+        if self.context.session.user is not None:
+            user_identifier = self.context.session.user.identifier
         else:
             raise ValueError("User not found in session context")
         data = {
@@ -294,7 +298,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def create_step(self, step_dict: "StepDict"):
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
-        if not getattr(context.session.user, "id", None):
+        if not getattr(self.context.session.user, "id", None):
             raise ValueError("No authenticated user in context")
         step_dict["showInput"] = (
             str(step_dict.get("showInput", "")).lower()
@@ -405,7 +409,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def create_element(self, element: "Element"):
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
-        if not getattr(context.session.user, "id", None):
+        if not getattr(self.context.session.user, "id", None):
             raise ValueError("No authenticated user in context")
         if not self.storage_provider:
             logger.warn(
@@ -434,7 +438,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if content is None:
             raise ValueError("Content is None, cannot upload file")
 
-        context_user = context.session.user
+        context_user = self.context.session.user
 
         user_folder = getattr(context_user, "id", "unknown")
         file_object_key = f"{user_folder}/{element.id}" + (
