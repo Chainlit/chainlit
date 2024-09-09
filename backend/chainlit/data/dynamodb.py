@@ -13,7 +13,8 @@ import aiohttp
 import boto3  # type: ignore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from chainlit.context import context
-from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
+from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
 from chainlit.step import StepDict
@@ -37,7 +38,6 @@ _logger.setLevel(logging.WARNING)
 
 
 class DynamoDBDataLayer(BaseDataLayer):
-
     def __init__(
         self,
         table_name: str,
@@ -611,9 +611,6 @@ class DynamoDBDataLayer(BaseDataLayer):
             },
             updates=item,
         )
-
-    async def delete_user_session(self, id: str) -> bool:
-        return True  # Not sure why documentation wants this
 
     async def build_debug_url(self) -> str:
         return ""
