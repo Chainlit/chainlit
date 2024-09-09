@@ -1,41 +1,9 @@
-from contextlib import asynccontextmanager
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import pytest_asyncio
-from chainlit.context import ChainlitContext, context_var
-
-# Import the class we're testing
 from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
-from chainlit.session import WebsocketSession
 from chainlit.step import Step
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.tools.types import ToolMetadata
-
-
-@asynccontextmanager
-async def create_chainlit_context():
-    mock_session = Mock(spec=WebsocketSession)
-    mock_session.id = "test_session_id"
-    mock_session.thread_id = "test_session_thread_id"
-    mock_session.user_env = {"test_env": "value"}
-    mock_session.chat_settings = {}
-    mock_session.user = None
-    mock_session.chat_profile = None
-    mock_session.http_referer = None
-    mock_session.client_type = "webapp"
-    mock_session.languages = ["en"]
-
-    context = ChainlitContext(mock_session)
-    token = context_var.set(context)
-    try:
-        yield context
-    finally:
-        context_var.reset(token)
-
-
-@pytest_asyncio.fixture
-async def mock_chainlit_context():
-    return create_chainlit_context()
 
 
 async def test_on_event_start_for_function_calls(mock_chainlit_context):
