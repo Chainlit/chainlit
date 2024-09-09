@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import socketio
-
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -970,22 +969,20 @@ async def get_avatar(avatar_id: str):
 
     avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
-    base_path = os.path.join(APP_ROOT, "public", "avatars")
-    avatar_glob = os.path.join(base_path, f"{avatar_id}.*")
+    base_path = Path(APP_ROOT) / "public" / "avatars"
+    avatar_pattern = f"{avatar_id}.*"
 
-    files = glob.glob(avatar_glob)
+    matching_files = base_path.glob(avatar_pattern)
 
-    if files:
-        avatar_path = files[0]
-
-        if not is_path_inside(Path(avatar_path), Path(base_path)):
+    if avatar_path := next(matching_files, None):
+        if not is_path_inside(avatar_path, base_path):
             raise HTTPException(status_code=400, detail="Invalid filename")
 
-        media_type, _ = mimetypes.guess_type(avatar_path)
+        media_type, _ = mimetypes.guess_type(str(avatar_path))
 
         return FileResponse(avatar_path, media_type=media_type)
-    else:
-        return await get_favicon()
+
+    return await get_favicon()
 
 
 @router.head("/")

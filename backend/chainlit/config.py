@@ -345,40 +345,41 @@ class ChainlitConfig:
         # fallback to root language (ex: `de` when `de-DE` is not found)
         parent_language = language.split("-")[0]
 
-        translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{language}.json"
-        )
-        translation_lib_parent_language_file_path = os.path.join(
-            config_translation_dir, f"{parent_language}.json"
-        )
-        default_translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{default_language}.json"
-        )
+        translation_dir = Path(config_translation_dir)
 
-        if is_path_inside(
-            Path(translation_lib_file_path), Path(config_translation_dir)
-        ) and os.path.exists(translation_lib_file_path):
-            with open(translation_lib_file_path, "r", encoding="utf-8") as f:
-                translation = json.load(f)
-        elif is_path_inside(
-            Path(translation_lib_parent_language_file_path),
-            Path(config_translation_dir),
-        ) and os.path.exists(translation_lib_parent_language_file_path):
+        translation_lib_file_path = translation_dir / f"{language}.json"
+        translation_lib_parent_language_file_path = (
+            translation_dir / f"{parent_language}.json"
+        )
+        default_translation_lib_file_path = translation_dir / f"{default_language}.json"
+
+        if (
+            is_path_inside(translation_lib_file_path, translation_dir)
+            and translation_lib_file_path.is_file()
+        ):
+            translation = json.loads(
+                translation_lib_file_path.read_text(encoding="utf-8")
+            )
+        elif (
+            is_path_inside(translation_lib_parent_language_file_path, translation_dir)
+            and translation_lib_parent_language_file_path.is_file()
+        ):
             logger.warning(
                 f"Translation file for {language} not found. Using parent translation {parent_language}."
             )
-            with open(
-                translation_lib_parent_language_file_path, "r", encoding="utf-8"
-            ) as f:
-                translation = json.load(f)
-        elif is_path_inside(
-            Path(default_translation_lib_file_path), Path(config_translation_dir)
-        ) and os.path.exists(default_translation_lib_file_path):
+            translation = json.loads(
+                translation_lib_parent_language_file_path.read_text(encoding="utf-8")
+            )
+        elif (
+            is_path_inside(default_translation_lib_file_path, translation_dir)
+            and default_translation_lib_file_path.is_file()
+        ):
             logger.warning(
                 f"Translation file for {language} not found. Using default translation {default_language}."
             )
-            with open(default_translation_lib_file_path, "r", encoding="utf-8") as f:
-                translation = json.load(f)
+            translation = json.loads(
+                default_translation_lib_file_path.read_text(encoding="utf-8")
+            )
 
         return translation
 
