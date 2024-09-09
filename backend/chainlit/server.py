@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import socketio
+
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -56,6 +57,8 @@ from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
+
+from ._utils import is_path_inside
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -642,9 +645,16 @@ async def oauth_azure_hf_callback(
     return response
 
 
+_language_pattern = (
+    "^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?(-[a-zA-Z]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+)
+
+
 @router.get("/project/translations")
 async def project_translations(
-    language: str = Query(default="en-US", description="Language code"),
+    language: str = Query(
+        default="en-US", description="Language code", pattern=_language_pattern
+    ),
 ):
     """Return project translations."""
 
@@ -661,11 +671,14 @@ async def project_translations(
 @router.get("/project/settings")
 async def project_settings(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
-    language: str = Query(default="en-US", description="Language code"),
+    language: str = Query(
+        default="en-US", description="Language code", pattern=_language_pattern
+    ),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
     # Load the markdown file based on the provided language
+
     markdown = get_markdown_str(config.root, language)
 
     profiles = []
@@ -897,8 +910,7 @@ async def serve_file(
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()
 
-    # Check if the base path is a parent of the file path
-    if base_path not in file_path.parents:
+    if not is_path_inside(file_path, base_path):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     if file_path.is_file():
@@ -941,26 +953,36 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 
     if not logo_path:
         raise HTTPException(status_code=404, detail="Missing default logo")
+
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
 
 
-@router.get("/avatars/{avatar_id}")
+@router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
     """Get the avatar for the user based on the avatar_id."""
+    if not re.match(r"^[a-zA-Z0-9_-]+$", avatar_id):
+        raise HTTPException(status_code=400, detail="Invalid avatar_id")
+
     if avatar_id == "default":
         avatar_id = config.ui.name
 
     avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
-    avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
+    base_path = os.path.join(APP_ROOT, "public", "avatars")
+    avatar_glob = os.path.join(base_path, f"{avatar_id}.*")
 
-    files = glob.glob(avatar_path)
+    files = glob.glob(avatar_glob)
 
     if files:
         avatar_path = files[0]
+
+        if not is_path_inside(Path(avatar_path), Path(base_path)):
+            raise HTTPException(status_code=400, detail="Invalid filename")
+
         media_type, _ = mimetypes.guess_type(avatar_path)
+
         return FileResponse(avatar_path, media_type=media_type)
     else:
         return await get_favicon()

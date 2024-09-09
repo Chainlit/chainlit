@@ -15,7 +15,9 @@ def test_client():
 
 
 @pytest.fixture
-def test_config(monkeypatch: pytest.MonkeyPatch):
+def test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", str(tmp_path))
+
     config = load_config()
 
     monkeypatch.setattr("chainlit.server.config", config)
@@ -61,11 +63,12 @@ def test_project_translations_invalid_language(
     """Test with an invalid language."""
 
     response = test_client.get("/project/translations?language=invalid")
-    assert response.status_code == 200  # It should still return 200
+    assert response.status_code == 422
+
     assert (
-        "translation" in response.json()
+        "translation" not in response.json()
     )  # It should fall back to default translation
-    mock_load_translation.assert_called_once_with("invalid")
+    assert not mock_load_translation.called
 
 
 @pytest.fixture
@@ -114,7 +117,7 @@ def test_project_settings_path_traversal(
     # Create a mock chainlit directory structure
     app_dir = tmp_path / "app"
     app_dir.mkdir()
-    (app_dir / "README.md").write_text("This is a secret README")
+    (tmp_path / "README.md").write_text("This is a secret README")
 
     # This is required for the exploit to occur.
     chainlit_dir = app_dir / "chainlit_stuff"
@@ -125,13 +128,13 @@ def test_project_settings_path_traversal(
 
     # Attempt to access the file using path traversal
     response = test_client.get(
-        "/project/settings", params={"language": "stuff/../../app/README"}
+        "/project/settings", params={"language": "stuff/../../README"}
     )
-
-    assert response.status_code == 400
 
     # Should not be able to read the file
     assert "This is a secret README" not in response.text
+
+    assert response.status_code == 422
 
     # The response should not contain the normally expected keys
     data = response.json()
@@ -200,11 +203,11 @@ def test_avatar_path_traversal(
     # Attempt to access a file using path traversal
     response = test_client.get("/avatars/..%5C..%5Capp")
 
-    # Should return a 400 Bad Request status
-    assert response.status_code == 400
-
     # No glob should ever be called
     assert not mock_glob.called
+
+    # Should return an error status
+    assert response.status_code == 400
 
 
 def test_project_translations_file_path_traversal(
@@ -224,4 +227,4 @@ def test_project_translations_file_path_traversal(
     assert not mock_open_inst.called
 
     # Should give error status
-    assert response.status_code == 400
+    assert response.status_code == 422

@@ -24,6 +24,8 @@ from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
 
+from ._utils import is_path_inside
+
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.element import ElementBased
@@ -353,10 +355,15 @@ class ChainlitConfig:
             config_translation_dir, f"{default_language}.json"
         )
 
-        if os.path.exists(translation_lib_file_path):
+        if is_path_inside(
+            Path(translation_lib_file_path), Path(config_translation_dir)
+        ) and os.path.exists(translation_lib_file_path):
             with open(translation_lib_file_path, "r", encoding="utf-8") as f:
                 translation = json.load(f)
-        elif os.path.exists(translation_lib_parent_language_file_path):
+        elif is_path_inside(
+            Path(translation_lib_parent_language_file_path),
+            Path(config_translation_dir),
+        ) and os.path.exists(translation_lib_parent_language_file_path):
             logger.warning(
                 f"Translation file for {language} not found. Using parent translation {parent_language}."
             )
@@ -364,7 +371,9 @@ class ChainlitConfig:
                 translation_lib_parent_language_file_path, "r", encoding="utf-8"
             ) as f:
                 translation = json.load(f)
-        elif os.path.exists(default_translation_lib_file_path):
+        elif is_path_inside(
+            Path(default_translation_lib_file_path), Path(config_translation_dir)
+        ) and os.path.exists(default_translation_lib_file_path):
             logger.warning(
                 f"Translation file for {language} not found. Using default translation {default_language}."
             )
