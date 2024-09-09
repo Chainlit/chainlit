@@ -1,5 +1,13 @@
-import asyncio
 import os
+from dotenv import load_dotenv
+
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+
+from chainlit.logger import logger
+if env_found:
+    logger.info("Loaded .env file")
+
+import asyncio
 from typing import TYPE_CHECKING, Any, Dict
 
 import chainlit.input_widget as input_widget
@@ -22,7 +30,6 @@ from chainlit.element import (
     Text,
     Video,
 )
-from chainlit.logger import logger
 from chainlit.message import (
     AskActionMessage,
     AskFileMessage,
@@ -37,7 +44,6 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
 from chainlit.version import __version__
-from dotenv import load_dotenv
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from pydantic.dataclasses import dataclass
 
@@ -69,12 +75,6 @@ if TYPE_CHECKING:
     from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
     from chainlit.mistralai import instrument_mistralai
     from chainlit.openai import instrument_openai
-
-
-env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
-
-if env_found:
-    logger.info("Loaded .env file")
 
 
 def sleep(duration: int):
