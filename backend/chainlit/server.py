@@ -66,6 +66,7 @@ IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Context manager to handle app start and shutdown."""
     host = config.run.host
     port = config.run.port
 
@@ -148,7 +149,18 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir(local_target: str, packaged_target: str):
+def get_build_dir(local_target: str, packaged_target: str) -> str:
+    """
+    Get the build directory based on the UI build strategy.
+
+    Args:
+        local_target (str): The local target directory.
+        packaged_target (str): The packaged target directory.
+
+    Returns:
+        str: The build directory
+    """
+
     local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
 
@@ -249,12 +261,19 @@ if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
 # -------------------------------------------------------------------------------
 
 
-def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: str):
+def replace_between_tags(
+    text: str, start_tag: str, end_tag: str, replacement: str
+) -> str:
+    """Replace text between two tags in a string."""
+
     pattern = start_tag + ".*?" + end_tag
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
 def get_html_template():
+    """
+    Get HTML template for the index view.
+    """
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -341,6 +360,9 @@ async def auth(request: Request):
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login a user using the password auth callback.
+    """
     if not config.code.password_auth_callback:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
@@ -370,6 +392,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.post("/logout")
 async def logout(request: Request, response: Response):
+    """Logout the user by calling the on_logout callback."""
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
     return {"success": True}
@@ -377,6 +400,7 @@ async def logout(request: Request, response: Response):
 
 @router.post("/auth/header")
 async def header_auth(request: Request):
+    """Login a user using the header_auth_callback."""
     if not config.code.header_auth_callback:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -406,6 +430,7 @@ async def header_auth(request: Request):
 
 @router.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
+    """Redirect the user to the oauth provider login page."""
     if config.code.oauth_callback is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -453,6 +478,8 @@ async def oauth_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
 ):
+    """Handle the oauth callback and login the user."""
+
     if config.code.oauth_callback is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -540,6 +567,8 @@ async def oauth_azure_hf_callback(
     code: Annotated[Optional[str], Form()] = None,
     id_token: Annotated[Optional[str], Form()] = None,
 ):
+    """Handle the azure ad hybrid flow callback and login the user."""
+
     provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -804,6 +833,8 @@ async def upload_file(
         Union[None, User, PersistedUser], Depends(get_current_user)
     ],
 ):
+    """Upload a file to the session files directory."""
+
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id)
@@ -837,6 +868,8 @@ async def get_file(
     file_id: str,
     session_id: Optional[str] = None,
 ):
+    """Get a file from the session files directory."""
+
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id) if session_id else None
@@ -859,6 +892,8 @@ async def serve_file(
     filename: str,
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
+    """Serve a file from the local filesystem."""
+
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()
 
@@ -874,6 +909,7 @@ async def serve_file(
 
 @router.get("/favicon")
 async def get_favicon():
+    """Get the favicon for the UI."""
     custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
     files = glob.glob(custom_favicon_path)
 
@@ -889,6 +925,7 @@ async def get_favicon():
 
 @router.get("/logo")
 async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
+    """Get the default logo for the UI."""
     theme_value = theme.value if theme else Theme.light.value
     logo_path = None
 
@@ -911,6 +948,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 
 @router.get("/avatars/{avatar_id}")
 async def get_avatar(avatar_id: str):
+    """Get the avatar for the user based on the avatar_id."""
     if avatar_id == "default":
         avatar_id = config.ui.name
 
@@ -930,6 +968,7 @@ async def get_avatar(avatar_id: str):
 
 @router.head("/")
 def status_check():
+    """Check if the site is operational."""
     return {"message": "Site is operational"}
 
 
