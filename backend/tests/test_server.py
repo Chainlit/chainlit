@@ -1,9 +1,10 @@
 import os
-from unittest.mock import Mock, create_autospec
+from pathlib import Path
+from unittest.mock import Mock, create_autospec, mock_open
 
 import pytest
 from chainlit.auth import get_current_user
-from chainlit.config import APP_ROOT, ChainlitConfig
+from chainlit.config import APP_ROOT, ChainlitConfig, load_config
 from chainlit.server import app
 from fastapi.testclient import TestClient
 
@@ -14,19 +15,21 @@ def test_client():
 
 
 @pytest.fixture
-def mock_config(monkeypatch: pytest.MonkeyPatch):
-    mock_config = Mock(spec=ChainlitConfig)
+def test_config(monkeypatch: pytest.MonkeyPatch):
+    config = load_config()
 
-    monkeypatch.setattr("chainlit.server.config", mock_config)
+    monkeypatch.setattr("chainlit.server.config", config)
 
-    return mock_config
+    return config
 
 
 @pytest.fixture
-def mock_load_translation(mock_config: Mock):
-    mock_config.load_translation.return_value = {"key": "value"}
+def mock_load_translation(test_config: ChainlitConfig, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        test_config, "load_translation", Mock(return_value={"key": "value"})
+    )
 
-    return mock_config.load_translation
+    return test_config.load_translation
 
 
 def test_project_translations_default_language(
@@ -100,6 +103,49 @@ async def test_project_settings(test_client: TestClient, mock_get_current_user: 
     assert data["starters"] == []
 
 
+def test_project_settings_path_traversal(
+    test_client: TestClient,
+    mock_get_current_user: Mock,
+    tmp_path: Path,
+    test_config: ChainlitConfig,
+):
+    """Test to prevent path traversal in project settings."""
+
+    # Create a mock chainlit directory structure
+    app_dir = tmp_path / "app"
+    app_dir.mkdir()
+    (app_dir / "README.md").write_text("This is a secret README")
+
+    # This is required for the exploit to occur.
+    chainlit_dir = app_dir / "chainlit_stuff"
+    chainlit_dir.mkdir()
+
+    # Mock the config root
+    test_config.root = str(app_dir)
+
+    # Attempt to access the file using path traversal
+    response = test_client.get(
+        "/project/settings", params={"language": "stuff/../../app/README"}
+    )
+
+    assert response.status_code == 400
+
+    # Should not be able to read the file
+    assert "This is a secret README" not in response.text
+
+    # The response should not contain the normally expected keys
+    data = response.json()
+    assert "ui" not in data
+    assert "features" not in data
+    assert "userEnv" not in data
+    assert "dataPersistence" not in data
+    assert "threadResumable" not in data
+    assert "markdown" not in data
+    assert "chatProfiles" not in data
+    assert "starters" not in data
+    assert "debugUrl" not in data
+
+
 def test_get_avatar_default(test_client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Test with default avatar."""
     response = test_client.get("/avatars/default")
@@ -135,5 +181,47 @@ def test_get_avatar_non_existent_favicon(
     response = test_client.get("/avatars/non_existent")
 
     assert response.status_code == 200
-    # assert response.headers["content-type"] == favicon_response.
+    assert response.headers["content-type"].startswith("image/")
     assert response.content == favicon_response.content
+
+
+def test_avatar_path_traversal(
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path
+):
+    """Test to prevent potential path traversal in avatar route on Windows."""
+
+    # Create a Mock object for the glob function
+    mock_glob = Mock(return_value=[])
+    monkeypatch.setattr("chainlit.server.glob.glob", mock_glob)
+
+    mock_open_inst = mock_open(read_data=b'{"should_not": "Be readable."}')
+    monkeypatch.setattr("builtins.open", mock_open_inst)
+
+    # Attempt to access a file using path traversal
+    response = test_client.get("/avatars/..%5C..%5Capp")
+
+    # Should return a 400 Bad Request status
+    assert response.status_code == 400
+
+    # No glob should ever be called
+    assert not mock_glob.called
+
+
+def test_project_translations_file_path_traversal(
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    """Test to prevent file path traversal in project translations."""
+
+    mock_open_inst = mock_open(read_data='{"should_not": "Be readable."}')
+    monkeypatch.setattr("builtins.open", mock_open_inst)
+
+    # Attempt to access the file using path traversal
+    response = test_client.get(
+        "/project/translations", params={"language": "/app/unreadable"}
+    )
+
+    # File should never be opened
+    assert not mock_open_inst.called
+
+    # Should give error status
+    assert response.status_code == 400
