@@ -27,6 +27,7 @@ export default function ChatProfiles() {
   const { clear } = useChatInteract();
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -57,8 +58,6 @@ export default function ChatProfiles() {
 
   const allowHtml = config?.features?.unsafe_allow_html;
   const latex = config?.features?.latex;
-
-  const popoverOpen = Boolean(anchorEl);
 
   const items = config.chatProfiles.map((item) => {
     const icon = item.icon?.includes('/public')
@@ -94,7 +93,8 @@ export default function ChatProfiles() {
               theme.palette.mode === 'light'
                 ? '0px 2px 4px 0px #0000000D'
                 : '0px 10px 10px 0px #0000000D',
-            ml: 2
+            ml: 2,
+            pointerEvents: 'auto' // Allow mouse interaction with the chat profile description
           }
         }}
         sx={{
@@ -110,6 +110,11 @@ export default function ChatProfiles() {
           horizontal: 'left'
         }}
         disableRestoreFocus
+        onMouseEnter={() => setPopoverOpen(true)}
+        onMouseLeave={() => {
+          setPopoverOpen(false);
+          setAnchorEl(null);
+        }}
       >
         <Box
           p={2}
@@ -134,10 +139,17 @@ export default function ChatProfiles() {
           if (!item) return;
           setChatProfileDescription(item.markdown_description);
           setAnchorEl(event.currentTarget);
+          setPopoverOpen(true);
         }}
-        onItemMouseLeave={() => setAnchorEl(null)}
+        onItemMouseLeave={() => setPopoverOpen(false)}
         onChange={(e) => {
           const newValue = e.target.value;
+
+          // Close the chat profile description when any selection is made
+          setPopoverOpen(false);
+          setAnchorEl(null);
+
+          // Handle user selection
           setNewChatProfile(newValue);
           if (firstInteraction) {
             setOpenDialog(true);
@@ -145,7 +157,10 @@ export default function ChatProfiles() {
             handleConfirm(newValue);
           }
         }}
-        onClose={() => setAnchorEl(null)}
+        onClose={() => {
+          setPopoverOpen(false);
+          setAnchorEl(null);
+        }}
       />
       <NewChatDialog
         open={openDialog}

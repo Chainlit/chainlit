@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import aiohttp
 from chainlit.context import context
-from chainlit.data import BaseDataLayer, BaseStorageClient, queue_until_user_message
+from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
 from chainlit.step import StepDict
@@ -54,7 +55,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self.engine: AsyncEngine = create_async_engine(
             self._conninfo, connect_args=ssl_args
         )
-        self.async_session = sessionmaker(bind=self.engine, expire_on_commit=False, class_=AsyncSession)  # type: ignore
+        self.async_session = sessionmaker(
+            bind=self.engine, expire_on_commit=False, class_=AsyncSession
+        )  # type: ignore
         if storage_provider:
             self.storage_provider: Optional[BaseStorageClient] = storage_provider
             if self.show_logger:
@@ -378,7 +381,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             raise ValueError("No authenticated user in context")
         if not self.storage_provider:
             logger.warn(
-                f"SQLAlchemy: create_element error. No blob_storage_client is configured!"
+                "SQLAlchemy: create_element error. No blob_storage_client is configured!"
             )
             return
         if not element.for_id:
@@ -440,15 +443,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"id": element_id}
         await self.execute_sql(query=query, parameters=parameters)
 
-    async def delete_user_session(self, id: str) -> bool:
-        return False  # Not sure why documentation wants this
-
     async def get_all_user_threads(
         self, user_id: Optional[str] = None, thread_id: Optional[str] = None
     ) -> Optional[List[ThreadDict]]:
         """Fetch all user threads up to self.user_thread_limit, or one thread by id if thread_id is provided."""
         if self.show_logger:
-            logger.info(f"SQLAlchemy: get_all_user_threads")
+            logger.info("SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
                 "id" AS thread_id,
