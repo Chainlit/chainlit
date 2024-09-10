@@ -4,9 +4,26 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.1.404] - 2024-09-04
 
-Nothing unreleased!
+### Security
+
+- **[breaking]**: Listen to 127.0.0.1 (localhost) instead on 0.0.0.0 (public) (#861).
+- **[breaking]**: Dropped support for Python 3.8, solving dependency resolution, addressing vulnerable dependencies (#1192, #1236, #1250).
+
+### Fixed
+
+- Frontend connection resuming after connection loss (#828).
+- Gracefully handle HTTP errors in data layers (#1232).
+- AttributeError: 'ChatCompletionChunk' object has no attribute 'get' in llama_index (#1229).
+- `edit_message` in correct place in default config, allowing users to edit messages (#1218).
+
+### Added
+
+- `CHAINLIT_APP_ROOT` environment variable to modify `APP_ROOT`, enabling the ability to set the location of `config.toml` and other setting files (#1259).
+- Poetry lockfile in GIT repository for reproducible builds (#1191).
+- pytest-based testing infrastructure, first unit tests of backend and testing on all supported Python versions (#1245 and #1271).
+- Black and isort added to dev dependencies group (#1217).
 
 ## [1.1.403rc0] - 2024-08-13
 

@@ -4,7 +4,17 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+)
 
 import tomli
 from chainlit.logger import logger
@@ -29,7 +39,7 @@ TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 
 
 # Get the directory the script is running from
-APP_ROOT = os.getcwd()
+APP_ROOT = os.getenv("CHAINLIT_APP_ROOT", os.getcwd())
 
 # Create the directory to store the uploaded files
 FILES_DIRECTORY = Path(APP_ROOT) / ".files"
@@ -70,6 +80,9 @@ latex = false
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
+# Allow users to edit their own messages
+edit_message = true
+
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
@@ -90,8 +103,6 @@ auto_tag_thread = true
     chunk_duration = 1000
     # Sample rate of the audio
     sample_rate = 44100
-
-edit_message = true
 
 [UI]
 # Name of the assistant.
@@ -163,7 +174,7 @@ generated_by = "{__version__}"
 """
 
 
-DEFAULT_HOST = "0.0.0.0"
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
 DEFAULT_ROOT_PATH = ""
 
@@ -269,10 +280,14 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
-    header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
+    password_auth_callback: Optional[
+        Callable[[str, str], Awaitable[Optional["User"]]]
+    ] = None
+    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
+        None
+    )
     oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
+        Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
@@ -283,12 +298,14 @@ class CodeSettings:
     on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
 
-    author_rename: Optional[Callable[[str], str]] = None
+    author_rename: Optional[Callable[[str], Awaitable[str]]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
         None
     )
-    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
 
 
 @dataclass()
