@@ -28,7 +28,7 @@ chainlit = 'chainlit.cli:cli'
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.0.607"
-dataclasses_json = "^0.5.7"
+dataclasses_json = "^0.6.7"
 fastapi = ">=0.110.1,<0.113"
 starlette = "^0.37.2"
 uvicorn = "^0.25.0"
@@ -102,6 +102,7 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
+
 
 
 
