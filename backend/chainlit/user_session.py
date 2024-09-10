@@ -29,6 +29,8 @@ class UserSession:
         user_session["chat_profile"] = context.session.chat_profile
         user_session["http_referer"] = context.session.http_referer
         user_session["client_type"] = context.session.client_type
+        user_session["http_path"] = context.session.http_path
+        user_session["http_query"] = context.session.http_query
 
         if isinstance(context.session, WebsocketSession):
             user_session["languages"] = context.session.languages

@@ -158,6 +158,8 @@ async def connect(sid, environ):
         thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
+        http_path=environ.get("PATH_INFO"),
+        http_query=environ.get("QUERY_STRING"),
     )
 
     trace_event("connection_successful")

@@ -59,10 +59,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from contextvars import ContextVar
 from typing_extensions import Annotated
 from watchfiles import awatch
 
 ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+SIO_PATH = os.environ.get("CHAINLIT_SIO_PATH", None)
 IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
 
 
@@ -171,11 +174,34 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
+
+# Create a context variable to store the request
+request_context_var: ContextVar[Request] = ContextVar("request_context_var")
+
+def get_current_request() -> Request:
+    return request_context_var.get()
+
+class RequestContextMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Set the request in the context variable
+        request_context_var.set(request)
+        # Process the request and get the response
+        response = await call_next(request)
+        return response
+    
+# Add request contextvar middleware to the FastAPI application
+app.add_middleware(RequestContextMiddleware)
+
+
 sio = socketio.AsyncServer(
     cors_allowed_origins=[], async_mode="asgi"
 )
 
+
 sio_mount_location = f"{ROOT_PATH}/ws" if ROOT_PATH else "ws"
+
+if SIO_PATH :
+    sio_mount_location = SIO_PATH 
 
 asgi_app = socketio.ASGIApp(
     socketio_server=sio,

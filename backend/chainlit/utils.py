@@ -114,9 +114,11 @@ def check_file(target: str):
         raise click.BadParameter(f"File does not exist: {target}")
 
 
-def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
+def mount_chainlit(app: FastAPI, target: str, path="/chainlit", sio_path=None):
     os.environ["CHAINLIT_ROOT_PATH"] = path
-    os.environ["CHAINLIT_SUBMOUNT"] = "true"
+    if sio_path:
+        os.environ["CHAINLIT_SIO_PATH"] = sio_path 
+    os.environ["CHAINLIT_SUBMOUNT"] = "false"
     from chainlit.config import config, load_module
     from chainlit.server import app as chainlit_app
 
@@ -131,3 +133,7 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     ensure_jwt_secret()
 
     app.mount("/", chainlit_app)
+
+def get_current_http_request():
+    from chainlit.server import get_current_request 
+    return get_current_request()
