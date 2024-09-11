@@ -5,3 +5,7 @@ from chainlit.config import config
 jwt_blacklist = cachetools.TTLCache(
     maxsize=8096, ttl=config.project.user_session_timeout
 )
+
+jwt_session_tokens = cachetools.TTLCache(
+    maxsize=8096, ttl=config.project.user_session_timeout
+)

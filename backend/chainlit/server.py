@@ -6,7 +6,7 @@ import shutil
 import urllib.parse
 from typing import Any, Optional, Union
 
-from chainlit.auth_ext import jwt_blacklist
+from chainlit.auth_ext import jwt_blacklist, jwt_session_tokens
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 
@@ -18,14 +18,8 @@ import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-
 import socketio
-from chainlit.auth import (
-    create_jwt,
-    get_configuration,
-    get_current_user,
-    reuseable_oauth,
-)
+
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -521,7 +515,14 @@ async def oauth_callback(
             detail="Unauthorized",
         )
 
+    email = user.identifier
+    jwt_token = jwt_session_tokens.get(email)
+    if jwt_token:
+        jwt_blacklist[jwt_token] = True
+        del jwt_session_tokens[email]
+
     access_token = create_jwt(user)
+    jwt_session_tokens[email] = access_token
 
     if data_layer := get_data_layer():
         try:
