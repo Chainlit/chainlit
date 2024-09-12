@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
-from chainlit.auth_ext import jwt_blacklist
+from chainlit.auth_ext import jwt_session_tokens
 from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.oauth_providers import get_configured_oauth_providers
@@ -74,10 +74,13 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    if token in jwt_blacklist:
+    email = user.identifier
+    if not email:
+        raise HTTPException(status_code=401, detail="Missing user identifier")
+    if jwt_session_tokens.get(email) != token:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
-    else:
-        return user
+
+    return user
 
     if data_layer := get_data_layer():
         try:
