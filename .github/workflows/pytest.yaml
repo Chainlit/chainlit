@@ -23,6 +23,14 @@ jobs:
       - name: Install fastapi ${{ matrix.fastapi-version }}
         run: poetry add fastapi@^${{ matrix.fastapi-version}}
         working-directory: ${{ env.BACKEND_DIR }}
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+        with:
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
+      - name: Build UI
+        run: pnpm run buildUi
       - name: Run Pytest
         run: poetry run pytest --cov=chainlit/
         working-directory: ${{ env.BACKEND_DIR }}

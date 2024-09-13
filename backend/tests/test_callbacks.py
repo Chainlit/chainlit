@@ -1,11 +1,22 @@
 from __future__ import annotations
 
+import pytest
+
 from chainlit.callbacks import password_auth_callback
-from chainlit.config import config
+from chainlit import config
 from chainlit.user import User
 
 
-async def test_password_auth_callback():
+@pytest.fixture
+def test_config(monkeypatch: pytest.MonkeyPatch):
+    test_config = config.load_config()
+
+    monkeypatch.setattr("chainlit.callbacks.config", test_config)
+
+    return test_config
+
+
+async def test_password_auth_callback(test_config):
     @password_auth_callback
     async def auth_func(username: str, password: str) -> User | None:
         if username == "testuser" and password == "testpass":
@@ -13,19 +24,19 @@ async def test_password_auth_callback():
         return None
 
     # Test that the callback is properly registered
-    assert config.code.password_auth_callback is not None
+    assert test_config.code.password_auth_callback is not None
 
     # Test the wrapped function
-    result = await config.code.password_auth_callback("testuser", "testpass")
+    result = await test_config.code.password_auth_callback("testuser", "testpass")
     assert isinstance(result, User)
     assert result.identifier == "testuser"
 
     # Test with incorrect credentials
-    result = await config.code.password_auth_callback("wronguser", "wrongpass")
+    result = await test_config.code.password_auth_callback("wronguser", "wrongpass")
     assert result is None
 
 
-async def test_header_auth_callback():
+async def test_header_auth_callback(test_config):
     from chainlit.callbacks import header_auth_callback
     from starlette.datastructures import Headers
 
@@ -36,26 +47,26 @@ async def test_header_auth_callback():
         return None
 
     # Test that the callback is properly registered
-    assert config.code.header_auth_callback is not None
+    assert test_config.code.header_auth_callback is not None
 
     # Test the wrapped function with valid header
     valid_headers = Headers({"Authorization": "Bearer valid_token"})
-    result = await config.code.header_auth_callback(valid_headers)
+    result = await test_config.code.header_auth_callback(valid_headers)
     assert isinstance(result, User)
     assert result.identifier == "testuser"
 
     # Test with invalid header
     invalid_headers = Headers({"Authorization": "Bearer invalid_token"})
-    result = await config.code.header_auth_callback(invalid_headers)
+    result = await test_config.code.header_auth_callback(invalid_headers)
     assert result is None
 
     # Test with missing header
     missing_headers = Headers({})
-    result = await config.code.header_auth_callback(missing_headers)
+    result = await test_config.code.header_auth_callback(missing_headers)
     assert result is None
 
 
-async def test_oauth_callback():
+async def test_oauth_callback(test_config):
     from unittest.mock import patch
 
     from chainlit.callbacks import oauth_callback
@@ -80,23 +91,23 @@ async def test_oauth_callback():
             return None
 
         # Test that the callback is properly registered
-        assert config.code.oauth_callback is not None
+        assert test_config.code.oauth_callback is not None
 
         # Test the wrapped function with valid data
-        result = await config.code.oauth_callback(
+        result = await test_config.code.oauth_callback(
             "google", "valid_token", {}, User(identifier="default_user")
         )
         assert isinstance(result, User)
         assert result.identifier == "oauth_user"
 
         # Test with invalid data
-        result = await config.code.oauth_callback(
+        result = await test_config.code.oauth_callback(
             "facebook", "invalid_token", {}, User(identifier="default_user")
         )
         assert result is None
 
 
-async def test_on_message(mock_chainlit_context):
+async def test_on_message(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_message
     from chainlit.config import config
     from chainlit.message import Message
@@ -110,13 +121,13 @@ async def test_on_message(mock_chainlit_context):
             message_received = message
 
         # Test that the callback is properly registered
-        assert config.code.on_message is not None
+        assert test_config.code.on_message is not None
 
         # Create a test message
         test_message = Message(content="Test message", author="User")
 
         # Call the registered callback
-        await config.code.on_message(test_message)
+        await test_config.code.on_message(test_message)
 
         # Check that the message was received by our handler
         assert message_received is not None
@@ -127,7 +138,7 @@ async def test_on_message(mock_chainlit_context):
         context.session.emit.assert_called()
 
 
-async def test_on_stop(mock_chainlit_context):
+async def test_on_stop(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_stop
     from chainlit.config import config
 
@@ -140,16 +151,16 @@ async def test_on_stop(mock_chainlit_context):
             stop_called = True
 
         # Test that the callback is properly registered
-        assert config.code.on_stop is not None
+        assert test_config.code.on_stop is not None
 
         # Call the registered callback
-        await config.code.on_stop()
+        await test_config.code.on_stop()
 
         # Check that the stop_called flag was set
         assert stop_called
 
 
-async def test_action_callback(mock_chainlit_context):
+async def test_action_callback(mock_chainlit_context, test_config):
     from chainlit.action import Action
     from chainlit.callbacks import action_callback
     from chainlit.config import config
@@ -164,17 +175,17 @@ async def test_action_callback(mock_chainlit_context):
             assert action.name == "test_action"
 
         # Test that the callback is properly registered
-        assert "test_action" in config.code.action_callbacks
+        assert "test_action" in test_config.code.action_callbacks
 
         # Call the registered callback
         test_action = Action(name="test_action", value="test_value")
-        await config.code.action_callbacks["test_action"](test_action)
+        await test_config.code.action_callbacks["test_action"](test_action)
 
         # Check that the action_handled flag was set
         assert action_handled
 
 
-async def test_on_settings_update(mock_chainlit_context):
+async def test_on_settings_update(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_settings_update
     from chainlit.config import config
 
@@ -188,16 +199,16 @@ async def test_on_settings_update(mock_chainlit_context):
             assert settings == {"test_setting": "test_value"}
 
         # Test that the callback is properly registered
-        assert config.code.on_settings_update is not None
+        assert test_config.code.on_settings_update is not None
 
         # Call the registered callback
-        await config.code.on_settings_update({"test_setting": "test_value"})
+        await test_config.code.on_settings_update({"test_setting": "test_value"})
 
         # Check that the settings_updated flag was set
         assert settings_updated
 
 
-async def test_author_rename():
+async def test_author_rename(test_config):
     from chainlit.callbacks import author_rename
     from chainlit.config import config
 
@@ -208,27 +219,27 @@ async def test_author_rename():
         return author
 
     # Test that the callback is properly registered
-    assert config.code.author_rename is not None
+    assert test_config.code.author_rename is not None
 
     # Call the registered callback
-    result = await config.code.author_rename("AI")
+    result = await test_config.code.author_rename("AI")
     assert result == "Assistant"
 
-    result = await config.code.author_rename("Human")
+    result = await test_config.code.author_rename("Human")
     assert result == "Human"
 
     # Test that the callback is properly registered
-    assert config.code.author_rename is not None
+    assert test_config.code.author_rename is not None
 
     # Call the registered callback
-    result = await config.code.author_rename("AI")
+    result = await test_config.code.author_rename("AI")
     assert result == "Assistant"
 
-    result = await config.code.author_rename("Human")
+    result = await test_config.code.author_rename("Human")
     assert result == "Human"
 
 
-async def test_on_chat_start(mock_chainlit_context):
+async def test_on_chat_start(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_start
     from chainlit.config import config
 
@@ -241,10 +252,10 @@ async def test_on_chat_start(mock_chainlit_context):
             chat_started = True
 
         # Test that the callback is properly registered
-        assert config.code.on_chat_start is not None
+        assert test_config.code.on_chat_start is not None
 
         # Call the registered callback
-        await config.code.on_chat_start()
+        await test_config.code.on_chat_start()
 
         # Check that the chat_started flag was set
         assert chat_started
@@ -253,7 +264,7 @@ async def test_on_chat_start(mock_chainlit_context):
         context.session.emit.assert_called()
 
 
-async def test_on_chat_resume(mock_chainlit_context):
+async def test_on_chat_resume(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_resume
     from chainlit.config import config
     from chainlit.types import ThreadDict
@@ -268,10 +279,10 @@ async def test_on_chat_resume(mock_chainlit_context):
             assert thread["id"] == "test_thread_id"
 
         # Test that the callback is properly registered
-        assert config.code.on_chat_resume is not None
+        assert test_config.code.on_chat_resume is not None
 
         # Call the registered callback
-        await config.code.on_chat_resume(
+        await test_config.code.on_chat_resume(
             {
                 "id": "test_thread_id",
                 "createdAt": "2023-01-01T00:00:00Z",
@@ -289,7 +300,7 @@ async def test_on_chat_resume(mock_chainlit_context):
         assert chat_resumed
 
 
-async def test_set_chat_profiles(mock_chainlit_context):
+async def test_set_chat_profiles(mock_chainlit_context, test_config):
     from chainlit.callbacks import set_chat_profiles
     from chainlit.config import config
     from chainlit.types import ChatProfile
@@ -303,10 +314,10 @@ async def test_set_chat_profiles(mock_chainlit_context):
             ]
 
         # Test that the callback is properly registered
-        assert config.code.set_chat_profiles is not None
+        assert test_config.code.set_chat_profiles is not None
 
         # Call the registered callback
-        result = await config.code.set_chat_profiles(None)
+        result = await test_config.code.set_chat_profiles(None)
 
         # Check the result
         assert result is not None
@@ -317,7 +328,7 @@ async def test_set_chat_profiles(mock_chainlit_context):
         assert result[0].markdown_description == "A test profile"
 
 
-async def test_set_starters(mock_chainlit_context):
+async def test_set_starters(mock_chainlit_context, test_config):
     from chainlit.callbacks import set_starters
     from chainlit.config import config
     from chainlit.types import Starter
@@ -334,10 +345,10 @@ async def test_set_starters(mock_chainlit_context):
             ]
 
         # Test that the callback is properly registered
-        assert config.code.set_starters is not None
+        assert test_config.code.set_starters is not None
 
         # Call the registered callback
-        result = await config.code.set_starters(None)
+        result = await test_config.code.set_starters(None)
 
         # Check the result
         assert result is not None
@@ -348,7 +359,7 @@ async def test_set_starters(mock_chainlit_context):
         assert result[0].message == "Test Message"
 
 
-async def test_on_chat_end(mock_chainlit_context):
+async def test_on_chat_end(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_end
     from chainlit.config import config
 
@@ -361,10 +372,10 @@ async def test_on_chat_end(mock_chainlit_context):
             chat_ended = True
 
         # Test that the callback is properly registered
-        assert config.code.on_chat_end is not None
+        assert test_config.code.on_chat_end is not None
 
         # Call the registered callback
-        await config.code.on_chat_end()
+        await test_config.code.on_chat_end()
 
         # Check that the chat_ended flag was set
         assert chat_ended
