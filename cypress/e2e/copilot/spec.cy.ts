@@ -78,7 +78,8 @@ describe('Copilot with sendCookies', () => {
         // @ts-expect-error is not a valid prop
         win.mountChainlitWidget({
           // need to match baseUrl to allow origin to be set properly for CORS
-          chainlitServer: 'http://127.0.0.1:8000'
+          chainlitServer: 'http://127.0.0.1:8000',
+          sendCookies: true
         });
 
         win.addEventListener('chainlit-call-fn', (e) => {
