@@ -193,6 +193,9 @@ class HTTPSession(BaseSession):
             shutil.rmtree(self.files_dir)
 
 
+ThreadQueue = Deque[tuple[Callable, object, tuple, Dict]]
+
+
 class WebsocketSession(BaseSession):
     """Internal web socket session object.
 
@@ -250,7 +253,7 @@ class WebsocketSession(BaseSession):
 
         self.restored = False
 
-        self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
+        self.thread_queues: Dict[str, ThreadQueue] = {}
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self

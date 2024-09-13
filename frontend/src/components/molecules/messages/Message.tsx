@@ -23,7 +23,6 @@ import UserMessage from './UserMessage';
 
 interface Props {
   message: IStep;
-  showAvatar?: boolean;
   elements: IMessageElement[];
   actions: IAction[];
   indent: number;
@@ -35,7 +34,6 @@ interface Props {
 const Message = memo(
   ({
     message,
-    showAvatar = true,
     elements,
     actions,
     isRunning,
@@ -55,7 +53,6 @@ const Message = memo(
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
-
     // Only keep tool calls if Chain of Thought is tool_call
     const toolCallSkip =
       isStep && config?.ui.cot === 'tool_call' && message.type !== 'tool';
@@ -136,7 +133,7 @@ const Message = memo(
                   className="ai-message"
                 >
                   {!isStep || !indent ? (
-                    <MessageAvatar author={message.name} hide={!showAvatar} />
+                    <MessageAvatar author={message.name} />
                   ) : null}
                   {/* Display the step and its children */}
                   {isStep ? (
@@ -216,7 +213,7 @@ const Message = memo(
             messages={message.steps}
             elements={elements}
             actions={actions}
-            indent={isUserMessage ? indent : indent + 1}
+            indent={indent}
             isRunning={isRunning}
           />
         ) : null}
