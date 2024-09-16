@@ -8,6 +8,8 @@ on:
   push:
     branches: [main, dev]
 
+permissions: read-all
+
 jobs:
   pytest:
     uses: ./.github/workflows/pytest.yaml
