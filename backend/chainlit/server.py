@@ -196,12 +196,6 @@ app.add_middleware(
 
 router = APIRouter(prefix=ROOT_PATH)
 
-# app.mount(
-#     f"{ROOT_PATH}/static",
-#     StaticFiles(directory="static", check_dir=False),
-#     name="static",
-# )
-
 app.mount(
     f"{ROOT_PATH}/assets",
     StaticFiles(
@@ -940,13 +934,7 @@ async def upload_avatar(
         Union[None, User, PersistedUser], Depends(get_current_user)
     ],
 ):
-    # if not current_user:
-    #     raise HTTPException(status_code=401, detail="Not authenticated")
-
-    # Save the file to the avatars directory
     try:
-        # file_extension = os.path.splitext(file.filename)[1]
-        # avatar_filename = f"{avatar_id}{file_extension}"
         avatar_path = os.path.join(APP_ROOT, "public", "avatars", avatar_id)
 
         # Ensure the avatars directory exists
