@@ -40,13 +40,15 @@ export default function AssistantProfiles() {
   const { user } = useAuth();
 
   const fetchAssistants = useCallback(async () => {
-    try {
-      setAssistants((await listAssistants()) as Assistant[]);
-    } catch (error) {
-      console.error('Error fetching assistants:', error);
-      setAssistants([]);
+    if (assistantSettingsInputs && assistantSettingsInputs.length > 0) {
+      try {
+        setAssistants((await listAssistants()) as Assistant[]);
+      } catch (error) {
+        console.error('Error fetching assistants:', error);
+        setAssistants([]);
+      }
     }
-  }, [listAssistants, setAssistants]);
+  }, [listAssistants, setAssistants, assistantSettingsInputs]);
 
   useEffect(() => {
     fetchAssistants();
@@ -60,10 +62,10 @@ export default function AssistantProfiles() {
   }, [assistants, setSelectedAssistant, SetFrontSelectedAssistant]);
 
   if (
-    !assistants ||
-    assistants.length === 0 ||
     !assistantSettingsInputs ||
-    assistantSettingsInputs.length === 0
+    assistantSettingsInputs.length === 0 ||
+    !assistants ||
+    assistants.length === 0
   ) {
     return null;
   }
