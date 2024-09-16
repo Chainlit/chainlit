@@ -23,5 +23,5 @@ jobs:
     name: Run CI
     needs: [mypy, pytest, e2e-tests]
     steps:
-      - name: 'Done'
+      - name: Done
         run: echo "Done"
