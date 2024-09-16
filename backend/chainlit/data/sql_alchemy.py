@@ -378,7 +378,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info(f"SQLAlchemy: get_element, thread_id={thread_id}, element_id={element_id}")
         query = """SELECT * FROM elements WHERE "threadId" = :thread_id AND "id" = :element_id"""
         parameters = {"thread_id": thread_id, "element_id": element_id}
-        element = await self.execute_sql(query=query, parameters=parameters)
+        element: Union[List[Dict[str, Any]], int, None] = await self.execute_sql(query=query, parameters=parameters)
         if isinstance(element, list) and element:
             return ElementDict(**element[0])
         else:
