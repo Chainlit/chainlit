@@ -380,7 +380,24 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         parameters = {"thread_id": thread_id, "element_id": element_id}
         element: Union[List[Dict[str, Any]], int, None] = await self.execute_sql(query=query, parameters=parameters)
         if isinstance(element, list) and element:
-            return ElementDict(**element[0])
+            element_dict: Dict[str, Any] = element[0]
+            return ElementDict(
+                id=element_dict.get("id"),
+                threadId=element_dict.get("threadId"),
+                type=element_dict.get("type"),
+                chainlitKey=element_dict.get("chainlitKey"),
+                url=element_dict.get("url"),
+                objectKey=element_dict.get("objectKey"),
+                name=element_dict.get("name"),
+                display=element_dict.get("display"),
+                size=element_dict.get("size"),
+                language=element_dict.get("language"),
+                page=element_dict.get("page"),
+                autoPlay=element_dict.get("autoPlay"),
+                playerConfig=element_dict.get("playerConfig"),
+                forId=element_dict.get("forId"),
+                mime=element_dict.get("mime"),
+            )
         else:
             return None
 
