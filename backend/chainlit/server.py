@@ -63,6 +63,9 @@ from typing_extensions import Annotated
 from watchfiles import awatch
 
 ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
+# If the app is a submount, no need to set the prefix
+PREFIX = ROOT_PATH if ROOT_PATH and not IS_SUBMOUNT else ""
 
 
 @asynccontextmanager
@@ -170,16 +173,14 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
-sio = socketio.AsyncServer(
-    cors_allowed_origins=[], async_mode="asgi"
-)
+sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
 asgi_app = socketio.ASGIApp(
     socketio_server=sio,
     socketio_path="",
 )
 
-app.mount("/ws/socket.io", asgi_app)
+app.mount(f"{PREFIX}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -189,16 +190,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+router = APIRouter(prefix=PREFIX)
 
 app.mount(
-    f"/public",
+    f"{PREFIX}/public",
     StaticFiles(directory="public", check_dir=False),
     name="public",
 )
 
 app.mount(
-    f"/assets",
+    f"{PREFIX}/assets",
     StaticFiles(
         packages=[("chainlit", os.path.join(build_dir, "assets"))],
         follow_symlink=config.project.follow_symlink,
@@ -207,7 +208,7 @@ app.mount(
 )
 
 app.mount(
-    f"/copilot",
+    f"{PREFIX}/copilot",
     StaticFiles(
         packages=[("chainlit", copilot_build_dir)],
         follow_symlink=config.project.follow_symlink,
