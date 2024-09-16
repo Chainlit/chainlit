@@ -123,7 +123,7 @@ const FeedbackButtons = ({ message }: Props) => {
             <IconButton
               color="inherit"
               disabled={disabled}
-              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
+              className={`negative-feedback-${feedback === 0 ? 'on' : 'off'}`}
               onClick={() => {
                 handleFeedbackClick(0);
               }}
