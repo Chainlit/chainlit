@@ -23,6 +23,7 @@ interface Props {
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   setAutoScroll: (autoScroll: boolean) => void;
+  submitProxy?: (text: string, submitFunction: (text: string) => void) => void;
   autoScroll?: boolean;
   projectSettings?: IProjectSettings;
 }
@@ -34,7 +35,8 @@ const InputBox = memo(
     onFileUploadError,
     setAutoScroll,
     autoScroll,
-    projectSettings
+    projectSettings,
+    submitProxy
   }: Props) => {
     const layoutMaxWidth = useLayoutMaxWidth();
     const setInputHistory = useSetRecoilState(inputHistoryState);
@@ -45,6 +47,7 @@ const InputBox = memo(
 
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
+        console.error(msg);
         const message: IStep = {
           threadId: '',
           id: uuidv4(),
@@ -123,6 +126,7 @@ const InputBox = memo(
             onFileUploadError={onFileUploadError}
             onSubmit={onSubmit}
             onReply={onReply}
+            submitProxy={submitProxy}
           />
           {/* {tokenCount > 0 && ( */}
           {/* <Stack flexDirection="row" alignItems="center">

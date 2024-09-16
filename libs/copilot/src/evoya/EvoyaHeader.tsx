@@ -9,6 +9,7 @@ import CloseModalButton from './CloseModalButton';
 import MaximizeButton from './MaximizeButton';
 import ShareSessionButton from './ShareSessionButton';
 import FavoriteSessionButton from './FavoriteSessionButton';
+import PrivacyShieldToggle from './privacyShield/PrivacyShieldToggle';
 
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
@@ -71,6 +72,7 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
           <>
             <DashboardSidebarButton />
             <NewChatButton />
+            <PrivacyShieldToggle />
           </>
         ) : (
           evoya?.logo ? <img src={evoya.logo} style={{ height: '25px', width: 'auto' }} /> : <AvaiaLogo style={{ height: '25px', width: 'auto' }} />

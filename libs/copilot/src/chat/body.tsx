@@ -29,9 +29,20 @@ import { sideViewState } from '@chainlit/react-client';
 
 import { ElementSideView } from 'components/ElementSideView';
 import { InputBox as InputBoxDefault } from 'components/InputBox';
+import PrivacyShield from 'evoya/privacyShield/index';
+import TextSectionsCategoriesSimple from 'evoya/privacyShield/TextSectionsCategoriesSimple';
+import { usePrivacyShield } from 'evoya/privacyShield/usePrivacyShield';
 import InputBox from '@chainlit/app/src/components/organisms/chat/inputBox';
 
 import Messages from './messages';
+
+interface ChatFunctions {
+  submit: (text: string) => void;
+}
+
+const chatFunctions: ChatFunctions = {
+  submit: () => {}
+}
 
 const Chat = () => {
   const { apiClient, evoya } = useContext(WidgetContext);
@@ -156,6 +167,23 @@ const Chat = () => {
   const enableMultiModalUpload =
     !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
 
+  const {
+    getPrivacySections,
+    enabled,
+    enabledVisual,
+    sections,
+  } = usePrivacyShield();
+
+  const submitFunction = (text: string) => {
+    chatFunctions.submit(text);
+  }
+
+  const submitProxy = async (text: string, submitFunc: (text: string) => void) => {
+    chatFunctions.submit = submitFunc;
+
+    getPrivacySections(text);
+  }
+
   return (
     <Box
       {...(enableMultiModalUpload
@@ -200,11 +228,34 @@ const Chat = () => {
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
-            autoScroll={autoScroll}
-            projectSettings={projectSettings}
-            setAutoScroll={setAutoScroll}
-          />
+          <Box
+            display="grid"
+            flexGrow={1}
+            gridTemplateColumns="repeat(3, 1fr)"
+            sx={{
+              overflowY: 'auto',
+            }}
+          >
+            <Box
+              sx={{
+                gridColumnStart: `span ${enabledVisual ? 2 : 3}`,
+                gridColumnEnd: `span ${enabledVisual ? 2 : 3}`
+              }}
+            >
+              <Messages
+                autoScroll={autoScroll}
+                projectSettings={projectSettings}
+                setAutoScroll={setAutoScroll}
+              />
+            </Box>
+            {(enabledVisual && sections.length > 0) &&
+              <Box
+                padding={2}
+              >
+                <TextSectionsCategoriesSimple />
+              </Box>
+            }
+          </Box>
           {evoya?.type === 'default' ? (
             <InputBoxDefault
               fileSpec={fileSpec}
@@ -222,10 +273,12 @@ const Chat = () => {
               autoScroll={autoScroll}
               setAutoScroll={setAutoScroll}
               projectSettings={projectSettings}
+              submitProxy={enabled ? submitProxy : undefined}
             />
           )}
         </ErrorBoundary>
       </Box>
+      <PrivacyShield submit={submitFunction} />
       <ElementSideView
         onClose={() => setSideViewElement(undefined)}
         isOpen={!!sideViewElement}

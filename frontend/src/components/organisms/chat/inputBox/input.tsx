@@ -26,6 +26,7 @@ interface Props {
   onFileUploadError: (error: string) => void;
   onSubmit: (message: string, attachments?: IAttachment[]) => void;
   onReply: (message: string) => void;
+  submitProxy?: (text: string, submitFunction: (text: string) => void) => void;
 }
 
 function getLineCount(el: HTMLDivElement) {
@@ -38,7 +39,7 @@ function getLineCount(el: HTMLDivElement) {
 }
 
 const Input = memo(
-  ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply }: Props) => {
+  ({ fileSpec, onFileUpload, onFileUploadError, onSubmit, onReply, submitProxy }: Props) => {
     const [attachments, setAttachments] = useRecoilState(attachmentsState);
     const setInputHistory = useSetRecoilState(inputHistoryState);
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
@@ -101,7 +102,23 @@ const Input = memo(
       }
     }, [loading, disabled]);
 
-    const submit = useCallback(() => {
+    const submit = async () => {
+      if (submitProxy) {
+        submitProxy(value, (text: string) => {
+          if (askUser) {
+            onReply(text);
+          } else {
+            onSubmit(text, attachments);
+          }
+          setAttachments([]);
+          setValue('');
+        });
+      } else {
+        submitMessage();
+      }
+    }
+
+    const submitMessage = useCallback(() => {
       if (value === '' || disabled) {
         return;
       }

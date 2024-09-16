@@ -10,6 +10,27 @@ export interface EvoyaConfig {
   hideWaterMark?: boolean;
 }
 
+export interface SectionItem {
+  string: string;
+  type: string;
+  id: string;
+  isAnon: boolean;
+  isLocked: boolean;
+}
+
+export interface PrivacyCategories {
+  [key: string]: TextSection[];
+}
+
+export interface TextSection {
+  string: string;
+  type?: string;
+  id?: string;
+  anonString?: string;
+  isAnon?: boolean;
+  isLocked?: boolean;
+}
+
 export interface EvoyaFavoriteApiConfig {
   is_favorite: boolean;
   add: string;
