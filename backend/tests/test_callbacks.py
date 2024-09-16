@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import pytest
-
 from chainlit.callbacks import password_auth_callback
-from chainlit import config
 from chainlit.user import User
+
+from chainlit import config
 
 
 @pytest.fixture

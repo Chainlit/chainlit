@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
-
 from chainlit.context import ChainlitContext, context_var
 from chainlit.session import HTTPSession, WebsocketSession
 from chainlit.user_session import UserSession

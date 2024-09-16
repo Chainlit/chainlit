@@ -590,10 +590,14 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
 
         if output_keys:
             output = outputs.get(output_keys[0], outputs)
-            
+
         if current_step:
             current_step.output = (
-                output[0] if isinstance(output, Sequence) and not isinstance(output, str) and len(output) else output
+                output[0]
+                if isinstance(output, Sequence)
+                and not isinstance(output, str)
+                and len(output)
+                else output
             )
             current_step.end = utc_now()
             self._run_sync(current_step.update())

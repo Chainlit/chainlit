@@ -285,9 +285,9 @@ class CodeSettings:
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
-    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
-        None
-    )
+    header_auth_callback: Optional[
+        Callable[[Headers], Awaitable[Optional["User"]]]
+    ] = None
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
@@ -305,9 +305,9 @@ class CodeSettings:
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
+    set_starters: Optional[
+        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    ] = None
 
 
 @dataclass()
