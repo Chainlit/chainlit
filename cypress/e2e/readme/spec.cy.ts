@@ -31,7 +31,7 @@ describe('readme_language', () => {
     cy.visit('/', {
       onBeforeLoad(win) {
         Object.defineProperty(win.navigator, 'language', {
-          value: 'Klingon'
+          value: 'tlh'
         });
       }
     });

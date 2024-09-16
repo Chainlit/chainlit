@@ -186,9 +186,12 @@ const Message = memo(
                       {actions?.length ? (
                         <MessageActions message={message} actions={actions} />
                       ) : null}
-                      {scorableRun && isScorable ? (
-                        <MessageButtons message={message} run={scorableRun} />
-                      ) : null}
+                      <MessageButtons
+                        message={message}
+                        run={
+                          scorableRun && isScorable ? scorableRun : undefined
+                        }
+                      />
                     </Stack>
                   )}
                 </Stack>
