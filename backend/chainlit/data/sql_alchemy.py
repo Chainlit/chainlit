@@ -373,6 +373,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return True
 
     ###### Elements ######
+    async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_element, thread_id={thread_id}, element_id={element_id}")
+        query = """SELECT * FROM elements WHERE "threadId" = :thread_id AND "id" = :element_id"""
+        parameters = {"thread_id": thread_id, "element_id": element_id}
+        element = await self.execute_sql(query=query, parameters=parameters)
+        if element:
+            return ElementDict(**element[0])
+        else:
+            return None
+
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if self.show_logger:
