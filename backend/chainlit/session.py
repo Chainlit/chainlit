@@ -64,7 +64,7 @@ class BaseSession:
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str],
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]],
         # Logged-in user token
         token: Optional[str],
@@ -169,7 +169,7 @@ class HTTPSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
@@ -225,7 +225,7 @@ class WebsocketSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
