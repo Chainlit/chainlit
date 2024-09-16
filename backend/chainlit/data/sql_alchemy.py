@@ -382,21 +382,21 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if isinstance(element, list) and element:
             element_dict: Dict[str, Any] = element[0]
             return ElementDict(
-                id=element_dict.get("id"),
+                id=element_dict["id"],
                 threadId=element_dict.get("threadId"),
-                type=element_dict.get("type"),
+                type=element_dict["type"],
                 chainlitKey=element_dict.get("chainlitKey"),
                 url=element_dict.get("url"),
                 objectKey=element_dict.get("objectKey"),
-                name=element_dict.get("name"),
-                display=element_dict.get("display"),
+                name=element_dict["name"],
+                display=element_dict["display"],
                 size=element_dict.get("size"),
                 language=element_dict.get("language"),
                 page=element_dict.get("page"),
                 autoPlay=element_dict.get("autoPlay"),
                 playerConfig=element_dict.get("playerConfig"),
                 forId=element_dict.get("forId"),
-                mime=element_dict.get("mime"),
+                mime=element_dict.get("mime")
             )
         else:
             return None
