@@ -1,23 +1,18 @@
-import asyncio
-import logging
-import os
 import uuid
 from typing import List
 
-import dotenv
 from chainlit.assistant import Assistant
 from chainlit.input_widget import FileUploadInput, Select, Slider, TextInput
-from openai import AsyncOpenAI
 
 import chainlit as cl
-
-logging.basicConfig(level=logging.INFO)
 
 # Definitely not the best way to store assistants (use a database instead)
 ASSISTANTSLIST: List[Assistant] = []
 
-# Instrument the Mistral AI client
-cl.instrument_openai()
+CHAINLIT_AUTH_SECRET = (
+    "_jUILVPfd?JbeYskt:auBDW$?::0vUQ0UfVcZ%G,rfT5WIG%uiH/49SQIr6ig0po"
+)
+
 
 assistant_settings = [
     TextInput(
