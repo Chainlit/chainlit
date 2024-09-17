@@ -2,15 +2,15 @@
 name = "chainlit"
 version = "1.2.0"
 keywords = [
-    'LLM',
-    'Agents',
-    'gen ai',
-    'chat ui',
-    'chatbot ui',
-    'openai',
-    'copilot',
-    'langchain',
-    'conversational ai',
+  'LLM',
+  'Agents',
+  'gen ai',
+  'chat ui',
+  'chatbot ui',
+  'openai',
+  'copilot',
+  'langchain',
+  'conversational ai',
 ]
 description = "Build Conversational AI."
 authors = ["Chainlit"]
@@ -89,23 +89,20 @@ python_version = "3.9"
 
 [[tool.mypy.overrides]]
 module = [
-    "boto3.dynamodb.types",
-    "botbuilder.*",
-    "filetype",
-    "haystack.*",
-    "langflow",
-    "lazify",
-    "plotly",
-    "nest_asyncio",
-    "socketio.*",
-    "uptrace",
-    "syncer",
-    "azure.storage.filedatalake",
+  "boto3.dynamodb.types",
+  "botbuilder.*",
+  "filetype",
+  "haystack.*",
+  "langflow",
+  "lazify",
+  "plotly",
+  "nest_asyncio",
+  "socketio.*",
+  "uptrace",
+  "syncer",
+  "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
-
-
-
 
 
 [tool.poetry.group.custom-data]
