@@ -72,6 +72,7 @@ export default function AssistantInfoScreen({
   return (
     <Fade in={show}>
       <Stack
+        id="assistant-info-screen"
         position="absolute"
         zIndex={show ? 1 : -1}
         width="100%"
@@ -88,15 +89,15 @@ export default function AssistantInfoScreen({
         boxSizing={'border-box'}
         color="text.primary"
       >
-        {hideLogo ? null : <Stack>{logo}</Stack>}
+        {hideLogo ? null : <Stack id="assistant-logo">{logo}</Stack>}
         {selectedAssistant.settings_values['markdown_description'] && (
           <Box
+            id="assistant-description-container"
             sx={{
               backgroundColor: 'background.paper',
               borderRadius: '8px',
               paddingLeft: '16px',
               paddingRight: '16px'
-              // width: '100%'
             }}
           >
             <Markdown allowHtml={false} latex={false}>

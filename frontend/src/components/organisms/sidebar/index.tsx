@@ -34,7 +34,7 @@ const SideBar = () => {
     if (isMobile) {
       setChatHistoryOpen(false);
     } else {
-      setChatHistoryOpen(true);
+      setChatHistoryOpen(enableHistory);
     }
   }, [enableHistory, isMobile]);
 

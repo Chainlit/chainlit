@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from chainlit.assistant import Assistant
 from chainlit.callbacks import password_auth_callback
 from chainlit.user import User
 
@@ -382,3 +383,53 @@ async def test_on_chat_end(mock_chainlit_context, test_config):
 
         # Check that the emit method was called
         context.session.emit.assert_called()
+
+
+async def test_on_create_assistant(test_config):
+    from chainlit.assistant import Assistant
+    from chainlit.callbacks import on_create_assistant
+    from chainlit.config import config
+    from chainlit.user import User
+
+    @on_create_assistant
+    async def create_assistant(user: User, assistant: Assistant):
+        assistant.settings_values["name"] = "Test Assistant"
+        return assistant
+
+    # Test that the callback is properly registered
+    assert test_config.code.on_create_assistant is not None
+
+    # Test the wrapped function
+    user = User(identifier="testuser")
+    assistant = Assistant(input_widgets=[], settings_values={})
+    result = await test_config.code.on_create_assistant(user, assistant)
+
+    assert isinstance(result, Assistant)
+    assert result.settings_values["name"] == "Test Assistant"
+
+
+async def test_on_list_assistants(test_config):
+    from chainlit.assistant import Assistant
+    from chainlit.callbacks import on_list_assistants
+    from chainlit.config import config
+    from chainlit.user import User
+
+    @on_list_assistants
+    async def list_assistants(user: User):
+        return [
+            Assistant(input_widgets=[], settings_values={"name": "Assistant 1"}),
+            Assistant(input_widgets=[], settings_values={"name": "Assistant 2"}),
+        ]
+
+    # Test that the callback is properly registered
+    assert test_config.code.on_list_assistants is not None
+
+    # Test the wrapped function
+    user = User(identifier="testuser")
+    result = await test_config.code.on_list_assistants(user)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert all(isinstance(assistant, Assistant) for assistant in result)
+    assert result[0].settings_values["name"] == "Assistant 1"
+    assert result[1].settings_values["name"] == "Assistant 2"

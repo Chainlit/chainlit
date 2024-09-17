@@ -107,8 +107,8 @@ export default function AssistantProfiles() {
   const displayedAssistants = showAll ? assistants : assistants.slice(0, 5);
 
   return (
-    <Box>
-      <List>
+    <Box id="assistant-profiles-container">
+      <List id="assistant-profiles-list">
         {displayedAssistants.map((assistant: Assistant) => (
           <ListItem
             key={assistant.settings_values['name']}
@@ -116,6 +116,9 @@ export default function AssistantProfiles() {
             sx={{ mb: 1 }}
           >
             <ListItemButton
+              id={`assistant-profile-${assistant.settings_values['name']
+                .replace(/\s+/g, '-')
+                .toLowerCase()}`}
               onClick={() => handleAssistantClick(assistant)}
               sx={{
                 borderRadius: '12px',
@@ -127,6 +130,9 @@ export default function AssistantProfiles() {
               <ListItemIcon sx={{ minWidth: '36px' }}>
                 {assistant.settings_values['icon'] ? (
                   <img
+                    id={`assistant-icon-${assistant.settings_values['name']
+                      .replace(/\s+/g, '-')
+                      .toLowerCase()}`}
                     src={
                       assistant.settings_values['icon'].startsWith('/')
                         ? apiClient.buildEndpoint(
@@ -143,6 +149,11 @@ export default function AssistantProfiles() {
                   />
                 ) : (
                   <UserIcon
+                    id={`assistant-default-icon-${assistant.settings_values[
+                      'name'
+                    ]
+                      .replace(/\s+/g, '-')
+                      .toLowerCase()}`}
                     sx={{
                       width: '30px',
                       height: '30px',
@@ -154,6 +165,9 @@ export default function AssistantProfiles() {
               <ListItemText primary={assistant.settings_values['name']} />
               {assistant.settings_values['created_by'] === user?.identifier && (
                 <IconButton
+                  id={`edit-assistant-${assistant.settings_values['name']
+                    .replace(/\s+/g, '-')
+                    .toLowerCase()}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleEditAssistant(assistant);

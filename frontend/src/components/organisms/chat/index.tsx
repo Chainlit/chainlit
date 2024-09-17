@@ -178,6 +178,8 @@ const Chat = () => {
       {...(enableMultiModalUpload
         ? upload?.getRootProps({ className: 'dropzone' })
         : {})}
+      onBlur={undefined}
+      onFocus={undefined}
       display="flex"
       width="100%"
       flexGrow={1}

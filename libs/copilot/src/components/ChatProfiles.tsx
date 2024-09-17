@@ -73,7 +73,7 @@ export default function ChatProfiles() {
         value={chatProfile || ''}
         items={items}
         id="chat-profile-selector"
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+        onChange={(e) => {
           const newValue = e.target.value;
           setNewChatProfile(newValue);
           if (firstInteraction) {
