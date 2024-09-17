@@ -19,7 +19,7 @@ def test_config(monkeypatch: pytest.MonkeyPatch):
 async def test_password_auth_callback(test_config):
     @password_auth_callback
     async def auth_func(username: str, password: str) -> User | None:
-        if username == "testuser" and password == "testpass":
+        if username == "testuser" and password == "testpass":  # nosec B105
             return User(identifier="testuser")
         return None
 
@@ -86,7 +86,7 @@ async def test_oauth_callback(test_config):
             default_app_user: User,
             id_token: str | None = None,
         ) -> User | None:
-            if provider_id == "google" and token == "valid_token":
+            if provider_id == "google" and token == "valid_token":  # nosec B105
                 return User(identifier="oauth_user")
             return None
 
