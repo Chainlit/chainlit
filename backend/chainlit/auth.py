@@ -42,9 +42,9 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "oauthProviders": get_configured_oauth_providers()
-        if is_oauth_enabled()
-        else [],
+        "oauthProviders": (
+            get_configured_oauth_providers() if is_oauth_enabled() else []
+        ),
     }
 
 
@@ -69,14 +69,14 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         )
         del dict["exp"]
         user = User(**dict)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
     if data_layer := get_data_layer():
         try:
             persisted_user = await data_layer.get_user(user.identifier)
             if persisted_user == None:
                 persisted_user = await data_layer.create_user(user)
-        except Exception as e:
+        except Exception:
             return user
 
         return persisted_user
