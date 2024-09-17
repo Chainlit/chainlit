@@ -21,6 +21,8 @@ async def create_chainlit_context():
     mock_session.languages = ["en"]
     mock_session.thread_id = "test_thread_id"
     mock_session.emit = AsyncMock()
+    mock_session.selected_assistant = None
+    mock_session.assistant_settings = {}
 
     context = ChainlitContext(mock_session)
     token = context_var.set(context)
