@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -64,10 +64,18 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
-  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
+  const [currentThreadId, setCurrentThreadId] =
+    useRecoilState(currentThreadIdState);
   const setAssistantSettingsInputs = useSetRecoilState(
     assistantSettingsInputsState
   );
+  // Use currentThreadId as thread id in websocket header
+  useEffect(() => {
+    if (session?.socket) {
+      session.socket.io.opts.extraHeaders!['X-Chainlit-Thread-Id'] =
+        currentThreadId || '';
+    }
+  }, [currentThreadId]);
 
   const _connect = useCallback(
     ({

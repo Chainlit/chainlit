@@ -65,7 +65,7 @@ class Element:
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     # The key of the element hosted on Chainlit.
     chainlit_key: Optional[str] = None
-    # The URL of the element if already hosted somehwere else.
+    # The URL of the element if already hosted somewhere else.
     url: Optional[str] = None
     # The S3 object key.
     object_key: Optional[str] = None
@@ -235,14 +235,10 @@ class Pyplot(Element):
         if not isinstance(self.figure, Figure):
             raise TypeError("figure must be a matplotlib.figure.Figure")
 
-        options = {
-            "dpi": 200,
-            "bbox_inches": "tight",
-            "backend": "Agg",
-            "format": "png",
-        }
         image = BytesIO()
-        self.figure.savefig(image, **options)
+        self.figure.savefig(
+            image, dpi=200, bbox_inches="tight", backend="Agg", format="png"
+        )
         self.content = image.getvalue()
 
         super().__post_init__()

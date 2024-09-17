@@ -65,7 +65,7 @@ class BaseSession:
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str],
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]],
         # Logged-in user token
         token: Optional[str],
@@ -177,7 +177,7 @@ class HTTPSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
@@ -205,6 +205,9 @@ class HTTPSession(BaseSession):
         """Delete the session."""
         if self.files_dir.is_dir():
             shutil.rmtree(self.files_dir)
+
+
+ThreadQueue = Deque[tuple[Callable, object, tuple, Dict]]
 
 
 class WebsocketSession(BaseSession):
@@ -236,7 +239,7 @@ class WebsocketSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
@@ -270,7 +273,7 @@ class WebsocketSession(BaseSession):
 
         self.restored = False
 
-        self.thread_queues = {}  # type: Dict[str, Deque[Callable]]
+        self.thread_queues: Dict[str, ThreadQueue] = {}
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self

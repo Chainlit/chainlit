@@ -8,6 +8,7 @@ from literalai.helper import utc_now
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.llms import ChatMessage, ChatResponse, CompletionResponse
+from llama_index.core.tools.types import ToolMetadata
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,
@@ -54,7 +55,16 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
     ) -> str:
         """Run when an event starts and return id of event."""
         step_type: StepType = "undefined"
-        if event_type == CBEventType.RETRIEVE:
+        step_name: str = event_type.value
+        step_input: Optional[Dict[str, Any]] = payload
+        if event_type == CBEventType.FUNCTION_CALL:
+            step_type = "tool"
+            if payload:
+                metadata: Optional[ToolMetadata] = payload.get(EventPayload.TOOL)
+                if metadata:
+                    step_name = getattr(metadata, "name", step_name)
+                step_input = payload.get(EventPayload.FUNCTION_CALL)
+        elif event_type == CBEventType.RETRIEVE:
             step_type = "tool"
         elif event_type == CBEventType.QUERY:
             step_type = "tool"
@@ -64,7 +74,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             return event_id
 
         step = Step(
-            name=event_type.value,
+            name=step_name,
             type=step_type,
             parent_id=self._get_parent_id(parent_id),
             id=event_id,
@@ -72,7 +82,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
         self.steps[event_id] = step
         step.start = utc_now()
-        step.input = payload or {}
+        step.input = step_input or {}
         context_var.get().loop.create_task(step.send())
         return event_id
 
@@ -91,7 +101,13 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
 
         step.end = utc_now()
 
-        if event_type == CBEventType.QUERY:
+        if event_type == CBEventType.FUNCTION_CALL:
+            response = payload.get(EventPayload.FUNCTION_OUTPUT)
+            if response:
+                step.output = f"{response}"
+                context_var.get().loop.create_task(step.update())
+
+        elif event_type == CBEventType.QUERY:
             response = payload.get(EventPayload.RESPONSE)
             source_nodes = getattr(response, "source_nodes", None)
             if source_nodes:
