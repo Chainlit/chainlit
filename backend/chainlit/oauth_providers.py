@@ -442,7 +442,7 @@ class DescopeOAuthProvider(OAuthProvider):
     id = "descope"
     env = ["OAUTH_DESCOPE_CLIENT_ID", "OAUTH_DESCOPE_CLIENT_SECRET"]
     # Ensure that the domain does not have a trailing slash
-    domain = f"https://api.descope.com/oauth2/v1"
+    domain = "https://api.descope.com/oauth2/v1"
 
     authorize_url = f"{domain}/authorize"
 
