@@ -15,7 +15,6 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from chainlit.user import PersistedUser, User
 from literalai.helper import utc_now
 
 import chainlit as cl

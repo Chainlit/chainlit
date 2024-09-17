@@ -49,7 +49,7 @@ def get_configuration():
 
 
 def create_jwt(data: User) -> str:
-    to_encode = data.to_dict()  # type: Dict[str, Any]
+    to_encode: Dict[str, Any] = data.to_dict()
     to_encode.update(
         {
             "exp": datetime.utcnow() + timedelta(minutes=60 * 24 * 15),  # 15 days

@@ -1,7 +1,6 @@
 import re
 from typing import Any, Generic, List, Optional, TypeVar
 
-from chainlit.context import context
 from chainlit.step import Step
 from chainlit.sync import run_sync
 from haystack.agents import Agent, Tool
