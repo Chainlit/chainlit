@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Any, Dict
 
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
+from chainlit.assistant import Assistant
+from chainlit.assistant_settings import AssistantSettings
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
@@ -61,6 +63,8 @@ from .callbacks import (
     on_chat_end,
     on_chat_resume,
     on_chat_start,
+    on_create_assistant,
+    on_list_assistants,
     on_logout,
     on_message,
     on_settings_update,
