@@ -138,7 +138,9 @@ __all__ = [
     "TaskStatus",
     "Video",
     "ChatSettings",
+    # Experimental
     "AssistantSettings",
+    # Experimental
     "Assistant",
     "input_widget",
     "Message",

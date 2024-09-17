@@ -310,6 +310,7 @@ def on_settings_update(
     return func
 
 
+# Experimental
 @trace
 def on_create_assistant(
     func: Callable[[Optional[User], AssistantSettings], Any]
@@ -318,6 +319,7 @@ def on_create_assistant(
     return func
 
 
+# Experimental
 @trace
 def on_list_assistants(
     func: Callable[[Optional[User]], List[Assistant]]
