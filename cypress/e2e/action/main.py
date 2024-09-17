@@ -71,5 +71,5 @@ async def main():
         ],
     ).send()
 
-    if result != None:
+    if result is not None:
         await cl.Message(f"Thanks for pressing: {result['value']}").send()
