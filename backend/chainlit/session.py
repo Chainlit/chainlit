@@ -16,6 +16,7 @@ from typing import (
 )
 
 import aiofiles
+from chainlit.assistant import Assistant
 from chainlit.logger import logger
 
 if TYPE_CHECKING:
@@ -72,8 +73,12 @@ class BaseSession:
         user_env: Optional[Dict[str, str]],
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Selected assistant
+        selected_assistant: Optional[Assistant] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # assistant settings
+        assistant_settings: Optional[Dict[str, Any]] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -90,7 +95,9 @@ class BaseSession:
 
         self.id = id
 
+        self.assistant_settings = assistant_settings
         self.chat_settings: Dict[str, Any] = {}
+        self.selected_assistant = selected_assistant
 
     @property
     def files_dir(self):
@@ -153,6 +160,7 @@ class BaseSession:
         user_session = user_sessions.get(self.id) or {}  # type: Dict
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
+        user_session["selected_assistant"] = self.selected_assistant
         user_session["http_referer"] = self.http_referer
         user_session["client_type"] = self.client_type
         metadata = clean_metadata(user_session)
@@ -176,6 +184,10 @@ class HTTPSession(BaseSession):
         user_env: Optional[Dict[str, str]] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # assistant settings
+        assistant_settings: Optional[Dict[str, Any]] = None,
+        # selected assistant
+        selected_assistant: Optional[Assistant] = None,
     ):
         super().__init__(
             id=id,
@@ -185,6 +197,8 @@ class HTTPSession(BaseSession):
             client_type=client_type,
             user_env=user_env,
             http_referer=http_referer,
+            assistant_settings=assistant_settings,
+            selected_assistant=selected_assistant,
         )
 
     def delete(self):
@@ -231,10 +245,14 @@ class WebsocketSession(BaseSession):
         token: Optional[str] = None,
         # Chat profile selected before the session was created
         chat_profile: Optional[str] = None,
+        # Selected assistant
+        selected_assistant: Optional[Assistant] = None,
         # Languages of the user's browser
         languages: Optional[str] = None,
         # Origin of the request
         http_referer: Optional[str] = None,
+        # chat settings
+        assistant_settings: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(
             id=id,
@@ -244,7 +262,9 @@ class WebsocketSession(BaseSession):
             user_env=user_env,
             client_type=client_type,
             chat_profile=chat_profile,
+            selected_assistant=selected_assistant,
             http_referer=http_referer,
+            assistant_settings=assistant_settings,
         )
 
         self.socket_id = socket_id

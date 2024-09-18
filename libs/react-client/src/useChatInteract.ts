@@ -126,6 +126,35 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  // create a new assistant
+  const createAssistant = useCallback(
+    (values: object) => {
+      session?.socket.emit('on_create_assistant', values);
+    },
+    [session?.socket]
+  );
+
+  // get the list of assistants from the server and return a list of assistants
+  const listAssistants = useCallback(() => {
+    return new Promise((resolve, reject) => {
+      session?.socket.emit('on_list_assistants', (response) => {
+        if (response) {
+          resolve(response);
+        } else {
+          reject(new Error('Failed to fetch assistants'));
+        }
+      });
+    });
+  }, [session?.socket]);
+
+  // set the selected assistant (emit a message to the server with the assistant name)
+  const setSelectedAssistant = useCallback(
+    (assistant: any) => {
+      session?.socket.emit('select_assistant', assistant);
+    },
+    [session?.socket]
+  );
+
   const stopTask = useCallback(() => {
     setMessages((oldMessages) =>
       oldMessages.map((m) => {
@@ -166,16 +195,33 @@ const useChatInteract = () => {
   );
 
   const uploadFile = useCallback(
-    (file: File, onProgress: (progress: number) => void) => {
-      return client.uploadFile(file, onProgress, sessionId, accessToken);
+    (file: File, onProgress: (progress: number) => void, endpoint?: string) => {
+      return client.uploadFile(
+        file,
+        onProgress,
+        endpoint,
+        sessionId,
+        accessToken
+      );
     },
     [sessionId, accessToken]
   );
+
+  const resetMessages = useCallback(() => {
+    setMessages([]);
+    setElements([]);
+    setTasklists([]);
+    setActions([]);
+    setTokenCount(0);
+    setSideView(undefined);
+    setCurrentThreadId(undefined);
+  }, []);
 
   return {
     uploadFile,
     callAction,
     clear,
+    resetMessages, // Add this line
     replyMessage,
     sendMessage,
     editMessage,
@@ -183,7 +229,10 @@ const useChatInteract = () => {
     endAudioStream,
     stopTask,
     setIdToResume,
-    updateChatSettings
+    updateChatSettings,
+    createAssistant,
+    listAssistants,
+    setSelectedAssistant
   };
 };
 

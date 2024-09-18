@@ -228,7 +228,6 @@ app.mount(
     name="copilot",
 )
 
-
 # -------------------------------------------------------------------------------
 #                               SLACK HANDLER
 # -------------------------------------------------------------------------------
@@ -983,6 +982,29 @@ async def get_avatar(avatar_id: str):
         return FileResponse(avatar_path, media_type=media_type)
 
     return await get_favicon()
+
+
+# post avatar/{avatar_id} (only for authenticated users)
+@router.post("/avatars/{avatar_id}")
+async def upload_avatar(
+    avatar_id: str,
+    file: UploadFile,
+    current_user: Annotated[
+        Union[None, User, PersistedUser], Depends(get_current_user)
+    ],
+):
+    try:
+        avatar_path = os.path.join(APP_ROOT, "public", "avatars", avatar_id)
+
+        # Ensure the avatars directory exists
+        os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+
+        with open(avatar_path, "wb") as f:
+            f.write(await file.read())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"id": avatar_id}
 
 
 @router.head("/")

@@ -154,7 +154,7 @@ const Input = memo(
           onFileUploadError={onFileUploadError}
           onFileUpload={onFileUpload}
         />
-        {chatSettingsInputs.length > 0 && (
+        {chatSettingsInputs && chatSettingsInputs.length > 0 && (
           <IconButton
             id="chat-settings-open-modal"
             disabled={disabled}

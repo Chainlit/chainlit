@@ -2,13 +2,14 @@ import omit from 'utils/omit';
 
 import { IInput } from 'types/Input';
 
+import { FileUploadInput, FileUploadInputProps } from './FileUploadInput';
 import { SliderInput, SliderInputProps } from './SliderInput';
 import { SwitchInput, SwitchInputProps } from './SwitchInput';
 import { TagsInput, TagsInputProps } from './TagsInput';
 import { TextInput, TextInputProps } from './TextInput';
 import { SelectInput, SelectInputProps } from './selects/SelectInput';
 
-type TFormInputValue = string | number | boolean | string[] | undefined;
+type TFormInputValue = string | number | boolean | string[] | File | undefined;
 
 interface IFormInput<T, V extends TFormInputValue> extends IInput {
   type: T;
@@ -23,7 +24,9 @@ type TFormInput =
   | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
-  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>);
+  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>)
+  | (Omit<FileUploadInputProps, 'onFileSelect'> &
+      IFormInput<'fileupload', File | string>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element?.type) {
@@ -60,6 +63,15 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
           {...omit(element, 'setField')}
           type="number"
           value={element.value?.toString() ?? '0'}
+        />
+      );
+    case 'fileupload':
+      return (
+        <FileUploadInput
+          {...omit(element, 'setField')}
+          onFileSelect={(file: File | null) =>
+            element.setField?.(element.id, file ?? '', true)
+          }
         />
       );
     default:

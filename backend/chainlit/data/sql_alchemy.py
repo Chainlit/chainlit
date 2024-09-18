@@ -579,7 +579,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
-                            if step_feedback.get("step_showinput") not in [None, "false"]
+                            if step_feedback.get("step_showinput")
+                            not in [None, "false"]
                             else None
                         ),
                         output=step_feedback.get("step_output", ""),

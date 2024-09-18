@@ -161,6 +161,28 @@ class NumberInput(InputWidget):
             "description": self.description,
         }
 
+@dataclass
+class FileUploadInput(InputWidget):
+    """Useful to create a file upload input."""
+
+    type: InputWidgetType = "fileupload"
+    initial: Optional[str] = None
+    placeholder: Optional[str] = None
+    accept: List[str] = Field(default_factory=lambda: [])
+    max_size_mb: Optional[int] = None
+    max_files: Optional[int] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
+            "placeholder": self.placeholder,
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }
+
 
 @dataclass
 class Tags(InputWidget):

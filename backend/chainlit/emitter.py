@@ -114,6 +114,10 @@ class BaseChainlitEmitter:
         """Stub method to set chat settings."""
         pass
 
+    async def set_assistant_settings(self, settings: dict):
+        """Stub method to send assistant settings to the UI."""
+        pass
+
     async def send_action_response(
         self, id: str, status: bool, response: Optional[str] = None
     ):
@@ -360,6 +364,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     def set_chat_settings(self, settings: Dict[str, Any]):
         self.session.chat_settings = settings
+
+    def set_assistant_settings(self, settings: Dict[str, Any]):
+        self.session.assistant_settings = settings
 
     def send_action_response(
         self, id: str, status: bool, response: Optional[str] = None

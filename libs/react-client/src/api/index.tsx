@@ -196,7 +196,8 @@ export class ChainlitAPI extends APIBase {
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
-    sessionId: string,
+    endpoint: string = '/project/file',
+    sessionId?: string,
     token?: string
   ) {
     const xhr = new XMLHttpRequest();
@@ -205,11 +206,9 @@ export class ChainlitAPI extends APIBase {
       const formData = new FormData();
       formData.append('file', file);
 
-      xhr.open(
-        'POST',
-        this.buildEndpoint(`/project/file?session_id=${sessionId}`),
-        true
-      );
+      const url = sessionId ? `${endpoint}?session_id=${sessionId}` : endpoint;
+
+      xhr.open('POST', this.buildEndpoint(url), true);
 
       if (token) {
         xhr.setRequestHeader('Authorization', this.checkToken(token));

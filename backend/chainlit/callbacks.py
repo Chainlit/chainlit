@@ -1,7 +1,10 @@
+import functools
 import inspect
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from chainlit.action import Action
+from chainlit.assistant import Assistant
+from chainlit.assistant_settings import AssistantSettings
 from chainlit.config import config
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
@@ -12,6 +15,15 @@ from chainlit.user import User
 from chainlit.utils import wrap_user_function
 from fastapi import Request, Response
 from starlette.datastructures import Headers
+
+
+def experimental(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print(f"\033[1;33mexperimental feature: {func.__name__}\033[0m")
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @trace
@@ -305,4 +317,24 @@ def on_settings_update(
     """
 
     config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
+# Experimental
+@trace
+@experimental
+def on_create_assistant(
+    func: Callable[[Optional[User], AssistantSettings], Any]
+) -> Callable[[Optional[User], AssistantSettings], Any]:
+    config.code.on_create_assistant = wrap_user_function(func)
+    return func
+
+
+# Experimental
+@trace
+@experimental
+def on_list_assistants(
+    func: Callable[[Optional[User]], List[Assistant]]
+) -> Callable[[Optional[User]], List[Assistant]]:
+    config.code.on_list_assistants = wrap_user_function(func)
     return func

@@ -28,12 +28,12 @@ from ._utils import is_path_inside
 
 if TYPE_CHECKING:
     from chainlit.action import Action
+    from chainlit.assistant import Assistant
     from chainlit.element import ElementBased
     from chainlit.message import Message
     from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
-
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -285,9 +285,9 @@ class CodeSettings:
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
-    header_auth_callback: Optional[
-        Callable[[Headers], Awaitable[Optional["User"]]]
-    ] = None
+    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
+        None
+    )
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
@@ -305,9 +305,13 @@ class CodeSettings:
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
-    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
+
+    # assistant-related callback function
+    on_create_assistant: Optional[Callable[[Optional["User"], Any], Any]] = None
+    on_list_assistants: Optional[Callable[[Optional["User"]], List["Assistant"]]] = None
 
 
 @dataclass()

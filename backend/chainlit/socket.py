@@ -6,6 +6,7 @@ from typing import Any, Dict, Literal
 from urllib.parse import unquote
 
 from chainlit.action import Action
+from chainlit.assistant import Assistant
 from chainlit.auth import get_current_user, require_login
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -406,3 +407,51 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@sio.on("on_create_assistant")
+async def on_create_assistant(sid, options):
+    context = init_ws_context(sid)
+    logger.info(f"Received request to create assistant {options['settings_values']}")
+    if not options["settings_values"].get("id"):
+        options["settings_values"]["id"] = str(uuid.uuid4())
+    if not options["settings_values"].get("created_by"):
+        options["settings_values"]["created_by"] = context.session.user.identifier
+    logger.info(
+        f"Added id: {options['settings_values']['id']} and created_by: {options['settings_values']['created_by']} to the assistant options"
+    )
+    if config.code.on_create_assistant:
+        new_assistant = Assistant(
+            input_widgets=options["input_widgets"],
+            settings_values=options["settings_values"],
+        )
+        await config.code.on_create_assistant(context.session.user, new_assistant)
+        return new_assistant.to_dict()
+    logger.info("Assistant creation process completed")
+
+
+@sio.on("on_list_assistants")
+async def on_list_assistants(sid):
+    context = init_ws_context(sid)
+    if config.code.on_list_assistants:
+        assistants = await config.code.on_list_assistants(context.session.user)
+        return [assistant.to_dict() for assistant in assistants]
+
+
+@sio.on("select_assistant")
+async def select_assistant(sid, selected_assistant: Dict):
+    session = WebsocketSession.require(sid)
+
+    new_assistant = Assistant(
+        input_widgets=selected_assistant.get("input_widgets", []),
+        settings_values=selected_assistant.get("settings_values", {}),
+    )
+
+    session.selected_assistant = new_assistant
+
+    user_identifier = session.user.identifier if session.user else "Anonymous user"
+    logger.info(
+        f"{user_identifier} selected assistant {new_assistant.settings_values.get('name', 'Unknown')} for session with id {session.id}"
+    )
+
+    return new_assistant.to_dict()

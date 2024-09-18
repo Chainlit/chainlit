@@ -10,6 +10,7 @@ import io from 'socket.io-client';
 import {
   actionState,
   askUserState,
+  assistantSettingsInputsState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
@@ -65,7 +66,9 @@ const useChatSession = () => {
   const idToResume = useRecoilValue(threadIdToResumeState);
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
-
+  const setAssistantSettingsInputs = useSetRecoilState(
+    assistantSettingsInputsState
+  );
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {
     if (session?.socket) {
@@ -226,6 +229,10 @@ const useChatSession = () => {
       socket.on('chat_settings', (inputs: any) => {
         setChatSettingsInputs(inputs);
         resetChatSettingsValue();
+      });
+
+      socket.on('assistant_settings', (inputs: any) => {
+        setAssistantSettingsInputs(inputs);
       });
 
       socket.on('element', (element: IElement) => {
