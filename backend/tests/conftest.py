@@ -5,6 +5,7 @@ import pytest
 import pytest_asyncio
 from chainlit.context import ChainlitContext, context_var
 from chainlit.session import HTTPSession, WebsocketSession
+from chainlit.user import PersistedUser
 from chainlit.user_session import UserSession
 
 
@@ -14,13 +15,16 @@ async def create_chainlit_context():
     mock_session.id = "test_session_id"
     mock_session.user_env = {"test_env": "value"}
     mock_session.chat_settings = {}
-    mock_session.user = None
+    mock_user = Mock(spec=PersistedUser)
+    mock_user.id = "test_user_id"
+    mock_session.user = mock_user
     mock_session.chat_profile = None
     mock_session.http_referer = None
     mock_session.client_type = "webapp"
     mock_session.languages = ["en"]
     mock_session.thread_id = "test_thread_id"
     mock_session.emit = AsyncMock()
+    mock_session.has_first_interaction = True
 
     context = ChainlitContext(mock_session)
     token = context_var.set(context)
