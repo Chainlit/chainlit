@@ -68,6 +68,7 @@ plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
@@ -102,6 +103,7 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
+
 
 
 
