@@ -6,7 +6,7 @@ To contribute to Chainlit, you first need to setup the project on your local mac
 
 <!--
 Generated using https://ecotrust-canada.github.io/markdown-toc/.
-I've copy/pasted the whole document there, without the previous two headings.
+I've copy/pasted the whole document there, and then formatted it with prettier.
 -->
 
 - [Contribute to Chainlit](#contribute-to-chainlit)
@@ -37,11 +37,11 @@ I've copy/pasted the whole document there, without the previous two headings.
 
 With this setup you can easily code in your fork and fetch updates from the main repository.
 
-1. Go to https://github.com/Chainlit/chainlit/fork to fork the chainlit code into your own repository.
+1. Go to [https://github.com/Chainlit/chainlit/fork](https://github.com/Chainlit/chainlit/fork) to fork the chainlit code into your own repository.
 2. Clone your fork locally
 
 ```sh
-$ git clone https://github.com/YOUR_USERNAME/YOUR_FORK.git
+git clone https://github.com/YOUR_USERNAME/YOUR_FORK.git
 ```
 
 3. Go into your fork and list the current configured remote repository.
@@ -55,7 +55,7 @@ $ git remote -v
 4. Specify the new remote upstream repository that will be synced with the fork.
 
 ```sh
-$ git remote add upstream https://github.com/Chainlit/chainlit.git
+git remote add upstream https://github.com/Chainlit/chainlit.git
 ```
 
 5. Verify the new upstream repository you've specified for your fork.
@@ -103,7 +103,7 @@ If you've made it this far, you can now replace `chainlit/hello.py` by your own 
 
 ## Start the UI from source
 
-First, you will have to start the server either [from source](#start-the-chainlit-server-from-source) or with `chainlit run... `. Since we are starting the UI from source, you can start the server with the `-h` (headless) option.
+First, you will have to start the server either [from source](#start-the-chainlit-server-from-source) or with `chainlit run...`. Since we are starting the UI from source, you can start the server with the `-h` (headless) option.
 
 Then, start the UI.
 

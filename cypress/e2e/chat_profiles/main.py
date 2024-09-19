@@ -30,7 +30,7 @@ async def chat_profile(current_user: cl.User):
         ),
         cl.ChatProfile(
             name="GPT-4",
-            markdown_description="The underlying LLM model is **GPT-4**, a *1.5T parameter model* trained on 3.5TB of text data.",
+            markdown_description="The underlying LLM model is **GPT-4**, a *1.5T parameter model* trained on 3.5TB of text data. [Learn more](https://example.com/gpt4)",
             icon="https://picsum.photos/250",
             starters=starters,
         ),

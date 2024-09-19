@@ -79,11 +79,19 @@ const Messages = memo(
             // Score the current run
             const _scorableRun = m.type === 'run' ? m : scorableRun;
             // The message is scorable if it is the last assistant message of the run
-            const isScorable =
+
+            const isRunLastAssistantMessage =
               m ===
               _scorableRun?.steps?.findLast(
                 (_m) => _m.type === 'assistant_message'
               );
+
+            const isLastAssistantMessage =
+              messages.findLast((_m) => _m.type === 'assistant_message') === m;
+
+            const isScorable =
+              isRunLastAssistantMessage || isLastAssistantMessage;
+
             return (
               <Message
                 message={m}

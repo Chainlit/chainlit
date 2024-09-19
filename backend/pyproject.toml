@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.1.403rc0"
+version = "1.2.0"
 keywords = [
     'LLM',
     'Agents',
@@ -28,8 +28,8 @@ chainlit = 'chainlit.cli:cli'
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.0.607"
-dataclasses_json = "^0.5.7"
-fastapi = "^0.110.1"
+dataclasses_json = "^0.6.7"
+fastapi = ">=0.110.1,<0.113"
 starlette = "^0.37.2"
 uvicorn = "^0.25.0"
 python-socketio = "^5.11.0"
@@ -68,6 +68,7 @@ plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
@@ -102,6 +103,9 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
+
+
+
 
 
 [tool.poetry.group.custom-data]

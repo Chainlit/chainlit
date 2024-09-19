@@ -65,7 +65,7 @@ class Element:
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     # The key of the element hosted on Chainlit.
     chainlit_key: Optional[str] = None
-    # The URL of the element if already hosted somehwere else.
+    # The URL of the element if already hosted somewhere else.
     url: Optional[str] = None
     # The S3 object key.
     object_key: Optional[str] = None

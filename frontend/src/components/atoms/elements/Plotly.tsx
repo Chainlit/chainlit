@@ -18,7 +18,7 @@ const _PlotlyElement = ({ element }: Props) => {
   if (isLoading) {
     return <div>Loading...</div>;
   } else if (error) {
-    return <div>An error occured</div>;
+    return <div>An error occurred</div>;
   }
 
   let state;

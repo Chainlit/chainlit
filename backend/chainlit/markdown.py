@@ -1,6 +1,10 @@
 import os
+from pathlib import Path
+from typing import Optional
 
 from chainlit.logger import logger
+
+from ._utils import is_path_inside
 
 # Default chainlit.md file created if none exists
 DEFAULT_MARKDOWN_STR = """# Welcome to Chainlit! 🚀🤖
@@ -30,12 +34,16 @@ def init_markdown(root: str):
             logger.info(f"Created default chainlit markdown file at {chainlit_md_file}")
 
 
-def get_markdown_str(root: str, language: str):
+def get_markdown_str(root: str, language: str) -> Optional[str]:
     """Get the chainlit.md file as a string."""
-    translated_chainlit_md_path = os.path.join(root, f"chainlit_{language}.md")
-    default_chainlit_md_path = os.path.join(root, "chainlit.md")
+    root_path = Path(root)
+    translated_chainlit_md_path = root_path / f"chainlit_{language}.md"
+    default_chainlit_md_path = root_path / "chainlit.md"
 
-    if os.path.exists(translated_chainlit_md_path):
+    if (
+        is_path_inside(translated_chainlit_md_path, root_path)
+        and translated_chainlit_md_path.is_file()
+    ):
         chainlit_md_path = translated_chainlit_md_path
     else:
         chainlit_md_path = default_chainlit_md_path
@@ -43,9 +51,7 @@ def get_markdown_str(root: str, language: str):
             f"Translated markdown file for {language} not found. Defaulting to chainlit.md."
         )
 
-    if os.path.exists(chainlit_md_path):
-        with open(chainlit_md_path, "r", encoding="utf-8") as f:
-            chainlit_md = f.read()
-            return chainlit_md
+    if chainlit_md_path.is_file():
+        return chainlit_md_path.read_text(encoding="utf-8")
     else:
         return None

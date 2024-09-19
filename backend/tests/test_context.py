@@ -9,17 +9,7 @@ from chainlit.context import (
     init_ws_context,
 )
 from chainlit.emitter import BaseChainlitEmitter, ChainlitEmitter
-from chainlit.session import HTTPSession, WebsocketSession
-
-
-@pytest.fixture
-def mock_websocket_session():
-    return Mock(spec=WebsocketSession)
-
-
-@pytest.fixture
-def mock_http_session():
-    return Mock(spec=HTTPSession)
+from chainlit.session import HTTPSession
 
 
 @pytest.fixture

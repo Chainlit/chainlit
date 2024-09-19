@@ -392,7 +392,7 @@ async def call_action(sid, action):
     except Exception as e:
         logger.exception(e)
         await context.emitter.send_action_response(
-            id=action.id, status=False, response="An error occured"
+            id=action.id, status=False, response="An error occurred"
         )
 
 

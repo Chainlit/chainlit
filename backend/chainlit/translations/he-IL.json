@@ -1,0 +1,231 @@
+{
+  "components": {
+    "atoms": {
+      "buttons": {
+        "userButton": {
+          "menu": {
+            "settings": "הגדרות",
+            "settingsKey": "S",
+            "APIKeys": "API Keys",
+            "logout": "התנתק"
+          }
+        }
+      }
+    },
+    "molecules": {
+      "newChatButton": {
+        "newChat": "צ'אט חדש"
+      },
+      "tasklist": {
+        "TaskList": {
+          "title": "\ud83d\uddd2\ufe0f Task List",
+          "loading": "טוען...",
+          "error": "שגיאה"
+        }
+      },
+      "attachments": {
+        "cancelUpload": "בטל העלאה",
+        "removeAttachment": "הסר קובץ מצורף"
+      },
+      "newChatDialog": {
+        "createNewChat": "צור צ'אט חדש?",
+        "clearChat": "פעולה זו תנקה את ההודעות הנוכחיות ותתחיל צ'אט חדש.",
+        "cancel": "בטל",
+        "confirm": "אשר"
+      },
+      "settingsModal": {
+        "settings": "הגדרות",
+        "expandMessages": "הרחב הודעות",
+        "hideChainOfThought": "הסתר שרשרת מחשבות",
+        "darkMode": "מצב כהה"
+      },
+      "detailsButton": {
+        "using": "משתמש ב-",
+        "running": "רץ",
+        "took_one": "לקח צעד {{count}}",
+        "took_other": "לקח צעדים {{count}}"
+      },
+      "auth": {
+        "authLogin": {
+          "title": "התחבר כדי לגשת לאפליקציה.",
+          "form": {
+            "email": "כתובת אימייל",
+            "password": "סיסמא",
+            "noAccount": "אין לך חשבון?",
+            "alreadyHaveAccount": "כבר יש לך חשבון?",
+            "signup": "הירשם",
+            "signin": "היכנס",
+            "or": "או",
+            "continue": "המשך",
+            "forgotPassword": "שכחת סיסמה?",
+            "passwordMustContain": "הסיסמה שלך חייבת להכיל:",
+            "emailRequired": "אימייל הוא שדה חובה",
+            "passwordRequired": "סיסמה היא שדה חובה"
+          },
+          "error": {
+            "default": "לא ניתן להיכנס.",
+            "signin": "נסה להיכנס עם חשבון אחר.",
+            "oauthsignin": "נסה להיכנס עם חשבון אחר.",
+            "redirect_uri_mismatch": "כתובת ה-URI להפניה אינה תואמת לתצורת האפליקציה של oauth.",
+            "oauthcallbackerror": "נסה להיכנס עם חשבון אחר.",
+            "oauthcreateaccount": "נסה להיכנס עם חשבון אחר.",
+            "emailcreateaccount": "נסה להיכנס עם חשבון אחר.",
+            "callback": "נסה להיכנס עם חשבון אחר.",
+            "oauthaccountnotlinked": "כדי לאשר את זהותך, היכנס עם אותו חשבון שבו השתמשת במקור.",
+            "emailsignin": "לא ניתן לשלוח את האימייל.",
+            "emailverify": "אנא אשר את האימייל שלך, אימייל חדש נשלח.",
+            "credentialssignin": "הכניסה נכשלה. בדוק שהפרטים שסיפקת נכונים.",
+            "sessionrequired": "אנא היכנס כדי לגשת לדף זה."
+          }
+        },
+        "authVerifyEmail": {
+          "almostThere": "אתה כמעט שם! שלחנו אימייל אל ",
+          "verifyEmailLink": "אנא לחץ על הקישור באימייל זה כדי להשלים את ההרשמה שלך.",
+          "didNotReceive": "לא מוצא את האימייל?",
+          "resendEmail": "שלח שוב אימייל",
+          "goBack": "חזור אחורה",
+          "emailSent": "האימייל נשלח בהצלחה.",
+          "verifyEmail": "אמת את כתובת האימייל שלך"
+        },
+        "providerButton": {
+          "continue": "המשך עם {{provider}}",
+          "signup": "הירשם עם {{provider}}"
+        },
+        "authResetPassword": {
+          "newPasswordRequired": "סיסמה חדשה היא שדה חובה",
+          "passwordsMustMatch": "הסיסמאות חייבות להתאים",
+          "confirmPasswordRequired": "אישור סיסמה הוא שדה חובה",
+          "newPassword": "סיסמא חדשה",
+          "confirmPassword": "אשר סיסמא",
+          "resetPassword": "אפס סיסמה"
+        },
+        "authForgotPassword": {
+          "email": "כתובת אימייל",
+          "emailRequired": "אימייל הוא שדה חובה",
+          "emailSent": "אנא בדוק את כתובת האימייל {{email}} לקבלת הוראות לאיפוס הסיסמה שלך.",
+          "enterEmail": "הזן את כתובת האימייל שלך ואנו נשלח לך הוראות לאיפוס הסיסמה שלך.",
+          "resendEmail": "שלח שוב אימייל",
+          "continue": "המשך",
+          "goBack": "חזור אחורה"
+        }
+      }
+    },
+    "organisms": {
+      "chat": {
+        "history": {
+          "index": {
+            "showHistory": "הצג היסטוריה",
+            "lastInputs": "קלט אחרון",
+            "noInputs": "ריק...",
+            "loading": "טוען..."
+          }
+        },
+        "inputBox": {
+          "input": {
+            "placeholder": "כתוב הודעה כאן..."
+          },
+          "speechButton": {
+            "start": "התחל הקלטה",
+            "stop": "עצור הקלטה"
+          },
+          "SubmitButton": {
+            "sendMessage": "שלח הודעה",
+            "stopTask": "עצור משימה"
+          },
+          "UploadButton": {
+            "attachFiles": "צרף קבצים"
+          },
+          "waterMark": {
+            "text": "נבנה עם"
+          }
+        },
+        "Messages": {
+          "index": {
+            "running": "רץ",
+            "executedSuccessfully": "בוצע בהצלחה",
+            "failed": "נכשל",
+            "feedbackUpdated": "משוב עודכן",
+            "updating": "מעדכן"
+          }
+        },
+        "dropScreen": {
+          "dropYourFilesHere": "שחרר את הקבצים שלך כאן"
+        },
+        "index": {
+          "failedToUpload": "העלאה נכשלה",
+          "cancelledUploadOf": "העלאה של בוטלה",
+          "couldNotReachServer": "לא ניתן היה להגיע לשרת",
+          "continuingChat": "ממשיך בצ'אט הקודם"
+        },
+        "settings": {
+          "settingsPanel": "לוח הגדרות",
+          "reset": "אפס",
+          "cancel": "בטל",
+          "confirm": "אשר"
+        }
+      },
+      "threadHistory": {
+        "sidebar": {
+          "filters": {
+            "FeedbackSelect": {
+              "feedbackAll": "משוב: הכל",
+              "feedbackPositive": "משוב: חיובי",
+              "feedbackNegative": "משוב: שלילי"
+            },
+            "SearchBar": {
+              "search": "חיפוש"
+            }
+          },
+          "DeleteThreadButton": {
+            "confirmMessage": "פעולה זו תמחק את השרשור וכן את ההודעות והרכיבים שלו.",
+            "cancel": "בטל",
+            "confirm": "אשר",
+            "deletingChat": "מוחק צ'אט",
+            "chatDeleted": "הצ'אט נמחק"
+          },
+          "index": {
+            "pastChats": "צ'אטים קודמים"
+          },
+          "ThreadList": {
+            "empty": "ריק...",
+            "today": "היום",
+            "yesterday": "אתמול",
+            "previous7days": "7 ימים קודמים",
+            "previous30days": "30 ימים קודמים"
+          },
+          "TriggerButton": {
+            "closeSidebar": "סגור סרגל צד",
+            "openSidebar": "פתח סרגל צד"
+          }
+        },
+        "Thread": {
+          "backToChat": "חזור לצ'אט",
+          "chatCreatedOn": "הצ'אט הזה נוצר בתאריך"
+        }
+      },
+      "header": {
+        "chat": "צ'אט",
+        "readme": "אודות"
+      }
+    }
+  },
+  "hooks": {
+    "useLLMProviders": {
+      "failedToFetchProviders": "נכשלה הבאת ספקים:"
+    }
+  },
+  "pages": {
+    "Design": {},
+    "Env": {
+      "savedSuccessfully": "נשמר בהצלחה",
+      "requiredApiKeys": "מפתחות API נדרשים",
+      "requiredApiKeysInfo": "כדי להשתמש באפליקציה זו, נדרשים מפתחות ה-API הבאים. המפתחות מאוחסנים באחסון המקומי של המכשיר שלך."
+    },
+    "Page": {
+      "notPartOfProject": "אתה לא חלק מהפרויקט הזה."
+    },
+    "ResumeButton": {
+      "resumeChat": "המשך צ'אט"
+    }
+  }
+}

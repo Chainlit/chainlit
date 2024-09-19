@@ -2,22 +2,22 @@ name: Mypy
 
 on: [workflow_call]
 
+permissions: read-all
+
 jobs:
   mypy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
+    env:
+      BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
         with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install dependencies
-        run: poetry install --with tests --with mypy --with custom-data
+          python-version: 3.9
+          poetry-version: 1.8.3
+          poetry-install-args: --with tests --with mypy --with custom-data
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
       - name: Run Mypy
         run: poetry run mypy chainlit/
+        working-directory: ${{ env.BACKEND_DIR }}

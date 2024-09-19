@@ -14,7 +14,6 @@ describeSyncAsync('Stop task', (mode) => {
     cy.get('#stop-button').should('exist').click();
     cy.get('#stop-button').should('not.exist');
 
-    cy.wait(1000);
     cy.get('.step').should('have.length', 3);
     cy.get('.step').last().should('contain.text', 'Task manually stopped.');
   });

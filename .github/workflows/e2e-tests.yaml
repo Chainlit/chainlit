@@ -2,37 +2,35 @@ name: E2ETests
 
 on: [workflow_call]
 
+permissions: read-all
+
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+    env:
+      BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
         with:
-          version: 8.6.9
-      - name: Use Node.js 16.15.0
-        uses: actions/setup-node@v3
+          python-version: 3.9
+          poetry-version: 1.8.3
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
+          poetry-install-args: --with tests
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
         with:
-          node-version: '16.15.0'
-          cache: 'pnpm'
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install JS dependencies
-        run: pnpm install --no-frozen-lockfile
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
       - name: Build UI
         run: pnpm run buildUi
       - name: Lint UI
         run: pnpm run lintUi
-      - name: Install Python dependencies
-        run: poetry install -C ./backend --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

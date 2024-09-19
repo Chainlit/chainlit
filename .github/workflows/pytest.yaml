@@ -2,22 +2,37 @@ name: Pytest
 
 on: [workflow_call]
 
+permissions: read-all
+
 jobs:
-  mypy:
+  pytest:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        fastapi-version: ['0.110', '0.111', '0.112']
+    env:
+      BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
         with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install dependencies
-        run: poetry install --with tests --with mypy --with custom-data
+          python-version: ${{ matrix.python-version }}
+          poetry-version: 1.8.3
+          poetry-install-args: --with tests --with mypy --with custom-data
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
+      - name: Install fastapi ${{ matrix.fastapi-version }}
+        run: poetry add fastapi@^${{ matrix.fastapi-version}}
+        working-directory: ${{ env.BACKEND_DIR }}
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+        with:
+          node-version: 22.7.0
+          pnpm-version: 9.7.0
+          pnpm-install-args: --no-frozen-lockfile
+      - name: Build UI
+        run: pnpm run buildUi
       - name: Run Pytest
         run: poetry run pytest --cov=chainlit/
+        working-directory: ${{ env.BACKEND_DIR }}

@@ -1,11 +1,14 @@
 name: CI
 
 on:
+  workflow_call:
   workflow_dispatch:
   pull_request:
     branches: [main, dev]
   push:
     branches: [main, dev]
+
+permissions: read-all
 
 jobs:
   pytest:
@@ -22,5 +25,5 @@ jobs:
     name: Run CI
     needs: [mypy, pytest, e2e-tests]
     steps:
-      - name: 'Done'
+      - name: Done
         run: echo "Done"

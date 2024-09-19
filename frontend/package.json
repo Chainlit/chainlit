@@ -11,7 +11,7 @@
     "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error",
     "test": "vitest run",
-    "prepublish": "pnpm run build && pnpm test"
+    "prepublishOnly": "pnpm run build && pnpm test"
   },
   "dependencies": {
     "@chainlit/react-client": "workspace:^",

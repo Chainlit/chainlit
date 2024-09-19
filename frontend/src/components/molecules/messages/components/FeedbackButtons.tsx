@@ -7,7 +7,11 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { firstUserInteraction, useChatSession } from '@chainlit/react-client';
+import {
+  firstUserInteraction,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
@@ -30,6 +34,7 @@ interface Props {
 }
 
 const FeedbackButtons = ({ message }: Props) => {
+  const config = useConfig();
   const { onFeedbackUpdated, onFeedbackDeleted } = useContext(MessageContext);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
@@ -38,6 +43,10 @@ const FeedbackButtons = ({ message }: Props) => {
 
   const [feedback, setFeedback] = useState(message.feedback?.value);
   const [comment, setComment] = useState(message.feedback?.comment);
+
+  if (!config.config?.dataPersistence) {
+    return null;
+  }
 
   const DownIcon = feedback === 0 ? ThumbDownFilledIcon : ThumbDownIcon;
   const UpIcon = feedback === 1 ? ThumbUpFilledIcon : ThumbUpIcon;
@@ -114,7 +123,7 @@ const FeedbackButtons = ({ message }: Props) => {
             <IconButton
               color="inherit"
               disabled={disabled}
-              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
+              className={`negative-feedback-${feedback === 0 ? 'on' : 'off'}`}
               onClick={() => {
                 handleFeedbackClick(0);
               }}

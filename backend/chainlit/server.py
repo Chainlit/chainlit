@@ -1,22 +1,15 @@
+import asyncio
 import glob
 import json
 import mimetypes
+import os
 import re
 import shutil
 import urllib.parse
-from typing import Any, Optional, Union
-
-from chainlit.oauth_providers import get_oauth_provider
-from chainlit.secret import random_secret
-
-mimetypes.add_type("application/javascript", ".js")
-mimetypes.add_type("text/css", ".css")
-
-import asyncio
-import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any, Optional, Union
 
 import socketio
 from chainlit.auth import create_jwt, get_configuration, get_current_user
@@ -34,6 +27,8 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
+from chainlit.oauth_providers import get_oauth_provider
+from chainlit.secret import random_secret
 from chainlit.types import (
     DeleteFeedbackRequest,
     DeleteThreadRequest,
@@ -62,12 +57,20 @@ from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
 
+from ._utils import is_path_inside
+
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
+
 ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
 IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
+# If the app is a submount, no need to set the prefix
+PREFIX = ROOT_PATH if ROOT_PATH and not IS_SUBMOUNT else ""
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Context manager to handle app start and shutdown."""
     host = config.run.host
     port = config.run.port
 
@@ -150,7 +153,18 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir(local_target: str, packaged_target: str):
+def get_build_dir(local_target: str, packaged_target: str) -> str:
+    """
+    Get the build directory based on the UI build strategy.
+
+    Args:
+        local_target (str): The local target directory.
+        packaged_target (str): The packaged target directory.
+
+    Returns:
+        str: The build directory
+    """
+
     local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
     packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
 
@@ -171,18 +185,14 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
-sio = socketio.AsyncServer(
-    cors_allowed_origins=[], async_mode="asgi"
-)
-
-sio_mount_location = f"{ROOT_PATH}/ws" if ROOT_PATH else "ws"
+sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
 asgi_app = socketio.ASGIApp(
     socketio_server=sio,
-    socketio_path=f"{sio_mount_location}/socket.io",
+    socketio_path="",
 )
 
-app.mount(f"/{sio_mount_location}", asgi_app)
+app.mount(f"{PREFIX}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -192,16 +202,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter(prefix=ROOT_PATH)
+router = APIRouter(prefix=PREFIX)
 
 app.mount(
-    f"{ROOT_PATH}/public",
+    f"{PREFIX}/public",
     StaticFiles(directory="public", check_dir=False),
     name="public",
 )
 
 app.mount(
-    f"{ROOT_PATH}/assets",
+    f"{PREFIX}/assets",
     StaticFiles(
         packages=[("chainlit", os.path.join(build_dir, "assets"))],
         follow_symlink=config.project.follow_symlink,
@@ -210,7 +220,7 @@ app.mount(
 )
 
 app.mount(
-    f"{ROOT_PATH}/copilot",
+    f"{PREFIX}/copilot",
     StaticFiles(
         packages=[("chainlit", copilot_build_dir)],
         follow_symlink=config.project.follow_symlink,
@@ -253,12 +263,19 @@ if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
 # -------------------------------------------------------------------------------
 
 
-def replace_between_tags(text: str, start_tag: str, end_tag: str, replacement: str):
+def replace_between_tags(
+    text: str, start_tag: str, end_tag: str, replacement: str
+) -> str:
+    """Replace text between two tags in a string."""
+
     pattern = start_tag + ".*?" + end_tag
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
 def get_html_template():
+    """
+    Get HTML template for the index view.
+    """
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -345,6 +362,9 @@ async def auth(request: Request):
 
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login a user using the password auth callback.
+    """
     if not config.code.password_auth_callback:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No auth_callback defined"
@@ -374,6 +394,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.post("/logout")
 async def logout(request: Request, response: Response):
+    """Logout the user by calling the on_logout callback."""
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
     return {"success": True}
@@ -381,6 +402,7 @@ async def logout(request: Request, response: Response):
 
 @router.post("/auth/header")
 async def header_auth(request: Request):
+    """Login a user using the header_auth_callback."""
     if not config.code.header_auth_callback:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -410,6 +432,7 @@ async def header_auth(request: Request):
 
 @router.get("/auth/oauth/{provider_id}")
 async def oauth_login(provider_id: str, request: Request):
+    """Redirect the user to the oauth provider login page."""
     if config.code.oauth_callback is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -436,7 +459,7 @@ async def oauth_login(provider_id: str, request: Request):
     response = RedirectResponse(
         url=f"{provider.authorize_url}?{params}",
     )
-    samesite = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")  # type: Any
+    samesite: Any = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")
     secure = samesite.lower() == "none"
     response.set_cookie(
         "oauth_state",
@@ -457,6 +480,8 @@ async def oauth_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
 ):
+    """Handle the oauth callback and login the user."""
+
     if config.code.oauth_callback is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -544,6 +569,8 @@ async def oauth_azure_hf_callback(
     code: Annotated[Optional[str], Form()] = None,
     id_token: Annotated[Optional[str], Form()] = None,
 ):
+    """Handle the azure ad hybrid flow callback and login the user."""
+
     provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:
         raise HTTPException(
@@ -617,9 +644,16 @@ async def oauth_azure_hf_callback(
     return response
 
 
+_language_pattern = (
+    "^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?(-[a-zA-Z]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+)
+
+
 @router.get("/project/translations")
 async def project_translations(
-    language: str = Query(default="en-US", description="Language code"),
+    language: str = Query(
+        default="en-US", description="Language code", pattern=_language_pattern
+    ),
 ):
     """Return project translations."""
 
@@ -636,11 +670,14 @@ async def project_translations(
 @router.get("/project/settings")
 async def project_settings(
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
-    language: str = Query(default="en-US", description="Language code"),
+    language: str = Query(
+        default="en-US", description="Language code", pattern=_language_pattern
+    ),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
     # Load the markdown file based on the provided language
+
     markdown = get_markdown_str(config.root, language)
 
     profiles = []
@@ -808,6 +845,8 @@ async def upload_file(
         Union[None, User, PersistedUser], Depends(get_current_user)
     ],
 ):
+    """Upload a file to the session files directory."""
+
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id)
@@ -841,6 +880,8 @@ async def get_file(
     file_id: str,
     session_id: Optional[str] = None,
 ):
+    """Get a file from the session files directory."""
+
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id) if session_id else None
@@ -863,11 +904,12 @@ async def serve_file(
     filename: str,
     current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
+    """Serve a file from the local filesystem."""
+
     base_path = Path(config.project.local_fs_path).resolve()
     file_path = (base_path / filename).resolve()
 
-    # Check if the base path is a parent of the file path
-    if base_path not in file_path.parents:
+    if not is_path_inside(file_path, base_path):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     if file_path.is_file():
@@ -878,6 +920,7 @@ async def serve_file(
 
 @router.get("/favicon")
 async def get_favicon():
+    """Get the favicon for the UI."""
     custom_favicon_path = os.path.join(APP_ROOT, "public", "favicon.*")
     files = glob.glob(custom_favicon_path)
 
@@ -893,6 +936,7 @@ async def get_favicon():
 
 @router.get("/logo")
 async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
+    """Get the default logo for the UI."""
     theme_value = theme.value if theme else Theme.light.value
     logo_path = None
 
@@ -908,32 +952,42 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 
     if not logo_path:
         raise HTTPException(status_code=404, detail="Missing default logo")
+
     media_type, _ = mimetypes.guess_type(logo_path)
 
     return FileResponse(logo_path, media_type=media_type)
 
 
-@router.get("/avatars/{avatar_id}")
+@router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
+    """Get the avatar for the user based on the avatar_id."""
+    if not re.match(r"^[a-zA-Z0-9_-]+$", avatar_id):
+        raise HTTPException(status_code=400, detail="Invalid avatar_id")
+
     if avatar_id == "default":
         avatar_id = config.ui.name
 
     avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
-    avatar_path = os.path.join(APP_ROOT, "public", "avatars", f"{avatar_id}.*")
+    base_path = Path(APP_ROOT) / "public" / "avatars"
+    avatar_pattern = f"{avatar_id}.*"
 
-    files = glob.glob(avatar_path)
+    matching_files = base_path.glob(avatar_pattern)
 
-    if files:
-        avatar_path = files[0]
-        media_type, _ = mimetypes.guess_type(avatar_path)
+    if avatar_path := next(matching_files, None):
+        if not is_path_inside(avatar_path, base_path):
+            raise HTTPException(status_code=400, detail="Invalid filename")
+
+        media_type, _ = mimetypes.guess_type(str(avatar_path))
+
         return FileResponse(avatar_path, media_type=media_type)
-    else:
-        return await get_favicon()
+
+    return await get_favicon()
 
 
 @router.head("/")
 def status_check():
+    """Check if the site is operational."""
     return {"message": "Site is operational"}
 
 

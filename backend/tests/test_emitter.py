@@ -1,23 +1,19 @@
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from chainlit.emitter import ChainlitEmitter
 from chainlit.element import ElementDict
+from chainlit.emitter import ChainlitEmitter
 from chainlit.step import StepDict
 
 
 @pytest.fixture
-def mock_session():
-    session = MagicMock()
-    session.emit = AsyncMock()
-    return session
+def emitter(mock_websocket_session):
+    return ChainlitEmitter(mock_websocket_session)
 
 
-@pytest.fixture
-def emitter(mock_session):
-    return ChainlitEmitter(mock_session)
-
-
-async def test_send_element(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_send_element(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     element_dict: ElementDict = {
         "id": "test_element",
         "threadId": None,
@@ -33,15 +29,17 @@ async def test_send_element(emitter: ChainlitEmitter, mock_session: MagicMock) -
         "autoPlay": None,
         "playerConfig": None,
         "forId": None,
-        "mime": None
+        "mime": None,
     }
 
     await emitter.send_element(element_dict)
 
-    mock_session.emit.assert_called_once_with("element", element_dict)
+    mock_websocket_session.emit.assert_called_once_with("element", element_dict)
 
 
-async def test_send_step(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_send_step(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     step_dict: StepDict = {
         "id": "test_step",
         "type": "user_message",
@@ -51,10 +49,12 @@ async def test_send_step(emitter: ChainlitEmitter, mock_session: MagicMock) -> N
 
     await emitter.send_step(step_dict)
 
-    mock_session.emit.assert_called_once_with("new_message", step_dict)
+    mock_websocket_session.emit.assert_called_once_with("new_message", step_dict)
 
 
-async def test_update_step(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_update_step(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     step_dict: StepDict = {
         "id": "test_step",
         "type": "assistant_message",
@@ -64,10 +64,12 @@ async def test_update_step(emitter: ChainlitEmitter, mock_session: MagicMock) ->
 
     await emitter.update_step(step_dict)
 
-    mock_session.emit.assert_called_once_with("update_message", step_dict)
+    mock_websocket_session.emit.assert_called_once_with("update_message", step_dict)
 
 
-async def test_delete_step(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_delete_step(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     step_dict: StepDict = {
         "id": "test_step",
         "type": "system_message",
@@ -77,57 +79,61 @@ async def test_delete_step(emitter: ChainlitEmitter, mock_session: MagicMock) ->
 
     await emitter.delete_step(step_dict)
 
-    mock_session.emit.assert_called_once_with("delete_message", step_dict)
+    mock_websocket_session.emit.assert_called_once_with("delete_message", step_dict)
 
 
-async def test_send_timeout(emitter, mock_session):
+async def test_send_timeout(emitter, mock_websocket_session):
     await emitter.send_timeout("ask_timeout")
-    mock_session.emit.assert_called_once_with("ask_timeout", {})
+    mock_websocket_session.emit.assert_called_once_with("ask_timeout", {})
 
 
-async def test_clear(emitter, mock_session):
+async def test_clear(emitter, mock_websocket_session):
     await emitter.clear("clear_ask")
-    mock_session.emit.assert_called_once_with("clear_ask", {})
+    mock_websocket_session.emit.assert_called_once_with("clear_ask", {})
 
 
-async def test_send_token(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_send_token(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     await emitter.send_token("test_id", "test_token", is_sequence=True, is_input=False)
-    mock_session.emit.assert_called_once_with(
+    mock_websocket_session.emit.assert_called_once_with(
         "stream_token",
         {"id": "test_id", "token": "test_token", "isSequence": True, "isInput": False},
     )
 
 
-async def test_set_chat_settings(emitter, mock_session):
+async def test_set_chat_settings(emitter, mock_websocket_session):
     settings = {"key": "value"}
     emitter.set_chat_settings(settings)
     assert emitter.session.chat_settings == settings
 
 
-async def test_send_action_response(emitter, mock_session):
+async def test_send_action_response(emitter, mock_websocket_session):
     await emitter.send_action_response("test_id", True, "Success")
-    mock_session.emit.assert_called_once_with(
+    mock_websocket_session.emit.assert_called_once_with(
         "action_response", {"id": "test_id", "status": True, "response": "Success"}
     )
 
 
-async def test_update_token_count(emitter, mock_session):
+async def test_update_token_count(emitter, mock_websocket_session):
     count = 100
     await emitter.update_token_count(count)
-    mock_session.emit.assert_called_once_with("token_usage", count)
+    mock_websocket_session.emit.assert_called_once_with("token_usage", count)
 
 
-async def test_task_start(emitter, mock_session):
+async def test_task_start(emitter, mock_websocket_session):
     await emitter.task_start()
-    mock_session.emit.assert_called_once_with("task_start", {})
+    mock_websocket_session.emit.assert_called_once_with("task_start", {})
 
 
-async def test_task_end(emitter, mock_session):
+async def test_task_end(emitter, mock_websocket_session):
     await emitter.task_end()
-    mock_session.emit.assert_called_once_with("task_end", {})
+    mock_websocket_session.emit.assert_called_once_with("task_end", {})
 
 
-async def test_stream_start(emitter: ChainlitEmitter, mock_session: MagicMock) -> None:
+async def test_stream_start(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
     step_dict: StepDict = {
         "id": "test_stream",
         "type": "run",
@@ -135,4 +141,4 @@ async def test_stream_start(emitter: ChainlitEmitter, mock_session: MagicMock) -
         "output": "This is a test stream",
     }
     await emitter.stream_start(step_dict)
-    mock_session.emit.assert_called_once_with("stream_start", step_dict)
+    mock_websocket_session.emit.assert_called_once_with("stream_start", step_dict)
