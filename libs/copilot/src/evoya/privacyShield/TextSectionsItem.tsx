@@ -49,9 +49,11 @@ const TextSectionsItem = ({ section, isActive, setActive, toggleAnon, setEdit }:
         color={style}
         variant={isActive ? "filled" : "outlined"}
         size="small"
-        onClick={click}
-        onDelete={edit}
-        deleteIcon={<EditOutlined />}
+        {...(section.isLocked ? {} : {
+          onClick: click,
+          onDelete:edit,
+          deleteIcon: <EditOutlined />
+        })}
         sx={(theme) => ({
           border: `1px solid ${theme.palette[style].main}`,
           '&:hover': {
@@ -70,9 +72,11 @@ const TextSectionsItem = ({ section, isActive, setActive, toggleAnon, setEdit }:
             visibility: 'hidden',
             marginRight: '4px'
           },
-          '.MuiChip-label': {
-            transform: 'translateX(8px)'
-          }
+          ...(section.isLocked ? {} : {
+            '.MuiChip-label': {
+              transform: 'translateX(8px)'
+            }
+          })
         })}
       />
     </Box>

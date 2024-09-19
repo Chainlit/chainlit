@@ -47,7 +47,6 @@ const InputBox = memo(
 
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
-        console.error(msg);
         const message: IStep = {
           threadId: '',
           id: uuidv4(),

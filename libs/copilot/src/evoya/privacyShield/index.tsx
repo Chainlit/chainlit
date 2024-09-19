@@ -9,6 +9,8 @@ import Telegram from '@mui/icons-material/Telegram';
 import { usePrivacyShield } from './usePrivacyShield';
 import TextSections from './TextSections';
 
+import { Translator } from '@chainlit/app/src/components/i18n';
+
 interface Props {
   submit: (text: string) => void;
 }
@@ -19,6 +21,8 @@ const PrivacyShieldOverlay = ({ submit }: Props): JSX.Element => {
     loading,
     setOpen,
     anonText,
+    lockSections,
+    resetSections,
   } = usePrivacyShield();
 
   if (!open) {
@@ -26,12 +30,14 @@ const PrivacyShieldOverlay = ({ submit }: Props): JSX.Element => {
   }
 
   const cancelAction = () => {
+    resetSections();
     setOpen(false);
   }
 
   const submitAction = () => {
     submit(anonText);
     setOpen(false);
+    lockSections();
   }
 
   return (
@@ -93,10 +99,10 @@ const PrivacyShieldOverlay = ({ submit }: Props): JSX.Element => {
           }}
         >
           <Button variant="outlined" onClick={cancelAction}>
-            Cancel
+            <Translator path="components.organisms.privacyShield.actions.cancel" />
           </Button>
           <Button variant="contained" endIcon={<Telegram />} onClick={submitAction}>
-            Submit
+            <Translator path="components.organisms.privacyShield.actions.submit" />
           </Button>
         </Box>
       </Box>

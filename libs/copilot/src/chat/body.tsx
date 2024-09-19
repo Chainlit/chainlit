@@ -278,7 +278,9 @@ const Chat = () => {
           )}
         </ErrorBoundary>
       </Box>
-      <PrivacyShield submit={submitFunction} />
+      {evoya?.type === 'dashboard' && (
+        <PrivacyShield submit={submitFunction} />
+      )}
       <ElementSideView
         onClose={() => setSideViewElement(undefined)}
         isOpen={!!sideViewElement}

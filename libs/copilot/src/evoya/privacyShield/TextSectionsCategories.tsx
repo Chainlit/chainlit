@@ -10,6 +10,8 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import { usePrivacyShield } from './usePrivacyShield';
 
+import { Translator } from '@chainlit/app/src/components/i18n';
+
 interface Props {
   setActiveSection: (id: string) => void;
   createSectionAction: () => void;
@@ -81,7 +83,7 @@ const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeS
                     }}
                   >
                     <Box
-                      onClick={() => setSectionAnon(section.id, true)}
+                      onClick={section.isLocked ? () => {} : () => setSectionAnon(section.id, true)}
                     >
                       {section.isAnon ? (
                         <Chip
@@ -95,7 +97,7 @@ const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeS
                       )}
                     </Box>
                     <Box
-                      onClick={() => setSectionAnon(section.id, false)}
+                      onClick={section.isLocked ? () => {} : () => setSectionAnon(section.id, false)}
                     >
                       {!section.isAnon ? (
                         <Chip
@@ -130,7 +132,7 @@ const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeS
         }}
       >
         <Button startIcon={<AddIcon />} onClick={createSectionAction}>
-          create section
+          <Translator path="components.organisms.privacyShield.actions.createSection" />
         </Button>
       </Box>
     </Box>

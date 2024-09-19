@@ -1,12 +1,14 @@
 import {
   useMemo,
-  useCallback
+  useCallback,
+  useContext,
 } from 'react';
 import {
   useRecoilValue,
   useResetRecoilState,
   useSetRecoilState
 } from 'recoil';
+import { WidgetContext } from 'context';
 
 import {
   privacyShieldEnabledState,
@@ -23,8 +25,10 @@ import {
   PrivacyCategories,
   SectionItem,
 } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 const usePrivacyShield = () => {
+  const { evoya } = useContext(WidgetContext);
   const enabled = useRecoilValue(privacyShieldEnabledState);
   const setEnabled = useSetRecoilState(privacyShieldEnabledState);
   const enabledVisual = useRecoilValue(privacyShieldEnabledVisualState);
@@ -40,8 +44,31 @@ const usePrivacyShield = () => {
   const currentText = useRecoilValue(privacyShieldTextState);
   const setCurrentText = useSetRecoilState(privacyShieldTextState);
 
+  const combinedSections: SectionItem[] = useMemo(() => {
+    // const existingStrings = sections.map(sec => sec.string.toLowerCase());
+    // const newSecsFiltered = currentSections.filter(ns => !existingStrings.includes(ns.string.toLowerCase()));
+
+    const newSections = [
+      ...sections,
+      // ...newSecsFiltered
+      ...currentSections,
+    ];
+
+    return newSections;
+  }, [sections, currentSections]);
+
+  const lockSections = useCallback(() => {
+    const allSections = combinedSections.map((section) => ({
+        ...section,
+        isLocked: true,
+    }));
+
+    setSections(allSections);
+    setCurrentSections([]);
+  }, [combinedSections]);
+
   const categories: PrivacyCategories = useMemo<PrivacyCategories>(() => {
-    return sections.reduce((accCats: PrivacyCategories, section) => {
+    return combinedSections.reduce((accCats: PrivacyCategories, section) => {
       if (accCats[section.type]) {
         return {
           ...accCats,
@@ -65,53 +92,38 @@ const usePrivacyShield = () => {
         ]
       };
     }, {});
-  }, [sections]);
+  }, [combinedSections]);
 
   const addSection = useCallback((section: SectionItem) => {
     const newSections = [
-      ...sections,
+      ...currentSections,
       section
     ];
 
-    setSections(newSections);
-  }, [sections]);
+    setCurrentSections(newSections)
+  }, [currentSections]);
 
   const removeSection = useCallback((id: string) => {
-    const newSections = sections.filter((sec) => sec.id !== id);
+    const newSections = currentSections.filter((sec) => sec.id !== id);
 
-    setSections(newSections);
-  }, [sections]);
+    setCurrentSections(newSections);
+  }, [currentSections]);
 
-  const addSections = useCallback((newSecs: SectionItem[], lockOld: boolean = true) => {
-    const oldSections = sections.map((section) => ({
-        ...section,
-        ...(lockOld ? {isLocked: true} : {})
-    }));
-
-    const existingStrings = sections.map(sec => sec.string);
-    const newSecsFiltered = newSecs.filter(ns => !existingStrings.includes(ns.string));
-
-    console.log(sections, newSecsFiltered);
-
-    const newSections = [
-      ...oldSections,
-      ...newSecsFiltered
-    ];
-
-    setSections(newSections);
-  }, [sections]);
+  const resetSections = useCallback(() => {
+    setCurrentSections([]);
+  }, [currentSections]);
 
   const editSectionType = useCallback((id: string, type: string) => {
-    const newSections = sections.map((ps) => ({
+    const newSections = currentSections.map((ps) => ({
       ...ps,
       ...(ps.id === id ? {type} : {})
     }));
 
-    setSections(newSections);
-  }, [sections]);
+    setCurrentSections(newSections);
+  }, [currentSections]);
 
   const setSectionAnon = useCallback((id: string, isAnon: boolean) => {
-    const newSections = sections.map((section) => {
+    const newSections = currentSections.map((section) => {
       if (section.id === id) {
         return {
           ...section,
@@ -121,11 +133,11 @@ const usePrivacyShield = () => {
       return section;
     });
 
-    setSections(newSections);
-  }, [sections]);
+    setCurrentSections(newSections);
+  }, [currentSections]);
 
   const toggleSectionAnon = useCallback((id: string) => {
-    const newSections = sections.map((section) => {
+    const newSections = currentSections.map((section) => {
       if (section.id === id) {
         return {
           ...section,
@@ -135,18 +147,7 @@ const usePrivacyShield = () => {
       return section;
     });
 
-    setSections(newSections);
-  }, [sections]);
-
-  const lockAllSections = useCallback(() => {
-    const newSections = sections.map((section) => {
-      return {
-        ...section,
-        isLocked: true
-      }
-    });
-
-    setSections(newSections);
+    setCurrentSections(newSections);
   }, [sections]);
 
   const getPrivacySections = useCallback(async (text: string/*, submitFunction: (text: string) => void*/) => {
@@ -155,10 +156,9 @@ const usePrivacyShield = () => {
     // setSubmit(submitFunction);
     setOpen(true);
 
-    const apiKey = '75sT2p4Q.2sFsdlGGtXHdGmTHxAsmm4XZI6sMf3Vp';
-    const agent_uuid = '68486423-ded6-4af4-86bc-3d5a2dd2ec9d';
-    // const baseUrl = 'https://avaia.io';
-    const baseUrl = 'http://localhost:8000';
+    const apiKey = evoya?.api?.privacyShield.apiKey;
+    const agent_uuid = evoya?.api?.privacyShield.privacyAgent;
+    const baseUrl = evoya?.api?.baseUrl;
     const apiUrl = `${baseUrl}/api/agent/${agent_uuid}/invoke/`;
 
     const response = await fetch(apiUrl, {
@@ -180,21 +180,24 @@ const usePrivacyShield = () => {
 
       try {
         const parsedSections = JSON.parse(answerJson);
-        const mappedSections: SectionItem[] = parsedSections.map((ps: any, index: number) => ({
+        const mappedSections: SectionItem[] = parsedSections.map((ps: any) => ({
           ...ps,
-          id: `ps-${index}`,
+          id: `ps-${uuidv4()}`,
           isAnon: true,
           isLocked: false
         }));
+        const existingStrings = sections.map(sec => sec.string.toLowerCase());
+        const newSecsFiltered = mappedSections.filter(ns => !existingStrings.includes(ns.string.toLowerCase()));
         
-        addSections(mappedSections, true);
+        // addSections(mappedSections, true);
+        setCurrentSections(newSecsFiltered);
       } catch (e) {
         console.error(e);
       }
     }
 
     setLoading(false);
-  }, [addSections]);
+  }, [sections]);
 
   const textSections = useMemo(() => {
     const catSections = Object.values(categories).flatMap((cat) => cat);
@@ -237,15 +240,17 @@ const usePrivacyShield = () => {
     currentText,
     loading,
     setLoading,
-    sections,
+    sections: combinedSections,
+    lockSections,
+    resetSections,
     // setSections,
     addSection,
     removeSection,
-    addSections,
+    // addSections,
     editSectionType,
     setSectionAnon,
     toggleSectionAnon,
-    lockAllSections,
+    // lockAllSections,
     categories,
     textSections,
     anonText,

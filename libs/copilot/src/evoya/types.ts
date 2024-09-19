@@ -43,10 +43,17 @@ export interface EvoyaShareApiConfig {
   check: string;
 }
 
+export interface EvoyaPrivacyShieldApiConfig {
+  privacyAgent: string;
+  apiKey: string;
+}
+
 export interface EvoyaApiConfig {
   favorite: EvoyaFavoriteApiConfig;
   share: EvoyaShareApiConfig;
   csrf_token: string;
+  baseUrl: string;
+  privacyShield: EvoyaPrivacyShieldApiConfig;
 }
 
 export interface EvoyaShareLink {

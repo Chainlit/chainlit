@@ -11,6 +11,8 @@ import TextSectionsItem from './TextSectionsItem';
 import CreateSection from './CreateSection';
 import TextSectionsCategories from './TextSectionsCategories';
 
+import { Translator } from '@chainlit/app/src/components/i18n';
+
 const TextSections = (): JSX.Element => {
   const [activeSection, setActiveSection] = useState<string>('');
   const [editSection, setEditSection] = useState<TextSection|null>(null);
@@ -147,7 +149,7 @@ const TextSections = (): JSX.Element => {
             onMouseDown={(e) => e.stopPropagation()}
           >
             <Button startIcon={<Add />} onClick={createSectionAction}>
-              create section
+              <Translator path="components.organisms.privacyShield.actions.createSection" />
             </Button>
           </Box>
           <div
