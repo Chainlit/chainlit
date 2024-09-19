@@ -118,7 +118,7 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
 
 @pytest.fixture
 def test_user() -> User:
-    return User(identifier="test_user_id", metadata={"test": 1})
+    return User(identifier="sqlalchemy_test_user_id")
 
 
 async def test_create_and_get_element(
@@ -136,46 +136,37 @@ async def test_create_and_get_element(
         # Needs context because of wrapper in utils.py
         await data_layer.create_element(text_element)
 
-        retrieved_element = await data_layer.get_element(
-            text_element.thread_id, text_element.id
-        )
-        assert retrieved_element is not None
-        assert retrieved_element["id"] == text_element.id
-        assert retrieved_element["name"] == text_element.name
-        assert retrieved_element["mime"] == text_element.mime
-        # The 'content' field is not part of the ElementDict, so we remove this assertion
+    retrieved_element = await data_layer.get_element(
+        text_element.thread_id, text_element.id
+    )
+    assert retrieved_element is not None
+    assert retrieved_element["id"] == text_element.id
+    assert retrieved_element["name"] == text_element.name
+    assert retrieved_element["mime"] == text_element.mime
+    # The 'content' field is not part of the ElementDict, so we remove this assertion
 
 
-async def test_get_current_timestamp(
-    mock_chainlit_context, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        timestamp = await data_layer.get_current_timestamp()
+async def test_get_current_timestamp(data_layer: SQLAlchemyDataLayer):
+    timestamp = await data_layer.get_current_timestamp()
     assert isinstance(timestamp, str)
 
 
-async def test_get_user(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
-        assert persisted_user
+async def test_get_user(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
+    assert persisted_user
 
-        fetched_user = await data_layer.get_user(persisted_user.identifier)
+    fetched_user = await data_layer.get_user(persisted_user.identifier)
 
-        assert fetched_user
-        assert fetched_user.createdAt == persisted_user.createdAt
-        assert fetched_user.id == persisted_user.id
+    assert fetched_user
+    assert fetched_user.createdAt == persisted_user.createdAt
+    assert fetched_user.id == persisted_user.id
 
-        nonexistent_user = await data_layer.get_user("nonexistent")
-        assert nonexistent_user is None
+    nonexistent_user = await data_layer.get_user("nonexistent")
+    assert nonexistent_user is None
 
 
-async def test_create_user(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
+async def test_create_user(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
 
     assert persisted_user
     assert persisted_user.identifier == test_user.identifier
@@ -186,52 +177,40 @@ async def test_create_user(
     assert uuid.UUID(persisted_user.id)
 
 
-async def test_update_thread(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
-        assert persisted_user
+async def test_update_thread(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
+    assert persisted_user
 
-        await data_layer.update_thread("test_thread")
+    await data_layer.update_thread("test_thread")
 
 
-async def test_get_thread_author(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
-        assert persisted_user
+async def test_get_thread_author(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
+    assert persisted_user
 
-        await data_layer.update_thread("test_thread", user_id=persisted_user.id)
-        author = await data_layer.get_thread_author("test_thread")
+    await data_layer.update_thread("test_thread", user_id=persisted_user.id)
+    author = await data_layer.get_thread_author("test_thread")
 
     assert author == persisted_user.identifier
 
 
-async def test_get_thread(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
-        assert persisted_user
+async def test_get_thread(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
+    assert persisted_user
 
-        await data_layer.update_thread("test_thread")
-        result = await data_layer.get_thread("test_thread")
-        assert result is not None
+    await data_layer.update_thread("test_thread")
+    result = await data_layer.get_thread("test_thread")
+    assert result is not None
 
-        result = await data_layer.get_thread("nonexisting_thread")
-        assert result is None
+    result = await data_layer.get_thread("nonexisting_thread")
+    assert result is None
 
 
-async def test_delete_thread(
-    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
-):
-    async with mock_chainlit_context:
-        persisted_user = await data_layer.create_user(test_user)
-        assert persisted_user
+async def test_delete_thread(test_user: User, data_layer: SQLAlchemyDataLayer):
+    persisted_user = await data_layer.create_user(test_user)
+    assert persisted_user
 
-        await data_layer.update_thread("test_thread", "test_user")
-        await data_layer.delete_thread("test_thread")
-        thread = await data_layer.get_thread("test_thread")
+    await data_layer.update_thread("test_thread", "test_user")
+    await data_layer.delete_thread("test_thread")
+    thread = await data_layer.get_thread("test_thread")
     assert thread is None
