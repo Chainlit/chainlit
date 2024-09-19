@@ -2,6 +2,8 @@ name: E2ETests
 
 on: [workflow_call]
 
+permissions: read-all
+
 jobs:
   ci:
     runs-on: ${{ matrix.os }}

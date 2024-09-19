@@ -373,6 +373,34 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return True
 
     ###### Elements ######
+    async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_element, thread_id={thread_id}, element_id={element_id}")
+        query = """SELECT * FROM elements WHERE "threadId" = :thread_id AND "id" = :element_id"""
+        parameters = {"thread_id": thread_id, "element_id": element_id}
+        element: Union[List[Dict[str, Any]], int, None] = await self.execute_sql(query=query, parameters=parameters)
+        if isinstance(element, list) and element:
+            element_dict: Dict[str, Any] = element[0]
+            return ElementDict(
+                id=element_dict["id"],
+                threadId=element_dict.get("threadId"),
+                type=element_dict["type"],
+                chainlitKey=element_dict.get("chainlitKey"),
+                url=element_dict.get("url"),
+                objectKey=element_dict.get("objectKey"),
+                name=element_dict["name"],
+                display=element_dict["display"],
+                size=element_dict.get("size"),
+                language=element_dict.get("language"),
+                page=element_dict.get("page"),
+                autoPlay=element_dict.get("autoPlay"),
+                playerConfig=element_dict.get("playerConfig"),
+                forId=element_dict.get("forId"),
+                mime=element_dict.get("mime")
+            )
+        else:
+            return None
+
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if self.show_logger:

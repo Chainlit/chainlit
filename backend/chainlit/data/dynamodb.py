@@ -173,11 +173,11 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         if not feedback.forId:
             raise ValueError(
-                "DynamoDB datalayer expects value for feedback.threadId got None"
+                "DynamoDB data layer expects value for feedback.threadId got None"
             )
 
         feedback.id = f"THREAD#{feedback.threadId}::STEP#{feedback.forId}"
-        searialized_feedback = self._type_serializer.serialize(asdict(feedback))
+        serialized_feedback = self._type_serializer.serialize(asdict(feedback))
 
         self.client.update_item(
             TableName=self.table_name,
@@ -187,7 +187,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             },
             UpdateExpression="SET #feedback = :feedback",
             ExpressionAttributeNames={"#feedback": "feedback"},
-            ExpressionAttributeValues={":feedback": searialized_feedback},
+            ExpressionAttributeValues={":feedback": serialized_feedback},
         )
 
         return feedback.id
