@@ -4,7 +4,17 @@ import site
 import sys
 from importlib import util
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+)
 
 import tomli
 from chainlit.logger import logger
@@ -13,6 +23,8 @@ from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
+
+from ._utils import is_path_inside
 
 if TYPE_CHECKING:
     from chainlit.action import Action
@@ -270,10 +282,14 @@ class CodeSettings:
     # Module object loaded from the module_name
     module: Any = None
     # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[Callable[[str, str], Optional["User"]]] = None
-    header_auth_callback: Optional[Callable[[Headers], Optional["User"]]] = None
+    password_auth_callback: Optional[
+        Callable[[str, str], Awaitable[Optional["User"]]]
+    ] = None
+    header_auth_callback: Optional[
+        Callable[[Headers], Awaitable[Optional["User"]]]
+    ] = None
     oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "User"], Optional["User"]]
+        Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
@@ -284,12 +300,14 @@ class CodeSettings:
     on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
 
-    author_rename: Optional[Callable[[str], str]] = None
+    author_rename: Optional[Callable[[str], Awaitable[str]]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[Callable[[Optional["User"]], List["ChatProfile"]]] = (
-        None
-    )
-    set_starters: Optional[Callable[[Optional["User"]], List["Starter"]]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+    ] = None
+    set_starters: Optional[
+        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    ] = None
 
 
 @dataclass()
@@ -327,33 +345,41 @@ class ChainlitConfig:
         # fallback to root language (ex: `de` when `de-DE` is not found)
         parent_language = language.split("-")[0]
 
-        translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{language}.json"
-        )
-        translation_lib_parent_language_file_path = os.path.join(
-            config_translation_dir, f"{parent_language}.json"
-        )
-        default_translation_lib_file_path = os.path.join(
-            config_translation_dir, f"{default_language}.json"
-        )
+        translation_dir = Path(config_translation_dir)
 
-        if os.path.exists(translation_lib_file_path):
-            with open(translation_lib_file_path, "r", encoding="utf-8") as f:
-                translation = json.load(f)
-        elif os.path.exists(translation_lib_parent_language_file_path):
+        translation_lib_file_path = translation_dir / f"{language}.json"
+        translation_lib_parent_language_file_path = (
+            translation_dir / f"{parent_language}.json"
+        )
+        default_translation_lib_file_path = translation_dir / f"{default_language}.json"
+
+        if (
+            is_path_inside(translation_lib_file_path, translation_dir)
+            and translation_lib_file_path.is_file()
+        ):
+            translation = json.loads(
+                translation_lib_file_path.read_text(encoding="utf-8")
+            )
+        elif (
+            is_path_inside(translation_lib_parent_language_file_path, translation_dir)
+            and translation_lib_parent_language_file_path.is_file()
+        ):
             logger.warning(
                 f"Translation file for {language} not found. Using parent translation {parent_language}."
             )
-            with open(
-                translation_lib_parent_language_file_path, "r", encoding="utf-8"
-            ) as f:
-                translation = json.load(f)
-        elif os.path.exists(default_translation_lib_file_path):
+            translation = json.loads(
+                translation_lib_parent_language_file_path.read_text(encoding="utf-8")
+            )
+        elif (
+            is_path_inside(default_translation_lib_file_path, translation_dir)
+            and default_translation_lib_file_path.is_file()
+        ):
             logger.warning(
                 f"Translation file for {language} not found. Using default translation {default_language}."
             )
-            with open(default_translation_lib_file_path, "r", encoding="utf-8") as f:
-                translation = json.load(f)
+            translation = json.loads(
+                default_translation_lib_file_path.read_text(encoding="utf-8")
+            )
 
         return translation
 

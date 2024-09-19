@@ -8,19 +8,23 @@ This document outlines the steps for maintainers to create a new release of the 
 
 ## Steps
 
-1. **Update the changelog**:
-
-   - Create a pull request to update the CHANGELOG.md file with the changes for the new release.
-   - Mark any breaking changes clearly.
-   - Get the changelog update PR reviewed and merged.
-
-2. **Determine the new version number**:
+1. **Determine the new version number**:
 
    - We use semantic versioning (major.minor.patch).
    - Increment the major version for breaking changes, minor version for new features, patch version for bug fixes only.
    - If unsure, discuss with the maintainers to determine if it should be a major/minor version bump or new patch version.
 
-3. **Create a new release**:
+2. **Bump the package version**:
+
+   - Update `version` in `[tool.poetry]` of `backend/pyproject.toml`.
+
+3. **Update the changelog**:
+
+   - Create a pull request to update the CHANGELOG.md file with the changes for the new release.
+   - Mark any breaking changes clearly.
+   - Get the changelog update PR reviewed and merged.
+
+4. **Create a new release**:
 
    - In the GitHub repo, go to the "Releases" page and click "Draft a new release".
    - Input the new version number as the tag (e.g. 4.0.4).
@@ -29,7 +33,7 @@ This document outlines the steps for maintainers to create a new release of the 
    - If this is a full release after an RC, remove any "-rc" suffix from the version number.
    - Publish the release.
 
-4. **Update any associated documentation and examples**:
+5. **Update any associated documentation and examples**:
    - If needed, create PRs to update the version referenced in the docs and example code to match the newly released version.
    - Especially important for documented breaking changes.
 
