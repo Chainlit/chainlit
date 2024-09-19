@@ -122,7 +122,23 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         result = await self.execute_sql(query=query, parameters=parameters)
         if result and isinstance(result, list):
             user_data = result[0]
-            return PersistedUser(**user_data)
+
+            # SQLite returns JSON as string, we most convert it. (#1137)
+            metadata = user_data.get("metadata", {})
+            if isinstance(metadata, str):
+                metadata = json.loads(metadata)
+
+            assert isinstance(metadata, dict)
+            assert isinstance(user_data["id"], str)
+            assert isinstance(user_data["identifier"], str)
+            assert isinstance(user_data["createdAt"], str)
+
+            return PersistedUser(
+                id=user_data["id"],
+                identifier=user_data["identifier"],
+                createdAt=user_data["createdAt"],
+                metadata=metadata,
+            )
         return None
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
@@ -377,12 +393,18 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         return True
 
     ###### Elements ######
-    async def get_element(self, thread_id: str, element_id: str) -> Optional["ElementDict"]:
+    async def get_element(
+        self, thread_id: str, element_id: str
+    ) -> Optional["ElementDict"]:
         if self.show_logger:
-            logger.info(f"SQLAlchemy: get_element, thread_id={thread_id}, element_id={element_id}")
+            logger.info(
+                f"SQLAlchemy: get_element, thread_id={thread_id}, element_id={element_id}"
+            )
         query = """SELECT * FROM elements WHERE "threadId" = :thread_id AND "id" = :element_id"""
         parameters = {"thread_id": thread_id, "element_id": element_id}
-        element: Union[List[Dict[str, Any]], int, None] = await self.execute_sql(query=query, parameters=parameters)
+        element: Union[List[Dict[str, Any]], int, None] = await self.execute_sql(
+            query=query, parameters=parameters
+        )
         if isinstance(element, list) and element:
             element_dict: Dict[str, Any] = element[0]
             return ElementDict(
@@ -400,7 +422,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 autoPlay=element_dict.get("autoPlay"),
                 playerConfig=element_dict.get("playerConfig"),
                 forId=element_dict.get("forId"),
-                mime=element_dict.get("mime")
+                mime=element_dict.get("mime"),
             )
         else:
             return None
@@ -611,7 +633,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
-                            if step_feedback.get("step_showinput") not in [None, "false"]
+                            if step_feedback.get("step_showinput")
+                            not in [None, "false"]
                             else None
                         ),
                         output=step_feedback.get("step_output", ""),

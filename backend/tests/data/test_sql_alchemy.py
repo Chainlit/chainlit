@@ -1,14 +1,17 @@
+from unittest.mock import Mock
 import uuid
 from pathlib import Path
 
 import pytest
-
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
-from chainlit.data.base import BaseStorageClient
+from chainlit.data.base import BaseDataLayer, BaseStorageClient
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.element import Text
+from chainlit import User
+from chainlit.user import PersistedUser
 
 
 @pytest.fixture
@@ -113,7 +116,11 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     yield data_layer
 
 
-@pytest.mark.asyncio
+@pytest.fixture
+def test_user() -> User:
+    return User(identifier="test_user_id", metadata={"test": 1})
+
+
 async def test_create_and_get_element(
     mock_chainlit_context, data_layer: SQLAlchemyDataLayer
 ):
@@ -136,3 +143,79 @@ async def test_create_and_get_element(
         assert retrieved_element["name"] == text_element.name
         assert retrieved_element["mime"] == text_element.mime
         # The 'content' field is not part of the ElementDict, so we remove this assertion
+
+
+async def test_get_current_timestamp(
+    mock_chainlit_context, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        timestamp = await data_layer.get_current_timestamp()
+    assert isinstance(timestamp, str)
+
+
+async def test_get_user(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        result = await data_layer.get_user(test_user.identifier)
+    assert result is None
+
+
+async def test_create_user(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        persisted_user = await data_layer.create_user(test_user)
+
+    assert persisted_user
+    assert persisted_user.identifier == test_user.identifier
+    assert persisted_user.id
+    assert persisted_user.createdAt
+
+
+async def test_get_thread_author(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        persisted_user = await data_layer.create_user(test_user)
+        assert persisted_user
+
+        await data_layer.update_thread("test_thread", persisted_user.identifier)
+        author = await data_layer.get_thread_author("test_thread")
+    assert author == persisted_user.identifier
+
+
+async def test_get_thread(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        persisted_user = await data_layer.create_user(test_user)
+        assert persisted_user
+
+        result = await data_layer.get_thread("test_thread")
+    assert result is None
+
+
+async def test_update_thread(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        persisted_user = await data_layer.create_user(test_user)
+        assert persisted_user
+
+        await data_layer.update_thread("test_thread", persisted_user.identifier)
+    assert True
+
+
+async def test_delete_thread(
+    mock_chainlit_context, test_user: User, data_layer: SQLAlchemyDataLayer
+):
+    async with mock_chainlit_context:
+        persisted_user = await data_layer.create_user(test_user)
+        assert persisted_user
+
+        await data_layer.update_thread("test_thread", "test_user")
+        await data_layer.delete_thread("test_thread")
+        thread = await data_layer.get_thread("test_thread")
+    assert thread is None
+    assert True
