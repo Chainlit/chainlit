@@ -8,6 +8,13 @@ export interface EvoyaConfig {
   api?: EvoyaApiConfig;
   logo?: string | null;
   hideWaterMark?: boolean;
+  additionalInfo?: EvoyaAdditionalInfo;
+}
+
+export interface EvoyaAdditionalInfo {
+  text?: string;
+  link?: string;
+  linkText?: string;
 }
 
 export interface SectionItem {
