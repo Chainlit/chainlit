@@ -79,12 +79,6 @@ const AuthLogin = ({
     setErrorState(error);
   }, [error]);
 
-  // useEffect(() => {
-  //   if (!onPasswordSignIn && onOAuthSignIn && providers.length === 1) {
-  //     onOAuthSignIn(providers[0], callbackUrl);
-  //   }
-  // }, [onPasswordSignIn, onOAuthSignIn, providers]);
-
   const formik = useFormik({
     initialValues: {
       email: '',
