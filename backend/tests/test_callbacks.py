@@ -109,7 +109,6 @@ async def test_oauth_callback(test_config):
 
 async def test_on_message(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_message
-    from chainlit.config import config
     from chainlit.message import Message
 
     async with mock_chainlit_context as context:
