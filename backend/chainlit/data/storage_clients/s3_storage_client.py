@@ -1,7 +1,7 @@
 from typing import Any, Dict, Union
 
 import boto3  # type: ignore
-from chainlit.data.base import BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.logger import logger
 
 

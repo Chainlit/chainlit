@@ -6,7 +6,7 @@ from azure.storage.filedatalake import (
     DataLakeServiceClient,
     FileSystemClient,
 )
-from chainlit.data.base import BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.logger import logger
 
 if TYPE_CHECKING:
