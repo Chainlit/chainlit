@@ -5,8 +5,10 @@ import click
 import nest_asyncio
 import uvicorn
 
+# Not sure if it is necessary to call nest_asyncio.apply() before the other imports
 nest_asyncio.apply()
 
+# ruff: noqa: E402
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
     BACKEND_ROOT,

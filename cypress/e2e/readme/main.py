@@ -1,1 +1,1 @@
-import chainlit as cl
+import chainlit as cl  # noqa: F401
