@@ -46,6 +46,10 @@ async def resume_thread(session: WebsocketSession):
     data_layer = get_data_layer()
     if not data_layer or not session.user or not session.thread_id_to_resume:
         return
+
+    if session.id not in user_sessions:
+        user_sessions[session.id] = {}
+
     thread = await data_layer.get_thread(thread_id=session.thread_id_to_resume)
     if not thread:
         return
@@ -55,7 +59,17 @@ async def resume_thread(session: WebsocketSession):
 
     if user_is_author:
         metadata = thread.get("metadata") or {}
-        user_sessions[session.id] = metadata.copy()
+        if isinstance(metadata, str):
+            try:
+                metadata = json.loads(metadata)
+            except json.JSONDecodeError:
+                metadata = {}
+
+        if isinstance(metadata, dict):
+            user_sessions[session.id] = metadata.copy()
+        else:
+            user_sessions[session.id] = {}
+
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
         if chat_settings := metadata.get("chat_settings"):
