@@ -28,7 +28,7 @@ describe('Data Layer with Sqlite', () => {
 
 describe('DB file existence check', () => {
   it('should check if db file was created', () => {
-    const filePath = 'cypress/e2e/data_layer_sqlite/chainlit.db';
+    const filePath = 'cypress/e2e/data_layer_sqlite/test_db.sqlite';
 
     cy.readFile(filePath).then((content) => {
       expect(content).to.exist;
