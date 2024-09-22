@@ -286,7 +286,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         )
 
         search_keyword = filters.search.lower() if filters.search else None
-        feedback_value = int(filters.feedback) if filters.feedback else None
+        feedback_value = int(filters.feedback) if filters.feedback is not None else None
 
         filtered_threads = []
         for thread in all_user_threads:
