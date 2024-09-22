@@ -140,7 +140,7 @@ def step(
                     try:
                         if result and not step.output:
                             step.output = result
-                    except:
+                    except Exception as e:
                         step.is_error = True
                         step.output = str(e)
                     return result
