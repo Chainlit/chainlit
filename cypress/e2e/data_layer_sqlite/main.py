@@ -1,12 +1,11 @@
-from typing import List, Optional
+from typing import Optional
 
 import chainlit.data as cl_data
-from chainlit.data.sqlite import SQLiteDataLayer
-from literalai.helper import utc_now
+from chainlit.data.sql_alchemy_orm import SQLAlchemyORMDataLayer
 
 import chainlit as cl
 
-cl_data._data_layer = SQLiteDataLayer()
+cl_data._data_layer = SQLAlchemyORMDataLayer(url="sqlite+aiosqlite:///test_db.sqlite")
 
 
 @cl.on_chat_start
