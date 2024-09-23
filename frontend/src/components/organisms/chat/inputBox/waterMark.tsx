@@ -21,9 +21,9 @@ export default function WaterMark() {
   const Logo = theme === 'light' ? LogoLight : LogoDark;
 
   return (
-    <Box>
+    <Stack gap={1}>
       {!evoya?.hideWaterMark && (
-        <Stack alignItems="center" className="watermark" marginBottom={1}>
+        <Stack alignItems="center" className="watermark">
           <a
             href="https://evoya.ai"
             target="_blank"
@@ -51,14 +51,16 @@ export default function WaterMark() {
           </a>
         </Stack>
       )}
-      <Box textAlign="center" lineHeight={1.25}>
-        <Typography variant="caption" color="text.secondary" letterSpacing="initial">
-          {evoya?.additionalInfo?.text ? evoya?.additionalInfo?.text : <Translator path="components.organisms.chat.inputBox.additionalInfo.text" />}
-          {evoya?.additionalInfo?.link && (
-            <Link href={evoya?.additionalInfo?.link} variant="inherit" underline="hover" fontWeight={400} marginLeft={1}>{evoya?.additionalInfo?.linkText}</Link>
-          )}
-        </Typography>
-      </Box>
-    </Box>
+      {evoya?.additionalInfo && (
+        <Box textAlign="center" lineHeight={1.25}>
+          <Typography variant="caption" color="text.secondary" letterSpacing="initial">
+            {evoya?.additionalInfo?.text ? evoya?.additionalInfo?.text : <Translator path="components.organisms.chat.inputBox.additionalInfo.text" />}
+            {evoya?.additionalInfo?.link && (
+              <Link href={evoya?.additionalInfo?.link} variant="inherit" underline="hover" fontWeight={400} marginLeft={1}>{evoya?.additionalInfo?.linkText}</Link>
+            )}
+          </Typography>
+        </Box>
+      )}
+    </Stack>
   );
 }
