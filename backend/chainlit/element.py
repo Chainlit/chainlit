@@ -31,7 +31,16 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "component"
+    "image",
+    "text",
+    "pdf",
+    "tasklist",
+    "audio",
+    "video",
+    "file",
+    "plotly",
+    "dataframe",
+    "component",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -356,6 +365,13 @@ class Plotly(Element):
         self.mime = "application/json"
 
         super().__post_init__()
+
+
+@dataclass
+class Dataframe(Element):
+    type: ClassVar[ElementType] = "dataframe"
+
+    size: ElementSize = "large"
 
 
 @dataclass
