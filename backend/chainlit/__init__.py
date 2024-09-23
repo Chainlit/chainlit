@@ -23,6 +23,7 @@ from chainlit.context import context
 from chainlit.element import (
     Audio,
     Component,
+    Dataframe,
     File,
     Image,
     Pdf,
