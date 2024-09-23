@@ -1,5 +1,3 @@
-from chainlit.context import context
-
 import chainlit as cl
 
 

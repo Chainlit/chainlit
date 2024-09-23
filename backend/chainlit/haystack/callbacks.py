@@ -1,14 +1,12 @@
 import re
 from typing import Any, Generic, List, Optional, TypeVar
 
-from chainlit.context import context
+from chainlit import Message
 from chainlit.step import Step
 from chainlit.sync import run_sync
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
 from literalai.helper import utc_now
-
-from chainlit import Message
 
 T = TypeVar("T")
 

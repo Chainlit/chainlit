@@ -20,7 +20,7 @@ async def on_action(action: cl.Action):
 
 @cl.action_callback("all actions removed")
 async def on_action(_: cl.Action):
-    await cl.Message(content=f"All actions have been removed!").send()
+    await cl.Message(content="All actions have been removed!").send()
     to_remove = cl.user_session.get("to_remove")  # type: cl.Message
     await to_remove.remove_actions()
 
@@ -71,5 +71,5 @@ async def main():
         ],
     ).send()
 
-    if result != None:
+    if result is not None:
         await cl.Message(f"Thanks for pressing: {result['value']}").send()

@@ -2,6 +2,7 @@ import os.path
 import pickle
 from typing import Dict, List, Optional
 
+import chainlit as cl
 import chainlit.data as cl_data
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import Element, ElementDict
@@ -15,10 +16,7 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from chainlit.user import PersistedUser, User
 from literalai.helper import utc_now
-
-import chainlit as cl
 
 now = utc_now()
 

@@ -207,7 +207,7 @@ class AzureADOAuthProvider(OAuthProvider):
                 azure_user["image"] = (
                     f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
                 )
-            except Exception as e:
+            except Exception:
                 # Ignore errors getting the photo
                 pass
 
@@ -291,7 +291,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
                 azure_user["image"] = (
                     f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
                 )
-            except Exception as e:
+            except Exception:
                 # Ignore errors getting the photo
                 pass
 
@@ -442,7 +442,7 @@ class DescopeOAuthProvider(OAuthProvider):
     id = "descope"
     env = ["OAUTH_DESCOPE_CLIENT_ID", "OAUTH_DESCOPE_CLIENT_SECRET"]
     # Ensure that the domain does not have a trailing slash
-    domain = f"https://api.descope.com/oauth2/v1"
+    domain = "https://api.descope.com/oauth2/v1"
 
     authorize_url = f"{domain}/authorize"
 
