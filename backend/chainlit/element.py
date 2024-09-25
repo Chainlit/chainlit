@@ -369,9 +369,21 @@ class Plotly(Element):
 
 @dataclass
 class Dataframe(Element):
-    type: ClassVar[ElementType] = "dataframe"
+    """Useful to send a pandas DataFrame to the UI."""
 
+    type: ClassVar[ElementType] = "dataframe"
     size: ElementSize = "large"
+    data: Any = None  # The type is Any because it is checked in __post_init__.
+
+    def __post_init__(self) -> None:
+        """Ensures the data is a pandas DataFrame and converts it to JSON."""
+        from pandas import DataFrame
+
+        if not isinstance(self.data, DataFrame):
+            raise TypeError("data must be a pandas.DataFrame")
+
+        self.content = self.data.to_json(orient="split", date_format="iso")
+        super().__post_init__()
 
 
 @dataclass
