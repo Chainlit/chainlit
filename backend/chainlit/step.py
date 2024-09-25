@@ -191,33 +191,18 @@ class Step:
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
     ):
-        self = cls()
-        trace_event(f"init {self.__class__.__name__} {type}")
         await asyncio.sleep(0.001)
-        self._input = ""
-        self._output = ""
-        self.thread_id = context.session.thread_id
-        self.name = name or ""
-        self.type = type
-        self.id = id or str(uuid.uuid4())
-        self.metadata = metadata or {}
-        self.tags = tags
-        self.is_error = False
-        self.show_input = show_input
-        self.parent_id = parent_id
-
-        self.language = language
-        self.generation = None
-        self.elements = elements or []
-
-        self.created_at = utc_now()
-        self.start = None
-        self.end = None
-
-        self.streaming = False
-        self.persisted = False
-        self.fail_on_persist_error = False
-
+        self = cls(
+            name,
+            type,
+            id,
+            parent_id,
+            elements,
+            metadata,
+            tags,
+            language,
+            show_input,
+        )
         return self
 
     def __init__(
@@ -233,7 +218,6 @@ class Step:
         show_input: Union[bool, str] = "json",
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
-        time.sleep(0.001)
         self._input = ""
         self._output = ""
         self.thread_id = context.session.thread_id

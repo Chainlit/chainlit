@@ -221,40 +221,20 @@ class Message(MessageBase):
         parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
-        self = cls(content)
         await asyncio.sleep(0.001)
-        self.language = language
-        if isinstance(content, dict):
-            try:
-                self.content = json.dumps(content, indent=4, ensure_ascii=False)
-                self.language = "json"
-            except TypeError:
-                self.content = str(content)
-                self.language = "text"
-        elif isinstance(content, str):
-            self.content = content
-        else:
-            self.content = str(content)
-            self.language = "text"
-
-        if id:
-            self.id = str(id)
-
-        if parent_id:
-            self.parent_id = str(parent_id)
-
-        if created_at:
-            self.created_at = created_at
-
-        self.metadata = metadata
-        self.tags = tags
-
-        self.author = author or config.ui.name
-        self.type = type
-        self.actions = actions if actions is not None else []
-        self.elements = elements if elements is not None else []
-
-        super().__post_init__(self)
+        self = cls(
+            content,
+            author,
+            language,
+            actions,
+            elements,
+            type,
+            metadata,
+            tags,
+            id,
+            parent_id,
+            created_at,
+        )
         return self
 
     def __init__(
@@ -271,7 +251,6 @@ class Message(MessageBase):
         parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
-        time.sleep(0.001)
         self.language = language
         if isinstance(content, dict):
             try:
