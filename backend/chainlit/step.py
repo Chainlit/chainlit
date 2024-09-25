@@ -178,8 +178,9 @@ class Step:
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
 
+    @classmethod
     async def init(
-        self,
+        cls,
         name: Optional[str] = config.ui.name,
         type: TrueStepType = "undefined",
         id: Optional[str] = None,
@@ -190,6 +191,7 @@ class Step:
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
     ):
+        self = cls()
         trace_event(f"init {self.__class__.__name__} {type}")
         await asyncio.sleep(0.001)
         self._input = ""

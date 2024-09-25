@@ -206,8 +206,9 @@ class Message(MessageBase):
         elements (List[ElementBased], optional): A list of elements to send with the message.
     """
 
+    @classmethod
     async def init(
-        self,
+        cls,
         content: Union[str, Dict],
         author: Optional[str] = None,
         language: Optional[str] = None,
@@ -220,6 +221,7 @@ class Message(MessageBase):
         parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
+        self = cls(content)
         await asyncio.sleep(0.001)
         self.language = language
         if isinstance(content, dict):
