@@ -2,7 +2,7 @@ import os
 
 import boto3  # type: ignore
 import pytest
-from chainlit.data.storage_clients.s3_storage_client import S3StorageClient
+from chainlit.data.storage_clients.s3 import S3StorageClient
 from moto import mock_aws
 
 
