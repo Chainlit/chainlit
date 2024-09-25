@@ -254,7 +254,7 @@ class Message(MessageBase):
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
 
-        super().__post_init__()
+        super().__post_init__(self)
         return self
 
     def __init__(
