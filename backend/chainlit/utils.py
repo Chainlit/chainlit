@@ -130,4 +130,4 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
 
     ensure_jwt_secret()
 
-    app.mount("/", chainlit_app)
+    app.mount(path, chainlit_app)

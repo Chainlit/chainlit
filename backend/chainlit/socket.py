@@ -119,7 +119,7 @@ async def connect(sid, environ):
             authorization_header = environ.get("HTTP_AUTHORIZATION")
             token = authorization_header.split(" ")[1] if authorization_header else None
             user = await get_current_user(token=token)
-    except Exception as e:
+    except Exception:
         logger.info("Authentication failed")
         return False
 
@@ -145,7 +145,7 @@ async def connect(sid, environ):
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
 
-    ws_session = WebsocketSession(
+    WebsocketSession(
         id=session_id,
         socket_id=sid,
         emit=emit_fn,
@@ -392,7 +392,7 @@ async def call_action(sid, action):
     except Exception as e:
         logger.exception(e)
         await context.emitter.send_action_response(
-            id=action.id, status=False, response="An error occured"
+            id=action.id, status=False, response="An error occurred"
         )
 
 

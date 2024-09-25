@@ -9,7 +9,6 @@ from chainlit.step import Step
 from langchain.callbacks.tracers.base import BaseTracer
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import BaseMessage
-from langchain.schema.output import ChatGenerationChunk, GenerationChunk
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
@@ -587,12 +586,17 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
         outputs = run.outputs or {}
         output_keys = list(outputs.keys())
         output = outputs
+
         if output_keys:
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
             current_step.output = (
-                output[0] if isinstance(output, Sequence) and len(output) else output
+                output[0]
+                if isinstance(output, Sequence)
+                and not isinstance(output, str)
+                and len(output)
+                else output
             )
             current_step.end = utc_now()
             self._run_sync(current_step.update())

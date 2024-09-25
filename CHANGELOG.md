@@ -4,6 +4,45 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] - 2024-09-16
+
+### Security
+
+- Fixed critical vulnerabilities allowing arbitrary file read access (#1326)
+- Improved path traversal protection in various endpoints (#1326)
+
+### Added
+
+- Hebrew translation JSON (#1322)
+- Translation files for Indian languages (#1321)
+- Support for displaying function calls as tools in Chain of Thought for LlamaIndexCallbackHandler (#1285)
+- Improved feedback UI with refined type handling (#1325)
+
+### Changed
+
+- Upgraded cryptography from 43.0.0 to 43.0.1 in backend dependencies (#1298)
+- Improved GitHub Actions workflow (#1301)
+- Enhanced data layer cleanup for better performance (#1288)
+- Factored out callbacks with extensive test coverage (#1292)
+- Adopted strict adherence to Semantic Versioning (SemVer)
+
+### Fixed
+
+- Websocket connection issues when submounting Chainlit (#1337)
+- Show_input functionality on chat resume for SQLAlchemy (#1221)
+- Negative feedback class incorrectness (#1332)
+- Interaction issues with Chat Profile Description Popover (#1276)
+- Centered steps within assistant messages (#1324)
+- Minor spelling errors (#1341)
+
+### Development
+
+- Added documentation for release engineering process (#1293)
+- Implemented testing for FastAPI version matrix (#1306)
+- Removed wait statements from E2E tests for improved performance (#1270)
+- Bumped dataclasses to latest version (#1291)
+- Ensured environment loading before other imports (#1328)
+
 ## [1.1.404] - 2024-09-04
 
 ### Security

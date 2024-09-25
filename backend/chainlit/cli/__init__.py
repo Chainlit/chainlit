@@ -5,8 +5,10 @@ import click
 import nest_asyncio
 import uvicorn
 
+# Not sure if it is necessary to call nest_asyncio.apply() before the other imports
 nest_asyncio.apply()
 
+# ruff: noqa: E402
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
     BACKEND_ROOT,
@@ -183,7 +185,7 @@ def chainlit_run(
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-        # This is required for authenticationt tests
+        # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
     else:
         trace_event("chainlit run")
