@@ -113,11 +113,6 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     yield data_layer
 
 
-@pytest.fixture
-def test_user() -> User:
-    return User(identifier="sqlalchemy_test_user_id")
-
-
 async def test_create_and_get_element(
     mock_chainlit_context, data_layer: SQLAlchemyDataLayer
 ):
