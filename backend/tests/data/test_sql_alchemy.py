@@ -1,17 +1,14 @@
-from unittest.mock import Mock
 import uuid
 from pathlib import Path
 
 import pytest
-import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
-from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.base import BaseStorageClient
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.element import Text
 from chainlit import User
-from chainlit.user import PersistedUser
 
 
 @pytest.fixture
