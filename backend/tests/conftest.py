@@ -1,3 +1,4 @@
+import datetime
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, Mock
 
@@ -10,10 +11,12 @@ from chainlit.user_session import UserSession
 
 
 @pytest.fixture
-def mock_persisted_user():
-    mock = Mock(spec=PersistedUser)
-    mock.id = "test_user_id"
-    return mock
+def persisted_test_user():
+    return PersistedUser(
+        id="test_user_id",
+        createdAt=datetime.datetime.now().isoformat(),
+        identifier="test_user_identifier",
+    )
 
 
 @pytest.fixture
@@ -44,8 +47,8 @@ async def create_chainlit_context(mock_session):
 
 
 @pytest_asyncio.fixture
-async def mock_chainlit_context(mock_persisted_user, mock_session):
-    mock_session.user = mock_persisted_user
+async def mock_chainlit_context(persisted_test_user, mock_session):
+    mock_session.user = persisted_test_user
     return create_chainlit_context(mock_session)
 
 
