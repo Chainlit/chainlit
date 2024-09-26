@@ -7,6 +7,9 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+
+import { TextSection } from 'evoya/types';
 
 import { usePrivacyShield } from './usePrivacyShield';
 
@@ -15,10 +18,11 @@ import { Translator } from '@chainlit/app/src/components/i18n';
 interface Props {
   setActiveSection: (id: string) => void;
   createSectionAction: () => void;
+  editSectionAction: (section: TextSection) => void;
   activeSection: string;
 }
 
-const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeSection }: Props): JSX.Element => {
+const TextSectionsCategories = ({ setActiveSection, createSectionAction, editSectionAction, activeSection }: Props): JSX.Element => {
   const {
     setSectionAnon,
     categories,
@@ -78,7 +82,7 @@ const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeS
                   <Box
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(2, 1fr) 28px',
+                      gridTemplateColumns: 'repeat(2, 1fr) 72px',
                       alignItems: 'center'
                     }}
                   >
@@ -110,15 +114,18 @@ const TextSectionsCategories = ({ setActiveSection, createSectionAction, activeS
                         section.string
                       )}
                     </Box>
-                    <Box>
+                    <Stack direction="row" gap={1} pl={1}>
                       {!section.isLocked && (
                         <>
+                          <IconButton size="small" onClick={() => editSectionAction(section)}>
+                            <EditOutlined fontSize="inherit" />
+                          </IconButton>
                           <IconButton size="small" onClick={() => removeSection(section.id)}>
                             <CloseIcon fontSize="inherit" />
                           </IconButton>
                         </>
                       )}
-                    </Box>
+                    </Stack>
                   </Box>
                 </Box>
               ))}

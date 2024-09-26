@@ -22,6 +22,8 @@ import { ElementRef } from 'components/molecules/messages/components/ElementRef'
 
 import type { IMessageElement } from 'client-types/';
 
+import ResponseTextItem from '@chainlit/copilot/src/evoya/privacyShield/ResponseTextItem';
+
 interface Props {
   allowHtml?: boolean;
   latex?: boolean;
@@ -57,6 +59,12 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
       //skipHtml
       className="markdown-body"
       components={{
+        span({ children, ...props }) {
+          if (props.node?.properties.dataPrivacyComponent) {
+            return <ResponseTextItem sectionId={props.node?.properties.dataPrivacyComponent} />
+          }
+          return <span {...props}>{children}</span>
+        },
         a({ children, ...props }) {
           const name = children as string;
           const element = refElements?.find((e) => e.name === name);

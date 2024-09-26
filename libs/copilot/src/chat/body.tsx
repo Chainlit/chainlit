@@ -228,34 +228,11 @@ const Chat = () => {
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Box
-            display="grid"
-            flexGrow={1}
-            gridTemplateColumns="repeat(3, 1fr)"
-            sx={{
-              overflowY: 'auto',
-            }}
-          >
-            <Box
-              sx={{
-                gridColumnStart: `span ${enabledVisual ? 2 : 3}`,
-                gridColumnEnd: `span ${enabledVisual ? 2 : 3}`
-              }}
-            >
-              <Messages
-                autoScroll={autoScroll}
-                projectSettings={projectSettings}
-                setAutoScroll={setAutoScroll}
-              />
-            </Box>
-            {(enabledVisual && sections.length > 0) &&
-              <Box
-                padding={2}
-              >
-                <TextSectionsCategoriesSimple />
-              </Box>
-            }
-          </Box>
+          <Messages
+            autoScroll={autoScroll}
+            projectSettings={projectSettings}
+            setAutoScroll={setAutoScroll}
+          />
           {evoya?.type === 'default' ? (
             <InputBoxDefault
               fileSpec={fileSpec}

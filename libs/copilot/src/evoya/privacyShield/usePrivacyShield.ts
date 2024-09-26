@@ -148,7 +148,7 @@ const usePrivacyShield = () => {
     });
 
     setCurrentSections(newSections);
-  }, [sections]);
+  }, [currentSections]);
 
   const getPrivacySections = useCallback(async (text: string/*, submitFunction: (text: string) => void*/) => {
     setLoading(true);
@@ -230,7 +230,18 @@ const usePrivacyShield = () => {
     return textSections.map((ts) => ts.isAnon ? ts.anonString : ts.string).join('');
   }, [textSections]);
 
+  const transformOutput = useCallback((text: string) => {
+    let response = text;
+    const catSections = Object.values(categories).flatMap((cat) => cat);
+    catSections.forEach((section) => {
+      response = response.replaceAll(new RegExp(section.isAnon ? section.anonString : section.string, "gi"), `<span data-privacy-component="${section.id}">${section.isAnon ? section.anonString : section.string}</span>`);
+    });
+    
+    return response;
+  }, [categories]);
+
   return {
+    transformOutput,
     open,
     setOpen,
     enabled,

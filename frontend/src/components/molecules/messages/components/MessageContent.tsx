@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { prepareContent } from 'utils/message';
 
 import Box from '@mui/material/Box';
@@ -11,6 +11,8 @@ import { InlinedElements } from 'components/atoms/elements/InlinedElements';
 import { Markdown } from 'components/molecules/Markdown';
 
 import type { IMessageElement, IStep } from 'client-types/';
+
+import { usePrivacyShield } from '@chainlit/copilot/src/evoya/privacyShield/usePrivacyShield';
 
 const COLLAPSE_MIN_LINES = 25; // Set this to the maximum number of lines you want to display before collapsing
 const COLLAPSE_MIN_LENGTH = 3000; // Set this to the maximum number of characters you want to display before collapsing
@@ -31,13 +33,20 @@ const MessageContent = memo(
     let contentLength = 0;
 
     const {
+      transformOutput,
+    } = usePrivacyShield();
+    const messageTrans = useMemo<string>(() => {
+      return transformOutput(message.output);
+    }, [message])
+
+    const {
       preparedContent: output,
       inlinedElements: outputInlinedElements,
       refElements: outputRefElements
     } = prepareContent({
       elements,
       id: message.id,
-      content: message.output,
+      content: messageTrans,
       language: message.language
     });
 
@@ -46,7 +55,7 @@ const MessageContent = memo(
 
     const outputMarkdown = (
       <Markdown
-        allowHtml={allowHtml}
+        allowHtml={true}
         latex={latex}
         refElements={outputRefElements}
       >

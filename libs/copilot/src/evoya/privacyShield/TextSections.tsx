@@ -31,12 +31,15 @@ const TextSections = (): JSX.Element => {
   const textSelected = (event: React.MouseEvent) => {
     if (window.getSelection) {
       const selection = window.getSelection();
-      console.log(selection);
       if (selection && selection.toString()) {
-        console.log(selection.toString());
         if (textContainer.current) {
           const containerBound = textContainer.current.getBoundingClientRect();
-          setShowCreateSection({x: event.clientX - containerBound.x, y: event.clientY - containerBound.y - 60});
+          const menuPosY = event.clientY - containerBound.y - 60;
+          if (menuPosY < 0) {
+            setShowCreateSection({x: event.clientX - containerBound.x, y: event.clientY - containerBound.y});
+          } else {
+            setShowCreateSection({x: event.clientX - containerBound.x, y: menuPosY});
+          }
           setTextSelection(selection.toString());
         } else {
           setShowCreateSection(null);
@@ -179,6 +182,7 @@ const TextSections = (): JSX.Element => {
         <TextSectionsCategories
           setActiveSection={setActiveSection}
           createSectionAction={createSectionAction}
+          editSectionAction={editSectionAction}
           activeSection={activeSection}
         />
       </Box>
