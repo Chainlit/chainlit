@@ -4,7 +4,7 @@ from chainlit.input_widget import Select, Slider, Switch
 
 @cl.on_chat_start
 async def start():
-    settings = await cl.ChatSettings(
+    await cl.ChatSettings(
         [
             Select(
                 id="Model",
