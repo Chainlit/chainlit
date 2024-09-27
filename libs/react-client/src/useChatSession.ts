@@ -114,7 +114,7 @@ const useChatSession = () => {
         setTimeout(() => {
           _connect({ userEnv, accessToken });
         }, 3000);
-      })
+      });
 
       socket.on('connect', () => {
         socket.emit('connection_successful');
