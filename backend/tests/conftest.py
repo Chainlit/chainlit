@@ -1,3 +1,4 @@
+import uuid
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, Mock
 
@@ -19,14 +20,14 @@ def mock_persisted_user():
 @pytest.fixture
 def mock_session():
     mock = Mock(spec=WebsocketSession)
-    mock.id = "test_session_id"
+    mock.id = str(uuid.uuid4())
     mock.user_env = {"test_env": "value"}
     mock.chat_settings = {}
     mock.chat_profile = None
     mock.http_referer = None
     mock.client_type = "webapp"
     mock.languages = ["en"]
-    mock.thread_id = "test_thread_id"
+    mock.thread_id = str(uuid.uuid4())
     mock.emit = AsyncMock()
     mock.has_first_interaction = True
 
