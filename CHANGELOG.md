@@ -4,9 +4,193 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.2.0] - 2024-09-16
 
-Nothing unreleased!
+### Security
+
+- Fixed critical vulnerabilities allowing arbitrary file read access (#1326)
+- Improved path traversal protection in various endpoints (#1326)
+
+### Added
+
+- Hebrew translation JSON (#1322)
+- Translation files for Indian languages (#1321)
+- Support for displaying function calls as tools in Chain of Thought for LlamaIndexCallbackHandler (#1285)
+- Improved feedback UI with refined type handling (#1325)
+
+### Changed
+
+- Upgraded cryptography from 43.0.0 to 43.0.1 in backend dependencies (#1298)
+- Improved GitHub Actions workflow (#1301)
+- Enhanced data layer cleanup for better performance (#1288)
+- Factored out callbacks with extensive test coverage (#1292)
+- Adopted strict adherence to Semantic Versioning (SemVer)
+
+### Fixed
+
+- Websocket connection issues when submounting Chainlit (#1337)
+- Show_input functionality on chat resume for SQLAlchemy (#1221)
+- Negative feedback class incorrectness (#1332)
+- Interaction issues with Chat Profile Description Popover (#1276)
+- Centered steps within assistant messages (#1324)
+- Minor spelling errors (#1341)
+
+### Development
+
+- Added documentation for release engineering process (#1293)
+- Implemented testing for FastAPI version matrix (#1306)
+- Removed wait statements from E2E tests for improved performance (#1270)
+- Bumped dataclasses to latest version (#1291)
+- Ensured environment loading before other imports (#1328)
+
+## [1.1.404] - 2024-09-04
+
+### Security
+
+- **[breaking]**: Listen to 127.0.0.1 (localhost) instead on 0.0.0.0 (public) (#861).
+- **[breaking]**: Dropped support for Python 3.8, solving dependency resolution, addressing vulnerable dependencies (#1192, #1236, #1250).
+
+### Fixed
+
+- Frontend connection resuming after connection loss (#828).
+- Gracefully handle HTTP errors in data layers (#1232).
+- AttributeError: 'ChatCompletionChunk' object has no attribute 'get' in llama_index (#1229).
+- `edit_message` in correct place in default config, allowing users to edit messages (#1218).
+
+### Added
+
+- `CHAINLIT_APP_ROOT` environment variable to modify `APP_ROOT`, enabling the ability to set the location of `config.toml` and other setting files (#1259).
+- Poetry lockfile in GIT repository for reproducible builds (#1191).
+- pytest-based testing infrastructure, first unit tests of backend and testing on all supported Python versions (#1245 and #1271).
+- Black and isort added to dev dependencies group (#1217).
+
+## [1.1.403rc0] - 2024-08-13
+
+### Fixed
+
+- Langchain Callback handler IndexError
+- Attempt to fix websocket issues
+
+## [1.1.402] - 2024-08-07
+
+### Added
+
+- The `User` class now has a `display_name` field. It will not be persisted by the data layer.
+- The logout button will now reload the page (needed for custom auth providers)
+
+## [1.1.401] - 2024-08-02
+
+### Changed
+
+- Directly log step input args by name instead of wrapping them in "args" for readability.
+
+### Fixed
+
+- Langchain Callback handler ValueError('not enough values to unpack (expected 2, got 0)')
+
+## [1.1.400] - 2024-07-29
+
+### Changed
+
+- hide_cot becomes cot and has three possible values: hidden, tool_call, full
+- User feedback are now scoring an entire run instead of a specific message
+- Slack/Teams/Discord DM threads are now split by day
+- Slack DM now also use threads
+- Avatars are always displayed at the root level of the conversation
+
+### Removed
+
+- disable_feedback has been removed
+- root_message has been removed
+
+## [1.1.306] - 2024-07-03
+
+### Added
+
+- Messages are now editable. You can disable this feature with `config.features.edit_message = false`
+- `cl.chat_context` to help keeping track of the messages of the current thread
+- You can now enable debug_mode when mounting Chainlit as a sub app by setting the `CHAINLIT_DEBUG` to `true`.
+
+### Fixed
+
+- Message are now collapsible if too long
+- Only first level tool calls are displayed
+- OAuth redirection when mounting Chainlit on a FastAPI app should now work
+- The Langchain callback handler should better capture chain runs
+- The Llama Index callback handler should now work with other decorators
+
+## [1.1.305] - 2024-06-26
+
+### Added
+
+- Mistral AI instrumentation
+
+## [1.1.304] - 2024-06-21
+
+### Fixed
+
+- OAuth final redirection should account for root path if provided
+
+## [1.1.303] - 2024-06-20
+
+### Fixed
+
+- OAuth URL redirection should be correctly formed when using CHAINLIT_URL + submounted chainlit app
+
+## [1.1.302] - 2024-06-16
+
+### Added
+
+- Width and height option for the copilot bubble
+
+### Fixed
+
+- Chat profile icon in copilot should load
+- Theme should work with Copilot
+
+### Removed
+
+- Running toast when an action is running
+
+## [1.1.301] - 2024-06-14
+
+### Fixed
+
+- Azure AD oauth get_user_info not implemented error
+
+## [1.1.300] - 2024-06-13
+
+### Added
+
+- `@cl.set_starters` and `cl.Starter` to suggest conversation starters to the user
+- Teams integration
+- Expand copilot button
+- Debug mode when starting with `-d`. Only available if the data layer supports it. This replaces the Prompt Playground.
+- `default` theme config in `config.toml`
+- If only one OAuth provider is set, automatically redirect the user to it
+- Input streaming for tool calls
+
+### Changed
+
+- **[BREAKING]** Custom endpoints have been reworked. You should now mount your Chainlit app as a FastAPI subapp.
+- **[BREAKING]** Avatars have been reworked. `cl.Avatar` has been removed, instead place your avatars by name in `/public/avatars/*`
+- **[BREAKING]** The `running`, `took_one` and `took_other` translations have been replaced by `used`.
+- **[BREAKING]** `root` attribute of `cl.Step` has been removed. Use `cl.Message` to send root level messages.
+- Chain of Thought has been reworked. Only steps of type `tool` will be displayed if `hide_cot` is false
+- The `show_readme_as_default` config has been removed
+- No longer collapse root level messages
+- The blue alert "Continuing chat" has been removed.
+
+### Fix
+
+- The Chat Profile description should now disappear when not hovered.
+- Error handling of steps has been improved
+- No longer stream the first token twice
+- Copilot should now work as expected even if the user is closing/reopening it
+- Copilot CSS should no longer leak/be impacted by the host website CSS
+- Fix various `cl.Context` errors
+- Reworked message padding and spacing
+- Chat profile should now support non-ASCII characters (like chinese)
 
 ## [1.1.202] - 2024-05-22
 

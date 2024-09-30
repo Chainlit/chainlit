@@ -16,9 +16,10 @@ interface Props {
 export default function Widget({ config }: Props) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
   const customStyle = config.button?.style || {};
+  const buttonHeight = customStyle.height || customStyle.size || '60px';
   const style = {
-    width: customStyle.size || '60px',
-    height: customStyle.size || '60px',
+    width: customStyle.width || customStyle.size || '60px',
+    height: buttonHeight,
     bgcolor: customStyle.bgcolor || '#F80061',
     color: customStyle.color || 'white',
     '&:hover': {
@@ -35,7 +36,7 @@ export default function Widget({ config }: Props) {
 
   return (
     <>
-      <PopOver anchorEl={anchorEl} />
+      <PopOver anchorEl={anchorEl} buttonHeight={buttonHeight} />
       <Fab
         disableRipple
         aria-label="open copilot"

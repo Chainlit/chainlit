@@ -50,7 +50,7 @@ def get_configuration():
 
 
 def create_jwt(data: User) -> str:
-    to_encode = data.to_dict()  # type: Dict[str, Any]
+    to_encode: Dict[str, Any] = data.to_dict()
     to_encode.update(
         {
             "exp": datetime.utcnow()
@@ -71,7 +71,7 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         )
         del dict["exp"]
         user = User(**dict)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
     email = user.identifier
@@ -85,9 +85,9 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
     if data_layer := get_data_layer():
         try:
             persisted_user = await data_layer.get_user(user.identifier)
-            if persisted_user == None:
+            if persisted_user is None:
                 persisted_user = await data_layer.create_user(user)
-        except Exception as e:
+        except Exception:
             return user
 
         return persisted_user

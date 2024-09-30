@@ -7,8 +7,6 @@ dist
 
 *.files
 
-poetry.lock
-
 venv
 .venv
 .DS_Store
@@ -57,3 +55,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.aider*
+.coverage

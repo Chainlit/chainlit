@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from chainlit.step import Step
     from chainlit.user import PersistedUser, User
 
+CL_RUN_NAMES = ["on_chat_start", "on_message", "on_audio_end"]
+
 
 class ChainlitContextException(Exception):
     def __init__(self, msg="Chainlit context not found", *args, **kwargs):
@@ -27,6 +29,13 @@ class ChainlitContext:
     def current_step(self):
         if self.active_steps:
             return self.active_steps[-1]
+
+    @property
+    def current_run(self):
+        if self.active_steps:
+            return next(
+                (step for step in self.active_steps if step.name in CL_RUN_NAMES), None
+            )
 
     def __init__(
         self,
@@ -69,6 +78,8 @@ def init_http_context(
     user_env: Optional[Dict[str, str]] = None,
     client_type: ClientType = "webapp",
 ) -> ChainlitContext:
+    from chainlit.data import get_data_layer
+
     session_id = str(uuid.uuid4())
     thread_id = thread_id or str(uuid.uuid4())
     session = HTTPSession(
@@ -81,6 +92,13 @@ def init_http_context(
     )
     context = ChainlitContext(session)
     context_var.set(context)
+
+    if data_layer := get_data_layer():
+        if user_id := getattr(user, "id", None):
+            asyncio.create_task(
+                data_layer.update_thread(thread_id=thread_id, user_id=user_id)
+            )
+
     return context
 
 

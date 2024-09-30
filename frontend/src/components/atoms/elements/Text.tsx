@@ -1,13 +1,10 @@
-import { useRecoilValue } from 'recoil';
-
 import Box from '@mui/material/Box';
+
+import { type ITextElement, useConfig } from '@chainlit/react-client';
 
 import { Markdown } from 'components/molecules/Markdown';
 
 import { useFetch } from 'hooks/useFetch';
-
-import { type ITextElement } from 'client-types/';
-import { projectSettingsState } from 'state/project';
 
 interface Props {
   element: ITextElement;
@@ -15,16 +12,16 @@ interface Props {
 
 const TextElement = ({ element }: Props) => {
   const { data, error, isLoading } = useFetch(element.url || null);
-  const projectSettings = useRecoilValue(projectSettingsState);
-  const allowHtml = projectSettings?.features?.unsafe_allow_html;
-  const latex = projectSettings?.features?.latex;
+  const { config } = useConfig();
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
 
   let content = '';
 
   if (isLoading) {
     content = 'Loading...';
   } else if (error) {
-    content = 'An error occured';
+    content = 'An error occurred';
   } else if (data) {
     content = data;
   }
@@ -35,7 +32,9 @@ const TextElement = ({ element }: Props) => {
 
   return (
     <Box sx={{ fontFamily: (theme) => theme.typography.fontFamily }}>
-      <Markdown allowHtml={allowHtml} latex={latex}>{content}</Markdown>
+      <Markdown allowHtml={allowHtml} latex={latex}>
+        {content}
+      </Markdown>
     </Box>
   );
 };

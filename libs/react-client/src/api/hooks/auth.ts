@@ -1,25 +1,34 @@
 import jwt_decode from 'jwt-decode';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { accessTokenState, threadHistoryState, userState } from 'src/state';
-import { IUser } from 'src/types';
+import { ChainlitContext } from 'src/context';
+import {
+  accessTokenState,
+  authState,
+  threadHistoryState,
+  userState
+} from 'src/state';
+import { IAuthConfig, IUser } from 'src/types';
 import { getToken, removeToken, setToken } from 'src/utils/token';
 
-import { ChainlitAPI } from '..';
 import { useApi } from './api';
 
-export const useAuth = (apiClient: ChainlitAPI) => {
-  const { data, isLoading } = useApi<{
-    requireLogin: boolean;
-    passwordAuth: boolean;
-    headerAuth: boolean;
-    oauthProviders: string[];
-  }>(apiClient, '/auth/config');
+export const useAuth = () => {
+  const apiClient = useContext(ChainlitContext);
+  const [authConfig, setAuthConfig] = useRecoilState(authState);
+  const [user, setUser] = useRecoilState(userState);
+  const { data, isLoading } = useApi<IAuthConfig>(
+    authConfig ? null : '/auth/config'
+  );
   const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   const setThreadHistory = useSetRecoilState(threadHistoryState);
-  const [user, setUser] = useRecoilState(userState);
 
-  const isReady = !!(!isLoading && data);
+  useEffect(() => {
+    if (!data) return;
+    setAuthConfig(data);
+  }, [data, setAuthConfig]);
+
+  const isReady = !!(!isLoading && authConfig);
 
   const logout = async () => {
     await apiClient.logout(accessToken);
@@ -59,9 +68,9 @@ export const useAuth = (apiClient: ChainlitAPI) => {
 
   const isAuthenticated = !!accessToken;
 
-  if (data && !data.requireLogin) {
+  if (authConfig && !authConfig.requireLogin) {
     return {
-      data,
+      authConfig,
       user: null,
       isReady,
       isAuthenticated: true,
@@ -72,7 +81,7 @@ export const useAuth = (apiClient: ChainlitAPI) => {
   }
 
   return {
-    data,
+    data: authConfig,
     user: user,
     isAuthenticated,
     isReady,

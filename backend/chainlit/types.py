@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from chainlit.step import StepDict
 
 from dataclasses_json import DataClassJsonMixin
-from literalai import ChatGeneration, CompletionGeneration
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
@@ -150,7 +149,7 @@ class FileDict(TypedDict):
     type: str
 
 
-class UIMessagePayload(TypedDict):
+class MessagePayload(TypedDict):
     message: "StepDict"
     fileReferences: Optional[List[FileReference]]
 
@@ -193,21 +192,6 @@ class AskActionResponse(TypedDict):
     collapsed: bool
 
 
-class GenerationRequest(BaseModel):
-    chatGeneration: Optional[ChatGeneration] = None
-    completionGeneration: Optional[CompletionGeneration] = None
-    userEnv: Dict[str, str]
-
-    @property
-    def generation(self):
-        if self.chatGeneration:
-            return self.chatGeneration
-        return self.completionGeneration
-
-    def is_chat(self):
-        return self.chatGeneration is not None
-
-
 class DeleteThreadRequest(BaseModel):
     threadId: str
 
@@ -227,6 +211,15 @@ class Theme(str, Enum):
 
 
 @dataclass
+class Starter(DataClassJsonMixin):
+    """Specification for a starter that can be chosen by the user at the thread start."""
+
+    label: str
+    message: str
+    icon: Optional[str] = None
+
+
+@dataclass
 class ChatProfile(DataClassJsonMixin):
     """Specification for a chat profile that can be chosen by the user at the thread start."""
 
@@ -234,6 +227,7 @@ class ChatProfile(DataClassJsonMixin):
     markdown_description: str
     icon: Optional[str] = None
     default: bool = False
+    starters: Optional[List[Starter]] = None
 
 
 FeedbackStrategy = Literal["BINARY"]
@@ -249,8 +243,8 @@ class FeedbackDict(TypedDict):
 @dataclass
 class Feedback:
     forId: str
-    threadId: Optional[str]
     value: Literal[0, 1]
+    threadId: Optional[str] = None
     id: Optional[str] = None
     comment: Optional[str] = None
 

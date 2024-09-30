@@ -18,7 +18,7 @@ const _PlotlyElement = ({ element }: Props) => {
   if (isLoading) {
     return <div>Loading...</div>;
   } else if (error) {
-    return <div>An error occured</div>;
+    return <div>An error occurred</div>;
   }
 
   let state;
@@ -37,7 +37,12 @@ const _PlotlyElement = ({ element }: Props) => {
         layout={state.layout}
         frames={state.frames}
         config={state.config}
-        style={{ width: '100%', height: '100%' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '1rem',
+          overflow: 'hidden'
+        }}
         useResizeHandler={true}
       />
     </Suspense>

@@ -1,10 +1,12 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import * as yup from 'yup';
 
 import { Alert, Box, Button, Typography } from '@mui/material';
+
+import { useConfig } from '@chainlit/react-client';
 
 import { TextInput } from 'components/atoms/inputs/TextInput';
 import { Translator } from 'components/i18n';
@@ -13,19 +15,18 @@ import { Header } from 'components/organisms/header';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-import { projectSettingsState } from 'state/project';
 import { userEnvState } from 'state/user';
 
 export default function Env() {
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
-  const pSettings = useRecoilValue(projectSettingsState);
+  const { config } = useConfig();
   const layoutMaxWidth = useLayoutMaxWidth();
 
   const navigate = useNavigate();
 
   const { t } = useTranslation();
 
-  const requiredKeys = pSettings?.userEnv || [];
+  const requiredKeys = config?.userEnv || [];
 
   const initialValues: Record<string, string> = {};
   const _schema: Record<string, yup.StringSchema> = {};

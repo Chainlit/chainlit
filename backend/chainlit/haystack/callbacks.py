@@ -1,14 +1,12 @@
 import re
 from typing import Any, Generic, List, Optional, TypeVar
 
-from chainlit.context import context
+from chainlit import Message
 from chainlit.step import Step
 from chainlit.sync import run_sync
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
 from literalai.helper import utc_now
-
-from chainlit import Message
 
 T = TypeVar("T")
 
@@ -68,9 +66,7 @@ class HaystackAgentCallbackHandler:
             self.last_tokens: List[str] = []
             self.answer_reached = False
 
-        root_message = context.session.root_message
-        parent_id = root_message.id if root_message else None
-        run_step = Step(name=self.agent_name, type="run", parent_id=parent_id)
+        run_step = Step(name=self.agent_name, type="run")
         run_step.start = utc_now()
         run_step.input = kwargs
 

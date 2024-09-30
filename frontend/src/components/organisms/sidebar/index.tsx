@@ -1,6 +1,5 @@
-import { useAuth } from 'api/auth';
 import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import { Alert } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -8,12 +7,12 @@ import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import UserButton from 'components/atoms/buttons/userButton';
+import { useAuth, useConfig } from '@chainlit/react-client';
+
+import GithubButton from 'components/atoms/buttons/githubButton';
 import { Logo } from 'components/atoms/logo';
-import NewChatButton from 'components/molecules/newChatButton';
 import ReadmeButton from 'components/organisms/readmeButton';
 
-import { projectSettingsState } from 'state/project';
 import { settingsState } from 'state/settings';
 
 import TriggerButton from './OpenSideBarButton';
@@ -26,8 +25,8 @@ const SideBar = () => {
   const isMobile = useMediaQuery('(max-width:66rem)');
 
   const [settings, setSettings] = useRecoilState(settingsState);
-  const pSettings = useRecoilValue(projectSettingsState);
-  const enableHistory = !!user.accessToken && !!pSettings?.dataPersistence;
+  const { config } = useConfig();
+  const enableHistory = !!user.accessToken && !!config?.dataPersistence;
 
   useEffect(() => {
     if (isMobile) {
@@ -75,11 +74,11 @@ const SideBar = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mt: 1.5
+            height: '45px',
+            mt: 1
           }}
         >
           <Logo style={{ maxHeight: '25px' }} />
-          <NewChatButton edge="end" />
         </Stack>
         {enableHistory ? (
           <ThreadHistory />
@@ -88,10 +87,10 @@ const SideBar = () => {
             <Alert severity="info">Conversations are not persisted.</Alert>
           </Box>
         )}
-        <ReadmeButton />
-        <Box mb={2}>
-          <UserButton />
-        </Box>
+        <Stack mb={2}>
+          <ReadmeButton />
+          <GithubButton />
+        </Stack>
       </Drawer>
       {!isMobile ? (
         <Box

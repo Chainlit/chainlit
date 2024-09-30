@@ -18,7 +18,7 @@ export default function ScrollDownButton({ onClick }: Props) {
         color: 'background.paper',
         zIndex: 1,
         transform: 'translateY(-100%)',
-        top: 0,
+        top: -20,
         left: 0,
         right: 0,
         '&:hover': {

@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
   args: {
-    config: {
+    widgetConfig: {
       chainlitServer: 'http://localhost:8000'
     }
   }
@@ -29,7 +29,7 @@ export const Primary: Story = {
 
 export const Secondary: Story = {
   args: {
-    config: {
+    widgetConfig: {
       chainlitServer: 'http://localhost:8000',
       theme: 'dark',
       fontFamily: '"Nunito Sans"',

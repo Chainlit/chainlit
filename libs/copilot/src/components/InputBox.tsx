@@ -4,12 +4,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Box } from '@mui/material';
 
-import { useAuth } from '@chainlit/app/src/api/auth';
 import ScrollDownButton from '@chainlit/app/src/components/atoms/buttons/scrollDownButton';
 import { IAttachment } from '@chainlit/app/src/state/chat';
-import { IProjectSettings } from '@chainlit/app/src/state/project';
 import { inputHistoryState } from '@chainlit/app/src/state/userInputHistory';
-import { FileSpec, IStep, useChatInteract } from '@chainlit/react-client';
+import {
+  FileSpec,
+  IStep,
+  useAuth,
+  useChatInteract
+} from '@chainlit/react-client';
 
 import Input from './Input';
 
@@ -19,7 +22,6 @@ interface Props {
   onFileUploadError: (error: string) => void;
   setAutoScroll: (autoScroll: boolean) => void;
   autoScroll?: boolean;
-  projectSettings?: IProjectSettings;
 }
 
 const InputBox = memo(
@@ -28,8 +30,7 @@ const InputBox = memo(
     onFileUpload,
     onFileUploadError,
     setAutoScroll,
-    autoScroll,
-    projectSettings
+    autoScroll
   }: Props) => {
     const setInputHistory = useSetRecoilState(inputHistoryState);
 
@@ -71,7 +72,7 @@ const InputBox = memo(
         setAutoScroll(true);
         sendMessage(message, fileReferences);
       },
-      [user, projectSettings, sendMessage]
+      [user, sendMessage]
     );
 
     const onReply = useCallback(
