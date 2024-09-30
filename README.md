@@ -68,12 +68,11 @@ async def main(message: cl.Message):
         None.
     """
 
-    final_answer = await cl.Message(content="").send()
 
     # Call the tool
-    final_answer.content = await tool()
+    tool_res = await tool()
 
-    await final_answer.update()
+    await cl.Message(content=tool_res).send()
 ```
 
 Now run it!
