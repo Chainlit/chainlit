@@ -83,12 +83,15 @@ class Element:
     language: Optional[str] = None
     # Mime type, infered based on content if not provided
     mime: Optional[str] = None
+    # Thread id
+    thread_id: Optional[str] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
         self.updatable = False
-        self.thread_id = context.session.thread_id
+        if not self.thread_id:
+            self.thread_id = context.session.thread_id
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")

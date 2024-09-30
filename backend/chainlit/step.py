@@ -189,12 +189,13 @@ class Step:
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
+        thread_id: Optional[str] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
         self._input = ""
         self._output = ""
-        self.thread_id = context.session.thread_id
+        self.thread_id = thread_id or context.session.thread_id
         self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
