@@ -96,7 +96,7 @@ class GoogleOAuthProvider(OAuthProvider):
             "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
             "response_type": "code",
             "access_type": "offline",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -164,7 +164,7 @@ class AzureADOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "https://graph.microsoft.com/User.Read",
             "response_mode": "query",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -249,7 +249,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
             "response_mode": "form_post",
             "nonce": nonce,
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -329,7 +329,7 @@ class OktaOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "response_mode": "query",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     def get_authorization_server_path(self):
@@ -401,7 +401,7 @@ class Auth0OAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "audience": f"{self.original_domain}/userinfo",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -459,7 +459,7 @@ class DescopeOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "audience": f"{self.domain}/userinfo",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -518,7 +518,7 @@ class AWSCognitoOAuthProvider(OAuthProvider):
             "response_type": "code",
             "client_id": self.client_id,
             "scope": "openid profile email",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -587,7 +587,7 @@ class GitlabOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "scope": "openid profile email",
             "response_type": "code",
-            "prompt": "consent",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
