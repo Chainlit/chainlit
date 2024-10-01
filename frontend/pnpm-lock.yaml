@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@chainlit/copilot':
+        specifier: workspace:^
+        version: link:../libs/copilot
       '@chainlit/react-client':
         specifier: workspace:^
         version: link:../libs/react-client
