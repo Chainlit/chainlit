@@ -27,7 +27,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.607"
+literalai = "0.0.623"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.110.1,<0.113"
 starlette = "^0.37.2"
@@ -127,3 +127,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
