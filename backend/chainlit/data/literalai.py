@@ -14,9 +14,17 @@ from literalai.observability.step import StepDict as LiteralStepDict
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.utils import queue_until_user_message
-from chainlit.element import Element, ElementDict
+from chainlit.element import Audio, Element, ElementDict, File, Image, Pdf, Text, Video
 from chainlit.logger import logger
-from chainlit.step import FeedbackDict, Step, StepDict, StepType, TrueStepType
+from chainlit.step import (
+    FeedbackDict,
+    Step,
+    StepDict,
+    StepType,
+    TrueStepType,
+    check_add_step_in_cot,
+    stub_step,
+)
 from chainlit.types import (
     Feedback,
     PageInfo,
@@ -117,8 +125,6 @@ class LiteralToChainlitConverter:
     def attachment_to_element(
         cls, attachment: LiteralAttachment, thread_id: Optional[str] = None
     ) -> Element:
-        from chainlit.element import Element, File, Image, Audio, Video, Text, Pdf
-
         metadata = attachment.metadata or {}
         element_type = metadata.get("type", "file")
 
@@ -448,8 +454,6 @@ class LiteralDataLayer(BaseDataLayer):
         )
 
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
-        from chainlit.step import check_add_step_in_cot, stub_step
-
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
