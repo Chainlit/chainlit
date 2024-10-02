@@ -4,6 +4,36 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0rc0] - 2024-10-02
+
+### Added
+
+- SQLite support in SQLAlchemy integration (#1137)
+- Extensive test coverage for LiteralDataLayer and SQLAlchemyDataLayer
+- `get_element()` method to SQLAlchemyDataLayer (#1346)
+
+### Changed
+
+- Bumped LiteralAI dependency to version 0.0.625 (#1376)
+- Refactored LiteralDataLayer for improved performance and consistency
+- Refactored context handling in SQLAlchemy data layer (#1319)
+- Enhanced GitHub Actions workflow with restricted permissions (#1349)
+
+### Fixed
+
+- Resolved issues with SQLite database support (#1137)
+- Addressed automatic OAuth login after logout (#1362)
+- Various code style and linting improvements (#1353, #1348, #1347)
+
+### Development
+
+- Implemented LiteralToChainlitConverter class for handling conversions
+- Added comprehensive unit tests for data layer components
+- Improved import structure and removed unused imports
+- Updated README with latest project information (#1351)
+
+We encourage users to thoroughly test this release candidate, particularly the LiteralAI integration and history features, and provide feedback before the final 1.3.0 release.
+
 ## [1.2.0] - 2024-09-16
 
 ### Security
