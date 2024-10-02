@@ -16,7 +16,7 @@ from starlette.datastructures import Headers
 
 @trace
 def password_auth_callback(
-    func: Callable[[str, str], Awaitable[Optional[User]]]
+    func: Callable[[str, str], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
@@ -38,7 +38,7 @@ def password_auth_callback(
 
 @trace
 def header_auth_callback(
-    func: Callable[[Headers], Awaitable[Optional[User]]]
+    func: Callable[[Headers], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
@@ -177,7 +177,7 @@ def set_chat_profiles(
 
 @trace
 def set_starters(
-    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
@@ -245,7 +245,7 @@ def on_audio_end(func: Callable) -> Callable:
 
 @trace
 def author_rename(
-    func: Callable[[str], Awaitable[str]]
+    func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.

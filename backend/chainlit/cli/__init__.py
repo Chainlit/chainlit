@@ -186,7 +186,7 @@ def chainlit_run(
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
         # This is required for authentication tests
-        os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"
+        os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
     else:
         trace_event("chainlit run")
 

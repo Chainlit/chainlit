@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import pytest
+from chainlit import config
 from chainlit.callbacks import password_auth_callback
 from chainlit.user import User
-
-from chainlit import config
 
 
 @pytest.fixture
@@ -19,7 +18,7 @@ def test_config(monkeypatch: pytest.MonkeyPatch):
 async def test_password_auth_callback(test_config):
     @password_auth_callback
     async def auth_func(username: str, password: str) -> User | None:
-        if username == "testuser" and password == "testpass":
+        if username == "testuser" and password == "testpass":  # nosec B105
             return User(identifier="testuser")
         return None
 
@@ -70,7 +69,6 @@ async def test_oauth_callback(test_config):
     from unittest.mock import patch
 
     from chainlit.callbacks import oauth_callback
-    from chainlit.config import config
     from chainlit.user import User
 
     # Mock the get_configured_oauth_providers function
@@ -86,7 +84,7 @@ async def test_oauth_callback(test_config):
             default_app_user: User,
             id_token: str | None = None,
         ) -> User | None:
-            if provider_id == "google" and token == "valid_token":
+            if provider_id == "google" and token == "valid_token":  # nosec B105
                 return User(identifier="oauth_user")
             return None
 
@@ -139,7 +137,6 @@ async def test_on_message(mock_chainlit_context, test_config):
 
 async def test_on_stop(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_stop
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         stop_called = False
@@ -162,7 +159,6 @@ async def test_on_stop(mock_chainlit_context, test_config):
 async def test_action_callback(mock_chainlit_context, test_config):
     from chainlit.action import Action
     from chainlit.callbacks import action_callback
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         action_handled = False
@@ -186,7 +182,6 @@ async def test_action_callback(mock_chainlit_context, test_config):
 
 async def test_on_settings_update(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_settings_update
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         settings_updated = False
@@ -209,7 +204,6 @@ async def test_on_settings_update(mock_chainlit_context, test_config):
 
 async def test_author_rename(test_config):
     from chainlit.callbacks import author_rename
-    from chainlit.config import config
 
     @author_rename
     async def rename_author(author: str) -> str:
@@ -240,7 +234,6 @@ async def test_author_rename(test_config):
 
 async def test_on_chat_start(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_start
-    from chainlit.config import config
 
     async with mock_chainlit_context as context:
         chat_started = False
@@ -265,7 +258,6 @@ async def test_on_chat_start(mock_chainlit_context, test_config):
 
 async def test_on_chat_resume(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_resume
-    from chainlit.config import config
     from chainlit.types import ThreadDict
 
     async with mock_chainlit_context:
@@ -301,7 +293,6 @@ async def test_on_chat_resume(mock_chainlit_context, test_config):
 
 async def test_set_chat_profiles(mock_chainlit_context, test_config):
     from chainlit.callbacks import set_chat_profiles
-    from chainlit.config import config
     from chainlit.types import ChatProfile
 
     async with mock_chainlit_context:
@@ -329,7 +320,6 @@ async def test_set_chat_profiles(mock_chainlit_context, test_config):
 
 async def test_set_starters(mock_chainlit_context, test_config):
     from chainlit.callbacks import set_starters
-    from chainlit.config import config
     from chainlit.types import Starter
 
     async with mock_chainlit_context:
@@ -360,7 +350,6 @@ async def test_set_starters(mock_chainlit_context, test_config):
 
 async def test_on_chat_end(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_chat_end
-    from chainlit.config import config
 
     async with mock_chainlit_context as context:
         chat_ended = False

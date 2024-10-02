@@ -2,24 +2,24 @@ import chainlit as cl
 
 
 @cl.action_callback("test action")
-async def on_action():
+async def on_test_action():
     await cl.Message(content="Executed test action!").send()
 
 
 @cl.action_callback("removable action")
-async def on_action(action: cl.Action):
+async def on_removable_action(action: cl.Action):
     await cl.Message(content="Executed removable action!").send()
     await action.remove()
 
 
 @cl.action_callback("multiple actions")
-async def on_action(action: cl.Action):
+async def on_multiple_actions(action: cl.Action):
     await cl.Message(content=f"Action(id={action.id}) has been removed!").send()
     await action.remove()
 
 
 @cl.action_callback("all actions removed")
-async def on_action(_: cl.Action):
+async def on_all_actions_removed(_: cl.Action):
     await cl.Message(content="All actions have been removed!").send()
     to_remove = cl.user_session.get("to_remove")  # type: cl.Message
     await to_remove.remove_actions()
