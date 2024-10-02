@@ -17,8 +17,10 @@ import {
   currentThreadIdState,
   elementState,
   firstUserInteraction,
+  interruptAudioState,
   loadingState,
   messagesState,
+  outputAudioChunkState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -40,6 +42,8 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
+import { OutputAudioChunk } from './types/audio';
+
 import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
@@ -52,6 +56,8 @@ const useChatSession = () => {
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const setOutputAudioChunk = useSetRecoilState(outputAudioChunkState);
+  const setInterruptAudio = useSetRecoilState(interruptAudioState);
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
@@ -130,6 +136,14 @@ const useChatSession = () => {
       socket.on('reload', () => {
         socket.emit('clear_session');
         window.location.reload();
+      });
+
+      socket.on('audio_chunk', (chunk: OutputAudioChunk) => {
+        setOutputAudioChunk(chunk);
+      });
+
+      socket.on('audio_interrupt', () => {
+        setInterruptAudio(Date.now());
       });
 
       socket.on('resume_thread', (thread: IThread) => {

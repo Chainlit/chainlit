@@ -43,7 +43,7 @@ from chainlit.message import (
 )
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
-from chainlit.types import AudioChunk, ChatProfile, Starter
+from chainlit.types import InputAudioChunk, OutputAudioChunk, ChatProfile, Starter
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
@@ -117,7 +117,8 @@ __all__ = [
     "user_session",
     "chat_context",
     "CopilotFunction",
-    "AudioChunk",
+    "InputAudioChunk",
+    "OutputAudioChunk",
     "Action",
     "User",
     "PersistedUser",

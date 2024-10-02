@@ -3,6 +3,8 @@ import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
+import { OutputAudioChunk } from './types/audio';
+
 import {
   IAction,
   IAsk,
@@ -73,6 +75,16 @@ export const loadingState = atom<boolean>({
 
 export const askUserState = atom<IAsk | undefined>({
   key: 'AskUser',
+  default: undefined
+});
+
+export const outputAudioChunkState = atom<OutputAudioChunk | undefined>({
+  key: 'OutputAudioChunk',
+  default: undefined
+});
+
+export const interruptAudioState = atom<number | undefined>({
+  key: 'InterruptAudio',
   default: undefined
 });
 
