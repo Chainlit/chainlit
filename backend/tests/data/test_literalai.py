@@ -11,7 +11,7 @@ from literalai.observability.step import (
 from httpx import HTTPStatusError, RequestError
 
 from literalai import AsyncLiteralClient, PaginatedResponse, PageInfo, Thread, UserDict
-from literalai import Step as LiteralStep
+from literalai import Step as LiteralStep, Attachment as LiteralAttachment
 from literalai import Thread as LiteralThread
 from literalai import User as LiteralUser
 from literalai import Score as LiteralScore
@@ -124,6 +124,26 @@ def test_filters() -> ThreadFilter:
 @pytest.fixture
 def test_pagination() -> Pagination:
     return Pagination(first=10, cursor=None)
+
+
+@pytest.fixture
+def test_attachment(
+    test_thread: LiteralThread, test_step: LiteralStep
+) -> LiteralAttachment:
+    return Attachment(
+        id="test_attachment_id",
+        step_id=test_step.id,
+        thread_id=test_thread.id,
+        metadata={
+            "display": "side",
+            "language": "python",
+            "type": "file",
+        },
+        mime="text/plain",
+        name="test_file.txt",
+        object_key="test_object_key",
+        url="https://example.com/test_file.txt",
+    )
 
 
 async def test_create_step(
@@ -400,24 +420,10 @@ async def test_get_thread_with_attachment(
     mock_literal_client: Mock,
     test_thread: LiteralThread,
     test_step: LiteralStep,
+    test_attachment: LiteralAttachment,
 ):
-    # Create a mock attachment
-    mock_attachment = Mock()
-    mock_attachment.id = "test_attachment_id"
-    mock_attachment.step_id = test_step.id
-    mock_attachment.thread_id = test_thread.id
-    mock_attachment.metadata = {
-        "display": "side",
-        "language": "python",
-        "type": "file",
-    }
-    mock_attachment.mime = "text/plain"
-    mock_attachment.name = "test_file.txt"
-    mock_attachment.object_key = "test_object_key"
-    mock_attachment.url = "https://example.com/test_file.txt"
-
     # Add the attachment to the test step
-    test_step.attachments = [mock_attachment]
+    test_step.attachments = [test_attachment]
     test_thread.steps = [test_step]
 
     mock_literal_client.api.get_thread.return_value = test_thread
@@ -578,40 +584,32 @@ async def test_create_element(
 async def test_get_element(
     literal_data_layer: LiteralDataLayer,
     mock_literal_client: Mock,
+    test_attachment: LiteralAttachment,
 ):
-    mock_attachment = Mock()
-    mock_attachment.id = "test_element_id"
-    mock_attachment.step_id = "test_step_id"
-    mock_attachment.thread_id = "test_thread_id"
-    mock_attachment.metadata = {
-        "display": "side",
-        "language": "python",
-        "type": "text",
-    }
-    mock_attachment.mime = "text/plain"
-    mock_attachment.name = "test.txt"
-    mock_attachment.object_key = "test_object_key"
-    mock_attachment.url = "https://example.com/test.txt"
+    mock_literal_client.api.get_attachment.return_value = test_attachment
 
-    mock_literal_client.api.get_attachment.return_value = mock_attachment
-
-    element = await literal_data_layer.get_element("test_thread_id", "test_element_id")
+    element_dict = await literal_data_layer.get_element(
+        "test_thread_id", "test_element_id"
+    )
 
     mock_literal_client.api.get_attachment.assert_awaited_once_with(
         id="test_element_id"
     )
 
-    assert element is not None
-    assert element["id"] == "test_element_id"
-    assert element["forId"] == "test_step_id"
-    assert element["threadId"] == "test_thread_id"
-    assert element["type"] == "text"
-    assert element["display"] == "side"
-    assert element["language"] == "python"
-    assert element["mime"] == "text/plain"
-    assert element["name"] == "test.txt"
-    assert element["objectKey"] == "test_object_key"
-    assert element["url"] == "https://example.com/test.txt"
+    assert element_dict is not None
+
+    # Compare element_dict attributes to attachment attributes
+    assert element_dict["id"] == test_attachment.id
+    assert element_dict["forId"] == test_attachment.step_id
+    assert element_dict["threadId"] == test_attachment.thread_id
+    assert element_dict["name"] == test_attachment.name
+    assert element_dict["mime"] == test_attachment.mime
+    assert element_dict["url"] == test_attachment.url
+    assert element_dict["objectKey"] == test_attachment.object_key
+    assert test_attachment.metadata
+    assert element_dict["display"] == test_attachment.metadata["display"]
+    assert element_dict["language"] == test_attachment.metadata["language"]
+    assert element_dict["type"] == test_attachment.metadata["type"]
 
 
 async def test_upsert_feedback_create(
