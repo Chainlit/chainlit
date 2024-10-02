@@ -75,6 +75,7 @@ const AuthLogin = ({
     setErrorState(undefined);
     formik.resetForm();
   }, [showSignIn]);
+
   useEffect(() => {
     setErrorState(error);
   }, [error]);
