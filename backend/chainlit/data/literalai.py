@@ -440,14 +440,15 @@ class LiteralDataLayer(BaseDataLayer):
             data=chainlit_threads,
         )
 
-    async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
+    async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         from chainlit.step import check_add_step_in_cot, stub_step
 
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
-        elements = []  # List[ElementDict]
-        steps = []  # List[StepDict]
+
+        elements: List[ElementDict] = []
+        steps: List[StepDict] = []
         if thread.steps:
             for step in thread.steps:
                 for attachment in step.attachments:
