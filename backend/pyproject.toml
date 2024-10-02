@@ -127,3 +127,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
