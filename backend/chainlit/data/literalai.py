@@ -2,10 +2,21 @@ import json
 from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
+from httpx import HTTPStatusError, RequestError
+from literalai import (
+    Attachment as LiteralAttachment,
+    Score as LiteralScore,
+    Step as LiteralStep,
+    Thread as LiteralThread,
+)
+from literalai.observability.filter import threads_filters as LiteralThreadsFilters
+from literalai.observability.step import StepDict as LiteralStepDict
+
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.utils import queue_until_user_message
+from chainlit.element import Element, ElementDict
 from chainlit.logger import logger
-from chainlit.step import Step, TrueStepType, StepType
+from chainlit.step import FeedbackDict, Step, StepDict, StepType, TrueStepType
 from chainlit.types import (
     Feedback,
     PageInfo,
@@ -15,15 +26,6 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
-from chainlit.element import Element, ElementDict
-from chainlit.step import FeedbackDict, StepDict
-
-from httpx import HTTPStatusError, RequestError
-from literalai import Attachment, Thread as LiteralThread
-from literalai import Score as LiteralScore
-from literalai import Step as LiteralStep
-from literalai.observability.filter import threads_filters as LiteralThreadsFilters
-from literalai.observability.step import StepDict as LiteralStepDict
 
 
 class LiteralToChainlitConverter:
@@ -91,7 +93,7 @@ class LiteralToChainlitConverter:
         }
 
     @classmethod
-    def attachment_to_elementdict(cls, attachment: Attachment) -> ElementDict:
+    def attachment_to_elementdict(cls, attachment: LiteralAttachment) -> ElementDict:
         metadata = attachment.metadata or {}
         return {
             "chainlitKey": None,
@@ -113,7 +115,7 @@ class LiteralToChainlitConverter:
 
     @classmethod
     def attachment_to_element(
-        cls, attachment: Attachment, thread_id: Optional[str] = None
+        cls, attachment: LiteralAttachment, thread_id: Optional[str] = None
     ) -> Element:
         from chainlit.element import Element, File, Image, Audio, Video, Text, Pdf
 

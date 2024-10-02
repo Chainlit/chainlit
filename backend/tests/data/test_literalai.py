@@ -1,26 +1,32 @@
-import pytest
 import datetime
 import uuid
 from unittest.mock import ANY, AsyncMock, Mock, patch
 
-from literalai.observability.thread import ThreadDict as LiteralThreadDict
+import pytest
+from httpx import HTTPStatusError, RequestError
+from literalai import (
+    AsyncLiteralClient,
+    Attachment,
+    Attachment as LiteralAttachment,
+    PageInfo,
+    PaginatedResponse,
+    Score as LiteralScore,
+    Step as LiteralStep,
+    Thread,
+    Thread as LiteralThread,
+    User as LiteralUser,
+    UserDict,
+)
+from literalai.api import AsyncLiteralAPI
 from literalai.observability.step import (
     AttachmentDict as LiteralAttachmentDict,
     StepDict as LiteralStepDict,
 )
-from httpx import HTTPStatusError, RequestError
+from literalai.observability.thread import ThreadDict as LiteralThreadDict
 
-from literalai import AsyncLiteralClient, PaginatedResponse, PageInfo, Thread, UserDict
-from literalai import Step as LiteralStep, Attachment as LiteralAttachment
-from literalai import Thread as LiteralThread
-from literalai import User as LiteralUser
-from literalai import Score as LiteralScore
-from literalai import Attachment
-from literalai.api import AsyncLiteralAPI
-
-from chainlit.step import Step, StepDict
-from chainlit.element import File, Image, Audio, Video, Text, Pdf
 from chainlit.data.literalai import LiteralDataLayer, LiteralToChainlitConverter
+from chainlit.element import Audio, File, Image, Pdf, Text, Video
+from chainlit.step import Step, StepDict
 from chainlit.types import (
     Feedback,
     Pagination,
