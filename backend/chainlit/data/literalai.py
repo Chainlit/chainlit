@@ -112,7 +112,9 @@ class LiteralToChainlitConverter:
         }
 
     @classmethod
-    def attachment_to_element(cls, attachment: Attachment) -> Element:
+    def attachment_to_element(
+        cls, attachment: Attachment, thread_id: Optional[str] = None
+    ) -> Element:
         from chainlit.element import Element, File, Image, Audio, Video, Text, Pdf
 
         metadata = attachment.metadata or {}
@@ -127,6 +129,8 @@ class LiteralToChainlitConverter:
             "pdf": Pdf,
         }.get(element_type, Element)
 
+        assert thread_id or attachment.thread_id
+
         element = element_class(
             name=attachment.name or "",
             display=metadata.get("display", "side"),
@@ -134,7 +138,7 @@ class LiteralToChainlitConverter:
             size=metadata.get("size"),
             url=attachment.url,
             mime=attachment.mime,
-            thread_id=attachment.thread_id,
+            thread_id=thread_id or attachment.thread_id,
         )
         element.id = attachment.id or ""
         element.for_id = attachment.step_id
@@ -162,7 +166,8 @@ class LiteralToChainlitConverter:
 
         if step.attachments:
             chainlit_step.elements = [
-                cls.attachment_to_element(attachment) for attachment in step.attachments
+                cls.attachment_to_element(attachment, chainlit_step.thread_id)
+                for attachment in step.attachments
             ]
 
         return chainlit_step
