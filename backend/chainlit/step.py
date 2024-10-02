@@ -30,7 +30,7 @@ def check_add_step_in_cot(step: "Step"):
     return True
 
 
-def stub_step(step: "Step"):
+def stub_step(step: "Step") -> "StepDict":
     return {
         "type": step.type,
         "name": step.name,
