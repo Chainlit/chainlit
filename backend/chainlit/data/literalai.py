@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
 from chainlit.data.base import BaseDataLayer
