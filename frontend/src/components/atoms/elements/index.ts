@@ -1,4 +1,5 @@
 export { AudioElement } from './Audio';
+export { DataframeElement } from './Dataframe';
 export { Element } from './Element';
 export { ElementSideView } from './ElementSideView';
 export { ElementView } from './ElementView';
@@ -12,6 +13,7 @@ export { VideoElement } from './Video';
 
 // Inlined
 export { InlinedAudioList } from './InlinedAudioList';
+export { InlinedDataframeList } from './InlinedDataframeList';
 export { InlinedElements } from './InlinedElements';
 export { InlinedFileList } from './InlinedFileList';
 export { InlinedImageList } from './InlinedImageList';
