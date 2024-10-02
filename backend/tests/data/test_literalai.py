@@ -965,8 +965,6 @@ def test_step_to_step():
             "attachments": [
                 {
                     "id": "test_attachment_id",
-                    "stepId": "test_step_id",
-                    "threadId": "test_thread_id",
                     "name": "test.txt",
                     "mime": "text/plain",
                     "url": "https://example.com/test.txt",
