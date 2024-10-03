@@ -1,11 +1,30 @@
 import json
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
+from httpx import HTTPStatusError, RequestError
+from literalai import (
+    Attachment as LiteralAttachment,
+    Score as LiteralScore,
+    Step as LiteralStep,
+    Thread as LiteralThread,
+)
+from literalai.observability.filter import threads_filters as LiteralThreadsFilters
+from literalai.observability.step import StepDict as LiteralStepDict
+
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.utils import queue_until_user_message
+from chainlit.element import Audio, Element, ElementDict, File, Image, Pdf, Text, Video
 from chainlit.logger import logger
-from chainlit.step import Step, TrueStepType, StepType
+from chainlit.step import (
+    FeedbackDict,
+    Step,
+    StepDict,
+    StepType,
+    TrueStepType,
+    check_add_step_in_cot,
+    stub_step,
+)
 from chainlit.types import (
     Feedback,
     PageInfo,
@@ -15,15 +34,6 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
-from chainlit.element import Element, ElementDict
-from chainlit.step import FeedbackDict, StepDict
-
-from httpx import HTTPStatusError, RequestError
-from literalai import Attachment, Thread as LiteralThread
-from literalai import Score as LiteralScore
-from literalai import Step as LiteralStep
-from literalai.observability.filter import threads_filters as LiteralThreadsFilters
-from literalai.observability.step import StepDict as LiteralStepDict
 
 
 class LiteralToChainlitConverter:
@@ -91,7 +101,7 @@ class LiteralToChainlitConverter:
         }
 
     @classmethod
-    def attachment_to_elementdict(cls, attachment: Attachment) -> ElementDict:
+    def attachment_to_elementdict(cls, attachment: LiteralAttachment) -> ElementDict:
         metadata = attachment.metadata or {}
         return {
             "chainlitKey": None,
@@ -112,9 +122,9 @@ class LiteralToChainlitConverter:
         }
 
     @classmethod
-    def attachment_to_element(cls, attachment: Attachment) -> Element:
-        from chainlit.element import Element, File, Image, Audio, Video, Text, Pdf
-
+    def attachment_to_element(
+        cls, attachment: LiteralAttachment, thread_id: Optional[str] = None
+    ) -> Element:
         metadata = attachment.metadata or {}
         element_type = metadata.get("type", "file")
 
@@ -127,6 +137,8 @@ class LiteralToChainlitConverter:
             "pdf": Pdf,
         }.get(element_type, Element)
 
+        assert thread_id or attachment.thread_id
+
         element = element_class(
             name=attachment.name or "",
             display=metadata.get("display", "side"),
@@ -134,7 +146,7 @@ class LiteralToChainlitConverter:
             size=metadata.get("size"),
             url=attachment.url,
             mime=attachment.mime,
-            thread_id=attachment.thread_id,
+            thread_id=thread_id or attachment.thread_id,
         )
         element.id = attachment.id or ""
         element.for_id = attachment.step_id
@@ -162,7 +174,8 @@ class LiteralToChainlitConverter:
 
         if step.attachments:
             chainlit_step.elements = [
-                cls.attachment_to_element(attachment) for attachment in step.attachments
+                cls.attachment_to_element(attachment, chainlit_step.thread_id)
+                for attachment in step.attachments
             ]
 
         return chainlit_step
@@ -440,14 +453,13 @@ class LiteralDataLayer(BaseDataLayer):
             data=chainlit_threads,
         )
 
-    async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
-        from chainlit.step import check_add_step_in_cot, stub_step
-
+    async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
-        elements = []  # List[ElementDict]
-        steps = []  # List[StepDict]
+
+        elements: List[ElementDict] = []
+        steps: List[StepDict] = []
         if thread.steps:
             for step in thread.steps:
                 for attachment in step.attachments:
