@@ -645,7 +645,7 @@ async def oauth_azure_hf_callback(
 
 
 _language_pattern = (
-    "^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?(-[a-zA-Z]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,3})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
 )
 
 
