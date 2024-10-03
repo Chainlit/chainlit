@@ -3,8 +3,6 @@ import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { OutputAudioChunk } from './types/audio';
-
 import {
   IAction,
   IAsk,
@@ -18,6 +16,7 @@ import {
   ThreadHistory
 } from './types';
 import { groupByDate } from './utils/group';
+import { WavRecorder, WavStreamPlayer } from './wavtools';
 
 export interface ISession {
   socket: Socket;
@@ -78,14 +77,21 @@ export const askUserState = atom<IAsk | undefined>({
   default: undefined
 });
 
-export const outputAudioChunkState = atom<OutputAudioChunk | undefined>({
-  key: 'OutputAudioChunk',
-  default: undefined
+export const wavRecorderState = atom({
+  key: 'WavRecorder',
+  dangerouslyAllowMutability: true,
+  default: new WavRecorder()
 });
 
-export const interruptAudioState = atom<number | undefined>({
-  key: 'InterruptAudio',
-  default: undefined
+export const wavStreamPlayerState = atom({
+  key: 'WavStreamPlayer',
+  dangerouslyAllowMutability: true,
+  default: new WavStreamPlayer()
+});
+
+export const isRecordingState = atom<boolean | undefined>({
+  key: 'IsRecording',
+  default: false
 });
 
 export const callFnState = atom<ICallFn | undefined>({

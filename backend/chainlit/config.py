@@ -94,7 +94,7 @@ edit_message = true
 [features.audio]
     enabled = False
     # Sample rate of the audio
-    sample_rate = 24000
+    sample_rate = 44100
 
 [UI]
 # Name of the assistant.
@@ -227,7 +227,7 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
 
 @dataclass
 class AudioFeature(DataClassJsonMixin):
-    sample_rate: int = 24000
+    sample_rate: int = 44100
     enabled: bool = False
 
 

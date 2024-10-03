@@ -72,7 +72,7 @@ const Messages = memo(
                   />
                 ) : null}
                 <MessageLoader
-                  key={m.id}
+                  key={m.id + 'loader'}
                   show={showToolCoTLoader || showHiddenCoTLoader}
                 />
               </>

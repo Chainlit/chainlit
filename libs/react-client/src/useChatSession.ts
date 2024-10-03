@@ -17,15 +17,14 @@ import {
   currentThreadIdState,
   elementState,
   firstUserInteraction,
-  interruptAudioState,
   loadingState,
   messagesState,
-  outputAudioChunkState,
   sessionIdState,
   sessionState,
   tasklistState,
   threadIdToResumeState,
-  tokenCountState
+  tokenCountState,
+  wavStreamPlayerState
 } from 'src/state';
 import {
   IAction,
@@ -56,8 +55,7 @@ const useChatSession = () => {
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
-  const setOutputAudioChunk = useSetRecoilState(outputAudioChunkState);
-  const setInterruptAudio = useSetRecoilState(interruptAudioState);
+  const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
@@ -139,11 +137,11 @@ const useChatSession = () => {
       });
 
       socket.on('audio_chunk', (chunk: OutputAudioChunk) => {
-        setOutputAudioChunk(chunk);
+        wavStreamPlayer.add16BitPCM(chunk.data, chunk.track);
       });
 
       socket.on('audio_interrupt', () => {
-        setInterruptAudio(Date.now());
+        wavStreamPlayer.interrupt();
       });
 
       socket.on('resume_thread', (thread: IThread) => {

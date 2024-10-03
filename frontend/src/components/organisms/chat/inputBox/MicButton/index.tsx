@@ -15,24 +15,35 @@ interface Props {
 
 const MicButton = ({ disabled }: Props) => {
   const { config } = useConfig();
-  const { startConversation, endConversation, isRecording } = useAudio(
-    config?.features.audio
-  );
+  const { startConversation, endConversation, isRecording } = useAudio();
+  const isEnabled = !!config?.features.audio.enabled;
 
-  useHotkeys('p', startConversation);
+  useHotkeys(
+    'p',
+    () => {
+      if (!isEnabled) return;
+      if (isRecording) return endConversation();
+      return startConversation();
+    },
+    [isEnabled, isRecording]
+  );
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
     : 'medium';
 
-  if (!config?.features.audio.enabled) return null;
+  if (!isEnabled) return null;
 
   return (
     <>
       <Tooltip
         title={
           <Translator
-            path="components.organisms.chat.inputBox.speechButton.start"
+            path={
+              isRecording
+                ? 'components.organisms.chat.inputBox.speechButton.stop'
+                : 'components.organisms.chat.inputBox.speechButton.start'
+            }
             suffix=" (P)"
           />
         }
