@@ -313,6 +313,18 @@ async def message(sid, payload: MessagePayload):
     session.current_task = task
 
 
+@sio.on("audio_start")
+async def audio_start(sid):
+    """Handle audio init."""
+    session = WebsocketSession.require(sid)
+
+    context = init_ws_context(session)
+    if config.code.on_audio_start:
+       connected = bool(await config.code.on_audio_start())
+       connection_state = "on" if connected else "off"
+       await context.emitter.update_audio_connection(connection_state)
+        
+
 @sio.on("audio_chunk")
 async def audio_chunk(sid, payload: InputAudioChunkPayload):
     """Handle an audio chunk sent by the user."""

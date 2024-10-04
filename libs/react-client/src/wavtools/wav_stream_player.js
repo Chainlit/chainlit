@@ -11,8 +11,9 @@ export class WavStreamPlayer {
    * @param {{sampleRate?: number}} options
    * @returns {WavStreamPlayer}
    */
-  constructor({ sampleRate = 44100 } = {}) {
+  constructor({ sampleRate = 24000, onStop } = {}) {
     this.scriptSrc = StreamProcessorSrc;
+    this.onStop = onStop;
     this.sampleRate = sampleRate;
     this.context = null;
     this.stream = null;
@@ -79,6 +80,7 @@ export class WavStreamPlayer {
     streamNode.port.onmessage = (e) => {
       const { event } = e.data;
       if (event === 'stop') {
+        this.onStop?.();
         streamNode.disconnect();
         this.stream = null;
       } else if (event === 'offset') {

@@ -1,6 +1,12 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
+import {
+  CircularProgress,
+  IconButton,
+  Theme,
+  Tooltip,
+  useMediaQuery
+} from '@mui/material';
 
 import { useAudio, useConfig } from '@chainlit/react-client';
 
@@ -15,17 +21,17 @@ interface Props {
 
 const MicButton = ({ disabled }: Props) => {
   const { config } = useConfig();
-  const { startConversation, endConversation, isRecording } = useAudio();
+  const { startConversation, endConversation, audioConnection } = useAudio();
   const isEnabled = !!config?.features.audio.enabled;
 
   useHotkeys(
     'p',
     () => {
       if (!isEnabled) return;
-      if (isRecording) return endConversation();
+      if (audioConnection === 'on') return endConversation();
       return startConversation();
     },
-    [isEnabled, isRecording]
+    [isEnabled, audioConnection]
   );
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
@@ -40,9 +46,11 @@ const MicButton = ({ disabled }: Props) => {
         title={
           <Translator
             path={
-              isRecording
+              audioConnection === 'on'
                 ? 'components.organisms.chat.inputBox.speechButton.stop'
-                : 'components.organisms.chat.inputBox.speechButton.start'
+                : audioConnection === 'off'
+                ? 'components.organisms.chat.inputBox.speechButton.start'
+                : 'components.organisms.chat.inputBox.speechButton.loading'
             }
             suffix=" (P)"
           />
@@ -53,13 +61,27 @@ const MicButton = ({ disabled }: Props) => {
             disabled={disabled}
             color="inherit"
             size={size}
-            onClick={isRecording ? endConversation : startConversation}
+            onClick={
+              audioConnection === 'on'
+                ? endConversation
+                : audioConnection === 'off'
+                ? startConversation
+                : undefined
+            }
           >
-            {isRecording ? (
+            {audioConnection === 'on' ? (
               <MicrophoneOffIcon fontSize={size} />
-            ) : (
+            ) : null}
+            {audioConnection === 'off' ? (
               <MicrophoneIcon fontSize={size} />
-            )}
+            ) : null}
+            {audioConnection === 'connecting' ? (
+              <CircularProgress
+                color="inherit"
+                variant="indeterminate"
+                size={18}
+              />
+            ) : null}
           </IconButton>
         </span>
       </Tooltip>

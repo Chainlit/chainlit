@@ -2,37 +2,29 @@ import { useCallback } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import {
-  isRecordingState,
+  audioConnectionState,
+  isAiSpeakingState,
   wavRecorderState,
   wavStreamPlayerState
 } from './state';
 import { useChatInteract } from './useChatInteract';
 
 const useAudio = () => {
-  const [isRecording, setIsRecording] = useRecoilState(isRecordingState);
+  const [audioConnection, setAudioConnection] =
+    useRecoilState(audioConnectionState);
   const wavRecorder = useRecoilValue(wavRecorderState);
   const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
+  const isAiSpeaking = useRecoilValue(isAiSpeakingState);
 
-  const { sendAudioChunk, endAudioStream } = useChatInteract();
+  const { startAudioStream, endAudioStream } = useChatInteract();
 
   const startConversation = useCallback(async () => {
-    setIsRecording(true);
-    let isFirstChunk = true;
-    const startTime = Date.now();
-    const mimeType = 'pcm16';
-    // Connect to microphone
-    await wavRecorder.begin();
-    await wavStreamPlayer.connect();
-    await wavRecorder.record(async (data) => {
-      const elapsedTime = Date.now() - startTime;
-      await sendAudioChunk(isFirstChunk, mimeType, elapsedTime, data.mono);
-      isFirstChunk = false;
-    });
-  }, [sendAudioChunk, wavRecorder, wavStreamPlayer]);
+    setAudioConnection('connecting');
+    await startAudioStream();
+  }, [startAudioStream]);
 
   const endConversation = useCallback(async () => {
-    setIsRecording(false);
-
+    setAudioConnection('off');
     await wavRecorder.end();
     await wavStreamPlayer.interrupt();
     await endAudioStream();
@@ -41,9 +33,10 @@ const useAudio = () => {
   return {
     startConversation,
     endConversation,
-    isRecording,
-    wavStreamPlayer,
-    wavRecorder
+    audioConnection,
+    isAiSpeaking,
+    wavRecorder,
+    wavStreamPlayer
   };
 };
 

@@ -53,11 +53,15 @@ class BaseChainlitEmitter:
         """Stub method to send an element to the UI."""
         pass
     
+    async def update_audio_connection(self, state: Literal["on", "off"]):
+        """Audio connection signaling."""
+        pass
+    
     async def send_audio_chunk(self, chunk: OutputAudioChunk):
         """Stub method to send an audio chunk to the UI."""
         pass
         
-    async def send_audio_interrupt(self, track: str):
+    async def send_audio_interrupt(self):
         """Stub method to interrupt the current audio response."""
         pass
 
@@ -166,13 +170,17 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Send a thread to the UI to resume it"""
         return self.emit("resume_thread", thread_dict)
 
+    async def update_audio_connection(self, state: Literal["on", "off"]):
+        """Audio connection signaling."""
+        await self.emit("audio_connection", state)
+
     async def send_audio_chunk(self, chunk: OutputAudioChunk):
         """Send an audio chunk to the UI."""
         await self.emit("audio_chunk", chunk)
         
     async def send_audio_interrupt(self):
         """Method to interrupt the current audio response."""
-        await self.emit("audio_interrupt")
+        await self.emit("audio_interrupt", {})
 
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""

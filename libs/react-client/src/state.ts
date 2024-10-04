@@ -89,8 +89,13 @@ export const wavStreamPlayerState = atom({
   default: new WavStreamPlayer()
 });
 
-export const isRecordingState = atom<boolean | undefined>({
-  key: 'IsRecording',
+export const audioConnectionState = atom<'connecting' | 'on' | 'off'>({
+  key: 'AudioConnection',
+  default: 'off'
+});
+
+export const isAiSpeakingState = atom({
+  key: 'isAiSpeaking',
   default: false
 });
 

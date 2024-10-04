@@ -94,7 +94,7 @@ edit_message = true
 [features.audio]
     enabled = False
     # Sample rate of the audio
-    sample_rate = 44100
+    sample_rate = 24000
 
 [UI]
 # Name of the assistant.
@@ -227,7 +227,7 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
 
 @dataclass
 class AudioFeature(DataClassJsonMixin):
-    sample_rate: int = 44100
+    sample_rate: int = 24000
     enabled: bool = False
 
 
@@ -282,6 +282,7 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
 

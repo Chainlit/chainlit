@@ -22,7 +22,7 @@ export class WavRecorder {
    * @returns {WavRecorder}
    */
   constructor({
-    sampleRate = 44100,
+    sampleRate = 24000,
     outputToSpeakers = false,
     debug = false
   } = {}) {
@@ -60,7 +60,7 @@ export class WavRecorder {
    * @param {number} fromSampleRate
    * @returns {Promise<DecodedAudioType>}
    */
-  static async decode(audioData, sampleRate = 44100, fromSampleRate = -1) {
+  static async decode(audioData, sampleRate = 24000, fromSampleRate = -1) {
     const context = new AudioContext({ sampleRate });
     let arrayBuffer;
     let blob;

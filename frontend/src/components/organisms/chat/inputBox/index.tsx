@@ -38,7 +38,6 @@ const InputBox = memo(
 
     const { user } = useAuth();
     const { sendMessage, replyMessage } = useChatInteract();
-    // const tokenCount = useRecoilValue(tokenCountState);
 
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {

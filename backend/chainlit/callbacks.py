@@ -210,6 +210,18 @@ def on_chat_end(func: Callable) -> Callable:
 
 
 @trace
+def on_audio_start(func: Callable) -> Callable:
+    """
+    Hook to react to the user initiating audio.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_start = wrap_user_function(func, with_task=False)
+    return func
+
+@trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
     Hook to react to the audio chunks being sent.

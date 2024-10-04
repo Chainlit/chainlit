@@ -90,6 +90,10 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const startAudioStream = useCallback(() => {
+    session?.socket.emit('audio_start');
+  }, [session?.socket]);
+
   const sendAudioChunk = useCallback(
     (
       isStart: boolean,
@@ -181,6 +185,7 @@ const useChatInteract = () => {
     replyMessage,
     sendMessage,
     editMessage,
+    startAudioStream,
     sendAudioChunk,
     endAudioStream,
     stopTask,
