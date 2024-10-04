@@ -59,7 +59,7 @@ class MessageBase(ABC):
     @classmethod
     def from_dict(self, _dict: StepDict):
         type = _dict.get("type", "assistant_message")
-        message = Message(
+        return Message(
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
@@ -67,9 +67,8 @@ class MessageBase(ABC):
             author=_dict.get("name", config.ui.name),
             type=type,  # type: ignore
             language=_dict.get("language"),
+            metadata=_dict.get("metadata", {}),
         )
-
-        return message
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {
