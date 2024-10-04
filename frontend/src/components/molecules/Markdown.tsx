@@ -6,6 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { visit } from 'unist-util-visit';
 
 import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
@@ -23,6 +24,7 @@ import { ElementRef } from 'components/molecules/messages/components/ElementRef'
 import type { IMessageElement } from 'client-types/';
 
 import ResponseTextItem from '@chainlit/copilot/src/evoya/privacyShield/ResponseTextItem';
+import BlinkingCursor from './BlinkingCursor';
 
 interface Props {
   allowHtml?: boolean;
@@ -30,6 +32,52 @@ interface Props {
   refElements?: IMessageElement[];
   children: string;
 }
+
+const cursorPlugin = () => {
+  return (tree: any) => {
+    visit(tree, 'text', (node: any, index, parent) => {
+      const placeholderPattern = /\u200B/g;
+      const matches = [...(node.value?.matchAll(placeholderPattern) || [])];
+
+      if (matches.length > 0) {
+        const newNodes: any[] = [];
+        let lastIndex = 0;
+
+        matches.forEach((match) => {
+          const [fullMatch] = match;
+          const startIndex = match.index!;
+          const endIndex = startIndex + fullMatch.length;
+
+          if (startIndex > lastIndex) {
+            newNodes.push({
+              type: 'text',
+              value: node.value!.slice(lastIndex, startIndex)
+            });
+          }
+
+          newNodes.push({
+            type: 'blinkingCursor',
+            data: {
+              hName: 'blinkingCursor',
+              hProperties: { text: 'Blinking Cursor' }
+            }
+          });
+
+          lastIndex = endIndex;
+        });
+
+        if (lastIndex < node.value!.length) {
+          newNodes.push({
+            type: 'text',
+            value: node.value!.slice(lastIndex)
+          });
+        }
+
+        parent!.children.splice(index, 1, ...newNodes);
+      }
+    });
+  };
+};
 
 function Markdown({ refElements, allowHtml, latex, children }: Props) {
   const rehypePlugins = useMemo(() => {
@@ -44,10 +92,10 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
   }, [allowHtml, latex]);
 
   const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [remarkGfm as any];
+    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
 
     if (latex) {
-      remarkPlugins = [remarkMath as any, ...remarkPlugins];
+      remarkPlugins = [...remarkPlugins, remarkMath as any];
     }
     return remarkPlugins;
   }, [latex]);
@@ -128,7 +176,9 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
         tbody({ children, ...props }) {
           // @ts-ignore
           return <TableBody {...props}>{children}</TableBody>;
-        }
+        },
+        // @ts-expect-error custom plugin
+        blinkingCursor: () => <BlinkingCursor whitespace />
       }}
     >
       {children}

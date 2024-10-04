@@ -11,6 +11,7 @@ import EvoyaHeader from 'evoya/EvoyaHeader';
 
 interface Props {
   anchorEl?: HTMLElement | null;
+  buttonHeight: string;
 }
 
 export default function PopOver({ anchorEl }: Props) {

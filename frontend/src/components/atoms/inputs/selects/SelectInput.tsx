@@ -1,5 +1,5 @@
-import { MouseEvent } from 'react';
-import { grey, primary } from 'theme/index';
+import { MouseEvent, useState } from 'react';
+import { grey } from 'theme/index';
 
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { Stack, type SxProps } from '@mui/material';
@@ -58,6 +58,20 @@ const SelectInput = ({
 }: SelectInputProps): JSX.Element => {
   const isDarkMode = useIsDarkMode();
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuOpen = () => {
+    setMenuOpen(true);
+  };
+
+  const handleMenuClose = (event: React.SyntheticEvent) => {
+    setMenuOpen(false);
+
+    if (onClose) {
+      onClose(event);
+    }
+  };
+
   return (
     <InputStateHandler
       id={id}
@@ -70,7 +84,8 @@ const SelectInput = ({
       <MSelect
         {...rest}
         size={size}
-        onClose={onClose}
+        onClose={handleMenuClose}
+        onOpen={handleMenuOpen}
         labelId={id}
         value={value?.toString()}
         onChange={onChange}
@@ -115,7 +130,7 @@ const SelectInput = ({
                   ? '0px 2px 4px 0px #0000000D'
                   : '0px 10px 10px 0px #0000000D',
               '&& .Mui-selected, .Mui-selected.Mui-selected:hover': {
-                backgroundColor: isDarkMode ? grey[800] : primary[50]
+                backgroundColor: isDarkMode ? grey[800] : 'primary.light'
               }
             }
           },
@@ -142,8 +157,10 @@ const SelectInput = ({
             <MenuItem
               isDarkMode={isDarkMode}
               data-test={`select-item:${item.label}`}
-              onMouseEnter={(e) => onItemMouseEnter?.(e, item.label)}
-              onMouseLeave={(e) => onItemMouseLeave?.(e)}
+              onMouseEnter={(e) =>
+                menuOpen && onItemMouseEnter?.(e, item.label)
+              }
+              onMouseLeave={(e) => menuOpen && onItemMouseLeave?.(e)}
               item={item}
               selected={item.value === value}
               key={item.value}
