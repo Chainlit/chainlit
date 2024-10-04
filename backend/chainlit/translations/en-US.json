@@ -124,7 +124,8 @@
           },
           "speechButton": {
             "start": "Start recording",
-            "stop": "Stop recording"
+            "stop": "Stop recording",
+            "loading": "Connecting"
           },
           "SubmitButton": {
             "sendMessage": "Send message",
