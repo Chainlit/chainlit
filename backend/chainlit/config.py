@@ -92,7 +92,6 @@ edit_message = true
     max_size_mb = 500
 
 [features.audio]
-    enabled = False
     # Sample rate of the audio
     sample_rate = 24000
 
