@@ -31,7 +31,7 @@ const MicButton = ({ disabled }: Props) => {
       if (audioConnection === 'on') return endConversation();
       return startConversation();
     },
-    [isEnabled, audioConnection]
+    [isEnabled, audioConnection, startConversation, endConversation]
   );
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
