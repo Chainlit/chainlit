@@ -3,7 +3,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 
 import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
 import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
@@ -161,7 +161,7 @@ const Chat = () => {
       display="flex"
       width="100%"
       flexGrow={1}
-      overflow="auto"
+      position="relative"
     >
       {upload ? (
         <>
@@ -169,15 +169,7 @@ const Chat = () => {
           {upload?.isDragActive ? <DropScreen /> : null}
         </>
       ) : null}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          height: '100%'
-        }}
-      >
+      <Stack width="100%">
         {error ? (
           <Box
             sx={{
@@ -212,12 +204,7 @@ const Chat = () => {
             setAutoScroll={setAutoScroll}
           />
         </ErrorBoundary>
-      </Box>
-      <ElementSideView
-        onClose={() => setSideViewElement(undefined)}
-        isOpen={!!sideViewElement}
-        element={sideViewElement}
-      />
+      </Stack>
     </Box>
   );
 };

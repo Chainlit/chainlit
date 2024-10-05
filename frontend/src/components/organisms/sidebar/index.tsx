@@ -92,7 +92,7 @@ const SideBar = () => {
           <GithubButton />
         </Stack>
       </Drawer>
-      {!isMobile ? (
+      {!isMobile && settings.displaySidebar ? (
         <Box
           position="absolute"
           sx={{

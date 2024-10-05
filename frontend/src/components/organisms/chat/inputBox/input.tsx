@@ -170,21 +170,23 @@ const Input = memo(
 
     return (
       <Stack
-        sx={{
-          backgroundColor: 'background.paper',
-          borderRadius: '1.5rem',
-          boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
-          textarea: {
-            height: '34px',
-            maxHeight: '30vh',
-            overflowY: 'auto !important',
-            resize: 'none',
-            paddingBottom: '0.7rem',
-            paddingTop: '0.7rem',
-            color: 'text.primary',
-            lineHeight: '24px'
-          }
-        }}
+      sx={{
+        backgroundColor: 'background.default',
+        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+        margin: 1,
+        paddingTop: 1,
+        paddingX: 1,
+        boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
+        gap: 1,
+        textarea: {
+          height: '34px',
+          maxHeight: '30vh',
+          overflowY: 'auto !important',
+          resize: 'none',
+          color: 'text.primary',
+          lineHeight: '24px'
+        }
+      }}
       >
         {attachments.length > 0 ? (
           <Box

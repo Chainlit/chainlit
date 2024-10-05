@@ -3,7 +3,7 @@ import { Stack } from '@mui/material';
 import { useAudio } from '@chainlit/react-client';
 
 import AudioPresence from 'components/organisms/chat/inputBox/AudioPresence';
-import WaterMark from 'components/organisms/chat/inputBox/waterMark';
+import WaterMark from 'components/virto/organisms/chat/inputBox/waterMark';
 
 export default function InputBoxFooter() {
   const { audioConnection } = useAudio();
