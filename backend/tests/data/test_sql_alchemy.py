@@ -1,17 +1,14 @@
-from unittest.mock import Mock
 import uuid
 from pathlib import Path
 
 import pytest
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit import User
+from chainlit.data.base import BaseStorageClient
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.element import Text
-from chainlit import User
-from chainlit.user import PersistedUser
 
 
 @pytest.fixture
@@ -114,11 +111,6 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     data_layer = SQLAlchemyDataLayer(conninfo, storage_provider=mock_storage_client)
 
     yield data_layer
-
-
-@pytest.fixture
-def test_user() -> User:
-    return User(identifier="sqlalchemy_test_user_id")
 
 
 async def test_create_and_get_element(

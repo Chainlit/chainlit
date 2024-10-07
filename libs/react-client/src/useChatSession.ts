@@ -10,6 +10,7 @@ import io from 'socket.io-client';
 import {
   actionState,
   askUserState,
+  audioConnectionState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
@@ -17,13 +18,16 @@ import {
   currentThreadIdState,
   elementState,
   firstUserInteraction,
+  isAiSpeakingState,
   loadingState,
   messagesState,
   sessionIdState,
   sessionState,
   tasklistState,
   threadIdToResumeState,
-  tokenCountState
+  tokenCountState,
+  wavRecorderState,
+  wavStreamPlayerState
 } from 'src/state';
 import {
   IAction,
@@ -40,6 +44,8 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
+import { OutputAudioChunk } from './types/audio';
+
 import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
@@ -48,10 +54,13 @@ const useChatSession = () => {
   const sessionId = useRecoilValue(sessionIdState);
 
   const [session, setSession] = useRecoilState(sessionState);
-
+  const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
+  const setAudioConnection = useSetRecoilState(audioConnectionState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
+  const wavRecorder = useRecoilValue(wavRecorderState);
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
@@ -130,6 +139,41 @@ const useChatSession = () => {
       socket.on('reload', () => {
         socket.emit('clear_session');
         window.location.reload();
+      });
+
+      socket.on('audio_connection', async (state: 'on' | 'off') => {
+        if (state === 'on') {
+          let isFirstChunk = true;
+          const startTime = Date.now();
+          const mimeType = 'pcm16';
+          // Connect to microphone
+          await wavRecorder.begin();
+          await wavStreamPlayer.connect();
+          await wavRecorder.record(async (data) => {
+            const elapsedTime = Date.now() - startTime;
+            socket.emit('audio_chunk', {
+              isStart: isFirstChunk,
+              mimeType,
+              elapsedTime,
+              data: data.mono
+            });
+            isFirstChunk = false;
+          });
+          wavStreamPlayer.onStop = () => setIsAiSpeaking(false);
+        } else {
+          await wavRecorder.end();
+          await wavStreamPlayer.interrupt();
+        }
+        setAudioConnection(state);
+      });
+
+      socket.on('audio_chunk', (chunk: OutputAudioChunk) => {
+        wavStreamPlayer.add16BitPCM(chunk.data, chunk.track);
+        setIsAiSpeaking(true);
+      });
+
+      socket.on('audio_interrupt', () => {
+        wavStreamPlayer.interrupt();
       });
 
       socket.on('resume_thread', (thread: IThread) => {

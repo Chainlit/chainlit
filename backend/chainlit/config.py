@@ -28,9 +28,8 @@ from ._utils import is_path_inside
 
 if TYPE_CHECKING:
     from chainlit.action import Action
-    from chainlit.element import ElementBased
     from chainlit.message import Message
-    from chainlit.types import AudioChunk, ChatProfile, Starter, ThreadDict
+    from chainlit.types import InputAudioChunk, ChatProfile, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -93,18 +92,8 @@ edit_message = true
     max_size_mb = 500
 
 [features.audio]
-    # Threshold for audio recording
-    min_decibels = -45
-    # Delay for the user to start speaking in MS
-    initial_silence_timeout = 3000
-    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
-    silence_timeout = 1500
-    # Above this duration (MS), the recording will forcefully stop.
-    max_duration = 15000
-    # Duration of the audio chunks in MS
-    chunk_duration = 1000
     # Sample rate of the audio
-    sample_rate = 44100
+    sample_rate = 24000
 
 [UI]
 # Name of the assistant.
@@ -237,12 +226,7 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
 
 @dataclass
 class AudioFeature(DataClassJsonMixin):
-    min_decibels: int = -45
-    initial_silence_timeout: int = 2000
-    silence_timeout: int = 1500
-    chunk_duration: int = 1000
-    max_duration: int = 15000
-    sample_rate: int = 44100
+    sample_rate: int = 24000
     enabled: bool = False
 
 
@@ -297,8 +281,9 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
-    on_audio_chunk: Optional[Callable[["AudioChunk"], Any]] = None
-    on_audio_end: Optional[Callable[[List["ElementBased"]], Any]] = None
+    on_audio_start: Optional[Callable[[], Any]] = None
+    on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[], Any]] = None
 
     author_rename: Optional[Callable[[str], Awaitable[str]]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None

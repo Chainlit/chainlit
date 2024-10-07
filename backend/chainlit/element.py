@@ -57,6 +57,8 @@ class ElementDict(TypedDict):
 
 @dataclass
 class Element:
+    # Thread id
+    thread_id: str = Field(default_factory=lambda: context.session.thread_id)
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
     # Name of the element, this will be used to reference the element in the UI.
@@ -88,7 +90,6 @@ class Element:
         trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
         self.updatable = False
-        self.thread_id = context.session.thread_id
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")

@@ -1,10 +1,30 @@
 import json
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
+from httpx import HTTPStatusError, RequestError
+from literalai import (
+    Attachment as LiteralAttachment,
+    Score as LiteralScore,
+    Step as LiteralStep,
+    Thread as LiteralThread,
+)
+from literalai.observability.filter import threads_filters as LiteralThreadsFilters
+from literalai.observability.step import StepDict as LiteralStepDict
+
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.utils import queue_until_user_message
+from chainlit.element import Audio, Element, ElementDict, File, Image, Pdf, Text, Video
 from chainlit.logger import logger
+from chainlit.step import (
+    FeedbackDict,
+    Step,
+    StepDict,
+    StepType,
+    TrueStepType,
+    check_add_step_in_cot,
+    stub_step,
+)
 from chainlit.types import (
     Feedback,
     PageInfo,
@@ -14,50 +34,19 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
-from httpx import HTTPStatusError, RequestError
-from literalai import Attachment
-from literalai import Score as LiteralScore
-from literalai import Step as LiteralStep
-from literalai.filter import threads_filters as LiteralThreadsFilters
-from literalai.step import StepDict as LiteralStepDict
-
-if TYPE_CHECKING:
-    from chainlit.element import Element, ElementDict
-    from chainlit.step import FeedbackDict, StepDict
 
 
-_data_layer: Optional[BaseDataLayer] = None
+class LiteralToChainlitConverter:
+    @classmethod
+    def steptype_to_steptype(cls, step_type: Optional[StepType]) -> TrueStepType:
+        if step_type in ["user_message", "assistant_message", "system_message"]:
+            return "undefined"
+        return cast(TrueStepType, step_type or "undefined")
 
-
-class LiteralDataLayer(BaseDataLayer):
-    def __init__(self, api_key: str, server: Optional[str]):
-        from literalai import AsyncLiteralClient
-
-        self.client = AsyncLiteralClient(api_key=api_key, url=server)
-        logger.info("Chainlit data layer initialized")
-
-    def attachment_to_element_dict(self, attachment: Attachment) -> "ElementDict":
-        metadata = attachment.metadata or {}
-        return {
-            "chainlitKey": None,
-            "display": metadata.get("display", "side"),
-            "language": metadata.get("language"),
-            "autoPlay": metadata.get("autoPlay", None),
-            "playerConfig": metadata.get("playerConfig", None),
-            "page": metadata.get("page"),
-            "size": metadata.get("size"),
-            "type": metadata.get("type", "file"),
-            "forId": attachment.step_id,
-            "id": attachment.id or "",
-            "mime": attachment.mime,
-            "name": attachment.name or "",
-            "objectKey": attachment.object_key,
-            "url": attachment.url,
-            "threadId": attachment.thread_id,
-        }
-
-    def score_to_feedback_dict(
-        self, score: Optional[LiteralScore]
+    @classmethod
+    def score_to_feedbackdict(
+        cls,
+        score: Optional[LiteralScore],
     ) -> "Optional[FeedbackDict]":
         if not score:
             return None
@@ -68,7 +57,8 @@ class LiteralDataLayer(BaseDataLayer):
             "comment": score.comment,
         }
 
-    def step_to_step_dict(self, step: LiteralStep) -> "StepDict":
+    @classmethod
+    def step_to_stepdict(cls, step: LiteralStep) -> "StepDict":
         metadata = step.metadata or {}
         input = (step.input or {}).get("content") or (
             json.dumps(step.input) if step.input and step.input != {} else ""
@@ -95,7 +85,7 @@ class LiteralDataLayer(BaseDataLayer):
             "id": step.id or "",
             "threadId": step.thread_id or "",
             "parentId": step.parent_id,
-            "feedback": self.score_to_feedback_dict(user_feedback),
+            "feedback": cls.score_to_feedbackdict(user_feedback),
             "start": step.start_time,
             "end": step.end_time,
             "type": step.type or "undefined",
@@ -109,6 +99,116 @@ class LiteralDataLayer(BaseDataLayer):
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
         }
+
+    @classmethod
+    def attachment_to_elementdict(cls, attachment: LiteralAttachment) -> ElementDict:
+        metadata = attachment.metadata or {}
+        return {
+            "chainlitKey": None,
+            "display": metadata.get("display", "side"),
+            "language": metadata.get("language"),
+            "autoPlay": metadata.get("autoPlay", None),
+            "playerConfig": metadata.get("playerConfig", None),
+            "page": metadata.get("page"),
+            "size": metadata.get("size"),
+            "type": metadata.get("type", "file"),
+            "forId": attachment.step_id,
+            "id": attachment.id or "",
+            "mime": attachment.mime,
+            "name": attachment.name or "",
+            "objectKey": attachment.object_key,
+            "url": attachment.url,
+            "threadId": attachment.thread_id,
+        }
+
+    @classmethod
+    def attachment_to_element(
+        cls, attachment: LiteralAttachment, thread_id: Optional[str] = None
+    ) -> Element:
+        metadata = attachment.metadata or {}
+        element_type = metadata.get("type", "file")
+
+        element_class = {
+            "file": File,
+            "image": Image,
+            "audio": Audio,
+            "video": Video,
+            "text": Text,
+            "pdf": Pdf,
+        }.get(element_type, Element)
+
+        assert thread_id or attachment.thread_id
+
+        element = element_class(
+            name=attachment.name or "",
+            display=metadata.get("display", "side"),
+            language=metadata.get("language"),
+            size=metadata.get("size"),
+            url=attachment.url,
+            mime=attachment.mime,
+            thread_id=thread_id or attachment.thread_id,
+        )
+        element.id = attachment.id or ""
+        element.for_id = attachment.step_id
+        element.object_key = attachment.object_key
+        return element
+
+    @classmethod
+    def step_to_step(cls, step: LiteralStep) -> Step:
+        chainlit_step = Step(
+            name=step.name or "",
+            type=cls.steptype_to_steptype(step.type),
+            id=step.id,
+            parent_id=step.parent_id,
+            thread_id=step.thread_id or None,
+        )
+        chainlit_step.start = step.start_time
+        chainlit_step.end = step.end_time
+        chainlit_step.created_at = step.created_at
+        chainlit_step.input = step.input.get("content", "") if step.input else ""
+        chainlit_step.output = step.output.get("content", "") if step.output else ""
+        chainlit_step.is_error = bool(step.error)
+        chainlit_step.metadata = step.metadata or {}
+        chainlit_step.tags = step.tags
+        chainlit_step.generation = step.generation
+
+        if step.attachments:
+            chainlit_step.elements = [
+                cls.attachment_to_element(attachment, chainlit_step.thread_id)
+                for attachment in step.attachments
+            ]
+
+        return chainlit_step
+
+    @classmethod
+    def thread_to_threaddict(cls, thread: LiteralThread) -> ThreadDict:
+        return {
+            "id": thread.id,
+            "createdAt": getattr(thread, "created_at", ""),
+            "name": thread.name,
+            "userId": thread.participant_id,
+            "userIdentifier": thread.participant_identifier,
+            "tags": thread.tags,
+            "metadata": thread.metadata,
+            "steps": [cls.step_to_stepdict(step) for step in thread.steps]
+            if thread.steps
+            else [],
+            "elements": [
+                cls.attachment_to_elementdict(attachment)
+                for step in thread.steps
+                for attachment in step.attachments
+            ]
+            if thread.steps
+            else [],
+        }
+
+
+class LiteralDataLayer(BaseDataLayer):
+    def __init__(self, api_key: str, server: Optional[str]):
+        from literalai import AsyncLiteralClient
+
+        self.client = AsyncLiteralClient(api_key=api_key, url=server)
+        logger.info("Chainlit data layer initialized")
 
     async def build_debug_url(self) -> str:
         try:
@@ -239,7 +339,7 @@ class LiteralDataLayer(BaseDataLayer):
         attachment = await self.client.api.get_attachment(id=element_id)
         if not attachment:
             return None
-        return self.attachment_to_element_dict(attachment)
+        return LiteralToChainlitConverter.attachment_to_elementdict(attachment)
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
@@ -339,32 +439,41 @@ class LiteralDataLayer(BaseDataLayer):
             filters=literal_filters,
             order_by={"column": "createdAt", "direction": "DESC"},
         )
+
+        chainlit_threads = [
+            *map(LiteralToChainlitConverter.thread_to_threaddict, literal_response.data)
+        ]
+
         return PaginatedResponse(
             pageInfo=PageInfo(
-                hasNextPage=literal_response.pageInfo.hasNextPage,
-                startCursor=literal_response.pageInfo.startCursor,
-                endCursor=literal_response.pageInfo.endCursor,
+                hasNextPage=literal_response.page_info.has_next_page,
+                startCursor=literal_response.page_info.start_cursor,
+                endCursor=literal_response.page_info.end_cursor,
             ),
-            data=literal_response.data,
+            data=chainlit_threads,
         )
 
-    async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
-        from chainlit.step import check_add_step_in_cot, stub_step
-
+    async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         thread = await self.client.api.get_thread(id=thread_id)
         if not thread:
             return None
-        elements = []  # List[ElementDict]
-        steps = []  # List[StepDict]
+
+        elements: List[ElementDict] = []
+        steps: List[StepDict] = []
         if thread.steps:
             for step in thread.steps:
                 for attachment in step.attachments:
-                    elements.append(self.attachment_to_element_dict(attachment))
+                    elements.append(
+                        LiteralToChainlitConverter.attachment_to_elementdict(attachment)
+                    )
 
-                if check_add_step_in_cot(step):
-                    steps.append(self.step_to_step_dict(step))
+                chainlit_step = LiteralToChainlitConverter.step_to_step(step)
+                if check_add_step_in_cot(chainlit_step):
+                    steps.append(
+                        LiteralToChainlitConverter.step_to_stepdict(step)
+                    )  # TODO: chainlit_step.to_dict()
                 else:
-                    steps.append(stub_step(step))
+                    steps.append(stub_step(chainlit_step))
 
         return {
             "createdAt": thread.created_at or "",
