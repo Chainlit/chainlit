@@ -5,6 +5,8 @@ on:
   release:
     types: [published]
 
+permissions: read-all
+
 jobs:
   ci:
     uses: ./.github/workflows/ci.yaml

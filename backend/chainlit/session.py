@@ -3,25 +3,14 @@ import json
 import mimetypes
 import shutil
 import uuid
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional, Union
 
 import aiofiles
 from chainlit.logger import logger
+from chainlit.types import FileReference
 
 if TYPE_CHECKING:
-    from chainlit.message import Message
-    from chainlit.step import Step
-    from chainlit.types import FileDict, FileReference
+    from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
 
 ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
@@ -64,7 +53,7 @@ class BaseSession:
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str],
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]],
         # Logged-in user token
         token: Optional[str],
@@ -86,7 +75,7 @@ class BaseSession:
         self.chat_profile = chat_profile
         self.http_referer = http_referer
 
-        self.files = {}  # type: Dict[str, "FileDict"]
+        self.files: Dict[str, FileDict] = {}
 
         self.id = id
 
@@ -104,7 +93,7 @@ class BaseSession:
         mime: str,
         path: Optional[str] = None,
         content: Optional[Union[bytes, str]] = None,
-    ) -> "FileReference":
+    ) -> FileReference:
         if not path and not content:
             raise ValueError(
                 "Either path or content must be provided to persist a file"
@@ -169,7 +158,7 @@ class HTTPSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,
@@ -225,7 +214,7 @@ class WebsocketSession(BaseSession):
         client_type: ClientType,
         # Thread id
         thread_id: Optional[str] = None,
-        # Logged-in user informations
+        # Logged-in user information
         user: Optional[Union["User", "PersistedUser"]] = None,
         # Logged-in user token
         token: Optional[str] = None,

@@ -37,6 +37,7 @@ class GithubOAuthProvider(OAuthProvider):
         self.client_secret = os.environ.get("OAUTH_GITHUB_CLIENT_SECRET")
         self.authorize_params = {
             "scope": "user:email",
+            "prompt": "consent",
         }
 
     async def get_token(self, code: str, url: str):
@@ -95,6 +96,7 @@ class GoogleOAuthProvider(OAuthProvider):
             "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
             "response_type": "code",
             "access_type": "offline",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -162,6 +164,7 @@ class AzureADOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "https://graph.microsoft.com/User.Read",
             "response_mode": "query",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -207,7 +210,7 @@ class AzureADOAuthProvider(OAuthProvider):
                 azure_user["image"] = (
                     f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
                 )
-            except Exception as e:
+            except Exception:
                 # Ignore errors getting the photo
                 pass
 
@@ -246,6 +249,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
             "response_mode": "form_post",
             "nonce": nonce,
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -291,7 +295,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
                 azure_user["image"] = (
                     f"data:{photo_response.headers['Content-Type']};base64,{base64_image.decode('utf-8')}"
                 )
-            except Exception as e:
+            except Exception:
                 # Ignore errors getting the photo
                 pass
 
@@ -325,6 +329,7 @@ class OktaOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "response_mode": "query",
+            "prompt": "login",
         }
 
     def get_authorization_server_path(self):
@@ -396,6 +401,7 @@ class Auth0OAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "audience": f"{self.original_domain}/userinfo",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -442,7 +448,7 @@ class DescopeOAuthProvider(OAuthProvider):
     id = "descope"
     env = ["OAUTH_DESCOPE_CLIENT_ID", "OAUTH_DESCOPE_CLIENT_SECRET"]
     # Ensure that the domain does not have a trailing slash
-    domain = f"https://api.descope.com/oauth2/v1"
+    domain = "https://api.descope.com/oauth2/v1"
 
     authorize_url = f"{domain}/authorize"
 
@@ -453,6 +459,7 @@ class DescopeOAuthProvider(OAuthProvider):
             "response_type": "code",
             "scope": "openid profile email",
             "audience": f"{self.domain}/userinfo",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -511,6 +518,7 @@ class AWSCognitoOAuthProvider(OAuthProvider):
             "response_type": "code",
             "client_id": self.client_id,
             "scope": "openid profile email",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
@@ -579,6 +587,7 @@ class GitlabOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "scope": "openid profile email",
             "response_type": "code",
+            "prompt": "login",
         }
 
     async def get_token(self, code: str, url: str):
