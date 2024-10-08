@@ -4,6 +4,42 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.dev0] - 2024-10-08
+
+### Breaking Changes
+
+- Completely revamped audio implementation:
+  - Removed `AudioChunk` type, replaced with `InputAudioChunk` and `OutputAudioChunk`
+  - Changed audio sampling rate from 44100 to 24000
+  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
+  - Introduced new `on_audio_start` callback
+  - Modified `on_audio_end` callback to no longer accept file elements as arguments
+
+### Added
+
+- New audio connection signaling with `on` and `off` states
+- Introduced `AudioPresence` component for visual representation of audio state
+- Added `WavRecorder` and `WavStreamPlayer` classes for improved audio handling
+- New `startConversation` and `endConversation` methods in `useAudio` hook
+- Implemented audio interruption functionality
+
+### Changed
+
+- Updated `useChatInteract` hook to include `startAudioStream` method
+- Modified `useChatSession` to handle new audio streaming functionality
+- Updated UI components to reflect new audio implementation, including new microphone icons and audio presence indicators
+- Refactored `InputBoxFooter` to display audio presence when active
+
+### Removed
+
+- Eliminated `RecordScreen` component
+- Removed several audio-related configuration options from `config.toml`
+
+### Development
+
+- Added new wavtools directory with various audio processing utilities
+- Implemented new AudioWorklet processors for more efficient audio handling
+
 ## [1.3.0rc0] - 2024-10-02
 
 ### Added
