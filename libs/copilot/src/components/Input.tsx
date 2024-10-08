@@ -10,7 +10,7 @@ import { Attachments } from '@chainlit/app/src/components/molecules/attachments'
 import MicButton from '@chainlit/app/src/components/organisms/chat/inputBox/MicButton';
 import { SubmitButton } from '@chainlit/app/src/components/organisms/chat/inputBox/SubmitButton';
 import UploadButton from '@chainlit/app/src/components/organisms/chat/inputBox/UploadButton';
-import WaterMark from '@chainlit/app/src/components/organisms/chat/inputBox/waterMark';
+import InputBoxFooter from '@chainlit/app/src/components/organisms/chat/inputBox/footer';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import { chatSettingsOpenState } from '@chainlit/app/src/state/project';
 import { inputHistoryState } from '@chainlit/app/src/state/userInputHistory';
@@ -212,7 +212,7 @@ const Input = memo(
               <MicButton disabled={disabled} />
             </Stack>
             <Box>
-              <WaterMark />
+              <InputBoxFooter />
             </Box>
           </Stack>
         </Stack>

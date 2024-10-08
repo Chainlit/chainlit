@@ -2,6 +2,8 @@ name: Pytest
 
 on: [workflow_call]
 
+permissions: read-all
+
 jobs:
   pytest:
     runs-on: ubuntu-latest

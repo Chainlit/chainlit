@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.2.0"
+version = "2.0.dev0"
 keywords = [
     'LLM',
     'Agents',
@@ -27,7 +27,7 @@ chainlit = 'chainlit.cli:cli'
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.607"
+literalai = "0.0.623"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.110.1,<0.113"
 starlette = "^0.37.2"
@@ -68,6 +68,7 @@ plotly = "^5.18.0"
 slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
@@ -106,6 +107,7 @@ ignore_missing_imports = true
 
 
 
+
 [tool.poetry.group.custom-data]
 optional = true
 
@@ -125,3 +127,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

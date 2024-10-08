@@ -90,8 +90,17 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const startAudioStream = useCallback(() => {
+    session?.socket.emit('audio_start');
+  }, [session?.socket]);
+
   const sendAudioChunk = useCallback(
-    (isStart: boolean, mimeType: string, elapsedTime: number, data: Blob) => {
+    (
+      isStart: boolean,
+      mimeType: string,
+      elapsedTime: number,
+      data: Int16Array
+    ) => {
       session?.socket.emit('audio_chunk', {
         isStart,
         mimeType,
@@ -102,12 +111,9 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
-  const endAudioStream = useCallback(
-    (fileReferences?: IFileRef[]) => {
-      session?.socket.emit('audio_end', { fileReferences });
-    },
-    [session?.socket]
-  );
+  const endAudioStream = useCallback(() => {
+    session?.socket.emit('audio_end');
+  }, [session?.socket]);
 
   const replyMessage = useCallback(
     (message: IStep) => {
@@ -179,6 +185,7 @@ const useChatInteract = () => {
     replyMessage,
     sendMessage,
     editMessage,
+    startAudioStream,
     sendAudioChunk,
     endAudioStream,
     stopTask,

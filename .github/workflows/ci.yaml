@@ -8,6 +8,8 @@ on:
   push:
     branches: [main, dev]
 
+permissions: read-all
+
 jobs:
   pytest:
     uses: ./.github/workflows/pytest.yaml
@@ -23,5 +25,5 @@ jobs:
     name: Run CI
     needs: [mypy, pytest, e2e-tests]
     steps:
-      - name: 'Done'
+      - name: Done
         run: echo "Done"
