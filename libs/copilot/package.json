@@ -54,7 +54,7 @@
     "@types/react-file-icon": "^1.0.2",
     "@types/uuid": "^9.0.3",
     "@vitejs/plugin-react-swc": "^3.3.2",
-    "storybook": "^8.0.10",
+    "storybook": "^8.3.5",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
     "vite-plugin-svgr": "^4.2.0",
