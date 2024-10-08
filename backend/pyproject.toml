@@ -13,8 +13,8 @@ keywords = [
     'conversational ai',
 ]
 description = "Build Conversational AI."
-authors = ["Chainlit"]
-license = "Apache-2.0 license"
+authors = ["Willy Douhard", "Dan Andre Constantini"]
+license = " Apache-2.0"
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
