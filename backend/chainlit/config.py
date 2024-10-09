@@ -62,6 +62,9 @@ user_env = []
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
 
+# Duration (in seconds) of the user session expiry
+user_session_timeout = 1296000  # 15 days
+
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
@@ -306,6 +309,8 @@ class ProjectSettings(DataClassJsonMixin):
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
+    # Duration (in seconds) of the user session expiry
+    user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
     # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
