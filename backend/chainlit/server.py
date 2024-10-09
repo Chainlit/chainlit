@@ -1050,8 +1050,7 @@ async def get_avatar(avatar_id: str):
 
     if avatar_id == "default":
         avatar_id = config.ui.name
-
-    avatar_id = avatar_id.strip().lower().replace(" ", "_")
+        avatar_id = avatar_id.strip().lower().replace(" ", "_")
 
     base_path = Path(APP_ROOT) / "public" / "avatars"
     avatar_pattern = f"{avatar_id}.*"
