@@ -80,8 +80,6 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
     if jwt_session_tokens.get(email) != token:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    return user
-
     if data_layer := get_data_layer():
         try:
             persisted_user = await data_layer.get_user(user.identifier)
