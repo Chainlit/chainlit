@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.8"
           cache: "pip"
       - name: Install Poetry
         run: pip install poetry
