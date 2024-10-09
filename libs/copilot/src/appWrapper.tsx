@@ -20,7 +20,8 @@ export default function AppWrapper({ widgetConfig }: Props) {
       <RecoilRoot>
         <WidgetContext.Provider
           value={{
-            accessToken: widgetConfig.accessToken
+            accessToken: widgetConfig.accessToken,
+            sendCookies: widgetConfig.sendCookies
           }}
         >
           <App widgetConfig={widgetConfig} />
