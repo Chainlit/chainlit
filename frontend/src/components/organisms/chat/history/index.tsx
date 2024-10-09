@@ -5,7 +5,16 @@ import { useRecoilState } from 'recoil';
 import { grey } from 'theme';
 
 import AutoDelete from '@mui/icons-material/AutoDelete';
-import { IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Theme,
+  Typography,
+  useMediaQuery
+} from '@mui/material';
 
 import { UserInput } from '@chainlit/react-client';
 
@@ -62,6 +71,10 @@ export default function InputHistoryButton({ onClick }: Props) {
   const ref = useRef<any>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
+    ? 'small'
+    : 'medium';
+
   if (inputHistory.open && !anchorEl) {
     if (ref.current) {
       setAnchorEl(ref.current);
@@ -70,6 +83,13 @@ export default function InputHistoryButton({ onClick }: Props) {
 
   const toggleChatHistoryMenu = (open: boolean) =>
     setInputHistory((old) => ({ ...old, open }));
+
+  const handleHistoryButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setAnchorEl(event.currentTarget);
+    toggleChatHistoryMenu(true);
+  };
 
   const header = (
     // @ts-ignore
@@ -227,5 +247,16 @@ export default function InputHistoryButton({ onClick }: Props) {
     </Menu>
   ) : null;
 
-  return <div ref={ref}>{menu}</div>;
+  return (
+    <div ref={ref}>
+      <IconButton
+        color="inherit"
+        size={size}
+        onClick={handleHistoryButtonClick}
+      >
+        <HistoryIcon />
+      </IconButton>
+      {menu}
+    </div>
+  );
 }
