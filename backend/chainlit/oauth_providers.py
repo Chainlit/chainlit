@@ -39,6 +39,8 @@ class GithubOAuthProvider(OAuthProvider):
             "scope": "user:email",
             "prompt": "consent",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -98,6 +100,8 @@ class GoogleOAuthProvider(OAuthProvider):
             "access_type": "offline",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -166,6 +170,8 @@ class AzureADOAuthProvider(OAuthProvider):
             "response_mode": "query",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -251,6 +257,8 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             "nonce": nonce,
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -331,6 +339,8 @@ class OktaOAuthProvider(OAuthProvider):
             "response_mode": "query",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     def get_authorization_server_path(self):
         if not self.authorization_server_id:
@@ -403,6 +413,8 @@ class Auth0OAuthProvider(OAuthProvider):
             "audience": f"{self.original_domain}/userinfo",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -461,6 +473,8 @@ class DescopeOAuthProvider(OAuthProvider):
             "audience": f"{self.domain}/userinfo",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -520,6 +534,8 @@ class AWSCognitoOAuthProvider(OAuthProvider):
             "scope": "openid profile email",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
@@ -589,6 +605,8 @@ class GitlabOAuthProvider(OAuthProvider):
             "response_type": "code",
             "prompt": "login",
         }
+        if os.environ.get("OAUTH_DISABLE_REAUTHENTICATION_ON_LOGOUT", "false").lower() == "true":
+            self.authorize_params.pop("prompt", None)
 
     async def get_token(self, code: str, url: str):
         payload = {
