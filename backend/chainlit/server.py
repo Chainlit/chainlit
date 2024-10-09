@@ -358,6 +358,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="credentialssignin",
         )
+    email = user.identifier
+    jwt_token = jwt_session_tokens.get(email)
+    if jwt_token:
+        del jwt_session_tokens[email]
+
+    access_token = create_jwt(user)
+    jwt_session_tokens[email] = access_token
+
     access_token = create_jwt(user)
     if data_layer := get_data_layer():
         try:
@@ -408,6 +416,14 @@ async def header_auth(request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized",
         )
+
+    email = user.identifier
+    jwt_token = jwt_session_tokens.get(email)
+    if jwt_token:
+        del jwt_session_tokens[email]
+
+    access_token = create_jwt(user)
+    jwt_session_tokens[email] = access_token
 
     access_token = create_jwt(user)
     if data_layer := get_data_layer():
