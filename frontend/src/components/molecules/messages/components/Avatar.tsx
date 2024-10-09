@@ -28,7 +28,11 @@ const MessageAvatar = ({ author, hide }: Props) => {
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;
     }
-    return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
+
+    const authorAvatarId = author
+      ? author.trim().toLowerCase().replace(/\s/g, '_')
+      : 'default';
+    return apiClient?.buildEndpoint(`/avatars/${authorAvatarId}`);
   }, [apiClient, selectedChatProfile, config, author]);
 
   return (
