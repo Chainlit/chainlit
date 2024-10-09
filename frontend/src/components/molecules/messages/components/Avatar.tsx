@@ -14,6 +14,16 @@ interface Props {
   hide?: boolean;
 }
 
+const getAuthorAvatarId = (author) => {
+  if (!author) return 'default';
+
+  return author
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+};
+
 const MessageAvatar = ({ author, hide }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
@@ -29,9 +39,7 @@ const MessageAvatar = ({ author, hide }: Props) => {
       return selectedChatProfile.icon;
     }
 
-    const authorAvatarId = author
-      ? author.trim().toLowerCase().replace(/\s/g, '_')
-      : 'default';
+    const authorAvatarId = getAuthorAvatarId(author);
     return apiClient?.buildEndpoint(`/avatars/${authorAvatarId}`);
   }, [apiClient, selectedChatProfile, config, author]);
 
