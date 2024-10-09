@@ -174,6 +174,24 @@ def test_get_avatar_custom(test_client: TestClient, monkeypatch: pytest.MonkeyPa
     os.remove(custom_avatar_path)
 
 
+def test_get_avatar_with_spaces(
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    """Test with custom avatar."""
+    custom_avatar_path = os.path.join(APP_ROOT, "public", "avatars", "my_assistant.png")
+    os.makedirs(os.path.dirname(custom_avatar_path), exist_ok=True)
+    with open(custom_avatar_path, "wb") as f:
+        f.write(b"fake image data")
+
+    response = test_client.get("/avatars/My Assistant")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("image/")
+    assert response.content == b"fake image data"
+
+    # Clean up
+    os.remove(custom_avatar_path)
+
+
 def test_get_avatar_non_existent_favicon(
     test_client: TestClient, monkeypatch: pytest.MonkeyPatch
 ):
