@@ -14,7 +14,7 @@ interface Props {
   hide?: boolean;
 }
 
-const getAuthorAvatarId = (author) => {
+const getAuthorAvatarId = (author: string | undefined) => {
   if (!author) return 'default';
 
   return author
