@@ -16,6 +16,7 @@ import {
   ThreadHistory
 } from './types';
 import { groupByDate } from './utils/group';
+import { WavRecorder, WavStreamPlayer } from './wavtools';
 
 export interface ISession {
   socket: Socket;
@@ -74,6 +75,28 @@ export const loadingState = atom<boolean>({
 export const askUserState = atom<IAsk | undefined>({
   key: 'AskUser',
   default: undefined
+});
+
+export const wavRecorderState = atom({
+  key: 'WavRecorder',
+  dangerouslyAllowMutability: true,
+  default: new WavRecorder()
+});
+
+export const wavStreamPlayerState = atom({
+  key: 'WavStreamPlayer',
+  dangerouslyAllowMutability: true,
+  default: new WavStreamPlayer()
+});
+
+export const audioConnectionState = atom<'connecting' | 'on' | 'off'>({
+  key: 'AudioConnection',
+  default: 'off'
+});
+
+export const isAiSpeakingState = atom({
+  key: 'isAiSpeaking',
+  default: false
 });
 
 export const callFnState = atom<ICallFn | undefined>({

@@ -14,11 +14,7 @@ export interface ChatProfile {
 
 export interface IAudioConfig {
   enabled: boolean;
-  min_decibels: number;
-  initial_silence_timeout: number;
-  silence_timeout: number;
-  chunk_duration: number;
-  max_duration: number;
+  sample_rate: number;
 }
 
 export interface IAuthConfig {

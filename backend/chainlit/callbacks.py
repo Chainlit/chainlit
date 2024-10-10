@@ -210,12 +210,24 @@ def on_chat_end(func: Callable) -> Callable:
 
 
 @trace
+def on_audio_start(func: Callable) -> Callable:
+    """
+    Hook to react to the user initiating audio.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_start = wrap_user_function(func, with_task=False)
+    return func
+
+@trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
     Hook to react to the audio chunks being sent.
 
     Args:
-        chunk (AudioChunk): The audio chunk being sent.
+        chunk (InputAudioChunk): The audio chunk being sent.
 
     Returns:
         Callable[], Any]: The decorated hook.
@@ -229,9 +241,6 @@ def on_audio_chunk(func: Callable) -> Callable:
 def on_audio_end(func: Callable) -> Callable:
     """
     Hook to react to the audio stream ending. This is called after the last audio chunk is sent.
-
-    Args:
-    elements ([List[Element]): The files that were uploaded before starting the audio stream (if any).
 
     Returns:
         Callable[], Any]: The decorated hook.

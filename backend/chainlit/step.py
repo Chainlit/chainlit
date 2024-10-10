@@ -16,7 +16,7 @@ from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
 from literalai import BaseGeneration
 from literalai.helper import utc_now
-from literalai.step import StepType, TrueStepType
+from literalai.observability.step import StepType, TrueStepType
 
 
 def check_add_step_in_cot(step: "Step"):
@@ -30,7 +30,7 @@ def check_add_step_in_cot(step: "Step"):
     return True
 
 
-def stub_step(step: "Step"):
+def stub_step(step: "Step") -> "StepDict":
     return {
         "type": step.type,
         "name": step.name,
@@ -189,12 +189,13 @@ class Step:
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
+        thread_id: Optional[str] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
         self._input = ""
         self._output = ""
-        self.thread_id = context.session.thread_id
+        self.thread_id = thread_id or context.session.thread_id
         self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
