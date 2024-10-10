@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error",
