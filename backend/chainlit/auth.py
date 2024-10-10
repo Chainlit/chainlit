@@ -79,7 +79,7 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
         except Exception:
             return user
 
-        if user.display_name:
+        if user and user.display_name:
             persisted_user.display_name = user.display_name
         return persisted_user
     else:
