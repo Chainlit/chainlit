@@ -27,8 +27,6 @@ jobs:
           poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
-      - name: Build UI
-        run: pnpm run buildUi
       - name: Lint UI
         run: pnpm run lintUi
       - name: Run tests
