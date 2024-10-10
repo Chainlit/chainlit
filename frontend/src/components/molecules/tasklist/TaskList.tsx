@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import useSWR from 'swr';
 import { grey } from 'theme';
 
@@ -64,14 +63,7 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
   const { tasklists } = useChatData();
 
   const tasklist = tasklists[tasklists.length - 1];
-
-  // We remove the base URL since the useApi hook is already set with a base URL.
-  // This ensures we only pass the relative path and search parameters to the hook.
-  const url = useMemo(() => {
-    if (!tasklist?.url) return null;
-    const parsedUrl = new URL(tasklist.url);
-    return parsedUrl.pathname + parsedUrl.search;
-  }, [tasklist?.url]);
+  const url = tasklist?.url;
 
   const { error, data, isLoading } = useSWR(url, fetcher, {
     keepPreviousData: true
