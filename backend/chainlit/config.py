@@ -13,11 +13,13 @@ from typing import (
     List,
     Literal,
     Optional,
+    Type,
     Union,
 )
 
 import tomli
 from chainlit.logger import logger
+from chainlit.oauth_providers import OAuthProvider
 from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
@@ -275,6 +277,9 @@ class CodeSettings:
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
+    # Callbacks for authenticate mechanism
+    custom_authenticate_user: Optional[Callable[[str], Awaitable["User"]]] = None
+    custom_oauth_provider: Optional[Callable[[], Type[OAuthProvider]]] = None
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
