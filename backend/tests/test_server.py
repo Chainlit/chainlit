@@ -71,6 +71,18 @@ def test_project_translations_invalid_language(
     assert not mock_load_translation.called
 
 
+def test_project_translations_bcp47_language(
+    test_client: TestClient, mock_load_translation: Mock
+):
+    """Regression test for https://github.com/Chainlit/chainlit/issues/1352."""
+
+    response = test_client.get("/project/translations?language=es-419")
+    assert response.status_code == 200
+    assert "translation" in response.json()
+    mock_load_translation.assert_called_once_with("es-419")
+    mock_load_translation.reset_mock()
+
+
 @pytest.fixture
 def mock_get_current_user():
     """Override get_current_user() dependency."""
