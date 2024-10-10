@@ -118,6 +118,12 @@ const useChatSession = () => {
           socket
         };
       });
+      const engine = socket.io.engine;
+      engine.on("upgradeError", () => {
+        setTimeout(() => {
+          _connect({ userEnv, accessToken });
+        }, 3000);
+      });
 
       socket.on('connect', () => {
         socket.emit('connection_successful');
