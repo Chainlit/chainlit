@@ -178,6 +178,33 @@ class Step:
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
 
+    @classmethod
+    async def init(
+        cls,
+        name: Optional[str] = config.ui.name,
+        type: TrueStepType = "undefined",
+        id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        elements: Optional[List[Element]] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
+        language: Optional[str] = None,
+        show_input: Union[bool, str] = "json",
+    ):
+        await asyncio.sleep(0.001)
+        self = cls(
+            name,
+            type,
+            id,
+            parent_id,
+            elements,
+            metadata,
+            tags,
+            language,
+            show_input,
+        )
+        return self
+
     def __init__(
         self,
         name: Optional[str] = config.ui.name,
@@ -192,7 +219,6 @@ class Step:
         thread_id: Optional[str] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
-        time.sleep(0.001)
         self._input = ""
         self._output = ""
         self.thread_id = thread_id or context.session.thread_id
