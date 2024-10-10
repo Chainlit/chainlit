@@ -17,8 +17,8 @@ authors = ["Chainlit"]
 license = "Apache-2.0 license"
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
-exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
-include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
+exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
+include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
