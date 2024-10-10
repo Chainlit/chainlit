@@ -23,18 +23,17 @@ class ChainlitContext:
     loop: asyncio.AbstractEventLoop
     emitter: "BaseChainlitEmitter"
     session: Union["HTTPSession", "WebsocketSession"]
-    active_steps: List["Step"]
 
     @property
     def current_step(self):
-        if self.active_steps:
-            return self.active_steps[-1]
+        if previous_steps := local_steps.get():
+            return previous_steps[-1]
 
     @property
     def current_run(self):
-        if self.active_steps:
+        if previous_steps := local_steps.get():
             return next(
-                (step for step in self.active_steps if step.name in CL_RUN_NAMES), None
+                (step for step in previous_steps if step.name in CL_RUN_NAMES), None
             )
 
     def __init__(
@@ -46,7 +45,6 @@ class ChainlitContext:
 
         self.loop = asyncio.get_running_loop()
         self.session = session
-        self.active_steps = []
 
         if emitter:
             self.emitter = emitter

@@ -961,7 +961,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 @router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
     """Get the avatar for the user based on the avatar_id."""
-    if not re.match(r"^[a-zA-Z0-9_-]+$", avatar_id):
+    if not re.match(r"^[a-zA-Z0-9_ -]+$", avatar_id):
         raise HTTPException(status_code=400, detail="Invalid avatar_id")
 
     if avatar_id == "default":
