@@ -35,6 +35,9 @@ include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
 # command_name = module_for_handler : function_for_handler
 chainlit = 'chainlit.cli:cli'
 
+[tool.poetry.build]
+script = "build.py"
+
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
