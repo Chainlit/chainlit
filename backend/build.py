@@ -1,7 +1,8 @@
 """Build scritp gets called on poetry build."""
 
+import pathlib
+import shutil
 import subprocess
-from pathlib import Path
 
 
 def pnpm_install(project_root):
@@ -21,7 +22,8 @@ def copy_frontend(project_root):
 
     # Recursively copy frontend_dist to backend_frontend_dir
     frontend_dist = project_root / "frontend" / "dist"
-    subprocess.run(["cp", "-R", frontend_dist, backend_frontend_dir])
+
+    shutil.copytree(frontend_dist, backend_frontend_dir / "dist", dirs_exist_ok=True)
 
 
 def copy_copilot(project_root):
@@ -33,12 +35,12 @@ def copy_copilot(project_root):
 
     # Recursively copy copilot_dist to backend_copilot_dir
     copilot_dist = project_root / "libs" / "copilot" / "dist"
-    subprocess.run(["cp", "-R", copilot_dist, backend_copilot_dir])
-    # mkdir -p backend/chainlit/copilot && cp -R libs/copilot/dist backend/chainlit/copilot)
+
+    shutil.copytree(copilot_dist, backend_copilot_dir / "dist", dirs_exist_ok=True)
 
 
 if __name__ == "__main__":
-    project_root = Path.cwd().parent
+    project_root = pathlib.Path.cwd().parent
     pnpm_install(project_root)
     pnpm_buildui(project_root)
     copy_frontend(project_root)
