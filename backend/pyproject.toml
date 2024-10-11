@@ -13,8 +13,19 @@ keywords = [
     'conversational ai',
 ]
 description = "Build Conversational AI."
-authors = ["Chainlit"]
-license = "Apache-2.0 license"
+authors = ["Willy Douhard", "Dan Andre Constantini"]
+license = " Apache-2.0"
+homepage = "https://chainlit.io/"
+documentation = "https://docs.chainlit.io/"
+classifiers = [
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Communications :: Chat",
+    "Programming Language :: JavaScript",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Environment :: Web Environment"
+]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
