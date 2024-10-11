@@ -118,8 +118,11 @@ const useChatSession = () => {
           socket
         };
       });
+
+      // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+      // Retry upgrading to websocket when error
       const engine = socket.io.engine;
-      engine.on("upgradeError", () => {
+      engine.on('upgradeError', () => {
         setTimeout(() => {
           socket.removeAllListeners();
           socket.close();
