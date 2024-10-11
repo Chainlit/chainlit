@@ -87,11 +87,11 @@ const useChatSession = () => {
     ({
       userEnv,
       accessToken,
-      retryUpgradeWebSocket = false
+      retryWebSocketUpgrade = false
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
-      retryUpgradeWebSocket?: boolean;
+      retryWebSocketUpgrade?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -121,7 +121,7 @@ const useChatSession = () => {
         };
       });
 
-      if (retryUpgradeWebSocket) {
+      if (retryWebSocketUpgrade) {
         // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
         // Retry upgrading to websocket when error
         // This happens sometimes when user is using soft session affinity (like Istio)
