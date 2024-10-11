@@ -3,6 +3,8 @@ import { useContext, useMemo } from 'react';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 
+import { Author } from './Author';
+
 import {
   ChainlitContext,
   useChatSession,
@@ -32,16 +34,17 @@ const MessageAvatar = ({ author, hide }: Props) => {
   }, [apiClient, selectedChatProfile, config, author]);
 
   return (
-    <span className={`message-avatar`}>
+    <span className={`message-avatar xxx`}>
       <Tooltip title={author}>
-        <Avatar
+        <Author author={author ?? ''} hide={hide} avatarUrl={avatarUrl}></Author>
+        {/* <Avatar
           sx={{
             width: '1.6rem',
             height: '1.6rem',
             bgcolor: 'transparent'
           }}
           src={hide ? undefined : avatarUrl}
-        />
+        /> */}
       </Tooltip>
     </span>
   );

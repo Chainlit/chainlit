@@ -14,7 +14,7 @@ import PrivacyShieldToggle from './privacyShield/PrivacyShieldToggle';
 import { WidgetContext } from 'context';
 import { useContext, useEffect, useState } from 'react';
 
-import { firstUserInteraction, sessionIdState, useChatData } from '@chainlit/react-client';
+import { firstUserInteraction, sessionIdState, useChatData, ChainlitContext } from '@chainlit/react-client';
 import { useRecoilValue } from 'recoil';
 
 const sessionTokenKey = 'session_token';
@@ -25,7 +25,8 @@ interface Props {
 }
 
 const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
-  const { evoya, apiClient, accessToken, config } = useContext(WidgetContext);
+  const { evoya, accessToken } = useContext(WidgetContext);
+  const apiClient = useContext(ChainlitContext);
   const firstUserInt = useRecoilValue(firstUserInteraction);
   const [sessionUuid, setSessionUuid] = useState(evoya?.session_uuid ?? '');
   const sessionId = useRecoilValue(sessionIdState);
@@ -63,8 +64,12 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
       direction="row"
       alignItems="center"
       justifyContent="space-between"
-      bgcolor={evoya?.type === 'dashboard' ? 'background.paper' : config?.button?.style?.bgcolor}
+      bgcolor={evoya?.type === 'dashboard' ? 'background.default' : 'primary.main'}
+      borderBottom={evoya?.type === 'dashboard' ? '1px solid background.paper' : '0'}
       className="header-bar"
+      sx={(theme: any) => ({
+        borderBottom: evoya?.type === 'dashboard' ? `1px solid ${theme.palette.background.paper}` : '0'
+      })}
     >
 
       <Stack direction="row" alignItems="center" spacing={2}>

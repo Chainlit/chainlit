@@ -11,9 +11,8 @@ import { Theme, ThemeProvider } from '@mui/material/styles';
 import { overrideTheme } from '@chainlit/app/src/App';
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { settingsState } from '@chainlit/app/src/state/settings';
-import { useAuth, useChatInteract } from '@chainlit/react-client';
 import { makeTheme } from '@chainlit/app/src/theme';
-import { ChainlitContext, useAuth, useConfig } from '@chainlit/react-client';
+import { ChainlitContext, useChatInteract, useAuth, useConfig, configState } from '@chainlit/react-client';
 import { EvoyaConfig } from 'evoya/types';
 
 interface Props {
@@ -33,6 +32,7 @@ export default function App({ widgetConfig, evoya }: Props) {
   const { config } = useConfig(accessToken);
   const { setAccessToken } = useAuth();
   const [settings, setSettings] = useRecoilState(settingsState);
+  const [recconfig, setConfig] = useRecoilState(configState);
   const [theme, setTheme] = useState<Theme | null>(null);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
@@ -47,7 +47,18 @@ export default function App({ widgetConfig, evoya }: Props) {
       clear();
     }
     if (!config) return;
+    if (config.ui.cot !== 'hidden') {
+      setConfig({
+        ...config,
+        ...{ui: {
+          ...config.ui,
+          cot: 'hidden'
+        }}
+      });
+    }
+
     const themeVariant = widgetConfig.theme || config.ui.theme.default;
+    // const themeVariant = 'light';
     window.theme = config.ui.theme;
     widgetConfig.theme = themeVariant;
     setSettings((old) => ({
@@ -66,10 +77,10 @@ export default function App({ widgetConfig, evoya }: Props) {
         }
       }, {
         primary: {
-          main: config.button?.style?.bgcolor ?? '#ff2e4e',
-          dark: config.button?.style?.bgcolorHover ?? '#ff4764',
+          main: widgetConfig.button?.style?.bgcolor ?? '#ff2e4e',
+          dark: widgetConfig.button?.style?.bgcolorHover ?? '#ff4764',
           // light: '#ff7d91',
-          contrastText: config.button?.style?.color ?? '#ffffff'
+          contrastText: widgetConfig.button?.style?.color ?? '#ffffff'
         }
       })
     );

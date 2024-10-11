@@ -104,6 +104,7 @@ const InputBox = memo(
         flexDirection="column"
         gap={1}
         pb={2}
+        marginTop={0}
         px={2}
         sx={{
           boxSizing: 'border-box',

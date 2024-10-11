@@ -142,6 +142,7 @@ const Input = memo(
             backgroundColor: 'background.default',
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,
             margin: 1,
+            marginTop: 0,
             paddingTop: 1,
             paddingX: 1,
             boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',

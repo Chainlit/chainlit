@@ -77,8 +77,6 @@ const Message = memo(
       );
     }
 
-    const isUser = message.type === 'user_message';
-
     return (
       <>
         <Box
@@ -86,7 +84,7 @@ const Message = memo(
             color: 'text.primary',
             position: 'relative'
           }}
-          className={`step ${isUser ? 'user-message' : 'agent-message'}`}
+          className={`step ${isUserMessage ? 'user-message' : 'agent-message'}`}
         >
           <Box
             sx={{

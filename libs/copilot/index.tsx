@@ -43,6 +43,10 @@ window.mountChainlitWidget = (config: IWidgetConfig, evoya: EvoyaConfig) => {
   const shadowRootElement = document.createElement('div');
   shadowRootElement.id = 'cl-shadow-root';
   shadowContainer.appendChild(shadowRootElement);
+  if (evoya.container !== null) {
+    shadowRootElement.style.height = '100%';
+    shadowRootElement.style.width = '100%';
+  }
 
   const cache = createCache({
     key: 'css',

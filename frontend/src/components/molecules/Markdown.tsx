@@ -109,7 +109,7 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
       components={{
         span({ children, ...props }) {
           if (props.node?.properties.dataPrivacyComponent) {
-            return <ResponseTextItem sectionId={props.node?.properties.dataPrivacyComponent} />
+            return <ResponseTextItem sectionId={props.node?.properties.dataPrivacyComponent.toString()} />
           }
           return <span {...props}>{children}</span>
         },

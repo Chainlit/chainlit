@@ -225,7 +225,7 @@ const Input = memo(
           placeholder={t(
             'components.organisms.chat.inputBox.input.placeholder'
           )}
-          disabled={disabled}
+          // disabled={disabled}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onCompositionStart={() => setIsComposing(true)}

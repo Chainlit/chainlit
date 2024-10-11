@@ -28,6 +28,7 @@ const MessageContent = memo(
   ({ message, elements, preserveSize, allowHtml, latex }: Props) => {
     let lineCount = 0;
     let contentLength = 0;
+    const isUser = 'role' in message && message.role === 'user';
 
     const outputContent =
       message.streaming && message.output

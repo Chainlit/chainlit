@@ -1,5 +1,5 @@
 import PopOver from 'popover';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IWidgetConfig } from 'types';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -31,6 +31,13 @@ export default function Widget({ config }: Props) {
     borderRadius: customStyle.borderRadius || '50%',
     boxShadow: customStyle.boxShadow || '0 4px 10px 0 rgba(0,0,0,.05)!important'
   };
+
+  useEffect(() => {
+    window.addEventListener('copilot-close-popover', () => {
+      setAnchorEl(null)
+    });
+    return () => {}
+  }, [])
 
   const isPopoverOpen = Boolean(anchorEl);
 

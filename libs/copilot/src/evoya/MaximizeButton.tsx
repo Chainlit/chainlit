@@ -18,7 +18,7 @@ export default function MaximizeButton() {
       <Tooltip
         title={<Translator path="components.molecules.maximizeChatButton.maximizeChat" />}
       >
-        <IconButton edge="end" id="maximize-chat-button" onClick={handleClick} sx={evoya?.type === 'dashboard' ? {} : {color: config?.button?.style?.color}}>
+        <IconButton edge="end" id="maximize-chat-button" onClick={handleClick} sx={evoya?.type === 'dashboard' ? {} : {color: 'primary.contrastText'}}>
           <OpenInFull sx={{ width: 20, height: 20 }} />
         </IconButton>
       </Tooltip>

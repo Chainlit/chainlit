@@ -23,10 +23,10 @@ const PrivacyShieldToggle = (): JSX.Element => {
           <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} name="privacy_shield" />
         }
         label={
-          <>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {enabled ? <LockOutlinedIcon sx={{marginRight: 1}} /> : <LockOpenOutlinedIcon sx={{marginRight: 1}} />}
             Privacy Shield
-          </>
+          </Box>
         }
         labelPlacement="start"
       />

@@ -223,7 +223,7 @@ const Chat = () => {
             </Alert>
           </Box>
         ) : (
-          <Box mt={1} />
+          <Box mt={0} />
         )}
         <ChatSettingsModal />
         <TaskList isMobile={true} />
