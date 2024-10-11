@@ -86,10 +86,12 @@ const useChatSession = () => {
   const _connect = useCallback(
     ({
       userEnv,
-      accessToken
+      accessToken,
+      retryUpgradeWebSocket = false
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
+      retryUpgradeWebSocket?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -119,16 +121,19 @@ const useChatSession = () => {
         };
       });
 
-      // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
-      // Retry upgrading to websocket when error
-      const engine = socket.io.engine;
-      engine.on('upgradeError', () => {
-        setTimeout(() => {
-          socket.removeAllListeners();
-          socket.close();
-          _connect({ userEnv, accessToken });
-        }, 3000);
-      });
+      if (retryUpgradeWebSocket) {
+        // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+        // Retry upgrading to websocket when error
+        // This happens sometimes when user is using soft session affinity (like Istio)
+        const engine = socket.io.engine;
+        engine.on('upgradeError', () => {
+          setTimeout(() => {
+            socket.removeAllListeners();
+            socket.close();
+            _connect({ userEnv, accessToken });
+          }, 3000);
+        });
+      }
 
       socket.on('connect', () => {
         socket.emit('connection_successful');
