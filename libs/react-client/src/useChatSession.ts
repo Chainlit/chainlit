@@ -87,11 +87,11 @@ const useChatSession = () => {
     ({
       userEnv,
       accessToken,
-      retryWebSocketUpgrade = false
+      useWebSocket = false
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
-      retryWebSocketUpgrade?: boolean;
+      useWebSocket?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -121,28 +121,25 @@ const useChatSession = () => {
         };
       });
 
-      if (retryWebSocketUpgrade) {
-        // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
-        // Retry upgrading to websocket when error
-        // This happens sometimes when user is using soft session affinity (like Istio)
-        const engine = socket.io.engine;
-        engine.on('upgradeError', () => {
-          setTimeout(() => {
-            socket.removeAllListeners();
-            socket.close();
-            _connect({ userEnv, accessToken });
-          }, 3000);
-        });
-      }
-
-      socket.on('connect', () => {
+      const onConnect = () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
-      });
+      };
 
-      socket.on('connect_error', (_) => {
+      const onConnectError = () => {
         setSession((s) => ({ ...s!, error: true }));
-      });
+      };
+
+      if (useWebSocket) {
+        // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+        // Require WebSocket when connecting to backend
+        const engine = socket.io.engine;
+        engine.on('upgrade', onConnect);
+        engine.on('upgradeError', onConnectError);
+      } else {
+        socket.on('connect', onConnect);
+        socket.on('connect_error', onConnectError);
+      }
 
       socket.on('task_start', () => {
         setLoading(true);
