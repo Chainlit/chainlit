@@ -134,8 +134,23 @@ const useChatSession = () => {
         // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
         // Require WebSocket when connecting to backend
         const engine = socket.io.engine;
-        engine.on('upgrade', onConnect);
-        engine.on('upgradeError', onConnectError);
+        engine.once('upgrade', () => {
+          socket.on('connect', onConnect);
+        });
+
+        // Reconnect to websocket when error
+        engine.once('upgradeError', () => {
+          onConnectError();
+          setTimeout(() => {
+            socket.removeAllListeners();
+            socket.close();
+            _connect({
+              userEnv,
+              accessToken,
+              useWebSocket
+            });
+          }, 500);
+        });
       } else {
         socket.on('connect', onConnect);
       }
