@@ -138,8 +138,9 @@ const useChatSession = () => {
         engine.on('upgradeError', onConnectError);
       } else {
         socket.on('connect', onConnect);
-        socket.on('connect_error', onConnectError);
       }
+
+      socket.on('connect_error', onConnectError);
 
       socket.on('task_start', () => {
         setLoading(true);
