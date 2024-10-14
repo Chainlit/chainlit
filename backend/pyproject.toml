@@ -59,7 +59,6 @@ lazify = "^0.4.0"
 packaging = "^23.1"
 python-multipart = "^0.0.9"
 pyjwt = "^2.8.0"
-numpy = "^1.26"
 
 [tool.poetry.group.tests]
 optional = true
@@ -114,6 +113,7 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
+
 
 
 
