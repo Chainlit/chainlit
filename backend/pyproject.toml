@@ -81,6 +81,7 @@ discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
 aiosqlite = "^0.20.0"
 pandas = "^2.2.2"
+moto = "^5.0.14"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
@@ -116,7 +117,6 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
-
 
 
 
