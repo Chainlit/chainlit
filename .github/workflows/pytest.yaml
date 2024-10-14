@@ -19,7 +19,7 @@ jobs:
         name: Install Python, poetry and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-version: 1.8.3
+          poetry-version: '1.8.3'
           poetry-install-args: --with tests --with mypy --with custom-data
           poetry-working-directory: ${{ env.BACKEND_DIR }}
       - name: Install fastapi ${{ matrix.fastapi-version }}
@@ -28,8 +28,8 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          node-version: 22.7.0
-          pnpm-version: 9.7.0
+          node-version: '22.7.0'
+          pnpm-version: '9.7.0'
           pnpm-install-args: --no-frozen-lockfile
       - name: Build UI
         run: pnpm run buildUi
