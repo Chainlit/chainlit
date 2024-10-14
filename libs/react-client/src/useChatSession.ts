@@ -87,11 +87,11 @@ const useChatSession = () => {
     ({
       userEnv,
       accessToken,
-      useWebSocket = false
+      requireWebSocket = false
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
-      useWebSocket?: boolean;
+      requireWebSocket?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -130,26 +130,32 @@ const useChatSession = () => {
         setSession((s) => ({ ...s!, error: true }));
       };
 
-      if (useWebSocket) {
-        // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
-        // Require WebSocket when connecting to backend
-        const engine = socket.io.engine;
-        engine.once('upgrade', () => {
-          socket.on('connect', onConnect);
-        });
-
-        // Reconnect to websocket when error
-        engine.once('upgradeError', () => {
-          onConnectError();
-          setTimeout(() => {
-            socket.removeAllListeners();
-            socket.close();
-            _connect({
-              userEnv,
-              accessToken,
-              useWebSocket
-            });
-          }, 500);
+      // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+      // Require WebSocket when connecting to backend
+      if (requireWebSocket) {
+        // https://socket.io/docs/v4/client-socket-instance/#socketio
+        // 'connect' event is emitted when the underlying connection is established with polling transport
+        // 'upgrade' event is emitted when the underlying connection is upgraded to WebSocket and polling request is stopped.
+        socket.on('connect', () => {
+          const engine = socket.io.engine;
+          // https://github.com/socketio/socket.io/tree/main/packages/engine.io-client#events
+          engine.once('upgrade', onConnect);
+          // Socket.io will not retry upgrade request.
+          // Retry upgrade to websocket when error can only be done via reconnect.
+          // This will not be an issue for users if they are using persistent sticky session.
+          // In case they are using soft session affinity like Istio, then sometimes upgrade request will fail
+          engine.once('upgradeError', () => {
+            onConnectError();
+            setTimeout(() => {
+              socket.removeAllListeners();
+              socket.close();
+              _connect({
+                userEnv,
+                accessToken,
+                requireWebSocket
+              });
+            }, 500);
+          });
         });
       } else {
         socket.on('connect', onConnect);
