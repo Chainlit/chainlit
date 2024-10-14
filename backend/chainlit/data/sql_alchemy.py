@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import aiohttp
 
-from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.base import BaseDataLayer
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
