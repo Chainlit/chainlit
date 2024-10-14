@@ -14,7 +14,7 @@ jobs:
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
-          python-version: 3.9
+          python-version: 3.10
           poetry-version: 1.8.3
           poetry-install-args: --with tests --with mypy --with custom-data
           poetry-working-directory: ${{ env.BACKEND_DIR }}
