@@ -133,7 +133,7 @@ async def lifespan(app: FastAPI):
 
     slack_task = None
 
-    # Slack Socket Handler if env variable SLACK_APP_TOKEN is set
+    # Slack Socket Handler if env variable SLACK_WEBSOCKET_TOKEN is set
     if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_WEBSOCKET_TOKEN"):
         from chainlit.slack.app import start_socket_mode
         slack_task = asyncio.create_task(start_socket_mode())
