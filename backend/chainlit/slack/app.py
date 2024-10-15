@@ -131,7 +131,7 @@ async def start_socket_mode():
     """
     Initializes and starts the Slack app in Socket Mode asynchronously.
 
-    Uses the SLACK_APP_TOKEN from environment variables to authenticate.
+    Uses the SLACK_WEBSOCKET_TOKEN from environment variables to authenticate.
     """
     handler = AsyncSocketModeHandler(slack_app, os.environ.get("SLACK_WEBSOCKET_TOKEN"))
     await handler.start_async()
