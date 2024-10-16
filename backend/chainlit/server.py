@@ -878,7 +878,10 @@ async def upload_file(
 @router.get("/project/file/{file_id}")
 async def get_file(
     file_id: str,
-    session_id: Optional[str] = None,
+    session_id: str,
+    current_user: Annotated[
+        Union[None, User, PersistedUser], Depends(get_current_user)
+    ],
 ):
     """Get a file from the session files directory."""
 
@@ -891,6 +894,13 @@ async def get_file(
             status_code=404,
             detail="Session not found",
         )
+
+    if current_user:
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to download files from this session",
+            )
 
     if file_id in session.files:
         file = session.files[file_id]
