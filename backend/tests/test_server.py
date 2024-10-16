@@ -264,10 +264,13 @@ def test_get_file_success(
     test_client: TestClient,
     mock_session_get_by_id_patched: Mock,
     tmp_path: pathlib.Path,
+    mock_get_current_user: Mock,
 ):
     """
     Test successful retrieval of a file from a session.
     """
+    # Set current_user to match session.user
+    mock_get_current_user.return_value = mock_session_get_by_id_patched.user
 
     # Create test data
     test_content = b"Test file content"
@@ -301,10 +304,13 @@ def test_get_file_success(
 def test_get_file_not_existent_file(
     test_client: TestClient,
     mock_session_get_by_id_patched: Mock,
+    mock_get_current_user: Mock,
 ):
     """
     Test retrieval of a non-existing file from a session.
     """
+    # Set current_user to match session.user
+    mock_get_current_user.return_value = mock_session_get_by_id_patched.user
 
     # Make the GET request to retrieve the file
     response = test_client.get("/project/file/test_file_id?session_id=test_session_id")
