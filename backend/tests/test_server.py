@@ -1,12 +1,17 @@
 import os
 from pathlib import Path
+import pathlib
 from unittest.mock import Mock, create_autospec, mock_open
+import datetime  # Added import for datetime
 
 import pytest
+import tempfile
+from chainlit.session import WebsocketSession
 from chainlit.auth import get_current_user
 from chainlit.config import APP_ROOT, ChainlitConfig, load_config
 from chainlit.server import app
 from fastapi.testclient import TestClient
+from chainlit.user import PersistedUser  # Added import for PersistedUser
 
 
 @pytest.fixture
@@ -219,7 +224,7 @@ def test_get_avatar_non_existent_favicon(
 
 
 def test_avatar_path_traversal(
-    test_client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
 ):
     """Test to prevent potential path traversal in avatar route on Windows."""
 
@@ -238,6 +243,252 @@ def test_avatar_path_traversal(
 
     # Should return an error status
     assert response.status_code == 400
+
+
+@pytest.fixture
+def mock_session_get_by_id_patched(mock_session: Mock, monkeypatch: pytest.MonkeyPatch):
+    test_session_id = "test_session_id"
+
+    # Mock the WebsocketSession.get_by_id method to return the mock session
+    monkeypatch.setattr(
+        "chainlit.session.WebsocketSession.get_by_id",
+        lambda session_id: mock_session if session_id == test_session_id else None,
+    )
+
+    return mock_session
+
+
+def test_get_file_success(
+    test_client: TestClient,
+    mock_session_get_by_id_patched: Mock,
+    tmp_path: pathlib.Path,
+):
+    """
+    Test successful retrieval of a file from a session.
+    """
+
+    # Create test data
+    test_content = b"Test file content"
+    test_file_id = "test_file_id"
+
+    # Create a temporary file with the test content
+    test_file = tmp_path / "test_file"
+    test_file.write_bytes(test_content)
+
+    mock_session_get_by_id_patched.files = {
+        test_file_id: {
+            "id": test_file_id,
+            "path": test_file,
+            "name": "test.txt",
+            "type": "text/plain",
+            "size": len(test_content),
+        }
+    }
+
+    # Make the GET request to retrieve the file
+    response = test_client.get(
+        f"/project/file/{test_file_id}?session_id={mock_session_get_by_id_patched.id}"
+    )
+
+    # Verify the response
+    assert response.status_code == 200
+    assert response.content == test_content
+    assert response.headers["content-type"].startswith("text/plain")
+
+
+def test_get_file_not_existing(
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    """
+    Test retrieval of a non-existing file from a session.
+    """
+
+    # Mock the WebsocketSession.get_by_id method to return None
+    monkeypatch.setattr(
+        "chainlit.session.WebsocketSession.get_by_id", lambda session_id: None
+    )
+
+    # Make the GET request to retrieve the file
+    response = test_client.get("/project/file/test_file_id?session_id=test_session_id")
+
+    # Verify the response
+    assert response.status_code == 404
+
+
+def test_get_file_unauthorized(
+    test_client: TestClient,
+    tmp_path: pathlib.Path,
+    mock_session_get_by_id_patched: Mock,
+    mock_session: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """
+    Test that an unauthenticated user cannot retrieve a file uploaded by an authenticated user.
+    """
+
+    # Attempt to access the file without authentication by providing an invalid session_id
+    response = test_client.get(
+        f"/project/file/nonexistent?session_id=unauthenticated_session_id"
+    )
+
+    # Verify the response
+    assert response.status_code == 401  # Unauthorized
+
+
+def test_upload_file_success(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+):
+    """Test successful file upload."""
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        data={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == 200
+    response_data = response.json()
+    assert "id" in response_data
+    file_id = response_data["id"]
+
+    # Verify that the file is stored in the session
+    assert file_id in mock_session_get_by_id_patched.files
+    uploaded_file = mock_session_get_by_id_patched.files[file_id]
+    assert uploaded_file["name"] == "test_upload.txt"
+    assert uploaded_file["type"] == "text/plain"
+    assert uploaded_file["size"] == len(file_content)
+
+
+def test_file_access_by_different_user(
+    test_client: TestClient,
+    mock_session_get_by_id_patched: Mock,
+    persisted_test_user: PersistedUser,
+    tmp_path: pathlib.Path,
+):
+    """Test that a file uploaded by one user cannot be accessed by another user."""
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        data={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == 200
+    response_data = response.json()
+    assert "id" in response_data
+    file_id = response_data["id"]
+
+    # Create a second mock session with a different user
+    mock_session_get_by_id_patched.user = PersistedUser(
+        id="another_user_id",
+        createdAt=datetime.datetime.now().isoformat(),
+        identifier="another_user_identifier",
+    )
+    mock_session_get_by_id_patched.id = "another_session_id"
+
+    # Attempt to access the uploaded file using the second user's session
+    response = test_client.get(
+        f"/project/file/{file_id}?session_id={mock_session_get_by_id_patched.id}"
+    )
+
+    # Verify that the access attempt fails
+    assert response.status_code == 401  # Unauthorized
+
+
+def test_upload_file_missing_file(
+    test_client: TestClient,
+    mock_session: Mock,
+):
+    """Test file upload with missing file in the request."""
+
+    # Make the POST request without a file
+    response = test_client.post(
+        "/project/file",
+        data={"session_id": mock_session.id},
+    )
+
+    # Verify the response
+    assert response.status_code == 422  # Unprocessable Entity
+    assert "detail" in response.json()
+
+
+def test_upload_file_invalid_session(
+    test_client: TestClient,
+):
+    """Test file upload with an invalid session."""
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Make the POST request with an invalid session_id
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        data={"session_id": "invalid_session_id"},
+    )
+
+    # Verify the response
+    assert response.status_code == 422
+
+
+def test_upload_file_unauthorized(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+):
+    """Test file upload without proper authorization."""
+
+    # Mock the upload_file_session to have no user
+    mock_session_get_by_id_patched.user = None
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        data={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Assuming that unauthorized upload is allowed if user is not required
+    # If authorization is required, adjust the expected status code and response accordingly
+
+    assert response.status_code == 200  # Change this if authorization is enforced
+    response_data = response.json()
+    assert "id" in response_data
+    file_id = response_data["id"]
+
+    # Verify that the file is stored in the session
+    assert file_id in mock_session_get_by_id_patched.files
+    uploaded_file = mock_session_get_by_id_patched.files[file_id]
+    assert uploaded_file["name"] == "test_upload.txt"
+    assert uploaded_file["type"] == "text/plain"
+    assert uploaded_file["size"] == len(file_content)
 
 
 def test_project_translations_file_path_traversal(

@@ -20,8 +20,9 @@ def persisted_test_user():
 
 
 @pytest.fixture
-def mock_session():
+def mock_session(persisted_test_user: PersistedUser):
     mock = Mock(spec=WebsocketSession)
+    mock.user = persisted_test_user
     mock.id = "test_session_id"
     mock.user_env = {"test_env": "value"}
     mock.chat_settings = {}
