@@ -19,7 +19,11 @@ jobs:
         with:
           node-version: 22.7.0
           pnpm-version: 9.7.0
-          pnpm-install-args: --no-frozen-lockfile
+          pnpm-skip-install: true
+      - name: Install depdendencies and Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          runTests: false
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
