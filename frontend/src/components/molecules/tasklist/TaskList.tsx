@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
+import useSWR from 'swr';
 import { grey } from 'theme';
 
 import { Box, Chip, List, Theme, useTheme } from '@mui/material';
 
-import { useApi, useChatData } from '@chainlit/react-client';
+import { useChatData } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 
 import { ITaskList, Task } from './Task';
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const Header = ({ status }: { status: string }) => {
   const theme = useTheme();
@@ -70,7 +73,7 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
     return parsedUrl.pathname + parsedUrl.search;
   }, [tasklist?.url]);
 
-  const { isLoading, error, data } = useApi<ITaskList>(url ? url : null, {
+  const { error, data, isLoading } = useSWR(url, fetcher, {
     keepPreviousData: true
   });
 
@@ -90,7 +93,7 @@ const TaskList = ({ isMobile }: { isMobile: boolean }) => {
     );
   }
 
-  const content = data as ITaskList;
+  const content = data as unknown as ITaskList;
 
   if (!content) {
     return null;
