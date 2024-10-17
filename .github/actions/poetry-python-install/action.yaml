@@ -5,9 +5,11 @@ inputs:
   python-version:
     description: Python version
     required: true
+    default: '3.9'
   poetry-version:
     description: Poetry version
     required: true
+    default: '1.8.3'
   poetry-working-directory:
     description: Working directory for poetry command.
     required: false

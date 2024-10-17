@@ -1,0 +1,17 @@
+name: LintUI
+
+on: [workflow_call]
+
+permissions: read-all
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+      - name: Build UI
+        run: pnpm run buildUi
+      - name: Lint UI
+        run: pnpm run lintUi

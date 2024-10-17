@@ -10,12 +10,10 @@ jobs:
     env:
       BACKEND_DIR: ./backend
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
-          python-version: 3.9
-          poetry-version: 1.8.3
           poetry-install-args: --with tests --with mypy --with custom-data --no-root
           poetry-working-directory: ${{ env.BACKEND_DIR }}
       - name: Run Mypy

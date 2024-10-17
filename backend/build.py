@@ -6,7 +6,9 @@ import subprocess
 
 
 def pnpm_install(project_root, pnpm_path):
-    subprocess.run([pnpm_path, "install"], cwd=project_root, check=True)
+    subprocess.run(
+        [pnpm_path, "install", "--frozen-lockfile"], cwd=project_root, check=True
+    )
 
 
 def pnpm_buildui(project_root, pnpm_path):
