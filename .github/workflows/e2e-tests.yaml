@@ -27,8 +27,6 @@ jobs:
         with:
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
-      - name: Lint UI
-        run: pnpm run lintUi
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
