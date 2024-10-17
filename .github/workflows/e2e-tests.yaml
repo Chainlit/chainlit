@@ -17,8 +17,6 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          node-version: 22.7.0
-          pnpm-version: 9.7.0
           pnpm-skip-install: true
       - name: Install depdendencies and Cypress
         uses: cypress-io/github-action@v6
@@ -27,8 +25,6 @@ jobs:
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
-          python-version: 3.9
-          poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
       - name: Lint UI
