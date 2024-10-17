@@ -16,7 +16,7 @@ inputs:
     default: 'false'
   pnpm-install-args:
     description: Extra arguments for pnpm install, e.g. --no-frozen-lockfile.
-    default: '--no-frozen-lockfile'
+    default: '--frozen-lockfile'
 
 runs:
   using: composite
