@@ -38,10 +38,6 @@ jobs:
           python-version: 3.9
           poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
-      - name: Copy readme to backend
-        run: cp README.md backend/
-      - name: Build chainlit
-        run: pnpm run build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
