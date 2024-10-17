@@ -28,12 +28,15 @@ classifiers = [
 ]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
-exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
-include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
+exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
+include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
 chainlit = 'chainlit.cli:cli'
+
+[tool.poetry.build]
+script = "build.py"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
@@ -69,7 +72,7 @@ pytest = "^8.3.2"
 pytest-asyncio = "^0.23.8"
 pytest-cov = "^5.0.0"
 openai = "^1.11.1"
-langchain = "^0.1.5"
+langchain = "^0.2.4"
 llama-index = "^0.10.45"
 tenacity = "^8.4.1"
 transformers = "^4.38"
