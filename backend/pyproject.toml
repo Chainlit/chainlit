@@ -28,12 +28,15 @@ classifiers = [
 ]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
-exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
-include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
+exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
+include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
 chainlit = 'chainlit.cli:cli'
+
+[tool.poetry.build]
+script = "build.py"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
