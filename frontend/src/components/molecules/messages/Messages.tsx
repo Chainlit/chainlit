@@ -62,6 +62,7 @@ const Messages = memo(
               <>
                 {m.steps?.length ? (
                   <Messages
+                    key={m.id}
                     messages={m.steps}
                     elements={elements}
                     actions={actions}
@@ -71,6 +72,7 @@ const Messages = memo(
                   />
                 ) : null}
                 <MessageLoader
+                  key={m.id + 'loader'}
                   show={showToolCoTLoader || showHiddenCoTLoader}
                 />
               </>

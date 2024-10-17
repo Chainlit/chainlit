@@ -14,8 +14,8 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 import { IAttachment } from 'state/chat';
 import { inputHistoryState } from 'state/userInputHistory';
 
+import InputBoxFooter from './footer';
 import Input from './input';
-import WaterMark from './waterMark';
 
 interface Props {
   fileSpec: FileSpec;
@@ -38,7 +38,6 @@ const InputBox = memo(
 
     const { user } = useAuth();
     const { sendMessage, replyMessage } = useChatInteract();
-    // const tokenCount = useRecoilValue(tokenCountState);
 
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
@@ -122,19 +121,8 @@ const InputBox = memo(
             onSubmit={onSubmit}
             onReply={onReply}
           />
-          {/* {tokenCount > 0 && ( */}
-          {/* <Stack flexDirection="row" alignItems="center">
-          <Typography
-            sx={{ ml: 'auto' }}
-            color="text.secondary"
-            variant="caption"
-          >
-            Token usage: {tokenCount}
-          </Typography>
-        </Stack> */}
-          {/* )} */}
         </Box>
-        <WaterMark />
+        <InputBoxFooter />
       </Box>
     );
   }

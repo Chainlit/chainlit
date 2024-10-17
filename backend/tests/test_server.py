@@ -71,6 +71,18 @@ def test_project_translations_invalid_language(
     assert not mock_load_translation.called
 
 
+def test_project_translations_bcp47_language(
+    test_client: TestClient, mock_load_translation: Mock
+):
+    """Regression test for https://github.com/Chainlit/chainlit/issues/1352."""
+
+    response = test_client.get("/project/translations?language=es-419")
+    assert response.status_code == 200
+    assert "translation" in response.json()
+    mock_load_translation.assert_called_once_with("es-419")
+    mock_load_translation.reset_mock()
+
+
 @pytest.fixture
 def mock_get_current_user():
     """Override get_current_user() dependency."""
@@ -166,6 +178,24 @@ def test_get_avatar_custom(test_client: TestClient, monkeypatch: pytest.MonkeyPa
         f.write(b"fake image data")
 
     response = test_client.get("/avatars/custom_avatar")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("image/")
+    assert response.content == b"fake image data"
+
+    # Clean up
+    os.remove(custom_avatar_path)
+
+
+def test_get_avatar_with_spaces(
+    test_client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    """Test with custom avatar."""
+    custom_avatar_path = os.path.join(APP_ROOT, "public", "avatars", "my_assistant.png")
+    os.makedirs(os.path.dirname(custom_avatar_path), exist_ok=True)
+    with open(custom_avatar_path, "wb") as f:
+        f.write(b"fake image data")
+
+    response = test_client.get("/avatars/My Assistant")
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("image/")
     assert response.content == b"fake image data"

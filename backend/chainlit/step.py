@@ -16,7 +16,7 @@ from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
 from literalai import BaseGeneration
 from literalai.helper import utc_now
-from literalai.step import StepType, TrueStepType
+from literalai.observability.step import StepType, TrueStepType
 
 
 def check_add_step_in_cot(step: "Step"):
@@ -30,7 +30,7 @@ def check_add_step_in_cot(step: "Step"):
     return True
 
 
-def stub_step(step: "Step"):
+def stub_step(step: "Step") -> "StepDict":
     return {
         "type": step.type,
         "name": step.name,
@@ -65,7 +65,7 @@ class StepDict(TypedDict, total=False):
     feedback: Optional[FeedbackDict]
 
 
-def flatten_args_kwargs(func, *args, **kwargs):
+def flatten_args_kwargs(func, args, kwargs):
     signature = inspect.signature(func)
     bound_arguments = signature.bind(*args, **kwargs)
     bound_arguments.apply_defaults()
@@ -140,7 +140,7 @@ def step(
                     try:
                         if result and not step.output:
                             step.output = result
-                    except:
+                    except Exception as e:
                         step.is_error = True
                         step.output = str(e)
                     return result
@@ -189,12 +189,13 @@ class Step:
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
         show_input: Union[bool, str] = "json",
+        thread_id: Optional[str] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
         self._input = ""
         self._output = ""
-        self.thread_id = context.session.thread_id
+        self.thread_id = thread_id or context.session.thread_id
         self.name = name or ""
         self.type = type
         self.id = id or str(uuid.uuid4())
@@ -433,7 +434,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-        context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
         await self.send()
         return self
@@ -445,13 +445,10 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        if self in context.active_steps:
-            context.active_steps.remove(self)
-
-        local_active_steps = local_steps.get()
-        if local_active_steps and self in local_active_steps:
-            local_active_steps.remove(self)
-            local_steps.set(local_active_steps)
+        current_steps = local_steps.get()
+        if current_steps and self in current_steps:
+            current_steps.remove(self)
+            local_steps.set(current_steps)
 
         await self.update()
 
@@ -464,7 +461,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-        context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
 
         asyncio.create_task(self.send())
@@ -477,12 +473,9 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        if self in context.active_steps:
-            context.active_steps.remove(self)
-
-        local_active_steps = local_steps.get()
-        if local_active_steps and self in local_active_steps:
-            local_active_steps.remove(self)
-            local_steps.set(local_active_steps)
+        current_steps = local_steps.get()
+        if current_steps and self in current_steps:
+            current_steps.remove(self)
+            local_steps.set(current_steps)
 
         asyncio.create_task(self.update())

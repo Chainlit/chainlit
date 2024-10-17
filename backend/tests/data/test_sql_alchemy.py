@@ -1,17 +1,14 @@
-from unittest.mock import Mock
 import uuid
 from pathlib import Path
 
 import pytest
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import text
-
-from chainlit.data.base import BaseDataLayer, BaseStorageClient
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.element import Text
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
+
 from chainlit import User
-from chainlit.user import PersistedUser
 
 
 @pytest.fixture
@@ -26,18 +23,21 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     # Ref: https://docs.chainlit.io/data-persistence/custom#sql-alchemy-data-layer
     async with engine.begin() as conn:
         await conn.execute(
-            text("""
+            text(
+                """
                 CREATE TABLE users (
                     "id" UUID PRIMARY KEY,
                     "identifier" TEXT NOT NULL UNIQUE,
                     "metadata" JSONB NOT NULL,
                     "createdAt" TEXT
                 );
-        """)
+        """
+            )
         )
 
         await conn.execute(
-            text("""
+            text(
+                """
                 CREATE TABLE IF NOT EXISTS threads (
                     "id" UUID PRIMARY KEY,
                     "createdAt" TEXT,
@@ -48,11 +48,13 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
                     "metadata" JSONB,
                     FOREIGN KEY ("userId") REFERENCES users("id") ON DELETE CASCADE
                 );
-        """)
+        """
+            )
         )
 
         await conn.execute(
-            text("""
+            text(
+                """
                 CREATE TABLE IF NOT EXISTS steps (
                     "id" UUID PRIMARY KEY,
                     "name" TEXT NOT NULL,
@@ -75,11 +77,13 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
                     "language" TEXT,
                     "indent" INT
                 );
-        """)
+        """
+            )
         )
 
         await conn.execute(
-            text("""
+            text(
+                """
                 CREATE TABLE IF NOT EXISTS elements (
                     "id" UUID PRIMARY KEY,
                     "threadId" UUID,
@@ -95,11 +99,13 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
                     "forId" UUID,
                     "mime" TEXT
                 );
-        """)
+        """
+            )
         )
 
         await conn.execute(
-            text("""
+            text(
+                """
                 CREATE TABLE IF NOT EXISTS feedbacks (
                     "id" UUID PRIMARY KEY,
                     "forId" UUID NOT NULL,
@@ -107,18 +113,14 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
                     "value" INT NOT NULL,
                     "comment" TEXT
                 );
-        """)
+        """
+            )
         )
 
     # Create SQLAlchemyDataLayer instance
     data_layer = SQLAlchemyDataLayer(conninfo, storage_provider=mock_storage_client)
 
     yield data_layer
-
-
-@pytest.fixture
-def test_user() -> User:
-    return User(identifier="sqlalchemy_test_user_id")
 
 
 async def test_create_and_get_element(

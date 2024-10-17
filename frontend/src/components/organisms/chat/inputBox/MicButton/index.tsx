@@ -1,85 +1,87 @@
-import { useCallback, useEffect, useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { toast } from 'sonner';
 
-import { IconButton, Theme, Tooltip, useMediaQuery } from '@mui/material';
+import {
+  CircularProgress,
+  IconButton,
+  Theme,
+  Tooltip,
+  useMediaQuery
+} from '@mui/material';
 
-import { askUserState, useAudio, useConfig } from '@chainlit/react-client';
+import { useAudio, useConfig } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
 
 import MicrophoneIcon from 'assets/microphone';
-
-import { attachmentsState } from 'state/chat';
-
-import RecordScreen from './RecordScreen';
+import MicrophoneOffIcon from 'assets/microphoneOff';
 
 interface Props {
   disabled?: boolean;
 }
 
 const MicButton = ({ disabled }: Props) => {
-  const askUser = useRecoilValue(askUserState);
   const { config } = useConfig();
-  const {
-    startRecording: _startRecording,
-    isRecording,
-    isSpeaking,
-    isRecordingFinished,
-    error
-  } = useAudio(config?.features.audio);
-  const [attachments, setAttachments] = useRecoilState(attachmentsState);
+  const { startConversation, endConversation, audioConnection } = useAudio();
+  const isEnabled = !!config?.features.audio.enabled;
 
-  disabled = disabled || !!askUser;
-
-  useEffect(() => {
-    if (isRecordingFinished) setAttachments([]);
-  }, [isRecordingFinished]);
-
-  useEffect(() => {
-    if (!error) return;
-    toast.error(error);
-  }, [error]);
-
-  const fileReferences = useMemo(() => {
-    return attachments
-      ?.filter((a) => !!a.serverId)
-      .map((a) => ({ id: a.serverId! }));
-  }, [attachments]);
-
-  const startRecording = useCallback(() => {
-    if (disabled) return;
-    _startRecording(fileReferences);
-  }, [_startRecording, fileReferences, disabled]);
-
-  useHotkeys('p', startRecording);
+  useHotkeys(
+    'p',
+    () => {
+      if (!isEnabled) return;
+      if (audioConnection === 'on') return endConversation();
+      return startConversation();
+    },
+    [isEnabled, audioConnection, startConversation, endConversation]
+  );
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
     : 'medium';
 
-  if (!config?.features.audio.enabled) return null;
+  if (!isEnabled) return null;
 
   return (
     <>
-      <RecordScreen open={isRecording} isSpeaking={isSpeaking} />
       <Tooltip
         title={
           <Translator
-            path="components.organisms.chat.inputBox.speechButton.start"
+            path={
+              audioConnection === 'on'
+                ? 'components.organisms.chat.inputBox.speechButton.stop'
+                : audioConnection === 'off'
+                ? 'components.organisms.chat.inputBox.speechButton.start'
+                : 'components.organisms.chat.inputBox.speechButton.loading'
+            }
             suffix=" (P)"
           />
         }
       >
         <span>
           <IconButton
-            disabled={disabled || isRecording}
+            disabled={disabled}
             color="inherit"
             size={size}
-            onClick={startRecording}
+            onClick={
+              audioConnection === 'on'
+                ? endConversation
+                : audioConnection === 'off'
+                ? startConversation
+                : undefined
+            }
           >
-            <MicrophoneIcon fontSize={size} />
+            {audioConnection === 'on' ? (
+              <MicrophoneOffIcon fontSize={size} />
+            ) : null}
+            {audioConnection === 'off' ? (
+              <MicrophoneIcon fontSize={size} />
+            ) : null}
+            {audioConnection === 'connecting' ? (
+              <CircularProgress
+                color="inherit"
+                variant="indeterminate"
+                size={18}
+              />
+            ) : null}
           </IconButton>
         </span>
       </Tooltip>

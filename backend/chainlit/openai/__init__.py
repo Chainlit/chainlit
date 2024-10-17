@@ -1,7 +1,7 @@
 import asyncio
 from typing import Union
 
-from chainlit.context import get_context
+from chainlit.context import local_steps
 from chainlit.step import Step
 from chainlit.utils import check_module_version
 from literalai import ChatGeneration, CompletionGeneration
@@ -19,11 +19,9 @@ def instrument_openai():
     def on_new_generation(
         generation: Union["ChatGeneration", "CompletionGeneration"], timing
     ):
-        context = get_context()
+        previous_steps = local_steps.get()
 
-        parent_id = None
-        if context.current_step:
-            parent_id = context.current_step.id
+        parent_id = previous_steps[-1].id if previous_steps else None
 
         step = Step(
             name=generation.model if generation.model else generation.provider,

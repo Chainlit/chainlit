@@ -645,7 +645,7 @@ async def oauth_azure_hf_callback(
 
 
 _language_pattern = (
-    "^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?(-[a-zA-Z]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,3})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
 )
 
 
@@ -730,7 +730,7 @@ async def update_feedback(
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
     except Exception as e:
-        raise HTTPException(detail=str(e), status_code=500)
+        raise HTTPException(detail=str(e), status_code=500) from e
 
     return JSONResponse(content={"success": True, "feedbackId": feedback_id})
 
@@ -961,7 +961,7 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 @router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
     """Get the avatar for the user based on the avatar_id."""
-    if not re.match(r"^[a-zA-Z0-9_-]+$", avatar_id):
+    if not re.match(r"^[a-zA-Z0-9_ -]+$", avatar_id):
         raise HTTPException(status_code=400, detail="Invalid avatar_id")
 
     if avatar_id == "default":

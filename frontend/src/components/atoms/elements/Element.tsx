@@ -1,6 +1,7 @@
 import type { IMessageElement } from 'client-types/';
 
 import { AudioElement } from './Audio';
+import { DataframeElement } from './Dataframe';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { PDFElement } from './PDF';
@@ -28,6 +29,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <VideoElement element={element} />;
     case 'plotly':
       return <PlotlyElement element={element} />;
+    case 'dataframe':
+      return <DataframeElement element={element} />;
     default:
       return null;
   }
