@@ -41,6 +41,7 @@ from fastapi import (
     APIRouter,
     Depends,
     FastAPI,
+    File,
     Form,
     HTTPException,
     Query,
@@ -839,11 +840,9 @@ async def delete_thread(
 
 @router.post("/project/file")
 async def upload_file(
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
     session_id: str,
     file: UploadFile,
-    current_user: Annotated[
-        Union[None, User, PersistedUser], Depends(get_current_user)
-    ],
 ):
     """Upload a file to the session files directory."""
 
@@ -868,17 +867,21 @@ async def upload_file(
 
     content = await file.read()
 
+    assert file.filename, "No filename for uploaded file"
+    assert file.content_type, "No content type for uploaded file"
+
     file_response = await session.persist_file(
         name=file.filename, content=content, mime=file.content_type
     )
 
-    return JSONResponse(file_response)
+    return JSONResponse(content=file_response)
 
 
 @router.get("/project/file/{file_id}")
 async def get_file(
     file_id: str,
-    session_id: Optional[str] = None,
+    session_id: str,
+    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
 ):
     """Get a file from the session files directory."""
 
@@ -888,9 +891,16 @@ async def get_file(
 
     if not session:
         raise HTTPException(
-            status_code=404,
-            detail="Session not found",
+            status_code=401,
+            detail="Unauthorized",
         )
+
+    if current_user:
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to download files from this session",
+            )
 
     if file_id in session.files:
         file = session.files[file_id]
