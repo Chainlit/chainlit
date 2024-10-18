@@ -30,8 +30,15 @@ import Messages from './Messages';
 import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 import WelcomeScreen from './welcomeScreen';
+import { Header } from '../header';
 
-const Chat = () => {
+interface IChatProps {
+  isExpanded?: boolean;
+  toggleExpand?: () => void;
+  toggleChat?: () => void;
+}
+
+const Chat = ({ isExpanded, toggleExpand, toggleChat }: IChatProps) => {
   const { user } = useAuth();
   const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
@@ -183,7 +190,10 @@ const Chat = () => {
       width="100%"
       flexGrow={1}
       position="relative"
-    >
+    > 
+      {toggleExpand && toggleChat ? (
+        <Header isExpanded={isExpanded} toggleExpand={toggleExpand} toggleChat={toggleChat} />
+      ) : null} 
       {upload ? (
         <>
           <input id="#upload-drop-input" {...upload.getInputProps()} />
