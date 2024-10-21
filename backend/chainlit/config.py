@@ -447,7 +447,7 @@ def load_settings():
 
         if not meta or meta.get("generated_by") <= "0.3.0":
             raise ValueError(
-                "Your config file is outdated. Please delete it and restart the app to regenerate it."
+                f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")

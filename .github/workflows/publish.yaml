@@ -23,25 +23,17 @@ jobs:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          node-version: 22.7.0
-          pnpm-version: 9.7.0
           pnpm-install-args: --no-frozen-lockfile
       - uses: ./.github/actions/poetry-python-install
         name: Install Python, poetry and Python dependencies
         with:
-          python-version: 3.9
-          poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
-      - name: Copy readme to backend
-        run: cp README.md backend/
-      - name: Build chainlit
-        run: pnpm run build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
