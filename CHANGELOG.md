@@ -4,6 +4,40 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.dev1] - 2024-10-21
+
+### Added
+
+- Interactive DataFrame display component using MUI Data Grid (#1373)
+- Optional websocket connection in react-client (#1379)
+- Current URL in message payload (#1403)
+- Improved image interaction - clicking opens popup with download option (#1402)
+- Configurable user session timeout (#1032)
+
+### Security
+
+- Fixed file access vulnerability in get_file and upload_file endpoints (#1441)
+- Added authentication to /project/file endpoint (#1441)
+- Addressed security vulnerabilities in frontend dependencies (#1431, #1414)
+
+### Fixed
+
+- Dialog boxes extending beyond window (#1446)
+- Allow empty chat input when submitting attachments (#1261)
+- Tasklist when Chainlit is submounted (#1433)
+- Spaces in avatar filenames (#1418)
+- Step argument input and concurrency issues (#1409)
+- Display_name copying to PersistentUser during authentication (#1425)
+
+### Development
+
+- Refactored storage clients into separate modules (#1363)
+- Support for IETF BCP 47 language tags (#1399)
+- Improved GitHub Actions workflows and build process (#1445)
+- Direct installation from GitHub support (#1423)
+- Extended package metadata with homepage and documentation links (#1413)
+- Various backend fixes and code cleanup (#1432)
+
 ## [2.0.dev0] - 2024-10-08
 
 ### Breaking Changes
