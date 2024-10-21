@@ -25,15 +25,15 @@ const MessageAvatar = ({ author, hide }: Props) => {
 
   const avatarUrl = useMemo(() => {
     const isAssistant = !author || author === config?.ui.name;
-    if (isAssistant && selectedChatProfile?.icon) {
-      return selectedChatProfile.icon;
-    }
+    // if (isAssistant && selectedChatProfile?.icon) {
+    //   return selectedChatProfile.icon;
+    // }
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
   }, [apiClient, selectedChatProfile, config, author]);
 
   return (
     <span className={`message-avatar`}>
-      <Tooltip title={author}>
+      <Tooltip title={avatarUrl}>
         <Avatar
           sx={{
             width: '1.6rem',
