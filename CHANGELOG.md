@@ -4,6 +4,45 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0] - 2024-10-22
+
+### Security
+
+- Fixed critical endpoint security vulnerabilities (#1441)
+- Enhanced authentication for file-related endpoints (#1431)
+- Upgraded frontend and backend dependencies to address security issues (#1431)
+
+### Added
+
+- SQLite support in SQLAlchemy integration (#1319)
+- Support for IETF BCP 47 language tags, enabling localized languages like es-419 (#1399)
+- Enhanced OAuth logout process to prevent automatic re-login (#1362)
+- Added `get_element()` method to SQLAlchemyDataLayer (#1346)
+
+### Changed
+
+- Bumped LiteralAI dependency to version 0.0.625 (#1376)
+- Optimized LiteralDataLayer for improved performance and consistency (#1376)
+- Refactored context handling in SQLAlchemy data layer (#1319)
+- Updated package metadata with correct authors, license, and documentation links (#1413)
+- Enhanced GitHub Actions workflow with restricted permissions (#1349)
+
+### Fixed
+
+- Resolved dialog boxes extending beyond window bounds (#1446)
+- Fixed tasklist functionality when Chainlit is submounted (#1433)
+- Corrected handling of `display_name` in PersistentUser during authentication (#1425)
+- Fixed SQLAlchemy identifier quoting (#1395)
+- Improved spaces handling in avatar filenames (#1418)
+
+### Development
+
+- Implemented extensive test coverage for LiteralDataLayer and SQLAlchemyDataLayer
+- Added comprehensive unit tests for file-related endpoints
+- Enhanced code organization and import structure
+- Improved Python code style and linting (#1353)
+- Resolved various small text and documentation issues (#1347, #1348)
+
 ## [2.0.dev1] - 2024-10-22
 
 ### Added
@@ -73,36 +112,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added new wavtools directory with various audio processing utilities
 - Implemented new AudioWorklet processors for more efficient audio handling
-
-## [1.3.0rc0] - 2024-10-02
-
-### Added
-
-- SQLite support in SQLAlchemy integration (#1137)
-- Extensive test coverage for LiteralDataLayer and SQLAlchemyDataLayer
-- `get_element()` method to SQLAlchemyDataLayer (#1346)
-
-### Changed
-
-- Bumped LiteralAI dependency to version 0.0.625 (#1376)
-- Refactored LiteralDataLayer for improved performance and consistency
-- Refactored context handling in SQLAlchemy data layer (#1319)
-- Enhanced GitHub Actions workflow with restricted permissions (#1349)
-
-### Fixed
-
-- Resolved issues with SQLite database support (#1137)
-- Addressed automatic OAuth login after logout (#1362)
-- Various code style and linting improvements (#1353, #1348, #1347)
-
-### Development
-
-- Implemented LiteralToChainlitConverter class for handling conversions
-- Added comprehensive unit tests for data layer components
-- Improved import structure and removed unused imports
-- Updated README with latest project information (#1351)
-
-We encourage users to thoroughly test this release candidate, particularly the LiteralAI integration and history features, and provide feedback before the final 1.3.0 release.
 
 ## [1.2.0] - 2024-09-16
 
