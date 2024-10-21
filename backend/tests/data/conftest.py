@@ -1,8 +1,7 @@
-import pytest
-
 from unittest.mock import AsyncMock
 
-from chainlit.data.base import BaseStorageClient
+import pytest
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.user import User
 
 
