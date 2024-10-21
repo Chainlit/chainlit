@@ -10,6 +10,7 @@ import io from 'socket.io-client';
 import {
   actionState,
   askUserState,
+  audioConnectionState,
   callFnState,
   chatProfileState,
   chatSettingsInputsState,
@@ -17,13 +18,16 @@ import {
   currentThreadIdState,
   elementState,
   firstUserInteraction,
+  isAiSpeakingState,
   loadingState,
   messagesState,
   sessionIdState,
   sessionState,
   tasklistState,
   threadIdToResumeState,
-  tokenCountState
+  tokenCountState,
+  wavRecorderState,
+  wavStreamPlayerState
 } from 'src/state';
 import {
   IAction,
@@ -40,6 +44,8 @@ import {
   updateMessageContentById
 } from 'src/utils/message';
 
+import { OutputAudioChunk } from './types/audio';
+
 import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
 
@@ -48,10 +54,13 @@ const useChatSession = () => {
   const sessionId = useRecoilValue(sessionIdState);
 
   const [session, setSession] = useRecoilState(sessionState);
-
+  const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
+  const setAudioConnection = useSetRecoilState(audioConnectionState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
+  const wavRecorder = useRecoilValue(wavRecorderState);
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
@@ -77,10 +86,12 @@ const useChatSession = () => {
   const _connect = useCallback(
     ({
       userEnv,
-      accessToken
+      accessToken,
+      requireWebSocket = false
     }: {
       userEnv: Record<string, string>;
       accessToken?: string;
+      requireWebSocket?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -110,14 +121,49 @@ const useChatSession = () => {
         };
       });
 
-      socket.on('connect', () => {
+      const onConnect = () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
-      });
+      };
 
-      socket.on('connect_error', (_) => {
+      const onConnectError = () => {
         setSession((s) => ({ ...s!, error: true }));
-      });
+      };
+
+      // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+      // Require WebSocket when connecting to backend
+      if (requireWebSocket) {
+        // https://socket.io/docs/v4/client-socket-instance/#socketio
+        // 'connect' event is emitted when the underlying connection is established with polling transport
+        // 'upgrade' event is emitted when the underlying connection is upgraded to WebSocket and polling request is stopped.
+        const engine = socket.io.engine;
+        // https://github.com/socketio/socket.io/tree/main/packages/engine.io-client#events
+        engine.once('upgrade', () => {
+          // Set session on connect event, otherwise user can not interact with text input UI.
+          // Upgrade event is required to make sure user won't interact with the session before websocket upgrade success
+          socket.on('connect', onConnect);
+        });
+        // Socket.io will not retry upgrade request.
+        // Retry upgrade to websocket when error can only be done via reconnect.
+        // This will not be an issue for users if they are using persistent sticky session.
+        // In case they are using soft session affinity like Istio, then sometimes upgrade request will fail
+        engine.once('upgradeError', () => {
+          onConnectError();
+          setTimeout(() => {
+            socket.removeAllListeners();
+            socket.close();
+            _connect({
+              userEnv,
+              accessToken,
+              requireWebSocket
+            });
+          }, 500);
+        });
+      } else {
+        socket.on('connect', onConnect);
+      }
+
+      socket.on('connect_error', onConnectError);
 
       socket.on('task_start', () => {
         setLoading(true);
@@ -130,6 +176,41 @@ const useChatSession = () => {
       socket.on('reload', () => {
         socket.emit('clear_session');
         window.location.reload();
+      });
+
+      socket.on('audio_connection', async (state: 'on' | 'off') => {
+        if (state === 'on') {
+          let isFirstChunk = true;
+          const startTime = Date.now();
+          const mimeType = 'pcm16';
+          // Connect to microphone
+          await wavRecorder.begin();
+          await wavStreamPlayer.connect();
+          await wavRecorder.record(async (data) => {
+            const elapsedTime = Date.now() - startTime;
+            socket.emit('audio_chunk', {
+              isStart: isFirstChunk,
+              mimeType,
+              elapsedTime,
+              data: data.mono
+            });
+            isFirstChunk = false;
+          });
+          wavStreamPlayer.onStop = () => setIsAiSpeaking(false);
+        } else {
+          await wavRecorder.end();
+          await wavStreamPlayer.interrupt();
+        }
+        setAudioConnection(state);
+      });
+
+      socket.on('audio_chunk', (chunk: OutputAudioChunk) => {
+        wavStreamPlayer.add16BitPCM(chunk.data, chunk.track);
+        setIsAiSpeaking(true);
+      });
+
+      socket.on('audio_interrupt', () => {
+        wavStreamPlayer.interrupt();
       });
 
       socket.on('resume_thread', (thread: IThread) => {

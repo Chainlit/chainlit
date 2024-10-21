@@ -154,7 +154,7 @@ class MessagePayload(TypedDict):
     fileReferences: Optional[List[FileReference]]
 
 
-class AudioChunkPayload(TypedDict):
+class InputAudioChunkPayload(TypedDict):
     isStart: bool
     mimeType: str
     elapsedTime: float
@@ -162,16 +162,16 @@ class AudioChunkPayload(TypedDict):
 
 
 @dataclass
-class AudioChunk:
+class InputAudioChunk:
     isStart: bool
     mimeType: str
     elapsedTime: float
     data: bytes
 
-
-class AudioEndPayload(TypedDict):
-    fileReferences: Optional[List[FileReference]]
-
+class OutputAudioChunk(TypedDict):
+    track: str
+    mimeType: str
+    data: bytes
 
 @dataclass
 class AskFileResponse:

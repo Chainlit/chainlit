@@ -31,7 +31,16 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "component"
+    "image",
+    "text",
+    "pdf",
+    "tasklist",
+    "audio",
+    "video",
+    "file",
+    "plotly",
+    "dataframe",
+    "component",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -57,6 +66,8 @@ class ElementDict(TypedDict):
 
 @dataclass
 class Element:
+    # Thread id
+    thread_id: str = Field(default_factory=lambda: context.session.thread_id)
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
     # Name of the element, this will be used to reference the element in the UI.
@@ -88,7 +99,6 @@ class Element:
         trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
         self.updatable = False
-        self.thread_id = context.session.thread_id
 
         if not self.url and not self.path and not self.content:
             raise ValueError("Must provide url, path or content to instantiate element")
@@ -354,6 +364,25 @@ class Plotly(Element):
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
 
+        super().__post_init__()
+
+
+@dataclass
+class Dataframe(Element):
+    """Useful to send a pandas DataFrame to the UI."""
+
+    type: ClassVar[ElementType] = "dataframe"
+    size: ElementSize = "large"
+    data: Any = None  # The type is Any because it is checked in __post_init__.
+
+    def __post_init__(self) -> None:
+        """Ensures the data is a pandas DataFrame and converts it to JSON."""
+        from pandas import DataFrame
+
+        if not isinstance(self.data, DataFrame):
+            raise TypeError("data must be a pandas.DataFrame")
+
+        self.content = self.data.to_json(orient="split", date_format="iso")
         super().__post_init__()
 
 

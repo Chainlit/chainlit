@@ -11,7 +11,7 @@ import {
 } from '@chainlit/react-client';
 
 import { Translator } from 'components/i18n';
-import WaterMark from 'components/organisms/chat/inputBox/waterMark';
+import InputBoxFooter from 'components/organisms/chat/inputBox/footer';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
@@ -66,7 +66,7 @@ export default function ResumeButton({ threadId }: Props) {
       <Button id="resumeThread" onClick={onClick} variant="contained">
         <Translator path="pages.ResumeButton.resumeChat" />
       </Button>
-      <WaterMark />
+      <InputBoxFooter />
     </Box>
   );
 }

@@ -18,9 +18,8 @@ from chainlit.server import sio
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
 from chainlit.types import (
-    AudioChunk,
-    AudioChunkPayload,
-    AudioEndPayload,
+    InputAudioChunk,
+    InputAudioChunkPayload,
     MessagePayload,
 )
 from chainlit.user_session import user_sessions
@@ -314,19 +313,31 @@ async def message(sid, payload: MessagePayload):
     session.current_task = task
 
 
+@sio.on("audio_start")
+async def audio_start(sid):
+    """Handle audio init."""
+    session = WebsocketSession.require(sid)
+
+    context = init_ws_context(session)
+    if config.code.on_audio_start:
+       connected = bool(await config.code.on_audio_start())
+       connection_state = "on" if connected else "off"
+       await context.emitter.update_audio_connection(connection_state)
+        
+
 @sio.on("audio_chunk")
-async def audio_chunk(sid, payload: AudioChunkPayload):
+async def audio_chunk(sid, payload: InputAudioChunkPayload):
     """Handle an audio chunk sent by the user."""
     session = WebsocketSession.require(sid)
 
     init_ws_context(session)
 
     if config.code.on_audio_chunk:
-        asyncio.create_task(config.code.on_audio_chunk(AudioChunk(**payload)))
+        asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
 @sio.on("audio_end")
-async def audio_end(sid, payload: AudioEndPayload):
+async def audio_end(sid):
     """Handle the end of the audio stream."""
     session = WebsocketSession.require(sid)
     try:
@@ -337,18 +348,9 @@ async def audio_end(sid, payload: AudioEndPayload):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        file_elements = []
         if config.code.on_audio_end:
-            file_refs = payload.get("fileReferences")
-            if file_refs:
-                files = [
-                    session.files[file["id"]]
-                    for file in file_refs
-                    if file["id"] in session.files
-                ]
-                file_elements = [Element.from_dict(file) for file in files]
-
-            await config.code.on_audio_end(file_elements)
+            await config.code.on_audio_end()
+            
     except asyncio.CancelledError:
         pass
     except Exception as e:
