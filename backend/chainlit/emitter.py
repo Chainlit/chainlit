@@ -133,6 +133,9 @@ class BaseChainlitEmitter:
         """Send an action response to the UI."""
         pass
 
+    async def send_window_message(self, data: Any):
+        """Stub method to send custom data to the host window."""
+        pass
 
 class ChainlitEmitter(BaseChainlitEmitter):
     """
