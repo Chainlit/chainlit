@@ -49,7 +49,7 @@ const Page = ({ children }: Props) => {
         <Stack direction="row" height="100%" width="100%">
           <SideBar />
           <Stack flexGrow={1}>
-            <Header />
+            <Header isExpanded={false} toggleExpand={() => {}} toggleChat={() => {}} />
             <Stack direction="row" flexGrow={1} overflow="auto">
               {children}
             </Stack>

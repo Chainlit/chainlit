@@ -80,7 +80,7 @@ export default function Env() {
         flexGrow: 1
       }}
     >
-      <Header />
+      <Header isExpanded={false} toggleExpand={() => {}} toggleChat={() => {}} />
       <Box
         id="env"
         display="flex"
