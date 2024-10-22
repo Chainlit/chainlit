@@ -313,6 +313,22 @@ async def message(sid, payload: MessagePayload):
     session.current_task = task
 
 
+@sio.on("window_message")
+async def window_message(sid, data):
+    """Handle a message send by the host window."""
+    session = WebsocketSession.require(sid)
+    context = init_ws_context(session)
+
+    await context.emitter.task_start()
+
+    if config.code.on_window_message:
+        try:
+            await config.code.on_window_message(data)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            await context.emitter.task_end()
+
 @sio.on("audio_start")
 async def audio_start(sid):
     """Handle audio init."""

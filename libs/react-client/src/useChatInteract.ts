@@ -90,6 +90,13 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const windowMessage = useCallback(
+    (data: any) => {
+      session?.socket.emit('window_message', data);
+    },
+    [session?.socket]
+  );
+
   const startAudioStream = useCallback(() => {
     session?.socket.emit('audio_start');
   }, [session?.socket]);
@@ -185,6 +192,7 @@ const useChatInteract = () => {
     replyMessage,
     sendMessage,
     editMessage,
+    windowMessage,
     startAudioStream,
     sendAudioChunk,
     endAudioStream,

@@ -1,8 +1,10 @@
+import asyncio
 import inspect
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from chainlit.action import Action
 from chainlit.config import config
+from chainlit.context import context
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
@@ -120,6 +122,33 @@ def on_message(func: Callable) -> Callable:
                 await func()
 
     config.code.on_message = wrap_user_function(with_parent_id)
+    return func
+
+
+@trace
+def send_window_message(data: Any):
+    """
+    Send custom data to the host window via a window.postMessage event.
+
+    Args:
+        data (Any): The data to send with the event.
+    """
+    asyncio.create_task(context.emitter.send_window_message(data))
+
+
+@trace
+def on_window_message(func: Callable[[str], Any]) -> Callable:
+    """
+    Hook to react to javascript postMessage events coming from the UI.
+
+    Args:
+        func (Callable[[str], Any]): The function to be called when a window message is received.
+                                     Takes the message content as a string parameter.
+
+    Returns:
+        Callable[[str], Any]: The decorated on_window_message function.
+    """
+    config.code.on_window_message = wrap_user_function(func)
     return func
 
 
