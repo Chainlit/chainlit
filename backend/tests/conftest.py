@@ -1,11 +1,16 @@
 import datetime
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Callable
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
+
+from chainlit import config
+from chainlit.callbacks import data_layer
 from chainlit.context import ChainlitContext, context_var
+from chainlit.data.base import BaseDataLayer
 from chainlit.session import HTTPSession, WebsocketSession
 from chainlit.user import PersistedUser
 from chainlit.user_session import UserSession
@@ -79,3 +84,32 @@ def mock_websocket_session():
 @pytest.fixture
 def mock_http_session():
     return Mock(spec=HTTPSession)
+
+
+@pytest.fixture
+def mock_data_layer(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
+    mock_data_layer = AsyncMock(spec=BaseDataLayer)
+
+    return mock_data_layer
+
+
+@pytest.fixture
+def mock_get_data_layer(mock_data_layer: AsyncMock, test_config: config.ChainlitConfig):
+    # Instantiate mock data layer
+    mock_get_data_layer = Mock(return_value=mock_data_layer)
+
+    # Configure it using @data_layer decorator
+    return data_layer(mock_get_data_layer)
+
+
+@pytest.fixture
+def test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", str(tmp_path))
+
+    test_config = config.load_config()
+
+    monkeypatch.setattr("chainlit.callbacks.config", test_config)
+    monkeypatch.setattr("chainlit.server.config", test_config)
+    monkeypatch.setattr("chainlit.config.config", test_config)
+
+    return test_config

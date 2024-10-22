@@ -1,8 +1,12 @@
 import inspect
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
+from fastapi import Request, Response
+from starlette.datastructures import Headers
+
 from chainlit.action import Action
 from chainlit.config import config
+from chainlit.data.base import BaseDataLayer
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
@@ -10,10 +14,6 @@ from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
-from fastapi import Request, Response
-from starlette.datastructures import Headers
-
-from chainlit.data.base import BaseDataLayer
 
 
 @trace
@@ -320,9 +320,15 @@ def on_settings_update(
     return func
 
 
-def data_layer(func: Callable[[], BaseDataLayer]) -> Callable:
+def data_layer(
+    func: Callable[[], BaseDataLayer],
+) -> Callable[[], BaseDataLayer]:
     """
     Hook to configure custom data layer.
     """
-    config.code.data_layer = wrap_user_function(func)
+
+    # We don't use wrap_user_function here because:
+    # 1. We don't need to support async here and;
+    # 2. We don't want to change the API for get_data_layer() to be async, everywhere (at this point).
+    config.code.data_layer = func
     return func

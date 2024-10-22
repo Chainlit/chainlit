@@ -17,23 +17,24 @@ from typing import (
 )
 
 import tomli
-from chainlit.logger import logger
-from chainlit.translations import lint_translation_json
-from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
+from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
+from chainlit.version import __version__
 
 from ._utils import is_path_inside
 
 if TYPE_CHECKING:
+    from fastapi import Request, Response
+
     from chainlit.action import Action
     from chainlit.message import Message
     from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
     from chainlit.user import User
-    from fastapi import Request, Response
 
 
 BACKEND_ROOT = os.path.dirname(__file__)

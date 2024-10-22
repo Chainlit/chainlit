@@ -11,11 +11,13 @@ _data_layer: Optional[BaseDataLayer] = None
 
 def get_data_layer():
     global _data_layer
+    print("Getting data layer", _data_layer)
 
     if not _data_layer:
         from chainlit.config import config
 
         if config.code.data_layer:
+            print("Getting data layer from config")
             # When @data_layer is configured, call it to get data layer.
             _data_layer = config.code.data_layer()
         elif api_key := os.environ.get("LITERAL_API_KEY"):
