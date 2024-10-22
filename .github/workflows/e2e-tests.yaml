@@ -21,12 +21,18 @@ jobs:
           poetry-version: 1.8.3
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
-      - uses: ./.github/actions/pnpm-node-install
-        name: Install Node, pnpm and dependencies.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.7.0
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22.7.0
-          pnpm-version: 9.7.0
-          pnpm-install-args: --no-frozen-lockfile
+          cache: pnpm
+      - name: Install depdendencies and Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          runTests: false
       - name: Build UI
         run: pnpm run buildUi
       - name: Lint UI
