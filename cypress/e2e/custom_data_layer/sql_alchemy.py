@@ -10,9 +10,12 @@ storage_client = AzureStorageClient(
     account_url="<your_account_url>", container="<your_container>"
 )
 
-cl_data._data_layer = SQLAlchemyDataLayer(
-    conninfo="<your conninfo>", storage_provider=storage_client
-)
+
+@cl.data_layer
+def data_layer():
+    return SQLAlchemyDataLayer(
+        conninfo="<your conninfo>", storage_provider=storage_client
+    )
 
 
 @cl.on_chat_start

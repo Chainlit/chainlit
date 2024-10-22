@@ -13,10 +13,12 @@ from chainlit.utils import wrap_user_function
 from fastapi import Request, Response
 from starlette.datastructures import Headers
 
+from chainlit.data.base import BaseDataLayer
+
 
 @trace
 def password_auth_callback(
-    func: Callable[[str, str], Awaitable[Optional[User]]]
+    func: Callable[[str, str], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
@@ -38,7 +40,7 @@ def password_auth_callback(
 
 @trace
 def header_auth_callback(
-    func: Callable[[Headers], Awaitable[Optional[User]]]
+    func: Callable[[Headers], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
@@ -177,7 +179,7 @@ def set_chat_profiles(
 
 @trace
 def set_starters(
-    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
@@ -221,6 +223,7 @@ def on_audio_start(func: Callable) -> Callable:
     config.code.on_audio_start = wrap_user_function(func, with_task=False)
     return func
 
+
 @trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
@@ -254,7 +257,7 @@ def on_audio_end(func: Callable) -> Callable:
 
 @trace
 def author_rename(
-    func: Callable[[str], Awaitable[str]]
+    func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
@@ -314,4 +317,12 @@ def on_settings_update(
     """
 
     config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
+def data_layer(func: Callable[[], BaseDataLayer]) -> Callable:
+    """
+    Hook to configure custom data layer.
+    """
+    config.code.data_layer = wrap_user_function(func)
     return func
