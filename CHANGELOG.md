@@ -16,7 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - SQLite support in SQLAlchemy integration (#1319)
 - Support for IETF BCP 47 language tags, enabling localized languages like es-419 (#1399)
-- Enhanced OAuth logout process to prevent automatic re-login (#1362)
+- Environment variables `OAUTH_<PROVIDER>_PROMPT` and `OAUTH_PROMPT` to
+override oauth prompt parameter. Enabling users to explicitly enable login/consent prompts for oauth, e.g. `OAUTH_PROMPT=consent` to prevent automatic re-login. (#1362, #1456).
 - Added `get_element()` method to SQLAlchemyDataLayer (#1346)
 
 ### Changed
