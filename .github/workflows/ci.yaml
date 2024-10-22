@@ -4,9 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, 'release/**']
   push:
-    branches: [main, dev]
+    branches: [main, dev, 'release/**']
 
 permissions: read-all
 
