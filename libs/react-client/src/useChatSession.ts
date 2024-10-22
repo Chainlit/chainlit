@@ -361,7 +361,7 @@ const useChatSession = () => {
       });
 
       socket.on('window_message', (data: any) => {
-        if (window.parent && window.parent !== window) {
+        if (window.parent) {
           window.parent.postMessage(data, '*');
         }
       });
