@@ -18,7 +18,7 @@ Chainlit is an open-source async Python framework which allows developers to bui
 
 Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
-> [!NOTE]  
+> [!NOTE]
 > Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 >
 > Chainlit is developed and maintained by the Literal AI team, which is currently focused on expanding the capabilities of Literal AI. While we continue to support and maintain Chainlit, we are also committed to enabling the community to contribute, particularly in areas like integrations and data layers.
@@ -43,7 +43,7 @@ If this opens the `hello app` in your browser, you're all set!
 The latest in-development version can be installed straight from GitHub with:
 
 ```sh
-pip install git+https://github.com/Chainlit/chainlit.git@dokterbob/build_frontend_on_poetry_build#subdirectory=backend/
+pip install git+https://github.com/Chainlit/chainlit.git#subdirectory=backend/
 ```
 
 (Requires Node and pnpm installed on the system.)
