@@ -10,8 +10,17 @@ from fastapi.testclient import TestClient
 
 from chainlit.auth import get_current_user
 from chainlit.config import APP_ROOT, ChainlitConfig
+from chainlit.config import (
+    APP_ROOT,
+    ChainlitConfig,
+    SpontaneousFileUploadFeature,
+    load_config,
+)
 from chainlit.server import app
+from chainlit.session import WebsocketSession
+from chainlit.types import FileReference
 from chainlit.user import PersistedUser  # Added import for PersistedUser
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -319,7 +328,7 @@ def test_get_file_non_existing_session(
 
     # Attempt to access the file without authentication by providing an invalid session_id
     response = test_client.get(
-        "/project/file/nonexistent?session_id=unauthenticated_session_id"
+        f"/project/file/nonexistent?session_id=unauthenticated_session_id"
     )
 
     # Verify the response
@@ -494,6 +503,62 @@ def test_upload_file_unauthorized(
     )
 
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "accept_pattern, mime_type, expected_status",
+    [
+        (["image/*"], "text/plain", 400),
+        (["image/*", "application/*"], "text/plain", 400),
+        (["image/png", "application/pdf"], "image/jpeg", 400),
+        (["text/*"], "text/plain", 200),
+        (["application/*"], "application/pdf", 200),
+        (["image/*"], "image/jpeg", 200),
+        (["image/*", "text/*"], "text/plain", 200),
+        (["*/*"], "text/plain", 200),
+        (["*/*"], "image/jpeg", 200),
+        (["*/*"], "application/pdf", 200),
+        (["image/*", "application/*"], "application/pdf", 200),
+        (["image/*", "application/*"], "image/jpeg", 200),
+        (["image/png", "application/pdf"], "image/png", 200),
+        (["image/png", "application/pdf"], "application/pdf", 200),
+        ({"image/*": [".png", ".gif", ".jpeg", ".jpg"]}, "image/jpeg", 200),
+        ({"image/*": [".png", ".gif", ".jpeg", ".jpg"]}, "text/plain", 400),
+    ],
+)
+def test_upload_file_invalid_mime_type(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+    accept_pattern: list[str],
+    mime_type: str,
+    expected_status: int,
+):
+    """Test successful file upload."""
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=True, accept=accept_pattern),
+    )
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, mime_type),
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == expected_status
 
 
 def test_project_translations_file_path_traversal(

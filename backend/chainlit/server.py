@@ -1,4 +1,5 @@
 import asyncio
+import fnmatch
 import glob
 import json
 import mimetypes
@@ -870,6 +871,18 @@ async def upload_file(
 
     assert file.filename, "No filename for uploaded file"
     assert file.content_type, "No content type for uploaded file"
+
+    if (
+        config.features.spontaneous_file_upload is not None
+        and config.features.spontaneous_file_upload.accept is not None
+    ):
+        for pattern in config.features.spontaneous_file_upload.accept:
+            if fnmatch.fnmatch(file.content_type, pattern):
+                return True
+        raise HTTPException(
+            status_code=400,
+            detail="File type not allowed",
+        )
 
     file_response = await session.persist_file(
         name=file.filename, content=content, mime=file.content_type
