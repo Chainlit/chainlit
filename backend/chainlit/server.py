@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 import socketio
 from fastapi import (
@@ -872,23 +872,65 @@ async def upload_file(
     assert file.filename, "No filename for uploaded file"
     assert file.content_type, "No content type for uploaded file"
 
-    if (
-        config.features.spontaneous_file_upload is not None
-        and config.features.spontaneous_file_upload.accept is not None
-    ):
-        for pattern in config.features.spontaneous_file_upload.accept:
-            if fnmatch.fnmatch(file.content_type, pattern):
-                return True
-        raise HTTPException(
-            status_code=400,
-            detail="File type not allowed",
-        )
+    allowed_file_upload(file)
 
     file_response = await session.persist_file(
         name=file.filename, content=content, mime=file.content_type
     )
 
     return JSONResponse(content=file_response)
+
+
+def allowed_file_upload(file: UploadFile):
+    if config.features.spontaneous_file_upload is None:
+        return  # TODO: if it is not configured what should happen?
+
+    if config.features.spontaneous_file_upload.enabled is False:
+        raise HTTPException(
+            status_code=400,
+            detail="File upload is not enabled",
+        )
+
+    allowed_file_upload_mime(file)
+    allowed_file_upload_max_size(file)
+
+
+def allowed_file_upload_mime(file: UploadFile):
+    if config.features.spontaneous_file_upload.accept is None:
+        return
+
+    accept = config.features.spontaneous_file_upload.accept
+    if isinstance(accept, List):
+        for pattern in accept:
+            if fnmatch.fnmatch(file.content_type, pattern):
+                return
+    else:
+        for pattern, extensions in accept.items():
+            if fnmatch.fnmatch(file.content_type, pattern):
+                if len(extensions) == 0:
+                    return
+                for extension in extensions:
+                    if file.filename is not None and file.filename.endswith(extension):
+                        return
+    raise HTTPException(
+        status_code=400,
+        detail="File type not allowed",
+    )
+
+
+def allowed_file_upload_max_size(file: UploadFile):
+    if config.features.spontaneous_file_upload.max_size_mb is None:
+        return
+
+    if (
+        file.size is not None
+        and file.size
+        > config.features.spontaneous_file_upload.max_size_mb * 1024 * 1024
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="File size too large",
+        )
 
 
 @router.get("/project/file/{file_id}")
