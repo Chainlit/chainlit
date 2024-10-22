@@ -16,7 +16,7 @@ class OAuthProvider:
     client_secret: str
     authorize_url: str
     authorize_params: Dict[str, str]
-    default_prompt: Optional[str]
+    default_prompt: Optional[str] = None
 
     def is_configured(self):
         return all([os.environ.get(env) for env in self.env])
