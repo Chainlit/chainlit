@@ -241,6 +241,7 @@ class FeaturesSettings(DataClassJsonMixin):
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True
+    image_lightbox: bool = True
 
 
 @dataclass()
