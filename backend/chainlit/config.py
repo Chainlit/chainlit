@@ -87,6 +87,9 @@ auto_tag_thread = true
 # Allow users to edit their own messages
 edit_message = true
 
+# Enable lightbox for images - making it possible to view images in full screen
+image_lightbox = true
+
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true

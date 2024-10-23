@@ -16,19 +16,20 @@ interface Props {
 const ImageElement = ({ element }: Props) => {
   const [loading, setLoading] = useState(true);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const { config } = useConfig();
+  const config = useConfig();
 
   if (!element.url) {
     return null;
   }
 
-  const enableLightbox = config?.features?.image_lightbox && element.display === 'inline';
+  const enableLightbox = config.config?.features.image_lightbox && element.display === 'inline';
 
   const handleImageClick = () => {
     if (enableLightbox) {
       setLightboxOpen(true);
     }
   };
+
 
   return (
     <FrameElement>
