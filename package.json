@@ -34,5 +34,8 @@
       "braces@<3.0.3": ">=3.0.3",
       "micromatch@<4.0.8": ">=4.0.8"
     }
+  },
+  "dependencies": {
+    "yet-another-react-lightbox": "^3.21.6"
   }
 }
