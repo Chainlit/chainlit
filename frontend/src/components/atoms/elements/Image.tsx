@@ -22,7 +22,7 @@ const ImageElement = ({ element }: Props) => {
     return null;
   }
 
-  const enableLightbox = typedConfig?.features?.image_lightbox && element.display === 'inline';
+  const enableLightbox = config?.features?.image_lightbox && element.display === 'inline';
 
   const handleImageClick = () => {
     if (enableLightbox) {
