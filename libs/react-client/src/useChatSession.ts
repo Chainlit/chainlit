@@ -133,31 +133,27 @@ const useChatSession = () => {
       // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
       // Require WebSocket when connecting to backend
       if (requireWebSocket) {
-        // https://socket.io/docs/v4/client-socket-instance/#socketio
-        // 'connect' event is emitted when the underlying connection is established with polling transport
-        // 'upgrade' event is emitted when the underlying connection is upgraded to WebSocket and polling request is stopped.
-        const engine = socket.io.engine;
         // https://github.com/socketio/socket.io/tree/main/packages/engine.io-client#events
-        engine.once('upgrade', () => {
-          // Set session on connect event, otherwise user can not interact with text input UI.
-          // Upgrade event is required to make sure user won't interact with the session before websocket upgrade success
-          socket.on('connect', onConnect);
-        });
         // Socket.io will not retry upgrade request.
         // Retry upgrade to websocket when error can only be done via reconnect.
         // This will not be an issue for users if they are using persistent sticky session.
         // In case they are using soft session affinity like Istio, then sometimes upgrade request will fail
-        engine.once('upgradeError', () => {
-          onConnectError();
+        socket.io.engine.once('upgradeError', () => {
           setTimeout(() => {
             socket.removeAllListeners();
             socket.close();
-            _connect({
-              userEnv,
-              accessToken,
-              requireWebSocket
-            });
+            _connect({ userEnv, accessToken, requireWebSocket });
           }, 500);
+        });
+
+        // https://socket.io/docs/v4/client-socket-instance/#socketio
+        socket.on('connect', () => {
+          // Sometimes upgrade request already succeeded before connect event
+          if (socket.io.engine.transport.name === 'websocket') {
+            onConnect();
+          } else {
+            socket.io.engine.once('upgrade', onConnect);
+          }
         });
       } else {
         socket.on('connect', onConnect);
