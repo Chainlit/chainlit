@@ -131,6 +131,9 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.0
+      yet-another-react-lightbox:
+        specifier: ^3.21.6
+        version: 3.21.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       yup:
         specifier: ^1.2.0
         version: 1.2.0
@@ -3917,6 +3920,13 @@ packages:
     resolution: {integrity: sha512-pIXzoImaqmfOrL7teGUBt/T7ZDnyeGBWyXQBvOVhLkWLN37GXv8NMLK406UY6dS51JfcQHsmcW5cJ441bHg6Lg==}
     engines: {node: '>= 14'}
     hasBin: true
+
+  yet-another-react-lightbox@3.21.6:
+    resolution: {integrity: sha512-uKcRmmezsj1Fbj38B6hFOGwbAu94fPr8d5H6I0+1FmcToX56freEGXXXtdA1oRo6036ug+UgrKZzzvsw/MIM/w==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   yocto-queue@1.0.0:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
@@ -8155,6 +8165,11 @@ snapshots:
   yaml@1.10.2: {}
 
   yaml@2.4.1: {}
+
+  yet-another-react-lightbox@3.21.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   yocto-queue@1.0.0: {}
 
