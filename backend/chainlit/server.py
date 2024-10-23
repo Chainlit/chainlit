@@ -872,7 +872,7 @@ async def upload_file(
     assert file.filename, "No filename for uploaded file"
     assert file.content_type, "No content type for uploaded file"
 
-    allowed_file_upload(file)
+    validate_file_upload(file)
 
     file_response = await session.persist_file(
         name=file.filename, content=content, mime=file.content_type
@@ -881,7 +881,7 @@ async def upload_file(
     return JSONResponse(content=file_response)
 
 
-def allowed_file_upload(file: UploadFile):
+def validate_file_upload(file: UploadFile):
     if config.features.spontaneous_file_upload is None:
         return  # TODO: if it is not configured what should happen?
 
@@ -891,11 +891,11 @@ def allowed_file_upload(file: UploadFile):
             detail="File upload is not enabled",
         )
 
-    allowed_file_upload_mime(file)
-    allowed_file_upload_max_size(file)
+    validate_file_mime_type(file)
+    validate_file_size(file)
 
 
-def allowed_file_upload_mime(file: UploadFile):
+def validate_file_mime_type(file: UploadFile):
     if config.features.spontaneous_file_upload.accept is None:
         return
 
@@ -918,7 +918,7 @@ def allowed_file_upload_mime(file: UploadFile):
     )
 
 
-def allowed_file_upload_max_size(file: UploadFile):
+def validate_file_size(file: UploadFile):
     if config.features.spontaneous_file_upload.max_size_mb is None:
         return
 
