@@ -63,13 +63,19 @@ const ImageElement = ({ element }: Props) => {
             zoomInMultiplier: 2,
           }}
           download={{
-            download: ({ slide }) => {
-              const link = document.createElement('a');
-              link.href = slide.src;
-              link.download = element.name || 'image';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+            download: async ({ slide }) => {
+              try {
+                const response = await fetch(slide.src, { mode: 'cors' });
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = element.name || 'image';
+                link.click();
+                window.URL.revokeObjectURL(url);
+              } catch (error) {
+                console.error('Failed to download image:', error);
+              }
             },
           }}
         />
