@@ -1,7 +1,16 @@
 import useSWR, { SWRResponse } from 'swr';
+import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
 const fetcher = async (url: string): Promise<any> => {
-  const response = await fetch(url);
+  const { isAuthenticated, accessToken } = useAuth();
+
+  // If isAuthenticated, add {"Authorization": f"Bearer {token}"} to request
+  const headers = isAuthenticated
+    ? {
+      Authorization: `Bearer ${accessToken}`,
+    }
+    : {};
+  const response = await fetch(url, { headers });
 
   if (!response.ok) {
     throw new Error('Network response was not ok');
