@@ -98,17 +98,25 @@ const addMessageToParent = (
   return nextMessages;
 };
 
-const hasMessageById = (messages: IStep[], messageId: string) => {
+const findMessageById = (
+  messages: IStep[],
+  messageId: string
+): IStep | undefined => {
   for (const message of messages) {
     if (isEqual(message.id, messageId)) {
-      return true;
+      return message;
     } else if (message.steps && message.steps.length > 0) {
-      if (hasMessageById(message.steps, messageId)) {
-        return true;
+      const foundMessage = findMessageById(message.steps, messageId);
+      if (foundMessage) {
+        return foundMessage;
       }
     }
   }
-  return false;
+  return undefined;
+};
+
+const hasMessageById = (messages: IStep[], messageId: string): boolean => {
+  return findMessageById(messages, messageId) !== undefined;
 };
 
 const updateMessageById = (
@@ -156,10 +164,10 @@ const updateMessageContentById = (
   messages: IStep[],
   messageId: number | string,
   updatedContent: string,
-  isSequence: boolean
+  isSequence: boolean,
+  isInput: boolean
 ): IStep[] => {
   const nextMessages = [...messages];
-
   for (let index = 0; index < nextMessages.length; index++) {
     const msg = nextMessages[index];
 
@@ -169,6 +177,14 @@ const updateMessageContentById = (
           msg.content = updatedContent;
         } else {
           msg.content += updatedContent;
+        }
+      } else if (isInput) {
+        if ('input' in msg && msg.input !== undefined) {
+          if (isSequence) {
+            msg.input = updatedContent;
+          } else {
+            msg.input += updatedContent;
+          }
         }
       } else {
         if ('output' in msg && msg.output !== undefined) {
@@ -186,7 +202,8 @@ const updateMessageContentById = (
         msg.steps,
         messageId,
         updatedContent,
-        isSequence
+        isSequence,
+        isInput
       );
       nextMessages[index] = { ...msg };
     }

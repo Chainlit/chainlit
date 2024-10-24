@@ -3,7 +3,8 @@ export type AuthProvider =
   | 'header'
   | 'github'
   | 'google'
-  | 'azure-ad';
+  | 'azure-ad'
+  | 'azure-ad-hybrid';
 
 export interface IUserMetadata extends Record<string, any> {
   tags?: string[];
@@ -14,5 +15,6 @@ export interface IUserMetadata extends Record<string, any> {
 export interface IUser {
   id: string;
   identifier: string;
+  display_name?: string;
   metadata: IUserMetadata;
 }

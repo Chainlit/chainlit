@@ -1,10 +1,10 @@
-import { useAuth } from 'api/auth';
 import { memo, useCallback } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Box } from '@mui/material';
 
+import { useAuth } from '@chainlit/react-client';
 import { FileSpec, IStep, useChatInteract } from '@chainlit/react-client';
 
 import ScrollDownButton from 'components/atoms/buttons/scrollDownButton';
@@ -12,7 +12,6 @@ import ScrollDownButton from 'components/atoms/buttons/scrollDownButton';
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import { IAttachment } from 'state/chat';
-import { IProjectSettings } from 'state/project';
 import { inputHistoryState } from 'state/userInputHistory';
 
 import Input from './input';
@@ -25,7 +24,6 @@ interface Props {
   setAutoScroll: (autoScroll: boolean) => void;
   submitProxy?: (text: string, submitFunction: (text: string) => void) => void;
   autoScroll?: boolean;
-  projectSettings?: IProjectSettings;
 }
 
 const InputBox = memo(
@@ -35,7 +33,6 @@ const InputBox = memo(
     onFileUploadError,
     setAutoScroll,
     autoScroll,
-    projectSettings,
     submitProxy
   }: Props) => {
     const layoutMaxWidth = useLayoutMaxWidth();
@@ -80,7 +77,7 @@ const InputBox = memo(
         setAutoScroll(true);
         sendMessage(message, fileReferences);
       },
-      [user, projectSettings, sendMessage]
+      [user, sendMessage]
     );
 
     const onReply = useCallback(
@@ -106,7 +103,9 @@ const InputBox = memo(
         position="relative"
         flexDirection="column"
         gap={1}
-        p={2}
+        pb={2}
+        marginTop={0}
+        px={2}
         sx={{
           boxSizing: 'border-box',
           width: '100%',

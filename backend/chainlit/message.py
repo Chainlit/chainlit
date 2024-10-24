@@ -6,8 +6,9 @@ from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
 from chainlit.action import Action
+from chainlit.chat_context import chat_context
 from chainlit.config import config
-from chainlit.context import context
+from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import ElementBased
 from chainlit.logger import logger
@@ -21,7 +22,6 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai import BaseGeneration
 from literalai.helper import utc_now
 from literalai.step import MessageStepType
 
@@ -32,22 +32,26 @@ class MessageBase(ABC):
     author: str
     content: str = ""
     type: MessageStepType = "assistant_message"
-    disable_feedback = False
     streaming = False
     created_at: Union[str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
     is_error = False
+    parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
     wait_for_answer = False
     indent: Optional[int] = None
-    generation: Optional[BaseGeneration] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
         self.thread_id = context.session.thread_id
+
+        previous_steps = local_steps.get() or []
+        parent_step = previous_steps[-1] if previous_steps else None
+        if parent_step:
+            self.parent_id = parent_step.id
 
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
@@ -57,11 +61,11 @@ class MessageBase(ABC):
         type = _dict.get("type", "assistant_message")
         message = Message(
             id=_dict["id"],
+            parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
             type=type,  # type: ignore
-            disable_feedback=_dict.get("disableFeedback", False),
             language=_dict.get("language"),
         )
 
@@ -71,20 +75,18 @@ class MessageBase(ABC):
         _dict: StepDict = {
             "id": self.id,
             "threadId": self.thread_id,
+            "parentId": self.parent_id,
             "createdAt": self.created_at,
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
             "name": self.author,
             "type": self.type,
-            "createdAt": self.created_at,
             "language": self.language,
             "streaming": self.streaming,
-            "disableFeedback": self.disable_feedback,
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
             "indent": self.indent,
-            "generation": self.generation.to_dict() if self.generation else None,
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
@@ -103,6 +105,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = self.to_dict()
+        chat_context.add(self)
 
         data_layer = get_data_layer()
         if data_layer:
@@ -122,7 +125,7 @@ class MessageBase(ABC):
         Remove a message already sent to the UI.
         """
         trace_event("remove_message")
-
+        chat_context.remove(self)
         step_dict = self.to_dict()
         data_layer = get_data_layer()
         if data_layer:
@@ -164,6 +167,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = await self._create()
+        chat_context.add(self)
         await context.emitter.send_step(step_dict)
 
         return self
@@ -173,21 +177,21 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
-
-        if not self.streaming:
-            self.streaming = True
-            step_dict = self.to_dict()
-            await context.emitter.stream_start(step_dict)
-
         if is_sequence:
             self.content = token
         else:
             self.content += token
 
         assert self.id
-        await context.emitter.send_token(
-            id=self.id, token=token, is_sequence=is_sequence
-        )
+
+        if not self.streaming:
+            self.streaming = True
+            step_dict = self.to_dict()
+            await context.emitter.stream_start(step_dict)
+        else:
+            await context.emitter.send_token(
+                id=self.id, token=token, is_sequence=is_sequence
+            )
 
 
 class Message(MessageBase):
@@ -196,31 +200,28 @@ class Message(MessageBase):
 
     Args:
         content (Union[str, Dict]): The content of the message.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
         elements (List[ElementBased], optional): A list of elements to send with the message.
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
     """
 
     def __init__(
         self,
         content: Union[str, Dict],
-        author: str = config.ui.name,
+        author: Optional[str] = None,
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         elements: Optional[List[ElementBased]] = None,
-        disable_feedback: bool = False,
         type: MessageStepType = "assistant_message",
-        generation: Optional[BaseGeneration] = None,
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         id: Optional[str] = None,
+        parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
         self.language = language
-        self.generation = generation
         if isinstance(content, dict):
             try:
                 self.content = json.dumps(content, indent=4, ensure_ascii=False)
@@ -237,17 +238,19 @@ class Message(MessageBase):
         if id:
             self.id = str(id)
 
+        if parent_id:
+            self.parent_id = str(parent_id)
+
         if created_at:
             self.created_at = created_at
 
         self.metadata = metadata
         self.tags = tags
 
-        self.author = author
+        self.author = author or config.ui.name
         self.type = type
         self.actions = actions if actions is not None else []
         self.elements = elements if elements is not None else []
-        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -258,8 +261,6 @@ class Message(MessageBase):
         """
         trace_event("send_message")
         await super().send()
-
-        context.session.root_message = self
 
         # Create tasks for all actions and elements
         tasks = [action.send(for_id=self.id) for action in self.actions]
@@ -303,9 +304,7 @@ class ErrorMessage(MessageBase):
 
     Args:
         content (str): Text displayed above the upload button.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        parent_id (str, optional): If provided, the message will be nested inside the parent in the UI.
-        indent (int, optional): If positive, the message will be nested in the UI.
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
     """
 
     def __init__(
@@ -316,7 +315,7 @@ class ErrorMessage(MessageBase):
     ):
         self.content = content
         self.author = author
-        self.type = "system_message"
+        self.type = "assistant_message"
         self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
 
@@ -346,8 +345,7 @@ class AskUserMessage(AskMessageBase):
 
     Args:
         content (str): The content of the prompt.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -357,7 +355,6 @@ class AskUserMessage(AskMessageBase):
         content: str,
         author: str = config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
         timeout: int = 60,
         raise_on_timeout: bool = False,
     ):
@@ -365,7 +362,6 @@ class AskUserMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.type = type
-        self.disable_feedback = disable_feedback
         self.raise_on_timeout = raise_on_timeout
 
         super().__post_init__()
@@ -411,8 +407,7 @@ class AskFileMessage(AskMessageBase):
         accept (Union[List[str], Dict[str, List[str]]]): List of mime type to accept like ["text/csv", "application/pdf"] or a dict like {"text/plain": [".txt", ".py"]}.
         max_size_mb (int, optional): Maximum size per file in MB. Maximum value is 100.
         max_files (int, optional): Maximum number of files to upload. Maximum value is 10.
-        author (str, optional): The author of the message, this will be used in the UI. Defaults to the chatbot name (see config).
-        disable_feedback (bool, optional): Hide the feedback buttons for this specific message
+        author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         timeout (int, optional): The number of seconds to wait for an answer before raising a TimeoutError.
         raise_on_timeout (bool, optional): Whether to raise a socketio TimeoutError if the user does not answer in time.
     """
@@ -425,7 +420,6 @@ class AskFileMessage(AskMessageBase):
         max_files=1,
         author=config.ui.name,
         type: MessageStepType = "assistant_message",
-        disable_feedback: bool = False,
         timeout=90,
         raise_on_timeout=False,
     ):
@@ -437,7 +431,6 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
-        self.disable_feedback = disable_feedback
 
         super().__post_init__()
 
@@ -501,14 +494,12 @@ class AskActionMessage(AskMessageBase):
         content: str,
         actions: List[Action],
         author=config.ui.name,
-        disable_feedback=False,
         timeout=90,
         raise_on_timeout=False,
     ):
         self.content = content
         self.actions = actions
         self.author = author
-        self.disable_feedback = disable_feedback
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
 

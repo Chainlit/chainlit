@@ -1,15 +1,26 @@
+import os.path
+import pickle
 from typing import Dict, List, Optional
 
 import chainlit.data as cl_data
+from chainlit.data.utils import queue_until_user_message
+from chainlit.element import Element, ElementDict
+from chainlit.socket import persist_user_session
 from chainlit.step import StepDict
+from chainlit.types import (
+    Feedback,
+    PageInfo,
+    PaginatedResponse,
+    Pagination,
+    ThreadDict,
+    ThreadFilter,
+)
+from chainlit.user import PersistedUser, User
 from literalai.helper import utc_now
 
 import chainlit as cl
 
 now = utc_now()
-
-create_step_counter = 0
-
 
 thread_history = [
     {
@@ -58,8 +69,24 @@ thread_history = [
             },
         ],
     },
-]  # type: List[cl_data.ThreadDict]
+]  # type: List[ThreadDict]
 deleted_thread_ids = []  # type: List[str]
+
+THREAD_HISTORY_PICKLE_PATH = os.getenv("THREAD_HISTORY_PICKLE_PATH")
+if THREAD_HISTORY_PICKLE_PATH and os.path.exists(THREAD_HISTORY_PICKLE_PATH):
+    with open(THREAD_HISTORY_PICKLE_PATH, "rb") as f:
+        thread_history = pickle.load(f)
+
+
+async def save_thread_history():
+    if THREAD_HISTORY_PICKLE_PATH:
+        # Force saving of thread history for reload when server restarts
+        await persist_user_session(
+            cl.context.session.thread_id, cl.context.session.to_persistable()
+        )
+
+        with open(THREAD_HISTORY_PICKLE_PATH, "wb") as out_file:
+            pickle.dump(thread_history, out_file)
 
 
 class TestDataLayer(cl_data.BaseDataLayer):
@@ -101,8 +128,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     @cl_data.queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
-        global create_step_counter
-        create_step_counter += 1
+        cl.user_session.set(
+            "create_step_counter", cl.user_session.get("create_step_counter") + 1
+        )
 
         thread = next(
             (t for t in thread_history if t["id"] == step_dict.get("threadId")), None
@@ -114,34 +142,73 @@ class TestDataLayer(cl_data.BaseDataLayer):
         return "admin"
 
     async def list_threads(
-        self, pagination: cl_data.Pagination, filter: cl_data.ThreadFilter
-    ) -> cl_data.PaginatedResponse[cl_data.ThreadDict]:
-        return cl_data.PaginatedResponse(
+        self, pagination: Pagination, filters: ThreadFilter
+    ) -> PaginatedResponse[ThreadDict]:
+        return PaginatedResponse(
             data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
-            pageInfo=cl_data.PageInfo(
-                hasNextPage=False, startCursor=None, endCursor=None
-            ),
+            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
         )
 
     async def get_thread(self, thread_id: str):
-        return next((t for t in thread_history if t["id"] == thread_id), None)
+        thread = next((t for t in thread_history if t["id"] == thread_id), None)
+        if not thread:
+            return None
+        thread["steps"] = sorted(thread["steps"], key=lambda x: x["createdAt"])
+        return thread
 
     async def delete_thread(self, thread_id: str):
         deleted_thread_ids.append(thread_id)
+
+    async def delete_feedback(
+        self,
+        feedback_id: str,
+    ) -> bool:
+        return True
+
+    async def upsert_feedback(
+        self,
+        feedback: Feedback,
+    ) -> str:
+        return ""
+
+    @queue_until_user_message()
+    async def create_element(self, element: "Element"):
+        pass
+
+    async def get_element(
+        self, thread_id: str, element_id: str
+    ) -> Optional["ElementDict"]:
+        pass
+
+    @queue_until_user_message()
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
+        pass
+
+    @queue_until_user_message()
+    async def update_step(self, step_dict: "StepDict"):
+        pass
+
+    @queue_until_user_message()
+    async def delete_step(self, step_id: str):
+        pass
+
+    async def build_debug_url(self) -> str:
+        return ""
 
 
 cl_data._data_layer = TestDataLayer()
 
 
 async def send_count():
-    await cl.Message(
-        f"Create step counter: {create_step_counter}", disable_feedback=True
-    ).send()
+    create_step_counter = cl.user_session.get("create_step_counter")
+    await cl.Message(f"Create step counter: {create_step_counter}").send()
 
 
 @cl.on_chat_start
 async def main():
-    await cl.Message("Hello, send me a message!", disable_feedback=True).send()
+    # Add step counter to session so that it is saved in thread metadata
+    cl.user_session.set("create_step_counter", 0)
+    await cl.Message("Hello, send me a message!").send()
     await send_count()
 
 
@@ -150,10 +217,12 @@ async def handle_message():
     # Wait for queue to be flushed
     await cl.sleep(2)
     await send_count()
-    async with cl.Step(root=True, disable_feedback=True) as step:
+    async with cl.Step(type="tool", name="thinking") as step:
         step.output = "Thinking..."
     await cl.Message("Ok!").send()
     await send_count()
+
+    await save_thread_history()
 
 
 @cl.password_auth_callback
@@ -165,7 +234,7 @@ def auth_callback(username: str, password: str) -> Optional[cl.User]:
 
 
 @cl.on_chat_resume
-async def on_chat_resume(thread: cl_data.ThreadDict):
+async def on_chat_resume(thread: ThreadDict):
     await cl.Message(f"Welcome back to {thread['name']}").send()
     if "metadata" in thread:
         await cl.Message(thread["metadata"], author="metadata", language="json").send()

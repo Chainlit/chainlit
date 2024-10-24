@@ -2,21 +2,22 @@ import asyncio
 import os
 import re
 import uuid
+from datetime import datetime
 from functools import partial
 from typing import Dict, List, Optional, Union
 
 import httpx
 from chainlit.config import config
-from chainlit.context import ChainlitContext, HTTPSession, context_var
+from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
+from chainlit.logger import logger
 from chainlit.message import Message, StepDict
+from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from chainlit.logger import logger
-from chainlit.telemetry import trace
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_bolt.async_app import AsyncApp
 
@@ -28,18 +29,16 @@ class SlackEmitter(BaseChainlitEmitter):
         app: AsyncApp,
         channel_id: str,
         say,
-        enabled=False,
         thread_ts: Optional[str] = None,
     ):
         super().__init__(session)
         self.app = app
         self.channel_id = channel_id
         self.say = say
-        self.enabled = enabled
         self.thread_ts = thread_ts
 
     async def send_element(self, element_dict: ElementDict):
-        if not self.enabled or element_dict.get("display") != "inline":
+        if element_dict.get("display") != "inline":
             return
 
         persisted_file = self.session.files.get(element_dict.get("chainlitKey") or "")
@@ -64,16 +63,14 @@ class SlackEmitter(BaseChainlitEmitter):
         )
 
     async def send_step(self, step_dict: StepDict):
-        if not self.enabled:
-            return
-
-        is_chain_of_thought = bool(step_dict.get("parentId"))
+        step_type = step_dict.get("type")
+        is_assistant_message = step_type == "assistant_message"
         is_empty_output = not step_dict.get("output")
 
-        if is_chain_of_thought or is_empty_output:
+        if is_empty_output or not is_assistant_message:
             return
 
-        enable_feedback = not step_dict.get("disableFeedback") and get_data_layer()
+        enable_feedback = get_data_layer()
         blocks: List[Dict] = [
             {
                 "type": "section",
@@ -81,6 +78,8 @@ class SlackEmitter(BaseChainlitEmitter):
             }
         ]
         if enable_feedback:
+            current_run = context.current_run
+            scorable_id = current_run.id if current_run else step_dict.get("id")
             blocks.append(
                 {
                     "type": "actions",
@@ -93,7 +92,7 @@ class SlackEmitter(BaseChainlitEmitter):
                                 "emoji": True,
                                 "text": ":thumbsdown:",
                             },
-                            "value": step_dict.get("id"),
+                            "value": scorable_id,
                         },
                         {
                             "action_id": "thumbup",
@@ -103,7 +102,7 @@ class SlackEmitter(BaseChainlitEmitter):
                                 "emoji": True,
                                 "text": ":thumbsup:",
                             },
-                            "value": step_dict.get("id"),
+                            "value": scorable_id,
                         },
                     ],
                 }
@@ -113,7 +112,9 @@ class SlackEmitter(BaseChainlitEmitter):
         )
 
     async def update_step(self, step_dict: StepDict):
-        if not self.enabled:
+        is_assistant_message = step_dict["type"] == "assistant_message"
+
+        if not is_assistant_message:
             return
 
         await self.send_step(step_dict)
@@ -123,6 +124,7 @@ slack_app = AsyncApp(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
 )
+
 
 @trace
 def init_slack_context(
@@ -166,12 +168,12 @@ def clean_content(message: str):
 async def get_user(slack_user_id: str):
     if slack_user_id in users_by_slack_id:
         return users_by_slack_id[slack_user_id]
-    
+
     slack_user = await slack_app.client.users_info(user=slack_user_id)
     slack_user_profile = slack_user["user"]["profile"]
 
-    user_email = slack_user_profile.get("email")
-    user = User(identifier=USER_PREFIX + user_email, metadata=slack_user_profile)
+    user_identifier = slack_user_profile.get("email") or slack_user_id
+    user = User(identifier=USER_PREFIX + user_identifier, metadata=slack_user_profile)
 
     users_by_slack_id[slack_user_id] = user
 
@@ -241,6 +243,7 @@ async def download_slack_files(session: HTTPSession, files, token):
 async def process_slack_message(
     event,
     say,
+    thread_id: str,
     thread_name: Optional[str] = None,
     bind_thread_to_user=False,
     thread_ts: Optional[str] = None,
@@ -248,7 +251,6 @@ async def process_slack_message(
     user = await get_user(event["user"])
 
     channel_id = event["channel"]
-    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts or channel_id))
 
     text = event.get("text")
     slack_files = event.get("files", [])
@@ -273,6 +275,9 @@ async def process_slack_message(
         session, slack_files, slack_app.client.token
     )
 
+    if on_chat_start := config.code.on_chat_start:
+        await on_chat_start()
+
     msg = Message(
         content=clean_content(text),
         elements=file_elements,
@@ -281,11 +286,6 @@ async def process_slack_message(
     )
 
     await msg.send()
-
-    ctx.emitter.enabled = True
-
-    if on_chat_start := config.code.on_chat_start:
-        await on_chat_start()
 
     if on_message := config.code.on_message:
         await on_message(msg)
@@ -303,7 +303,7 @@ async def process_slack_message(
                 thread_id=thread_id,
                 name=thread_name or msg.content,
                 metadata=ctx.session.to_persistable(),
-                user_id=user_id
+                user_id=user_id,
             )
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
@@ -319,14 +319,29 @@ async def handle_app_home_opened(event, say):
 @slack_app.event("app_mention")
 async def handle_app_mentions(event, say):
     thread_ts = event.get("thread_ts", event["ts"])
-    await process_slack_message(event, say, thread_ts=thread_ts)
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
+
+    await process_slack_message(event, say, thread_id=thread_id, thread_ts=thread_ts)
 
 
 @slack_app.event("message")
 async def handle_message(message, say):
-    user = await get_user(message["user"])
-    thread_name = f"{user.identifier} Slack DM"
-    await process_slack_message(message, say, thread_name)
+    thread_id = str(
+        uuid.uuid5(
+            uuid.NAMESPACE_DNS,
+            message["channel"] + datetime.today().strftime("%Y-%m-%d"),
+        )
+    )
+    thread_ts = message.get("thread_ts", message["ts"])
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
+
+    await process_slack_message(
+        event=message,
+        say=say,
+        thread_id=thread_id,
+        bind_thread_to_user=True,
+        thread_ts=thread_ts,
+    )
 
 
 @slack_app.block_action("thumbdown")
@@ -335,7 +350,8 @@ async def thumb_down(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        await data_layer.upsert_feedback(Feedback(forId=step_id, value=0))
+        feedback = Feedback(forId=step_id, value=0)
+        await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
     blocks = body["message"]["blocks"]
@@ -360,7 +376,8 @@ async def thumb_up(ack, context, body):
     step_id = body["actions"][0]["value"]
 
     if data_layer := get_data_layer():
-        await data_layer.upsert_feedback(Feedback(forId=step_id, value=1))
+        feedback = Feedback(forId=step_id, value=1)
+        await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
     blocks = body["message"]["blocks"]

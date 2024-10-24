@@ -1,5 +1,4 @@
 import { IFeedback } from './feedback';
-import { IGeneration } from './generation';
 
 type StepType =
   | 'assistant_message'
@@ -27,11 +26,9 @@ export interface IStep {
   createdAt: number | string;
   start?: number | string;
   end?: number | string;
-  disableFeedback?: boolean;
   feedback?: IFeedback;
   language?: string;
   streaming?: boolean;
-  generation?: IGeneration;
   steps?: IStep[];
   //legacy
   indent?: number;

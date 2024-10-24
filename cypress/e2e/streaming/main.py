@@ -21,16 +21,9 @@ async def main():
 
     await msg.send()
 
-    step = cl.Step()
+    step = cl.Step(type="tool", name="tool1")
     for token in token_list:
         await step.stream_token(token)
-        await cl.sleep(0.2)
-
-    await step.send()
-
-    step = cl.Step()
-    for seq in sequence_list:
-        await step.stream_token(token=seq, is_sequence=True)
         await cl.sleep(0.2)
 
     await step.send()

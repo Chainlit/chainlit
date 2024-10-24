@@ -3,79 +3,36 @@ import { useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 
-import { AvatarElement } from 'components/atoms/elements';
+import { AvatarElement } from 'components/atoms/elements/Avatar';
 
 import { useColorForName } from 'hooks/useColors';
 
 import type { IStep } from 'client-types/';
 
-import { MessageTime } from './MessageTime';
-
 interface Props {
-  message: IStep;
-  show?: boolean;
-  children?: React.ReactNode;
+  author: string;
+  avatarUrl?: string;
+  hide?: boolean;
 }
 
 export const AUTHOR_BOX_WIDTH = 26;
 
-const Author = ({ message, show, children }: Props) => {
+const Author = ({ author, avatarUrl, hide }: Props) => {
   const context = useContext(MessageContext);
   const getColorForName = useColorForName(context.uiName);
 
-  const isUser = message.type === 'user_message';
-  const author = isUser ? 'You' : message.name;
-
-  const avatarEl = context.avatars.find((e) => e.name === author);
-  const avatar = show ? (
+  return !hide ? (
     <Stack alignItems="center" gap={1}>
       <AvatarElement
-        element={avatarEl}
         author={author}
-        bgColor={getColorForName(author, isUser, message.isError)}
-        classes={isUser ? 'user-avatar' : 'agent-avatar'}
+        // avatarUrl={avatarUrl}
+        bgColor={getColorForName(author, false, false)}
+        classes='agent-avatar'
       />
-      {(!!message.indent || message.parentId) && (
-        <Box
-          width="2px"
-          height="100%"
-          borderRadius="13px"
-          bgcolor={getColorForName(author, isUser)}
-        />
-      )}
     </Stack>
   ) : (
     <Box width={AUTHOR_BOX_WIDTH} />
-  );
-  const name = (
-    <Stack direction="row" gap={1} alignItems="center" className={`author-name ${isUser ? 'author-user' : 'author-agent'}`}>
-      {show ? (
-        <Typography
-          noWrap
-          sx={{
-            // fontSize: '1rem',
-            fontSize: 'theme.typography.body1.fontSize',
-            fontWeight: 600,
-            lineHeight: 'unset'
-          }}
-        >
-          {author}
-        </Typography>
-      ) : null}
-      <MessageTime timestamp={message.createdAt} />
-    </Stack>
-  );
-
-  return (
-    <Stack direction="row" gap={1.5} width="100%">
-      {avatar}
-      <Stack gap={1} width={`calc(100% - ${AUTHOR_BOX_WIDTH + 12}px)`}>
-        {name}
-        {children}
-      </Stack>
-    </Stack>
   );
 };
 

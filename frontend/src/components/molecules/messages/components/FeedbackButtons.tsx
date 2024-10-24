@@ -3,20 +3,27 @@ import { useContext, useState } from 'react';
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined';
-import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
-import ThumbDownAltOutlined from '@mui/icons-material/ThumbDownAltOutlined';
-import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
-import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 
-import { firstUserInteraction, useChatSession } from '@chainlit/react-client';
+import {
+  firstUserInteraction,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
 import { TextInput } from 'components/atoms/inputs';
+
+import MessageBubbleIcon from 'assets/messageBubble';
+import {
+  ThumbDownFilledIcon,
+  ThumbDownIcon,
+  ThumbUpFilledIcon,
+  ThumbUpIcon
+} from 'assets/thumbs';
 
 import type { IStep } from 'client-types/';
 
@@ -27,6 +34,7 @@ interface Props {
 }
 
 const FeedbackButtons = ({ message }: Props) => {
+  const config = useConfig();
   const { onFeedbackUpdated, onFeedbackDeleted } = useContext(MessageContext);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
@@ -36,8 +44,12 @@ const FeedbackButtons = ({ message }: Props) => {
   const [feedback, setFeedback] = useState(message.feedback?.value);
   const [comment, setComment] = useState(message.feedback?.comment);
 
-  const DownIcon = feedback === 0 ? ThumbDownAlt : ThumbDownAltOutlined;
-  const UpIcon = feedback === 1 ? ThumbUpAlt : ThumbUpAltOutlined;
+  if (!config.config?.dataPersistence) {
+    return null;
+  }
+
+  const DownIcon = feedback === 0 ? ThumbDownFilledIcon : ThumbDownIcon;
+  const UpIcon = feedback === 1 ? ThumbUpFilledIcon : ThumbUpIcon;
 
   const handleFeedbackChanged = (feedback?: number, comment?: string) => {
     if (feedback === undefined) {
@@ -61,6 +73,7 @@ const FeedbackButtons = ({ message }: Props) => {
         {
           ...(message.feedback || {}),
           forId: message.id,
+          threadId: message.threadId,
           value: feedback,
           comment
         }
@@ -110,7 +123,7 @@ const FeedbackButtons = ({ message }: Props) => {
             <IconButton
               color="inherit"
               disabled={disabled}
-              className={`negative-feedback-${feedback === -1 ? 'on' : 'off'}`}
+              className={`negative-feedback-${feedback === 0 ? 'on' : 'off'}`}
               onClick={() => {
                 handleFeedbackClick(0);
               }}
@@ -135,7 +148,7 @@ const FeedbackButtons = ({ message }: Props) => {
               }}
               className="feedback-comment-edit"
             >
-              <StickyNote2Outlined sx={iconSx} />
+              <MessageBubbleIcon sx={iconSx} />
             </IconButton>
           </span>
         </Tooltip>

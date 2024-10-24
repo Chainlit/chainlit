@@ -1,5 +1,5 @@
 import Chat from 'chat';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Box } from '@mui/material';
 import Fade from '@mui/material/Fade';
@@ -11,6 +11,7 @@ import EvoyaHeader from 'evoya/EvoyaHeader';
 
 interface Props {
   anchorEl?: HTMLElement | null;
+  buttonHeight: string;
 }
 
 export default function PopOver({ anchorEl }: Props) {
@@ -64,7 +65,7 @@ export default function PopOver({ anchorEl }: Props) {
         borderRadius: {
           sm:'12px'
         },
-        background: (theme) => theme.palette.background.default,
+        background: (theme: any) => theme.palette.background.default,
         boxShadow:
           '0 6px 6px 0 rgba(0,0,0,.02),0 8px 24px 0 rgba(0,0,0,.12)!important',
         zIndex: 9999

@@ -32,7 +32,7 @@ const Attachment = ({ name, mime, children }: Props) => {
           flexDirection: 'row',
           alignItems: 'center',
           gap: 1.2,
-          borderRadius: 1,
+          borderRadius: '0.7rem',
           px: 1.2,
           border: (theme) => `1px solid ${theme.palette.primary.main}`,
           color: (theme) =>

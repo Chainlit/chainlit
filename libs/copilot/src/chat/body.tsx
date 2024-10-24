@@ -1,29 +1,23 @@
-import { WidgetContext } from 'context';
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useCallback, useEffect, useMemo, useRef, useState, useContext } from 'react';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Alert, Box } from '@mui/material';
 
 import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
+import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
 import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
 import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
 import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
+import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/welcomeScreen';
 import { useUpload } from '@chainlit/app/src/hooks';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
-import { projectSettingsState } from '@chainlit/app/src/state/project';
 import {
   threadHistoryState,
   useChatData,
-  useChatInteract
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
 import { sideViewState } from '@chainlit/react-client';
 
@@ -33,6 +27,8 @@ import PrivacyShield from 'evoya/privacyShield/index';
 import TextSectionsCategoriesSimple from 'evoya/privacyShield/TextSectionsCategoriesSimple';
 import { usePrivacyShield } from 'evoya/privacyShield/usePrivacyShield';
 import InputBox from '@chainlit/app/src/components/organisms/chat/inputBox';
+
+import { WidgetContext } from 'context';
 
 import Messages from './messages';
 
@@ -45,28 +41,34 @@ const chatFunctions: ChatFunctions = {
 }
 
 const Chat = () => {
-  const { apiClient, evoya } = useContext(WidgetContext);
-  const projectSettings = useRecoilValue(projectSettingsState);
+  const { evoya } = useContext(WidgetContext);
+  const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
   const [autoScroll, setAutoScroll] = useState(true);
-  const { error, disabled } = useChatData();
+  const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
 
   const fileSpec = useMemo(
     () => ({
       max_size_mb:
-        projectSettings?.features?.spontaneous_file_upload?.max_size_mb || 500,
-      max_files:
-        projectSettings?.features?.spontaneous_file_upload?.max_files || 20,
-      accept: projectSettings?.features?.spontaneous_file_upload?.accept || [
-        '*/*'
-      ]
+        config?.features?.spontaneous_file_upload?.max_size_mb || 500,
+      max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
+      accept: config?.features?.spontaneous_file_upload?.accept || ['*/*']
     }),
-    [projectSettings]
+    [config]
   );
+
+  useEffect(() => {
+    if (callFn) {
+      const event = new CustomEvent('chainlit-call-fn', {
+        detail: callFn
+      });
+      window.dispatchEvent(event);
+    }
+  }, [callFn]);
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -77,23 +79,19 @@ const Chat = () => {
       const attachements: IAttachment[] = payloads.map((file) => {
         const id = uuidv4();
 
-        const { xhr, promise } = uploadFileRef.current(
-          apiClient,
-          file,
-          (progress) => {
-            setAttachments((prev) =>
-              prev.map((attachment) => {
-                if (attachment.id === id) {
-                  return {
-                    ...attachment,
-                    uploadProgress: progress
-                  };
-                }
-                return attachment;
-              })
-            );
-          }
-        );
+        const { xhr, promise } = uploadFileRef.current(file, (progress) => {
+          setAttachments((prev) =>
+            prev.map((attachment) => {
+              if (attachment.id === id) {
+                return {
+                  ...attachment,
+                  uploadProgress: progress
+                };
+              }
+              return attachment;
+            })
+          );
+        });
 
         promise
           .then((res) => {
@@ -165,7 +163,7 @@ const Chat = () => {
   }, []);
 
   const enableMultiModalUpload =
-    !disabled && projectSettings?.features?.spontaneous_file_upload?.enabled;
+    !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
   const {
     getPrivacySections,
@@ -196,6 +194,12 @@ const Chat = () => {
       width="100%"
       flexGrow={1}
       overflow="auto"
+      sx={{
+        boxSizing: 'border-box',
+        borderRadius: '0 0 10px 10px',
+        border: (theme) => evoya?.type === 'dashboard' ? '' : `1px solid ${theme.palette.background.paper}`,
+        borderTop: 0,
+      }}
     >
       {upload ? (
         <>
@@ -212,7 +216,7 @@ const Chat = () => {
           height: '100%'
         }}
       >
-        {error && (
+        {error ? (
           <Box
             sx={{
               width: '100%',
@@ -224,15 +228,20 @@ const Chat = () => {
               Could not reach the server.
             </Alert>
           </Box>
+        ) : (
+          <Box mt={0} />
         )}
         <ChatSettingsModal />
         <TaskList isMobile={true} />
         <ErrorBoundary>
-          <Messages
+          <ScrollContainer
             autoScroll={autoScroll}
-            projectSettings={projectSettings}
             setAutoScroll={setAutoScroll}
-          />
+          >
+            <WelcomeScreen hideLogo />
+            <Box my={1} />
+            <Messages />
+          </ScrollContainer>
           {evoya?.type === 'default' ? (
             <InputBoxDefault
               fileSpec={fileSpec}
@@ -240,7 +249,6 @@ const Chat = () => {
               onFileUploadError={onFileUploadError}
               autoScroll={autoScroll}
               setAutoScroll={setAutoScroll}
-              projectSettings={projectSettings}
             />
           ) : (
             <InputBox
@@ -249,7 +257,6 @@ const Chat = () => {
               onFileUploadError={onFileUploadError}
               autoScroll={autoScroll}
               setAutoScroll={setAutoScroll}
-              projectSettings={projectSettings}
               submitProxy={enabled ? submitProxy : undefined}
             />
           )}

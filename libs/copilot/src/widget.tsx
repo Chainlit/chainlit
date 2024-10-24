@@ -1,5 +1,5 @@
 import PopOver from 'popover';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IWidgetConfig } from 'types';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -16,9 +16,10 @@ interface Props {
 export default function Widget({ config }: Props) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
   const customStyle = config.button?.style || {};
+  const buttonHeight = customStyle.height || customStyle.size || '60px';
   const style = {
-    width: customStyle.size || '60px',
-    height: customStyle.size || '60px',
+    width: customStyle.width || customStyle.size || '60px',
+    height: buttonHeight,
     bgcolor: customStyle.bgcolor || '#F80061',
     color: customStyle.color || 'white',
     '&:hover': {
@@ -31,11 +32,18 @@ export default function Widget({ config }: Props) {
     boxShadow: customStyle.boxShadow || '0 4px 10px 0 rgba(0,0,0,.05)!important'
   };
 
+  useEffect(() => {
+    window.addEventListener('copilot-close-popover', () => {
+      setAnchorEl(null)
+    });
+    return () => {}
+  }, [])
+
   const isPopoverOpen = Boolean(anchorEl);
 
   return (
     <>
-      <PopOver anchorEl={anchorEl} />
+      <PopOver anchorEl={anchorEl} buttonHeight={buttonHeight} />
       <Fab
         disableRipple
         aria-label="open copilot"

@@ -28,13 +28,13 @@ const ResponseTextItem = ({ sectionId }: Props): JSX.Element => {
         sx={{
           display: 'inline',
           cursor: 'help',
-          color: (theme) => theme.palette.error.main
+          color: (theme: any) => theme.palette.error.main
         }}
       >
         <Tooltip
           title={t("components.organisms.privacyShield.word.notAnon")}
         >
-          {sectionItem?.string}
+          <>{sectionItem?.string ?? ''}</>
         </Tooltip>
       </Box>
     );
@@ -45,7 +45,7 @@ const ResponseTextItem = ({ sectionId }: Props): JSX.Element => {
       sx={{
         display: 'inline',
         cursor: 'help',
-        color: (theme) => sectionItem?.isAnon ? theme.palette.success.main : theme.palette.error.main
+        color: (theme: any) => sectionItem?.isAnon ? theme.palette.success.main : theme.palette.error.main
       }}
     >
       <Tooltip

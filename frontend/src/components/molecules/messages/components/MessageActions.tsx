@@ -25,7 +25,7 @@ const MessageActions = ({ message, actions }: Props) => {
 
   const show = displayedActions.length || drawerActions.length;
 
-  if (!show) {
+  if (!show || message.streaming) {
     return null;
   }
 

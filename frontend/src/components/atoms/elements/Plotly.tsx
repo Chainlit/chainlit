@@ -37,7 +37,12 @@ const _PlotlyElement = ({ element }: Props) => {
         layout={state.layout}
         frames={state.frames}
         config={state.config}
-        style={{ width: '100%', height: '100%' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '1rem',
+          overflow: 'hidden'
+        }}
         useResizeHandler={true}
       />
     </Suspense>
