@@ -1,15 +1,20 @@
 import useSWR, { SWRResponse } from 'swr';
-import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
+import { useAuth } from '@chainlit/react-client';
+import { boolean, string } from 'yup';
+
+const getHeaders = (isAuthenticated: boolean, accessToken: string | undefined) => {
+  if (isAuthenticated)
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+  return undefined;
+}
 
 const fetcher = async (url: string): Promise<any> => {
   const { isAuthenticated, accessToken } = useAuth();
 
-  // If isAuthenticated, add {"Authorization": f"Bearer {token}"} to request
-  const headers = isAuthenticated
-    ? {
-      Authorization: `Bearer ${accessToken}`,
-    }
-    : {};
+  const headers = getHeaders(isAuthenticated, accessToken);
   const response = await fetch(url, { headers });
 
   if (!response.ok) {
