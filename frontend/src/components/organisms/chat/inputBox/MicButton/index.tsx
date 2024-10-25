@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
@@ -52,8 +51,6 @@ const MicButton = ({ disabled }: Props) => {
     if (disabled) return;
     _startRecording(fileReferences);
   }, [_startRecording, fileReferences, disabled]);
-
-  useHotkeys('p', startRecording);
 
   const size = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'))
     ? 'small'
