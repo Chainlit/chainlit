@@ -49,7 +49,7 @@ class GithubOAuthProvider(OAuthProvider):
         "OAUTH_GITHUB_CLIENT_ID",
         "OAUTH_GITHUB_CLIENT_SECRET",
         "OAUTH_GITHUB_CUSTOM_URL",
-        "OAUTH_GITHUB_CUSTOM_API_URL",  # New environment variable for custom API URL
+        "OAUTH_GITHUB_CUSTOM_API_URL",
     ]
 
     def __init__(self):
