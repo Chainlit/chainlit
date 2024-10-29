@@ -8,18 +8,18 @@
 
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
 
-Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
+Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agent-driven applications.
 
 - ✅ ChatGPT-like application
 - ✅ Embedded Chatbot & Software Copilot
 - ✅ Slack & Discord
-- ✅ Custom frontend (build your own agentic experience)
+- ✅ Custom frontend (build your own agent-driven experience)
 - ✅ API Endpoint
 
 Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
 > [!NOTE]
-> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
+> Check out [Literal AI](https://literalai.com), our product for monitoring and evaluating LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
 >
 > Chainlit is developed and maintained by the Literal AI team, which is currently focused on expanding the capabilities of Literal AI. While we continue to support and maintain Chainlit, we are also committed to enabling the community to contribute, particularly in areas like integrations and data layers.
 
@@ -113,13 +113,13 @@ Chainlit is compatible with all Python programs and libraries. That being said, 
 
 ## 📚 More Examples - Cookbook
 
-You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
+You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropic, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
 Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/k73SQ3FyUh).
 
 ## 💁 Contributing
 
-As an open-source initiative in a rapidly evolving domain, we welcome contributions, be it through the addition of new features or the improvement of documentation.
+As an open-source initiative in a rapidly evolving domain, we welcome contributions, whether through adding new features or improving documentation.
 
 For detailed information on how to contribute, see [here](.github/CONTRIBUTING.md).
 
