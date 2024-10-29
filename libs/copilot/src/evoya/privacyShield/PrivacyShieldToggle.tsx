@@ -30,12 +30,12 @@ const PrivacyShieldToggle = (): JSX.Element => {
         }
         labelPlacement="start"
       />
-      <Box sx={{ margin: '0 !important',color:'#707070'}}>
+      <Box sx={{ margin: '0 !important'}}>
         <Tooltip
           title={enabledVisual ? <Translator path="components.organisms.privacyShield.hidePrivacyTable" /> : <Translator path="components.organisms.privacyShield.showPrivacyTable" />}
         >
           <IconButton edge="end" id="favorite-session-button" onClick={() => setEnabledVisual(!enabledVisual)} disabled={sections.length === 0}>
-            {enabledVisual ? (<VisibilityOffIcon sx={{width: 20, height: 20 }} />) : (<VisibilityIcon sx={{width: 20, height: 20 }} />)}
+            {enabledVisual ? (<VisibilityOffIcon sx={{width: 20, height: 20,color:'#707070' }} />) : (<VisibilityIcon sx={{width: 20, height: 20,color:'#707070' }} />)}
           </IconButton>
         </Tooltip>
       </Box>
