@@ -23,19 +23,19 @@ const PrivacyShieldToggle = (): JSX.Element => {
           <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} name="privacy_shield" />
         }
         label={
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {enabled ? <LockOutlinedIcon sx={{marginRight: 1}} /> : <LockOpenOutlinedIcon sx={{marginRight: 1}} />}
+          <Box sx={{ display: 'flex', alignItems: 'center',color:'#707070',marginRight: 1 }}>
+            {enabled ? <LockOutlinedIcon sx={{marginRight: 1,width: 20, height: 20 }} /> : <LockOpenOutlinedIcon sx={{marginRight: 1, width: 20, height: 20}} />}
             Privacy Shield
           </Box>
         }
         labelPlacement="start"
       />
-      <Box>
+      <Box sx={{ margin: '0 !important',color:'#707070'}}>
         <Tooltip
           title={enabledVisual ? <Translator path="components.organisms.privacyShield.hidePrivacyTable" /> : <Translator path="components.organisms.privacyShield.showPrivacyTable" />}
         >
           <IconButton edge="end" id="favorite-session-button" onClick={() => setEnabledVisual(!enabledVisual)} disabled={sections.length === 0}>
-            {enabledVisual ? (<VisibilityOffIcon sx={{ width: 20, height: 20 }} />) : (<VisibilityIcon sx={{ width: 20, height: 20 }} />)}
+            {enabledVisual ? (<VisibilityOffIcon sx={{width: 20, height: 20 }} />) : (<VisibilityIcon sx={{width: 20, height: 20 }} />)}
           </IconButton>
         </Tooltip>
       </Box>
