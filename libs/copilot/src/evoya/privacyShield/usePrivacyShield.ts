@@ -203,7 +203,7 @@ const usePrivacyShield = () => {
     const catSections = Object.values(categories).flatMap((cat) => cat);
     let secText = currentText;
     catSections.forEach((section) => {
-      secText = secText.replaceAll(new RegExp(section.string, "gi"), `{$}{=${section.id}=}{$}`);
+      secText = secText.replaceAll(new RegExp(section.string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), "gi"), `{$}{=${section.id}=}{$}`);
     });
 
     const secs = secText.split('{$}');
@@ -234,7 +234,7 @@ const usePrivacyShield = () => {
     let response = text;
     const catSections = Object.values(categories).flatMap((cat) => cat);
     catSections.forEach((section) => {
-      response = response.replaceAll(new RegExp(section.isAnon ? (section.anonString ?? '') : (section.string ?? ''), "gi"), `<span data-privacy-component="${section.id}">${section.isAnon ? section.anonString : section.string}</span>`);
+      response = response.replaceAll(new RegExp(section.isAnon ? (section.anonString ?? '') : (section.string ?? '').replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), "gi"), `<span data-privacy-component="${section.id}">${section.isAnon ? section.anonString : section.string}</span>`);
     });
     
     return response;
