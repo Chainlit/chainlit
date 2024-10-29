@@ -1,3 +1,4 @@
+import "./src/sentry";
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import React from 'react';

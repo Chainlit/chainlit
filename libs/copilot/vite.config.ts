@@ -3,11 +3,22 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), svgr()],
+  plugins: [
+    react(), 
+    tsconfigPaths(), 
+    svgr(),
+    sentryVitePlugin({
+      org: "insign",
+      project: "avaia-chat",
+      authToken: process.env.REACT_APP_SOURCE_MAP_AUTH
+    }),
+  ],
   build: {
+    sourcemap: true,
     rollupOptions: {
       input: {
         copilot: path.resolve(__dirname, 'index.tsx')

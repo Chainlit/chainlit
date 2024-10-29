@@ -1,3 +1,4 @@
+import '../../libs/copilot/src/sentry'
 import AppWrapper from 'AppWrapper';
 import { apiClient } from 'api';
 import React from 'react';
