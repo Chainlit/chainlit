@@ -52,7 +52,9 @@ def create_jwt(data: User) -> str:
     to_encode: Dict[str, Any] = data.to_dict()
     to_encode.update(
         {
-            "exp": datetime.utcnow() + timedelta(minutes=60 * 24 * 15),  # 15 days
+            "exp": datetime.utcnow() + timedelta(
+                seconds=config.project.user_session_timeout
+            ),
         }
     )
     encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
