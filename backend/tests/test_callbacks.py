@@ -107,6 +107,65 @@ async def test_oauth_callback(test_config):
         assert result is None
 
 
+async def test_custom_authenticate_user(test_config):
+    from unittest.mock import patch
+
+    from chainlit.callbacks import custom_authenticate_user
+    from chainlit.user import User
+
+    # Mock the get_configured_oauth_providers function
+    with patch(
+        "chainlit.callbacks.get_configured_oauth_providers",
+        return_value=["custom_provider"],
+    ):
+
+        @custom_authenticate_user
+        async def auth_func(
+            provider_id: str,
+            token: str,
+            raw_user_data: dict,
+            default_app_user: User,
+            id_token: str | None = None,
+        ) -> User | None:
+            if (
+                provider_id == "custom_provider" and token == "valid_token"
+            ):  # nosec B105
+                return User(identifier="oauth_user")
+            return None
+
+        # Test that the callback is properly registered as custom one
+        assert test_config.code.custom_authenticate_user is not None
+
+        # Test the wrapped function with valid data
+        result = await test_config.code.custom_authenticate_user(
+            "custom_provider", "valid_token", {}, User(identifier="default_user")
+        )
+        assert isinstance(result, User)
+        assert result.identifier == "oauth_user"
+
+        # Test with invalid data
+        result = await test_config.code.custom_authenticate_user(
+            "google", "invalid_token", {}, User(identifier="default_user")
+        )
+        assert result is None
+
+
+async def test_custom_oauth_provider(test_config):
+    from unittest.mock import Mock, patch
+
+    from chainlit.callbacks import custom_oauth_provider
+
+    custom_provider = Mock()
+
+    with patch("chainlit.callbacks.providers") as providers:
+
+        # Add custom provider to providers
+        custom_oauth_provider(custom_provider)
+
+        # Custom provider should be added to providers
+        providers.append.assert_called_once_with(custom_provider())
+
+
 async def test_on_message(mock_chainlit_context, test_config):
     from chainlit.callbacks import on_message
     from chainlit.message import Message
