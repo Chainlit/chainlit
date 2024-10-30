@@ -59,6 +59,16 @@ const getHtmlComputedFontSize = () => {
   return fsInt;
 }
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    gray: Palette['primary'];
+  }
+
+  interface PaletteOptions {
+    gray?: PaletteOptions['primary'];
+  }
+}
+
 const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palette?: any) =>
   createTheme({
     // typography: fontFamily ? { fontFamily } : typography,
@@ -87,6 +97,9 @@ const darkTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palett
         dark: '#763FB8',
         light: '#B87FE7',
         contrastText: white
+      },
+      gray:{
+        main:grey[550]
       },
       divider: grey[800],
       text: {
@@ -124,6 +137,9 @@ const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions, palet
         dark: '#763FB8',
         light: '#B87FE7',
         contrastText: white
+      },
+      gray:{
+        main:grey[550]
       },
       divider: grey[200],
       text: {
