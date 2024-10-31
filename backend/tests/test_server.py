@@ -1,19 +1,19 @@
+import datetime  # Added import for datetime
 import os
-from pathlib import Path
 import pathlib
+import tempfile
+from pathlib import Path
 from typing import Callable
 from unittest.mock import AsyncMock, Mock, create_autospec, mock_open
-import datetime  # Added import for datetime
 
 import pytest
-import tempfile
-from chainlit.session import WebsocketSession
 from chainlit.auth import get_current_user
 from chainlit.config import APP_ROOT, ChainlitConfig, load_config
 from chainlit.server import app
-from fastapi.testclient import TestClient
+from chainlit.session import WebsocketSession
 from chainlit.types import FileReference
 from chainlit.user import PersistedUser  # Added import for PersistedUser
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
