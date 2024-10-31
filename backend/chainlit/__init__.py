@@ -23,6 +23,7 @@ from chainlit.context import context
 from chainlit.element import (
     Audio,
     Component,
+    Dataframe,
     File,
     Image,
     Pdf,
@@ -43,7 +44,7 @@ from chainlit.message import (
 )
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
-from chainlit.types import InputAudioChunk, OutputAudioChunk, ChatProfile, Starter
+from chainlit.types import ChatProfile, InputAudioChunk, OutputAudioChunk, Starter
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
@@ -56,9 +57,9 @@ from .callbacks import (
     author_rename,
     header_auth_callback,
     oauth_callback,
-    on_audio_start,
     on_audio_chunk,
     on_audio_end,
+    on_audio_start,
     on_chat_end,
     on_chat_resume,
     on_chat_start,

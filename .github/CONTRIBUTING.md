@@ -68,13 +68,9 @@ $ git remote -v
 > upstream  https://github.com/Chainlit/chainlit.git (push)
 ```
 
-### Install JS dependencies
+### Install dependencies
 
-```sh
-pnpm install
-```
-
-### Install python dependencies
+The following command will install Python dependencies, Node (pnpm) dependencies and build the frontend.
 
 ```sh
 cd backend
@@ -82,12 +78,6 @@ poetry install --with tests --with mypy --with dev
 ```
 
 ## Start the Chainlit server from source
-
-You need to build the UI once before starting the server.
-
-```sh
-pnpm run buildUi
-```
 
 Start by running `backend/hello.py` as an example.
 
@@ -116,15 +106,28 @@ If you visit `http://127.0.0.1:5174/`, it should connect to your local server. I
 
 ## Run the tests
 
-Run `pnpm test`
+### Backend unit tests
+
+This will run the backend's unit tests.
+
+```sh
+cd backend
+pytest
+```
+
+### E2E tests
+
+This will run end to end tests, assessing both the frontend, the backend and their interaction:
+
+```sh
+pnpm test
+```
+
+(Go grab a cup of something, this will take a while.)
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
-You will need to rebuild the UI if you updated it between test runs.
-
-```sh
-pnpm run buildUi
-```
+Make sure to run `poetry install` again whenever you've updated the frontend!
 
 ### Run one test
 

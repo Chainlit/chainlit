@@ -1,5 +1,6 @@
 import datetime
 from contextlib import asynccontextmanager
+from typing import Callable
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -20,20 +21,30 @@ def persisted_test_user():
 
 
 @pytest.fixture
-def mock_session():
-    mock = Mock(spec=WebsocketSession)
-    mock.id = "test_session_id"
-    mock.user_env = {"test_env": "value"}
-    mock.chat_settings = {}
-    mock.chat_profile = None
-    mock.http_referer = None
-    mock.client_type = "webapp"
-    mock.languages = ["en"]
-    mock.thread_id = "test_thread_id"
-    mock.emit = AsyncMock()
-    mock.has_first_interaction = True
+def mock_session_factory(persisted_test_user: PersistedUser) -> Callable[..., Mock]:
+    def create_mock_session(**kwargs) -> Mock:
+        mock = Mock(spec=WebsocketSession)
+        mock.user = kwargs.get("user", persisted_test_user)
+        mock.id = kwargs.get("id", "test_session_id")
+        mock.user_env = kwargs.get("user_env", {"test_env": "value"})
+        mock.chat_settings = kwargs.get("chat_settings", {})
+        mock.chat_profile = kwargs.get("chat_profile", None)
+        mock.http_referer = kwargs.get("http_referer", None)
+        mock.client_type = kwargs.get("client_type", "webapp")
+        mock.languages = kwargs.get("languages", ["en"])
+        mock.thread_id = kwargs.get("thread_id", "test_thread_id")
+        mock.emit = AsyncMock()
+        mock.has_first_interaction = kwargs.get("has_first_interaction", True)
+        mock.files = kwargs.get("files", {})
 
-    return mock
+        return mock
+
+    return create_mock_session
+
+
+@pytest.fixture
+def mock_session(mock_session_factory) -> Mock:
+    return mock_session_factory()
 
 
 @asynccontextmanager

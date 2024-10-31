@@ -29,7 +29,7 @@ from ._utils import is_path_inside
 if TYPE_CHECKING:
     from chainlit.action import Action
     from chainlit.message import Message
-    from chainlit.types import InputAudioChunk, ChatProfile, Starter, ThreadDict
+    from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
     from chainlit.user import User
     from fastapi import Request, Response
 
@@ -61,6 +61,9 @@ user_env = []
 
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
+
+# Duration (in seconds) of the user session expiry
+user_session_timeout = 1296000  # 15 days
 
 # Enable third parties caching (e.g LangChain cache)
 cache = false
@@ -269,9 +272,9 @@ class CodeSettings:
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
-    header_auth_callback: Optional[
-        Callable[[Headers], Awaitable[Optional["User"]]]
-    ] = None
+    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
+        None
+    )
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
@@ -290,9 +293,9 @@ class CodeSettings:
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
-    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
 
 
 @dataclass()
@@ -306,6 +309,8 @@ class ProjectSettings(DataClassJsonMixin):
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
+    # Duration (in seconds) of the user session expiry
+    user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
     # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -447,7 +452,7 @@ def load_settings():
 
         if not meta or meta.get("generated_by") <= "0.3.0":
             raise ValueError(
-                "Your config file is outdated. Please delete it and restart the app to regenerate it."
+                f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
