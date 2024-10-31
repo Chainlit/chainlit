@@ -4,6 +4,21 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.1] - 2024-10-25
+
+### Security Advisory
+
+- **IMPORTANT**: This release temporarily reverts the file access security improvements from 1.3.0 to restore element functionality. The element feature currently has a known security vulnerability that could allow unauthorized access to files. We strongly recommend against using elements in production environments until the next release.
+- A comprehensive security fix using HTTP-only cookie authentication will be implemented in an upcoming release.
+
+### Changed
+
+- Reverted authentication requirements for file access endpoints to restore element functionality (#1474)
+
+### Development
+
+- Work in progress on implementing HTTP-only cookie authentication for proper security (#1472)
+
 ## [1.3.0] - 2024-10-22
 
 ### Security
@@ -43,6 +58,21 @@ override oauth prompt parameter. Enabling users to explicitly enable login/conse
 - Enhanced code organization and import structure
 - Improved Python code style and linting (#1353)
 - Resolved various small text and documentation issues (#1347, #1348)
+
+## [2.0.dev2] - 2024-10-25
+
+### Security Advisory
+
+- **IMPORTANT**: This release temporarily reverts the file access security improvements from 2.0.dev1 to restore element functionality. The element feature currently has a known security vulnerability that could allow unauthorized access to files. We strongly recommend against using elements in production environments until the next release.
+- A comprehensive security fix using HTTP-only cookie authentication will be implemented in an upcoming release.
+
+### Changed
+
+- Reverted authentication requirements for file access endpoints to restore element functionality (#1474)
+
+### Development
+
+- Work in progress on implementing HTTP-only cookie authentication for proper security (#1472)
 
 ## [2.0.dev1] - 2024-10-22
 
