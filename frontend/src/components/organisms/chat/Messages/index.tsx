@@ -11,17 +11,19 @@ import {
   updateMessageById,
   useChatData,
   useChatInteract,
-  useChatMessages
 } from '@chainlit/react-client';
 
 import { useTranslation } from 'components/i18n/Translator';
 
 import MessageContainer from './container';
 
-const Messages = (): JSX.Element => {
+interface MessagesProps {
+  messages: IStep[];
+}
+
+const Messages = ({ messages }: MessagesProps): JSX.Element => {
   const apiClient = useContext(ChainlitContext);
   const { elements, askUser, loading, actions } = useChatData();
-  const { messages } = useChatMessages();
   const { callAction } = useChatInteract();
   const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
