@@ -23,10 +23,8 @@ export default function Home() {
     loadLastThread();
   }, []);
 
-  // Сохраняем только новые чаты
   useEffect(() => {
     const saveChat = async () => {
-      // Не сохраняем, если это чат из БД
       if (isLoadedFromDB.current) {
         return;
       }
