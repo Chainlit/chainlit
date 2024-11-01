@@ -47,15 +47,6 @@ export default function App({ widgetConfig, evoya }: Props) {
       clear();
     }
     if (!config) return;
-    if (config.ui.cot !== 'hidden') {
-      setConfig({
-        ...config,
-        ...{ui: {
-          ...config.ui,
-          cot: 'hidden'
-        }}
-      });
-    }
 
     const themeVariant = widgetConfig.theme || config.ui.theme.default;
     // const themeVariant = 'light';

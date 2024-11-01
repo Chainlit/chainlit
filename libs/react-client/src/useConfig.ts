@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState } from './state';
+import { configState, userState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = (accessToken?: string) => {
   const [config, setConfig] = useRecoilState(configState);
+  const user = useRecoilValue(userState);
   const { isAuthenticated } = useAuth();
   const language = navigator.language || 'en-US';
 
@@ -19,7 +20,14 @@ const useConfig = (accessToken?: string) => {
 
   useEffect(() => {
     if (!data) return;
-    setConfig(data);
+    setConfig({
+      ...data,
+      ...{ui: {
+        ...data.ui,
+        cot: user?.config?.cot ?? 'hidden'
+      }}
+    });
+    // setConfig(data);
   }, [data, setConfig]);
 
   return { config, error, isLoading, language };
