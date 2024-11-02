@@ -16,7 +16,7 @@ const InlinedDataframeList = ({ items }: Props) => (
           key={i}
           style={{
             height: 450,
-            maxWidth: '650px'
+            maxWidth: 'fit-content'
           }}
         >
           <DataframeElement element={element} />
