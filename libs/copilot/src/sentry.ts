@@ -20,4 +20,11 @@ Sentry.init({
   ],
 
   tracesSampleRate: 1.0,
+  beforeSend(event) {
+    const allowedHosts = ["avaia.io", "chat.avaia.io"];
+    if (!allowedHosts.includes(window.location.hostname)) {
+      return null; 
+    }
+    return event; 
+  },
 });
