@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Alert, Box, Stack } from '@mui/material';
 
 import {
+  IStep,
   threadHistoryState,
   useAuth,
   useChatData,
@@ -31,18 +32,21 @@ import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 import WelcomeScreen from './welcomeScreen';
 import { Header } from '../header';
+import { threadStorage } from 'services/indexedDB';
 
 interface IChatProps {
   isExpanded?: boolean;
   toggleExpand?: () => void;
   toggleChat?: () => void;
+  threadMessages?: IStep[];
 }
 
-const Chat = ({ isExpanded, toggleExpand, toggleChat }: IChatProps) => {
+const Chat = ({ isExpanded, toggleExpand, toggleChat, threadMessages }: IChatProps) => {
   const { user } = useAuth();
   const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
+  const { messages } = useChatMessages();
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
@@ -175,8 +179,32 @@ const Chat = ({ isExpanded, toggleExpand, toggleChat }: IChatProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (messages.length > 0 && threadId) {
+      const thread = {
+        id: threadId,
+        createdAt: new Date().toISOString(),
+        steps: messages,
+        name: `Chat ${new Date().toLocaleString()}`
+      };
+      threadStorage.saveThread(thread);
+    }
+  }, [messages, threadId]);
+
   const enableMultiModalUpload =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
+
+  const isLoadedFromDB = useRef(false);
+
+  useEffect(() => {
+    const checkIfLoadedFromDB = async () => {
+      const lastThread = await threadStorage.getLastThread();
+      if (lastThread && messages.length === lastThread.steps.length) {
+        isLoadedFromDB.current = true;
+      }
+    };
+    checkIfLoadedFromDB();
+  }, []);
 
   return (
     <Box
@@ -221,9 +249,9 @@ const Chat = ({ isExpanded, toggleExpand, toggleChat }: IChatProps) => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-            <WelcomeScreen hideLogo />
+            {!isLoadedFromDB.current && <WelcomeScreen hideLogo />}
             <Box py={1} />
-            <Messages />
+            <Messages messages={threadMessages || messages} />
           </ScrollContainer>
           <InputBox
             fileSpec={fileSpec}
