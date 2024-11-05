@@ -1,48 +1,46 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { useChatMessages, messagesState } from '@chainlit/react-client';
+import { 
+  currentThreadIdState, 
+  firstUserInteraction, 
+  useChatInteract,
+  useChatSession,
+  useChatMessages,
+  messagesState
+} from '@chainlit/react-client';
 import Chat from 'components/organisms/chat';
 import Page from './Page';
 import { threadStorage } from 'services/indexedDB';
 
 export default function Home() {
-  const { messages } = useChatMessages();
+  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
+  const setFirstInteraction = useSetRecoilState(firstUserInteraction);
   const setMessages = useSetRecoilState(messagesState);
-  const isLoadedFromDB = useRef(false);
-  
+  const { setIdToResume } = useChatInteract();
+  const { session } = useChatSession();
+  const { messages} = useChatMessages();
+
   useEffect(() => {
+    if (messages?.length > 0) return;
+    
     const loadLastThread = async () => {
-      if (!messages.length) {
+      try {
         const thread = await threadStorage.getLastThread();
-        if (thread) {
+        if (thread?.steps?.length) {
+          setCurrentThreadId(thread.id);
+          setIdToResume(thread.id);
           setMessages(thread.steps);
-          isLoadedFromDB.current = true;
+          setFirstInteraction('resume');
         }
+      } catch (err) {
+        console.error('Failed to load last thread:', err);
       }
     };
-    loadLastThread();
-  }, []);
 
-  useEffect(() => {
-    const saveChat = async () => {
-      if (isLoadedFromDB.current) {
-        return;
-      }
-
-      const hasUserMessage = messages.some(msg => msg.type === 'user_message');
-      
-      if (hasUserMessage) {
-        const thread = {
-          id: Date.now().toString(),
-          createdAt: new Date().toISOString(),
-          steps: messages,
-          name: `Chat ${new Date().toLocaleString()}`
-        };
-        threadStorage.saveThread(thread);
-      }
-    };
-    saveChat();
-  }, [messages]);
+    if (session?.socket?.connected) {
+      loadLastThread();
+    }
+  }, [session?.socket?.connected]);
 
   return (
     <Page>

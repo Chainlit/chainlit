@@ -8,7 +8,8 @@ import {
   IStarter,
   IStep,
   useAuth,
-  useChatData
+  useChatData,
+  useChatMessages
 } from '@chainlit/react-client';
 import { useChatInteract } from '@chainlit/react-client';
 
@@ -21,10 +22,11 @@ export default function Starter({ starter }: Props) {
   const { sendMessage } = useChatInteract();
   const { loading } = useChatData();
   const { user } = useAuth();
+  const { threadId } = useChatMessages();
 
   const onSubmit = useCallback(async () => {
     const message: IStep = {
-      threadId: '',
+      threadId: threadId || '',
       id: uuidv4(),
       name: user?.identifier || 'User',
       type: 'user_message',
@@ -33,7 +35,7 @@ export default function Starter({ starter }: Props) {
     };
 
     sendMessage(message, []);
-  }, [user, sendMessage, starter]);
+  }, [user, sendMessage, starter, threadId]);
 
   return (
     <Button
