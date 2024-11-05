@@ -154,35 +154,42 @@ async def lifespan(app: FastAPI):
         os._exit(0)
 
 
-def get_build_dir(local_target: str, packaged_target: str) -> str:
+def get_build_dir(target: str) -> str:
     """
     Get the build directory based on the UI build strategy.
+    Looks in order in the following directories:
+    - Custom build directory, if set in the config.toml (<BUILD_ROOT>/<target>/dist)
+    - Local build directory (<PACKAGE_ROOT>/libs/<target>/dist)
+    - Packaged build directory (<BACKEND_ROOT>/<target>/dist)
 
     Args:
-        local_target (str): The local target directory.
-        packaged_target (str): The packaged target directory.
+        target (str): The target directory.
 
     Returns:
-        str: The build directory
+        str: The path of the target build directory
     """
 
-    local_build_dir = os.path.join(PACKAGE_ROOT, local_target, "dist")
-    packaged_build_dir = os.path.join(BACKEND_ROOT, packaged_target, "dist")
+    local_build_dir = os.path.join(PACKAGE_ROOT, "libs", target, "dist")
+    packaged_build_dir = os.path.join(BACKEND_ROOT, target, "dist")
 
-    if config.ui.custom_build and os.path.exists(
-        os.path.join(APP_ROOT, config.ui.custom_build)
-    ):
-        return os.path.join(APP_ROOT, config.ui.custom_build)
-    elif os.path.exists(local_build_dir):
+    # Check if the custom build directory exists
+    if config.ui.custom_build:
+        custom_build_dir = os.path.join(
+            APP_ROOT, config.ui.custom_build, target, "dist"
+        )
+        if os.path.exists(custom_build_dir):
+            return custom_build_dir
+
+    if os.path.exists(local_build_dir):
         return local_build_dir
     elif os.path.exists(packaged_build_dir):
         return packaged_build_dir
     else:
-        raise FileNotFoundError(f"{local_target} built UI dir not found")
+        raise FileNotFoundError(f"{target} built UI dir not found")
 
 
-build_dir = get_build_dir("frontend", "frontend")
-copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
+build_dir = get_build_dir("frontend")
+copilot_build_dir = get_build_dir("copilot")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -895,7 +902,7 @@ async def get_file(
             detail="Unauthorized",
         )
 
-     #TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
+    # TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
     # if current_user:
     #     if not session.user or session.user.identifier != current_user.identifier:
     #         raise HTTPException(
