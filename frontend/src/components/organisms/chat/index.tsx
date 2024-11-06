@@ -180,31 +180,22 @@ const Chat = ({ isExpanded, toggleExpand, toggleChat, threadMessages }: IChatPro
   }, []);
 
   useEffect(() => {
-    if (messages.length > 0 && threadId) {
-      const thread = {
-        id: threadId,
-        createdAt: new Date().toISOString(),
-        steps: messages,
-        name: `Chat ${new Date().toLocaleString()}`
-      };
-      threadStorage.saveThread(thread);
-    }
+    const saveThread = async () => {
+      if (messages.length > 0 && threadId) {
+        const currentThread = {
+          id: threadId,
+          createdAt: new Date().toISOString(),
+          steps: messages,
+          name: `Chat ${new Date().toLocaleString()}`
+        };
+        await threadStorage.saveThread(currentThread);
+      }
+    };
+    saveThread();
   }, [messages, threadId]);
 
   const enableMultiModalUpload =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
-
-  const isLoadedFromDB = useRef(false);
-
-  useEffect(() => {
-    const checkIfLoadedFromDB = async () => {
-      const lastThread = await threadStorage.getLastThread();
-      if (lastThread && messages.length === lastThread.steps.length) {
-        isLoadedFromDB.current = true;
-      }
-    };
-    checkIfLoadedFromDB();
-  }, []);
 
   return (
     <Box
@@ -249,7 +240,7 @@ const Chat = ({ isExpanded, toggleExpand, toggleChat, threadMessages }: IChatPro
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-            {!isLoadedFromDB.current && <WelcomeScreen hideLogo />}
+            <WelcomeScreen hideLogo />
             <Box py={1} />
             <Messages messages={threadMessages || messages} />
           </ScrollContainer>

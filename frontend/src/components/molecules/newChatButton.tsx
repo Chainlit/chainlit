@@ -10,6 +10,7 @@ import { Translator } from 'components/i18n';
 import SquarePenIcon from 'assets/squarePen';
 
 import NewChatDialog from './newChatDialog';
+import { threadStorage } from 'services/indexedDB';
 
 export default function NewChatButton(props: IconButtonProps) {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function NewChatButton(props: IconButtonProps) {
   };
 
   const handleConfirm = () => {
+    void threadStorage.clear();
     clear();
     navigate('/');
     handleClose();

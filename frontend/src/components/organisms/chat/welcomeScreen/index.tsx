@@ -12,30 +12,41 @@ import {
 } from '@chainlit/react-client';
 
 import Starter from './starter';
+import { threadStorage } from 'services/indexedDB';
 
 interface Props {
   hideLogo?: boolean;
 }
 
-const hasMessage = (messages: IStep[]): boolean => {
+const hasMessage = async (messages: IStep[]): Promise<boolean> => {
   const validTypes = ['user_message', 'assistant_message'];
-  return messages.some(
+  
+  const hasCurrentMessages = messages.some(
     (message) =>
       validTypes.includes(message.type) || hasMessage(message.steps || [])
   );
+
+  if (hasCurrentMessages) return true;
+
+  const lastThread = await threadStorage.getLastThread();
+  if (lastThread && lastThread.steps.length > 0) {
+    return lastThread.steps.some(
+      (message) =>
+        validTypes.includes(message.type) || hasMessage(message.steps || [])
+    );
+  }
+
+  return false;
 };
 
 export default function WelcomeScreen({ hideLogo }: Props) {
   const { messages } = useChatMessages();
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { chatProfile } = useChatSession();
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const defaultIconUrl = apiClient?.buildEndpoint(`/avatars/default`);
-
-  useEffect(() => {
-    setShow(!hasMessage(messages));
-  }, [messages]);
 
   const selectedChatProfile = useMemo(() => {
     return config?.chatProfiles.find((profile) => profile.name === chatProfile);
@@ -53,30 +64,37 @@ export default function WelcomeScreen({ hideLogo }: Props) {
       <Stack gap={2} alignItems="center">
         <Avatar sx={{ height: 48, width: 48 }} src={icon} />
         {name ? (
-          <Typography
-            color="text.primary"
-            sx={{ fontSize: '1.1rem', fontWeight: 600 }}
-          >
+          <Typography color="text.primary" sx={{ fontSize: '1.1rem', fontWeight: 600 }}>
             {name}
           </Typography>
         ) : null}
       </Stack>
     );
-  }, [config, chatProfile, selectedChatProfile]);
+  }, [selectedChatProfile, defaultIconUrl, apiClient]);
 
   const starters = useMemo(() => {
     if (chatProfile) {
-      const selectedChatProfile = config?.chatProfiles.find(
-        (profile) => profile.name === chatProfile
+      const profile = config?.chatProfiles.find(
+        (p) => p.name === chatProfile
       );
-      if (selectedChatProfile?.starters) {
-        return selectedChatProfile.starters.slice(0, 4);
+      if (profile?.starters) {
+        return profile.starters.slice(0, 4);
       }
     }
     return config?.starters;
   }, [config, chatProfile]);
 
-  if (!starters?.length) {
+  useEffect(() => {
+    const checkMessages = async () => {
+      setIsLoading(true);
+      const hasAnyMessage = await hasMessage(messages);
+      setShow(!hasAnyMessage);
+      setIsLoading(false);
+    };
+    checkMessages();
+  }, [messages]);
+
+  if (isLoading || !show || !starters?.length) {
     return null;
   }
 
@@ -98,9 +116,9 @@ export default function WelcomeScreen({ hideLogo }: Props) {
         px={2}
         boxSizing={'border-box'}
       >
-        {hideLogo ? null : <Stack>{logo}</Stack>}
+        {!hideLogo && <Stack>{logo}</Stack>}
         <Grid container spacing={2} minHeight={100} justifyContent="center">
-          {starters?.map((starter, i) => (
+          {starters.map((starter, i) => (
             <Fade in={show} timeout={i * 300} key={i}>
               <Grid item xs={6} sm={3}>
                 <Starter starter={starter} />
