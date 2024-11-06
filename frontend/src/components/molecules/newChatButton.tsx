@@ -25,10 +25,10 @@ export default function NewChatButton(props: IconButtonProps) {
     setOpen(false);
   };
 
-  const handleConfirm = () => {
-    void threadStorage.clear();
+  const handleConfirm = async () => {
+    await threadStorage.clear();
     clear();
-    navigate('/');
+    navigate('/', { replace: true });
     handleClose();
   };
 
