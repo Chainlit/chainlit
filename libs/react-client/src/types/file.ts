@@ -22,4 +22,5 @@ export interface IAsk {
     timeout: number;
   } & FileSpec &
     ActionSpec;
+  parentId?: string;
 }

@@ -125,6 +125,7 @@ const useChatInteract = () => {
   const replyMessage = useCallback(
     (message: IStep) => {
       if (askUser) {
+        if (askUser.parentId) message.parentId = askUser.parentId;
         setMessages((oldMessages) => addMessage(oldMessages, message));
         askUser.callback(message);
       }
