@@ -14,8 +14,8 @@ jobs:
   pytest:
     uses: ./.github/workflows/pytest.yaml
     secrets: inherit
-  mypy:
-    uses: ./.github/workflows/mypy.yaml
+  lint-backend:
+    uses: ./.github/workflows/lint-backend.yaml
     secrets: inherit
   e2e-tests:
     uses: ./.github/workflows/e2e-tests.yaml
@@ -26,7 +26,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     name: Run CI
-    needs: [mypy, pytest, lint-ui, e2e-tests]
+    needs: [lint-backend, pytest, lint-ui, e2e-tests]
     steps:
       - name: Done
         run: echo "Done"

@@ -60,3 +60,4 @@ dist-ssr
 .coverage
 
 backend/README.md
+backend/.dmypy.json
