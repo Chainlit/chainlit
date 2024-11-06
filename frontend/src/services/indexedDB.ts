@@ -70,6 +70,21 @@ class ThreadStorageService {
       request.onsuccess = () => resolve();
     });
   }
+
+  async hasStoredThread(): Promise<boolean> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.count();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        resolve(request.result > 0);
+      };
+    });
+  }
 }
 
 export const threadStorage = new ThreadStorageService();

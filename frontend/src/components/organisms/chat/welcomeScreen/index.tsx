@@ -14,10 +14,10 @@ import {
 import Starter from './starter';
 import { threadStorage } from 'services/indexedDB';
 
+
 interface Props {
   hideLogo?: boolean;
 }
-
 const hasMessage = async (messages: IStep[]): Promise<boolean> => {
   const validTypes = ['user_message', 'assistant_message'];
   
@@ -26,17 +26,7 @@ const hasMessage = async (messages: IStep[]): Promise<boolean> => {
       validTypes.includes(message.type) || hasMessage(message.steps || [])
   );
 
-  if (hasCurrentMessages) return true;
-
-  const lastThread = await threadStorage.getLastThread();
-  if (lastThread && lastThread.steps.length > 0) {
-    return lastThread.steps.some(
-      (message) =>
-        validTypes.includes(message.type) || hasMessage(message.steps || [])
-    );
-  }
-
-  return false;
+  return hasCurrentMessages;
 };
 
 export default function WelcomeScreen({ hideLogo }: Props) {
@@ -88,7 +78,9 @@ export default function WelcomeScreen({ hideLogo }: Props) {
     const checkMessages = async () => {
       setIsLoading(true);
       const hasAnyMessage = await hasMessage(messages);
-      setShow(!hasAnyMessage);
+      const hasStoredChat = await threadStorage.hasStoredThread();
+      
+      setShow(!hasAnyMessage && !hasStoredChat);
       setIsLoading(false);
     };
     checkMessages();
