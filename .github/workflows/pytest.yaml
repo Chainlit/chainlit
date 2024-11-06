@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
-        fastapi-version: ['0.110', '0.111', '0.112']
+        fastapi-version: ['0.115']
     env:
       BACKEND_DIR: ./backend
     steps:
