@@ -22,8 +22,13 @@ const hasMessage = async (messages: IStep[]): Promise<boolean> => {
   const validTypes = ['user_message', 'assistant_message'];
   
   const hasCurrentMessages = messages.some(
-    (message) =>
-      validTypes.includes(message.type) || hasMessage(message.steps || [])
+    (message) => {
+      if (message.type === 'run' && !message.steps) {
+        return false;
+      }
+      return validTypes.includes(message.type) || 
+             (message.steps && hasMessage(message.steps));
+    }
   );
 
   return hasCurrentMessages;
