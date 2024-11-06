@@ -34,6 +34,9 @@ jobs:
         name: Install Python, poetry and Python dependencies
         with:
           poetry-working-directory: ${{ env.BACKEND_DIR }}
+      - name: Build Python distribution
+        run: poetry self add poetry-plugin-ignore-build-script && poetry build --ignore-build-script
+        working-directory: ${{ env.BACKEND_DIR }}
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
