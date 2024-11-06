@@ -62,6 +62,9 @@ user_env = []
 # Duration (in seconds) during which the session is saved when the connection is lost
 session_timeout = 3600
 
+# Duration (in seconds) of the user session expiry
+user_session_timeout = 1296000  # 15 days
+
 # Enable third parties caching (e.g LangChain cache)
 cache = false
 
@@ -306,6 +309,8 @@ class ProjectSettings(DataClassJsonMixin):
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
     session_timeout: int = 3600
+    # Duration (in seconds) of the user session expiry
+    user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
     # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
@@ -447,7 +452,7 @@ def load_settings():
 
         if not meta or meta.get("generated_by") <= "0.3.0":
             raise ValueError(
-                "Your config file is outdated. Please delete it and restart the app to regenerate it."
+                f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
