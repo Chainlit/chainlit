@@ -2,7 +2,7 @@ from typing import Optional
 
 import chainlit.data as cl_data
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
-from chainlit.data.storage_clients import AzureStorageClient
+from chainlit.data.storage_clients.azure import AzureStorageClient
 
 import chainlit as cl
 

@@ -45,7 +45,8 @@ const InputBox = memo(
           name: user?.identifier || 'User',
           type: 'user_message',
           output: msg,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          metadata: {location: window.location.href},
         };
 
         setInputHistory((old) => {

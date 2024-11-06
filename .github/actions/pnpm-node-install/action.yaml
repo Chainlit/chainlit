@@ -5,11 +5,18 @@ inputs:
   node-version:
     description: Node.js version
     required: true
+    default: '22.7.0'
   pnpm-version:
     description: pnpm version
     required: true
+    default: '9.7.0'
+  pnpm-skip-install:
+    description: Skip install.
+    required: false
+    default: 'false'
   pnpm-install-args:
     description: Extra arguments for pnpm install, e.g. --no-frozen-lockfile.
+    default: '--frozen-lockfile'
 
 runs:
   using: composite
@@ -25,3 +32,5 @@ runs:
     - name: Install JS dependencies
       run: pnpm install ${{ inputs.pnpm-install-args }}
       shell: bash
+      # Skip install if pnpm-skip-install is true
+      if: ${{ inputs.pnpm-skip-install != 'true' }}

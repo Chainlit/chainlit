@@ -30,6 +30,7 @@ export interface IStep {
   language?: string;
   streaming?: boolean;
   steps?: IStep[];
+  metadata?: Record<string, any>;
   //legacy
   indent?: number;
 }

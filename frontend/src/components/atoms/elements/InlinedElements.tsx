@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import type { ElementType, IMessageElement } from 'client-types/';
 
 import { InlinedAudioList } from './InlinedAudioList';
+import { InlinedDataframeList } from './InlinedDataframeList';
 import { InlinedFileList } from './InlinedFileList';
 import { InlinedImageList } from './InlinedImageList';
 import { InlinedPDFList } from './InlinedPDFList';
@@ -63,6 +64,9 @@ const InlinedElements = ({ elements }: Props) => {
       ) : null}
       {elementsByType.plotly?.length ? (
         <InlinedPlotlyList items={elementsByType.plotly} />
+      ) : null}
+      {elementsByType.dataframe?.length ? (
+        <InlinedDataframeList items={elementsByType.dataframe} />
       ) : null}
     </Stack>
   );
