@@ -11,9 +11,16 @@ _data_layer: Optional[BaseDataLayer] = None
 
 def get_data_layer():
     global _data_layer
+    print("Getting data layer", _data_layer)
 
     if not _data_layer:
-        if api_key := os.environ.get("LITERAL_API_KEY"):
+        from chainlit.config import config
+
+        if config.code.data_layer:
+            # When @data_layer is configured, call it to get data layer.
+            _data_layer = config.code.data_layer()
+        elif api_key := os.environ.get("LITERAL_API_KEY"):
+            # When LITERAL_API_KEY is defined, use LiteralAI data layer
             from .literalai import LiteralDataLayer
 
             # support legacy LITERAL_SERVER variable as fallback
