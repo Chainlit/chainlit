@@ -4,12 +4,72 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.2] - 2024-11-08
+
+### Security Advisory
+**IMPORTANT**:
+- This release drops support for FastAPI versions before 0.115.3 and Starlette versions before 0.41.2 due to a severe security vulnerability (CVE-2024-47874). We strongly encourage all downstream dependencies to upgrade as well.
+- This release still contains a known security vulnerability in the element feature that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
+
+### Security
+- **[breaking]** Updated dependencies to address critical issues (#1493):
+  - Upgraded fastapi to 0.115.3 to address CVE-2024-47874 in Starlette
+  - Upgraded starlette to 0.41.2 (required for security fix)
+  - Upgraded werkzeug to 3.0.6
+
+Note: This is a breaking change as older FastAPI versions are no longer supported.
+To prioritize security, we opted to break with semver on this particular occasion.
+
+### Fixed
+- Resolved incorrect message ordering in UI (#1501)
+
+## [2.0rc0] - 2024-11-08
+
+### Security Advisory
+**IMPORTANT**:
+- The element feature currently contains a known security vulnerability that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
+
+### Changed
+- **[breaking]**: Completely revamped audio implementation (#1401, #1410):
+  - Replaced `AudioChunk` with `InputAudioChunk` and `OutputAudioChunk`
+  - Changed default audio sampling rate from 44100 to 24000
+  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
+  - Removed `RecordScreen` component
+- Factored storage clients into separate modules (#1363)
+
+### Added
+- Realtime audio streaming and processing (#1401, #1406, #1410):
+  - New `AudioPresence` component for visual representation
+  - Implemented `WavRecorder` and `WavStreamPlayer` classes
+  - Introduced new `on_audio_start` callback
+  - Added audio interruption functionality
+  - New audio connection signaling with `on` and `off` states
+- Interactive DataFrame display with auto-fit content using MUI Data Grid (#1373, #1467)
+- Optional websocket connection in react-client (#1379)
+- Enhanced image interaction with popup view and download option (#1402)
+- Current URL included in message payload (#1403)
+- Allow empty chat input when submitting attachments (#1261)
+
+### Fixes
+- Various backend fixes and cleanup (#1432):
+  - Use importlib.util.find_spec to check if a package is installed
+  - Use `raise... from` to wrap exceptions
+  - Fix error message in Discord integration
+  - Several minor fixups/cleanup
+
+### Development
+- Implemented ruff for linting and formatting (#1495)
+- Added mypy daemon for faster type-checking (#1495)
+- Added GitHub Actions linting (#1445)
+- Enabled direct installation from GitHub (#1423)
+- Various build script improvements (#1462)
+
 ## [1.3.1] - 2024-10-25
 
 ### Security Advisory
 
 - **IMPORTANT**: This release temporarily reverts the file access security improvements from 1.3.0 to restore element functionality. The element feature currently has a known security vulnerability that could allow unauthorized access to files. We strongly recommend against using elements in production environments until the next release.
-- A comprehensive security fix using HTTP-only cookie authentication will be implemented in an upcoming release.
+- A comprehensive security fix will be implemented in an upcoming release.
 
 ### Changed
 
@@ -58,91 +118,6 @@ override oauth prompt parameter. Enabling users to explicitly enable login/conse
 - Enhanced code organization and import structure
 - Improved Python code style and linting (#1353)
 - Resolved various small text and documentation issues (#1347, #1348)
-
-## [2.0.dev2] - 2024-10-25
-
-### Security Advisory
-
-- **IMPORTANT**: This release temporarily reverts the file access security improvements from 2.0.dev1 to restore element functionality. The element feature currently has a known security vulnerability that could allow unauthorized access to files. We strongly recommend against using elements in production environments until the next release.
-- A comprehensive security fix using HTTP-only cookie authentication will be implemented in an upcoming release.
-
-### Changed
-
-- Reverted authentication requirements for file access endpoints to restore element functionality (#1474)
-
-### Development
-
-- Work in progress on implementing HTTP-only cookie authentication for proper security (#1472)
-
-## [2.0.dev1] - 2024-10-22
-
-### Added
-
-- Interactive DataFrame display component using MUI Data Grid (#1373)
-- Optional websocket connection in react-client (#1379)
-- Current URL in message payload (#1403)
-- Improved image interaction - clicking opens popup with download option (#1402)
-- Configurable user session timeout (#1032)
-
-### Security
-
-- Fixed file access vulnerability in get_file and upload_file endpoints (#1441)
-- Added authentication to /project/file endpoint (#1441)
-- Addressed security vulnerabilities in frontend dependencies (#1431, #1414)
-
-### Fixed
-
-- Dialog boxes extending beyond window (#1446)
-- Allow empty chat input when submitting attachments (#1261)
-- Tasklist when Chainlit is submounted (#1433)
-- Spaces in avatar filenames (#1418)
-- Step argument input and concurrency issues (#1409)
-- Display_name copying to PersistentUser during authentication (#1425)
-
-### Development
-
-- Refactored storage clients into separate modules (#1363)
-- Support for IETF BCP 47 language tags (#1399)
-- Improved GitHub Actions workflows and build process (#1445)
-- Direct installation from GitHub support (#1423)
-- Extended package metadata with homepage and documentation links (#1413)
-- Various backend fixes and code cleanup (#1432)
-
-## [2.0.dev0] - 2024-10-08
-
-### Breaking Changes
-
-- Completely revamped audio implementation:
-  - Removed `AudioChunk` type, replaced with `InputAudioChunk` and `OutputAudioChunk`
-  - Changed audio sampling rate from 44100 to 24000
-  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
-  - Introduced new `on_audio_start` callback
-  - Modified `on_audio_end` callback to no longer accept file elements as arguments
-
-### Added
-
-- New audio connection signaling with `on` and `off` states
-- Introduced `AudioPresence` component for visual representation of audio state
-- Added `WavRecorder` and `WavStreamPlayer` classes for improved audio handling
-- New `startConversation` and `endConversation` methods in `useAudio` hook
-- Implemented audio interruption functionality
-
-### Changed
-
-- Updated `useChatInteract` hook to include `startAudioStream` method
-- Modified `useChatSession` to handle new audio streaming functionality
-- Updated UI components to reflect new audio implementation, including new microphone icons and audio presence indicators
-- Refactored `InputBoxFooter` to display audio presence when active
-
-### Removed
-
-- Eliminated `RecordScreen` component
-- Removed several audio-related configuration options from `config.toml`
-
-### Development
-
-- Added new wavtools directory with various audio processing utilities
-- Implemented new AudioWorklet processors for more efficient audio handling
 
 ## [1.2.0] - 2024-09-16
 
