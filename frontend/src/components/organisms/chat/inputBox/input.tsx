@@ -218,7 +218,6 @@ const Input = memo(
         <TextField
           inputRef={ref}
           id="chat-input"
-          autoFocus
           multiline
           variant="standard"
           autoComplete="false"
