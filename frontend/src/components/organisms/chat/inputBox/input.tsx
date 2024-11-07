@@ -96,11 +96,6 @@ const Input = memo(
       };
     }, []);
 
-    useEffect(() => {
-      if (ref.current && !loading && !disabled) {
-        ref.current.focus();
-      }
-    }, [loading, disabled]);
 
     const submit = async () => {
       if (submitProxy) {

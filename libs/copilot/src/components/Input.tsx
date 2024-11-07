@@ -83,12 +83,6 @@ const Input = memo(
       };
     }, []);
 
-    useEffect(() => {
-      if (ref.current && !loading && !disabled) {
-        evoya?.type === 'default' && ref.current.focus();
-      }
-    }, [loading, disabled]);
-
     const submit = useCallback(() => {
       if (value === '' || disabled) {
         return;
