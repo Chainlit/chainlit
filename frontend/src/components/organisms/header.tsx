@@ -7,7 +7,6 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { Logo } from 'components/atoms/logo';
 import ChatProfiles from 'components/molecules/chatProfiles';
 import NewChatButton from 'components/molecules/newChatButton';
-import Translator from 'components/i18n/Translator';
 
 interface HeaderProps {
   isExpanded?: boolean;
@@ -56,12 +55,12 @@ const Header = memo(({ isExpanded: propIsExpanded, toggleExpand, toggleChat }: H
       <Stack direction="row" alignItems="center" spacing={1}>
         <ChatProfiles />
         <NewChatButton />
-        <Tooltip title={<Translator path={localIsExpanded ? "header.collapse" : "header.expand"} />}>
+        <Tooltip title={localIsExpanded ? "Minimize" : "Expand"}>
           <IconButton onClick={handleExpandClick}>
             {localIsExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Tooltip>
-        <Tooltip title={<Translator path="header.close" />}>
+        <Tooltip title='Close'>
           <IconButton onClick={handleCloseClick}>
             <CloseIcon />
           </IconButton>

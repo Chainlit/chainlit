@@ -37,7 +37,7 @@ const hasMessage = async (messages: IStep[]): Promise<boolean> => {
 export default function WelcomeScreen({ hideLogo }: Props) {
   const { messages } = useChatMessages();
   const [show, setShow] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const { chatProfile } = useChatSession();
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
@@ -81,12 +81,10 @@ export default function WelcomeScreen({ hideLogo }: Props) {
 
   useEffect(() => {
     const checkMessages = async () => {
-      setIsLoading(true);
       const hasAnyMessage = await hasMessage(messages);
       const hasStoredChat = await threadStorage.hasStoredThread();
       
       setShow(!hasAnyMessage && !hasStoredChat);
-      setIsLoading(false);
     };
     checkMessages();
   }, [messages]);
