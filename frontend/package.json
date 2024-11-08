@@ -21,6 +21,7 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/lab": "^5.0.0-alpha.122",
     "@mui/material": "^5.14.10",
+    "@sentry/react": "^8.35.0",
     "formik": "^2.4.3",
     "highlight.js": "^11.9.0",
     "i18next": "^23.7.16",
@@ -53,6 +54,7 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
+    "@sentry/vite-plugin": "^2.22.6",
     "@swc/core": "^1.3.86",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^14.0.0",
