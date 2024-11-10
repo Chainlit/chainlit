@@ -37,7 +37,8 @@ describe('Chat profiles', () => {
     cy.get('[data-test="select-item:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.wait(1000);
+    cy.get('#chat-input').should('have.attr', 'disabled');
+    cy.get('#chat-input').should('not.have.attr', 'disabled');
     cy.get('#starter-ask-for-help').should('exist').click();
 
     cy.get('.step')
@@ -78,7 +79,9 @@ describe('Chat profiles', () => {
     cy.get('#chat-profile-selector').parent().click();
 
     // Force hover over GPT-4 profile to show description
-    cy.get('[data-test="select-item:GPT-4"]').trigger('mouseover', { force: true });
+    cy.get('[data-test="select-item:GPT-4"]').trigger('mouseover', {
+      force: true
+    });
 
     // Wait for the popover to appear and check its content
     cy.get('#chat-profile-description').within(() => {
@@ -111,6 +114,8 @@ describe('Chat profiles', () => {
 
     // Select GPT-4 profile
     cy.get('[data-test="select-item:GPT-4"]').click();
+    cy.get('#chat-input').should('have.attr', 'disabled');
+    cy.get('#chat-input').should('not.have.attr', 'disabled');
 
     // Verify the profile has been changed
     submitMessage('hello');
@@ -121,6 +126,5 @@ describe('Chat profiles', () => {
         'contain',
         'starting chat with admin using the GPT-4 chat profile'
       );
-
   });
 });

@@ -1,6 +1,7 @@
 import importlib.util
 import os
 import threading
+from typing import Any
 
 from chainlit.config import config
 from chainlit.logger import logger
@@ -22,7 +23,7 @@ def init_lc_cache():
                 )
 
 
-_cache = {}
+_cache: dict[tuple, Any] = {}
 _cache_lock = threading.Lock()
 
 

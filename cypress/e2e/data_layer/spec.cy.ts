@@ -116,7 +116,7 @@ describe('Data Layer', () => {
   afterEach(() => {
     cy.get('@threadHistoryFile').then((threadHistoryFile) => {
       // Clean up the thread history file
-      cy.exec(`rm ${threadHistoryFile}`);
+      cy.exec(`rm -f ${threadHistoryFile}`);
     });
   });
 
