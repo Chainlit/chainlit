@@ -6,6 +6,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import { Translator } from 'components/i18n';
+
 import { useUpload } from 'hooks/useUpload';
 
 import type { IAsk, IFileRef } from 'client-types/';
@@ -95,9 +97,12 @@ const AskUploadChildButton = ({
     >
       <input id="ask-button-input" {...getInputProps()} />
       <Stack>
-        <Typography color="text.primary">Drag and drop files here</Typography>
+        <Typography color="text.primary">
+          {<Translator path="components.molecules.askUploadButton.title" />}
+        </Typography>
         <Typography variant="caption" color="text.secondary">
-          Limit {askUser.spec.max_size_mb}mb.
+          {<Translator path="components.molecules.askUploadButton.limit" />}{' '}
+          {askUser.spec.max_size_mb} mb.
         </Typography>
       </Stack>
       <Button
@@ -109,7 +114,7 @@ const AskUploadChildButton = ({
         {uploading ? (
           <CircularProgress variant="determinate" value={progress} size={20} />
         ) : (
-          'Browse Files'
+          <Translator path="components.molecules.askUploadButton.browse" />
         )}
       </Button>
     </Stack>

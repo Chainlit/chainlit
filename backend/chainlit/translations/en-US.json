@@ -13,6 +13,11 @@
       }
     },
     "molecules": {
+      "askUploadButton": {
+        "title": "Drag and drop files here",
+        "limit": "Limit",
+        "browse": "Browse Files"
+      },
       "newChatButton": {
         "newChat": "New Chat"
       },
