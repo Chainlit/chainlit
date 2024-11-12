@@ -2,6 +2,9 @@ import asyncio
 import uuid
 from typing import Any, Dict, List, Literal, Optional, Union, cast
 
+from literalai.helper import utc_now
+from socketio.exceptions import TimeoutError
+
 from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.data import get_data_layer
@@ -16,12 +19,10 @@ from chainlit.types import (
     FileDict,
     FileReference,
     MessagePayload,
+    OutputAudioChunk,
     ThreadDict,
-    OutputAudioChunk
 )
 from chainlit.user import PersistedUser
-from literalai.helper import utc_now
-from socketio.exceptions import TimeoutError
 
 
 class BaseChainlitEmitter:
