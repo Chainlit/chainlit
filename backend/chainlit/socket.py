@@ -17,11 +17,7 @@ from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
 from chainlit.telemetry import trace_event
-from chainlit.types import (
-    InputAudioChunk,
-    InputAudioChunkPayload,
-    MessagePayload,
-)
+from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload
 from chainlit.user_session import user_sessions
 
 
@@ -329,6 +325,7 @@ async def window_message(sid, data):
         finally:
             await context.emitter.task_end()
 
+
 @sio.on("audio_start")
 async def audio_start(sid):
     """Handle audio init."""
@@ -336,10 +333,10 @@ async def audio_start(sid):
 
     context = init_ws_context(session)
     if config.code.on_audio_start:
-       connected = bool(await config.code.on_audio_start())
-       connection_state = "on" if connected else "off"
-       await context.emitter.update_audio_connection(connection_state)
-        
+        connected = bool(await config.code.on_audio_start())
+        connection_state = "on" if connected else "off"
+        await context.emitter.update_audio_connection(connection_state)
+
 
 @sio.on("audio_chunk")
 async def audio_chunk(sid, payload: InputAudioChunkPayload):
@@ -366,7 +363,7 @@ async def audio_end(sid):
 
         if config.code.on_audio_end:
             await config.code.on_audio_end()
-            
+
     except asyncio.CancelledError:
         pass
     except Exception as e:
