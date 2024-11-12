@@ -194,7 +194,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
         return ""
 
 
-cl_data._data_layer = TestDataLayer()
+@cl.data_layer
+def data_layer():
+    return TestDataLayer()
 
 
 async def send_count():

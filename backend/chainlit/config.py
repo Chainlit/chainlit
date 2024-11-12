@@ -17,21 +17,24 @@ from typing import (
 )
 
 import tomli
-from chainlit.logger import logger
-from chainlit.translations import lint_translation_json
-from chainlit.version import __version__
 from dataclasses_json import DataClassJsonMixin
 from pydantic.dataclasses import Field, dataclass
 from starlette.datastructures import Headers
 
+from chainlit.data.base import BaseDataLayer
+from chainlit.logger import logger
+from chainlit.translations import lint_translation_json
+from chainlit.version import __version__
+
 from ._utils import is_path_inside
 
 if TYPE_CHECKING:
+    from fastapi import Request, Response
+
     from chainlit.action import Action
     from chainlit.message import Message
-    from chainlit.types import InputAudioChunk, ChatProfile, Starter, ThreadDict
+    from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
     from chainlit.user import User
-    from fastapi import Request, Response
 
 
 BACKEND_ROOT = os.path.dirname(__file__)
@@ -272,9 +275,9 @@ class CodeSettings:
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
-    header_auth_callback: Optional[
-        Callable[[Headers], Awaitable[Optional["User"]]]
-    ] = None
+    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
+        None
+    )
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
@@ -294,9 +297,10 @@ class CodeSettings:
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
-    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
+    data_layer: Optional[Callable[[], BaseDataLayer]] = None
 
 
 @dataclass()
