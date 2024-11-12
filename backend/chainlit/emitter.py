@@ -53,15 +53,15 @@ class BaseChainlitEmitter:
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
         pass
-    
+
     async def update_audio_connection(self, state: Literal["on", "off"]):
         """Audio connection signaling."""
         pass
-    
+
     async def send_audio_chunk(self, chunk: OutputAudioChunk):
         """Stub method to send an audio chunk to the UI."""
         pass
-        
+
     async def send_audio_interrupt(self):
         """Stub method to interrupt the current audio response."""
         pass
@@ -138,6 +138,7 @@ class BaseChainlitEmitter:
         """Stub method to send custom data to the host window."""
         pass
 
+
 class ChainlitEmitter(BaseChainlitEmitter):
     """
     Chainlit Emitter class. The Emitter is not directly exposed to the developer.
@@ -181,7 +182,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
     async def send_audio_chunk(self, chunk: OutputAudioChunk):
         """Send an audio chunk to the UI."""
         await self.emit("audio_chunk", chunk)
-        
+
     async def send_audio_interrupt(self):
         """Method to interrupt the current audio response."""
         await self.emit("audio_interrupt", {})
