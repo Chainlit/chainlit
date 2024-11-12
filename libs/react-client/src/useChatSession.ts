@@ -277,7 +277,7 @@ const useChatSession = () => {
       );
 
       socket.on('ask', ({ msg, spec }, callback) => {
-        setAskUser({ spec, callback });
+        setAskUser({ spec, callback, parentId: msg.parentId });
         setMessages((oldMessages) => addMessage(oldMessages, msg));
 
         setLoading(false);

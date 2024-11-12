@@ -14,6 +14,9 @@ if env_found:
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
 
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
+from pydantic.dataclasses import dataclass
+
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
@@ -49,12 +52,11 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
 from chainlit.version import __version__
-from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
-from pydantic.dataclasses import dataclass
 
 from .callbacks import (
     action_callback,
     author_rename,
+    data_layer,
     header_auth_callback,
     oauth_callback,
     on_audio_chunk,
@@ -190,6 +192,7 @@ __all__ = [
     "on_stop",
     "action_callback",
     "on_settings_update",
+    "data_layer",
 ]
 
 
