@@ -8,14 +8,13 @@ from fastapi.security import OAuth2PasswordBearer
 
 from chainlit.config import config
 from chainlit.data import get_data_layer
+from chainlit.logger import logger
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.user import User
 
+from .jwt import create_jwt, decode_jwt, get_jwt_secret
+
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
-
-
-def get_jwt_secret():
-    return os.environ.get("CHAINLIT_AUTH_SECRET")
 
 
 def ensure_jwt_secret():
@@ -49,28 +48,10 @@ def get_configuration():
     }
 
 
-def create_jwt(data: User) -> str:
-    to_encode: Dict[str, Any] = data.to_dict()
-    to_encode.update(
-        {
-            "exp": datetime.utcnow()
-            + timedelta(seconds=config.project.user_session_timeout),
-        }
-    )
-    encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
-    return encoded_jwt
-
-
 async def authenticate_user(token: str = Depends(reuseable_oauth)):
     try:
-        dict = jwt.decode(
-            token,
-            get_jwt_secret(),
-            algorithms=["HS256"],
-            options={"verify_signature": True},
-        )
-        del dict["exp"]
-        user = User(**dict)
+        user = decode_jwt(token)
+
     except Exception as e:
         raise HTTPException(
             status_code=401, detail="Invalid authentication token"
@@ -80,7 +61,9 @@ async def authenticate_user(token: str = Depends(reuseable_oauth)):
             persisted_user = await data_layer.get_user(user.identifier)
             if persisted_user is None:
                 persisted_user = await data_layer.create_user(user)
-        except Exception:
+                assert persisted_user
+        except Exception as e:
+            logger.exception(e)
             return user
 
         if user and user.display_name:

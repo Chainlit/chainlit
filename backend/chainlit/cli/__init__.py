@@ -24,7 +24,8 @@ from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
 from chainlit.telemetry import trace_event
-from chainlit.utils import check_file, ensure_jwt_secret
+from chainlit.auth import ensure_jwt_secret
+from chainlit.utils import check_file
 
 
 # Create the main command group for Chainlit CLI
