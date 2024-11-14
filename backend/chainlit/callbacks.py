@@ -128,14 +128,14 @@ def on_message(func: Callable) -> Callable:
 
 
 @trace
-def send_window_message(data: Any):
+async def send_window_message(data: Any):
     """
     Send custom data to the host window via a window.postMessage event.
 
     Args:
         data (Any): The data to send with the event.
     """
-    asyncio.create_task(context.emitter.send_window_message(data))
+    await context.emitter.send_window_message(data)
 
 
 @trace
