@@ -4,7 +4,9 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [2.1.dev0] - 2024-11-14
+
+Pre-release: developer preview.
 
 ### Added
 - New `@data_layer` decorator for configuring custom data layers declaratively
