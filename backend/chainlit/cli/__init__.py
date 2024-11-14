@@ -9,6 +9,7 @@ import uvicorn
 nest_asyncio.apply()
 
 # ruff: noqa: E402
+from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
     BACKEND_ROOT,
@@ -24,7 +25,6 @@ from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
 from chainlit.telemetry import trace_event
-from chainlit.auth import ensure_jwt_secret
 from chainlit.utils import check_file
 
 

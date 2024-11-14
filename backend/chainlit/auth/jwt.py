@@ -1,17 +1,15 @@
 import datetime
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
-import jwt
+import jwt as pyjwt
 
 from chainlit.config import config
 from chainlit.user import User
 
 
-def get_jwt_secret() -> str:
-    secret = os.environ.get("CHAINLIT_AUTH_SECRET")
-    assert secret
-    return secret
+def get_jwt_secret() -> Optional[str]:
+    return os.environ.get("CHAINLIT_AUTH_SECRET")
 
 
 def create_jwt(data: User) -> str:
@@ -22,12 +20,14 @@ def create_jwt(data: User) -> str:
             + datetime.timedelta(seconds=config.project.user_session_timeout),
         }
     )
-    encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
+    secret = get_jwt_secret()
+    assert secret
+    encoded_jwt = pyjwt.encode(to_encode, secret, algorithm="HS256")
     return encoded_jwt
 
 
 def decode_jwt(token: str) -> User:
-    dict = jwt.decode(
+    dict = pyjwt.decode(
         token,
         get_jwt_secret(),
         algorithms=["HS256"],
