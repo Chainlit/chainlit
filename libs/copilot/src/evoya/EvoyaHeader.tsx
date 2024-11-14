@@ -77,9 +77,7 @@ const Header = ({ showClose, noShow = false }: Props): JSX.Element => {
           <>
             <DashboardSidebarButton />
             <NewChatButton />
-            {evoya?.api?.privacyShield.privacyAgent &&
-              <PrivacyShieldToggle />
-            }
+            <PrivacyShieldToggle />
           </>
         ) : (
           evoya?.logo ? <img src={evoya.logo} style={{ height: '25px', width: 'auto' }} /> : <AvaiaLogo style={{ height: '25px', width: 'auto' }} />
