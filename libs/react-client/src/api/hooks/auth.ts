@@ -33,8 +33,12 @@ export const useAuth = () => {
   const logout = async (reload = false) => {
     await apiClient.logout();
     setUser(null);
-    removeToken();
-    setAccessToken('');
+
+    if (!authConfig?.cookieAuth) {
+      removeToken();
+      setAccessToken('');
+    }
+
     setThreadHistory(undefined);
     if (reload) {
       window.location.reload();
@@ -69,6 +73,7 @@ export const useAuth = () => {
     }
   }, []);
 
+  // TODO: Change this to the result of `/login` (basically).
   const isAuthenticated = !!accessToken;
 
   if (authConfig && !authConfig.requireLogin) {
