@@ -33,6 +33,7 @@ const Page = ({ children }: Props) => {
     return <Navigate to="/login" />;
   }
 
+  // Question: isn't isAuthenticated unreachable here?
   return (
     <Box
       sx={{

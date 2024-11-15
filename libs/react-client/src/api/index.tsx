@@ -1,5 +1,5 @@
-import { IThread } from 'src/types';
-import { removeToken } from 'src/utils/token';
+import { ensureTokenPrefix, removeToken } from 'src/auth/token';
+import { IThread, IUser } from 'src/types';
 
 import { IFeedback } from 'src/types/feedback';
 
@@ -57,15 +57,25 @@ export class APIBase {
     }
   }
 
-  checkToken(token: string) {
-    const prefix = 'Bearer ';
-    if (token.startsWith(prefix)) {
-      return token;
-    } else {
-      return prefix + token;
-    }
-  }
-
+  /**
+   * Low-level HTTP request handler for direct API interactions.
+   * Provides full control over HTTP methods, request configuration, and error handling.
+   *
+   * Key features:
+   * - Supports all HTTP methods (GET, POST, PUT, PATCH, DELETE)
+   * - Handles both FormData and JSON payloads
+   * - Manages authentication headers and token formatting
+   * - Custom error handling with ClientError class
+   * - Support for request cancellation via AbortSignal
+   *
+   * @param method - HTTP method to use (GET, POST, etc.)
+   * @param path - API endpoint path
+   * @param token - Optional authentication token
+   * @param data - Optional request payload (FormData or JSON-serializable data)
+   * @param signal - Optional AbortSignal for request cancellation
+   * @returns Promise<Response>
+   * @throws ClientError for HTTP errors, including 401 unauthorized
+   */
   async fetch(
     method: string,
     path: string,
@@ -75,7 +85,7 @@ export class APIBase {
   ): Promise<Response> {
     try {
       const headers: { Authorization?: string; 'Content-Type'?: string } = {};
-      if (token) headers['Authorization'] = this.checkToken(token); // Assuming token is a bearer token
+      if (token) headers['Authorization'] = ensureTokenPrefix(token); // Assuming token is a bearer token
 
       let body;
 
@@ -149,6 +159,11 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async getUser(accessToken?: string): Promise<IUser> {
+    const res = await this.get(`/user`, accessToken);
+    return res.json();
+  }
+
   async logout() {
     const res = await this.post(`/logout`, {});
     return res.json();
@@ -212,7 +227,7 @@ export class ChainlitAPI extends APIBase {
       );
 
       if (token) {
-        xhr.setRequestHeader('Authorization', this.checkToken(token));
+        xhr.setRequestHeader('Authorization', ensureTokenPrefix(token));
       }
 
       // Track the progress of the upload

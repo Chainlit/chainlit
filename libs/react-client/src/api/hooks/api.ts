@@ -14,6 +14,30 @@ const fetcher = async (
   return res?.json();
 };
 
+/**
+ * React hook for cached API data fetching using SWR (stale-while-revalidate).
+ * Optimized for GET requests with automatic caching and revalidation.
+ *
+ * Key features:
+ * - Automatic data caching and revalidation
+ * - Integration with React component lifecycle
+ * - Loading state management
+ * - Recoil state integration for global state
+ * - Memoized fetcher function to prevent unnecessary rerenders
+ *
+ * @param path - API endpoint path or null to disable the request
+ * @param config - Optional SWR configuration and token override
+ * @returns SWR response object containing:
+ *          - data: The fetched data
+ *          - error: Any error that occurred
+ *          - isValidating: Whether a request is in progress
+ *          - mutate: Function to mutate the cached data
+ *
+ * @example
+ * const { data, error, isValidating } = useApi<UserData>('/user', {
+ *   token: accessToken
+ * });
+ */
 function useApi<T>(
   path?: string | null,
   { token, ...swrConfig }: SWRConfiguration & { token?: string } = {}

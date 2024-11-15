@@ -26,7 +26,7 @@ const SideBar = () => {
 
   const [settings, setSettings] = useRecoilState(settingsState);
   const { config } = useConfig();
-  const enableHistory = !!user.accessToken && !!config?.dataPersistence;
+  const enableHistory = !!user && !!config?.dataPersistence;
 
   useEffect(() => {
     if (isMobile) {
