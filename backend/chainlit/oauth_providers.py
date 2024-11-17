@@ -671,7 +671,7 @@ class KeycloakOAuthProvider(OAuthProvider):
         "OAUTH_KEYCLOAK_REALM",
         "OAUTH_KEYCLOAK_BASE_URL",
     ]
-    id = os.environ.get("OAUTH_KEYCLOAK_NAME")
+    id = os.environ.get("OAUTH_KEYCLOAK_NAME", "keycloak")
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_KEYCLOAK_CLIENT_ID")
