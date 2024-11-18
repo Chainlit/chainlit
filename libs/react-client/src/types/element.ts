@@ -68,8 +68,8 @@ export interface IFileElement extends TMessageElement<'file'> {
   type: 'file';
 }
 
-export interface IPlotlyElement extends TMessageElement<'plotly'> {}
+export type IPlotlyElement = TMessageElement<'plotly'>;
 
-export interface ITasklistElement extends TElement<'tasklist'> {}
+export type ITasklistElement = TElement<'tasklist'>;
 
-export interface IDataframeElement extends TMessageElement<'dataframe'> {}
+export type IDataframeElement = TMessageElement<'dataframe'>;
