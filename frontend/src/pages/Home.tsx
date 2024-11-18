@@ -16,7 +16,7 @@ export default function Home() {
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
   const setFirstInteraction = useSetRecoilState(firstUserInteraction);
   const setMessages = useSetRecoilState(messagesState);
-  const { setIdToResume } = useChatInteract();
+  const { setIdToResume, callAction } = useChatInteract();
   const { session } = useChatSession();
   const { messages} = useChatMessages();
 
@@ -31,6 +31,15 @@ export default function Home() {
           setIdToResume(thread.id);
           setMessages(thread.steps);
           setFirstInteraction('resume');
+          
+          await callAction({
+            name: "restore_chat_history",
+            forId: thread.id,
+            id: `restore_${thread.id}`,
+            value: JSON.stringify(thread),
+            onClick: () => {},
+            collapsed: false 
+          });
         }
       } catch (err) {
         console.error('Failed to load last thread:', err);
