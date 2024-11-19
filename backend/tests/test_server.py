@@ -319,7 +319,7 @@ def test_get_file_non_existing_session(
 
     # Attempt to access the file without authentication by providing an invalid session_id
     response = test_client.get(
-        f"/project/file/nonexistent?session_id=unauthenticated_session_id"
+        "/project/file/nonexistent?session_id=unauthenticated_session_id"
     )
 
     # Verify the response
