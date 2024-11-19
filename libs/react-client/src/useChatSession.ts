@@ -359,6 +359,12 @@ const useChatSession = () => {
       socket.on('token_usage', (count: number) => {
         setTokenCount((old) => old + count);
       });
+
+      socket.on('window_message', (data: any) => {
+        if (window.parent) {
+          window.parent.postMessage(data, '*');
+        }
+      });
     },
     [setSession, sessionId, chatProfile]
   );

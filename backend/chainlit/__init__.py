@@ -69,7 +69,9 @@ from .callbacks import (
     on_message,
     on_settings_update,
     on_stop,
+    on_window_message,
     password_auth_callback,
+    send_window_message,
     set_chat_profiles,
     set_starters,
 )
@@ -151,6 +153,8 @@ __all__ = [
     "CompletionGeneration",
     "GenerationMessage",
     "on_logout",
+    "on_window_message",
+    "send_window_message",
     "on_chat_start",
     "on_chat_end",
     "on_chat_resume",
