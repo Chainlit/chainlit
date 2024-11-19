@@ -108,8 +108,8 @@ def step(
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.exception(e)
                     result = await func(*args, **kwargs)
                     try:
                         if result and not step.output:
@@ -135,8 +135,8 @@ def step(
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.exception(e)
                     result = func(*args, **kwargs)
                     try:
                         if result and not step.output:
