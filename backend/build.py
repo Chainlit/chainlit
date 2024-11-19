@@ -3,11 +3,8 @@
 import os
 import pathlib
 import shutil
-import signal
 import subprocess
 import sys
-from contextlib import contextmanager
-from typing import Optional
 
 
 class BuildError(Exception):
