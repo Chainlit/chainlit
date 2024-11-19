@@ -33,7 +33,7 @@ export default function Home() {
           setFirstInteraction('resume');
           
           await callAction({
-            name: "restore_chat_history",
+            name: "on_chat_resume",
             forId: thread.id,
             id: `restore_${thread.id}`,
             value: JSON.stringify(thread),
