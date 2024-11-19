@@ -3007,6 +3007,7 @@ files = [
 
 [package.dependencies]
 mypy-extensions = ">=1.0.0"
+orjson = {version = "*", optional = true, markers = "extra == \"faster-cache\""}
 tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
 typing-extensions = ">=4.6.0"
 
@@ -5722,4 +5723,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "b16e0102efc1746c650803d2db027209a93686aaa27b79cd28e13dc49bb210d8"
+content-hash = "4af0a6e15e48b71406fd3cba9b34f95724f9388fac8728aa40d9984f805e0c32"
