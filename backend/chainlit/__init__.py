@@ -134,6 +134,7 @@ __all__ = [
     "Image",
     "Text",
     "Component",
+    "Dataframe",
     "Pyplot",
     "File",
     "Task",
