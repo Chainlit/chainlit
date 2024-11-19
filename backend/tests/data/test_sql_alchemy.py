@@ -120,7 +120,7 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     # Create SQLAlchemyDataLayer instance
     data_layer = SQLAlchemyDataLayer(conninfo, storage_provider=mock_storage_client)
 
-    yield data_layer
+    return data_layer
 
 
 async def test_create_and_get_element(
