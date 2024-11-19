@@ -4,7 +4,7 @@ import GithubIcon from 'assets/github';
 
 import { useConfig } from 'client-types/*';
 
-interface Props extends ButtonProps {}
+type Props = ButtonProps;
 
 export default function GithubButton({ ...props }: Props) {
   const { config } = useConfig();

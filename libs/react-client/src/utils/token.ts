@@ -3,7 +3,7 @@ const tokenKey = 'token';
 export function getToken() {
   try {
     return localStorage.getItem(tokenKey);
-  } catch (e) {
+  } catch (_) {
     return;
   }
 }
@@ -11,7 +11,7 @@ export function getToken() {
 export function setToken(token: string) {
   try {
     return localStorage.setItem(tokenKey, token);
-  } catch (e) {
+  } catch (_) {
     return;
   }
 }
@@ -19,7 +19,7 @@ export function setToken(token: string) {
 export function removeToken() {
   try {
     return localStorage.removeItem(tokenKey);
-  } catch (e) {
+  } catch (_) {
     return;
   }
 }
