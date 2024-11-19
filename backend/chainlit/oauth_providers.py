@@ -4,9 +4,10 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
+from fastapi import HTTPException
+
 from chainlit.secret import random_secret
 from chainlit.user import User
-from fastapi import HTTPException
 
 
 class OAuthProvider:
