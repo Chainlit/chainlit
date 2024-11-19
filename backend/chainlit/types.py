@@ -79,7 +79,7 @@ T = TypeVar("T", covariant=True)
 class HasFromDict(Protocol[T]):
     @classmethod
     def from_dict(cls, obj_dict: Any) -> T:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 @dataclass

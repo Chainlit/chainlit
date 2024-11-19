@@ -105,7 +105,7 @@ def get_context() -> ChainlitContext:
     try:
         return context_var.get()
     except LookupError as e:
-        raise ChainlitContextException() from e
+        raise ChainlitContextException from e
 
 
 context: ChainlitContext = LazyProxy(get_context, enable_cache=False)
