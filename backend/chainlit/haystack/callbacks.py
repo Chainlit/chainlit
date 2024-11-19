@@ -132,7 +132,7 @@ class HaystackAgentCallbackHandler:
         tool_result: str,
         tool_name: Optional[str] = None,
         tool_input: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         # Tool finished, send step with tool_result
         tool_step = self.stack.pop()

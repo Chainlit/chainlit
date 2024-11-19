@@ -113,9 +113,10 @@ class BaseSession:
 
         if path:
             # Copy the file from the given path
-            async with aiofiles.open(path, "rb") as src, aiofiles.open(
-                file_path, "wb"
-            ) as dst:
+            async with (
+                aiofiles.open(path, "rb") as src,
+                aiofiles.open(file_path, "wb") as dst,
+            ):
                 await dst.write(await src.read())
         elif content:
             # Write the provided content to the file

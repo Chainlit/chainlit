@@ -144,16 +144,15 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             context_var.get().loop.create_task(step.update())
 
         elif event_type == CBEventType.LLM:
-            formatted_messages = payload.get(
-                EventPayload.MESSAGES
-            )  # type: Optional[List[ChatMessage]]
+            formatted_messages = payload.get(EventPayload.MESSAGES)  # type: Optional[List[ChatMessage]]
             formatted_prompt = payload.get(EventPayload.PROMPT)
             response = payload.get(EventPayload.RESPONSE)
 
             if formatted_messages:
                 messages = [
                     GenerationMessage(
-                        role=m.role.value, content=m.content or ""  # type: ignore
+                        role=m.role.value,  # type: ignore
+                        content=m.content or "",
                     )
                     for m in formatted_messages
                 ]

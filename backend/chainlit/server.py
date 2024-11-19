@@ -897,7 +897,7 @@ async def get_file(
             detail="Unauthorized",
         )
 
-     #TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
+    # TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
     # if current_user:
     #     if not session.user or session.user.identifier != current_user.identifier:
     #         raise HTTPException(

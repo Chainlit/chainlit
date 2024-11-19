@@ -168,10 +168,12 @@ class InputAudioChunk:
     elapsedTime: float
     data: bytes
 
+
 class OutputAudioChunk(TypedDict):
     track: str
     mimeType: str
     data: bytes
+
 
 @dataclass
 class AskFileResponse:
