@@ -11,6 +11,7 @@ import aiofiles
 import aiohttp
 import boto3  # type: ignore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+
 from chainlit.context import context
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
@@ -29,8 +30,9 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 if TYPE_CHECKING:
-    from chainlit.element import Element
     from mypy_boto3_dynamodb import DynamoDBClient
+
+    from chainlit.element import Element
 
 
 _logger = logger.getChild("DynamoDB")

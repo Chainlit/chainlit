@@ -1,14 +1,15 @@
 from typing import Any, Dict, List, Optional
 
-from chainlit.context import context_var
-from chainlit.element import Text
-from chainlit.step import Step, StepType
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.llms import ChatMessage, ChatResponse, CompletionResponse
 from llama_index.core.tools.types import ToolMetadata
+
+from chainlit.context import context_var
+from chainlit.element import Text
+from chainlit.step import Step, StepType
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,

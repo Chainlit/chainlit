@@ -7,6 +7,9 @@ from functools import partial
 from typing import Dict, List, Optional, Union
 
 import httpx
+from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_bolt.async_app import AsyncApp
+
 from chainlit.config import config
 from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
@@ -18,8 +21,6 @@ from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
-from slack_bolt.async_app import AsyncApp
 
 
 class SlackEmitter(BaseChainlitEmitter):

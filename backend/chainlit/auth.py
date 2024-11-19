@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+
 from chainlit.config import config
 from chainlit.data import get_data_layer
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.user import User
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 

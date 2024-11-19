@@ -1,5 +1,6 @@
-from chainlit.data import get_data_layer
 from fastapi import HTTPException
+
+from chainlit.data import get_data_layer
 
 
 async def is_thread_author(username: str, thread_id: str):

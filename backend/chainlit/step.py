@@ -7,6 +7,10 @@ from copy import deepcopy
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
+from literalai import BaseGeneration
+from literalai.helper import utc_now
+from literalai.observability.step import StepType, TrueStepType
+
 from chainlit.config import config
 from chainlit.context import CL_RUN_NAMES, context, local_steps
 from chainlit.data import get_data_layer
@@ -14,9 +18,6 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from literalai import BaseGeneration
-from literalai.helper import utc_now
-from literalai.observability.step import StepType, TrueStepType
 
 
 def check_add_step_in_cot(step: "Step"):

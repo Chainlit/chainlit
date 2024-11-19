@@ -2,8 +2,9 @@ from abc import abstractmethod
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
-from chainlit.types import InputWidgetType
 from pydantic.dataclasses import Field, dataclass
+
+from chainlit.types import InputWidgetType
 
 
 @dataclass

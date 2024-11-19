@@ -3,8 +3,9 @@ import uuid
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from chainlit.session import ClientType, HTTPSession, WebsocketSession
 from lazify import LazyProxy
+
+from chainlit.session import ClientType, HTTPSession, WebsocketSession
 
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
