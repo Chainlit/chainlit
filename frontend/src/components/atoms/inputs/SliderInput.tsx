@@ -25,9 +25,13 @@ const SliderInput = ({
     const parsedValue = parseFloat(event.target.value);
     const { min, max, onChange } = sliderProps;
 
-    if (max && parsedValue > max) setField && setField(id, max);
-    else if (min && parsedValue < min) setField && setField(id, min);
-    else onChange && onChange(event, parsedValue, 0);
+    if (max && parsedValue > max) {
+      setField?.(id, max);
+    } else if (min && parsedValue < min) {
+      setField?.(id, min);
+    } else {
+      onChange?.(event, parsedValue, 0);
+    }
   };
 
   return (

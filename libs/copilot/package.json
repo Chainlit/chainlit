@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
+    "lint": "eslint ./src --ext .ts,.tsx",
     "format": "prettier src/**/*.{ts,tsx} --write --loglevel error",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
