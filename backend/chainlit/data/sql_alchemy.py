@@ -168,7 +168,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def create_user(self, user: User) -> Optional[PersistedUser]:
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_user, user_identifier={user.identifier}")
-        existing_user: Optional["PersistedUser"] = await self.get_user(user.identifier)
+        existing_user: Optional[PersistedUser] = await self.get_user(user.identifier)
         user_dict: Dict[str, Any] = {
             "identifier": str(user.identifier),
             "metadata": json.dumps(user.metadata) or {},

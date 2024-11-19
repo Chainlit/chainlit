@@ -317,7 +317,7 @@ def get_html_template():
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
-    with open(index_html_file_path, "r", encoding="utf-8") as f:
+    with open(index_html_file_path, encoding="utf-8") as f:
         content = f.read()
         content = content.replace(PLACEHOLDER, tags)
         if js:

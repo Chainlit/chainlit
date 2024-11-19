@@ -18,9 +18,9 @@ ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, o):
         try:
-            return super(JSONEncoderIgnoreNonSerializable, self).default(obj)
+            return super().default(o)
         except TypeError:
             return None
 

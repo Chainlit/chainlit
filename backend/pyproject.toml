@@ -145,8 +145,8 @@ target-version = "py39"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "LOG"]
-ignore = ["E712", "E501"]
+select = ["E", "F", "I", "LOG", "UP"]
+ignore = ["E712", "E501", "UP006", "UP035"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

@@ -400,7 +400,7 @@ def init_config(log=False):
             dst = os.path.join(config_translation_dir, file)
             if not os.path.exists(dst):
                 src = os.path.join(TRANSLATIONS_DIR, file)
-                with open(src, "r", encoding="utf-8") as f:
+                with open(src, encoding="utf-8") as f:
                     translation = json.load(f)
                     with open(dst, "w", encoding="utf-8") as f:
                         json.dump(translation, f, indent=4)
@@ -515,7 +515,7 @@ def load_config():
 def lint_translations():
     # Load the ground truth (en-US.json file from chainlit source code)
     src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
-    with open(src, "r", encoding="utf-8") as f:
+    with open(src, encoding="utf-8") as f:
         truth = json.load(f)
 
         # Find the local app translations
@@ -523,7 +523,7 @@ def lint_translations():
             if file.endswith(".json"):
                 # Load the translation file
                 to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, "r", encoding="utf-8") as f:
+                with open(to_lint, encoding="utf-8") as f:
                     translation = json.load(f)
 
                     # Lint the translation file

@@ -289,7 +289,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
             await self.task_end()
 
             final_res: Optional[
-                Union["StepDict", "AskActionResponse", List["FileDict"]]
+                Union[StepDict, AskActionResponse, List[FileDict]]
             ] = None
 
             if user_res:
