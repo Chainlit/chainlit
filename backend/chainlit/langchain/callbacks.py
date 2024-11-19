@@ -3,6 +3,7 @@ import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from uuid import UUID
 
+import pydantic
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
@@ -10,7 +11,6 @@ from langchain_core.tracers.base import AsyncBaseTracer
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
 from literalai.observability.step import TrueStepType
-from pydantic import BaseModel
 
 from chainlit.context import context_var
 from chainlit.message import Message
@@ -124,8 +124,14 @@ class GenerationHelper:
                 key: self.ensure_values_serializable(value)
                 for key, value in data.items()
             }
-        elif isinstance(data, BaseModel):
-            return data.model_dump()
+        elif isinstance(data, pydantic.BaseModel):
+            # Fallback to support pydantic v1
+            # https://docs.pydantic.dev/latest/migration/#changes-to-pydanticbasemodel
+            if pydantic.VERSION.startswith("1"):
+                return data.dict()
+
+            # pydantic v2
+            return data.model_dump()  # pyright: ignore reportAttributeAccessIssue
         elif isinstance(data, list):
             return [self.ensure_values_serializable(item) for item in data]
         elif isinstance(data, (str, int, float, bool, type(None))):
