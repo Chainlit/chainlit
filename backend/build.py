@@ -47,7 +47,7 @@ def copy_directory(src, dst, description):
             shutil.rmtree(dst)
         raise
     except Exception as e:
-        raise BuildError(f"Failed to copy {src} to {dst}: {str(e)}")
+        raise BuildError(f"Failed to copy {src} to {dst}: {e!s}")
 
 
 def copy_frontend(project_root):
@@ -91,10 +91,10 @@ def build():
         print("\nBuild interrupted by user")
         sys.exit(1)
     except BuildError as e:
-        print(f"\nBuild failed: {str(e)}")
+        print(f"\nBuild failed: {e!s}")
         sys.exit(1)
     except Exception as e:
-        print(f"\nUnexpected error: {str(e)}")
+        print(f"\nUnexpected error: {e!s}")
         sys.exit(1)
 
 

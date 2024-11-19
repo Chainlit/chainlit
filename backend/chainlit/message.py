@@ -114,7 +114,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message update: {str(e)}")
+                logger.error(f"Failed to persist message update: {e!s}")
 
         await context.emitter.update_step(step_dict)
 
@@ -134,7 +134,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message deletion: {str(e)}")
+                logger.error(f"Failed to persist message deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -150,7 +150,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message creation: {str(e)}")
+                logger.error(f"Failed to persist message creation: {e!s}")
 
         return step_dict
 

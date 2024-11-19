@@ -155,7 +155,7 @@ class Element:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
-                logger.error(f"Failed to create element: {str(e)}")
+                logger.error(f"Failed to create element: {e!s}")
         if not self.url and (not self.chainlit_key or self.updatable):
             file_dict = await context.session.persist_file(
                 name=self.name,

@@ -318,7 +318,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step update: {str(e)}")
+                logger.error(f"Failed to persist step update: {e!s}")
 
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
@@ -345,7 +345,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step deletion: {str(e)}")
+                logger.error(f"Failed to persist step deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -372,7 +372,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step creation: {str(e)}")
+                logger.error(f"Failed to persist step creation: {e!s}")
 
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
