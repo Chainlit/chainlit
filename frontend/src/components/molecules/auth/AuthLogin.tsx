@@ -109,9 +109,11 @@ const AuthLogin = ({
       }
 
       try {
-        showSignIn
-          ? await onPasswordSignIn(email, password, callbackUrl)
-          : onSignUp && (await onSignUp(email, password, callbackUrl));
+        if (showSignIn) {
+          await onPasswordSignIn(email, password, callbackUrl);
+        } else {
+          await onSignUp?.(email, password, callbackUrl);
+        }
       } catch (err: unknown) {
         if (err instanceof Error) {
           setErrorState(err.message);
