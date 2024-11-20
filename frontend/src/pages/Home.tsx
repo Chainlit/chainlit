@@ -1,59 +1,38 @@
 import { useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { 
-  currentThreadIdState, 
-  firstUserInteraction, 
-  useChatInteract,
-  useChatSession,
-  useChatMessages,
-  messagesState
-} from '@chainlit/react-client';
+import { useChatSession, useChatMessages } from '@chainlit/react-client';
 import Chat from 'components/organisms/chat';
 import Page from './Page';
-import { threadStorage } from 'services/indexedDB';
+import { useChatService } from 'services/ChatService';
 
-export default function Home() {
-  const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
-  const setFirstInteraction = useSetRecoilState(firstUserInteraction);
-  const setMessages = useSetRecoilState(messagesState);
-  const { setIdToResume, callAction } = useChatInteract();
+export const Home = () => {
   const { session } = useChatSession();
-  const { messages} = useChatMessages();
+  const { messages, threadId } = useChatMessages();
+  const chatService = useChatService();
 
   useEffect(() => {
-    if (messages?.length > 0) return;
-    
-    const loadLastThread = async () => {
-      try {
-        const thread = await threadStorage.getLastThread();
-        if (thread?.steps?.length) {
-          setCurrentThreadId(thread.id);
-          setIdToResume(thread.id);
-          setMessages(thread.steps);
-          setFirstInteraction('resume');
-          
-          await callAction({
-            name: "on_chat_resume",
-            forId: thread.id,
-            id: `restore_${thread.id}`,
-            value: JSON.stringify(thread),
-            onClick: () => {},
-            collapsed: false 
-          });
-        }
-      } catch (err) {
-        console.error('Failed to load last thread:', err);
+    if (messages?.length > 0 || !session?.socket?.connected) return;
+
+    chatService.initChat().catch(err => {
+      console.error('Failed to initialize chat:', err);
+    });
+  }, [session?.socket?.connected]);
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data.type === 'pageData' && threadId) {
+        await chatService.sendPageAnalytics(threadId, event.data.data);
       }
     };
 
-    if (session?.socket?.connected) {
-      loadLastThread();
-    }
-  }, [session?.socket?.connected]);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [threadId, chatService]);
 
   return (
     <Page>
       <Chat />
     </Page>
   );
-}
+};
+
+export default Home;

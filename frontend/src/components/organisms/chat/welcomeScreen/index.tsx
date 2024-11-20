@@ -12,7 +12,7 @@ import {
 } from '@chainlit/react-client';
 
 import Starter from './starter';
-import { threadStorage } from 'services/indexedDB';
+import { threadStorage } from 'services/ThreadStorageService';
 
 
 interface Props {

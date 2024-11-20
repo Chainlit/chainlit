@@ -32,7 +32,7 @@ import DropScreen from './dropScreen';
 import InputBox from './inputBox';
 import WelcomeScreen from './welcomeScreen';
 import { Header } from '../header';
-import { threadStorage } from 'services/indexedDB';
+import { threadStorage } from 'services/ThreadStorageService';
 
 interface IChatProps {
   isExpanded?: boolean;
