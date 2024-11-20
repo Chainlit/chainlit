@@ -288,9 +288,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
 
-            final_res: Optional[
-                Union["StepDict", "AskActionResponse", List["FileDict"]]
-            ] = None
+            final_res: Optional[Union[StepDict, AskActionResponse, List[FileDict]]] = (
+                None
+            )
 
             if user_res:
                 interaction: Union[str, None] = None

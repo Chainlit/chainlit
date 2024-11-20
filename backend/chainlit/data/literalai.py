@@ -349,11 +349,9 @@ class LiteralDataLayer(BaseDataLayer):
     async def create_step(self, step_dict: "StepDict"):
         metadata = dict(
             step_dict.get("metadata", {}),
-            **{
-                "waitForAnswer": step_dict.get("waitForAnswer"),
-                "language": step_dict.get("language"),
-                "showInput": step_dict.get("showInput"),
-            },
+            waitForAnswer=step_dict.get("waitForAnswer"),
+            language=step_dict.get("language"),
+            showInput=step_dict.get("showInput"),
         )
 
         step: LiteralStepDict = {

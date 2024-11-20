@@ -4,9 +4,10 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
+from fastapi import HTTPException
+
 from chainlit.secret import random_secret
 from chainlit.user import User
-from fastapi import HTTPException
 
 
 class OAuthProvider:
@@ -22,10 +23,10 @@ class OAuthProvider:
         return all([os.environ.get(env) for env in self.env])
 
     async def get_token(self, code: str, url: str) -> str:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def get_user_info(self, token: str) -> Tuple[Dict[str, str], User]:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_env_prefix(self) -> str:
         """Return environment prefix, like AZURE_AD."""

@@ -3,13 +3,11 @@ import chainlit as cl
 
 @cl.step(type="tool")
 async def gen_img():
-
     return cl.Image(path="./cat.jpeg", name="image1", display="inline")
 
 
 @cl.on_chat_start
 async def start():
-
     img = await gen_img()
 
     # Element should not be inlined or referenced

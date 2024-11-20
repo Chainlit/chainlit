@@ -6,6 +6,7 @@ import uuid
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional, Union
 
 import aiofiles
+
 from chainlit.logger import logger
 from chainlit.types import FileReference
 
@@ -17,9 +18,9 @@ ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, o):
         try:
-            return super(JSONEncoderIgnoreNonSerializable, self).default(obj)
+            return super().default(o)
         except TypeError:
             return None
 
@@ -112,9 +113,10 @@ class BaseSession:
 
         if path:
             # Copy the file from the given path
-            async with aiofiles.open(path, "rb") as src, aiofiles.open(
-                file_path, "wb"
-            ) as dst:
+            async with (
+                aiofiles.open(path, "rb") as src,
+                aiofiles.open(file_path, "wb") as dst,
+            ):
                 await dst.write(await src.read())
         elif content:
             # Write the provided content to the file

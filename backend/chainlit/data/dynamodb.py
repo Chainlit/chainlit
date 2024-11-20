@@ -11,6 +11,7 @@ import aiofiles
 import aiohttp
 import boto3  # type: ignore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+
 from chainlit.context import context
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
@@ -29,8 +30,9 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 if TYPE_CHECKING:
-    from chainlit.element import Element
     from mypy_boto3_dynamodb import DynamoDBClient
+
+    from chainlit.element import Element
 
 
 _logger = logger.getChild("DynamoDB")
@@ -402,7 +404,7 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         BATCH_ITEM_SIZE = 25  # pylint: disable=invalid-name
         for i in range(0, len(delete_requests), BATCH_ITEM_SIZE):
-            chunk = delete_requests[i : i + BATCH_ITEM_SIZE]  # noqa: E203
+            chunk = delete_requests[i : i + BATCH_ITEM_SIZE]
             response = self.client.batch_write_item(
                 RequestItems={
                     self.table_name: chunk,  # type: ignore
@@ -410,7 +412,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             )
 
             backoff_time = 1
-            while "UnprocessedItems" in response and response["UnprocessedItems"]:
+            while response.get("UnprocessedItems"):
                 backoff_time *= 2
                 # Cap the backoff time at 32 seconds & add jitter
                 delay = min(backoff_time, 32) + random.uniform(0, 1)

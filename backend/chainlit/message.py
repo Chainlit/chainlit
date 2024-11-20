@@ -5,6 +5,9 @@ import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
+from literalai.helper import utc_now
+from literalai.observability.step import MessageStepType
+
 from chainlit.action import Action
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -22,8 +25,6 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai.helper import utc_now
-from literalai.observability.step import MessageStepType
 
 
 class MessageBase(ABC):
@@ -113,7 +114,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message update: {str(e)}")
+                logger.error(f"Failed to persist message update: {e!s}")
 
         await context.emitter.update_step(step_dict)
 
@@ -133,7 +134,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message deletion: {str(e)}")
+                logger.error(f"Failed to persist message deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -149,7 +150,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message creation: {str(e)}")
+                logger.error(f"Failed to persist message creation: {e!s}")
 
         return step_dict
 

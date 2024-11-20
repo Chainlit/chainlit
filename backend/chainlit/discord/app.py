@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 import discord
 import filetype
 import httpx
+from discord.ui import Button, View
+
 from chainlit.config import config
 from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
@@ -23,7 +25,6 @@ from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from discord.ui import Button, View
 
 
 class FeedbackView(View):

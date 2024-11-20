@@ -12,6 +12,26 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import socketio
+from fastapi import (
+    APIRouter,
+    Depends,
+    FastAPI,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import URL
+from starlette.middleware.cors import CORSMiddleware
+from typing_extensions import Annotated
+from watchfiles import awatch
+
 from chainlit.auth import create_jwt, get_configuration, get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -37,26 +57,6 @@ from chainlit.types import (
     UpdateFeedbackRequest,
 )
 from chainlit.user import PersistedUser, User
-from fastapi import (
-    APIRouter,
-    Depends,
-    FastAPI,
-    File,
-    Form,
-    HTTPException,
-    Query,
-    Request,
-    Response,
-    UploadFile,
-    status,
-)
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
-from starlette.datastructures import URL
-from starlette.middleware.cors import CORSMiddleware
-from typing_extensions import Annotated
-from watchfiles import awatch
 
 from ._utils import is_path_inside
 
@@ -248,6 +248,7 @@ if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
 
 if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
     from botbuilder.schema import Activity
+
     from chainlit.teams.app import adapter, bot
 
     @router.post("/teams/events")
@@ -316,7 +317,7 @@ def get_html_template():
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
-    with open(index_html_file_path, "r", encoding="utf-8") as f:
+    with open(index_html_file_path, encoding="utf-8") as f:
         content = f.read()
         content = content.replace(PLACEHOLDER, tags)
         if js:
@@ -895,7 +896,7 @@ async def get_file(
             detail="Unauthorized",
         )
 
-     #TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
+    # TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
     # if current_user:
     #     if not session.user or session.user.identifier != current_user.identifier:
     #         raise HTTPException(
