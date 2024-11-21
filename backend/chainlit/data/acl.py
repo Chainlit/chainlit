@@ -1,5 +1,6 @@
-from chainlit.data import get_data_layer
 from fastapi import HTTPException
+
+from chainlit.data import get_data_layer
 
 
 async def is_thread_author(username: str, thread_id: str):
@@ -8,7 +9,7 @@ async def is_thread_author(username: str, thread_id: str):
         raise HTTPException(status_code=400, detail="Data layer not initialized")
 
     thread_author = await data_layer.get_thread_author(thread_id)
-    
+
     if not thread_author:
         raise HTTPException(status_code=404, detail="Thread not found")
 

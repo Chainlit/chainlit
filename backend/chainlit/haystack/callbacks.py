@@ -1,12 +1,13 @@
 import re
 from typing import Any, Generic, List, Optional, TypeVar
 
-from chainlit import Message
-from chainlit.step import Step
-from chainlit.sync import run_sync
 from haystack.agents import Agent, Tool
 from haystack.agents.agent_step import AgentStep
 from literalai.helper import utc_now
+
+from chainlit import Message
+from chainlit.step import Step
+from chainlit.sync import run_sync
 
 T = TypeVar("T")
 
@@ -131,7 +132,7 @@ class HaystackAgentCallbackHandler:
         tool_result: str,
         tool_name: Optional[str] = None,
         tool_input: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         # Tool finished, send step with tool_result
         tool_step = self.stack.pop()

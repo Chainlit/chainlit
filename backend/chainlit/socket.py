@@ -11,7 +11,6 @@ from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
-from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio

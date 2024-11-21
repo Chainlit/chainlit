@@ -3,8 +3,7 @@ import { sep } from 'path';
 import { ExecutionMode } from './utils';
 
 export function submitMessage(message: string) {
-  cy.get(`#chat-input`).should('not.be.disabled');
-  cy.get(`#chat-input`).type(`${message}{enter}`);
+  cy.get(`#chat-input`).should('not.be.disabled').type(`${message}{enter}`);
 }
 
 export function submitMessageCopilot(message: string) {
@@ -16,8 +15,7 @@ export function submitMessageCopilot(message: string) {
 }
 
 export function openHistory() {
-  cy.get(`#chat-input`).should('not.be.disabled');
-  cy.get(`#chat-input`).type(`{upArrow}`);
+  cy.get(`#chat-input`).should('not.be.disabled').type(`{upArrow}`);
 }
 
 export function closeHistory() {

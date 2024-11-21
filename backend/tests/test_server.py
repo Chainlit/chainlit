@@ -1,7 +1,6 @@
 import datetime  # Added import for datetime
 import os
 import pathlib
-import tempfile
 from pathlib import Path
 from typing import Callable
 from unittest.mock import AsyncMock, Mock, create_autospec, mock_open
@@ -10,10 +9,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from chainlit.auth import get_current_user
-from chainlit.config import APP_ROOT, ChainlitConfig, load_config
+from chainlit.config import APP_ROOT, ChainlitConfig
 from chainlit.server import app
-from chainlit.session import WebsocketSession
-from chainlit.types import FileReference
 from chainlit.user import PersistedUser  # Added import for PersistedUser
 
 
@@ -322,7 +319,7 @@ def test_get_file_non_existing_session(
 
     # Attempt to access the file without authentication by providing an invalid session_id
     response = test_client.get(
-        f"/project/file/nonexistent?session_id=unauthenticated_session_id"
+        "/project/file/nonexistent?session_id=unauthenticated_session_id"
     )
 
     # Verify the response

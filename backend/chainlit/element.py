@@ -16,13 +16,14 @@ from typing import (
 )
 
 import filetype
+from pydantic.dataclasses import Field, dataclass
+from syncer import asyncio
+
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FileDict
-from pydantic.dataclasses import Field, dataclass
-from syncer import asyncio
 
 mime_types = {
     "text": "text/plain",
@@ -154,7 +155,7 @@ class Element:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
-                logger.error(f"Failed to create element: {str(e)}")
+                logger.error(f"Failed to create element: {e!s}")
         if not self.url and (not self.chainlit_key or self.updatable):
             file_dict = await context.session.persist_file(
                 name=self.name,
@@ -352,8 +353,7 @@ class Plotly(Element):
     content: str = ""
 
     def __post_init__(self) -> None:
-        from plotly import graph_objects as go
-        from plotly import io as pio
+        from plotly import graph_objects as go, io as pio
 
         if not isinstance(self.figure, go.Figure):
             raise TypeError("figure must be a plotly.graph_objects.Figure")

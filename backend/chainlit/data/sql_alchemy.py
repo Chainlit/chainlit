@@ -7,6 +7,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
 import aiohttp
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
@@ -23,10 +28,6 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -167,7 +168,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def create_user(self, user: User) -> Optional[PersistedUser]:
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_user, user_identifier={user.identifier}")
-        existing_user: Optional["PersistedUser"] = await self.get_user(user.identifier)
+        existing_user: Optional[PersistedUser] = await self.get_user(user.identifier)
         user_dict: Dict[str, Any] = {
             "identifier": str(user.identifier),
             "metadata": json.dumps(user.metadata) or {},

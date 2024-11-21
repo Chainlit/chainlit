@@ -1,14 +1,15 @@
 from typing import Any, Dict, List, Optional
 
-from chainlit.context import context_var
-from chainlit.element import Text
-from chainlit.step import Step, StepType
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.helper import utc_now
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.llms import ChatMessage, ChatResponse, CompletionResponse
 from llama_index.core.tools.types import ToolMetadata
+
+from chainlit.context import context_var
+from chainlit.element import Text
+from chainlit.step import Step, StepType
 
 DEFAULT_IGNORE = [
     CBEventType.CHUNKING,
@@ -143,16 +144,15 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             context_var.get().loop.create_task(step.update())
 
         elif event_type == CBEventType.LLM:
-            formatted_messages = payload.get(
-                EventPayload.MESSAGES
-            )  # type: Optional[List[ChatMessage]]
+            formatted_messages = payload.get(EventPayload.MESSAGES)  # type: Optional[List[ChatMessage]]
             formatted_prompt = payload.get(EventPayload.PROMPT)
             response = payload.get(EventPayload.RESPONSE)
 
             if formatted_messages:
                 messages = [
                     GenerationMessage(
-                        role=m.role.value, content=m.content or ""  # type: ignore
+                        role=m.role.value,  # type: ignore
+                        content=m.content or "",
                     )
                     for m in formatted_messages
                 ]

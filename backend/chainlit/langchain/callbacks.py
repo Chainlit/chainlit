@@ -468,7 +468,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
         if ignore:
             return
 
-        step_type: "TrueStepType" = "undefined"
+        step_type: TrueStepType = "undefined"
         if run.run_type == "agent":
             step_type = "run"
         elif run.run_type == "chain":
