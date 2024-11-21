@@ -913,6 +913,11 @@ def validate_file_mime_type(file: UploadFile):
         return
 
     accept = config.features.spontaneous_file_upload.accept
+
+    assert (
+        isinstance(accept, List) or isinstance(accept, dict)
+    ), "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+
     if isinstance(accept, List):
         for pattern in accept:
             if fnmatch.fnmatch(file.content_type, pattern):
@@ -925,10 +930,6 @@ def validate_file_mime_type(file: UploadFile):
                 for extension in extensions:
                     if file.filename is not None and file.filename.endswith(extension):
                         return
-    else:
-        assert (
-            False
-        ), "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
     raise ValueError("File type not allowed")
 
 
