@@ -626,7 +626,7 @@ def test_upload_file_mime_type_check(
         (b"11", 1024 * 1024, 1, 400),
     ],
 )
-def test_upload_file_mime_type_check(
+def test_upload_file_size_check(
     test_client: TestClient,
     test_config: ChainlitConfig,
     mock_session_get_by_id_patched: Mock,

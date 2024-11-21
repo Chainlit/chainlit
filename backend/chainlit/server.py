@@ -872,7 +872,10 @@ async def upload_file(
     assert file.filename, "No filename for uploaded file"
     assert file.content_type, "No content type for uploaded file"
 
-    validate_file_upload(file)
+    try:
+        validate_file_upload(file)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     file_response = await session.persist_file(
         name=file.filename, content=content, mime=file.content_type
@@ -882,21 +885,31 @@ async def upload_file(
 
 
 def validate_file_upload(file: UploadFile):
-    if config.features.spontaneous_file_upload is None:
-        return  # TODO: if it is not configured what should happen?
-
-    if config.features.spontaneous_file_upload.enabled is False:
-        raise HTTPException(
-            status_code=400,
-            detail="File upload is not enabled",
-        )
+    """Validate the file upload as configured in config.features.spontaneous_file_upload.
+    Args:
+        file (UploadFile): The file to validate.
+    Raises:
+        ValueError: If the file is not allowed.
+    """
+    if (
+        config.features.spontaneous_file_upload is None
+        or config.features.spontaneous_file_upload.enabled is False
+    ):
+        raise ValueError("File upload is not enabled")
 
     validate_file_mime_type(file)
     validate_file_size(file)
 
 
 def validate_file_mime_type(file: UploadFile):
+    """Validate the file mime type as configured in config.features.spontaneous_file_upload.
+    Args:
+        file (UploadFile): The file to validate.
+    Raises:
+        ValueError: If the file type is not allowed.
+    """
     if config.features.spontaneous_file_upload.accept is None:
+        "Accept is not configured, allowing all file types"
         return
 
     accept = config.features.spontaneous_file_upload.accept
@@ -904,7 +917,7 @@ def validate_file_mime_type(file: UploadFile):
         for pattern in accept:
             if fnmatch.fnmatch(file.content_type, pattern):
                 return
-    else:
+    elif isinstance(accept, dict):
         for pattern, extensions in accept.items():
             if fnmatch.fnmatch(file.content_type, pattern):
                 if len(extensions) == 0:
@@ -912,13 +925,20 @@ def validate_file_mime_type(file: UploadFile):
                 for extension in extensions:
                     if file.filename is not None and file.filename.endswith(extension):
                         return
-    raise HTTPException(
-        status_code=400,
-        detail="File type not allowed",
-    )
+    else:
+        assert (
+            False
+        ), "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+    raise ValueError("File type not allowed")
 
 
 def validate_file_size(file: UploadFile):
+    """Validate the file size as configured in config.features.spontaneous_file_upload.
+    Args:
+        file (UploadFile): The file to validate.
+    Raises:
+        ValueError: If the file size is too large.
+    """
     if config.features.spontaneous_file_upload.max_size_mb is None:
         return
 
@@ -927,10 +947,7 @@ def validate_file_size(file: UploadFile):
         and file.size
         > config.features.spontaneous_file_upload.max_size_mb * 1024 * 1024
     ):
-        raise HTTPException(
-            status_code=400,
-            detail="File size too large",
-        )
+        raise ValueError("File size too large")
 
 
 @router.get("/project/file/{file_id}")
