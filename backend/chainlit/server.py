@@ -892,7 +892,7 @@ def validate_file_upload(file: UploadFile):
         ValueError: If the file is not allowed.
     """
     if config.features.spontaneous_file_upload is None:
-        """Default to allowing all file types"""
+        """Default for a missing config is to allow the fileupload without any restrictions"""
         return
     if config.features.spontaneous_file_upload.enabled is False:
         raise ValueError("File upload is not enabled")
