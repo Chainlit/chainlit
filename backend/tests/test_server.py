@@ -1,4 +1,4 @@
-import datetime  # Added import for datetime
+import datetime
 import os
 import pathlib
 from pathlib import Path
@@ -9,18 +9,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from chainlit.auth import get_current_user
-from chainlit.config import APP_ROOT, ChainlitConfig
 from chainlit.config import (
     APP_ROOT,
     ChainlitConfig,
     SpontaneousFileUploadFeature,
-    load_config,
 )
 from chainlit.server import app
-from chainlit.session import WebsocketSession
-from chainlit.types import FileReference
-from chainlit.user import PersistedUser  # Added import for PersistedUser
-from fastapi.testclient import TestClient
+from chainlit.user import PersistedUser
 
 
 @pytest.fixture
@@ -328,7 +323,7 @@ def test_get_file_non_existing_session(
 
     # Attempt to access the file without authentication by providing an invalid session_id
     response = test_client.get(
-        f"/project/file/nonexistent?session_id=unauthenticated_session_id"
+        "/project/file/nonexistent?session_id=unauthenticated_session_id"
     )
 
     # Verify the response
@@ -538,7 +533,7 @@ def test_upload_file_disabled(
 
 
 @pytest.mark.parametrize(
-    "accept_pattern, mime_type, expected_status",
+    ("accept_pattern", "mime_type", "expected_status"),
     [
         ({"image/*": [".png", ".gif", ".jpeg", ".jpg"]}, "image/jpeg", 400),
         (["image/*"], "text/plain", 400),
@@ -620,7 +615,7 @@ def test_upload_file_mime_type_check(
 
 
 @pytest.mark.parametrize(
-    "file_content, content_multiplier, max_size_mb, expected_status",
+    ("file_content", "content_multiplier", "max_size_mb", "expected_status"),
     [
         (b"1", 1, 1, 200),
         (b"11", 1024 * 1024, 1, 400),
