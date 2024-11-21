@@ -891,10 +891,10 @@ def validate_file_upload(file: UploadFile):
     Raises:
         ValueError: If the file is not allowed.
     """
-    if (
-        config.features.spontaneous_file_upload is None
-        or config.features.spontaneous_file_upload.enabled is False
-    ):
+    if config.features.spontaneous_file_upload is None:
+        """Default to allowing all file types"""
+        return
+    if config.features.spontaneous_file_upload.enabled is False:
         raise ValueError("File upload is not enabled")
 
     validate_file_mime_type(file)
@@ -908,11 +908,10 @@ def validate_file_mime_type(file: UploadFile):
     Raises:
         ValueError: If the file type is not allowed.
     """
-    if config.features.spontaneous_file_upload.accept is None:
+    accept = config.features.spontaneous_file_upload.accept
+    if accept is None:
         "Accept is not configured, allowing all file types"
         return
-
-    accept = config.features.spontaneous_file_upload.accept
 
     assert (
         isinstance(accept, List) or isinstance(accept, dict)
