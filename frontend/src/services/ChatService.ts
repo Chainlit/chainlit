@@ -1,4 +1,8 @@
 import { useSetRecoilState } from 'recoil';
+import {
+  createAnalyticsDataMessage,
+  createResumeChatMessage
+} from 'services/ActionConstructor';
 
 import {
   IThread,
@@ -9,10 +13,6 @@ import {
 } from '@chainlit/react-client';
 
 import { threadStorage } from './ThreadStorageService';
-import {
-  createAnalyticsDataMessage,
-  createResumeChatMessage
-} from './actionConstructor';
 
 export class ChatService {
   private setCurrentThreadId;
