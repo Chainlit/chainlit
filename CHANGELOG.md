@@ -4,6 +4,23 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.1.dev0] - 2024-11-14
+
+Pre-release: developer preview.
+
+### Added
+- New `@data_layer` decorator for configuring custom data layers declaratively
+- Unit tests for `get_data_layer()` and `@data_layer` functionality
+
+### Changed
+- Data layer configuration system now prioritizes `@data_layer` decorator over environment variables
+- Data layer initialization is now more explicit and testable through the decorator pattern
+- Updated example code in `/cypress/e2e/custom_data_layer` and `/cypress/e2e/data_layer` to use the new decorator
+
+### Developer Experience
+- Improved test infrastructure with new fixtures for data layer mocking
+- Added comprehensive tests for data layer configuration scenarios
+
 ## [1.3.2] - 2024-11-08
 
 ### Security Advisory
