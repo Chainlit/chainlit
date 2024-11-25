@@ -150,14 +150,20 @@ const usePrivacyShield = () => {
     setCurrentSections(newSections);
   }, [currentSections]);
 
-  const getPrivacySections = useCallback(async (text: string/*, submitFunction: (text: string) => void*/) => {
-    setLoading(true);
+  const getPrivacySections = useCallback(async (text: string) => {
     setCurrentText(text);
-    // setSubmit(submitFunction);
     setOpen(true);
 
     const apiKey = evoya?.api?.privacyShield.apiKey;
     const agent_uuid = evoya?.api?.privacyShield.privacyAgent;
+
+    if (!agent_uuid) {
+      setCurrentSections([]);
+      return;
+    }
+    
+    setLoading(true);
+
     const baseUrl = evoya?.api?.baseUrl;
     const apiUrl = `${baseUrl}/api/agent/${agent_uuid}/invoke/`;
 
