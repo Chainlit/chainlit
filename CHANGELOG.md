@@ -4,35 +4,140 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.3.0rc0] - 2024-10-02
+## [1.3.2] - 2024-11-08
+
+### Security Advisory
+**IMPORTANT**:
+- This release drops support for FastAPI versions before 0.115.3 and Starlette versions before 0.41.2 due to a severe security vulnerability (CVE-2024-47874). We strongly encourage all downstream dependencies to upgrade as well.
+- This release still contains a known security vulnerability in the element feature that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
+
+### Security
+- **[breaking]** Updated dependencies to address critical issues (#1493):
+  - Upgraded fastapi to 0.115.3 to address CVE-2024-47874 in Starlette
+  - Upgraded starlette to 0.41.2 (required for security fix)
+  - Upgraded werkzeug to 3.0.6
+
+Note: This is a breaking change as older FastAPI versions are no longer supported.
+To prioritize security, we opted to break with semver on this particular occasion.
+
+### Fixed
+- Resolved incorrect message ordering in UI (#1501)
+
+## [2.0rc0] - 2024-11-08
+
+### Security Advisory
+**IMPORTANT**:
+- This release drops support for FastAPI versions before 0.115.3 and Starlette versions before 0.41.2 due to a severe security vulnerability (CVE-2024-47874). We strongly encourage all downstream dependencies to upgrade as well.
+- The element feature currently contains a known security vulnerability that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
+
+### Changed
+- **[breaking]**: Completely revamped audio implementation:
+  - Replaced `AudioChunk` with `InputAudioChunk` and `OutputAudioChunk`
+  - Changed audio sampling rate from 44100 to 24000
+  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
+  - Modified `on_audio_end` callback
+  - Removed `RecordScreen` componenta
+  - Removed several audio-related configuration options from `config.toml`
+
+### Security
+- Comprehensive security updates:
+  - **[breaking]** Upgraded fastapi to 0.115.3 and starlette to 0.41.2 to address severe security vulnerability CVE-2024-47874 (#1493)
+    - Note: This is a breaking change as older FastAPI versions are no longer supported
+  - Added authentication for file uploads (#1441, #1472)
+  - Updated starlette, werkzeug, and frontend dependencies (#1431, #1414)
+
+### Added
+- Realtime audio streaming and processing (#1401, #1406, #1409):
+  - New `AudioPresence` component for visual representation
+  - Implemented `WavRecorder` and `WavStreamPlayer` classes
+  - Introduced new `on_audio_start` callback
+  - Added audio interruption functionality
+  - New audio connection signaling with `on` and `off` states
+- Interactive DataFrame display with auto-fit content using MUI Data Grid (#1373, #1467)
+- Optional websocket connection in react-client (#1379)
+- Enhanced image interaction with popup view and download option (#1402)
+- Configurable user session timeout and OAuth prompt settings (#1032, #1456)
+- Support for IETF BCP 47 language tags (e.g., es-419) (#1399)
+- Current URL included in message payload (#1403)
+
+### Fixed
+- Enhanced UI interactions:
+  - Allow empty chat input when submitting attachments (#1261)
+  - Fixed dialog boxes extending beyond window bounds (#1446)
+  - Fixed spaces in avatar filenames (#1418)
+- Improved messaging and displays:
+  - Resolved incorrect message ordering (#1501)
+  - Fixed tasklist functionality when Chainlit is submounted (#1433)
+  - Fixed display_name copying during authentication (#1425)
+  - Fixed step argument input and concurrency issues (#1409)
+- Fixed SQLAlchemy identifier quoting (#1395)
+
+### Development
+- Comprehensive build and CI improvements:
+  - Implemented ruff for linting and formatting (#1495)
+  - Added mypy daemon for faster type-checking (#1495)
+  - Added GitHub Actions linting (#1445)
+  - Enabled direct installation from GitHub (#1423)
+  - Various build script improvements (#1462)
+- Enhanced codebase organization:
+  - Factored storage clients into separate modules (#1363)
+  - Extended package metadata (#1413)
+  - Various backend fixes and cleanup (#1432)
+
+## [1.3.1] - 2024-10-25
+
+### Security Advisory
+
+- **IMPORTANT**: This release temporarily reverts the file access security improvements from 1.3.0 to restore element functionality. The element feature currently has a known security vulnerability that could allow unauthorized access to files. We strongly recommend against using elements in production environments until the next release.
+- A comprehensive security fix will be implemented in an upcoming release.
+
+### Changed
+
+- Reverted authentication requirements for file access endpoints to restore element functionality (#1474)
+
+### Development
+
+- Work in progress on implementing HTTP-only cookie authentication for proper security (#1472)
+
+## [1.3.0] - 2024-10-22
+
+### Security
+
+- Fixed critical endpoint security vulnerabilities (#1441)
+- Enhanced authentication for file-related endpoints (#1431)
+- Upgraded frontend and backend dependencies to address security issues (#1431)
 
 ### Added
 
-- SQLite support in SQLAlchemy integration (#1137)
-- Extensive test coverage for LiteralDataLayer and SQLAlchemyDataLayer
-- `get_element()` method to SQLAlchemyDataLayer (#1346)
+- SQLite support in SQLAlchemy integration (#1319)
+- Support for IETF BCP 47 language tags, enabling localized languages like es-419 (#1399)
+- Environment variables `OAUTH_<PROVIDER>_PROMPT` and `OAUTH_PROMPT` to
+override oauth prompt parameter. Enabling users to explicitly enable login/consent prompts for oauth, e.g. `OAUTH_PROMPT=consent` to prevent automatic re-login. (#1362, #1456).
+- Added `get_element()` method to SQLAlchemyDataLayer (#1346)
 
 ### Changed
 
 - Bumped LiteralAI dependency to version 0.0.625 (#1376)
-- Refactored LiteralDataLayer for improved performance and consistency
+- Optimized LiteralDataLayer for improved performance and consistency (#1376)
 - Refactored context handling in SQLAlchemy data layer (#1319)
+- Updated package metadata with correct authors, license, and documentation links (#1413)
 - Enhanced GitHub Actions workflow with restricted permissions (#1349)
 
 ### Fixed
 
-- Resolved issues with SQLite database support (#1137)
-- Addressed automatic OAuth login after logout (#1362)
-- Various code style and linting improvements (#1353, #1348, #1347)
+- Resolved dialog boxes extending beyond window bounds (#1446)
+- Fixed tasklist functionality when Chainlit is submounted (#1433)
+- Corrected handling of `display_name` in PersistentUser during authentication (#1425)
+- Fixed SQLAlchemy identifier quoting (#1395)
+- Improved spaces handling in avatar filenames (#1418)
 
 ### Development
 
-- Implemented LiteralToChainlitConverter class for handling conversions
-- Added comprehensive unit tests for data layer components
-- Improved import structure and removed unused imports
-- Updated README with latest project information (#1351)
-
-We encourage users to thoroughly test this release candidate, particularly the LiteralAI integration and history features, and provide feedback before the final 1.3.0 release.
+- Implemented extensive test coverage for LiteralDataLayer and SQLAlchemyDataLayer
+- Added comprehensive unit tests for file-related endpoints
+- Enhanced code organization and import structure
+- Improved Python code style and linting (#1353)
+- Resolved various small text and documentation issues (#1347, #1348)
 
 ## [1.2.0] - 2024-09-16
 

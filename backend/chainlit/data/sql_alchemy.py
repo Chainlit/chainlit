@@ -155,7 +155,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     async def _get_user_id_by_thread(self, thread_id: str) -> Optional[str]:
         if self.show_logger:
             logger.info(f"SQLAlchemy: _get_user_id_by_thread, thread_id={thread_id}")
-        query = "SELECT userId FROM threads WHERE id = :thread_id"
+        query = """SELECT "userId" FROM threads WHERE id = :thread_id"""
         parameters = {"thread_id": thread_id}
         result = await self.execute_sql(query=query, parameters=parameters)
         if result:

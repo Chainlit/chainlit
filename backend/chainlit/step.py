@@ -65,7 +65,7 @@ class StepDict(TypedDict, total=False):
     feedback: Optional[FeedbackDict]
 
 
-def flatten_args_kwargs(func, *args, **kwargs):
+def flatten_args_kwargs(func, args, kwargs):
     signature = inspect.signature(func)
     bound_arguments = signature.bind(*args, **kwargs)
     bound_arguments.apply_defaults()
@@ -434,7 +434,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-        context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
         await self.send()
         return self
@@ -446,13 +445,10 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        if self in context.active_steps:
-            context.active_steps.remove(self)
-
-        local_active_steps = local_steps.get()
-        if local_active_steps and self in local_active_steps:
-            local_active_steps.remove(self)
-            local_steps.set(local_active_steps)
+        current_steps = local_steps.get()
+        if current_steps and self in current_steps:
+            current_steps.remove(self)
+            local_steps.set(current_steps)
 
         await self.update()
 
@@ -465,7 +461,6 @@ class Step:
         if not self.parent_id:
             if parent_step:
                 self.parent_id = parent_step.id
-        context.active_steps.append(self)
         local_steps.set(previous_steps + [self])
 
         asyncio.create_task(self.send())
@@ -478,12 +473,9 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        if self in context.active_steps:
-            context.active_steps.remove(self)
-
-        local_active_steps = local_steps.get()
-        if local_active_steps and self in local_active_steps:
-            local_active_steps.remove(self)
-            local_steps.set(local_active_steps)
+        current_steps = local_steps.get()
+        if current_steps and self in current_steps:
+            current_steps.remove(self)
+            local_steps.set(current_steps)
 
         asyncio.create_task(self.update())
