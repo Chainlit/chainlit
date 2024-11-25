@@ -667,8 +667,8 @@ class GitlabOAuthProvider(OAuthProvider):
 
 class KeycloakOAuthProvider(OAuthProvider):
     env = [
-        "OAUTH_KEYCLOAK_CLIENT_ID", 
-        "OAUTH_KEYCLOAK_CLIENT_SECRET", 
+        "OAUTH_KEYCLOAK_CLIENT_ID",
+        "OAUTH_KEYCLOAK_CLIENT_SECRET",
         "OAUTH_KEYCLOAK_REALM",
         "OAUTH_KEYCLOAK_BASE_URL",
     ]
@@ -679,11 +679,13 @@ class KeycloakOAuthProvider(OAuthProvider):
         self.client_secret = os.environ.get("OAUTH_KEYCLOAK_CLIENT_SECRET")
         self.realm = os.environ.get("OAUTH_KEYCLOAK_REALM")
         self.base_url = os.environ.get("OAUTH_KEYCLOAK_BASE_URL")
-        self.authorize_url = f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/auth"
+        self.authorize_url = (
+            f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/auth"
+        )
 
         self.authorize_params = {
             "scope": "profile email openid",
-            "response_type": "code"
+            "response_type": "code",
         }
 
         if prompt := self.get_prompt():
