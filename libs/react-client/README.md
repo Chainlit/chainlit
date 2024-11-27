@@ -42,8 +42,8 @@ This hook is responsible for managing the chat session's connection to the WebSo
 
 #### Methods
 
-- `connect`: Establishes a connection to the SocketIO server.
-- `disconnect`: Disconnects from the SocketIO server.
+- `connect`: Establishes a connection to the WebSocket server.
+- `disconnect`: Disconnects from the WebSocket server.
 - `setChatProfile`: Sets the chat profile state.
 
 #### Example
@@ -60,8 +60,7 @@ const ChatComponent = () => {
       userEnv: {
         /* user environment variables */
       },
-      accessToken: 'Bearer YOUR_ACCESS_TOKEN', // Optional Chainlit auth token
-      requireWebSocket: true // Optional, require WebSocket upgrade to be successful before user can interact with the chat bot. Will retry upgrade request every 500ms until successful. Please note if your server is behind a proxy, you will have to configure it to accept websocket upgrade request, otherwise users won't be able to interact with the app. You can check an example using nginx proxy here: https://nginx.org/en/docs/http/websocket.html. Default to false.
+      accessToken: 'Bearer YOUR_ACCESS_TOKEN' // Optional Chainlit auth token
     });
 
     return () => {
