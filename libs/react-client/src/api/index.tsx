@@ -22,10 +22,12 @@ export interface IPagination {
 }
 
 export class ClientError extends Error {
+  status: number;
   detail?: string;
 
-  constructor(message: string, detail?: string) {
+  constructor(message: string, status: number, detail?: string) {
     super(message);
+    this.status = status;
     this.detail = detail;
   }
 
@@ -55,6 +57,32 @@ export class APIBase {
     } else {
       return `${this.httpEndpoint}${path}`;
     }
+  }
+
+  private async getDetailFromErrorResponse(
+    res: Response
+  ): Promise<string | undefined> {
+    try {
+      const body = await res.json();
+      return body?.detail;
+    } catch (error: any) {
+      console.error('Unable to parse error response', error);
+    }
+    return undefined;
+  }
+
+  private handleRequestError(error: any) {
+    if (error instanceof ClientError) {
+      if (error.status === 401 && this.on401) {
+        // TODO: Consider whether we should logout() here instead.
+        removeToken();
+        this.on401();
+      }
+      if (this.onError) {
+        this.onError(error);
+      }
+    }
+    console.error(error);
   }
 
   /**
@@ -104,20 +132,14 @@ export class APIBase {
       });
 
       if (!res.ok) {
-        const body = await res.json();
-        if (res.status === 401 && this.on401) {
-          removeToken();
-          this.on401();
-        }
-        throw new ClientError(res.statusText, body.detail);
+        const detail = await this.getDetailFromErrorResponse(res);
+
+        throw new ClientError(res.statusText, res.status, detail);
       }
 
       return res;
     } catch (error: any) {
-      if (error instanceof ClientError && this.onError) {
-        this.onError(error);
-      }
-      console.error(error);
+      this.handleRequestError(error);
       throw error;
     }
   }

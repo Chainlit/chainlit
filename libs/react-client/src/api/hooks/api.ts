@@ -14,6 +14,19 @@ const fetcher = async (
   return res?.json();
 };
 
+const cloneClient = (client: ChainlitAPI): ChainlitAPI => {
+  // Shallow clone API client.
+  // TODO: Move me to core API.
+
+  // Create new client
+  const newClient = new ChainlitAPI('', 'webapp');
+
+  // Assign old properties to new client
+  Object.assign(newClient, client);
+
+  return newClient;
+};
+
 /**
  * React hook for cached API data fetching using SWR (stale-while-revalidate).
  * Optimized for GET requests with automatic caching and revalidation.
@@ -49,8 +62,11 @@ function useApi<T>(
   // Memoize the fetcher function to avoid recreating it on every render
   const memoizedFetcher = useMemo(
     () =>
-      ([url, token]: [url: string, token: string]) =>
-        fetcher(client, url, token),
+      ([url, token]: [url: string, token: string]) => {
+        const useApiClient = cloneClient(client);
+        useApiClient.on401 = useApiClient.onError = undefined;
+        return fetcher(useApiClient, url, token);
+      },
     [client]
   );
 
