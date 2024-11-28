@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { ChainlitAPI } from 'src/api';
 import { ChainlitContext } from 'src/context';
 import { accessTokenState } from 'src/state';
-import useSWR, { SWRConfiguration } from 'swr';
+import useSWR, { SWRConfig, SWRConfiguration } from 'swr';
 
 const fetcher = async (
   client: ChainlitAPI,
@@ -63,6 +63,19 @@ function useApi<T>(
   const memoizedFetcher = useMemo(
     () =>
       ([url, token]: [url: string, token: string]) => {
+        if (!swrConfig.onErrorRetry) {
+          swrConfig.onErrorRetry = (...args) => {
+            const [err] = args;
+
+            // Don't do automatic retry for 401 - it just means we're not logged in (yet).
+            // TODO: Consider setUser(null) if (user)
+            if (err.status === 401) return;
+
+            // Fall back to default behavior.
+            return SWRConfig.defaultValue.onErrorRetry(...args);
+          };
+        }
+
         const useApiClient = cloneClient(client);
         useApiClient.on401 = useApiClient.onError = undefined;
         return fetcher(useApiClient, url, token);
