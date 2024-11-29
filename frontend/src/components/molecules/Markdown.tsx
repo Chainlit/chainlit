@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useMemo } from 'react';
+import { useMemo, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
@@ -134,18 +134,20 @@ function Markdown({ refElements, allowHtml, latex, children }: Props) {
           return <InlineCode {...props} />;
         },
         pre({ ...props }) {
-          if (props.children?.props?.className?.indexOf('-vega') >= 0) {
-            const vegaSpec = JSON.parse(props.children?.props?.children);
-            return <VegaLite spec={vegaSpec} data={vegaSpec.data} />
-          } else if (props.children?.props?.className?.indexOf('-json') >= 0) {
-            const jsonContent = JSON.parse(props.children?.props?.children);
-            if (jsonContent.$schema && jsonContent.$schema.indexOf('vega.github.io') >= 0) {
-              return <VegaLite spec={jsonContent} data={jsonContent.data} />
+          if (props.children && isValidElement(props.children)) {
+            if (props.children?.props?.className?.indexOf('-vega') >= 0) {
+              const vegaSpec = JSON.parse(props.children?.props?.children);
+              return <VegaLite spec={vegaSpec} data={vegaSpec.data} />
+            } else if (props.children?.props?.className?.indexOf('-json') >= 0) {
+              const jsonContent = JSON.parse(props.children?.props?.children);
+              if (jsonContent.$schema && jsonContent.$schema.indexOf('vega.github.io') >= 0) {
+                return <VegaLite spec={jsonContent} data={jsonContent.data} />
+              }
+            } else if (props.children?.props?.className?.indexOf('-mermaid') >= 0) {
+              const mermaidGraph = props.children?.props?.children;
+              return <MermaidDiagram>{mermaidGraph}</MermaidDiagram>
             }
-          } else if (props.children?.props?.className?.indexOf('-mermaid') >= 0) {
-            const mermaidGraph = props.children?.props?.children;
-            return <MermaidDiagram>{mermaidGraph}</MermaidDiagram>
-          } 
+          }
 
           return <Code {...props} />;
         },
