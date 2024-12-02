@@ -75,7 +75,7 @@ const PrivacyShieldToggle = (): JSX.Element => {
                 </MenuItem>
                 <MenuItem onClick={handleMenuClose}>
                   <Switch
-                    checked={enabled}
+                    checked={enabledVisual}
                     onChange={() => setEnabledVisual(!enabledVisual)}
                     name="view"
                     size="small"
