@@ -73,6 +73,16 @@ const PrivacyShieldToggle = (): JSX.Element => {
                     />
                     Privacy Shield
                 </MenuItem>
+                <MenuItem onClick={handleMenuClose}>
+                  <Switch
+                    checked={enabled}
+                    onChange={() => setEnabledVisual(!enabledVisual)}
+                    name="view"
+                    size="small"
+                    disabled={sections.length === 0}
+                    />
+                    View
+                </MenuItem>
               </Menu>
             </>
               ):(
@@ -86,15 +96,15 @@ const PrivacyShieldToggle = (): JSX.Element => {
         }
         labelPlacement="start"
       />
-      <Box sx={{ margin: '0 !important'}}>
+      {!isSmallScreen &&<Box sx={{ margin: '0 !important'}}>
         <Tooltip
           title={enabledVisual ? <Translator path="components.organisms.privacyShield.hidePrivacyTable" /> : <Translator path="components.organisms.privacyShield.showPrivacyTable" />}
         >
           <IconButton edge="end" id="favorite-session-button" onClick={() => setEnabledVisual(!enabledVisual)} disabled={sections.length === 0}>
-            {enabledVisual ? (<VisibilityOffIcon sx={{width: 20, height: 20,color:'gray.main',marginRight:isSmallScreen ? 1:0 }} />) : (<VisibilityIcon sx={{width: 20, height: 20,color:'gray.main' }} />)}
+            {enabledVisual ? (<VisibilityOffIcon sx={{width: 20, height: 20,color:'gray.main' }} />) : (<VisibilityIcon sx={{width: 20, height: 20,color:'gray.main' }} />)}
           </IconButton>
         </Tooltip>
-      </Box>
+      </Box>}
     </>
   );
 }
