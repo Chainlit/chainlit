@@ -10,7 +10,7 @@ import { Translator } from 'components/i18n';
 import SquarePenIcon from 'assets/squarePen';
 
 import NewChatDialog from './newChatDialog';
-import { threadStorage } from 'services/indexedDB';
+import { threadStorage } from 'services/ThreadStorageService';
 
 export default function NewChatButton(props: IconButtonProps) {
   const [open, setOpen] = useState(false);
