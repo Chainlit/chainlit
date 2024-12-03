@@ -1,4 +1,4 @@
-import datetime  # Added import for datetime
+import datetime
 import os
 import pathlib
 from pathlib import Path
@@ -9,9 +9,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from chainlit.auth import get_current_user
-from chainlit.config import APP_ROOT, ChainlitConfig
+from chainlit.config import (
+    APP_ROOT,
+    ChainlitConfig,
+    SpontaneousFileUploadFeature,
+)
 from chainlit.server import app
-from chainlit.user import PersistedUser  # Added import for PersistedUser
+from chainlit.user import PersistedUser
 
 
 @pytest.fixture
@@ -494,6 +498,175 @@ def test_upload_file_unauthorized(
     )
 
     assert response.status_code == 422
+
+
+def test_upload_file_disabled(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test file upload being disabled by config."""
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=False),
+    )
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize(
+    ("accept_pattern", "mime_type", "expected_status"),
+    [
+        ({"image/*": [".png", ".gif", ".jpeg", ".jpg"]}, "image/jpeg", 400),
+        (["image/*"], "text/plain", 400),
+        (["image/*", "application/*"], "text/plain", 400),
+        (["image/png", "application/pdf"], "image/jpeg", 400),
+        (["text/*"], "text/plain", 200),
+        (["application/*"], "application/pdf", 200),
+        (["image/*"], "image/jpeg", 200),
+        (["image/*", "text/*"], "text/plain", 200),
+        (["*/*"], "text/plain", 200),
+        (["*/*"], "image/jpeg", 200),
+        (["*/*"], "application/pdf", 200),
+        (["image/*", "application/*"], "application/pdf", 200),
+        (["image/*", "application/*"], "image/jpeg", 200),
+        (["image/png", "application/pdf"], "image/png", 200),
+        (["image/png", "application/pdf"], "application/pdf", 200),
+        ({"image/*": []}, "image/jpeg", 200),
+        (
+            {"image/*": [".png", ".gif", ".jpeg", ".jpg"]},
+            "text/plain",
+            400,
+        ),  # mime type not allowed
+        (
+            {"*/*": [".txt", ".gif", ".jpeg", ".jpg"]},
+            "text/plain",
+            200,
+        ),  # extension allowed
+        (
+            {"*/*": [".gif", ".jpeg", ".jpg"]},
+            "text/plain",
+            400,
+        ),  # extension not allowed
+    ],
+)
+def test_upload_file_mime_type_check(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+    accept_pattern: list[str],
+    mime_type: str,
+    expected_status: int,
+):
+    """Test check of mime_type."""
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=True, accept=accept_pattern),
+    )
+
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, mime_type),
+    }
+
+    # Mock the persist_file method to return a known value
+    expected_file_id = "mocked_file_id"
+    mock_session_get_by_id_patched.persist_file = AsyncMock(
+        return_value={
+            "id": expected_file_id,
+            "name": "test_upload.txt",
+            "type": "text/plain",
+            "size": len(file_content),
+        }
+    )
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("file_content", "content_multiplier", "max_size_mb", "expected_status"),
+    [
+        (b"1", 1, 1, 200),
+        (b"11", 1024 * 1024, 1, 400),
+    ],
+)
+def test_upload_file_size_check(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+    file_content: bytes,
+    content_multiplier: int,
+    max_size_mb: int,
+    expected_status: int,
+):
+    """Test check of max_size_mb."""
+
+    file_content = file_content * content_multiplier
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(max_size_mb=max_size_mb),
+    )
+
+    # Prepare the files to upload
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    # Mock the persist_file method to return a known value
+    expected_file_id = "mocked_file_id"
+    mock_session_get_by_id_patched.persist_file = AsyncMock(
+        return_value={
+            "id": expected_file_id,
+            "name": "test_upload.txt",
+            "type": "text/plain",
+            "size": len(file_content),
+        }
+    )
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == expected_status
 
 
 def test_project_translations_file_path_traversal(
