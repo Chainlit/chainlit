@@ -21,6 +21,7 @@
     "test": "pnpm exec ts-node ./cypress/support/e2e.ts",
     "test:ui": "cd frontend && pnpm test",
     "prepare": "husky",
+    "lint": "pnpm run lintUi && pnpm run lintPython",
     "lintUi": "pnpm run --parallel lint",
     "formatUi": "cd frontend && pnpm run format",
     "lintPython": "cd backend && poetry run dmypy run --timeout 600 -- chainlit/ tests/",

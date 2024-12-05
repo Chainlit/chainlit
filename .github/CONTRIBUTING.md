@@ -133,3 +133,13 @@ Make sure to run `poetry install` again whenever you've updated the frontend!
 
 1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
 2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements pnpm run test`).
+
+### Headed/debugging
+
+Causes the Electron browser to be shown on screen and keeps it open after tests are done.
+Extremely useful for debugging!
+
+```sh
+SINGLE_TEST=password_auth CYPRESS_OPTIONS='--headed --no-exit' pnpm test
+```
+

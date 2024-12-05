@@ -19,6 +19,7 @@ jobs:
       - name: Lint with ruff
         uses: astral-sh/ruff-action@v1
         with:
+          version: '0.8.0'
           src: ${{ env.BACKEND_DIR }}
           changed-files: "true"
       - name: Check formatting with ruff

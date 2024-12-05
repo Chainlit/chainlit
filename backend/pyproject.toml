@@ -87,7 +87,7 @@ pandas = "^2.2.2"
 moto = "^5.0.14"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.7.1"
+ruff = "^0.8.0"
 
 [tool.poetry.group.mypy]
 optional = true
@@ -101,6 +101,7 @@ pandas-stubs = { version = "^2.2.2", python = ">=3.9" }
 
 [tool.mypy]
 python_version = "3.9"
+
 
 [[tool.mypy.overrides]]
 module = [
@@ -118,6 +119,7 @@ module = [
     "azure.storage.filedatalake",
 ]
 ignore_missing_imports = true
+
 
 
 

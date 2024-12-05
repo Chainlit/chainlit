@@ -5,19 +5,64 @@ describe('Header auth', () => {
     runTestServer();
   });
 
-  it('should fail to auth without custom header', () => {
-    cy.get('.MuiAlert-message').should('exist');
+  beforeEach(() => {
+    cy.visit('/');
   });
 
-  it('should be able to auth with custom header', () => {
-    cy.intercept('*', (req) => {
-      req.headers['test-header'] = 'test header value';
+  describe('without an authorization header', () => {
+    it('should display an alert message', () => {
+      cy.get('.MuiAlert-message').should('exist');
     });
-    cy.visit('/');
-    cy.get('.MuiAlert-message').should('not.exist');
-    cy.get('.step').eq(0).should('contain', 'Hello admin');
+  });
 
-    cy.reload();
-    cy.get('.step').eq(0).should('contain', 'Hello admin');
+  describe('with authorization header set', () => {
+    beforeEach(() => {
+      cy.intercept('/auth/header', (req) => {
+        req.headers['test-header'] = 'test header value';
+        req.continue();
+      }).as('auth');
+
+      // Only intercept /user _after_ we're logged in.
+      cy.wait('@auth').then(() => {
+        cy.intercept('GET', '/user').as('user');
+      });
+    });
+
+    const shouldBeLoggedIn = () => {
+      it('should have an access_token cookie in /auth/header response', () => {
+        cy.wait('@auth').then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+
+          // Response contains `Authorization` cookie, starting with Bearer
+          expect(interception.response.headers).to.have.property('set-cookie');
+          const cookie = interception.response.headers['set-cookie'][0];
+          expect(cookie).to.contain('access_token');
+        });
+      });
+
+      it('should not display an alert message', () => {
+        cy.get('.MuiAlert-message').should('not.exist');
+      });
+
+      it("should display 'Hello admin'", () => {
+        cy.get('.step').eq(0).should('contain', 'Hello admin');
+      });
+    };
+
+    shouldBeLoggedIn();
+
+    it('should request and have access to /user', () => {
+      cy.wait('@user').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+    });
+
+    describe('after reloading', () => {
+      before(() => {
+        cy.reload();
+      });
+
+      shouldBeLoggedIn();
+    });
   });
 });

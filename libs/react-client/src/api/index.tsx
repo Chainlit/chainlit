@@ -1,5 +1,5 @@
-import { IThread } from 'src/types';
-import { removeToken } from 'src/utils/token';
+import { ensureTokenPrefix, removeToken } from 'src/auth/token';
+import { IThread, IUser } from 'src/types';
 
 import { IFeedback } from 'src/types/feedback';
 
@@ -22,10 +22,12 @@ export interface IPagination {
 }
 
 export class ClientError extends Error {
+  status: number;
   detail?: string;
 
-  constructor(message: string, detail?: string) {
+  constructor(message: string, status: number, detail?: string) {
     super(message);
+    this.status = status;
     this.detail = detail;
   }
 
@@ -57,15 +59,51 @@ export class APIBase {
     }
   }
 
-  checkToken(token: string) {
-    const prefix = 'Bearer ';
-    if (token.startsWith(prefix)) {
-      return token;
-    } else {
-      return prefix + token;
+  private async getDetailFromErrorResponse(
+    res: Response
+  ): Promise<string | undefined> {
+    try {
+      const body = await res.json();
+      return body?.detail;
+    } catch (error: any) {
+      console.error('Unable to parse error response', error);
     }
+    return undefined;
   }
 
+  private handleRequestError(error: any) {
+    if (error instanceof ClientError) {
+      if (error.status === 401 && this.on401) {
+        // TODO: Consider whether we should logout() here instead.
+        removeToken();
+        this.on401();
+      }
+      if (this.onError) {
+        this.onError(error);
+      }
+    }
+    console.error(error);
+  }
+
+  /**
+   * Low-level HTTP request handler for direct API interactions.
+   * Provides full control over HTTP methods, request configuration, and error handling.
+   *
+   * Key features:
+   * - Supports all HTTP methods (GET, POST, PUT, PATCH, DELETE)
+   * - Handles both FormData and JSON payloads
+   * - Manages authentication headers and token formatting
+   * - Custom error handling with ClientError class
+   * - Support for request cancellation via AbortSignal
+   *
+   * @param method - HTTP method to use (GET, POST, etc.)
+   * @param path - API endpoint path
+   * @param token - Optional authentication token
+   * @param data - Optional request payload (FormData or JSON-serializable data)
+   * @param signal - Optional AbortSignal for request cancellation
+   * @returns Promise<Response>
+   * @throws ClientError for HTTP errors, including 401 unauthorized
+   */
   async fetch(
     method: string,
     path: string,
@@ -75,7 +113,7 @@ export class APIBase {
   ): Promise<Response> {
     try {
       const headers: { Authorization?: string; 'Content-Type'?: string } = {};
-      if (token) headers['Authorization'] = this.checkToken(token); // Assuming token is a bearer token
+      if (token) headers['Authorization'] = ensureTokenPrefix(token); // Assuming token is a bearer token
 
       let body;
 
@@ -94,20 +132,14 @@ export class APIBase {
       });
 
       if (!res.ok) {
-        const body = await res.json();
-        if (res.status === 401 && this.on401) {
-          removeToken();
-          this.on401();
-        }
-        throw new ClientError(res.statusText, body.detail);
+        const detail = await this.getDetailFromErrorResponse(res);
+
+        throw new ClientError(res.statusText, res.status, detail);
       }
 
       return res;
     } catch (error: any) {
-      if (error instanceof ClientError && this.onError) {
-        this.onError(error);
-      }
-      console.error(error);
+      this.handleRequestError(error);
       throw error;
     }
   }
@@ -146,6 +178,11 @@ export class ChainlitAPI extends APIBase {
 
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
+    return res.json();
+  }
+
+  async getUser(accessToken?: string): Promise<IUser> {
+    const res = await this.get(`/user`, accessToken);
     return res.json();
   }
 
@@ -212,7 +249,7 @@ export class ChainlitAPI extends APIBase {
       );
 
       if (token) {
-        xhr.setRequestHeader('Authorization', this.checkToken(token));
+        xhr.setRequestHeader('Authorization', ensureTokenPrefix(token));
       }
 
       // Track the progress of the upload
