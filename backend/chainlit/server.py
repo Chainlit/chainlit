@@ -948,7 +948,7 @@ def validate_file_size(file: UploadFile):
 async def get_file(
     file_id: str,
     session_id: str,
-    # current_user: UserParam, #TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
+    current_user: UserParam,
 ):
     """Get a file from the session files directory."""
 
@@ -969,13 +969,12 @@ async def get_file(
             detail="Unauthorized",
         )
 
-    # TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
-    # if current_user:
-    #     if not session.user or session.user.identifier != current_user.identifier:
-    #         raise HTTPException(
-    #             status_code=401,
-    #             detail="You are not authorized to download files from this session",
-    #         )
+    if current_user:
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to download files from this session",
+            )
 
     if file_id in session.files:
         file = session.files[file_id]
