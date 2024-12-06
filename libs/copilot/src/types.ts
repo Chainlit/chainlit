@@ -2,6 +2,7 @@ export interface IWidgetConfig {
   chainlitServer: string;
   showCot?: boolean;
   accessToken?: string;
+  sendCookies?: boolean;
   theme?: 'light' | 'dark';
   fontFamily?: string;
   button?: {
