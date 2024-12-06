@@ -38,7 +38,7 @@ export default function NewChatButton(props: IconButtonProps) {
         title={<Translator path="components.molecules.newChatButton.newChat" />}
       >
         <IconButton id="new-chat-button" onClick={handleClickOpen} {...props}>
-          <SquarePenIcon sx={{ height: 20, width: 20 }} />
+          <SquarePenIcon sx={{ padding: 0, height: 20, width: 20, '& .MuiSvgIcon-root': {padding: 0} }} />
         </IconButton>
       </Tooltip>
       <NewChatDialog

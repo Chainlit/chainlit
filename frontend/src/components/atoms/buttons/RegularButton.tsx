@@ -16,7 +16,7 @@ const RegularButton = ({ children, ...props }: Props) => {
           color: (theme) =>
             theme.palette.mode === 'dark'
               ? 'text.primary'
-              : theme.palette.primary.main,
+              : theme.palette.primary.contrastText,
           background: (theme) =>
             theme.palette.mode === 'dark'
               ? grey[700]

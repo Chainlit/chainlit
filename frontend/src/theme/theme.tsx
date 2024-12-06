@@ -98,13 +98,13 @@ const lightTheme = (fontFamily?: string, breakpoints?: BreakpointsOptions) =>
       success,
       error,
       background: {
-        default: grey[50],
-        paper: white
+        default: white,
+        paper: '#F7F3F3'
       },
       primary: {
-        main: '#F80061',
+        main: '#FF7E13',
         dark: primary[800],
-        light: '#FFE7EB',
+        light: '#FFB273',
         contrastText: white
       },
       secondary: {

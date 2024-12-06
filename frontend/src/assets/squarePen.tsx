@@ -2,7 +2,15 @@ import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
 
 const SquarePenIcon = (props: SvgIconProps) => {
   return (
-    <SvgIcon>
+    <SvgIcon sx={{ 
+      width: '20px',
+      height: '20px',
+      padding: 0,
+      '& svg': {
+        width: '20px',
+        height: '20px'
+      }
+    }}>
       <svg
         {...props}
         viewBox="0 0 24 24"

@@ -43,25 +43,52 @@ const Header = memo(({ isExpanded: propIsExpanded, toggleExpand, toggleChat }: H
   return (
     <Stack
       px={2}
-      py={1.5}
+      py={2.5}
       direction="row"
       alignItems="center"
       justifyContent="space-between"
-      bgcolor="background.paper"
+      bgcolor="background.default"
+      sx={{
+        borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        padding: '16px'
+      }}
     >
       <Stack direction="row" alignItems="center" spacing={0.5}>
-        <Logo style={{ maxHeight: '25px' }} />
+        <Logo style={{ maxHeight: '28px' }} />
       </Stack>
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Stack 
+        direction="row" 
+        alignItems="center" 
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px'
+        }}
+      >
         <ChatProfiles />
         <NewChatButton />
         <Tooltip title={localIsExpanded ? "Minimize" : "Expand"}>
-          <IconButton onClick={handleExpandClick}>
+          <IconButton 
+            sx={{ 
+              height: '22px', 
+              width: '22px',
+            }} 
+            onClick={handleExpandClick}
+          >
             {localIsExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Tooltip>
         <Tooltip title='Close'>
-          <IconButton onClick={handleCloseClick}>
+          <IconButton 
+            sx={{ 
+              height: '22px', 
+              width: '22px',
+            }} 
+            onClick={handleCloseClick}
+          >
             <CloseIcon />
           </IconButton>
         </Tooltip>

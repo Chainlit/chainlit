@@ -29,7 +29,7 @@ const SubmitButton = ({ disabled, onSubmit }: SubmitButtonProps) => {
   return (
     <Box
       sx={{
-        mr: 1,
+        mr: 0,
         color: 'text.secondary'
       }}
     >
@@ -39,7 +39,16 @@ const SubmitButton = ({ disabled, onSubmit }: SubmitButtonProps) => {
             <Translator path="components.organisms.chat.inputBox.SubmitButton.stopTask" />
           }
         >
-          <IconButton id="stop-button" onClick={handleClick}>
+          <IconButton 
+            id="stop-button" 
+            onClick={handleClick}
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              }
+            }}
+          >
             <StopCircle />
           </IconButton>
         </Tooltip>
@@ -49,8 +58,25 @@ const SubmitButton = ({ disabled, onSubmit }: SubmitButtonProps) => {
             <Translator path="components.organisms.chat.inputBox.SubmitButton.sendMessage" />
           }
         >
-          <IconButton disabled={disabled} color="inherit" onClick={onSubmit}>
-            <Telegram />
+          <IconButton 
+            disabled={disabled} 
+            onClick={onSubmit}
+            sx={{
+              backgroundColor: disabled ? '#E0E0E0' : '#FF7E13',
+              color: disabled ? '#9E9E9E' : '#fff',
+              '&:hover': {
+                backgroundColor: disabled ? '#E0E0E0' : '#F4511E'
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#E0E0E0',
+                color: '#fff'
+              },
+              transition: 'all 0.2s ease',
+              width: 32,
+              height: 32
+            }}
+          >
+            <Telegram sx={{ fontSize: 20 }} />
           </IconButton>
         </Tooltip>
       )}

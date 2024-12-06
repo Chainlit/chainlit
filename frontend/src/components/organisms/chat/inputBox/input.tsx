@@ -170,23 +170,31 @@ const Input = memo(
 
     return (
       <Stack
-      sx={{
-        backgroundColor: 'background.default',
-        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-        margin: 1,
-        paddingTop: 1,
-        paddingX: 1,
-        boxShadow: 'box-shadow: 0px 2px 4px 0px #0000000D',
-        gap: 1,
-        textarea: {
-          height: '34px',
-          maxHeight: '30vh',
-          overflowY: 'auto !important',
-          resize: 'none',
-          color: 'text.primary',
-          lineHeight: '24px'
-        }
-      }}
+        sx={{
+          backgroundColor: 'background.default',
+          borderTop: (theme) => `0px solid ${theme.palette.divider}`,
+          display: 'flex',
+          minHeight: '53px',
+          maxHeight: '53px',
+          padding: '16px',
+          paddingTop: '25px',
+          gap: '16px',
+          alignItems: 'flex-start',
+          alignSelf: 'stretch',
+          '& .MuiOutlinedInput-root': {
+            height: '53px',
+            padding: '16px',
+            '& textarea': {
+              height: '21px !important',
+              padding: '0 !important',
+              maxHeight: '21px !important',
+              overflowY: 'auto !important',
+              resize: 'none',
+              color: 'text.primary',
+              lineHeight: '21px'
+            }
+          }
+        }}
       >
         {attachments.length > 0 ? (
           <Box
@@ -205,7 +213,7 @@ const Input = memo(
           id="chat-input"
           autoFocus
           multiline
-          variant="standard"
+          variant="outlined"
           autoComplete="false"
           placeholder={t(
             'components.organisms.chat.inputBox.input.placeholder'
@@ -217,16 +225,24 @@ const Input = memo(
           onCompositionEnd={() => setIsComposing(false)}
           value={value}
           fullWidth
+          sx={{
+            width: '100%',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '6px',
+              '& fieldset': {
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+              },
+              '&:hover fieldset': {
+                borderColor: 'rgba(0, 0, 0, 0.3)',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'rgba(0, 0, 0, 0.3)',
+                borderWidth: '1px'
+              }
+            }
+          }}
           InputProps={{
             disableUnderline: true,
-            startAdornment: (
-              <InputAdornment
-                sx={{ ml: 1, color: 'text.secondary' }}
-                position="start"
-              >
-                {startAdornment}
-              </InputAdornment>
-            ),
             endAdornment: (
               <SubmitButton onSubmit={submit} disabled={disabled || !value} />
             )
