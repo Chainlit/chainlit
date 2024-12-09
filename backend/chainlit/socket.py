@@ -162,12 +162,12 @@ async def connect(sid, environ):
 async def connection_successful(sid):
     context = init_ws_context(sid)
 
-    if context.session.restored:
-        return
-
     await context.emitter.task_end()
     await context.emitter.clear("clear_ask")
     await context.emitter.clear("clear_call_fn")
+
+    if context.session.restored:
+        return
 
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
@@ -312,17 +312,13 @@ async def message(sid, payload: MessagePayload):
 async def window_message(sid, data):
     """Handle a message send by the host window."""
     session = WebsocketSession.require(sid)
-    context = init_ws_context(session)
-
-    await context.emitter.task_start()
+    init_ws_context(session)
 
     if config.code.on_window_message:
         try:
             await config.code.on_window_message(data)
         except asyncio.CancelledError:
             pass
-        finally:
-            await context.emitter.task_end()
 
 
 @sio.on("audio_start")
