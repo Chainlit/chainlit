@@ -101,6 +101,7 @@ const useChatSession = () => {
       const socket = io(uri, {
         path,
         withCredentials: true,
+        transports: ['websocket'],
         extraHeaders: {
           Authorization: accessToken || '',
           'X-Chainlit-Client-Type': client.type,
