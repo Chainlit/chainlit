@@ -77,24 +77,8 @@ def load_user_env(user_env):
     return user_env
 
 
-def build_anon_user_identifier(environ):
-    scope = environ.get("asgi.scope", {})
-    client_ip, _ = scope.get("client")
-    ip = environ.get("HTTP_X_FORWARDED_FOR", client_ip)
-
-    try:
-        headers = scope.get("headers", {})
-        user_agent = next(
-            (v.decode("utf-8") for k, v in headers if k.decode("utf-8") == "user-agent")
-        )
-        return str(uuid.uuid5(uuid.NAMESPACE_DNS, user_agent + ip))
-
-    except StopIteration:
-        return str(uuid.uuid5(uuid.NAMESPACE_DNS, ip))
-
-
 @sio.on("connect")
-async def connect(sid, environ):
+async def connect(sid, environ, auth):
     if (
         not config.code.on_chat_start
         and not config.code.on_message
@@ -110,8 +94,8 @@ async def connect(sid, environ):
     try:
         # Check if the authentication is required
         if login_required:
-            authorization_header = environ.get("HTTP_AUTHORIZATION")
-            token = authorization_header.split(" ")[1] if authorization_header else None
+            token = auth.get("token")
+            token = token.split(" ")[1] if token else None
             user = await get_current_user(token=token)
     except Exception:
         logger.info("Authentication failed")
@@ -125,16 +109,16 @@ async def connect(sid, environ):
     def emit_call_fn(event: Literal["ask", "call_fn"], data, timeout):
         return sio.call(event, data, timeout=timeout, to=sid)
 
-    session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
+    session_id = auth.get("sessionId")
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
         return True
 
-    user_env_string = environ.get("HTTP_USER_ENV")
+    user_env_string = auth.get("userEnv")
     user_env = load_user_env(user_env_string)
 
-    client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
+    client_type = auth.get("clientType")
     http_referer = environ.get("HTTP_REFERER")
-    url_encoded_chat_profile = environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE")
+    url_encoded_chat_profile = auth.get("chatProfile")
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
@@ -149,7 +133,7 @@ async def connect(sid, environ):
         user=user,
         token=token,
         chat_profile=chat_profile,
-        thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
+        thread_id=auth.get("threadId"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
     )
