@@ -187,7 +187,13 @@ copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
 app = FastAPI(lifespan=lifespan)
 
-sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
+ws_cors = (
+    "*" if config.project.allow_origins[0] == "*" else config.project.allow_origins
+)
+
+sio = socketio.AsyncServer(
+    cors_allowed_origins=ws_cors, cors_credentials=True, async_mode="asgi"
+)
 
 asgi_app = socketio.ASGIApp(
     socketio_server=sio,
@@ -196,9 +202,11 @@ asgi_app = socketio.ASGIApp(
 
 app.mount(f"{PREFIX}/ws/socket.io", asgi_app)
 
+http_cors = config.project.allow_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.project.allow_origins,
+    allow_origins=http_cors,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
