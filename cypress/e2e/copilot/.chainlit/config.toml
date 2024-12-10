@@ -13,7 +13,7 @@ session_timeout = 3600
 cache = false
 
 # Authorized origins
-allow_origins = ["*"]
+allow_origins = ["http://127.0.0.1:8000"]
 
 # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
 # follow_symlink = false
