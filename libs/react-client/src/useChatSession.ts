@@ -85,9 +85,11 @@ const useChatSession = () => {
 
   const _connect = useCallback(
     ({
+      transports,
       userEnv,
       accessToken
     }: {
+      transports?: string[]
       userEnv: Record<string, string>;
       accessToken?: string;
     }) => {
@@ -101,7 +103,7 @@ const useChatSession = () => {
       const socket = io(uri, {
         path,
         withCredentials: true,
-        transports: ['websocket'],
+        transports,
         auth: {
               token: accessToken,
               clientType: client.type,

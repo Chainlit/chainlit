@@ -42,6 +42,7 @@ declare global {
       light?: ThemOverride;
       dark?: ThemOverride;
     };
+    transports?: string[]
   }
 }
 
@@ -99,6 +100,7 @@ function App() {
       return;
     } else {
       connect({
+        transports: window.transports,
         userEnv,
         accessToken
       });
