@@ -121,11 +121,11 @@ ignore_missing_imports = true
 
 
 
+
 [tool.poetry.group.custom-data]
 optional = true
 
 [tool.poetry.group.custom-data.dependencies]
-asyncpg = "^0.29.0"
 SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
