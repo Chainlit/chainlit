@@ -120,19 +120,8 @@ async def _authenticate_connection(
     return None, None
 
 
-# TODO: Consider making this an assertion as it's an actual programming error, rather than an in-program exception.
 @sio.on("connect")  # pyright: ignore [reportOptionalCall]
 async def connect(sid, environ, auth):
-    if (
-        not config.code.on_chat_start
-        and not config.code.on_message
-        and not config.code.on_audio_chunk
-    ):
-        logger.warning(
-            "You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback"
-        )
-        return False
-
     user = token = None
 
     if require_login():
