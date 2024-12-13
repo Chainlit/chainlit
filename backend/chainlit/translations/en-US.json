@@ -47,6 +47,13 @@
         "using": "Using",
         "used": "Used"
       },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
+      },
       "auth": {
         "authLogin": {
           "title": "Login to access the app.",
