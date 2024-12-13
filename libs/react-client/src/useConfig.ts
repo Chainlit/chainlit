@@ -6,8 +6,6 @@ import { configState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = (accessToken?: string) => {
-  console.log('useConfig');
-
   const [config, setConfig] = useRecoilState(configState);
   const { isAuthenticated } = useAuth();
   const language = navigator.language || 'en-US';
@@ -21,7 +19,6 @@ const useConfig = (accessToken?: string) => {
 
   useEffect(() => {
     if (!data) return;
-    console.log('setConfig');
     setConfig(data);
   }, [data, setConfig]);
 

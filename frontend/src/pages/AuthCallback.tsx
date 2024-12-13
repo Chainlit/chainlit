@@ -12,8 +12,6 @@ export default function AuthCallback() {
 
   // Get access token from query in cookieless oauth.
   useEffect(() => {
-    console.log('Query callback');
-
     if (!cookieAuth) {
       // Get token from query parameters for oauth login.
       const token = query.get('access_token');
@@ -23,7 +21,6 @@ export default function AuthCallback() {
 
   // Fetch user in cookie-based oauth.
   useEffect(() => {
-    console.log('Cookie auth callback');
     if (!user && cookieAuth) setUserFromAPI();
   }, [cookieAuth]);
 

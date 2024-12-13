@@ -1,7 +1,6 @@
 import asyncio
 import json
 import time
-import uuid
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 from urllib.parse import unquote
 
@@ -83,27 +82,11 @@ def load_user_env(user_env):
     return user_env
 
 
-def build_anon_user_identifier(environ):
-    scope = environ.get("asgi.scope", {})
-    client_ip, _ = scope.get("client")
-    ip = environ.get("HTTP_X_FORWARDED_FOR", client_ip)
-
-    try:
-        headers = scope.get("headers", {})
-        user_agent = next(
-            (v.decode("utf-8") for k, v in headers if k.decode("utf-8") == "user-agent")
-        )
-        return str(uuid.uuid5(uuid.NAMESPACE_DNS, user_agent + ip))
-
-    except StopIteration:
-        return str(uuid.uuid5(uuid.NAMESPACE_DNS, ip))
-
-
-def _get_token_from_header(environ: WSGIEnvironment) -> Optional[str]:
-    # Not using cookie auth, return token Authorization header.
-    authorization_header = environ.get("HTTP_AUTHORIZATION")
-    if authorization_header:
-        return authorization_header.split(" ")[1]
+def _get_token_from_auth(auth: dict) -> Optional[str]:
+    # Not using cookie auth, return token.
+    token = auth.get("token")
+    if token:
+        return token.split(" ")[1]
 
     return None
 
@@ -116,19 +99,20 @@ def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
     return None
 
 
-def _get_token_from_environ(environ: WSGIEnvironment) -> Optional[str]:
+def _get_token(environ: WSGIEnvironment, auth: dict) -> Optional[str]:
     """Take WSGI environ, return access token."""
 
     if not config.project.cookie_auth:
-        return _get_token_from_header(environ)
+        return _get_token_from_auth(auth)
 
     return _get_token_from_cookie(environ)
 
 
 async def _authenticate_connection(
     environ,
+    auth,
 ) -> Union[Tuple[Union[User, PersistedUser], str], Tuple[None, None]]:
-    if token := _get_token_from_environ(environ):
+    if token := _get_token(environ, auth):
         user = await get_current_user(token=token)
         if user:
             return user, token
@@ -136,9 +120,9 @@ async def _authenticate_connection(
     return None, None
 
 
-@sio.on("connect")  # pyright: ignore [reportOptionalCall]
-async def connect(sid, environ):
-    # TODO: Consider making this an assertion as it's an actual programming error, rather than an in-program exception.
+# TODO: Consider making this an assertion as it's an actual programming error, rather than an in-program exception.
+@sio.on("connect") # pyright: ignore [reportOptionalCall]
+async def connect(sid, environ, auth):
     if (
         not config.code.on_chat_start
         and not config.code.on_message
@@ -153,7 +137,7 @@ async def connect(sid, environ):
 
     if require_login():
         try:
-            user, token = await _authenticate_connection(environ)
+            user, token = await _authenticate_connection(environ, auth)
         except Exception as e:
             logger.exception("Exception authenticating connection: %s", e)
 
@@ -169,17 +153,16 @@ async def connect(sid, environ):
     def emit_call_fn(event: Literal["ask", "call_fn"], data, timeout):
         return sio.call(event, data, timeout=timeout, to=sid)
 
-    session_id = environ.get("HTTP_X_CHAINLIT_SESSION_ID")
+    session_id = auth.get("sessionId")
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
         return True
 
-    # Create new session
-    user_env_string = environ.get("HTTP_USER_ENV")
+    user_env_string = auth.get("userEnv")
     user_env = load_user_env(user_env_string)
 
-    client_type = environ.get("HTTP_X_CHAINLIT_CLIENT_TYPE")
+    client_type = auth.get("clientType")
     http_referer = environ.get("HTTP_REFERER")
-    url_encoded_chat_profile = environ.get("HTTP_X_CHAINLIT_CHAT_PROFILE")
+    url_encoded_chat_profile = auth.get("chatProfile")
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
@@ -194,7 +177,7 @@ async def connect(sid, environ):
         user=user,
         token=token,
         chat_profile=chat_profile,
-        thread_id=environ.get("HTTP_X_CHAINLIT_THREAD_ID"),
+        thread_id=auth.get("threadId"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
     )
@@ -207,12 +190,12 @@ async def connect(sid, environ):
 async def connection_successful(sid):
     context = init_ws_context(sid)
 
-    if context.session.restored:
-        return
-
     await context.emitter.task_end()
     await context.emitter.clear("clear_ask")
     await context.emitter.clear("clear_call_fn")
+
+    if context.session.restored:
+        return
 
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
@@ -357,17 +340,13 @@ async def message(sid, payload: MessagePayload):
 async def window_message(sid, data):
     """Handle a message send by the host window."""
     session = WebsocketSession.require(sid)
-    context = init_ws_context(session)
-
-    await context.emitter.task_start()
+    init_ws_context(session)
 
     if config.code.on_window_message:
         try:
             await config.code.on_window_message(data)
         except asyncio.CancelledError:
             pass
-        finally:
-            await context.emitter.task_end()
 
 
 @sio.on("audio_start")  # pyright: ignore [reportOptionalCall]

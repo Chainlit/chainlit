@@ -41,8 +41,6 @@ export function ensureTokenPrefix(token: string): string {
 }
 
 export const useTokenManagement = () => {
-  console.log('useTokenManagement');
-
   const [, setUser] = useRecoilState(userState);
   const [, setAccessToken] = useRecoilState(accessTokenState);
 

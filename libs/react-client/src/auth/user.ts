@@ -7,7 +7,6 @@ import { useAuthConfig } from './config';
 import { getToken, useTokenManagement } from './token';
 
 export const useUser = () => {
-  console.log('useUser');
   const [user, setUser] = useRecoilState(userState);
   const { cookieAuth, isLoading: authConfigLoading } = useAuthConfig();
   const { handleSetAccessToken } = useTokenManagement();
@@ -20,8 +19,6 @@ export const useUser = () => {
   const userDataEffectRun = useRef(false);
   useEffect(() => {
     if (!userDataEffectRun.current && userData) {
-      console.log('userData effect');
-      console.log('setUser', userData);
       setUser(userData);
       userDataEffectRun.current = true;
     }
@@ -34,7 +31,6 @@ export const useUser = () => {
       !tokenAuthEffectRun.current &&
       !(user && authConfigLoading && cookieAuth)
     ) {
-      console.log('tokenAuth', user, cookieAuth);
       const token = getToken();
       if (token) {
         handleSetAccessToken(token);

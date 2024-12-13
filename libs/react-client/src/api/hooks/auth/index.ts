@@ -7,7 +7,6 @@ import { useUser } from 'src/auth/user';
 import { accessTokenState } from 'src/state';
 
 export const useAuth = (): IUseAuth => {
-  console.log('useAuth');
   const { authConfig, isLoading, cookieAuth } = useAuthConfig();
   const { logout } = useSessionManagement();
   const { user, setUserFromAPI } = useUser();

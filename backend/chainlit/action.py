@@ -2,7 +2,8 @@ import uuid
 from typing import Optional
 
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import Field, dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 from chainlit.context import context
 from chainlit.telemetry import trace_event

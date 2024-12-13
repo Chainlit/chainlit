@@ -18,7 +18,8 @@ from typing import (
 
 import tomli
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import Field, dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -313,6 +314,8 @@ class CodeSettings:
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
+    # Socket.io client transports option
+    transports: Optional[List[str]] = None
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
