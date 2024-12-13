@@ -10,6 +10,10 @@
                         "logout": "Uitloggen"
                     }
                 }
+            },
+            "clipboardCopy": {
+                "copy": "Copy",
+                "copied": "Copied to clipboard!"
             }
         },
         "molecules": {
@@ -42,6 +46,13 @@
             "detailsButton": {
                 "using": "Gebruikt",
                 "used": "Gebruikt"
+            },
+            "feedback": {
+                "helpful": "Helpful",
+                "notHelpful": "Not helpful",
+                "feedback": "Feedback",
+                "addAComment": "Add a comment",
+                "submitFeedback": "Submit feedback"
             },
             "auth": {
                 "authLogin": {

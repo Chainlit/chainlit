@@ -10,6 +10,10 @@
             "logout": "লগআউট"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {
@@ -44,6 +48,13 @@
         "running": "চলমান",
         "took_one": "{{count}} পদক্ষেপ নিয়েছে",
         "took_other": "{{count}}টি পদক্ষেপ নিয়েছে"
+      },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
       },
       "auth": {
         "authLogin": {
