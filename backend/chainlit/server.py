@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 import socketio
 from fastapi import (
@@ -34,6 +34,13 @@ from typing_extensions import Annotated
 from watchfiles import awatch
 
 from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.auth.cookie import (
+    clear_auth_cookie,
+    clear_oauth_state_cookie,
+    set_auth_cookie,
+    set_oauth_state_cookie,
+    validate_oauth_state_cookie,
+)
 from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
@@ -366,8 +373,85 @@ async def auth(request: Request):
     return get_configuration()
 
 
+def _get_response_dict(access_token: str) -> dict:
+    """Get the response dictionary for the auth response."""
+
+    if not config.project.cookie_auth:
+        # Legacy auth
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+
+    return {"success": True}
+
+
+def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Response:
+    """Get the redirect params for the OAuth callback."""
+
+    response_dict = _get_response_dict(access_token)
+
+    if redirect_to_callback:
+        root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+        redirect_url = (
+            f"{root_path}/login/callback?{urllib.parse.urlencode(response_dict)}"
+        )
+
+        return RedirectResponse(
+            # FIXME: redirect to the right frontend base url to improve the dev environment
+            url=redirect_url,
+            status_code=302,
+        )
+
+    return JSONResponse(response_dict)
+
+
+def _get_oauth_redirect_error(error: str) -> Response:
+    """Get the redirect response for an OAuth error."""
+    params = urllib.parse.urlencode(
+        {
+            "error": error,
+        }
+    )
+    response = RedirectResponse(
+        # FIXME: redirect to the right frontend base url to improve the dev environment
+        url=f"/login?{params}",  # Shouldn't there be {root_path} here?
+    )
+    return response
+
+
+async def _authenticate_user(
+    user: Optional[User], redirect_to_callback: bool = False
+) -> Response:
+    """Authenticate a user and return the response."""
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="credentialssignin",
+        )
+
+    # If a data layer is defined, attempt to persist user.
+    if data_layer := get_data_layer():
+        try:
+            await data_layer.create_user(user)
+        except Exception as e:
+            # Catch and log exceptions during user creation.
+            # TODO: Make this catch only specific errors and allow others to propagate.
+            logger.error(f"Error creating user: {e}")
+
+    access_token = create_jwt(user)
+
+    response = _get_auth_response(access_token, redirect_to_callback)
+
+    if config.project.cookie_auth:
+        set_auth_cookie(response, access_token)
+
+    return response
+
+
 @router.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Login a user using the password auth callback.
     """
@@ -380,29 +464,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         form_data.username, form_data.password
     )
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="credentialssignin",
-        )
-    access_token = create_jwt(user)
-    if data_layer := get_data_layer():
-        try:
-            await data_layer.create_user(user)
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+    return await _authenticate_user(user)
 
 
 @router.post("/logout")
 async def logout(request: Request, response: Response):
     """Logout the user by calling the on_logout callback."""
+    if config.project.cookie_auth:
+        clear_auth_cookie(response)
+
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
+
     return {"success": True}
 
 
@@ -417,23 +490,7 @@ async def header_auth(request: Request):
 
     user = await config.code.header_auth_callback(request.headers)
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
-
-    access_token = create_jwt(user)
-    if data_layer := get_data_layer():
-        try:
-            await data_layer.create_user(user)
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+    return await _authenticate_user(user)
 
 
 @router.get("/auth/oauth/{provider_id}")
@@ -465,16 +522,9 @@ async def oauth_login(provider_id: str, request: Request):
     response = RedirectResponse(
         url=f"{provider.authorize_url}?{params}",
     )
-    samesite: Any = os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax")
-    secure = samesite.lower() == "none"
-    response.set_cookie(
-        "oauth_state",
-        random,
-        httponly=True,
-        samesite=samesite,
-        secure=secure,
-        max_age=3 * 60,
-    )
+
+    set_oauth_state_cookie(response, random)
+
     return response
 
 
@@ -502,16 +552,7 @@ async def oauth_callback(
         )
 
     if error:
-        params = urllib.parse.urlencode(
-            {
-                "error": error,
-            }
-        )
-        response = RedirectResponse(
-            # FIXME: redirect to the right frontend base url to improve the dev environment
-            url=f"/login?{params}",
-        )
-        return response
+        return _get_oauth_redirect_error(error)
 
     if not code or not state:
         raise HTTPException(
@@ -519,9 +560,11 @@ async def oauth_callback(
             detail="Missing code or state",
         )
 
-    # Check the state from the oauth provider against the browser cookie
-    oauth_state = request.cookies.get("oauth_state")
-    if oauth_state != state:
+    try:
+        validate_oauth_state_cookie(request, state)
+    except Exception as e:
+        logger.exception("Unable to validate oauth state: %1", e)
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized",
@@ -536,34 +579,10 @@ async def oauth_callback(
         provider_id, token, raw_user_data, default_user
     )
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
+    response = await _authenticate_user(user, redirect_to_callback=True)
 
-    access_token = create_jwt(user)
+    clear_oauth_state_cookie(response)
 
-    if data_layer := get_data_layer():
-        try:
-            await data_layer.create_user(user)
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-
-    params = urllib.parse.urlencode(
-        {
-            "access_token": access_token,
-            "token_type": "bearer",
-        }
-    )
-
-    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
-
-    response = RedirectResponse(
-        # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"{root_path}/login/callback?{params}",
-    )
-    response.delete_cookie("oauth_state")
     return response
 
 
@@ -592,16 +611,7 @@ async def oauth_azure_hf_callback(
         )
 
     if error:
-        params = urllib.parse.urlencode(
-            {
-                "error": error,
-            }
-        )
-        response = RedirectResponse(
-            # FIXME: redirect to the right frontend base url to improve the dev environment
-            url=f"/login?{params}",
-        )
-        return response
+        return _get_oauth_redirect_error(error)
 
     if not code:
         raise HTTPException(
@@ -618,36 +628,20 @@ async def oauth_azure_hf_callback(
         provider_id, token, raw_user_data, default_user, id_token
     )
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
+    response = await _authenticate_user(user, redirect_to_callback=True)
 
-    access_token = create_jwt(user)
+    clear_oauth_state_cookie(response)
 
-    if data_layer := get_data_layer():
-        try:
-            await data_layer.create_user(user)
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-
-    params = urllib.parse.urlencode(
-        {
-            "access_token": access_token,
-            "token_type": "bearer",
-        }
-    )
-
-    root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
-
-    response = RedirectResponse(
-        # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"{root_path}/login/callback?{params}",
-        status_code=302,
-    )
-    response.delete_cookie("oauth_state")
     return response
+
+
+GenericUser = Union[User, PersistedUser]
+UserParam = Annotated[GenericUser, Depends(get_current_user)]
+
+
+@router.get("/user")
+async def get_user(current_user: UserParam) -> GenericUser:
+    return current_user
 
 
 _language_pattern = (
@@ -675,7 +669,7 @@ async def project_translations(
 
 @router.get("/project/settings")
 async def project_settings(
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
     language: str = Query(
         default="en-US", description="Language code", pattern=_language_pattern
     ),
@@ -726,7 +720,7 @@ async def project_settings(
 async def update_feedback(
     request: Request,
     update: UpdateFeedbackRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Update the human feedback for a particular message."""
     data_layer = get_data_layer()
@@ -745,7 +739,7 @@ async def update_feedback(
 async def delete_feedback(
     request: Request,
     payload: DeleteFeedbackRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Delete a feedback."""
 
@@ -764,7 +758,7 @@ async def delete_feedback(
 async def get_user_threads(
     request: Request,
     payload: GetThreadsRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Get the threads page by page."""
 
@@ -789,7 +783,7 @@ async def get_user_threads(
 async def get_thread(
     request: Request,
     thread_id: str,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Get a specific thread."""
     data_layer = get_data_layer()
@@ -808,7 +802,7 @@ async def get_thread_element(
     request: Request,
     thread_id: str,
     element_id: str,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Get a specific thread element."""
     data_layer = get_data_layer()
@@ -826,7 +820,7 @@ async def get_thread_element(
 async def delete_thread(
     request: Request,
     payload: DeleteThreadRequest,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Delete a thread."""
 
@@ -845,7 +839,7 @@ async def delete_thread(
 
 @router.post("/project/file")
 async def upload_file(
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
     session_id: str,
     file: UploadFile,
 ):
@@ -957,9 +951,16 @@ def validate_file_size(file: UploadFile):
 async def get_file(
     file_id: str,
     session_id: str,
-    # current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)], #TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
+    current_user: UserParam,
 ):
     """Get a file from the session files directory."""
+
+    if not config.project.cookie_auth:
+        # We cannot make this work safely without cookie auth, so disable it.
+        raise HTTPException(
+            status_code=404,
+            detail="File downloads unavailable.",
+        )
 
     from chainlit.session import WebsocketSession
 
@@ -971,13 +972,12 @@ async def get_file(
             detail="Unauthorized",
         )
 
-    # TODO: Causes 401 error. See https://github.com/Chainlit/chainlit/issues/1472
-    # if current_user:
-    #     if not session.user or session.user.identifier != current_user.identifier:
-    #         raise HTTPException(
-    #             status_code=401,
-    #             detail="You are not authorized to download files from this session",
-    #         )
+    if current_user:
+        if not session.user or session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to download files from this session",
+            )
 
     if file_id in session.files:
         file = session.files[file_id]
@@ -989,7 +989,7 @@ async def get_file(
 @router.get("/files/{filename:path}")
 async def serve_file(
     filename: str,
-    current_user: Annotated[Union[User, PersistedUser], Depends(get_current_user)],
+    current_user: UserParam,
 ):
     """Serve a file from the local filesystem."""
 

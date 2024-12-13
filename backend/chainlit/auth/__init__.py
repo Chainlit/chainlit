@@ -1,21 +1,16 @@
 import os
-from datetime import datetime, timedelta
-from typing import Any, Dict
 
-import jwt
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 
 from chainlit.config import config
 from chainlit.data import get_data_layer
+from chainlit.logger import logger
 from chainlit.oauth_providers import get_configured_oauth_providers
-from chainlit.user import User
 
-reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
+from .cookie import OAuth2PasswordBearerWithCookie
+from .jwt import create_jwt, decode_jwt, get_jwt_secret
 
-
-def get_jwt_secret():
-    return os.environ.get("CHAINLIT_AUTH_SECRET")
+reuseable_oauth = OAuth2PasswordBearerWithCookie(tokenUrl="/login", auto_error=False)
 
 
 def ensure_jwt_secret():
@@ -43,51 +38,39 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
+        "cookieAuth": config.project.cookie_auth,
         "oauthProviders": (
             get_configured_oauth_providers() if is_oauth_enabled() else []
         ),
     }
 
 
-def create_jwt(data: User) -> str:
-    to_encode: Dict[str, Any] = data.to_dict()
-    to_encode.update(
-        {
-            "exp": datetime.utcnow()
-            + timedelta(seconds=config.project.user_session_timeout),
-        }
-    )
-    encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm="HS256")
-    return encoded_jwt
-
-
 async def authenticate_user(token: str = Depends(reuseable_oauth)):
     try:
-        dict = jwt.decode(
-            token,
-            get_jwt_secret(),
-            algorithms=["HS256"],
-            options={"verify_signature": True},
-        )
-        del dict["exp"]
-        user = User(**dict)
+        user = decode_jwt(token)
     except Exception as e:
         raise HTTPException(
             status_code=401, detail="Invalid authentication token"
         ) from e
+
     if data_layer := get_data_layer():
+        # Get or create persistent user if we've a data layer available.
         try:
             persisted_user = await data_layer.get_user(user.identifier)
             if persisted_user is None:
                 persisted_user = await data_layer.create_user(user)
-        except Exception:
+                assert persisted_user
+        except Exception as e:
+            logger.exception("Unable to get persisted_user from data layer: %s", e)
             return user
 
         if user and user.display_name:
+            # Copy ephemeral display_name from authenticated user to persistent user.
             persisted_user.display_name = user.display_name
+
         return persisted_user
-    else:
-        return user
+
+    return user
 
 
 async def get_current_user(token: str = Depends(reuseable_oauth)):
@@ -95,3 +78,6 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         return None
 
     return await authenticate_user(token)
+
+
+__all__ = ["create_jwt", "get_configuration", "get_current_user"]
