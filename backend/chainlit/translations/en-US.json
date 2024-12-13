@@ -10,6 +10,10 @@
             "logout": "Logout"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {

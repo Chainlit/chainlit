@@ -4,6 +4,8 @@ import { useCopyToClipboard } from 'usehooks-ts';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
+import { useTranslation } from 'components/i18n/Translator';
+
 import CopyIcon from 'assets/copy';
 
 interface ClipboardCopyProps {
@@ -15,6 +17,7 @@ interface ClipboardCopyProps {
 const ClipboardCopy = ({ value, edge }: ClipboardCopyProps): JSX.Element => {
   const [isCopied, setIsCopied] = useState(false);
   const [_, copy] = useCopyToClipboard();
+  const { t } = useTranslation();
 
   const handleCopy = () => {
     copy(value)
@@ -30,7 +33,11 @@ const ClipboardCopy = ({ value, edge }: ClipboardCopyProps): JSX.Element => {
 
   return (
     <Tooltip
-      title={isCopied ? 'Copied to clipboard!' : 'Copy'}
+      title={
+        isCopied
+          ? t('components.atoms.clipboardCopy.copied')
+          : t('components.atoms.clipboardCopy.copy')
+      }
       onClose={handleTooltipClose}
       sx={{ zIndex: 2 }}
     >
