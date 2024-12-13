@@ -121,7 +121,7 @@ async def _authenticate_connection(
 
 
 # TODO: Consider making this an assertion as it's an actual programming error, rather than an in-program exception.
-@sio.on("connect") # pyright: ignore [reportOptionalCall]
+@sio.on("connect")  # pyright: ignore [reportOptionalCall]
 async def connect(sid, environ, auth):
     if (
         not config.code.on_chat_start
