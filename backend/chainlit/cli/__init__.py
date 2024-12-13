@@ -27,13 +27,16 @@ from chainlit.secret import random_secret
 from chainlit.telemetry import trace_event
 from chainlit.utils import check_file
 
+
 def assert_app():
     if (
         not config.code.on_chat_start
         and not config.code.on_message
         and not config.code.on_audio_chunk
     ):
-        raise Exception("You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback")
+        raise Exception(
+            "You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback"
+        )
 
 
 # Create the main command group for Chainlit CLI
