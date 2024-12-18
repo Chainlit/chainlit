@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
+ISO_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
 
 class ChainlitDataLayer(BaseDataLayer):
     def __init__(
@@ -60,7 +62,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         query = """
-        SELECT * FROM "Participant" 
+        SELECT * FROM "User" 
         WHERE identifier = :identifier
         """
         result = await self.execute_query(query, {"identifier": identifier})
@@ -77,7 +79,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
         query = """
-        INSERT INTO "Participant" (id, identifier, metadata, "createdAt", "updatedAt")
+        INSERT INTO "User" (id, identifier, metadata, "createdAt", "updatedAt")
         VALUES (:id, :identifier, :metadata, :created_at, :updated_at)
         ON CONFLICT (identifier) DO UPDATE
         SET metadata = :metadata
@@ -103,14 +105,14 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def delete_feedback(self, feedback_id: str) -> bool:
         query = """
-        DELETE FROM "Score" WHERE id = :feedback_id
+        DELETE FROM "Feedback" WHERE id = :feedback_id
         """
         await self.execute_query(query, {"feedback_id": feedback_id})
         return True
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         query = """
-        INSERT INTO "Score" (id, "stepId", type, name, value, "valueLabel", comment, scorer)
+        INSERT INTO "Feedback" (id, "stepId", type, name, value, "valueLabel", comment, scorer)
         VALUES (:id, :step_id, :type, :name, :value, :value_label, :comment, :scorer)
         ON CONFLICT (id) DO UPDATE
         SET value = :value, comment = :comment
@@ -120,7 +122,6 @@ class ChainlitDataLayer(BaseDataLayer):
         params = {
             "id": feedback_id,
             "step_id": feedback.forId,
-            "type": "HUMAN",
             "name": "user_feedback",
             "value": float(feedback.value),
             "value_label": None,
@@ -180,10 +181,12 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
         query = """
-        INSERT INTO "Attachment" (
-            id, "threadId", "stepId", metadata, mime, name, "objectKey", url
+        INSERT INTO "Element" (
+            id, "threadId", "stepId", metadata, mime, name, "objectKey", url,
+            "chainlitKey", display, size, language, page
         ) VALUES (
-            :id, :thread_id, :step_id, :metadata, :mime, :name, :object_key, :url
+            :id, :thread_id, :step_id, :metadata, :mime, :name, :object_key, :url,
+            :chainlit_key, :display, :size, :language, :page
         )
         """
         params = {
@@ -203,6 +206,11 @@ class ChainlitDataLayer(BaseDataLayer):
             "mime": element.mime,
             "object_key": path,
             "url": element.url,
+            "chainlit_key": element.chainlit_key,
+            "display": element.display,
+            "size": element.size,
+            "language": element.language,
+            "page": getattr(element, "page", None),
         }
         await self.execute_query(query, params)
 
@@ -210,7 +218,7 @@ class ChainlitDataLayer(BaseDataLayer):
         self, thread_id: str, element_id: str
     ) -> Optional[ElementDict]:
         query = """
-        SELECT * FROM "Attachment"
+        SELECT * FROM "Element"
         WHERE id = :element_id AND "threadId" = :thread_id
         """
         result = await self.execute_query(
@@ -244,7 +252,7 @@ class ChainlitDataLayer(BaseDataLayer):
         """Does not delete the actual file from storage."""
 
         query = """
-        DELETE FROM "Attachment" 
+        DELETE FROM "Element" 
         WHERE id = :element_id
         """
         if thread_id:
@@ -312,6 +320,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "rootRunId" = EXCLUDED."rootRunId"
         """
 
+        start = step_dict.get("start")
+        end = step_dict.get("end")
         params = {
             "id": step_dict["id"],
             "thread_id": step_dict.get("threadId"),
@@ -321,8 +331,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "name": step_dict.get("name"),
             "output": json.dumps(step_dict.get("output", {})),
             "type": step_dict["type"],
-            "start_time": now,  # step_dict.get("start") or now,
-            "end_time": now,  # step_dict.get("end") or now,
+            "start_time": datetime.strptime(start, ISO_FORMAT) if start else now,
+            "end_time": datetime.strptime(end, ISO_FORMAT) if end else now,
             "variables": json.dumps(step_dict.get("variables", {})),
             "settings": json.dumps(step_dict.get("settings", {})),
             "tools": json.dumps(step_dict.get("tools", {})),
@@ -339,21 +349,22 @@ class ChainlitDataLayer(BaseDataLayer):
         WHERE id = :id
         """
         now = await self.get_current_timestamp()
+        end = step_dict.get("end")
         params = {
             "id": step_dict["id"],
             "output": json.dumps(step_dict.get("output", {})),
-            "end_time": now,
+            "end_time": datetime.strptime(end, ISO_FORMAT) if end else now,
         }
         await self.execute_query(query, params)
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
-        # Delete associated attachments and scores first
+        # Delete associated elements and feedbacks first
         await self.execute_query(
-            'DELETE FROM "Attachment" WHERE "stepId" = :step_id', {"step_id": step_id}
+            'DELETE FROM "Element" WHERE "stepId" = :step_id', {"step_id": step_id}
         )
         await self.execute_query(
-            'DELETE FROM "Score" WHERE "stepId" = :step_id', {"step_id": step_id}
+            'DELETE FROM "Feedback" WHERE "stepId" = :step_id', {"step_id": step_id}
         )
         # Delete the step
         await self.execute_query(
@@ -362,9 +373,9 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_thread_author(self, thread_id: str) -> str:
         query = """
-        SELECT p.identifier 
+        SELECT u.identifier 
         FROM "Thread" t
-        JOIN "Participant" p ON t."participantId" = p.id
+        JOIN "User" u ON t."userId" = u.id
         WHERE t.id = :thread_id
         """
         result = await self.execute_query(query, {"thread_id": thread_id})
@@ -385,16 +396,16 @@ class ChainlitDataLayer(BaseDataLayer):
         query = """
         SELECT 
             t.*, 
-            p.identifier as participant_identifier,
-            (SELECT COUNT(*) FROM "Thread" WHERE "participantId" = t."participantId") as total
+            u.identifier as user_identifier,
+            (SELECT COUNT(*) FROM "Thread" WHERE "userId" = t."userId") as total
         FROM "Thread" t
-        LEFT JOIN "Participant" p ON t."participantId" = p.id
+        LEFT JOIN "User" p ON t."userId" = u.id
         WHERE t."deletedAt" IS NULL
         """
         params = {}
 
         if filters.userId:
-            query += ' AND t."participantId" = :user_id'
+            query += ' AND t."userId" = :user_id'
             params["user_id"] = filters.userId
 
         if pagination.cursor:
@@ -417,8 +428,8 @@ class ChainlitDataLayer(BaseDataLayer):
                 id=str(thread.id),
                 createdAt=thread.createdAt.isoformat(),
                 name=thread.name,
-                userId=str(thread.participantId) if thread.participantId else None,
-                userIdentifier=thread.participant_identifier,
+                userId=str(thread.userId) if thread.userId else None,
+                userIdentifier=thread.user_identifier,
                 metadata=thread.metadata,
                 steps=[],
                 elements=[],
@@ -437,9 +448,9 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         query = """
-        SELECT t.*, p.identifier as participant_identifier
+        SELECT t.*, p.identifier as user_identifier
         FROM "Thread" t
-        LEFT JOIN "Participant" p ON t."participantId" = p.id
+        LEFT JOIN "User" p ON t."userId" = p.id
         WHERE t.id = :thread_id AND t."deletedAt" IS NULL
         """
         result = await self.execute_query(query, {"thread_id": thread_id})
@@ -456,7 +467,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         # Get elements
         elements_result = await self.execute_query(
-            'SELECT * FROM "Attachment" WHERE "threadId" = :thread_id',
+            'SELECT * FROM "Element" WHERE "threadId" = :thread_id',
             {"thread_id": thread_id},
         )
 
@@ -464,8 +475,8 @@ class ChainlitDataLayer(BaseDataLayer):
             id=str(thread.id),
             createdAt=thread.createdAt.isoformat(),
             name=thread.name,
-            userId=str(thread.participantId) if thread.participantId else None,
-            userIdentifier=thread.participant_identifier,
+            userId=str(thread.userId) if thread.userId else None,
+            userIdentifier=thread.user_identifier,
             metadata=thread.metadata,
             steps=[self._convert_step_row_to_dict(step) for step in steps_result],
             elements=[

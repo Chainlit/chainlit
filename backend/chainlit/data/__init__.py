@@ -83,7 +83,6 @@ def get_data_layer():
                         aws_access_key_id=aws_access_key,
                         aws_secret_access_key=aws_secret_key,
                         endpoint_url=dev_aws_endpoint,
-                        force_path_style=True,
                     )
                 elif is_using_gcs:
                     from chainlit.data.storage_clients.gcs import GCSStorageClient
