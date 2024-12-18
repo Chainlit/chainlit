@@ -3,6 +3,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+import aiofiles
+import aiohttp
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -32,14 +34,14 @@ class ChainlitDataLayer(BaseDataLayer):
     def __init__(
         self,
         database_url: str,
-        storage_provider: Optional[BaseStorageClient] = None,
+        storage_client: Optional[BaseStorageClient] = None,
         show_logger: bool = False,
     ):
         self.engine = create_async_engine(database_url)
         self.async_session = sessionmaker(
             bind=self.engine, class_=AsyncSession, expire_on_commit=False
         )  # type: ignore
-        self.storage_provider = storage_provider
+        self.storage_client = storage_client
         self.show_logger = show_logger
 
     async def get_current_timestamp(self) -> datetime:
@@ -128,14 +130,54 @@ class ChainlitDataLayer(BaseDataLayer):
         result = await self.execute_query(query, params)
         return str(result.scalar())
 
-    queue_until_user_message()
-
+    @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        if not self.storage_provider:
-            logger.warning("No storage provider configured")
+        if not self.storage_client:
+            logger.warn(
+                "Data Layer: create_element error. No cloud storage configured!"
+            )
             return
 
-        # Storage provider upload logic here
+        if not element.for_id:
+            return
+
+        if element.thread_id:
+            query = 'SELECT id FROM "Thread" WHERE id = :thread_id'
+            result = await self.execute_query(query, {"thread_id": element.thread_id})
+            if not result.first():
+                await self.update_thread(thread_id=element.thread_id)
+
+        content: Optional[Union[bytes, str]] = None
+
+        if element.path:
+            async with aiofiles.open(element.path, "rb") as f:
+                content = await f.read()
+        elif element.url:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(element.url) as response:
+                    if response.status == 200:
+                        content = await response.read()
+                    else:
+                        content = None
+        elif element.content:
+            content = element.content
+        else:
+            raise ValueError("Element url, path or content must be provided")
+
+        if content is None:
+            raise ValueError("Content is None, cannot upload file")
+
+        if element.thread_id:
+            path = f"threads/{element.thread_id}/files/{element.name}"
+        else:
+            path = f"files/{element.name}"
+
+        await self.storage_client.upload_file(
+            object_key=path,
+            data=content,
+            mime=element.mime or "application/octet-stream",
+            overwrite=True,
+        )
 
         query = """
         INSERT INTO "Attachment" (
@@ -146,13 +188,21 @@ class ChainlitDataLayer(BaseDataLayer):
         """
         params = {
             "id": element.id,
+            "name": element.name,
             "thread_id": element.thread_id,
             "step_id": element.for_id,
-            "metadata": json.dumps({}),
+            "metadata": json.dumps(
+                {
+                    "size": element.size,
+                    "language": element.language,
+                    "display": element.display,
+                    "type": element.type,
+                    "page": getattr(element, "page", None),
+                }
+            ),
             "mime": element.mime,
-            "name": element.name,
-            "object_key": None,  # Set from storage provider
-            "url": None,  # Set from storage provider
+            "object_key": path,
+            "url": element.url,
         }
         await self.execute_query(query, params)
 
@@ -189,9 +239,10 @@ class ChainlitDataLayer(BaseDataLayer):
             playerConfig=row.get("playerConfig"),
         )
 
-    queue_until_user_message()
-
+    @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
+        """Does not delete the actual file from storage."""
+
         query = """
         DELETE FROM "Attachment" 
         WHERE id = :element_id
@@ -205,18 +256,62 @@ class ChainlitDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
+        if step_dict.get("threadId"):
+            thread_query = """
+            SELECT id FROM "Thread" WHERE id = :thread_id
+            """
+            thread_result = await self.execute_query(
+                thread_query, {"thread_id": step_dict["threadId"]}
+            )
+            if not thread_result.first():
+                await self.update_thread(thread_id=step_dict["threadId"])
+
+        now = await self.get_current_timestamp()
+
+        if step_dict.get("parentId"):
+            parent_query = """
+            SELECT id FROM "Step" WHERE id = :parent_id
+            """
+            parent_result = await self.execute_query(
+                parent_query, {"parent_id": step_dict["parentId"]}
+            )
+            if not parent_result.first():
+                await self.create_step(
+                    {
+                        "id": step_dict["parentId"],
+                        "metadata": json.dumps(step_dict.get("metadata", {})),
+                        "type": "run",
+                        "start_time": now,
+                        "end_time": now,
+                        "variables": json.dumps(step_dict.get("variables", {})),
+                        "settings": json.dumps(step_dict.get("settings", {})),
+                        "tools": json.dumps(step_dict.get("tools", {})),
+                    }
+                )
         query = """
         INSERT INTO "Step" (
             id, "threadId", "parentId", input, metadata, name, output,
-            type, "startTime", "endTime", variables, settings, tools
+            type, "startTime", "endTime", variables, settings, tools,
+            "rootRunId"
         ) VALUES (
             :id, :thread_id, :parent_id, :input, :metadata, :name, :output, 
-            :type, :start_time, :end_time, :variables, :settings, :tools
+            :type, :start_time, :end_time, :variables, :settings, :tools,
+            :root_run_id
         )
+        ON CONFLICT (id) DO UPDATE SET
+            input = EXCLUDED.input,
+            metadata = EXCLUDED.metadata,
+            name = EXCLUDED.name,
+            output = EXCLUDED.output,
+            type = EXCLUDED.type,
+            "startTime" = EXCLUDED."startTime",
+            "endTime" = EXCLUDED."endTime",
+            variables = EXCLUDED.variables,
+            settings = EXCLUDED.settings,
+            tools = EXCLUDED.tools,
+            "rootRunId" = EXCLUDED."rootRunId"
         """
-        print(f"Creating step {step_dict["id"]}")
 
-        now = await self.get_current_timestamp()
         params = {
             "id": step_dict["id"],
             "thread_id": step_dict.get("threadId"),
@@ -231,9 +326,9 @@ class ChainlitDataLayer(BaseDataLayer):
             "variables": json.dumps(step_dict.get("variables", {})),
             "settings": json.dumps(step_dict.get("settings", {})),
             "tools": json.dumps(step_dict.get("tools", {})),
+            "root_run_id": step_dict.get("rootRunId"),
         }
         await self.execute_query(query, params)
-        print(f"Done with {step_dict["id"]}")
 
     @queue_until_user_message()
     async def update_step(self, step_dict: StepDict):

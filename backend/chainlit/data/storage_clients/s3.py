@@ -11,10 +11,10 @@ class S3StorageClient(BaseStorageClient):
     Class to enable Amazon S3 storage provider
     """
 
-    def __init__(self, bucket: str):
+    def __init__(self, bucket: str, **kwargs: Any):
         try:
             self.bucket = bucket
-            self.client = boto3.client("s3")
+            self.client = boto3.client("s3", **kwargs)
             logger.info("S3StorageClient initialized")
         except Exception as e:
             logger.warn(f"S3StorageClient initialization error: {e}")
