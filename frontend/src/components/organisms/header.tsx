@@ -15,6 +15,7 @@ import { settingsState } from 'state/settings';
 
 import AudioPresence from './chat/inputBox/AudioPresence';
 import { OpenSideBarMobileButton } from './sidebar/OpenSideBarMobileButton';
+import { Button } from '@/components/ui/button';
 
 const Header = memo(() => {
   const isMobile = useMediaQuery('(max-width: 66rem)');
@@ -35,6 +36,7 @@ const Header = memo(() => {
       id="header"
       position="relative"
     >
+      <Button className='bg-red-500'>Hello</Button>
       <Box
         sx={{
           position: 'absolute',
