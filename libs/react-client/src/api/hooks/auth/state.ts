@@ -20,6 +20,6 @@ export const useAuthState = () => {
     accessToken,
     setAccessToken,
     setThreadHistory,
-    cookieAuth: authConfig?.cookieAuth !== false
+    cookieAuth: authConfig?.cookieAuth !== false && authConfig?.requireLogin
   };
 };
