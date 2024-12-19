@@ -21,7 +21,7 @@ import { ThreadHistory } from './threadHistory';
 const DRAWER_WIDTH = 260;
 
 const SideBar = () => {
-  const user = useAuth();
+  const { user } = useAuth();
   const isMobile = useMediaQuery('(max-width:66rem)');
 
   const [settings, setSettings] = useRecoilState(settingsState);
