@@ -1,20 +1,19 @@
-import { useRecoilState } from 'recoil';
-import { useAuthConfig } from 'src/auth/config';
-import { useSessionManagement } from 'src/auth/session';
-import { useTokenManagement } from 'src/auth/token';
-import { IUseAuth } from 'src/auth/types';
-import { useUser } from 'src/auth/user';
-import { accessTokenState } from 'src/state';
+import { IAuthConfig, IUser } from 'src/types';
 
-export const useAuth = (): IUseAuth => {
-  const { authConfig, isLoading, cookieAuth } = useAuthConfig();
+import { useAuthConfig } from './config';
+import { useSessionManagement } from './sessionManagement';
+import { useAuthState } from './state';
+import { useTokenManagement } from './tokenManagement';
+import { useUserManagement } from './userManagement';
+
+export const useAuth = () => {
+  const { authConfig, cookieAuth } = useAuthConfig();
   const { logout } = useSessionManagement();
-  const { user, setUserFromAPI } = useUser();
-  const [accessToken] = useRecoilState(accessTokenState);
-
+  const { user, setUserFromAPI } = useUserManagement();
+  const { accessToken } = useAuthState();
   const { handleSetAccessToken } = useTokenManagement();
 
-  const isReady = !!(!isLoading && authConfig);
+  const isReady = !!authConfig;
 
   if (authConfig && !authConfig.requireLogin) {
     return {
@@ -43,5 +42,4 @@ export const useAuth = (): IUseAuth => {
   };
 };
 
-// Re-export types and main hook
-export type { IUseAuth };
+export type { IAuthConfig, IUser };
