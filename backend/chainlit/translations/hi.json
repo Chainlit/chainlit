@@ -10,6 +10,10 @@
             "logout": "लॉगआउट"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {
@@ -44,6 +48,13 @@
         "running": "भागना",
         "took_one": "{{count}} कदम उठाया",
         "took_other": "{{count}} कदम उठाए"
+      },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
       },
       "auth": {
         "authLogin": {

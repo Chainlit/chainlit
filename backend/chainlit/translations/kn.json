@@ -10,6 +10,10 @@
             "logout": "ಲಾಗ್ ಔಟ್"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {
@@ -44,6 +48,13 @@
         "running": "ಚಲಿಸುತ್ತಿದೆ",
         "took_one": "{{count}} ಹೆಜ್ಜೆ ಇಟ್ಟಿದೆ",
         "took_other": "{{count}} ಹೆಜ್ಜೆಗಳನ್ನು ತೆಗೆದುಕೊಂಡರು"
+      },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
       },
       "auth": {
         "authLogin": {

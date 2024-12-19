@@ -10,6 +10,10 @@
             "logout": "வெளியேறு"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {
@@ -44,6 +48,13 @@
         "running": "ஓடுதல்",
         "took_one": "{{count}} அடி எடுத்து வைத்தார்",
         "took_other": "{{count}} படிகளை எடுத்தார்"
+      },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
       },
       "auth": {
         "authLogin": {

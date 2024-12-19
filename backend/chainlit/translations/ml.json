@@ -10,6 +10,10 @@
             "logout": "ലോഗോട്ട്"
           }
         }
+      },
+      "clipboardCopy": {
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
       }
     },
     "molecules": {
@@ -44,6 +48,13 @@
         "running": "ഓടുന്നു",
         "took_one": "{{count}} സ്റ്റെപ്പ് എടുത്തു",
         "took_other": "{{count}} സ്റ്റെപ്പുകൾ എടുത്തു"
+      },
+      "feedback": {
+        "helpful": "Helpful",
+        "notHelpful": "Not helpful",
+        "feedback": "Feedback",
+        "addAComment": "Add a comment",
+        "submitFeedback": "Submit feedback"
       },
       "auth": {
         "authLogin": {

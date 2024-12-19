@@ -16,6 +16,7 @@ import {
 import Dialog from 'components/atoms/Dialog';
 import { AccentButton } from 'components/atoms/buttons/AccentButton';
 import { TextInput } from 'components/atoms/inputs';
+import Translator, { useTranslation } from 'components/i18n/Translator';
 
 import MessageBubbleIcon from 'assets/messageBubble';
 import {
@@ -40,6 +41,8 @@ const FeedbackButtons = ({ message }: Props) => {
   const [commentInput, setCommentInput] = useState<string>();
   const firstInteraction = useRecoilValue(firstUserInteraction);
   const { idToResume } = useChatSession();
+
+  const { t } = useTranslation();
 
   const [feedback, setFeedback] = useState(message.feedback?.value);
   const [comment, setComment] = useState(message.feedback?.comment);
@@ -102,7 +105,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     const baseButtons = [
       () => (
-        <Tooltip title="Helpful">
+        <Tooltip title={t('components.molecules.feedback.helpful')}>
           <span>
             <IconButton
               color="inherit"
@@ -118,7 +121,7 @@ const FeedbackButtons = ({ message }: Props) => {
         </Tooltip>
       ),
       () => (
-        <Tooltip title="Not helpful">
+        <Tooltip title={t('components.molecules.feedback.notHelpful')}>
           <span>
             <IconButton
               color="inherit"
@@ -137,7 +140,7 @@ const FeedbackButtons = ({ message }: Props) => {
 
     if (comment) {
       baseButtons.push(() => (
-        <Tooltip title="Feedback">
+        <Tooltip title={t('components.molecules.feedback.feedback')}>
           <span>
             <IconButton
               color="inherit"
@@ -175,7 +178,7 @@ const FeedbackButtons = ({ message }: Props) => {
         title={
           <Stack direction="row" alignItems="center" gap={2}>
             {showFeedbackDialog === 0 ? <DownIcon /> : <UpIcon />}
-            Add a comment
+            <Translator path="components.molecules.feedback.addAComment" />
           </Stack>
         }
         content={
@@ -207,7 +210,7 @@ const FeedbackButtons = ({ message }: Props) => {
             }}
             autoFocus
           >
-            Submit feedback
+            <Translator path="components.molecules.feedback.submitFeedback" />
           </AccentButton>
         }
       />
