@@ -4,23 +4,6 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.1.dev0] - 2024-11-14
-
-Pre-release: developer preview.
-
-### Added
-- New `@data_layer` decorator for configuring custom data layers declaratively
-- Unit tests for `get_data_layer()` and `@data_layer` functionality
-
-### Changed
-- Data layer configuration system now prioritizes `@data_layer` decorator over environment variables
-- Data layer initialization is now more explicit and testable through the decorator pattern
-- Updated example code in `/cypress/e2e/custom_data_layer` and `/cypress/e2e/data_layer` to use the new decorator
-
-### Developer Experience
-- Improved test infrastructure with new fixtures for data layer mocking
-- Added comprehensive tests for data layer configuration scenarios
-
 ## [1.3.2] - 2024-11-08
 
 ### Security Advisory
@@ -39,6 +22,40 @@ To prioritize security, we opted to break with semver on this particular occasio
 
 ### Fixed
 - Resolved incorrect message ordering in UI (#1501)
+
+## [2.1.dev0] - Unreleased
+
+Pre-release: developer preview.
+
+### Added
+- New `@data_layer` decorator for configuring custom data layers declaratively (#1463)
+- Support for 2-way messaging with iframes through `window.postMessage` (#1469)
+- Dutch (nl-NL) translation added (#1554)
+- Keycloak OAuth provider support (#1525)
+- MIME type and file size validation for file uploads (#1459)
+
+### Changed
+- Switched to async Langchain tracer instead of `run_sync` for improved performance (#1529)
+- Enhanced data layer acquisition logic (#1534):
+  - Data layer now initialized only once
+  - Added deprecation warning when users set `_data_layer` directly
+  - Improved configuration handling
+- Major code quality improvements (#1531):
+  - Enabled comprehensive linting with ruff
+  - Implemented consistent code formatting
+  - Added TypeScript linting for react-client
+  - Enhanced import sorting
+- Improved test infrastructure (#1533):
+  - Enhanced E2E test reliability
+  - Increased timeout for cypress tests
+  - Improved chain disabled checks
+
+### Removed
+- Reverted optional websocket connection feature in react-client due to race conditions (#1547)
+
+### Fixed
+- Forward annotations evaluation issue in `chainlit.config` (#1564)
+- Various eslint configuration and implementation issues (#1530)
 
 ## [2.0rc0] - 2024-11-08
 
