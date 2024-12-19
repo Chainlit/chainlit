@@ -1,5 +1,9 @@
-import { ensureTokenPrefix, removeToken } from 'src/auth/token';
 import { IThread, IUser } from 'src/types';
+
+import {
+  ensureTokenPrefix,
+  removeToken
+} from 'src/api/hooks/auth/tokenManagement';
 
 import { IFeedback } from 'src/types/feedback';
 
