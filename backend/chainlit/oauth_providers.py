@@ -183,7 +183,7 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read",
+            "scope": "https://graph.microsoft.com/User.Read offline_access",
             "response_mode": "query",
         }
 
@@ -207,10 +207,12 @@ class AzureADOAuthProvider(OAuthProvider):
             json = response.json()
 
             token = json["access_token"]
+            refresh_token = json.get("refresh_token")
             if not token:
                 raise HTTPException(
                     status_code=400, detail="Failed to get the access token"
                 )
+            self._refresh_token = refresh_token
             return token
 
     async def get_user_info(self, token: str):
@@ -239,7 +241,7 @@ class AzureADOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
+                metadata={"image": azure_user.get("image"), "provider": "azure-ad", "refresh_token": getattr(self, "_refresh_token", None)},
             )
             return (azure_user, user)
 
