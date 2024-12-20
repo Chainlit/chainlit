@@ -87,12 +87,14 @@ export default function Login() {
     }
     if (!config.requireLogin) {
       navigate('/');
-    }
-    if (config.headerAuth) {
-      handleHeaderAuth();
+      return;
     }
     if (user) {
       navigate('/');
+      return;
+    }
+    if (config.headerAuth) {
+      handleHeaderAuth();
     }
   }, [config, user]);
 
