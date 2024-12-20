@@ -51,12 +51,11 @@ describe('Header auth', () => {
 
     shouldBeLoggedIn();
 
-    // TODO: passing locally but failing on the CI
-    // it('should request and have access to /user', () => {
-    //   cy.wait('@user').then((interception) => {
-    //     expect(interception.response.statusCode).to.equal(200);
-    //   });
-    // });
+    it('should request and have access to /user', () => {
+      cy.wait('@user').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+    });
 
     describe('after reloading', () => {
       before(() => {
