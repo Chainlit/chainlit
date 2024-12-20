@@ -38,6 +38,7 @@ export interface IChainlitConfig {
     custom_js?: string;
     custom_font?: string;
     custom_meta_image_url?: string;
+    custom_bookmark_icon?: string;
   };
   features: {
     spontaneous_file_upload?: {
