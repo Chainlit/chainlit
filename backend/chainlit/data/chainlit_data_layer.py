@@ -112,8 +112,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         query = """
-        INSERT INTO "Feedback" (id, "stepId", type, name, value, "valueLabel", comment, scorer)
-        VALUES (:id, :step_id, :type, :name, :value, :value_label, :comment, :scorer)
+        INSERT INTO "Feedback" (id, "stepId", name, value, "valueLabel", comment, scorer)
+        VALUES (:id, :step_id, :name, :value, :value_label, :comment, :scorer)
         ON CONFLICT (id) DO UPDATE
         SET value = :value, comment = :comment
         RETURNING id

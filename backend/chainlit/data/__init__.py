@@ -1,4 +1,5 @@
 import os
+import warnings
 from typing import Optional
 
 from .base import BaseDataLayer
@@ -16,7 +17,6 @@ def get_data_layer():
     if not _data_layer_initialized:
         if _data_layer:
             # Data layer manually set, warn user that this is deprecated.
-            import warnings
 
             warnings.warn(
                 "Setting data layer manually is deprecated. Use @data_layer instead.",
