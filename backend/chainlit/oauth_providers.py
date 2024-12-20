@@ -183,7 +183,7 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read",
+            "scope": "https://graph.microsoft.com/User.Read offline_access",
             "response_mode": "query",
         }
 
