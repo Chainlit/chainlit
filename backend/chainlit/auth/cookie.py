@@ -88,7 +88,6 @@ def set_auth_cookie(response: Response, token: str):
         secure=_cookie_secure,
         samesite=_cookie_samesite,
         max_age=_auth_cookie_lifetime,
-        path="/",  # Why is path set here and not below?
     )
 
 

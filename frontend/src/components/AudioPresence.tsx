@@ -4,6 +4,7 @@ import { Box, Typography } from '@mui/material';
 
 import { WavRenderer, useAudio } from '@chainlit/react-client';
 import { useTheme } from '@/components/ThemeProvider';
+import { hlsStringToHex } from '@/lib/utils';
 
 interface Props {
   type: 'client' | 'server';
@@ -27,7 +28,7 @@ export default function AudioPresence({
   const foregroundColor = useMemo(() => {
     const root = document.documentElement;
     const styles = getComputedStyle(root);
-    return styles.getPropertyValue('--foreground')
+    return hlsStringToHex(styles.getPropertyValue('--foreground'))
   }, [variant])
 
   width = type === 'server' && !isAiSpeaking ? height : width;

@@ -6,7 +6,7 @@ import { Toaster } from 'sonner';
 import { makeTheme } from 'theme';
 
 import { Box, GlobalStyles } from '@mui/material';
-import { Theme, ThemeProvider } from '@mui/material/styles';
+import { Theme, ThemeProvider as TP } from '@mui/material/styles';
 
 import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
@@ -16,6 +16,7 @@ import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
 
 import './App.css';
+import { ThemeProvider } from './components/ThemeProvider';
 
 type Primary = {
   dark?: string;
@@ -120,7 +121,9 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider storageKey="vite-ui-theme">
+
+    <TP theme={theme}>
       <GlobalStyles
         styles={{
           body: { backgroundColor: theme.palette.background.default }
@@ -138,17 +141,12 @@ function App() {
           }
         }}
       />
-      <Box
-        display="flex"
-        height="100vh"
-        maxHeight="-webkit-fill-available"
-        width="100vw"
-        sx={{ overflowX: 'hidden' }}
-        className={`theme-${themeVariant}`}
-      >
+
         <ChatSettingsModal />
+        
         <RouterProvider router={router} />
-      </Box>
+   
+    </TP>
     </ThemeProvider>
   );
 }

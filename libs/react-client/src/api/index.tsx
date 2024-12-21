@@ -126,6 +126,7 @@ export class APIBase {
 
       const res = await fetch(this.buildEndpoint(path), {
         method,
+        credentials: "include",
         headers,
         signal,
         body

@@ -1,17 +1,14 @@
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-
-import { Alert, Box, Stack } from '@mui/material';
-
-import { sideViewState, useAuth, useConfig } from '@chainlit/react-client';
-
+import { useAuth, useConfig, sideViewState } from '@chainlit/react-client';
 import { ElementSideView } from 'components/atoms/elements';
 import { Translator } from 'components/i18n';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
-import { Header } from 'components/organisms/header';
-import { SideBar } from 'components/organisms/sidebar';
-
 import { userEnvState } from 'state/user';
+import { Header } from '@/components/header';
+import Alert from '@/components/Alert';
+import LeftSidebar from '@/components/LeftSidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 type Props = {
   children: JSX.Element;
@@ -33,33 +30,30 @@ const Page = ({ children }: Props) => {
     return <Navigate to="/login" />;
   }
 
-  // Question: isn't isAuthenticated unreachable here?
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%'
-      }}
-    >
+    <SidebarProvider>
+      <LeftSidebar />
+      <SidebarInset>
+    <div className="flex flex-col flex-grow">
       {!isAuthenticated ? (
-        <Alert severity="error">
-          <Translator path="pages.Page.notPartOfProject" />
+        <Alert variant="error">
+            <Translator path="pages.Page.notPartOfProject" />
         </Alert>
       ) : (
-        <Stack direction="row" height="100%" width="100%">
-          <SideBar />
-          <Stack flexGrow={1}>
+        <div className="flex flex-row h-full w-full">
+          <div className="flex flex-col flex-grow">
             <Header />
-            <Stack direction="row" flexGrow={1} overflow="auto">
+            <div className="flex flex-row flex-grow overflow-auto">
               {children}
-            </Stack>
-          </Stack>
+            </div>
+          </div>
           {sideViewElement ? null : <TaskList isMobile={false} />}
           <ElementSideView />
-        </Stack>
+        </div>
       )}
-    </Box>
+    </div>
+    </SidebarInset>
+        </SidebarProvider>
   );
 };
 
