@@ -11,7 +11,7 @@ export const useSessionManagement = () => {
 
   const logout = async (reload = false): Promise<void> => {
     await apiClient.logout();
-    setUser(null);
+    setUser(undefined);
     setThreadHistory(undefined);
 
     if (!cookieAuth) {

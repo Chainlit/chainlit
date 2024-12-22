@@ -16,7 +16,7 @@ type Props = {
 };
 
 const Page = ({ children }: Props) => {
-  const { isAuthenticated } = useAuth();
+  const { isReady, isAuthenticated } = useAuth();
   const { config } = useConfig();
   const userEnv = useRecoilValue(userEnvState);
   const sideViewElement = useRecoilValue(sideViewState);
@@ -32,7 +32,7 @@ const Page = ({ children }: Props) => {
       <LeftSidebar />
       <SidebarInset>
     <div className="flex flex-col flex-grow">
-      {!isAuthenticated ? (
+      {isReady && !isAuthenticated ? (
         <Alert variant="error">
             <Translator path="pages.Page.notPartOfProject" />
         </Alert>

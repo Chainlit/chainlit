@@ -11,18 +11,13 @@ export const useUserManagement = () => {
   const { handleSetAccessToken } = useTokenManagement();
   const { isLoading: authConfigLoading } = useAuthConfig();
 
-  console.log("1111", user)
   const { data: userData, isLoading, mutate: setUserFromAPI } = useApi<IUser>(
     cookieAuth ? '/user' : null
   );
 
-  console.log("2222", userData)
-
   useEffect(() => {
     if (userData) {
       setUser(userData);
-    } else if(!isLoading) {
-      setUser(null)
     }
   }, [userData, isLoading, setUser]);
 

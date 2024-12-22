@@ -1,13 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Logo } from 'components/atoms/logo';
 import { Translator } from 'components/i18n';
 import { AuthLogin } from 'components/molecules/auth';
 
 import { useQuery } from 'hooks/query';
 
 import { ChainlitContext, useAuth } from 'client-types/*';
+import { Logo } from '@/components/Logo';
+import { LoginForm } from '@/components/LoginForm';
 
 export const LoginError = new Error(
   'Error logging in. Please try again later.'
@@ -97,16 +98,32 @@ export default function Login() {
   }, [config, user]);
 
   return (
-    <AuthLogin
-      title={<Translator path="components.molecules.auth.authLogin.title" />}
-      error={error}
-      callbackUrl="/"
-      providers={config?.oauthProviders || []}
-      onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
-      onOAuthSignIn={async (provider: string) => {
-        window.location.href = apiClient.getOAuthEndpoint(provider);
-      }}
-      renderLogo={<Logo style={{ maxWidth: '60%', maxHeight: '90px' }} />}
-    />
+    <div className="grid min-h-svh lg:grid-cols-2">
+    <div className="flex flex-col gap-4 p-6 md:p-10">
+      <div className="flex justify-center gap-2 md:justify-start">
+      <Logo className='w-[150px]' />
+      </div>
+      <div className="flex flex-1 items-center justify-center">
+        <div className="w-full max-w-xs">
+          <LoginForm
+               error={error}
+               callbackUrl="/"
+               providers={config?.oauthProviders || []}
+               onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
+               onOAuthSignIn={async (provider: string) => {
+                 window.location.href = apiClient.getOAuthEndpoint(provider);
+               }}
+          />
+        </div>
+      </div>
+    </div>
+    <div className="relative hidden bg-muted lg:block">
+      <img
+        src={apiClient.buildEndpoint("/favicon")}
+        alt="Image"
+        className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+      />
+    </div>
+  </div>
   );
 }

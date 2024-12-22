@@ -121,10 +121,6 @@ function App() {
     }
   }
 
-  const content = isReady ? <RouterProvider router={router} /> : <div className='h-screen w-screen flex items-center justify-center'>
-      <Loader className='!size-6' />
-    </div>
-
   return (
     <ThemeProvider storageKey="vite-ui-theme">
 
@@ -140,7 +136,7 @@ function App() {
       />
 
         <ChatSettingsModal />
-        {content}
+        <RouterProvider router={router} />
    
     </TP>
     </ThemeProvider>

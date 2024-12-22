@@ -32,6 +32,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.0
         version: 11.11.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react@18.2.0)
+      '@hookform/resolvers':
+        specifier: ^3.9.1
+        version: 3.9.1(react-hook-form@7.54.2(react@18.2.0))
       '@mui/icons-material':
         specifier: ^5.14.9
         version: 5.14.9(@mui/material@5.14.10(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.2.0)(react@18.2.0)
@@ -104,9 +107,6 @@ importers:
       mui-chips-input:
         specifier: 2.0.0
         version: 2.0.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react@18.2.0))(@mui/icons-material@5.14.9(@mui/material@5.14.10(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.2.0)(react@18.2.0))(@mui/material@5.14.10(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react@18.2.0))(@types/react@18.2.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@types/react@18.2.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next-themes:
-        specifier: ^0.4.4
-        version: 0.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       plotly.js:
         specifier: ^2.27.0
         version: 2.30.1(mapbox-gl@1.13.3)
@@ -122,6 +122,9 @@ importers:
       react-file-icon:
         specifier: ^1.3.0
         version: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-hook-form:
+        specifier: ^7.54.2
+        version: 7.54.2(react@18.2.0)
       react-hotkeys-hook:
         specifier: ^4.4.1
         version: 4.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -188,6 +191,9 @@ importers:
       yup:
         specifier: ^1.2.0
         version: 1.2.0
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
     devDependencies:
       '@swc/core':
         specifier: ^1.3.86
@@ -741,6 +747,11 @@ packages:
 
   '@floating-ui/utils@0.1.6':
     resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
+
+  '@hookform/resolvers@3.9.1':
+    resolution: {integrity: sha512-ud2HqmGBM0P0IABqoskKWI6PEf6ZDDBZkFqe2Vnl+mTHCEHzr3ISjjZyCwTjC/qpL25JC9aIDkloQejvMeq0ug==}
+    peerDependencies:
+      react-hook-form: ^7.0.0
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3569,12 +3580,6 @@ packages:
     engines: {node: '>= 4.4.x'}
     hasBin: true
 
-  next-themes@0.4.4:
-    resolution: {integrity: sha512-LDQ2qIOJF0VnuVrrMSMLrWGjRMkq+0mpgl6e0juCLqdJ+oo8Q84JRWT6Wh11VDQKkMMe+dVzDKLWs5n87T+PkQ==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-
   next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
 
@@ -3860,6 +3865,12 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^17.0.0 || ^16.2.0
       react-dom: ^18.0.0 || ^17.0.0 || ^16.2.0
+
+  react-hook-form@7.54.2:
+    resolution: {integrity: sha512-eHpAUgUjWbZocoQYUHposymRb4ZP6d0uwUnooL2uOybA9/3tPUvoAKqEWK1WaSiTxxOfTpffNZP7QwlnM3/gEg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
 
   react-hotkeys-hook@4.4.1:
     resolution: {integrity: sha512-sClBMBioFEgFGYLTWWRKvhxcCx1DRznd+wkFHwQZspnRBkHTgruKIHptlK/U/2DPX8BhHoRGzpMVWUXMmdZlmw==}
@@ -4760,6 +4771,9 @@ packages:
   yup@1.2.0:
     resolution: {integrity: sha512-PPqYKSAXjpRCgLgLKVGPA33v5c/WgEx3wi6NFjIiegz90zSwyMpvTFp/uGcVnnbx6to28pgnzp/q8ih3QRjLMQ==}
 
+  zod@3.24.1:
+    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -5160,6 +5174,10 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   '@floating-ui/utils@0.1.6': {}
+
+  '@hookform/resolvers@3.9.1(react-hook-form@7.54.2(react@18.2.0))':
+    dependencies:
+      react-hook-form: 7.54.2(react@18.2.0)
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -8389,11 +8407,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next-themes@0.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-
   next-tick@1.1.0: {}
 
   no-case@3.0.4:
@@ -8718,6 +8731,10 @@ snapshots:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+
+  react-hook-form@7.54.2(react@18.2.0):
+    dependencies:
+      react: 18.2.0
 
   react-hotkeys-hook@4.4.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -9744,5 +9761,7 @@ snapshots:
       tiny-case: 1.0.3
       toposort: 2.0.2
       type-fest: 2.19.0
+
+  zod@3.24.1: {}
 
   zwitch@2.0.4: {}
