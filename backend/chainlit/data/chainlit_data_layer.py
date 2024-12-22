@@ -154,6 +154,19 @@ class ChainlitDataLayer(BaseDataLayer):
             if not results:
                 await self.update_thread(thread_id=element.thread_id)
 
+        if element.for_id:
+            query = 'SELECT id FROM "Step" WHERE id = $1'
+            results = await self.execute_query(query, {"step_id": element.for_id})
+            if not results:
+                await self.create_step(
+                    {
+                        "id": element.for_id,
+                        "metadata": {},
+                        "type": "run",
+                        "start_time": await self.get_current_timestamp(),
+                        "end_time": await self.get_current_timestamp(),
+                    }
+                )
         content: Optional[Union[bytes, str]] = None
 
         if element.path:
@@ -208,6 +221,7 @@ class ChainlitDataLayer(BaseDataLayer):
                 }
             ),
             "mime": element.mime,
+            "name": element.name,
             "object_key": path,
             "url": element.url,
             "chainlit_key": element.chainlit_key,
@@ -412,7 +426,7 @@ class ChainlitDataLayer(BaseDataLayer):
             param_count += 1
 
         query += f' ORDER BY t."createdAt" DESC LIMIT ${param_count}'
-        params["limit"] = str(pagination.first + 1)
+        params["limit"] = pagination.first + 1
 
         results = await self.execute_query(query, params)
         threads = results
@@ -490,22 +504,6 @@ class ChainlitDataLayer(BaseDataLayer):
             tags=[],
         )
 
-    async def _get_user_identifer_by_id(self, user_id: str) -> str:
-        if self.show_logger:
-            logger.info(f"asyncpg: _get_user_identifer_by_id, user_id={user_id}")
-
-        query = """
-        SELECT identifier 
-        FROM "User" 
-        WHERE id = $1
-        """
-        results = await self.execute_query(query, {"user_id": user_id})
-
-        if not results:
-            raise ValueError(f"User {user_id} not found")
-
-        return results[0]["identifier"]
-
     async def update_thread(
         self,
         thread_id: str,
@@ -517,22 +515,14 @@ class ChainlitDataLayer(BaseDataLayer):
         if self.show_logger:
             logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
-        user_identifier = None
-        if user_id:
-            user_identifier = await self._get_user_identifer_by_id(user_id)
-
-        now = await self.get_current_timestamp()
-
         data = {
             "id": thread_id,
-            "createdAt": now if metadata is None else None,
             "name": (
                 name
                 if name is not None
                 else (metadata.get("name") if metadata and "name" in metadata else None)
             ),
             "userId": user_id,
-            "userIdentifier": user_identifier,
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
         }
