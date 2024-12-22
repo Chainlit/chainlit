@@ -5,9 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
 import aiohttp
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+import asyncpg  # type: ignore
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
@@ -39,50 +37,58 @@ class ChainlitDataLayer(BaseDataLayer):
         storage_client: Optional[BaseStorageClient] = None,
         show_logger: bool = False,
     ):
-        self.engine = create_async_engine(database_url)
-        self.async_session = sessionmaker(
-            bind=self.engine, class_=AsyncSession, expire_on_commit=False
-        )  # type: ignore
+        self.database_url = database_url
+        self.pool: Optional[asyncpg.Pool] = None
         self.storage_client = storage_client
         self.show_logger = show_logger
+
+    async def connect(self):
+        if not self.pool:
+            self.pool = await asyncpg.create_pool(self.database_url)
 
     async def get_current_timestamp(self) -> datetime:
         return datetime.now()
 
-    async def execute_query(self, query: str, params: Union[Dict, None] = None) -> Any:
-        async with self.async_session() as session:
+    async def execute_query(
+        self, query: str, params: Union[Dict, None] = None
+    ) -> List[Dict[str, Any]]:
+        if not self.pool:
+            await self.connect()
+
+        async with self.pool.acquire() as connection:  # type: ignore
             try:
-                result = await session.execute(text(query), params or {})
-                await session.commit()
-                return result
+                if params:
+                    records = await connection.fetch(query, *params.values())
+                else:
+                    records = await connection.fetch(query)
+                return [dict(record) for record in records]
             except Exception as e:
-                await session.rollback()
                 logger.error(f"Database error: {e!s}")
                 raise
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         query = """
         SELECT * FROM "User" 
-        WHERE identifier = :identifier
+        WHERE identifier = $1
         """
         result = await self.execute_query(query, {"identifier": identifier})
-        row = result.first()
-        if not row:
+        if not result or len(result) == 0:
             return None
+        row = result[0]
 
         return PersistedUser(
-            id=str(row.id),
-            identifier=row.identifier,
-            createdAt=row.createdAt.isoformat(),
-            metadata=row.metadata,
+            id=str(row.get("id")),
+            identifier=row.get("identifier"),
+            createdAt=row.get("createdAt").isoformat(),
+            metadata=json.loads(row.get("metadata", "{}")),
         )
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
         query = """
         INSERT INTO "User" (id, identifier, metadata, "createdAt", "updatedAt")
-        VALUES (:id, :identifier, :metadata, :created_at, :updated_at)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (identifier) DO UPDATE
-        SET metadata = :metadata
+        SET metadata = $3
         RETURNING *
         """
         now = await self.get_current_timestamp()
@@ -94,18 +100,18 @@ class ChainlitDataLayer(BaseDataLayer):
             "updated_at": now,
         }
         result = await self.execute_query(query, params)
-        row = result.first()
+        row = result[0]
 
         return PersistedUser(
-            id=str(row.id),
-            identifier=row.identifier,
-            createdAt=row.createdAt.isoformat(),
-            metadata=row.metadata,
+            id=str(row.get("id")),
+            identifier=row.get("identifier"),
+            createdAt=row.get("createdAt").isoformat(),
+            metadata=json.loads(row.get("metadata", "{}")),
         )
 
     async def delete_feedback(self, feedback_id: str) -> bool:
         query = """
-        DELETE FROM "Feedback" WHERE id = :feedback_id
+        DELETE FROM "Feedback" WHERE id = $1
         """
         await self.execute_query(query, {"feedback_id": feedback_id})
         return True
@@ -113,9 +119,9 @@ class ChainlitDataLayer(BaseDataLayer):
     async def upsert_feedback(self, feedback: Feedback) -> str:
         query = """
         INSERT INTO "Feedback" (id, "stepId", name, value, "valueLabel", comment, scorer)
-        VALUES (:id, :step_id, :name, :value, :value_label, :comment, :scorer)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (id) DO UPDATE
-        SET value = :value, comment = :comment
+        SET value = $4, comment = $6
         RETURNING id
         """
         feedback_id = feedback.id or str(uuid.uuid4())
@@ -128,8 +134,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "comment": feedback.comment,
             "scorer": None,
         }
-        result = await self.execute_query(query, params)
-        return str(result.scalar())
+        results = await self.execute_query(query, params)
+        return str(results[0]["id"])
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
@@ -143,9 +149,9 @@ class ChainlitDataLayer(BaseDataLayer):
             return
 
         if element.thread_id:
-            query = 'SELECT id FROM "Thread" WHERE id = :thread_id'
-            result = await self.execute_query(query, {"thread_id": element.thread_id})
-            if not result.first():
+            query = 'SELECT id FROM "Thread" WHERE id = $1'
+            results = await self.execute_query(query, {"thread_id": element.thread_id})
+            if not results:
                 await self.update_thread(thread_id=element.thread_id)
 
         content: Optional[Union[bytes, str]] = None
@@ -185,13 +191,11 @@ class ChainlitDataLayer(BaseDataLayer):
             id, "threadId", "stepId", metadata, mime, name, "objectKey", url,
             "chainlitKey", display, size, language, page
         ) VALUES (
-            :id, :thread_id, :step_id, :metadata, :mime, :name, :object_key, :url,
-            :chainlit_key, :display, :size, :language, :page
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         )
         """
         params = {
             "id": element.id,
-            "name": element.name,
             "thread_id": element.thread_id,
             "step_id": element.for_id,
             "metadata": json.dumps(
@@ -219,25 +223,25 @@ class ChainlitDataLayer(BaseDataLayer):
     ) -> Optional[ElementDict]:
         query = """
         SELECT * FROM "Element"
-        WHERE id = :element_id AND "threadId" = :thread_id
+        WHERE id = $1 AND "threadId" = $2
         """
-        result = await self.execute_query(
+        results = await self.execute_query(
             query, {"element_id": element_id, "thread_id": thread_id}
         )
-        row: Dict[str, Any] = result.first()
 
-        if not row:
+        if not results:
             return None
 
+        row = results[0]
         return ElementDict(
-            id=str(row.get("id")),
-            threadId=str(row.get("threadId")),
+            id=str(row["id"]),
+            threadId=str(row["threadId"]),
             type="file",
-            url=str(row.get("url")),
-            name=str(row.get("name")),
-            mime=str(row.get("mime")),
-            objectKey=str(row.get("objectKey")),
-            forId=str(row.get("stepId")),
+            url=str(row["url"]),
+            name=str(row["name"]),
+            mime=str(row["mime"]),
+            objectKey=str(row["objectKey"]),
+            forId=str(row["stepId"]),
             chainlitKey=row.get("chainlitKey"),
             display=row["display"],
             size=row["size"],
@@ -249,41 +253,36 @@ class ChainlitDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
-        """Does not delete the actual file from storage."""
-
         query = """
         DELETE FROM "Element" 
-        WHERE id = :element_id
+        WHERE id = $1
         """
-        if thread_id:
-            query += ' AND "threadId" = :thread_id'
+        params = {"element_id": element_id}
 
-        await self.execute_query(
-            query, {"element_id": element_id, "thread_id": thread_id}
-        )
+        if thread_id:
+            query += ' AND "threadId" = $2'
+            params["thread_id"] = thread_id
+
+        await self.execute_query(query, params)
 
     @queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
         if step_dict.get("threadId"):
-            thread_query = """
-            SELECT id FROM "Thread" WHERE id = :thread_id
-            """
-            thread_result = await self.execute_query(
+            thread_query = 'SELECT id FROM "Thread" WHERE id = $1'
+            thread_results = await self.execute_query(
                 thread_query, {"thread_id": step_dict["threadId"]}
             )
-            if not thread_result.first():
+            if not thread_results:
                 await self.update_thread(thread_id=step_dict["threadId"])
 
         now = await self.get_current_timestamp()
 
         if step_dict.get("parentId"):
-            parent_query = """
-            SELECT id FROM "Step" WHERE id = :parent_id
-            """
-            parent_result = await self.execute_query(
+            parent_query = 'SELECT id FROM "Step" WHERE id = $1'
+            parent_results = await self.execute_query(
                 parent_query, {"parent_id": step_dict["parentId"]}
             )
-            if not parent_result.first():
+            if not parent_results:
                 await self.create_step(
                     {
                         "id": step_dict["parentId"],
@@ -296,15 +295,14 @@ class ChainlitDataLayer(BaseDataLayer):
                         "tools": json.dumps(step_dict.get("tools", {})),
                     }
                 )
+
         query = """
         INSERT INTO "Step" (
             id, "threadId", "parentId", input, metadata, name, output,
             type, "startTime", "endTime", variables, settings, tools,
             "rootRunId"
         ) VALUES (
-            :id, :thread_id, :parent_id, :input, :metadata, :name, :output, 
-            :type, :start_time, :end_time, :variables, :settings, :tools,
-            :root_run_id
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
         )
         ON CONFLICT (id) DO UPDATE SET
             input = EXCLUDED.input,
@@ -344,16 +342,16 @@ class ChainlitDataLayer(BaseDataLayer):
     async def update_step(self, step_dict: StepDict):
         query = """
         UPDATE "Step" SET
-            output = :output,
-            "endTime" = :end_time
-        WHERE id = :id
+            output = $1,
+            "endTime" = $2
+        WHERE id = $3
         """
         now = await self.get_current_timestamp()
         end = step_dict.get("end")
         params = {
-            "id": step_dict["id"],
             "output": json.dumps(step_dict.get("output", {})),
             "end_time": datetime.strptime(end, ISO_FORMAT) if end else now,
+            "id": step_dict["id"],
         }
         await self.execute_query(query, params)
 
@@ -361,14 +359,14 @@ class ChainlitDataLayer(BaseDataLayer):
     async def delete_step(self, step_id: str):
         # Delete associated elements and feedbacks first
         await self.execute_query(
-            'DELETE FROM "Element" WHERE "stepId" = :step_id', {"step_id": step_id}
+            'DELETE FROM "Element" WHERE "stepId" = $1', {"step_id": step_id}
         )
         await self.execute_query(
-            'DELETE FROM "Feedback" WHERE "stepId" = :step_id', {"step_id": step_id}
+            'DELETE FROM "Feedback" WHERE "stepId" = $1', {"step_id": step_id}
         )
         # Delete the step
         await self.execute_query(
-            'DELETE FROM "Step" WHERE id = :step_id', {"step_id": step_id}
+            'DELETE FROM "Step" WHERE id = $1', {"step_id": step_id}
         )
 
     async def get_thread_author(self, thread_id: str) -> str:
@@ -376,18 +374,16 @@ class ChainlitDataLayer(BaseDataLayer):
         SELECT u.identifier 
         FROM "Thread" t
         JOIN "User" u ON t."userId" = u.id
-        WHERE t.id = :thread_id
+        WHERE t.id = $1
         """
-        result = await self.execute_query(query, {"thread_id": thread_id})
-        row = result.first()
-        if not row:
+        results = await self.execute_query(query, {"thread_id": thread_id})
+        if not results:
             raise ValueError(f"Thread {thread_id} not found")
-        return row.identifier
+        return results[0]["identifier"]
 
     async def delete_thread(self, thread_id: str):
-        # Cascade delete will handle related records
         await self.execute_query(
-            'DELETE FROM "Thread" WHERE id = :thread_id', {"thread_id": thread_id}
+            'DELETE FROM "Thread" WHERE id = $1', {"thread_id": thread_id}
         )
 
     async def list_threads(
@@ -399,24 +395,27 @@ class ChainlitDataLayer(BaseDataLayer):
             u.identifier as user_identifier,
             (SELECT COUNT(*) FROM "Thread" WHERE "userId" = t."userId") as total
         FROM "Thread" t
-        LEFT JOIN "User" p ON t."userId" = u.id
+        LEFT JOIN "User" u ON t."userId" = u.id
         WHERE t."deletedAt" IS NULL
         """
         params = {}
+        param_count = 1
 
         if filters.userId:
-            query += ' AND t."userId" = :user_id'
+            query += f' AND t."userId" = ${param_count}'
             params["user_id"] = filters.userId
+            param_count += 1
 
         if pagination.cursor:
-            query += ' AND t."createdAt" < (SELECT "createdAt" FROM "Thread" WHERE id = :cursor)'
+            query += f' AND t."createdAt" < (SELECT "createdAt" FROM "Thread" WHERE id = ${param_count})'
             params["cursor"] = pagination.cursor
+            param_count += 1
 
-        query += ' ORDER BY t."createdAt" DESC LIMIT :limit'
+        query += f' ORDER BY t."createdAt" DESC LIMIT ${param_count}'
         params["limit"] = str(pagination.first + 1)
 
-        result = await self.execute_query(query, params)
-        threads = result.fetchall()
+        results = await self.execute_query(query, params)
+        threads = results
 
         has_next_page = len(threads) > pagination.first
         if has_next_page:
@@ -425,12 +424,12 @@ class ChainlitDataLayer(BaseDataLayer):
         thread_dicts = []
         for thread in threads:
             thread_dict = ThreadDict(
-                id=str(thread.id),
-                createdAt=thread.createdAt.isoformat(),
-                name=thread.name,
-                userId=str(thread.userId) if thread.userId else None,
-                userIdentifier=thread.user_identifier,
-                metadata=thread.metadata,
+                id=str(thread["id"]),
+                createdAt=thread["createdAt"].isoformat(),
+                name=thread["name"],
+                userId=str(thread["userId"]) if thread["userId"] else None,
+                userIdentifier=thread["user_identifier"],
+                metadata=thread["metadata"],
                 steps=[],
                 elements=[],
                 tags=[],
@@ -448,54 +447,64 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
         query = """
-        SELECT t.*, p.identifier as user_identifier
+        SELECT t.*, u.identifier as user_identifier
         FROM "Thread" t
-        LEFT JOIN "User" p ON t."userId" = p.id
-        WHERE t.id = :thread_id AND t."deletedAt" IS NULL
+        LEFT JOIN "User" u ON t."userId" = u.id
+        WHERE t.id = $1 AND t."deletedAt" IS NULL
         """
-        result = await self.execute_query(query, {"thread_id": thread_id})
-        thread = result.first()
+        results = await self.execute_query(query, {"thread_id": thread_id})
 
-        if not thread:
+        if not results:
             return None
 
+        thread = results[0]
+
         # Get steps
-        steps_result = await self.execute_query(
-            'SELECT * FROM "Step" WHERE "threadId" = :thread_id ORDER BY "startTime"',
-            {"thread_id": thread_id},
-        )
+        steps_query = """
+        SELECT * FROM "Step" 
+        WHERE "threadId" = $1 
+        ORDER BY "startTime"
+        """
+        steps_results = await self.execute_query(steps_query, {"thread_id": thread_id})
 
         # Get elements
-        elements_result = await self.execute_query(
-            'SELECT * FROM "Element" WHERE "threadId" = :thread_id',
-            {"thread_id": thread_id},
+        elements_query = """
+        SELECT * FROM "Element" 
+        WHERE "threadId" = $1
+        """
+        elements_results = await self.execute_query(
+            elements_query, {"thread_id": thread_id}
         )
 
         return ThreadDict(
-            id=str(thread.id),
-            createdAt=thread.createdAt.isoformat(),
-            name=thread.name,
-            userId=str(thread.userId) if thread.userId else None,
-            userIdentifier=thread.user_identifier,
-            metadata=thread.metadata,
-            steps=[self._convert_step_row_to_dict(step) for step in steps_result],
+            id=str(thread["id"]),
+            createdAt=thread["createdAt"].isoformat(),
+            name=thread["name"],
+            userId=str(thread["userId"]) if thread["userId"] else None,
+            userIdentifier=thread["user_identifier"],
+            metadata=thread["metadata"],
+            steps=[self._convert_step_row_to_dict(step) for step in steps_results],
             elements=[
-                self._convert_element_row_to_dict(elem) for elem in elements_result
+                self._convert_element_row_to_dict(elem) for elem in elements_results
             ],
             tags=[],
         )
 
     async def _get_user_identifer_by_id(self, user_id: str) -> str:
         if self.show_logger:
-            logger.info(f"SQLAlchemy: _get_user_identifer_by_id, user_id={user_id}")
-        query = "SELECT identifier FROM users WHERE id = :user_id"
-        parameters = {"user_id": user_id}
-        result = await self.execute_query(query=query, params=parameters)
+            logger.info(f"asyncpg: _get_user_identifer_by_id, user_id={user_id}")
 
-        assert result
-        assert isinstance(result, list)
+        query = """
+        SELECT identifier 
+        FROM "User" 
+        WHERE id = $1
+        """
+        results = await self.execute_query(query, {"user_id": user_id})
 
-        return result[0]["identifier"]
+        if not results:
+            raise ValueError(f"User {user_id} not found")
+
+        return results[0]["identifier"]
 
     async def update_thread(
         self,
@@ -506,17 +515,17 @@ class ChainlitDataLayer(BaseDataLayer):
         tags: Optional[List[str]] = None,
     ):
         if self.show_logger:
-            logger.info(f"SQLAlchemy: update_thread, thread_id={thread_id}")
+            logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
         user_identifier = None
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
+        now = await self.get_current_timestamp()
+
         data = {
             "id": thread_id,
-            "createdAt": (
-                await self.get_current_timestamp() if metadata is None else None
-            ),
+            "createdAt": now if metadata is None else None,
             "name": (
                 name
                 if name is not None
@@ -527,46 +536,50 @@ class ChainlitDataLayer(BaseDataLayer):
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
         }
-        parameters = {
-            key: value for key, value in data.items() if value is not None
-        }  # Remove keys with None values
-        columns = ", ".join(f'"{key}"' for key in parameters.keys())
-        values = ", ".join(f":{key}" for key in parameters.keys())
-        updates = ", ".join(
-            f'"{key}" = EXCLUDED."{key}"' for key in parameters.keys() if key != "id"
-        )
+
+        # Remove None values
+        data = {k: v for k, v in data.items() if v is not None}
+
+        # Build the query dynamically based on available fields
+        columns = [f'"{k}"' for k in data.keys()]
+        placeholders = [f"${i+1}" for i in range(len(data))]
+        values = list(data.values())
+
+        update_sets = [f'"{k}" = EXCLUDED."{k}"' for k in data.keys() if k != "id"]
+
         query = f"""
-            INSERT INTO "Thread" ({columns})
-            VALUES ({values})
-            ON CONFLICT ("id") DO UPDATE
-            SET {updates};
+            INSERT INTO "Thread" ({", ".join(columns)})
+            VALUES ({", ".join(placeholders)})
+            ON CONFLICT (id) DO UPDATE
+            SET {", ".join(update_sets)};
         """
-        await self.execute_query(query=query, params=parameters)
 
-    def _convert_step_row_to_dict(self, row) -> StepDict:
+        await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
+
+    def _convert_step_row_to_dict(self, row: Dict) -> StepDict:
         return StepDict(
-            id=str(row.id),
-            threadId=str(row.get("threadId")),
-            parentId=str(row.parentId) if row.parentId else None,
-            name=row.name,
-            type=row.type,
-            input=row.input,
-            output=row.output,
-            metadata=row.metadata,
-            start=row.startTime.isoformat() if row.startTime else None,
-            end=row.endTime.isoformat() if row.endTime else None,
+            id=str(row["id"]),
+            threadId=str(row["threadId"]) if row.get("threadId") else None,
+            parentId=str(row["parentId"]) if row.get("parentId") else None,
+            name=row.get("name"),
+            type=row["type"],
+            input=row.get("input"),
+            output=row.get("output"),
+            metadata=row.get("metadata"),
+            start=row["startTime"].isoformat() if row.get("startTime") else None,
+            end=row["endTime"].isoformat() if row.get("endTime") else None,
         )
 
-    def _convert_element_row_to_dict(self, row) -> ElementDict:
+    def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:
         return ElementDict(
-            id=str(row.id),
-            threadId=str(row.get("threadId")),
+            id=str(row["id"]),
+            threadId=str(row["threadId"]) if row.get("threadId") else None,
             type="file",
-            url=row.url,
-            name=row.name,
-            mime=row.mime,
-            objectKey=row.objectKey,
-            forId=str(row.stepId),
+            url=row["url"],
+            name=row["name"],
+            mime=row["mime"],
+            objectKey=row["objectKey"],
+            forId=str(row["stepId"]),
             chainlitKey=row.get("chainlitKey"),
             display=row["display"],
             size=row["size"],
@@ -578,3 +591,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def build_debug_url(self) -> str:
         return ""
+
+    async def cleanup(self):
+        """Cleanup database connections"""
+        if self.pool:
+            await self.pool.close()
