@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { router } from 'router';
-import { Toaster } from 'sonner';
+import { Toaster } from "@/components/ui/sonner"
 import { makeTheme } from 'theme';
 
 import { Box, GlobalStyles } from '@mui/material';
@@ -17,6 +17,7 @@ import { userEnvState } from 'state/user';
 
 import './App.css';
 import { ThemeProvider } from './components/ThemeProvider';
+import { Loader } from './components/Loader';
 
 type Primary = {
   dark?: string;
@@ -82,7 +83,7 @@ function App() {
   // @ts-expect-error custom property
   const fontFamily = window.theme?.font_family;
   const theme = overrideTheme(makeTheme(themeVariant, fontFamily));
-  const { isAuthenticated, accessToken } = useAuth();
+  const { isReady, isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
 
@@ -120,6 +121,10 @@ function App() {
     }
   }
 
+  const content = isReady ? <RouterProvider router={router} /> : <div className='h-screen w-screen flex items-center justify-center'>
+      <Loader className='!size-6' />
+    </div>
+
   return (
     <ThemeProvider storageKey="vite-ui-theme">
 
@@ -132,19 +137,10 @@ function App() {
       <Toaster
         className="toast"
         position="top-right"
-        toastOptions={{
-          style: {
-            fontFamily: theme.typography.fontFamily,
-            background: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.divider}`,
-            color: theme.palette.text.primary
-          }
-        }}
       />
 
         <ChatSettingsModal />
-        
-        <RouterProvider router={router} />
+        {content}
    
     </TP>
     </ThemeProvider>

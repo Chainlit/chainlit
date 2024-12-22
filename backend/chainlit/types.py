@@ -194,9 +194,13 @@ class AskActionResponse(TypedDict):
     collapsed: bool
 
 
+class UpdateThreadRequest(BaseModel):
+    threadId: str
+    name: str
+
+
 class DeleteThreadRequest(BaseModel):
     threadId: str
-
 
 class DeleteFeedbackRequest(BaseModel):
     feedbackId: str

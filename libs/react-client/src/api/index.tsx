@@ -225,6 +225,12 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async renameThread(threadId: string, name: string, accessToken?: string) {
+    const res = await this.put(`/project/thread`, { threadId, name }, accessToken);
+
+    return res.json();
+  }
+
   async deleteThread(threadId: string, accessToken?: string) {
     const res = await this.delete(`/project/thread`, { threadId }, accessToken);
 

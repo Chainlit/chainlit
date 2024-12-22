@@ -1,4 +1,3 @@
-import { useConfig } from '@chainlit/react-client';
 import { PanelLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -7,16 +6,13 @@ import { useSidebar } from '../ui/sidebar';
 
 
 export default function SidebarTrigger() {
-    const { config } = useConfig();
-    const {setOpen, open} = useSidebar()
-
-// if(!config?.dataPersistence) return null
+    const {setOpen, open, openMobile, setOpenMobile, isMobile} = useSidebar()
 
 return   <TooltipProvider>
 <Tooltip>
   <TooltipTrigger asChild>
     
-  <Button onClick={() => setOpen(!open)} size="icon" variant="ghost"               className='text-muted-foreground hover:text-muted-foreground'>
+  <Button onClick={() => isMobile? setOpenMobile(!openMobile) : setOpen(!open)} size="icon" variant="ghost"               className='text-muted-foreground hover:text-muted-foreground'>
 
       <PanelLeft className="!size-5" />
       </Button>

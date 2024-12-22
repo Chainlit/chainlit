@@ -60,6 +60,7 @@ from chainlit.secret import random_secret
 from chainlit.types import (
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    UpdateThreadRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
@@ -815,6 +816,26 @@ async def get_thread_element(
     res = await data_layer.get_element(thread_id, element_id)
     return JSONResponse(content=res)
 
+
+@router.put("/project/thread")
+async def rename_thread(
+    request: Request,
+    payload: UpdateThreadRequest,
+    current_user: UserParam,
+):
+    """Rename a thread."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    thread_id = payload.threadId
+
+    await is_thread_author(current_user.identifier, thread_id)
+
+    await data_layer.update_thread(thread_id, name=payload.name)
+    return JSONResponse(content={"success": True})
 
 @router.delete("/project/thread")
 async def delete_thread(

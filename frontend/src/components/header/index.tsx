@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { useAudio } from '@chainlit/react-client';
+import { useAudio, useConfig } from '@chainlit/react-client';
 
 import { settingsState } from 'state/settings';
 import { ThemeToggle } from './ThemeToggle';
@@ -16,16 +16,19 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 const Header = memo(() => {
   const { audioConnection } = useAudio();
-  const {open} = useSidebar()
+  const {config} = useConfig()
+  const {open, openMobile, isMobile} = useSidebar()
 
+  const sidebarOpen = isMobile ? openMobile : open
 
+  const show = config?.dataPersistence && sidebarOpen
 
   return (
     <div className='p-3 flex h-[60px] items-center justify-between gap-2 relative' id="header">
             <div className='flex items-center'>
 
-                {open ? null : <SidebarTrigger />}
-                {open ? null : <NewChatButton />}
+                {show ? null : <SidebarTrigger />}
+                {show ? null : <NewChatButton />}
 
                 <ChatProfiles />
                 </div>

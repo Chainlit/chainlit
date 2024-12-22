@@ -13,7 +13,7 @@ export const useAuth = () => {
   const { accessToken } = useAuthState();
   const { handleSetAccessToken } = useTokenManagement();
 
-  const isReady = !!authConfig;
+  const isReady = !!authConfig && (!authConfig.requireLogin || user !== undefined);
 
   if (authConfig && !authConfig.requireLogin) {
     return {

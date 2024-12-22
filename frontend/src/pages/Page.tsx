@@ -9,13 +9,14 @@ import { Header } from '@/components/header';
 import Alert from '@/components/Alert';
 import LeftSidebar from '@/components/LeftSidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Loader } from '@/components/Loader';
 
 type Props = {
   children: JSX.Element;
 };
 
 const Page = ({ children }: Props) => {
-  const { isAuthenticated, isReady } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { config } = useConfig();
   const userEnv = useRecoilValue(userEnvState);
   const sideViewElement = useRecoilValue(sideViewState);
@@ -26,12 +27,8 @@ const Page = ({ children }: Props) => {
     }
   }
 
-  if (isReady && !isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <LeftSidebar />
       <SidebarInset>
     <div className="flex flex-col flex-grow">

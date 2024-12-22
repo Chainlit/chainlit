@@ -6,7 +6,7 @@ import getRouterBasename from 'utils/router';
 import { useApi, useAuth, useChatInteract, useConfig } from '@chainlit/react-client';
 
 export default function AppWrapper() {
-  const { isAuthenticated, isReady } = useAuth();
+  const { isAuthenticated, isReady, user } = useAuth();
   const { language: languageInUse } = useConfig();
   const { i18n } = useTranslation();
   const { windowMessage } = useChatInteract();
@@ -19,15 +19,6 @@ export default function AppWrapper() {
   const { data: translations } = useApi<any>(
     `/project/translations?language=${languageInUse}`
   );
-
-  if (
-    isReady &&
-    !isAuthenticated &&
-    window.location.pathname !== getRouterBasename() + '/login' &&
-    window.location.pathname !== getRouterBasename() + '/login/callback'
-  ) {
-    window.location.href = getRouterBasename() + '/login';
-  }
 
   useEffect(() => {
     if (!translations) return;
@@ -42,8 +33,12 @@ export default function AppWrapper() {
     return () => window.removeEventListener('message', handleWindowMessage);
   }, [windowMessage]);
 
-  if (!isReady) {
-    return null;
+  if (
+    isReady && !isAuthenticated &&
+    window.location.pathname !== getRouterBasename() + '/login' &&
+    window.location.pathname !== getRouterBasename() + '/login/callback'
+  ) {
+    window.location.href = getRouterBasename() + '/login';
   }
 
   return <App />;

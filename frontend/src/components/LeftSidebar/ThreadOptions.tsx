@@ -1,0 +1,45 @@
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { cn } from "@/lib/utils";
+import { Pen, Ellipsis, Trash } from "lucide-react";
+
+interface Props {
+    onDelete: () => void;
+    onRename: () => void;
+    className?: string
+}
+
+export default function ThreadOptions({onDelete, onRename, className}: Props) {
+    return  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+              }}
+              id="thread-options"
+              className={cn('focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-muted-foreground hover:text-muted-foreground', className)}
+            >
+              <Ellipsis />
+            </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent className="w-20" align="start" forceMount>
+      <DropdownMenuItem onClick={(e) => {
+        e.stopPropagation()
+        onRename()
+      }}>
+        Rename
+        <Pen className='ml-auto' />
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={(e) => {
+        e.stopPropagation()
+        onDelete()
+      }} className="text-red-500 hover:text-red-500">
+        Delete
+        <Trash className='ml-auto' />
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+}
