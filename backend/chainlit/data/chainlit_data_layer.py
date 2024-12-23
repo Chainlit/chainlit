@@ -412,7 +412,7 @@ class ChainlitDataLayer(BaseDataLayer):
         LEFT JOIN "User" u ON t."userId" = u.id
         WHERE t."deletedAt" IS NULL
         """
-        params = {}
+        params: Dict[str, Any] = {}
         param_count = 1
 
         if filters.search:
@@ -554,13 +554,13 @@ class ChainlitDataLayer(BaseDataLayer):
     def _convert_step_row_to_dict(self, row: Dict) -> StepDict:
         return StepDict(
             id=str(row["id"]),
-            threadId=str(row["threadId"]) if row.get("threadId") else None,
+            threadId=str(row["threadId"]) if row.get("threadId") else "",
             parentId=str(row["parentId"]) if row.get("parentId") else None,
-            name=row.get("name"),
+            name=str(row.get("name")),
             type=row["type"],
-            input=row.get("input"),
-            output=row.get("output"),
-            metadata=row.get("metadata"),
+            input=row.get("input", {}),
+            output=row.get("output", {}),
+            metadata=row.get("metadata", {}),
             start=row["startTime"].isoformat() if row.get("startTime") else None,
             end=row["endTime"].isoformat() if row.get("endTime") else None,
         )
