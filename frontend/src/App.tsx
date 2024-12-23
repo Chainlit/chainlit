@@ -5,12 +5,9 @@ import { router } from 'router';
 import { Toaster } from "@/components/ui/sonner"
 import { makeTheme } from 'theme';
 
-import { Box, GlobalStyles } from '@mui/material';
 import { Theme, ThemeProvider as TP } from '@mui/material/styles';
 
 import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
-
-import ChatSettingsModal from 'components/organisms/chat/settings';
 
 import { settingsState } from 'state/settings';
 import { userEnvState } from 'state/user';
@@ -18,6 +15,7 @@ import { userEnvState } from 'state/user';
 import './App.css';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Loader } from './components/Loader';
+import ChatSettingsModal from './components/ChatSettings';
 
 type Primary = {
   dark?: string;
