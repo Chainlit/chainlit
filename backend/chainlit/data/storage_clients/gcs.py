@@ -4,8 +4,8 @@ from typing import Any, Dict, Union
 from google.cloud import storage  # type: ignore
 from google.oauth2 import service_account
 
-from chainlit import logger
 from chainlit.data.storage_clients.base import BaseStorageClient
+from chainlit.logger import logger
 
 
 class GCSStorageClient(BaseStorageClient):

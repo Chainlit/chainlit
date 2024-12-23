@@ -78,8 +78,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
         return PersistedUser(
             id=str(row.get("id")),
-            identifier=row.get("identifier"),
-            createdAt=row.get("createdAt").isoformat(),
+            identifier=str(row.get("identifier")),
+            createdAt=row.get("createdAt").isoformat(),  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -104,8 +104,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
         return PersistedUser(
             id=str(row.get("id")),
-            identifier=row.get("identifier"),
-            createdAt=row.get("createdAt").isoformat(),
+            identifier=str(row.get("identifier")),
+            createdAt=row.get("createdAt").isoformat(),  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -414,6 +414,11 @@ class ChainlitDataLayer(BaseDataLayer):
         """
         params = {}
         param_count = 1
+
+        if filters.search:
+            query += f" AND t.name ILIKE ${param_count}"
+            params["name"] = f"%{filters.search}%"
+            param_count += 1
 
         if filters.userId:
             query += f' AND t."userId" = ${param_count}'
