@@ -16,7 +16,6 @@ import {
 
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
-import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
@@ -26,6 +25,7 @@ import Alert from '@/components/Alert';
 import { ErrorBoundary } from '../ErrorBoundary';
 import ScrollContainer from './ScrollContainer';
 import WelcomeScreen from './WelcomeScreen';
+import { TaskList } from '../Tasklist';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -175,12 +175,12 @@ const Chat = () => {
       // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
-      className='flex w-full flex-grow relative'
+      className='flex w-full flex-col flex-grow relative'
     >
       {upload ? (
           <input id="#upload-drop-input" {...upload.getInputProps()} />
       ) : null}
-      <div className='flex flex-grow'>
+      <div className='flex flex-col flex-grow p-4 md:p-2'>
         {error ? (
           <div
           className="w-full mx-auto my-2"
@@ -193,7 +193,7 @@ const Chat = () => {
             </Alert>
           </div>
         ) : null}
-        {/* <TaskList isMobile={true} /> */}
+        <TaskList isMobile={true} />
         <ErrorBoundary>
           <ScrollContainer
             autoScroll={autoScroll}

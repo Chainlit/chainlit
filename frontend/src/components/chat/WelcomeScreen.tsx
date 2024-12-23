@@ -14,7 +14,7 @@ interface Props {
 export default function WelcomeScreen(props: Props) {
     const layoutMaxWidth = useLayoutMaxWidth();
 
-    return <div className="flex flex-col gap-4 w-full flex-grow items-center justify-center welcome-screen mx-auto"
+    return <div className="flex flex-col -mt-[60px] gap-8 w-full flex-grow items-center justify-center welcome-screen mx-auto"
     style={{
         "maxWidth": layoutMaxWidth
       }}

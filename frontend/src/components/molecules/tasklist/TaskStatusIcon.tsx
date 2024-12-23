@@ -1,42 +1,18 @@
-import { green, grey, primary, white } from 'theme';
-
-import { Box, CircularProgress, SvgIcon } from '@mui/material';
-
+import { Loader } from '@/components/Loader';
 import type { ITask } from './Task';
 
 export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => {
   if (status === 'running') {
-    return (
-      <Box
-        sx={{
-          marginTop: '-2px',
-          width: '24px',
-          height: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: grey[700]
-        }}
-      >
-        <CircularProgress color="inherit" size={18} />
-      </Box>
-    );
+    return <Loader />
   }
 
   return (
-    <SvgIcon
-      width={24}
-      height={24}
-      sx={{
-        marginTop: '-2px',
-        fill: 'none'
-      }}
-    >
+    <>
       {status === 'done' && (
         <>
-          <circle cx={12} cy={12} r={9} fill={green[500]} />
+          <circle cx={12} cy={12} r={9} className='fill-green-500' />
           <path
-            stroke={white}
+            stroke="#FFFFFF"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.5}
@@ -45,13 +21,13 @@ export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => {
         </>
       )}
       {status === 'ready' && (
-        <circle cx={12} cy={12} r={8.25} stroke={grey[700]} strokeWidth={1.5} />
+        <circle cx={12} cy={12} r={8.25} className="stoke-gray-500" strokeWidth={1.5} />
       )}
       {status === 'failed' && (
         <>
-          <circle cx={12} cy={12} r={9} fill={primary[500]} />
+          <circle cx={12} cy={12} r={9} className="fill-red-500" />
           <path
-            stroke={white}
+            stroke="#FFFFFF"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.5}
@@ -59,6 +35,6 @@ export const TaskStatusIcon = ({ status }: { status: ITask['status'] }) => {
           />
         </>
       )}
-    </SvgIcon>
+      </>
   );
 };

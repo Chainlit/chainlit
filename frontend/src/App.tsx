@@ -14,7 +14,6 @@ import { userEnvState } from 'state/user';
 
 import './App.css';
 import { ThemeProvider } from './components/ThemeProvider';
-import { Loader } from './components/Loader';
 import ChatSettingsModal from './components/ChatSettings';
 
 type Primary = {
@@ -81,7 +80,7 @@ function App() {
   // @ts-expect-error custom property
   const fontFamily = window.theme?.font_family;
   const theme = overrideTheme(makeTheme(themeVariant, fontFamily));
-  const { isReady, isAuthenticated, accessToken } = useAuth();
+  const { isAuthenticated, accessToken } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
 
@@ -118,6 +117,8 @@ function App() {
       setChatProfile(config.chatProfiles[0].name);
     }
   }
+
+  if(!configLoaded) return null
 
   return (
     <ThemeProvider storageKey="vite-ui-theme">

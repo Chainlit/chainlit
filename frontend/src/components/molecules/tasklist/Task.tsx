@@ -1,76 +1,55 @@
-import { useSetRecoilState } from 'recoil';
-import { grey } from 'theme';
-
-import { Box, ListItem, ListItemButton, useTheme } from '@mui/material';
-
-import { highlightMessage } from 'state/project';
-
-import { TaskStatusIcon } from './TaskStatusIcon';
+import { Button } from "@/components/ui/button";
+import { useSetRecoilState } from "recoil";
+import { TaskStatusIcon } from "./TaskStatusIcon";
 
 export interface ITask {
   title: string;
-  status: 'ready' | 'running' | 'done' | 'failed';
+  status: "ready" | "running" | "done" | "failed";
   forId?: string;
 }
 
 export interface ITaskList {
-  status: 'ready' | 'running' | 'done';
+  status: "ready" | "running" | "done";
   tasks: ITask[];
 }
 
-export const Task = ({ index, task }: { index: number; task: ITask }) => {
-  const setHighlightedMessage = useSetRecoilState(highlightMessage);
-  const theme = useTheme();
+interface TaskProps {
+  index: number;
+  task: ITask;
+}
+
+export const Task = ({ index, task }: TaskProps) => {
+
+  const handleClick = () => {
+    if (task.forId) {
+      const element = document.getElementById(`message-${task.forId}`);
+      element?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "start",
+      });
+    }
+  };
+
+  const statusStyles = {
+    ready: "text-gray-700 dark:text-gray-300",
+    running: "text-gray-900 dark:text-gray-100 font-bold",
+    done: "text-gray-500",
+    failed: "text-gray-500",
+  };
+
   return (
-    <ListItem disableGutters className={`task task-status-${task.status}`}>
-      <ListItemButton
-        disableRipple={!task.forId}
-        sx={{
-          color:
-            {
-              ready: theme.palette.mode === 'dark' ? grey[300] : grey[700],
-              running: theme.palette.mode === 'dark' ? grey[100] : grey[850],
-              done: grey[500],
-              failed: grey[500]
-            }[task.status] || theme.palette.text.secondary,
-          fontWeight: task.status === 'running' ? '700' : '500',
-          alignItems: 'flex-start',
-          fontSize: '14px',
-          lineHeight: 1.36,
-          cursor: task.forId ? 'pointer' : 'default'
-        }}
-        onClick={() => {
-          if (task.forId) {
-            setHighlightedMessage(task.forId);
-            const element = document.getElementById(`message-${task.forId}`);
-            if (element) {
-              element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-                inline: 'start'
-              });
-            }
-          }
-        }}
+    <li className={`task task-status-${task.status}`}>
+      <Button
+        variant="ghost"
+        className={`w-full flex items-start text-sm leading-snug ${statusStyles[task.status]}`}
+        onClick={handleClick}
+        disabled={!task.forId}
       >
-        <Box
-          sx={{
-            paddingRight: theme.spacing(1),
-            flex: '0 0 18px',
-            width: '18px'
-          }}
-        >
-          {index}
-        </Box>
+        <span className="flex-none w-[18px] pr-4">{index}</span>
         <TaskStatusIcon status={task.status} />
-        <Box
-          sx={{
-            paddingLeft: theme.spacing(2)
-          }}
-        >
-          {task.title}
-        </Box>
-      </ListItemButton>
-    </ListItem>
+        <span className="pl-8">{task.title}</span>
+      </Button>
+    </li>
   );
 };

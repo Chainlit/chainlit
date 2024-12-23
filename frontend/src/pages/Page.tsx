@@ -2,11 +2,11 @@ import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { useConfig, sideViewState } from '@chainlit/react-client';
 import { ElementSideView } from 'components/atoms/elements';
-import { TaskList } from 'components/molecules/tasklist/TaskList';
 import { userEnvState } from 'state/user';
 import { Header } from '@/components/header';
 import LeftSidebar from '@/components/LeftSidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { TaskList } from '@/components/Tasklist';
 
 type Props = {
   children: JSX.Element;

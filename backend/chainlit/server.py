@@ -636,7 +636,7 @@ async def oauth_azure_hf_callback(
     return response
 
 
-GenericUser = Union[User, PersistedUser]
+GenericUser = Union[User, PersistedUser, None]
 UserParam = Annotated[GenericUser, Depends(get_current_user)]
 
 

@@ -13,7 +13,6 @@ interface IMessageContext {
   ) => { xhr: XMLHttpRequest; promise: Promise<IFileRef> };
   askUser?: IAsk;
   defaultCollapseContent: boolean;
-  highlightedMessage: string | null;
   loading: boolean;
   showFeedbackButtons: boolean;
   uiName: string;

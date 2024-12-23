@@ -16,8 +16,6 @@ import {
 
 import { MessageContainer as CMessageContainer } from 'components/molecules/messages/MessageContainer';
 
-import { highlightMessage } from 'state/project';
-
 interface Props {
   loading: boolean;
   actions: IAction[];
@@ -50,7 +48,6 @@ const MessageContainer = memo(
   }: Props) => {
     const { config } = useConfig();
     const setSideView = useSetRecoilState(sideViewState);
-    const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
 
     const uploadFile = useCallback(
@@ -110,7 +107,6 @@ const MessageContainer = memo(
         allowHtml: config?.features?.unsafe_allow_html,
         latex: config?.features?.latex,
         defaultCollapseContent: !!config?.ui.default_collapse_content,
-        highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
         uiName: config?.ui?.name || '',
@@ -122,7 +118,6 @@ const MessageContainer = memo(
     }, [
       askUser,
       enableFeedback,
-      highlightedMessage,
       loading,
       config?.ui?.name,
       config?.features?.unsafe_allow_html,

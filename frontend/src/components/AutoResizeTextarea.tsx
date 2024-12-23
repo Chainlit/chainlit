@@ -6,11 +6,13 @@ interface Props extends React.ComponentProps<'textarea'> {
   maxHeight?: number;
   placeholder?: string;
   onPaste?: (event: any) => void;
+  onEnter?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 const AutoResizeTextarea = ({
   maxHeight,
   onPaste,
+  onEnter,
   placeholder,
   className,
   ...props
@@ -21,11 +23,9 @@ const AutoResizeTextarea = ({
     const textarea = textareaRef.current;
     if (!textarea || !onPaste) return;
 
-    // Add paste event listener
     textarea.addEventListener('paste', onPaste);
 
     return () => {
-      // Remove paste event listener
       textarea.removeEventListener('paste', onPaste);
     };
   }, [onPaste]);
@@ -38,12 +38,20 @@ const AutoResizeTextarea = ({
     textarea.style.height = `${newHeight}px`;
   }, [props.value]);
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey && onEnter) {
+      event.preventDefault();
+      onEnter(event);
+    }
+  };
+
   return (
     <Textarea
       ref={textareaRef as any}
       {...props}
+      onKeyDown={handleKeyDown}
       className={cn(
-        'p-0 min-h-6 resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+        'p-0 min-h-6 rounded-none resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
         className
       )}
       placeholder={placeholder}

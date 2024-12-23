@@ -11,7 +11,7 @@ interface HeaderProps {
   status: string
 }
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string) => fetch(url, {credentials: "include"}).then((r) => r.json())
 
 const Header = ({ status }: HeaderProps) => {
   return (
@@ -30,26 +30,18 @@ const TaskList = ({ isMobile }: TaskListProps) => {
   const { tasklists } = useChatData()
   const tasklist = tasklists[tasklists.length - 1]
 
-  // We remove the base URL since the useApi hook is already set with a base URL.
-  // This ensures we only pass the relative path and search parameters to the hook.
-  const url = useMemo(() => {
-    if (!tasklist?.url) return null
-    const parsedUrl = new URL(tasklist.url)
-    return parsedUrl.pathname + parsedUrl.search
-  }, [tasklist?.url])
-
-  const { error, data, isLoading } = useSWR<ITaskList>(url, fetcher, {
-    keepPreviousData: true
+  const { error, data, isLoading } = useSWR<ITaskList>(tasklist?.url, fetcher, {
+    keepPreviousData: true,
   })
 
-  if (!url) return null
+  if (!tasklist?.url) return null
 
   if (isLoading && !data) {
-    return <div>Loading tasks...</div>
+    return null
   }
 
   if (error) {
-    return <div>Error loading tasks</div>
+    return null
   }
 
   const content = data as ITaskList
@@ -69,7 +61,7 @@ const TaskList = ({ isMobile }: TaskListProps) => {
     const highlightedTask = tasks?.[highlightedTaskIndex]
 
     return (
-      <aside className="w-full p-4 md:hidden">
+      <aside className="w-full md:hidden">
         <Card>
           <Header status={content.status} />
           {highlightedTask && (
@@ -83,15 +75,13 @@ const TaskList = ({ isMobile }: TaskListProps) => {
   }
 
   return (
-    <aside className="hidden w-96 shrink-0 md:block">
-      <Card>
+    <aside className="hidden max-w-96 flex-grow md:block overflow-y-auto ml-0 m-4">
+      <Card className='overflow-y-auto h-full'>
         <Header status={content?.status} />
-        <CardContent>
-          <ScrollArea className="h-[calc(100vh-200px)]">
+        <CardContent className='flex flex-col gap-2'>
             {tasks?.map((task, index) => (
               <Task key={index} index={index + 1} task={task} />
             ))}
-          </ScrollArea>
         </CardContent>
       </Card>
     </aside>

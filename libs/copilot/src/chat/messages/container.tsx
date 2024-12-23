@@ -3,7 +3,6 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import { MessageContainer as CMessageContainer } from '@chainlit/app/src/components/molecules/messages/MessageContainer';
-import { highlightMessage } from '@chainlit/app/src/state/project';
 import {
   IAction,
   IAsk,
@@ -47,7 +46,6 @@ const MessageContainer = memo(
   }: Props) => {
     const { config } = useConfig();
     const setSideView = useSetRecoilState(sideViewState);
-    const highlightedMessage = useRecoilValue(highlightMessage);
     const { uploadFile: _uploadFile } = useChatInteract();
 
     const uploadFile = useCallback(
@@ -96,7 +94,6 @@ const MessageContainer = memo(
         allowHtml: config?.features?.unsafe_allow_html,
         latex: config?.features?.latex,
         defaultCollapseContent: true,
-        highlightedMessage,
         loading,
         showFeedbackButtons: enableFeedback,
         uiName: config?.ui?.name || '',
@@ -108,7 +105,6 @@ const MessageContainer = memo(
     }, [
       askUser,
       enableFeedback,
-      highlightedMessage,
       loading,
       config?.ui?.name,
       config?.features?.unsafe_allow_html,

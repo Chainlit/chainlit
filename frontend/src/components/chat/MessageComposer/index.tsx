@@ -37,6 +37,29 @@ export default function MessageComposer({fileSpec, onFileUpload, onFileUploadErr
 
       const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
+const onPaste = useCallback((event: ClipboardEvent) => {
+    if (event.clipboardData && event.clipboardData.items) {
+      const items = Array.from(event.clipboardData.items);
+
+      // Attempt to handle text data first
+      const textData = event.clipboardData.getData('text/plain');
+      if (textData) {
+        // Skip file handling if text data is present
+        return;
+      }
+
+      // If no text data, check for files (e.g., images)
+      items.forEach((item) => {
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+          if (file) {
+            onFileUpload([file]);
+          }
+        }
+      });
+  };
+}, [])
+
     const onSubmit = useCallback(
       async (msg: string, attachments?: IAttachment[]) => {
         const message: IStep = {
@@ -104,7 +127,12 @@ export default function MessageComposer({fileSpec, onFileUpload, onFileUploadErr
             <Attachments />
           </div>
         ) : null}
-        <AutoResizeTextarea value={value} onChange={(e) => setValue(e.target.value)} className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"    maxHeight={250}      placeholder={t(
+        <AutoResizeTextarea
+        
+        value={value} 
+        onPaste={onPaste}
+        onEnter={submit}
+        onChange={(e) => setValue(e.target.value)} className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"    maxHeight={250}      placeholder={t(
             'components.organisms.chat.inputBox.input.placeholder'
           )} />
           <div className="flex items-center justify-between">
