@@ -12,7 +12,7 @@ export default function Starter({ starter }: StarterProps) {
   const { sendMessage } = useChatInteract()
   const { loading } = useChatData()
   const { user } = useAuth()
-  console.log(starter)
+  
   const onSubmit = useCallback(async () => {
     const message: IStep = {
       threadId: '',

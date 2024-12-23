@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react'
 import hljs from 'highlight.js'
-import { Copy } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import 'highlight.js/styles/monokai-sublime.css'
+import CopyButton from './CopyButton'
 
 interface CodeSnippetProps {
   language: string
@@ -58,12 +57,6 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
 
   const showSyntaxHighlighter = match && code
 
-  const handleCopy = async () => {
-    if (code) {
-      await navigator.clipboard.writeText(code)
-    }
-  }
-
   const highlightedCode = showSyntaxHighlighter ? (
     <HighlightedCode language={match[1]}>{code}</HighlightedCode>
   ) : null
@@ -82,14 +75,7 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
         <span className="text-sm text-muted-foreground">
           {match?.[1] || 'Raw code'}
         </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
-          onClick={handleCopy}
-        >
-          <Copy className="h-4 w-4" />
-        </Button>
+        <CopyButton content={code} />
       </CardHeader>
       <CardContent className="p-0">
         {highlightedCode}
