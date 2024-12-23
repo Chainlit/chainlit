@@ -12,6 +12,7 @@ import UserNav from './UserNav';
 import SidebarTrigger from './SidebarTrigger';
 import ChatProfiles from './ChatProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
+import ReadmeButton from './Readme';
 
 
 const Header = memo(() => {
@@ -50,6 +51,7 @@ const Header = memo(() => {
 
       <div />
       <div className='flex items-center gap-1'>
+        <ReadmeButton />
         <ApiKeys />
         <ThemeToggle />
         <UserNav />

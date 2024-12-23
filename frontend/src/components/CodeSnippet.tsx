@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import 'highlight.js/styles/monokai-sublime.css'
-import { useTheme } from './ThemeProvider'
 
 interface CodeSnippetProps {
   language: string
@@ -52,9 +51,6 @@ interface CodeProps {
 }
 
 export default function CodeSnippet({ children, ...props }: CodeProps) {
-  const { variant } = useTheme()
-  const isDarkMode = variant === 'dark'
-
   const codeChildren = props.node?.children?.[0]
   const className = codeChildren?.properties?.className?.[0]
   const match = /language-(\w+)/.exec(className || '')
@@ -73,9 +69,7 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
   ) : null
 
   const nonHighlightedCode = showSyntaxHighlighter ? null : (
-    <div className={`rounded-lg p-4 min-h-20 overflow-x-auto ${
-      isDarkMode ? 'bg-zinc-900' : 'bg-zinc-100'
-    }`}>
+    <div className="rounded-lg p-2 min-h-20 overflow-x-auto bg-accent">
       <code className="whitespace-pre-wrap">
         {children}
       </code>
@@ -84,7 +78,7 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
 
   return (
     <Card className="relative">
-      <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
+      <CardHeader className="flex flex-row items-center justify-between py-1 px-4">
         <span className="text-sm text-muted-foreground">
           {match?.[1] || 'Raw code'}
         </span>

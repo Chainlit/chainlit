@@ -17,6 +17,8 @@ const Page = ({ children }: Props) => {
   const userEnv = useRecoilValue(userEnvState);
   const sideViewElement = useRecoilValue(sideViewState);
 
+  if(!config) return null
+
   if (config?.userEnv) {
     for (const key of config.userEnv || []) {
       if (!userEnv[key]) return <Navigate to="/env" />;

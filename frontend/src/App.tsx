@@ -118,8 +118,6 @@ function App() {
     }
   }
 
-  if(!configLoaded) return null
-
   return (
     <ThemeProvider storageKey="vite-ui-theme">
 

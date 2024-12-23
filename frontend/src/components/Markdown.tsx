@@ -17,15 +17,18 @@ import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkMath from 'remark-math';
-import { useMemo } from 'react';
-import { IMessageElement } from 'client-types/*';
+import { useContext, useMemo } from 'react';
+import { ChainlitContext, IMessageElement } from '@chainlit/react-client';
 import CodeSnippet from './CodeSnippet';
+import { cn } from '@/lib/utils';
+import { ElementRef } from './Elements/ElementRef';
 
 interface Props {
     allowHtml?: boolean;
     latex?: boolean;
     refElements?: IMessageElement[];
     children: string;
+    className?: string;
   }
 
   const cursorPlugin = () => {
@@ -74,7 +77,9 @@ interface Props {
     };
   };
 
-const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
+const Markdown = ({ allowHtml, latex, refElements, className, children }: Props) => {
+  const apiClient = useContext(ChainlitContext)
+
     const rehypePlugins = useMemo(() => {
         let rehypePlugins: PluggableList = [];
         if (allowHtml) {
@@ -97,7 +102,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
 
   return (
     <ReactMarkdown
-    className="prose lg:prose-xl"
+    className={cn("prose lg:prose-xl", className)}
     remarkPlugins={remarkPlugins}
     rehypePlugins={rehypePlugins}
       components={{
@@ -114,24 +119,26 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
 
         },
         a({ children, ...props }) {
-          return (
-            <a {...props} className="text-primary" target="_blank">
+          const name = children as string;
+          const element = refElements?.find((e) => e.name === name);
+
+          if (element) {
+            return <ElementRef element={element} />;
+          } else {
+            return (
+              <a {...props} className="text-primary hover:underline" target="_blank">
               {children}
             </a>
-          );
+            );
+          }
         },
         img: (image: any) => {
           return (
-            <AspectRatio
-              ratio={16 / 9}
-              className="max-h-[200px] max-w-[355px] bg-muted"
-            >
               <img
-                src={image.src}
+                src={image.src.startsWith("/public") ? apiClient.buildEndpoint(image.src) : image.src}
                 alt={image.alt}
-                className="h-full w-full rounded-md object-cover"
+                className="max-h-[200px] bg-muted overflow-hidden rounded-md object-cover"
               />
-            </AspectRatio>
           );
         },
         blockquote(props) {
@@ -163,7 +170,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <ol
               {...omit(props, ['node'])}
-              className="my-3 ml-3 list-decimal [&>li]:mt-1"
+              className="my-3 ml-3 list-decimal pl-2 [&>li]:mt-1"
             />
           );
         },
@@ -171,7 +178,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <h1
               {...omit(props, ['node'])}
-              className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+              className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mt-8 first:mt-0"
             />
           );
         },
@@ -179,7 +186,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <h2
               {...omit(props, ['node'])}
-              className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+              className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mt-8 first:mt-0"
             />
           );
         },
@@ -187,7 +194,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <h3
               {...omit(props, ['node'])}
-              className="scroll-m-20 text-2xl font-semibold tracking-tight"
+              className="scroll-m-20 text-2xl font-semibold tracking-tight mt-6 first:mt-0"
             />
           );
         },
@@ -195,7 +202,7 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <h4
               {...omit(props, ['node'])}
-              className="scroll-m-20 text-xl font-semibold tracking-tight"
+              className="scroll-m-20 text-xl font-semibold tracking-tight mt-6 first:mt-0"
             />
           );
         },
@@ -203,31 +210,31 @@ const Markdown = ({ allowHtml, latex, refElements, children }: Props) => {
           return (
             <p
               {...omit(props, ['node'])}
-              className="leading-7 [&:not(:first-child)]:mt-6"
+              className="leading-7 [&:not(:first-child)]:mt-4"
             />
           );
         },
         table({ children, ...props }) {
           return (
             <Card className="[&:not(:first-child)]:mt-2 [&:not(:last-child)]:mb-2">
-              <Table {...props}>{children}</Table>
+              <Table {...props as any}>{children}</Table>
             </Card>
           );
         },
         thead({ children, ...props }) {
-          return <TableHeader {...props}>{children}</TableHeader>;
+          return <TableHeader {...props  as any}>{children}</TableHeader>;
         },
         tr({ children, ...props }) {
-          return <TableRow {...props}>{children}</TableRow>;
+          return <TableRow {...props  as any}>{children}</TableRow>;
         },
         th({ children, ...props }) {
-          return <TableHead {...props}>{children}</TableHead>;
+          return <TableHead {...props  as any}>{children}</TableHead>;
         },
         td({ children, ...props }) {
-          return <TableCell {...props}>{children}</TableCell>;
+          return <TableCell {...props  as any}>{children}</TableCell>;
         },
         tbody({ children, ...props }) {
-          return <TableBody {...props}>{children}</TableBody>;
+          return <TableBody {...props  as any}>{children}</TableBody>;
         }
       }}
     >
