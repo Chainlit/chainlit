@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EditSquare } from '../icons/EditSquare';
 
 type NewChatDialogProps = {
   open: boolean;
@@ -79,7 +80,8 @@ const NewChatButton = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => 
               onClick={handleClickOpen}
               {...props}
             >
-              <SquarePen className="!size-5" />
+                            <EditSquare className="!size-6" />
+
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -1,8 +1,8 @@
-import { PanelLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Translator } from 'components/i18n';
 import { useSidebar } from '../ui/sidebar';
+import { Sidebar } from '../icons/Sidebar';
 
 
 export default function SidebarTrigger() {
@@ -13,8 +13,7 @@ return   <TooltipProvider>
   <TooltipTrigger asChild>
     
   <Button onClick={() => isMobile? setOpenMobile(!openMobile) : setOpen(!open)} size="icon" variant="ghost"               className='text-muted-foreground hover:text-muted-foreground'>
-
-      <PanelLeft className="!size-5" />
+  <Sidebar className='!size-6' />
       </Button>
   </TooltipTrigger>
   <TooltipContent>

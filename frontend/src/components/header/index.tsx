@@ -27,7 +27,7 @@ const Header = memo(() => {
     <div className='p-3 flex h-[60px] items-center justify-between gap-2 relative' id="header">
             <div className='flex items-center'>
 
-                {show ? null : <SidebarTrigger />}
+                {show ? null : config?.dataPersistence? <SidebarTrigger /> : null}
                 {show ? null : <NewChatButton />}
 
                 <ChatProfiles />

@@ -7,6 +7,7 @@ interface AlertProps {
   variant?: AlertVariant;
   children: React.ReactNode;
   className?: string;
+  id?: string;
 }
 
 const variantStyles = {
@@ -52,12 +53,13 @@ const icons = {
 export const Alert: React.FC<AlertProps> = ({ 
   variant = 'info', 
   children, 
-  className 
+  className,
+  id
 }) => {
   const styles = variantStyles[variant].light;
 
   return (
-    <div className={cn(
+    <div id={id} className={cn(
       'border rounded-lg p-4 mb-4',
       styles.container,
       className

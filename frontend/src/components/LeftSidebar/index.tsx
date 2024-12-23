@@ -10,7 +10,7 @@ import { ThreadHistory } from "./ThreadHistory"
 
 export default function LeftSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props}>
+    <Sidebar {...props} className="border-none">
       <SidebarHeader className="py-3">
         <div className="flex items-center justify-between">
         <SidebarTrigger />

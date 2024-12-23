@@ -14,21 +14,18 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { ErrorBoundary } from 'components/atoms/ErrorBoundary';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
-import ScrollContainer from 'components/molecules/messages/ScrollContainer';
 import { TaskList } from 'components/molecules/tasklist/TaskList';
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import { IAttachment, attachmentsState } from 'state/chat';
 
-import Messages from './Messages';
-import DropScreen from './dropScreen';
-import InputBox from './inputBox';
-import WelcomeScreen from './welcomeScreen';
 import Alert from '@/components/Alert';
+import { ErrorBoundary } from '../ErrorBoundary';
+import ScrollContainer from './ScrollContainer';
+import WelcomeScreen from './WelcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -181,29 +178,35 @@ const Chat = () => {
       className='flex w-full flex-grow relative'
     >
       {upload ? (
-        <>
           <input id="#upload-drop-input" {...upload.getInputProps()} />
-          {upload?.isDragActive ? <DropScreen /> : null}
-        </>
       ) : null}
-      <div className='w-full'>
+      <div className='flex flex-grow'>
         {error ? (
           <div
-          className={`w-full mx-auto my-2 max-w[${layoutMaxWidth}]`}
+          className="w-full mx-auto my-2"
+          style={{
+            "maxWidth": layoutMaxWidth
+          }}
           >
             <Alert className='mx-2' id="session-error" variant="error">
               <Translator path="components.organisms.chat.index.couldNotReachServer" />
             </Alert>
           </div>
         ) : null}
-        <TaskList isMobile={true} />
+        {/* <TaskList isMobile={true} /> */}
         <ErrorBoundary>
           <ScrollContainer
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-            <WelcomeScreen />
-            <div className='py-2' />
+            <WelcomeScreen 
+                        fileSpec={fileSpec}
+                        onFileUpload={onFileUpload}
+                        onFileUploadError={onFileUploadError}
+                        autoScroll={autoScroll}
+                        setAutoScroll={setAutoScroll}
+            />
+            {/* <div className='py-2' />
             <Messages />
           </ScrollContainer>
           <InputBox
@@ -212,7 +215,8 @@ const Chat = () => {
             onFileUploadError={onFileUploadError}
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
-          />
+          /> */}
+          </ScrollContainer>
         </ErrorBoundary>
       </div>
     </div>

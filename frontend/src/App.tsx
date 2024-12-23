@@ -125,11 +125,7 @@ function App() {
     <ThemeProvider storageKey="vite-ui-theme">
 
     <TP theme={theme}>
-      <GlobalStyles
-        styles={{
-          body: { backgroundColor: theme.palette.background.default }
-        }}
-      />
+
       <Toaster
         className="toast"
         position="top-right"

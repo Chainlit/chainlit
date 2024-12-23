@@ -1,25 +1,17 @@
-import { Backdrop, Stack, Typography } from '@mui/material';
-
+import { Image } from 'lucide-react';
 import { Translator } from 'components/i18n';
 
-import ImageIcon from 'assets/Image';
-
-export default function DropScreen() {
+const DropScreen = () => {
   return (
-    <Backdrop
-      open
-      sx={{
-        zIndex: 10
-      }}
-    >
-      <Stack alignItems="center" gap={2}>
-        <ImageIcon
-          sx={{ width: '100px', height: '100px', color: 'grey.400' }}
-        />
-        <Typography color="grey.200" fontWeight={600} fontSize="1.5rem">
+    <div className="fixed inset-0 bg-black/80 z-10 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-8">
+        <Image className="w-24 h-24 text-gray-400" />
+        <p className="text-2xl font-semibold text-gray-200">
           <Translator path="components.organisms.chat.dropScreen.dropYourFilesHere" />
-        </Typography>
-      </Stack>
-    </Backdrop>
+        </p>
+      </div>
+    </div>
   );
-}
+};
+
+export default DropScreen;

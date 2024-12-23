@@ -42,7 +42,7 @@ export default function Login() {
     setUserFromAPI();
   };
 
-  const handleAuth = async (jsonPromise: Promise<any>, redirectURL: string) => {
+  const handleAuth = async (jsonPromise: Promise<any>, redirectURL?: string) => {
     try {
       const json = await jsonPromise;
 
@@ -51,8 +51,9 @@ export default function Login() {
       } else {
         handleCookieAuth(json);
       }
-
-      navigate(redirectURL);
+      if(redirectURL) {
+        navigate(redirectURL);
+      }
     } catch (error: any) {
       setError(error.message);
     }
@@ -75,7 +76,7 @@ export default function Login() {
     formData.append('password', password);
 
     const jsonPromise = apiClient.passwordAuth(formData);
-    handleAuth(jsonPromise, callbackUrl);
+    handleAuth(jsonPromise);
   };
 
   useEffect(() => {

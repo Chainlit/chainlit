@@ -244,7 +244,8 @@ export class ChainlitAPI extends APIBase {
     token?: string
   ) {
     const xhr = new XMLHttpRequest();
-
+    xhr.withCredentials = true;
+    
     const promise = new Promise<{ id: string }>((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
