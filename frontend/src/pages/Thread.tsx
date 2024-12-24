@@ -11,11 +11,11 @@ import {
   useChatMessages
 } from '@chainlit/react-client';
 
-import Chat from 'components/organisms/chat';
 import { Thread } from 'components/organisms/sidebar/threadHistory/Thread';
 
 import Page from './Page';
 import ResumeButton from './ResumeButton';
+import Chat from '@/components/chat';
 
 export default function ThreadPage() {
   const { id } = useParams();

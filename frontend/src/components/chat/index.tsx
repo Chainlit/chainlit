@@ -26,6 +26,7 @@ import { ErrorBoundary } from '../ErrorBoundary';
 import ScrollContainer from './ScrollContainer';
 import WelcomeScreen from './WelcomeScreen';
 import { TaskList } from '../Tasklist';
+import ChatFooter from './Footer';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -180,13 +181,14 @@ const Chat = () => {
       {upload ? (
           <input id="#upload-drop-input" {...upload.getInputProps()} />
       ) : null}
-      <div className='flex flex-col flex-grow p-4 md:p-2'>
+      <div className='flex flex-col mx-auto w-full flex-grow p-4 md:p-2'
+            style={{
+              "maxWidth": layoutMaxWidth
+            }}
+      >
         {error ? (
           <div
           className="w-full mx-auto my-2"
-          style={{
-            "maxWidth": layoutMaxWidth
-          }}
           >
             <Alert className='mx-2' id="session-error" variant="error">
               <Translator path="components.organisms.chat.index.couldNotReachServer" />
@@ -203,20 +205,17 @@ const Chat = () => {
                         fileSpec={fileSpec}
                         onFileUpload={onFileUpload}
                         onFileUploadError={onFileUploadError}
-                        autoScroll={autoScroll}
                         setAutoScroll={setAutoScroll}
             />
-            {/* <div className='py-2' />
-            <Messages />
+            {/* <Messages /> */}
           </ScrollContainer>
-          <InputBox
-            fileSpec={fileSpec}
-            onFileUpload={onFileUpload}
-            onFileUploadError={onFileUploadError}
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
-          /> */}
-          </ScrollContainer>
+         <ChatFooter 
+          fileSpec={fileSpec}
+          onFileUpload={onFileUpload}
+          onFileUploadError={onFileUploadError}
+          setAutoScroll={setAutoScroll}
+          autoScroll={autoScroll}
+         />
         </ErrorBoundary>
       </div>
     </div>

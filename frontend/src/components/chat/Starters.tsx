@@ -21,9 +21,8 @@ export default function Starters() {
 
     if(!starters?.length) return null;
 
-    return <div className="flex gap-2 flex-wrap">
+    return <div className="flex gap-2 justify-center flex-wrap">
                   {starters?.map((starter, i) => (
-        
                 <Starter key={i} starter={starter} />
             
           ))}

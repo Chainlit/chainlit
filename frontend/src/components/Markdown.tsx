@@ -22,6 +22,7 @@ import { ChainlitContext, IMessageElement } from '@chainlit/react-client';
 import CodeSnippet from './CodeSnippet';
 import { cn } from '@/lib/utils';
 import { ElementRef } from './Elements/ElementRef';
+import BlinkingCursor from './BlinkingCursor';
 
 interface Props {
     allowHtml?: boolean;
@@ -134,11 +135,15 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         },
         img: (image: any) => {
           return (
+            <div className='sm:max-w-sm md:max-w-md'>
+            <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
               <img
                 src={image.src.startsWith("/public") ? apiClient.buildEndpoint(image.src) : image.src}
                 alt={image.alt}
-                className="max-h-[200px] bg-muted overflow-hidden rounded-md object-cover"
+                className="h-full w-full object-contain"
               />
+            </AspectRatio>
+            </div>
           );
         },
         blockquote(props) {
@@ -235,7 +240,9 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         },
         tbody({ children, ...props }) {
           return <TableBody {...props  as any}>{children}</TableBody>;
-        }
+        },
+                // @ts-expect-error custom plugin
+                blinkingCursor: () => <BlinkingCursor whitespace />
       }}
     >
       {children}

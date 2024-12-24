@@ -1,3 +1,4 @@
+import { PaperClip } from "@/components/icons/PaperClip";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -7,9 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useUpload } from "@/hooks";
 import { FileSpec } from "@chainlit/react-client";
-import { Paperclip } from "lucide-react";
-import { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
 
 
 interface UploadButtonProps {
@@ -54,7 +52,7 @@ export const UploadButton = ({
               disabled={disabled}
               {...getRootProps()}
             >
-              <Paperclip className="!size-5" />
+              <PaperClip className="!size-6" />
             </Button>
           </span>
         </TooltipTrigger>

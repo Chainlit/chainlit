@@ -1,9 +1,18 @@
+import { IStep } from "@chainlit/react-client";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export const hasMessage = (messages: IStep[]): boolean => {
+    const validTypes = ['user_message', 'assistant_message'];
+    return messages.some(
+      (message) =>
+        validTypes.includes(message.type) || hasMessage(message.steps || [])
+    );
+  };
 
 export function hlsStringToHex(hlsString: string): string {
   // Extract numbers and remove % signs

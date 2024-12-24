@@ -11,6 +11,7 @@ import { Button } from '../../ui/button';
 import { VoiceLines } from '../../icons/VoiceLines';
 import { X } from 'lucide-react';
 import { Loader } from '../../Loader';
+import AudioPresence from '@/components/AudioPresence';
 
 interface Props {
   disabled?: boolean;
@@ -34,6 +35,14 @@ const VoiceButton = ({ disabled }: Props) => {
   if (!isEnabled) return null;
 
   return (
+    <div className='flex items-center gap-1'>
+                 {audioConnection === 'on'? <AudioPresence
+          type="client"
+          height={18}
+          width={36}
+          barCount={4}
+          barSpacing={2}
+        /> : null }
     <TooltipProvider>
 <Tooltip>
   <TooltipTrigger asChild>
@@ -55,10 +64,10 @@ const VoiceButton = ({ disabled }: Props) => {
               <X className='!size-5' />
             ) : null}
             {audioConnection === 'off' ? (
-              <VoiceLines className='!size-5' />
+              <VoiceLines className='!size-6' />
             ) : null}
             {audioConnection === 'connecting' ? (
-              <Loader className='!size-4' />
+              <Loader className='!size-5' />
             ) : null}
           </Button>
           </TooltipTrigger>
@@ -77,6 +86,7 @@ const VoiceButton = ({ disabled }: Props) => {
   </TooltipContent>
 </Tooltip>
 </TooltipProvider>
+</div>
   );
 };
 export default VoiceButton;

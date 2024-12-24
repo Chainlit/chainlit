@@ -1,5 +1,4 @@
 import { ChainlitContext, IThread, accessTokenState } from '@chainlit/react-client';
-import { Search } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Translator } from 'components/i18n';
@@ -17,7 +16,8 @@ import { useRecoilValue } from 'recoil';
 import _ from 'lodash';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { Loader } from '../Loader';
+import { Loader } from '@/components/Loader';
+import { Search } from '@/components/icons/Search';
 
 export default function SearchChats() {
   const navigate = useNavigate()

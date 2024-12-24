@@ -7,21 +7,20 @@ import { FileSpec, IStep, useChatInteract, useAuth, useChatData } from '@chainli
 import { v4 as uuidv4 } from 'uuid';
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
 import { chatSettingsOpenState } from "@/state/project";
 import VoiceButton from "./VoiceButton";
 import SubmitButton from "./SubmitButton";
 import { Attachments } from "./Attachments";
+import { Settings } from "@/components/icons/Settings";
 
 interface Props {
     fileSpec: FileSpec;
     onFileUpload: (payload: File[]) => void;
     onFileUploadError: (error: string) => void;
     setAutoScroll: (autoScroll: boolean) => void;
-    autoScroll?: boolean;
   }
 
-export default function MessageComposer({fileSpec, onFileUpload, onFileUploadError, setAutoScroll, autoScroll}: Props) {
+export default function MessageComposer({fileSpec, onFileUpload, onFileUploadError, setAutoScroll}: Props) {
     const [value, setValue] = useState("")
     const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
     const [attachments, setAttachments] = useRecoilState(attachmentsState);
@@ -143,8 +142,6 @@ const onPaste = useCallback((event: ClipboardEvent) => {
                           onFileUploadError={onFileUploadError}
                           onFileUpload={onFileUpload}
                 />
-                                    <VoiceButton />
-
                             {chatSettingsInputs.length > 0 && (
                 <Button
                   id="chat-settings-open-modal"
@@ -154,12 +151,13 @@ const onPaste = useCallback((event: ClipboardEvent) => {
                   variant="ghost"
                   size="icon"
                 >
-                  <Settings className="!size-5" />
+                  <Settings className="!size-6" />
 
                 </Button>
               )}
+                                                  <VoiceButton />
             </div>
-            <div>
+            <div className="flex items-center gap-1">
                 <SubmitButton onSubmit={submit} disabled={disabled || !value} />
             </div>
           </div>

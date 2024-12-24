@@ -17,7 +17,7 @@ export const defaultSettingsState = {
   language: 'en-US',
   theme
 };
-
+// todo remove
 export const settingsState = atom<{
   open: boolean;
   theme: ThemeVariant;
