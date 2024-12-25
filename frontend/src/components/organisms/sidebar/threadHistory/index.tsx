@@ -11,6 +11,7 @@ import {
   IThreadFilters,
   accessTokenState,
   threadHistoryState,
+  useAuth,
   useChatMessages
 } from '@chainlit/react-client';
 
@@ -35,6 +36,7 @@ export function ThreadHistory() {
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const { isAuthenticated, isReady } = useAuth();
   const apiClient = useContext(ChainlitContext);
   const { firstInteraction, messages, threadId } = useChatMessages();
   const navigate = useNavigate();
@@ -120,7 +122,13 @@ export function ThreadHistory() {
     }
   };
 
-  if (accessToken && !isFetching && !threadHistory?.threads && !error) {
+  if (
+    isReady &&
+    isAuthenticated &&
+    !isFetching &&
+    !threadHistory?.threads &&
+    !error
+  ) {
     fetchThreads();
   }
 
