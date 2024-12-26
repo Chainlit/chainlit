@@ -60,6 +60,7 @@
     "react-player": "^2.16.0",
     "react-plotly.js": "^2.6.0",
     "react-resizable": "^3.0.5",
+    "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^6.15.0",
     "recoil": "^0.7.7",
     "regenerator-runtime": "^0.14.0",

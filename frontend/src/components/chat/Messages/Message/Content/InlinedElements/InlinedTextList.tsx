@@ -12,10 +12,10 @@ const InlinedTextList = ({ items }: Props) => (
     {items.map((el, i) => {
       return (
         <Card>
-            <CardContent>
-                <CardHeader>
+                          <CardHeader>
                     <CardTitle>{el.name}</CardTitle>
                 </CardHeader>
+            <CardContent>
             <TextElement element={el} />
             </CardContent>
         </Card>

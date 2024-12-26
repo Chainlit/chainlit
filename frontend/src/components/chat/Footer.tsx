@@ -20,7 +20,7 @@ export default function ChatFooter({autoScroll, ...props}: Props) {
 
     if(!hasMessage(messages)) return null
 
-    return          <div className='flex flex-col mx-auto w-full p-4 md:p-2'
+    return          <div className='flex flex-col mx-auto w-full p-4'
     style={{
       "maxWidth": layoutMaxWidth
     }}>

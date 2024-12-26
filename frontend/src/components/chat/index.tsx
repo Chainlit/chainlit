@@ -198,7 +198,7 @@ const Chat = () => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-                  <div className='flex flex-col mx-auto w-full flex-grow p-4 md:p-2'
+                  <div className='flex flex-col mx-auto w-full flex-grow p-4'
             style={{
               "maxWidth": layoutMaxWidth
             }}

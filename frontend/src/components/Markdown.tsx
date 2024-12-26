@@ -18,11 +18,12 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkMath from 'remark-math';
 import { useContext, useMemo } from 'react';
-import { ChainlitContext, IMessageElement } from '@chainlit/react-client';
+import { ChainlitContext, IMessageElement, sideViewState } from '@chainlit/react-client';
 import CodeSnippet from './CodeSnippet';
 import { cn } from '@/lib/utils';
 import { ElementRef } from './Elements/ElementRef';
 import BlinkingCursor from './BlinkingCursor';
+import { useSetRecoilState } from 'recoil';
 
 interface Props {
     allowHtml?: boolean;
@@ -80,7 +81,8 @@ interface Props {
 
 const Markdown = ({ allowHtml, latex, refElements, className, children }: Props) => {
   const apiClient = useContext(ChainlitContext)
-
+  const setSideViewState = useSetRecoilState(sideViewState)
+ 
     const rehypePlugins = useMemo(() => {
         let rehypePlugins: PluggableList = [];
         if (allowHtml) {
@@ -123,7 +125,7 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
           const name = children as string;
           const element = refElements?.find((e) => e.name === name);
           if (element) {
-            return <ElementRef element={element} />;
+            return <ElementRef element={element} onElementRefClick={setSideViewState} />;
           } else {
             return (
               <a {...props} className="text-primary hover:underline" target="_blank">

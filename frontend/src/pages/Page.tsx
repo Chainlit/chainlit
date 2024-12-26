@@ -1,12 +1,16 @@
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { useConfig, sideViewState, useAuth } from '@chainlit/react-client';
-import { ElementSideView } from 'components/atoms/elements';
 import { userEnvState } from 'state/user';
 import { Header } from '@/components/header';
 import LeftSidebar from '@/components/LeftSidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { TaskList } from '@/components/Tasklist';
+import {
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import ElementSideView from '@/components/ElementSideView';
 
 type Props = {
   children: JSX.Element;
@@ -27,22 +31,27 @@ const Page = ({ children }: Props) => {
   }
 
   const content = <div className="flex flex-col flex-grow">
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="flex flex-row h-full w-full"
+    >
+            <ResizablePanel className='flex flex-col flex-grow' minSize={60} defaultSize={50}>
 
-    <div className="flex flex-row h-full w-full">
-      <div className="flex flex-col flex-grow">
         <Header />
         <div className="flex flex-row flex-grow overflow-auto">
           {children}
         </div>
-      </div>
-      {sideViewElement ? null : <TaskList isMobile={false} />}
-      <ElementSideView />
-    </div>
+      </ResizablePanel>
+      {sideViewElement ? <ElementSideView />
+ : <TaskList isMobile={false} />}
+    </ResizablePanelGroup>
 </div>
+
+const historyEnabled = config?.dataPersistence && data?.requireLogin
 
   return (
     <SidebarProvider>
-    {config?.dataPersistence && data?.requireLogin ?
+    { historyEnabled ?
     <>
       <LeftSidebar />
       <SidebarInset>

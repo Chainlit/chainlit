@@ -1,6 +1,5 @@
 import type { IVideoElement } from 'client-types/';
 
-import { QuiltedGrid } from '@/components/QuiltedGrid';
 import { VideoElement } from '@/components/Elements/Video';
 
 interface Props {
@@ -8,11 +7,9 @@ interface Props {
 }
 
 const InlinedVideoList = ({ items }: Props) => (
-    <QuiltedGrid 
-    elements={items}
-    renderElement={(ctx) => <VideoElement element={ctx.element} />}
-  />
-
+  <div className='flex flex-col gap-2'>
+    {items.map((i) => <VideoElement key={i.id} element={i} />)}
+  </div>
 );
 
 export { InlinedVideoList };

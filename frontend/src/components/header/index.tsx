@@ -24,7 +24,7 @@ const Header = memo(() => {
   const historyEnabled = data?.requireLogin && config?.dataPersistence
 
   return (
-    <div className='p-3 mb-1.5 flex h-[60px] items-center justify-between gap-2 relative' id="header">
+    <div className='p-3 flex h-[60px] items-center justify-between gap-2 relative' id="header">
             <div className='flex items-center'>
 
                 {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
