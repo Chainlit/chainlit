@@ -24,11 +24,11 @@ export default function WelcomeScreen(props: Props) {
     if(hasMessage(messages)) return null
 
 
-    return <div className={cn("flex flex-col -mt-[60px] gap-6 w-full flex-grow items-center justify-center welcome-screen mx-auto transition-opacity duration-500 opacity-0 delay-100",
+    return <div className={cn("flex flex-col -mt-[60px] gap-4 w-full flex-grow items-center justify-center welcome-screen mx-auto transition-opacity duration-500 opacity-0 delay-100",
     isVisible && 'opacity-100'
     )}
     >
-        <Logo className="w-[200px]" />
+        <Logo className="w-[200px] mb-2" />
         <MessageComposer {...props} />
         <Starters />
     </div>

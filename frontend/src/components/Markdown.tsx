@@ -122,7 +122,6 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         a({ children, ...props }) {
           const name = children as string;
           const element = refElements?.find((e) => e.name === name);
-
           if (element) {
             return <ElementRef element={element} />;
           } else {
@@ -241,8 +240,8 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         tbody({ children, ...props }) {
           return <TableBody {...props  as any}>{children}</TableBody>;
         },
-                // @ts-expect-error custom plugin
-                blinkingCursor: () => <BlinkingCursor whitespace />
+        // @ts-expect-error custom plugin
+        blinkingCursor: () => <BlinkingCursor whitespace />
       }}
     >
       {children}

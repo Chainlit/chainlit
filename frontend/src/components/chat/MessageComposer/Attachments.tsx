@@ -8,7 +8,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { attachmentsState } from '@/state/chat';
 import { Attachment } from './Attachment';
 

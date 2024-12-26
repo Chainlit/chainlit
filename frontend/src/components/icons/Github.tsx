@@ -4,7 +4,7 @@ export const GitHub = () => {
         width="24"
         height="24"
         viewBox="0 0 98 96"
-        className="fill-white"
+        className="fill-text-primary"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMinYMin meet"
       >

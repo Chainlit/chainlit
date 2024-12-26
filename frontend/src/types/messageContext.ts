@@ -11,6 +11,7 @@ interface IMessageContext {
     file: File,
     onProgress: (progress: number) => void
   ) => { xhr: XMLHttpRequest; promise: Promise<IFileRef> };
+  cot: 'hidden' | 'tool_call' | 'full';
   askUser?: IAsk;
   defaultCollapseContent: boolean;
   loading: boolean;

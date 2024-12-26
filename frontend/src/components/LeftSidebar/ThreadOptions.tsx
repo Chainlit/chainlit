@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from "@/lib/utils";
-import { Pen, Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash } from "lucide-react";
+import { Pencil } from "@/components/icons/Pencil";
 
 interface Props {
     onDelete: () => void;
@@ -31,7 +32,7 @@ export default function ThreadOptions({onDelete, onRename, className}: Props) {
         onRename()
       }}>
         Rename
-        <Pen className='ml-auto' />
+        <Pencil className='ml-auto' />
       </DropdownMenuItem>
       <DropdownMenuItem onClick={(e) => {
         e.stopPropagation()

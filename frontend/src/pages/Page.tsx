@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { useConfig, sideViewState } from '@chainlit/react-client';
+import { useConfig, sideViewState, useAuth } from '@chainlit/react-client';
 import { ElementSideView } from 'components/atoms/elements';
 import { userEnvState } from 'state/user';
 import { Header } from '@/components/header';
@@ -14,6 +14,7 @@ type Props = {
 
 const Page = ({ children }: Props) => {
   const { config } = useConfig();
+  const {data} = useAuth()
   const userEnv = useRecoilValue(userEnvState);
   const sideViewElement = useRecoilValue(sideViewState);
 
@@ -41,7 +42,7 @@ const Page = ({ children }: Props) => {
 
   return (
     <SidebarProvider>
-    {config?.dataPersistence ?
+    {config?.dataPersistence && data?.requireLogin ?
     <>
       <LeftSidebar />
       <SidebarInset>

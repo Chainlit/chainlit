@@ -1,9 +1,7 @@
 import { memo } from 'react';
-import { useRecoilValue } from 'recoil';
 
-import { useAudio, useConfig } from '@chainlit/react-client';
+import { useAudio, useAuth, useConfig } from '@chainlit/react-client';
 
-import { settingsState } from 'state/settings';
 import { ThemeToggle } from './ThemeToggle';
 import ApiKeys from './ApiKeys';
 import NewChatButton from './NewChat';
@@ -17,19 +15,20 @@ import ReadmeButton from './Readme';
 
 const Header = memo(() => {
   const { audioConnection } = useAudio();
+  const {data} = useAuth()
   const {config} = useConfig()
   const {open, openMobile, isMobile} = useSidebar()
 
   const sidebarOpen = isMobile ? openMobile : open
 
-  const show = config?.dataPersistence && sidebarOpen
+  const historyEnabled = data?.requireLogin && config?.dataPersistence
 
   return (
-    <div className='p-3 flex h-[60px] items-center justify-between gap-2 relative' id="header">
+    <div className='p-3 mb-1.5 flex h-[60px] items-center justify-between gap-2 relative' id="header">
             <div className='flex items-center'>
 
-                {show ? null : config?.dataPersistence? <SidebarTrigger /> : null}
-                {show ? null : <NewChatButton />}
+                {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
+                {historyEnabled ? sidebarOpen ? <NewChatButton /> : null : <NewChatButton />}
 
                 <ChatProfiles />
                 </div>

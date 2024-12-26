@@ -27,6 +27,7 @@ import ScrollContainer from './ScrollContainer';
 import WelcomeScreen from './WelcomeScreen';
 import { TaskList } from '../Tasklist';
 import ChatFooter from './Footer';
+import MessagesContainer from './MessagesContainer';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -181,11 +182,7 @@ const Chat = () => {
       {upload ? (
           <input id="#upload-drop-input" {...upload.getInputProps()} />
       ) : null}
-      <div className='flex flex-col mx-auto w-full flex-grow p-4 md:p-2'
-            style={{
-              "maxWidth": layoutMaxWidth
-            }}
-      >
+
         {error ? (
           <div
           className="w-full mx-auto my-2"
@@ -201,14 +198,21 @@ const Chat = () => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
+                  <div className='flex flex-col mx-auto w-full flex-grow p-4 md:p-2'
+            style={{
+              "maxWidth": layoutMaxWidth
+            }}
+      >
             <WelcomeScreen 
                         fileSpec={fileSpec}
                         onFileUpload={onFileUpload}
                         onFileUploadError={onFileUploadError}
                         setAutoScroll={setAutoScroll}
             />
-            {/* <Messages /> */}
+            <MessagesContainer />
+            </div>
           </ScrollContainer>
+ 
          <ChatFooter 
           fileSpec={fileSpec}
           onFileUpload={onFileUpload}
@@ -217,7 +221,6 @@ const Chat = () => {
           autoScroll={autoScroll}
          />
         </ErrorBoundary>
-      </div>
     </div>
   );
 };
