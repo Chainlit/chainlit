@@ -64,9 +64,9 @@ from chainlit.types import (
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
+    CallActionRequest,
 )
 from chainlit.user import PersistedUser, User
-
 from ._utils import is_path_inside
 
 mimetypes.add_type("application/javascript", ".js")
@@ -857,6 +857,39 @@ async def delete_thread(
     await data_layer.delete_thread(thread_id)
     return JSONResponse(content={"success": True})
 
+
+@router.post("/project/action")
+async def call_action(
+    payload: CallActionRequest,
+    current_user: UserParam,
+):
+    """Run an action."""
+
+    from chainlit.session import WebsocketSession
+    from chainlit.action import Action
+    from chainlit.context import init_ws_context
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    action = Action(**payload.action)
+
+    if current_user:
+        if not context.session.user or context.session.user.identifier != current_user.identifier:
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to upload files for this session",
+            )
+
+    callback = config.code.action_callbacks.get(action.name)
+    if callback:
+        await callback(action)
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No callback found for action {action.name}",
+        )
+
+    return JSONResponse(content={"success": True})
 
 @router.post("/project/file")
 async def upload_file(

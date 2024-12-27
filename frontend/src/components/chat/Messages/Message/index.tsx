@@ -13,6 +13,7 @@ import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
 import UserMessage from './UserMessage';
 import Step from './Step';
+import { AskActionButtons } from './AskActionButtons';
 
 interface Props {
   message: IStep;
@@ -35,7 +36,6 @@ const Message = memo(
     scorableRun
   }: Props) => {
     const {
-      defaultCollapseContent,
       allowHtml,
       cot,
       latex,
@@ -120,7 +120,7 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      <MessageButtons message={message} />
+                      <MessageButtons message={message} actions={actions} />
                     </Step>
                   ) : (
                     // Display an assistant message
@@ -134,10 +134,14 @@ const Message = memo(
                         latex={latex}
                       />
                       {!isRunning && isAsk && (
+                        <>
                         <AskFileButton onError={onError} />
+                        <AskActionButtons actions={actions} messageId={message.id} />
+                        </>
                       )}
                       <MessageButtons
                         message={message}
+                        actions={actions}
                         run={
                           scorableRun && isScorable ? scorableRun : undefined
                         }

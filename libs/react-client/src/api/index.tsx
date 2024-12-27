@@ -2,6 +2,7 @@ import { ensureTokenPrefix, removeToken } from 'src/api/hooks/auth/tokenManageme
 import { IThread, IUser } from 'src/types';
 
 import { IFeedback } from 'src/types/feedback';
+import { IAction } from 'src/types/action';
 
 export * from './hooks/auth';
 export * from './hooks/api';
@@ -285,6 +286,16 @@ export class ChainlitAPI extends APIBase {
     });
 
     return { xhr, promise };
+  }
+
+  async callAction(
+    action: IAction,
+    sessionId: string,
+    token?: string
+  ) {
+    const res = await this.post(`/project/action`, { sessionId, action }, token);
+
+    return res.json();
   }
 
   getElementUrl(id: string, sessionId: string) {

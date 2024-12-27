@@ -14,43 +14,47 @@ export const hasMessage = (messages: IStep[]): boolean => {
     );
   };
 
-export function hlsStringToHex(hlsString: string): string {
-  // Extract numbers and remove % signs
-  const [h, l, s] = hlsString
-      .replace(/%/g, '')
-      .split(' ')
-      .map(Number);
+export function hslToHex(hslStr: string): string {
+    // Parse HSL string
+    const values = hslStr.split(' ').map(value => 
+        parseFloat(value.replace('%', ''))
+    );
+    
+    const h = values[0];
+    const s = values[1];
+    const l = values[2];
+    
+    // Convert to fractions of 1
+    const hue = h / 360;
+    const sat = s / 100;
+    const light = l / 100;
+    
+    function hueToRgb(p: number, q: number, t: number): number {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+    }
 
-  // Convert to RGB
-  const l_decimal = l / 100;
-  const s_decimal = s / 100;
-  
-  const c = (1 - Math.abs(2 * l_decimal - 1)) * s_decimal;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = l_decimal - c / 2;
-  
-  let r = 0, g = 0, b = 0;
-  
-  if (h >= 0 && h < 60) {
-      [r, g, b] = [c, x, 0];
-  } else if (h >= 60 && h < 120) {
-      [r, g, b] = [x, c, 0];
-  } else if (h >= 120 && h < 180) {
-      [r, g, b] = [0, c, x];
-  } else if (h >= 180 && h < 240) {
-      [r, g, b] = [0, x, c];
-  } else if (h >= 240 && h < 300) {
-      [r, g, b] = [x, 0, c];
-  } else {
-      [r, g, b] = [c, 0, x];
-  }
-  
-  // Convert to 0-255 range and round
-  r = Math.round((r + m) * 255);
-  g = Math.round((g + m) * 255);
-  b = Math.round((b + m) * 255);
-  
-  // Convert to hex
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+    let r, g, b;
+
+    if (sat === 0) {
+        r = g = b = light;
+    } else {
+        const q = light < 0.5 ? light * (1 + sat) : light + sat - light * sat;
+        const p = 2 * light - q;
+
+        r = hueToRgb(p, q, hue + 1/3);
+        g = hueToRgb(p, q, hue);
+        b = hueToRgb(p, q, hue - 1/3);
+    }
+
+    const toHex = (x: number): string => {
+        const hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }

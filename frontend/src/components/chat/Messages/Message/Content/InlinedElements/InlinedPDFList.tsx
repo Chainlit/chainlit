@@ -11,7 +11,7 @@ const InlinedPDFList = ({ items }: Props) => (
       return (
         <div
           key={i}
-          className='max-w-[600px] h-[400px]'
+          className='w-full h-[400px]'
         >
           <PDFElement element={pdf} />
         </div>

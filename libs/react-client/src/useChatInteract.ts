@@ -153,32 +153,6 @@ const useChatInteract = () => {
     session?.socket.emit('stop');
   }, [session?.socket]);
 
-  const callAction = useCallback(
-    (action: IAction) => {
-      const socket = session?.socket;
-      if (!socket) return;
-
-      const promise = new Promise<{
-        id: string;
-        status: boolean;
-        response?: string;
-      }>((resolve, reject) => {
-        socket.once('action_response', (response) => {
-          if (response.status) {
-            resolve(response);
-          } else {
-            reject(response);
-          }
-        });
-      });
-
-      socket.emit('action_call', action);
-
-      return promise;
-    },
-    [session?.socket]
-  );
-
   const uploadFile = useCallback(
     (file: File, onProgress: (progress: number) => void) => {
       return client.uploadFile(file, onProgress, sessionId, accessToken);
@@ -188,7 +162,6 @@ const useChatInteract = () => {
 
   return {
     uploadFile,
-    callAction,
     clear,
     replyMessage,
     sendMessage,
