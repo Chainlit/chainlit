@@ -3,7 +3,6 @@ import { createContext } from 'react';
 import { IMessageContext } from 'types/messageContext';
 
 const defaultMessageContext = {
-  defaultCollapseContent: false,
   highlightedMessage: null,
   loading: false,
   onElementRefClick: undefined,

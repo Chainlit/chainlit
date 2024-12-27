@@ -2,30 +2,17 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
-import { Box } from '@mui/material';
-
 import {
-  IThread,
   threadHistoryState,
-  useApi,
   useChatMessages
 } from '@chainlit/react-client';
 
-import { Thread } from 'components/organisms/sidebar/threadHistory/Thread';
-
-import Page from './Page';
-import ResumeButton from './ResumeButton';
+import Page from 'pages/Page';
 import Chat from '@/components/chat';
+import { PersistedThread } from '@/components/PersistedThread';
 
 export default function ThreadPage() {
   const { id } = useParams();
-
-  const { data, error, isLoading } = useApi<IThread>(
-    id ? `/project/thread/${id}` : null,
-    {
-      revalidateOnFocus: false
-    }
-  );
 
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
 
@@ -45,20 +32,8 @@ export default function ThreadPage() {
     <Page>
       <>
         {isCurrentThread && <Chat />}
-        {!isCurrentThread && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              flexGrow: 1,
-              gap: 2
-            }}
-          >
-            <Box sx={{ width: '100%', flexGrow: 1, overflow: 'auto' }}>
-              <Thread thread={data} error={error} isLoading={isLoading} />
-            </Box>
-            <ResumeButton threadId={id} />
-          </Box>
+        {!isCurrentThread && id && (
+          <PersistedThread id={id} />
         )}
       </>
     </Page>

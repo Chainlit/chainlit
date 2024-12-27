@@ -25,7 +25,7 @@ import Alert from '@/components/Alert';
 import { ErrorBoundary } from '../ErrorBoundary';
 import ScrollContainer from './ScrollContainer';
 import WelcomeScreen from './WelcomeScreen';
-import { TaskList } from '../Tasklist';
+import { TaskList } from '@/components/Tasklist';
 import ChatFooter from './Footer';
 import MessagesContainer from './MessagesContainer';
 
@@ -177,7 +177,7 @@ const Chat = () => {
       // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
-      className='flex w-full flex-col flex-grow relative'
+      className='flex w-full h-full flex-col relative'
     >
       {upload ? (
           <input id="#upload-drop-input" {...upload.getInputProps()} />
@@ -192,7 +192,6 @@ const Chat = () => {
             </Alert>
           </div>
         ) : null}
-        <TaskList isMobile={true} />
         <ErrorBoundary>
           <ScrollContainer
             autoScroll={autoScroll}
@@ -203,6 +202,7 @@ const Chat = () => {
               "maxWidth": layoutMaxWidth
             }}
       >
+            <TaskList isMobile={true} />
             <WelcomeScreen 
                         fileSpec={fileSpec}
                         onFileUpload={onFileUpload}

@@ -125,7 +125,6 @@ const MessagesContainer = (): JSX.Element => {
           askUser,
           allowHtml: config?.features?.unsafe_allow_html,
           latex: config?.features?.latex,
-          defaultCollapseContent: !!config?.ui.default_collapse_content,
           loading,
           showFeedbackButtons: enableFeedback,
           uiName: config?.ui?.name || '',

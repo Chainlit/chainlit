@@ -30,12 +30,11 @@ const Page = ({ children }: Props) => {
     }
   }
 
-  const content = <div className="flex flex-col flex-grow">
-    <ResizablePanelGroup
+  const content = <ResizablePanelGroup
       direction="horizontal"
       className="flex flex-row h-full w-full"
     >
-            <ResizablePanel className='flex flex-col flex-grow' minSize={60} defaultSize={50}>
+            <ResizablePanel className='flex flex-col h-full w-full' minSize={60} defaultSize={50}>
 
         <Header />
         <div className="flex flex-row flex-grow overflow-auto">
@@ -45,7 +44,6 @@ const Page = ({ children }: Props) => {
       {sideViewElement ? <ElementSideView />
  : <TaskList isMobile={false} />}
     </ResizablePanelGroup>
-</div>
 
 const historyEnabled = config?.dataPersistence && data?.requireLogin
 
@@ -54,7 +52,7 @@ const historyEnabled = config?.dataPersistence && data?.requireLogin
     { historyEnabled ?
     <>
       <LeftSidebar />
-      <SidebarInset>
+      <SidebarInset className='max-h-svh'>
     {content}
     </SidebarInset>
     </>

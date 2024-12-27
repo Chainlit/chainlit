@@ -117,9 +117,11 @@ export default function SearchChats() {
                             <CommandGroup key={`${searchQuery}-${monthYear}`} heading={monthYear}>
                                 {monthThreads.map((thread) => (
                                     <CommandItem
+                                    className='cursor-pointer'
                                     key={`${searchQuery}-${thread.id}`}
                                     value={`${searchQuery}-${thread.id}`}
                                         onSelect={() => {
+                                            setOpen(false)
                                           navigate(`/thread/${thread.id}`)
                                         }}
                                     >
