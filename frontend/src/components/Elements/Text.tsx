@@ -1,8 +1,8 @@
 import { type ITextElement, useConfig } from '@chainlit/react-client';
-import { Markdown } from 'components/molecules/Markdown';
 import { useFetch } from 'hooks/useFetch';
 import { Skeleton } from "@/components/ui/skeleton";
 import Alert from "@/components/Alert";
+import Markdown from '@/components/Markdown';
 
 interface TextElementProps {
   element: ITextElement;

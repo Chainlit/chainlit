@@ -1,4 +1,4 @@
-import { useUpload } from 'hooks';
+import { useUpload } from '@/hooks/useUpload';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';

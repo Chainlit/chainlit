@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useUpload } from "@/hooks";
+import { useUpload } from "@/hooks/useUpload";
 import { FileSpec, useConfig } from "@chainlit/react-client";
 
 

@@ -1,7 +1,7 @@
 import App from 'App';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import getRouterBasename from 'utils/router';
+import getRouterBasename from '@/lib/router';
 
 import { useApi, useAuth, useChatInteract, useConfig } from '@chainlit/react-client';
 
