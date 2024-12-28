@@ -1,14 +1,17 @@
+import { MessageContext } from "@/contexts/MessageContext";
 import { cn } from "@/lib/utils";
 import type { IMessageElement } from '@chainlit/react-client';
+import { useContext } from "react";
 
 
 
 interface ElementRefProps {
   element: IMessageElement;
-  onElementRefClick?: (element: IMessageElement) => void;
 }
 
-const ElementRef = ({ element, onElementRefClick }: ElementRefProps) => {
+const ElementRef = ({ element }: ElementRefProps) => {
+  const { onElementRefClick } = useContext(MessageContext);
+
   // For inline elements, return a styled span
   if (element.display === "inline") {
     return <span className="font-bold">{element.name}</span>;
