@@ -11,10 +11,10 @@ import {
 
 
 interface Props {
-  threadId: string;
+  id: string;
 }
 
-export default function AutoResumeThread({ threadId }: Props) {
+export default function AutoResumeThread({ id }: Props) {
   const navigate = useNavigate();
   const { config } = useConfig();
   const { clear, setIdToResume } = useChatInteract();
@@ -23,23 +23,21 @@ export default function AutoResumeThread({ threadId }: Props) {
   useEffect(() => {   
     if (!config?.threadResumable) return
     clear();
-    setIdToResume(threadId!);
+    setIdToResume(id);
     if (!config?.dataPersistence) {
       navigate('/');
     }
 
-  }, [config?.threadResumable])
+  }, [config?.threadResumable, id])
   
   useEffect(() => {
-    if (threadId !== idToResume) {
+    if (id !== idToResume) {
       return;
     }
-    if (session?.socket.connected) {
-      toast.success('Chat resumed successfully');
-    } else if (session?.error) {
+    if (session?.error) {
       toast.error("Couldn't resume chat");
     }
-  }, [session, idToResume, threadId]);
+  }, [session, idToResume, id]);
 
   return null
 }

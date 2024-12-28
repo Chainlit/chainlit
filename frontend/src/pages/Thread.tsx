@@ -4,15 +4,19 @@ import { useRecoilState } from 'recoil';
 
 import {
   threadHistoryState,
-  useChatMessages
+  useChatMessages,
+  useConfig
 } from '@chainlit/react-client';
 
 import Page from 'pages/Page';
 import Chat from '@/components/chat';
-import { PersistedThread } from '@/components/PersistedThread';
+import { ReadOnlyThread } from '@/components/ReadOnlyThread';
+import AutoResumeThread from '@/components/AutoResumeThread';
+import { Loader } from '@/components/Loader';
 
 export default function ThreadPage() {
   const { id } = useParams();
+  const { config } = useConfig();
 
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
 
@@ -31,10 +35,10 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-        {isCurrentThread && <Chat />}
-        {!isCurrentThread && id && (
-          <PersistedThread id={id} />
-        )}
+      {config?.threadResumable ?       <AutoResumeThread id={id!} /> : null}
+      {config?.threadResumable ? isCurrentThread ?
+      <Chat /> : <div className='flex flex-grow items-center justify-center'><Loader className='!size-6' /></div>
+    :  <ReadOnlyThread id={id!} />}
       </>
     </Page>
   );

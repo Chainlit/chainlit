@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useUpload } from "@/hooks";
-import { FileSpec } from "@chainlit/react-client";
+import { FileSpec, useConfig } from "@chainlit/react-client";
 
 
 interface UploadButtonProps {
@@ -24,6 +24,7 @@ export const UploadButton = ({
   onFileUpload,
   onFileUploadError
 }: UploadButtonProps) => {
+  const {config} = useConfig()
   const upload = useUpload({
     spec: fileSpec,
     onResolved: (payloads: File[]) => onFileUpload(payloads),
@@ -33,6 +34,8 @@ export const UploadButton = ({
 
   if (!upload) return null;
   const { getRootProps, getInputProps } = upload;
+
+  if(!config?.features.spontaneous_file_upload) return null
 
   return (
     <TooltipProvider>

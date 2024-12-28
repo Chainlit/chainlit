@@ -24,13 +24,12 @@ import { Messages } from './chat/Messages';
 import Alert from './Alert';
 import { Loader } from './Loader';
 import { useNavigate } from 'react-router-dom';
-import AutoResumeThread from './AutoResumeThread';
 
 type Props = {
   id: string;
 };
 
-const PersistedThread = ({ id }: Props) => {
+const ReadOnlyThread = ({ id }: Props) => {
     const {config} = useConfig()
 const { data: thread, error, isLoading } = useApi<IThread>(
     id ? `/project/thread/${id}` : null,
@@ -181,7 +180,6 @@ const { data: thread, error, isLoading } = useApi<IThread>(
 
   return (
     <div className='flex w-full flex-col flex-grow relative overflow-y-auto'>
-      <AutoResumeThread threadId={id} />
         {error ? <Alert variant='error'>{error.message}</Alert> : null}
 
       <ErrorBoundary>
@@ -206,4 +204,4 @@ style={{
   );
 };
 
-export { PersistedThread };
+export { ReadOnlyThread };

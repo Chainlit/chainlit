@@ -19,7 +19,7 @@ return   <TooltipProvider>
       to="/env" 
     >
       <Button size="icon" variant="ghost"               className='text-muted-foreground hover:text-muted-foreground'>
-      <KeyRound className="!size-5" />
+      <KeyRound className="!size-4" />
       </Button>
     </Link>
   </TooltipTrigger>

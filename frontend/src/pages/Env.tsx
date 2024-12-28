@@ -1,42 +1,41 @@
-import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useFormik } from 'formik';
 import { toast } from 'sonner';
 import * as yup from 'yup';
 
-import { Alert, Box, Button, Typography } from '@mui/material';
-
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Alert from '@/components/Alert';
 import { useConfig } from '@chainlit/react-client';
+import { useLayoutMaxWidth } from '@/hooks/useLayoutMaxWidth';
+import { useTranslation } from 'react-i18next';
+import { useRecoilState } from 'recoil';
+import { userEnvState } from '@/state/user';
 
-import { TextInput } from 'components/atoms/inputs/TextInput';
-import { Translator } from 'components/i18n';
-import { useTranslation } from 'components/i18n/Translator';
-import { Header } from 'components/organisms/header';
-
-import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
-
-import { userEnvState } from 'state/user';
-
-export default function Env() {
-  const [userEnv, setUserEnv] = useRecoilState(userEnvState);
-  const { config } = useConfig();
-  const layoutMaxWidth = useLayoutMaxWidth();
-
+const Env = () => {
   const navigate = useNavigate();
-
-  const { t } = useTranslation();
-
+  const {config} = useConfig()
+  const [userEnv, setUserEnv] = useRecoilState(userEnvState);
+  const layoutMaxWidth = useLayoutMaxWidth()
+  const {t} = useTranslation()
   const requiredKeys = config?.userEnv || [];
 
   const initialValues: Record<string, string> = {};
-  const _schema: Record<string, yup.StringSchema> = {};
+  const validationSchema: Record<string, any> = {};
 
-  requiredKeys.forEach((key) => {
+  requiredKeys.forEach((key, i) => {
     initialValues[key] = userEnv[key] || '';
-    _schema[key] = yup.string().required();
+    validationSchema[key] = yup.string().required('Required');
   });
 
-  const schema = yup.object(_schema);
+  const schema = yup.object().shape(validationSchema);
 
   const formik = useFormik({
     initialValues,
@@ -45,78 +44,65 @@ export default function Env() {
       localStorage.setItem('userEnv', JSON.stringify(values));
       setUserEnv(values);
       toast.success(t('pages.Env.savedSuccessfully'));
-      return navigate('/');
+      navigate('/');
     }
   });
 
   if (requiredKeys.length === 0) {
     navigate('/');
+    return null;
   }
 
-  const renderInput = (key: string) => {
-    const hasError = !!formik.errors[key];
-
-    return (
-      <TextInput
-        id={key}
-        className={key}
-        label={key}
-        value={formik.values[key]}
-        size="medium"
-        hasError={hasError}
-        description={hasError ? formik.errors[key] : ''}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          formik.setFieldValue(key, e.target.value)
-        }
-      />
-    );
-  };
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexGrow: 1
-      }}
-    >
-      <Header />
-      <Box
-        id="env"
-        display="flex"
-        flexDirection="column"
-        flexGrow={1}
-        gap={2}
-        sx={{
-          maxWidth: layoutMaxWidth,
-          width: '100%',
-          mx: 'auto'
-        }}
+    <div className="flex flex-col flex-grow">
+      <div
+        className="flex flex-col flex-grow gap-4 mx-auto w-full"
+        style={{ maxWidth: layoutMaxWidth }}
       >
-        <Typography
-          mt={5}
-          fontSize="18px"
-          fontWeight={700}
-          color="text.primary"
-        >
-          <Translator path="pages.Env.requiredApiKeys" />
-        </Typography>
-        <Alert severity="info">
-          <Translator path="pages.Env.requiredApiKeysInfo" />
-        </Alert>
-        <form onSubmit={formik.handleSubmit}>
-          {requiredKeys.map((key) => renderInput(key))}
-          <Button
-            id="submit-env"
-            fullWidth
-            type="submit"
-            variant="contained"
-            sx={{ mt: 1 }}
-          >
-            Save
-          </Button>
-        </form>
-      </Box>
-    </Box>
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold">
+              {t('pages.Env.requiredApiKeys')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="info" className="mb-6">
+                {t('pages.Env.requiredApiKeysInfo')}
+            </Alert>
+
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+              {requiredKeys.map((key) => (
+                <div key={key} className="space-y-2">
+                  <Label htmlFor={key}>{key}</Label>
+                  <Input
+                    id={key}
+                    name={key}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values[key]}
+                    className={formik.touched[key] && formik.errors[key] ? "border-red-500" : ""}
+                  />
+                  {formik.touched[key] && formik.errors[key] && (
+                    <p className="text-sm text-red-500">
+                      {formik.errors[key]}
+                    </p>
+                  )}
+                </div>
+              ))}
+              
+              <Button
+                id="submit-env"
+                type="submit"
+                className="w-full mt-4"
+              >
+                Save
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
-}
+};
+
+export default Env;

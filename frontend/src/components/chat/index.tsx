@@ -166,20 +166,19 @@ const Chat = () => {
     }
   }, []);
 
-  const enableMultiModalUpload =
+  const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
-
   return (
     <div
-      {...(enableMultiModalUpload
-        ? upload?.getRootProps({ className: 'dropzone' })
+      {...(enableAttachments
+        ? upload.getRootProps({ className: 'dropzone' })
         : {})}
       // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
       className='flex w-full h-full flex-col relative'
     >
-      {upload ? (
+      {enableAttachments ? (
           <input id="#upload-drop-input" {...upload.getInputProps()} />
       ) : null}
 

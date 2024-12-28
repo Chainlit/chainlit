@@ -18,7 +18,7 @@ import {
   threadIdToResumeState,
   tokenCountState
 } from 'src/state';
-import { IAction, IFileRef, IStep } from 'src/types';
+import { IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
 import { v4 as uuidv4 } from 'uuid';
 
