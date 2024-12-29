@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { LoginForm } from '@/components/LoginForm';
+import { Logo } from '@/components/Logo';
+
 import { useQuery } from 'hooks/query';
 
 import { ChainlitContext, useAuth } from 'client-types/*';
-import { Logo } from '@/components/Logo';
-import { LoginForm } from '@/components/LoginForm';
 
 export const LoginError = new Error(
   'Error logging in. Please try again later.'
@@ -13,11 +14,7 @@ export const LoginError = new Error(
 
 export default function Login() {
   const query = useQuery();
-  const {
-    data: config,
-    user,
-    setUserFromAPI
-  } = useAuth();
+  const { data: config, user, setUserFromAPI } = useAuth();
   const [error, setError] = useState('');
   const apiClient = useContext(ChainlitContext);
   const navigate = useNavigate();
@@ -29,13 +26,16 @@ export default function Login() {
     setUserFromAPI();
   };
 
-  const handleAuth = async (jsonPromise: Promise<any>, redirectURL?: string) => {
+  const handleAuth = async (
+    jsonPromise: Promise<any>,
+    redirectURL?: string
+  ) => {
     try {
       const json = await jsonPromise;
 
       handleCookieAuth(json);
-      
-      if(redirectURL) {
+
+      if (redirectURL) {
         navigate(redirectURL);
       }
     } catch (error: any) {
@@ -50,10 +50,7 @@ export default function Login() {
     handleAuth(jsonPromise, '/');
   };
 
-  const handlePasswordLogin = async (
-    email: string,
-    password: string,
-  ) => {
+  const handlePasswordLogin = async (email: string, password: string) => {
     const formData = new FormData();
     formData.append('username', email);
     formData.append('password', password);
@@ -83,31 +80,33 @@ export default function Login() {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-    <div className="flex flex-col gap-4 p-6 md:p-10">
-      <div className="flex justify-center gap-2 md:justify-start">
-      <Logo className='w-[150px]' />
-      </div>
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-xs">
-          <LoginForm
-               error={error}
-               callbackUrl="/"
-               providers={config?.oauthProviders || []}
-               onPasswordSignIn={config?.passwordAuth ? handlePasswordLogin : undefined}
-               onOAuthSignIn={async (provider: string) => {
-                 window.location.href = apiClient.getOAuthEndpoint(provider);
-               }}
-          />
+      <div className="flex flex-col gap-4 p-6 md:p-10">
+        <div className="flex justify-center gap-2 md:justify-start">
+          <Logo className="w-[150px]" />
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-xs">
+            <LoginForm
+              error={error}
+              callbackUrl="/"
+              providers={config?.oauthProviders || []}
+              onPasswordSignIn={
+                config?.passwordAuth ? handlePasswordLogin : undefined
+              }
+              onOAuthSignIn={async (provider: string) => {
+                window.location.href = apiClient.getOAuthEndpoint(provider);
+              }}
+            />
+          </div>
         </div>
       </div>
+      <div className="relative hidden bg-muted lg:block">
+        <img
+          src={apiClient.buildEndpoint('/favicon')}
+          alt="Image"
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
     </div>
-    <div className="relative hidden bg-muted lg:block">
-      <img
-        src={apiClient.buildEndpoint("/favicon")}
-        alt="Image"
-        className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-      />
-    </div>
-  </div>
   );
 }

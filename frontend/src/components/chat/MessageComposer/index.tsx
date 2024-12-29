@@ -56,7 +56,7 @@ const onPaste = useCallback((event: ClipboardEvent) => {
           }
         }
       });
-  };
+  }
 }, [])
 
     const onSubmit = useCallback(

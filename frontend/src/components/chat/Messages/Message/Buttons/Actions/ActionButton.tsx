@@ -12,7 +12,6 @@ import { ChainlitContext, useChatSession, type IAction } from '@chainlit/react-c
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/Loader';
 import { toast } from 'sonner';
-import { useRecoilValue } from 'recoil';
 
 interface ActionProps {
   action: IAction;

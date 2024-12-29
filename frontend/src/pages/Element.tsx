@@ -10,10 +10,11 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { useQuery } from 'hooks/query';
-import { Loader } from '@/components/Loader';
 import Alert from '@/components/Alert';
 import { ElementView } from '@/components/ElementView';
+import { Loader } from '@/components/Loader';
+
+import { useQuery } from 'hooks/query';
 
 export default function Element() {
   const { id } = useParams();
@@ -46,13 +47,18 @@ export default function Element() {
     }
   }, [data, element, elements, id, threadId]);
 
-
   return (
     <Page>
       <>
-      {isLoading ? <div className='flex flex-grow justify-center items-center'><Loader className="!size-6" /></div> : null}
-      {error ? <Alert variant='error'>{error.message}</Alert> : null}
-      {element ? <ElementView element={element} onGoBack={() => navigate('/')} /> : null}
+        {isLoading ? (
+          <div className="flex flex-grow justify-center items-center">
+            <Loader className="!size-6" />
+          </div>
+        ) : null}
+        {error ? <Alert variant="error">{error.message}</Alert> : null}
+        {element ? (
+          <ElementView element={element} onGoBack={() => navigate('/')} />
+        ) : null}
       </>
     </Page>
   );

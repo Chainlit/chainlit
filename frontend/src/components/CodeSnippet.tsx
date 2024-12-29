@@ -1,27 +1,29 @@
-import { useEffect, useRef } from 'react'
-import hljs from 'highlight.js'
+import hljs from 'highlight.js';
+import { useEffect, useRef } from 'react';
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-import 'highlight.js/styles/monokai-sublime.css'
-import CopyButton from './CopyButton'
+import 'highlight.js/styles/monokai-sublime.css';
+
+import CopyButton from './CopyButton';
 
 interface CodeSnippetProps {
-  language: string
-  children: string
+  language: string;
+  children: string;
 }
 
 const HighlightedCode = ({ language, children }: CodeSnippetProps) => {
-  const codeRef = useRef<HTMLElement>(null)
+  const codeRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (codeRef.current) {
-      const highlighted = codeRef.current.getAttribute('data-highlighted') === 'yes'
+      const highlighted =
+        codeRef.current.getAttribute('data-highlighted') === 'yes';
       if (!highlighted) {
-        hljs.highlightElement(codeRef.current)
+        hljs.highlightElement(codeRef.current);
       }
     }
-  }, [])
+  }, []);
 
   return (
     <pre className="m-0">
@@ -32,42 +34,40 @@ const HighlightedCode = ({ language, children }: CodeSnippetProps) => {
         {children}
       </code>
     </pre>
-  )
-}
+  );
+};
 
 interface CodeProps {
-  children: React.ReactNode
+  children: React.ReactNode;
   node?: {
     children?: Array<{
       properties?: {
-        className?: string[]
-      }
+        className?: string[];
+      };
       children?: Array<{
-        value?: string
-      }>
-    }>
-  }
+        value?: string;
+      }>;
+    }>;
+  };
 }
 
 export default function CodeSnippet({ children, ...props }: CodeProps) {
-  const codeChildren = props.node?.children?.[0]
-  const className = codeChildren?.properties?.className?.[0]
-  const match = /language-(\w+)/.exec(className || '')
-  const code = codeChildren?.children?.[0]?.value
+  const codeChildren = props.node?.children?.[0];
+  const className = codeChildren?.properties?.className?.[0];
+  const match = /language-(\w+)/.exec(className || '');
+  const code = codeChildren?.children?.[0]?.value;
 
-  const showSyntaxHighlighter = match && code
+  const showSyntaxHighlighter = match && code;
 
   const highlightedCode = showSyntaxHighlighter ? (
     <HighlightedCode language={match[1]}>{code}</HighlightedCode>
-  ) : null
+  ) : null;
 
   const nonHighlightedCode = showSyntaxHighlighter ? null : (
     <div className="rounded-lg p-2 min-h-20 overflow-x-auto bg-accent">
-      <code className="whitespace-pre-wrap">
-        {children}
-      </code>
+      <code className="whitespace-pre-wrap">{children}</code>
     </div>
-  )
+  );
 
   return (
     <Card className="relative">
@@ -82,5 +82,5 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
         {nonHighlightedCode}
       </CardContent>
     </Card>
-  )
+  );
 }

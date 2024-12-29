@@ -1,3 +1,7 @@
+import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -5,9 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
-import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
 
 interface Props {
   content: unknown;

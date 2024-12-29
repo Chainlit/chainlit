@@ -12,7 +12,7 @@ export default function ChatWrapper() {
     connect({
       // @ts-expect-error window typing
       transports: window.transports,
-      userEnv: {},
+      userEnv: {}
     });
   }, [connect]);
 

@@ -2,17 +2,18 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
+import Page from 'pages/Page';
+
 import {
   threadHistoryState,
   useChatMessages,
   useConfig
 } from '@chainlit/react-client';
 
-import Page from 'pages/Page';
-import Chat from '@/components/chat';
-import { ReadOnlyThread } from '@/components/ReadOnlyThread';
 import AutoResumeThread from '@/components/AutoResumeThread';
 import { Loader } from '@/components/Loader';
+import { ReadOnlyThread } from '@/components/ReadOnlyThread';
+import Chat from '@/components/chat';
 
 export default function ThreadPage() {
   const { id } = useParams();
@@ -35,10 +36,20 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-      {config?.threadResumable && !isCurrentThread ?       <AutoResumeThread id={id!} /> : null}
-      {config?.threadResumable ? isCurrentThread ?
-      <Chat /> : <div className='flex flex-grow items-center justify-center'><Loader className='!size-6' /></div>
-    :  <ReadOnlyThread id={id!} />}
+        {config?.threadResumable && !isCurrentThread ? (
+          <AutoResumeThread id={id!} />
+        ) : null}
+        {config?.threadResumable ? (
+          isCurrentThread ? (
+            <Chat />
+          ) : (
+            <div className="flex flex-grow items-center justify-center">
+              <Loader className="!size-6" />
+            </div>
+          )
+        ) : (
+          <ReadOnlyThread id={id!} />
+        )}
       </>
     </Page>
   );

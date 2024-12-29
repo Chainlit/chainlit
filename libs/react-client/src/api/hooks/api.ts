@@ -1,5 +1,4 @@
 import { useContext, useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
 import { ChainlitAPI } from 'src/api';
 import { ChainlitContext } from 'src/context';
 import useSWR, { SWRConfig, SWRConfiguration } from 'swr';

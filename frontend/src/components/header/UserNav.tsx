@@ -2,7 +2,7 @@ import { useAuth } from '@chainlit/react-client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import capitalize from 'lodash/capitalize';
 
 export default function UserNav() {

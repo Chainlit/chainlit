@@ -1,8 +1,9 @@
+import { hslToHex } from '@/lib/utils';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { WavRenderer, useAudio } from '@chainlit/react-client';
+
 import { useTheme } from '@/components/ThemeProvider';
-import { hslToHex } from '@/lib/utils';
 
 interface Props {
   type: 'client' | 'server';
@@ -19,15 +20,15 @@ export default function AudioPresence({
   barCount,
   barSpacing
 }: Props) {
-  const {variant} = useTheme()
+  const { variant } = useTheme();
   const { wavRecorder, wavStreamPlayer, isAiSpeaking } = useAudio();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const foregroundColor = useMemo(() => {
     const root = document.documentElement;
     const styles = getComputedStyle(root);
-    return hslToHex(styles.getPropertyValue('--foreground'))
-  }, [variant])
+    return hslToHex(styles.getPropertyValue('--foreground'));
+  }, [variant]);
 
   width = type === 'server' && !isAiSpeaking ? height : width;
 
@@ -113,14 +114,20 @@ export default function AudioPresence({
     return () => {
       isLoaded = false;
     };
-  }, [height, width, barCount, barSpacing, foregroundColor, wavRecorder, isAiSpeaking]);
+  }, [
+    height,
+    width,
+    barCount,
+    barSpacing,
+    foregroundColor,
+    wavRecorder,
+    isAiSpeaking
+  ]);
 
   return (
-    <div className='flex items-center gap-1'>
+    <div className="flex items-center gap-1">
       {type === 'server' && !isAiSpeaking ? (
-        <div className='text-muted-foreground'>
-          Listening
-        </div>
+        <div className="text-muted-foreground">Listening</div>
       ) : null}
       <canvas ref={canvasRef} />
     </div>

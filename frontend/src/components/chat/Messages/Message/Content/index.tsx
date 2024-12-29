@@ -15,9 +15,6 @@ export interface Props {
 
 const MessageContent = memo(
   ({ message, elements, allowHtml, latex }: Props) => {
-    let lineCount = 0;
-    let contentLength = 0;
-
     const outputContent =
       message.streaming && message.output
         ? message.output + CURSOR_PLACEHOLDER
@@ -33,10 +30,7 @@ const MessageContent = memo(
       content: outputContent,
       language: message.language
     });
-
-    lineCount += output.split('\n').length;
-    contentLength += output.length;
-
+    
     const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
@@ -70,9 +64,6 @@ const MessageContent = memo(
               ? message.showInput
               : undefined
         });
-
-      lineCount += input.split('\n').length;
-      contentLength += input.length;
 
       inputMarkdown = (
         <p className='flex flex-col gap-2'>

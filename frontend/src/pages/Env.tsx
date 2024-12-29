@@ -1,23 +1,21 @@
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Alert from '@/components/Alert';
 import { useConfig } from '@chainlit/react-client';
+
+import Alert from '@/components/Alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 import { useLayoutMaxWidth } from '@/hooks/useLayoutMaxWidth';
-import { useTranslation } from 'react-i18next';
-import { useRecoilState } from 'recoil';
+
 import { userEnvState } from '@/state/user';
 
 const Env = () => {
@@ -89,7 +87,9 @@ const Env = () => {
                   <Input
                     id={key}
                     {...register(key)}
-                    className={touchedFields[key] && errors[key] ? "border-red-500" : ""}
+                    className={
+                      touchedFields[key] && errors[key] ? 'border-red-500' : ''
+                    }
                   />
                   {touchedFields[key] && errors[key] && (
                     <p className="text-sm text-red-500">
@@ -98,12 +98,8 @@ const Env = () => {
                   )}
                 </div>
               ))}
-              
-              <Button
-                id="submit-env"
-                type="submit"
-                className="w-full mt-4"
-              >
+
+              <Button id="submit-env" type="submit" className="w-full mt-4">
                 Save
               </Button>
             </form>

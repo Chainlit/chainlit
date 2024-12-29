@@ -1,8 +1,9 @@
-import { usePlatform } from '@/hooks/usePlatform';
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { Command, CornerDownLeft } from 'lucide-react';
 import { ForwardedRef, forwardRef } from 'react';
+
+import { usePlatform } from '@/hooks/usePlatform';
 
 export type KbdProps = React.HTMLAttributes<HTMLElement> & {
   asChild?: boolean;

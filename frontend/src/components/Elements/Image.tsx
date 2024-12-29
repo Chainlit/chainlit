@@ -10,7 +10,6 @@ import { X } from "lucide-react";
 import { IImageElement } from '@chainlit/react-client';
 
 const ImageElement = ({ element }: { element: IImageElement }) => {
-  const [loading, setLoading] = useState(true);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (!element.url) return null;
@@ -31,7 +30,6 @@ const ImageElement = ({ element }: { element: IImageElement }) => {
           src={element.url}
           alt={element.name}
           loading="lazy"
-          onLoad={() => setLoading(false)}
           onClick={handleClick}
         />
       </div>

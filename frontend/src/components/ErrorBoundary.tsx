@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+
 import Alert from './Alert';
 
 interface Props {
@@ -32,7 +33,7 @@ class ErrorBoundary extends Component<Props, State> {
         ? `${this.props.prefix}: ${this.state.error}`
         : this.state.error;
       return (
-        <div className='flex-grow'>
+        <div className="flex-grow">
           <Alert variant="error">{msg}</Alert>
         </div>
       );

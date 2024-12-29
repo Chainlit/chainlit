@@ -169,7 +169,7 @@ async def test_action_callback(
         assert "test_action" in test_config.code.action_callbacks
 
         # Call the registered callback
-        test_action = Action(name="test_action", value="test_value")
+        test_action = Action(name="test_action", payload={"value": "test_value"})
         await test_config.code.action_callbacks["test_action"](test_action)
 
         # Check that the action_handled flag was set

@@ -11,9 +11,7 @@ const useConfig = () => {
   const language = navigator.language || 'en-US';
 
   const { data, error, isLoading } = useApi<IChainlitConfig>(
-    !config && isAuthenticated
-      ? `/project/settings?language=${language}`
-      : null
+    !config && isAuthenticated ? `/project/settings?language=${language}` : null
   );
 
   useEffect(() => {

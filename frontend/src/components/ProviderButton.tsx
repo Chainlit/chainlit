@@ -1,12 +1,13 @@
-import { GitHub } from 'components/icons/Github';
-import { Google } from 'components/icons/Google';
-import { Microsoft } from 'components/icons/Microsoft';
+import { useTranslation } from 'components/i18n/Translator';
 import { Auth0 } from 'components/icons/Auth0';
 import { Cognito } from 'components/icons/Cognito';
 import { Descope } from 'components/icons/Descope';
+import { GitHub } from 'components/icons/Github';
 import { Gitlab } from 'components/icons/Gitlab';
+import { Google } from 'components/icons/Google';
+import { Microsoft } from 'components/icons/Microsoft';
 import { Okta } from 'components/icons/Okta';
-import { useTranslation } from 'components/i18n/Translator';
+
 import { Button } from './ui/button';
 
 function capitalizeFirstLetter(string: string) {
@@ -62,19 +63,15 @@ interface ProviderButtonProps {
 
 const ProviderButton = ({
   provider,
-  onClick,
+  onClick
 }: ProviderButtonProps): JSX.Element => {
   const { t } = useTranslation();
   return (
-    <Button
-      type="button"
-      variant="outline"
-      onClick={onClick}
-    >
-{renderProviderIcon(provider.toLowerCase())}
+    <Button type="button" variant="outline" onClick={onClick}>
+      {renderProviderIcon(provider.toLowerCase())}
       {t('components.molecules.auth.providerButton.continue', {
-            provider: getProviderName(provider)
-          })}
+        provider: getProviderName(provider)
+      })}
     </Button>
   );
 };

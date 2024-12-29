@@ -10,7 +10,7 @@ const defaultMessageContext = {
   showFeedbackButtons: true,
   onError: () => undefined,
   uiName: '',
-  cot: "hidden" as const,
+  cot: 'hidden' as const
 };
 
 const MessageContext = createContext<IMessageContext>(defaultMessageContext);

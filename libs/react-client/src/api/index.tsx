@@ -1,7 +1,7 @@
 import { IThread, IUser } from 'src/types';
 
-import { IFeedback } from 'src/types/feedback';
 import { IAction } from 'src/types/action';
+import { IFeedback } from 'src/types/feedback';
 
 export * from './hooks/auth';
 export * from './hooks/api';
@@ -120,7 +120,7 @@ export class APIBase {
 
       const res = await fetch(this.buildEndpoint(path), {
         method,
-        credentials: "include",
+        credentials: 'include',
         headers,
         signal,
         body
@@ -143,11 +143,7 @@ export class APIBase {
     return await this.fetch('GET', endpoint);
   }
 
-  async post(
-    endpoint: string,
-    data: Payload,
-    signal?: AbortSignal
-  ) {
+  async post(endpoint: string, data: Payload, signal?: AbortSignal) {
     return await this.fetch('POST', endpoint, data, signal);
   }
 
@@ -171,7 +167,9 @@ export class ChainlitAPI extends APIBase {
   }
 
   async jwtAuth(token: string) {
-    const res = await this.fetch('POST', "/auth/jwt", undefined, undefined, {"Authorization": `Bearer ${token}`});
+    const res = await this.fetch('POST', '/auth/jwt', undefined, undefined, {
+      Authorization: `Bearer ${token}`
+    });
     return res.json();
   }
 
@@ -191,30 +189,25 @@ export class ChainlitAPI extends APIBase {
   }
 
   async setFeedback(
-    feedback: IFeedback,
+    feedback: IFeedback
   ): Promise<{ success: boolean; feedbackId: string }> {
     const res = await this.put(`/feedback`, { feedback });
     return res.json();
   }
 
-  async deleteFeedback(
-    feedbackId: string,
-  ): Promise<{ success: boolean }> {
+  async deleteFeedback(feedbackId: string): Promise<{ success: boolean }> {
     const res = await this.delete(`/feedback`, { feedbackId });
     return res.json();
   }
 
   async listThreads(
     pagination: IPagination,
-    filter: IThreadFilters,
+    filter: IThreadFilters
   ): Promise<{
     pageInfo: IPageInfo;
     data: IThread[];
   }> {
-    const res = await this.post(
-      `/project/threads`,
-      { pagination, filter },
-    );
+    const res = await this.post(`/project/threads`, { pagination, filter });
 
     return res.json();
   }
@@ -234,11 +227,11 @@ export class ChainlitAPI extends APIBase {
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
-    sessionId: string,
+    sessionId: string
   ) {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-    
+
     const promise = new Promise<{ id: string }>((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
@@ -276,10 +269,7 @@ export class ChainlitAPI extends APIBase {
     return { xhr, promise };
   }
 
-  async callAction(
-    action: IAction,
-    sessionId: string,
-  ) {
+  async callAction(action: IAction, sessionId: string) {
     const res = await this.post(`/project/action`, { sessionId, action });
 
     return res.json();

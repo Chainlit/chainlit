@@ -1,8 +1,6 @@
-import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Task, ITaskList } from './Task'
 import { useChatData } from '@chainlit/react-client';
 import { cn } from '@/lib/utils'

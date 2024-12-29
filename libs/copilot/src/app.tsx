@@ -5,7 +5,7 @@ import Widget from 'widget';
 
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import {ThemeProvider} from '@chainlit/app/src/components/ThemeProvider';
-import { ChainlitContext, useAuth, useConfig } from '@chainlit/react-client';
+import { ChainlitContext, useAuth } from '@chainlit/react-client';
 
 interface Props {
   widgetConfig: IWidgetConfig;

@@ -1,4 +1,16 @@
+import { cn } from '@/lib/utils';
+import { omit } from 'lodash';
+import { useContext, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { PluggableList } from 'react-markdown/lib';
+import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
+
+import { ChainlitContext, IMessageElement } from '@chainlit/react-client';
+
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -10,102 +22,99 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { omit } from 'lodash';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { PluggableList } from 'react-markdown/lib';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
-import remarkMath from 'remark-math';
-import { useContext, useMemo } from 'react';
-import { ChainlitContext, IMessageElement } from '@chainlit/react-client';
-import CodeSnippet from './CodeSnippet';
-import { cn } from '@/lib/utils';
-import { ElementRef } from './Elements/ElementRef';
+
 import BlinkingCursor from './BlinkingCursor';
+import CodeSnippet from './CodeSnippet';
+import { ElementRef } from './Elements/ElementRef';
 
 interface Props {
-    allowHtml?: boolean;
-    latex?: boolean;
-    refElements?: IMessageElement[];
-    children: string;
-    className?: string;
-  }
+  allowHtml?: boolean;
+  latex?: boolean;
+  refElements?: IMessageElement[];
+  children: string;
+  className?: string;
+}
 
-  const cursorPlugin = () => {
-    return (tree: any) => {
-      visit(tree, 'text', (node: any, index, parent) => {
-        const placeholderPattern = /\u200B/g;
-        const matches = [...(node.value?.matchAll(placeholderPattern) || [])];
-  
-        if (matches.length > 0) {
-          const newNodes: any[] = [];
-          let lastIndex = 0;
-  
-          matches.forEach((match) => {
-            const [fullMatch] = match;
-            const startIndex = match.index!;
-            const endIndex = startIndex + fullMatch.length;
-  
-            if (startIndex > lastIndex) {
-              newNodes.push({
-                type: 'text',
-                value: node.value!.slice(lastIndex, startIndex)
-              });
-            }
-  
-            newNodes.push({
-              type: 'blinkingCursor',
-              data: {
-                hName: 'blinkingCursor',
-                hProperties: { text: 'Blinking Cursor' }
-              }
-            });
-  
-            lastIndex = endIndex;
-          });
-  
-          if (lastIndex < node.value!.length) {
+const cursorPlugin = () => {
+  return (tree: any) => {
+    visit(tree, 'text', (node: any, index, parent) => {
+      const placeholderPattern = /\u200B/g;
+      const matches = [...(node.value?.matchAll(placeholderPattern) || [])];
+
+      if (matches.length > 0) {
+        const newNodes: any[] = [];
+        let lastIndex = 0;
+
+        matches.forEach((match) => {
+          const [fullMatch] = match;
+          const startIndex = match.index!;
+          const endIndex = startIndex + fullMatch.length;
+
+          if (startIndex > lastIndex) {
             newNodes.push({
               type: 'text',
-              value: node.value!.slice(lastIndex)
+              value: node.value!.slice(lastIndex, startIndex)
             });
           }
-  
-          parent!.children.splice(index, 1, ...newNodes);
+
+          newNodes.push({
+            type: 'blinkingCursor',
+            data: {
+              hName: 'blinkingCursor',
+              hProperties: { text: 'Blinking Cursor' }
+            }
+          });
+
+          lastIndex = endIndex;
+        });
+
+        if (lastIndex < node.value!.length) {
+          newNodes.push({
+            type: 'text',
+            value: node.value!.slice(lastIndex)
+          });
         }
-      });
-    };
+
+        parent!.children.splice(index, 1, ...newNodes);
+      }
+    });
   };
+};
 
-const Markdown = ({ allowHtml, latex, refElements, className, children }: Props) => {
-  const apiClient = useContext(ChainlitContext)
- 
-    const rehypePlugins = useMemo(() => {
-        let rehypePlugins: PluggableList = [];
-        if (allowHtml) {
-          rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
-        }
-        if (latex) {
-          rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
-        }
-        return rehypePlugins;
-      }, [allowHtml, latex]);
+const Markdown = ({
+  allowHtml,
+  latex,
+  refElements,
+  className,
+  children
+}: Props) => {
+  const apiClient = useContext(ChainlitContext);
 
-      const remarkPlugins = useMemo(() => {
-        let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
-    
-        if (latex) {
-          remarkPlugins = [...remarkPlugins, remarkMath as any];
-        }
-        return remarkPlugins;
-      }, [latex]);
+  const rehypePlugins = useMemo(() => {
+    let rehypePlugins: PluggableList = [];
+    if (allowHtml) {
+      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
+    }
+    if (latex) {
+      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
+    }
+    return rehypePlugins;
+  }, [allowHtml, latex]);
+
+  const remarkPlugins = useMemo(() => {
+    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
+
+    if (latex) {
+      remarkPlugins = [...remarkPlugins, remarkMath as any];
+    }
+    return remarkPlugins;
+  }, [latex]);
 
   return (
     <ReactMarkdown
-    className={cn("prose lg:prose-xl", className)}
-    remarkPlugins={remarkPlugins}
-    rehypePlugins={rehypePlugins}
+      className={cn('prose lg:prose-xl', className)}
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
       components={{
         code(props) {
           return (
@@ -116,7 +125,7 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
           );
         },
         pre({ children, ...props }: any) {
-            return <CodeSnippet {...props} />;
+          return <CodeSnippet {...props} />;
         },
         a({ children, ...props }) {
           const name = children as string;
@@ -125,22 +134,33 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
             return <ElementRef element={element} />;
           } else {
             return (
-              <a {...props} className="text-primary hover:underline" target="_blank">
-              {children}
-            </a>
+              <a
+                {...props}
+                className="text-primary hover:underline"
+                target="_blank"
+              >
+                {children}
+              </a>
             );
           }
         },
         img: (image: any) => {
           return (
-            <div className='sm:max-w-sm md:max-w-md'>
-            <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
-              <img
-                src={image.src.startsWith("/public") ? apiClient.buildEndpoint(image.src) : image.src}
-                alt={image.alt}
-                className="h-full w-full object-contain"
-              />
-            </AspectRatio>
+            <div className="sm:max-w-sm md:max-w-md">
+              <AspectRatio
+                ratio={16 / 9}
+                className="bg-muted rounded-md overflow-hidden"
+              >
+                <img
+                  src={
+                    image.src.startsWith('/public')
+                      ? apiClient.buildEndpoint(image.src)
+                      : image.src
+                  }
+                  alt={image.alt}
+                  className="h-full w-full object-contain"
+                />
+              </AspectRatio>
             </div>
           );
         },
@@ -220,24 +240,24 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         table({ children, ...props }) {
           return (
             <Card className="[&:not(:first-child)]:mt-2 [&:not(:last-child)]:mb-2">
-              <Table {...props as any}>{children}</Table>
+              <Table {...(props as any)}>{children}</Table>
             </Card>
           );
         },
         thead({ children, ...props }) {
-          return <TableHeader {...props  as any}>{children}</TableHeader>;
+          return <TableHeader {...(props as any)}>{children}</TableHeader>;
         },
         tr({ children, ...props }) {
-          return <TableRow {...props  as any}>{children}</TableRow>;
+          return <TableRow {...(props as any)}>{children}</TableRow>;
         },
         th({ children, ...props }) {
-          return <TableHead {...props  as any}>{children}</TableHead>;
+          return <TableHead {...(props as any)}>{children}</TableHead>;
         },
         td({ children, ...props }) {
-          return <TableCell {...props  as any}>{children}</TableCell>;
+          return <TableCell {...(props as any)}>{children}</TableCell>;
         },
         tbody({ children, ...props }) {
-          return <TableBody {...props  as any}>{children}</TableBody>;
+          return <TableBody {...(props as any)}>{children}</TableBody>;
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />

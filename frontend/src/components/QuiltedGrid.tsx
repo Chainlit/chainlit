@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils"
-import { IImageElement, IVideoElement } from "@chainlit/react-client";
+import { cn } from '@/lib/utils';
 
+import { IImageElement, IVideoElement } from '@chainlit/react-client';
 
 const sizeToUnit = (element: IImageElement | IVideoElement) => {
   switch (element.size) {
@@ -27,10 +27,10 @@ const QuiltedGrid = <T extends IImageElement | IVideoElement>({
   className
 }: QuiltedGridProps<T>) => {
   return (
-    <div 
+    <div
       className={cn(
-        "grid grid-cols-4 gap-2 w-full max-w-[600px]",
-        "transform-gpu", // equivalent to transform: translateZ(0)
+        'grid grid-cols-4 gap-2 w-full max-w-[600px]',
+        'transform-gpu', // equivalent to transform: translateZ(0)
         className
       )}
     >
@@ -39,12 +39,20 @@ const QuiltedGrid = <T extends IImageElement | IVideoElement>({
         const rows = sizeToUnit(element);
 
         return (
-          <div 
+          <div
             key={i}
             className={cn(
-              "relative",
-              cols === 1 ? "col-span-1" : cols === 2 ? "col-span-2" : "col-span-4",
-              rows === 1 ? "row-span-1" : rows === 2 ? "row-span-2" : "row-span-4",
+              'relative',
+              cols === 1
+                ? 'col-span-1'
+                : cols === 2
+                ? 'col-span-2'
+                : 'col-span-4',
+              rows === 1
+                ? 'row-span-1'
+                : rows === 2
+                ? 'row-span-2'
+                : 'row-span-4'
             )}
           >
             <Renderer element={element} />

@@ -9,9 +9,9 @@ interface Props {
 
 const InlinedTextList = ({ items }: Props) => (
   <div className='flex flex-col gap-2'>
-    {items.map((el, i) => {
+    {items.map((el) => {
       return (
-        <Card>
+        <Card key={el.id}>
                           <CardHeader>
                     <CardTitle>{el.name}</CardTitle>
                 </CardHeader>

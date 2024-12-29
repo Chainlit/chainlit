@@ -1,13 +1,15 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Translator, { useTranslation } from 'components/i18n/Translator'
-import { ProviderButton } from "./ProviderButton"
-import { useEffect, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import Alert from "./Alert"
-import { useForm } from "react-hook-form"
+import { cn } from '@/lib/utils';
+import { Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Translator, { useTranslation } from 'components/i18n/Translator';
+
+import Alert from './Alert';
+import { ProviderButton } from './ProviderButton';
 
 interface Props {
   error?: string;
@@ -56,7 +58,7 @@ export function LoginForm({
 
   const onSubmit = async (data: FormValues) => {
     if (!onPasswordSignIn) return;
-    
+
     setLoading(true);
     try {
       await onPasswordSignIn(data.email, data.password, callbackUrl);
@@ -72,7 +74,10 @@ export function LoginForm({
   const oAuthReady = onOAuthSignIn && providers.length;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6")}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className={cn('flex flex-col gap-6')}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">
           <Translator path="components.molecules.auth.authLogin.title" />
@@ -98,15 +103,19 @@ export function LoginForm({
               <Input
                 id="email"
                 placeholder="m@example.com"
-                {...register('email', { 
-                  required: t('components.molecules.auth.authLogin.form.emailRequired')
+                {...register('email', {
+                  required: t(
+                    'components.molecules.auth.authLogin.form.emailRequired'
+                  )
                 })}
                 className={cn(
-                  touchedFields.email && errors.email && "border-destructive"
+                  touchedFields.email && errors.email && 'border-destructive'
                 )}
               />
               {touchedFields.email && errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -119,12 +128,16 @@ export function LoginForm({
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password', {
-                    required: t('components.molecules.auth.authLogin.form.passwordRequired')
+                    required: t(
+                      'components.molecules.auth.authLogin.form.passwordRequired'
+                    )
                   })}
                   className={cn(
-                    touchedFields.password && errors.password && "border-destructive"
+                    touchedFields.password &&
+                      errors.password &&
+                      'border-destructive'
                   )}
                 />
                 <Button
@@ -142,7 +155,9 @@ export function LoginForm({
                 </Button>
               </div>
               {touchedFields.password && errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -158,7 +173,7 @@ export function LoginForm({
               <Translator path="components.molecules.auth.authLogin.form.or" />
             </span>
           </div>
-        ): null}
+        ) : null}
 
         {oAuthReady ? (
           <div className="grid gap-2">
@@ -170,8 +185,8 @@ export function LoginForm({
               />
             ))}
           </div>
-        ): null}
+        ) : null}
       </div>
     </form>
-  )
+  );
 }

@@ -26,7 +26,6 @@ const SwitchInput = ({
   hasError,
   id,
   label,
-  onChange,
   setField,
   tooltip
 }: SwitchInputProps): JSX.Element => {
