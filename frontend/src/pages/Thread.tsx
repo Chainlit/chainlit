@@ -35,7 +35,7 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-      {config?.threadResumable ?       <AutoResumeThread id={id!} /> : null}
+      {config?.threadResumable && !isCurrentThread ?       <AutoResumeThread id={id!} /> : null}
       {config?.threadResumable ? isCurrentThread ?
       <Chat /> : <div className='flex flex-grow items-center justify-center'><Loader className='!size-6' /></div>
     :  <ReadOnlyThread id={id!} />}

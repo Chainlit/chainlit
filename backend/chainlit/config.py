@@ -95,9 +95,6 @@ auto_tag_thread = true
 # Allow users to edit their own messages
 edit_message = true
 
-# Use httponly cookie for client->server authentication, required to be able to use file upload and elements.
-cookie_auth = true
-
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
@@ -296,8 +293,6 @@ class ProjectSettings(DataClassJsonMixin):
     cache: bool = False
     # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
     follow_symlink: bool = False
-    # Use httponly cookie for client->server authentication, required to be able to use file upload and elements.
-    cookie_auth: bool = True
 
 
 @dataclass()

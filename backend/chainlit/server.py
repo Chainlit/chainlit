@@ -33,7 +33,7 @@ from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
 
-from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.auth import create_jwt, decode_jwt, get_configuration, get_current_user
 from chainlit.auth.cookie import (
     clear_auth_cookie,
     clear_oauth_state_cookie,
@@ -376,13 +376,6 @@ async def auth(request: Request):
 def _get_response_dict(access_token: str) -> dict:
     """Get the response dictionary for the auth response."""
 
-    if not config.project.cookie_auth:
-        # Legacy auth
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-        }
-
     return {"success": True}
 
 
@@ -444,8 +437,7 @@ async def _authenticate_user(
 
     response = _get_auth_response(access_token, redirect_to_callback)
 
-    if config.project.cookie_auth:
-        set_auth_cookie(response, access_token)
+    set_auth_cookie(response, access_token)
 
     return response
 
@@ -470,13 +462,48 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
 @router.post("/logout")
 async def logout(request: Request, response: Response):
     """Logout the user by calling the on_logout callback."""
-    if config.project.cookie_auth:
-        clear_auth_cookie(response)
+    clear_auth_cookie(response)
 
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
 
     return {"success": True}
+
+
+@router.post("/auth/jwt")
+async def jwt_auth(request: Request):
+    """Login a user using a valid jwt."""
+    from jwt import InvalidTokenError
+    
+    auth_header: Optional[str] = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(
+            status_code=401,
+            detail="Authorization header missing"
+        )
+
+    # Check if it starts with "Bearer "
+    try:
+        scheme, token = auth_header.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication scheme. Please use Bearer"
+            )
+    except ValueError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authorization header format"
+        )
+    
+    try:
+        user = decode_jwt(token)
+        return await _authenticate_user(user)
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
 
 
 @router.post("/auth/header")
@@ -1007,14 +1034,6 @@ async def get_file(
     current_user: UserParam,
 ):
     """Get a file from the session files directory."""
-
-    if not config.project.cookie_auth:
-        # We cannot make this work safely without cookie auth, so disable it.
-        raise HTTPException(
-            status_code=404,
-            detail="File downloads unavailable.",
-        )
-
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id) if session_id else None

@@ -1,7 +1,6 @@
 import { useCallback, useContext } from 'react';
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
-  accessTokenState,
   actionState,
   askUserState,
   chatSettingsInputsState,
@@ -28,7 +27,6 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 const useChatInteract = () => {
   const client = useContext(ChainlitContext);
-  const accessToken = useRecoilValue(accessTokenState);
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const sessionId = useRecoilValue(sessionIdState);
@@ -155,9 +153,9 @@ const useChatInteract = () => {
 
   const uploadFile = useCallback(
     (file: File, onProgress: (progress: number) => void) => {
-      return client.uploadFile(file, onProgress, sessionId, accessToken);
+      return client.uploadFile(file, onProgress, sessionId);
     },
-    [sessionId, accessToken]
+    [sessionId]
   );
 
   return {

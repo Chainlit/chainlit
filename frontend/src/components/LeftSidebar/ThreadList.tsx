@@ -6,7 +6,6 @@ import {
     useChatSession,
     useChatMessages,
     ChainlitContext,
-    accessTokenState,
     ClientError,
     threadHistoryState
   } from '@chainlit/react-client';
@@ -38,7 +37,7 @@ import { cn } from '@/lib/utils';
 import ThreadOptions from './ThreadOptions';
 import { useContext, useState } from 'react';
 import { toast } from 'sonner';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { Translator } from '../i18n';
 
 interface ThreadListProps {
@@ -63,7 +62,6 @@ export function ThreadList({
   const [threadNewName, setThreadNewName] = useState<string>()
   const setThreadHistory = useSetRecoilState(threadHistoryState);
   const apiClient = useContext(ChainlitContext);
-  const accessToken = useRecoilValue(accessTokenState)
 
   if (isFetching || (!threadHistory?.timeGroupedThreads && isLoadingMore)) {
     return <div className='flex items-center justify-center p-2'><Loader /></div>
@@ -89,7 +87,7 @@ No threads found
   const handleDeleteThread = () => {
     if(!threadIdToDelete) return
 
-      toast.promise(apiClient.deleteThread(threadIdToDelete, accessToken), {
+      toast.promise(apiClient.deleteThread(threadIdToDelete), {
         loading: (
           <Translator path="components.organisms.threadHistory.sidebar.DeleteThreadButton.deletingChat" />
         ),
@@ -118,7 +116,7 @@ No threads found
   const handleRenameThread = () => {
     if(!threadIdToRename || !threadNewName) return
 
-      toast.promise(apiClient.renameThread(threadIdToRename, threadNewName, accessToken), {
+      toast.promise(apiClient.renameThread(threadIdToRename, threadNewName), {
         loading: "Renaming thread",
         success: () => {
           setThreadNewName(undefined)

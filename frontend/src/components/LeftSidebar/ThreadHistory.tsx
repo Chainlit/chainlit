@@ -4,12 +4,11 @@ import { uniqBy } from 'lodash';
 
 import {
     ChainlitContext,
-    accessTokenState,
     threadHistoryState,
     useChatMessages
   } from '@chainlit/react-client';
   import { SidebarContent, SidebarGroup, SidebarMenu } from '@/components/ui/sidebar';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { ThreadList } from './ThreadList';
 
 const BATCH_SIZE = 20;
@@ -19,7 +18,6 @@ export function ThreadHistory() {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const apiClient = useContext(ChainlitContext);
-  const accessToken = useRecoilValue(accessTokenState);
   const { firstInteraction, messages, threadId } = useChatMessages();
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
   const [error, setError] = useState<string>();
@@ -74,8 +72,7 @@ export function ThreadHistory() {
 
       const { pageInfo, data } = await apiClient.listThreads(
         { first: BATCH_SIZE, cursor },
-        {},
-        accessToken
+        {}
       );
 
       setError(undefined);
@@ -107,7 +104,7 @@ export function ThreadHistory() {
     if (!isFetching && !threadHistory?.threads && !error) {
       fetchThreads();
     }
-  }, [accessToken, isFetching, threadHistory, error]);
+  }, [isFetching, threadHistory, error]);
 
   // Handle infinite scroll
   useEffect(() => {

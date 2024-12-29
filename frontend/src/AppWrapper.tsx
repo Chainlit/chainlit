@@ -44,6 +44,5 @@ export default function AppWrapper() {
   ) {
     window.location.href = getRouterBasename() + '/login';
   }
-
   return <App />;
 }

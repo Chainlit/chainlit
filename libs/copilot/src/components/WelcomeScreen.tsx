@@ -18,6 +18,6 @@ export default function WelcomeScreen() {
     isVisible && 'opacity-100'
     )}
     >
-        <Starters className="flex-grow items-end gap-4" />
+        <Starters className="items-end mt-auto" />
     </div>
 }

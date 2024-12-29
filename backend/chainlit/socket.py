@@ -81,15 +81,6 @@ def load_user_env(user_env):
     return user_env
 
 
-def _get_token_from_auth(auth: dict) -> Optional[str]:
-    # Not using cookie auth, return token.
-    token = auth.get("token")
-    if token:
-        return token.split(" ")[1]
-
-    return None
-
-
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
     if cookie_header := environ.get("HTTP_COOKIE", None):
         cookies = cookie_parser(cookie_header)
@@ -100,10 +91,6 @@ def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
 
 def _get_token(environ: WSGIEnvironment, auth: dict) -> Optional[str]:
     """Take WSGI environ, return access token."""
-
-    if not config.project.cookie_auth:
-        return _get_token_from_auth(auth)
-
     return _get_token_from_cookie(environ)
 
 

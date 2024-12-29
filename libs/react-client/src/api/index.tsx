@@ -1,4 +1,3 @@
-import { ensureTokenPrefix, removeToken } from 'src/api/hooks/auth/tokenManagement';
 import { IThread, IUser } from 'src/types';
 
 import { IFeedback } from 'src/types/feedback';
@@ -75,8 +74,6 @@ export class APIBase {
   private handleRequestError(error: any) {
     if (error instanceof ClientError) {
       if (error.status === 401 && this.on401) {
-        // TODO: Consider whether we should logout() here instead.
-        removeToken();
         this.on401();
       }
       if (this.onError) {
@@ -93,13 +90,12 @@ export class APIBase {
    * Key features:
    * - Supports all HTTP methods (GET, POST, PUT, PATCH, DELETE)
    * - Handles both FormData and JSON payloads
-   * - Manages authentication headers and token formatting
+   * - Manages authentication headers
    * - Custom error handling with ClientError class
    * - Support for request cancellation via AbortSignal
    *
    * @param method - HTTP method to use (GET, POST, etc.)
    * @param path - API endpoint path
-   * @param token - Optional authentication token
    * @param data - Optional request payload (FormData or JSON-serializable data)
    * @param signal - Optional AbortSignal for request cancellation
    * @returns Promise<Response>
@@ -108,14 +104,11 @@ export class APIBase {
   async fetch(
     method: string,
     path: string,
-    token?: string,
     data?: Payload,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    headers: { Authorization?: string; 'Content-Type'?: string } = {}
   ): Promise<Response> {
     try {
-      const headers: { Authorization?: string; 'Content-Type'?: string } = {};
-      if (token) headers['Authorization'] = ensureTokenPrefix(token); // Assuming token is a bearer token
-
       let body;
 
       if (data instanceof FormData) {
@@ -146,29 +139,28 @@ export class APIBase {
     }
   }
 
-  async get(endpoint: string, token?: string) {
-    return await this.fetch('GET', endpoint, token);
+  async get(endpoint: string) {
+    return await this.fetch('GET', endpoint);
   }
 
   async post(
     endpoint: string,
     data: Payload,
-    token?: string,
     signal?: AbortSignal
   ) {
-    return await this.fetch('POST', endpoint, token, data, signal);
+    return await this.fetch('POST', endpoint, data, signal);
   }
 
-  async put(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('PUT', endpoint, token, data);
+  async put(endpoint: string, data: Payload) {
+    return await this.fetch('PUT', endpoint, data);
   }
 
-  async patch(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('PATCH', endpoint, token, data);
+  async patch(endpoint: string, data: Payload) {
+    return await this.fetch('PATCH', endpoint, data);
   }
 
-  async delete(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('DELETE', endpoint, token, data);
+  async delete(endpoint: string, data: Payload) {
+    return await this.fetch('DELETE', endpoint, data);
   }
 }
 
@@ -178,13 +170,18 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async jwtAuth(token: string) {
+    const res = await this.fetch('POST', "/auth/jwt", undefined, undefined, {"Authorization": `Bearer ${token}`});
+    return res.json();
+  }
+
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
     return res.json();
   }
 
-  async getUser(accessToken?: string): Promise<IUser> {
-    const res = await this.get(`/user`, accessToken);
+  async getUser(): Promise<IUser> {
+    const res = await this.get(`/user`);
     return res.json();
   }
 
@@ -195,24 +192,21 @@ export class ChainlitAPI extends APIBase {
 
   async setFeedback(
     feedback: IFeedback,
-    accessToken?: string
   ): Promise<{ success: boolean; feedbackId: string }> {
-    const res = await this.put(`/feedback`, { feedback }, accessToken);
+    const res = await this.put(`/feedback`, { feedback });
     return res.json();
   }
 
   async deleteFeedback(
     feedbackId: string,
-    accessToken?: string
   ): Promise<{ success: boolean }> {
-    const res = await this.delete(`/feedback`, { feedbackId }, accessToken);
+    const res = await this.delete(`/feedback`, { feedbackId });
     return res.json();
   }
 
   async listThreads(
     pagination: IPagination,
     filter: IThreadFilters,
-    accessToken?: string
   ): Promise<{
     pageInfo: IPageInfo;
     data: IThread[];
@@ -220,20 +214,19 @@ export class ChainlitAPI extends APIBase {
     const res = await this.post(
       `/project/threads`,
       { pagination, filter },
-      accessToken
     );
 
     return res.json();
   }
 
-  async renameThread(threadId: string, name: string, accessToken?: string) {
-    const res = await this.put(`/project/thread`, { threadId, name }, accessToken);
+  async renameThread(threadId: string, name: string) {
+    const res = await this.put(`/project/thread`, { threadId, name });
 
     return res.json();
   }
 
-  async deleteThread(threadId: string, accessToken?: string) {
-    const res = await this.delete(`/project/thread`, { threadId }, accessToken);
+  async deleteThread(threadId: string) {
+    const res = await this.delete(`/project/thread`, { threadId });
 
     return res.json();
   }
@@ -242,7 +235,6 @@ export class ChainlitAPI extends APIBase {
     file: File,
     onProgress: (progress: number) => void,
     sessionId: string,
-    token?: string
   ) {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
@@ -256,10 +248,6 @@ export class ChainlitAPI extends APIBase {
         this.buildEndpoint(`/project/file?session_id=${sessionId}`),
         true
       );
-
-      if (token) {
-        xhr.setRequestHeader('Authorization', ensureTokenPrefix(token));
-      }
 
       // Track the progress of the upload
       xhr.upload.onprogress = function (event) {
@@ -291,9 +279,8 @@ export class ChainlitAPI extends APIBase {
   async callAction(
     action: IAction,
     sessionId: string,
-    token?: string
   ) {
-    const res = await this.post(`/project/action`, { sessionId, action }, token);
+    const res = await this.post(`/project/action`, { sessionId, action });
 
     return res.json();
   }

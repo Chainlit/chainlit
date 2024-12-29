@@ -87,11 +87,9 @@ const useChatSession = () => {
     ({
       transports,
       userEnv,
-      accessToken
     }: {
       transports?: string[]
       userEnv: Record<string, string>;
-      accessToken?: string;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -105,7 +103,6 @@ const useChatSession = () => {
         withCredentials: true,
         transports,
         auth: {
-              token: accessToken,
               clientType: client.type,
               sessionId,
               threadId: idToResume || '',

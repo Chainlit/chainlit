@@ -8,7 +8,7 @@ import {
     TooltipTrigger
   } from '@/components/ui/tooltip';
 
-import { ChainlitContext, useChatSession, type IAction, accessTokenState } from '@chainlit/react-client';
+import { ChainlitContext, useChatSession, type IAction } from '@chainlit/react-client';
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/Loader';
 import { toast } from 'sonner';
@@ -23,7 +23,6 @@ const ActionButton = ({ action }: ActionProps) => {
   const apiClient = useContext(ChainlitContext)
   const {sessionId} = useChatSession()
   const [isRunning, setIsRunning] = useState(false)
-  const accessToken = useRecoilValue(accessTokenState)
 
   const content = useMemo(() => {
     return action.icon ?  action.label : action.label ? action.label : action.name
@@ -38,13 +37,13 @@ const ActionButton = ({ action }: ActionProps) => {
   const handleClick = useCallback(async () => {
     try {
         setIsRunning(true)
-        await apiClient.callAction(action, sessionId, accessToken)
+        await apiClient.callAction(action, sessionId)
     } catch(err) {
         toast.error(String(err))
     } finally {
         setIsRunning(false)
     }
-  }, [action, sessionId, apiClient, accessToken])
+  }, [action, sessionId, apiClient])
 
   const isAskingAction = askUser?.spec.type === 'action';
   const ignore = isAskingAction && askUser?.spec.keys?.includes(action.id);

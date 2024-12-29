@@ -1,9 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Translator } from 'components/i18n';
-import { AuthLogin } from 'components/molecules/auth';
-
 import { useQuery } from 'hooks/query';
 
 import { ChainlitContext, useAuth } from 'client-types/*';
@@ -18,22 +15,12 @@ export default function Login() {
   const query = useQuery();
   const {
     data: config,
-    setAccessToken,
     user,
-    cookieAuth,
     setUserFromAPI
   } = useAuth();
   const [error, setError] = useState('');
   const apiClient = useContext(ChainlitContext);
-
   const navigate = useNavigate();
-
-  const handleTokenAuth = (json: any): void => {
-    // Handle case where access_token is in JSON reply.
-    const access_token = json.access_token;
-    if (access_token) return setAccessToken(access_token);
-    throw LoginError;
-  };
 
   const handleCookieAuth = (json: any): void => {
     if (json?.success != true) throw LoginError;
@@ -46,11 +33,8 @@ export default function Login() {
     try {
       const json = await jsonPromise;
 
-      if (!cookieAuth) {
-        handleTokenAuth(json);
-      } else {
-        handleCookieAuth(json);
-      }
+      handleCookieAuth(json);
+      
       if(redirectURL) {
         navigate(redirectURL);
       }
@@ -69,7 +53,6 @@ export default function Login() {
   const handlePasswordLogin = async (
     email: string,
     password: string,
-    callbackUrl: string
   ) => {
     const formData = new FormData();
     formData.append('username', email);

@@ -1,5 +1,5 @@
 import { useCallback, useContext, useMemo } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -7,7 +7,6 @@ import {
   IFeedback,
   IMessageElement,
   IStep,
-  accessTokenState,
   messagesState,
   sideViewState,
   updateMessageById,
@@ -32,7 +31,6 @@ const MessagesContainer = ({navigate}: Props) => {
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { uploadFile: _uploadFile } = useChatInteract();
-  const accessToken = useRecoilValue(accessTokenState);
   const setMessages = useSetRecoilState(messagesState);
   const setSideView = useSetRecoilState(sideViewState);
 
@@ -47,7 +45,7 @@ const MessagesContainer = ({navigate}: Props) => {
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-        toast.promise(apiClient.setFeedback(feedback, accessToken), {
+        toast.promise(apiClient.setFeedback(feedback), {
           loading: t('components.organisms.chat.Messages.index.updating'),
           success: (res) => {
             setMessages((prev) =>
@@ -74,7 +72,7 @@ const MessagesContainer = ({navigate}: Props) => {
 
   const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
-        toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
+        toast.promise(apiClient.deleteFeedback(feedbackId), {
           loading: t('components.organisms.chat.Messages.index.updating'),
           success: () => {
             setMessages((prev) =>

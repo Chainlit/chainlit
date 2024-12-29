@@ -67,6 +67,7 @@ const ProviderButton = ({
   const { t } = useTranslation();
   return (
     <Button
+      type="button"
       variant="outline"
       onClick={onClick}
     >

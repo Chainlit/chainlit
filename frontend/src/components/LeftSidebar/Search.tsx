@@ -1,4 +1,4 @@
-import { ChainlitContext, IThread, accessTokenState } from '@chainlit/react-client';
+import { ChainlitContext, IThread } from '@chainlit/react-client';
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Translator } from 'components/i18n';
@@ -12,7 +12,6 @@ import {
     CommandList,
     CommandItem,
 } from "@/components/ui/command"
-import { useRecoilValue } from 'recoil';
 import _ from 'lodash';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +26,6 @@ export default function SearchChats() {
     const [loading, setLoading] = useState(false);
     
     const apiClient = useContext(ChainlitContext);
-    const accessToken = useRecoilValue(accessTokenState);
 
     // Debounced search function
     const debouncedSearch = useMemo(
@@ -38,7 +36,6 @@ export default function SearchChats() {
                     const { data } = await apiClient.listThreads(
                         { first: 20, cursor: undefined },
                         { search: query || undefined },
-                        accessToken
                     );
                     setThreads(data || []);
                 } catch (error) {
@@ -47,7 +44,7 @@ export default function SearchChats() {
                     setLoading(false);
                 }
             }, 300),
-        [apiClient, accessToken]
+        [apiClient]
     );
 
     // Group threads by month and year

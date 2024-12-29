@@ -11,24 +11,6 @@ import { userEnvState } from 'state/user';
 import { ThemeProvider } from './components/ThemeProvider';
 import ChatSettingsModal from './components/ChatSettings';
 
-type Primary = {
-  dark?: string;
-  light?: string;
-  main?: string;
-};
-
-type Text = {
-  primary?: string;
-  secondary?: string;
-};
-
-type ThemOverride = {
-  primary?: Primary;
-  background?: string;
-  paper?: string;
-  text?: Text;
-};
-
 declare global {
   interface Window {
     transports?: string[]
@@ -38,7 +20,7 @@ declare global {
 function App() {
   const { config } = useConfig();
 
-  const { isAuthenticated, accessToken } = useAuth();
+  const { isAuthenticated, data } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
 
@@ -59,10 +41,9 @@ function App() {
       connect({
         transports: window.transports,
         userEnv,
-        accessToken
       });
     }
-  }, [userEnv, accessToken, isAuthenticated, connect, chatProfileOk]);
+  }, [userEnv, isAuthenticated, connect, chatProfileOk]);
 
   if (configLoaded && config.chatProfiles.length && !chatProfile) {
     // Autoselect the first default chat profile
@@ -76,10 +57,10 @@ function App() {
     }
   }
 
-  if(!configLoaded) return null
+  if(!configLoaded && isAuthenticated) return null
 
   return (
-    <ThemeProvider storageKey="vite-ui-theme" defaultTheme={config.ui.default_theme}>
+    <ThemeProvider storageKey="vite-ui-theme" defaultTheme={data?.default_theme}>
 
       <Toaster
         className="toast"

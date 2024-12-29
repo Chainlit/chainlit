@@ -1,5 +1,4 @@
-import { WidgetContext } from 'context';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
@@ -19,22 +18,15 @@ declare global {
 }
 
 export default function App({ widgetConfig }: Props) {
+  const { isAuthenticated, data } = useAuth();
   const apiClient = useContext(ChainlitContext);
-  const { accessToken } = useContext(WidgetContext);
-  const { config } = useConfig(accessToken);
-  const { setAccessToken } = useAuth();
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
+  const [authError, setAuthError] = useState<string>()
 
   useEffect(() => {
-    setAccessToken(widgetConfig.accessToken || "");
-  }, [widgetConfig.accessToken]);
-
-  useEffect(() => {
-    if (!config) return;
-
     apiClient
-      .get(`/project/translations?language=${languageInUse}`, accessToken)
+      .get(`/project/translations?language=${languageInUse}`)
       .then((res) => res.json())
       .then((data) => {
         i18n.addResourceBundle(languageInUse, 'translation', data.translation);
@@ -43,14 +35,22 @@ export default function App({ widgetConfig }: Props) {
       .catch((err) => {
         console.error(err);
       });
-  }, [config]);
+  }, []);
 
+  const defaultTheme = widgetConfig.theme || data?.default_theme;
 
-  if (!config) {
-    return null;
-  }
-
-  const defaultTheme = widgetConfig.theme || config.ui.default_theme;
+  useEffect(() => {
+    if(!isAuthenticated) {
+      if(!widgetConfig.accessToken) {
+        setAuthError("No authentication token provided.")
+      } else {
+        apiClient.jwtAuth(widgetConfig.accessToken)
+        .catch((err) => setAuthError(String(err)))
+      }
+    } else {
+      setAuthError(undefined)
+    }
+  }, [isAuthenticated, apiClient, setAuthError])
 
   return (
     <ThemeProvider storageKey="vite-ui-theme" defaultTheme={defaultTheme}>
@@ -58,7 +58,7 @@ export default function App({ widgetConfig }: Props) {
     className="toast"
     position="bottom-center"
   />
-      <Widget config={widgetConfig} />
+      <Widget config={widgetConfig} authError={authError} />
       </ThemeProvider>
   );
 }

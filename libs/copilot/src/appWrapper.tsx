@@ -1,11 +1,10 @@
 import { makeApiClient } from 'api';
-import App from 'app';
-import { WidgetContext } from 'context';
 import { RecoilRoot } from 'recoil';
 import { IWidgetConfig } from 'types';
 
 import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
 import { ChainlitContext } from '@chainlit/react-client';
+import App from './app';
 
 i18nSetupLocalization();
 interface Props {
@@ -18,13 +17,7 @@ export default function AppWrapper({ widgetConfig }: Props) {
   return (
     <ChainlitContext.Provider value={apiClient}>
       <RecoilRoot>
-        <WidgetContext.Provider
-          value={{
-            accessToken: widgetConfig.accessToken
-          }}
-        >
           <App widgetConfig={widgetConfig} />
-        </WidgetContext.Provider>
       </RecoilRoot>
     </ChainlitContext.Provider>
   );

@@ -37,7 +37,7 @@ export default function Starter({ starter }: StarterProps) {
       <div className="flex gap-2">
         {starter.icon ? (
           <img
-            className="h-5 w-5 rounded-full"
+            className="h-5 w-5 rounded-md"
             src={
               starter.icon?.startsWith('/public')
                 ? apiClient.buildEndpoint(starter.icon)

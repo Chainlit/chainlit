@@ -211,7 +211,7 @@ const Chat = () => {
             <MessagesContainer navigate={navigate} />
             </div>
           </ScrollContainer>
-          <div className='flex flex-col mx-auto w-full p-4'
+          <div className='flex flex-col mx-auto w-full p-4 pt-0'
             style={{
               "maxWidth": layoutMaxWidth
             }}

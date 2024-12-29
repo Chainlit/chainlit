@@ -10,13 +10,15 @@ import { cn } from '@/lib/utils';
 import { IWidgetConfig } from './types';
 import Header from './components/Header';
 import ChatWrapper from './chat';
+import Alert from '@chainlit/app/src/components/Alert';
 
 interface Props {
   config: IWidgetConfig;
+  authError?: string;
 }
 
 
-const Widget = ({ config }: Props) => {
+const Widget = ({ config, authError }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -82,11 +84,14 @@ const Widget = ({ config }: Props) => {
         )}
       >
         <div className="flex flex-col h-full w-full">
-          <Header expanded={expanded} setExpanded={setExpanded} />
-          {/* Chat content will go here */}
+          {authError ? <Alert variant='error'>{authError}</Alert> : <>
+            <Header expanded={expanded} setExpanded={setExpanded} />
           <div className="flex flex-grow pt-4 overflow-y-auto">
             <ChatWrapper />
-          </div>
+            </div>
+          </>}
+
+   
         </div>
       </PopoverContent>
     </Popover>

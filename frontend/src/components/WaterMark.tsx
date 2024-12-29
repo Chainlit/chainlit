@@ -15,6 +15,7 @@ export default function WaterMark() {
     <a
       href="https://github.com/Chainlit/chainlit"
       target="_blank"
+      className='watermark'
       style={{
         display: 'flex',
         alignItems: 'center',

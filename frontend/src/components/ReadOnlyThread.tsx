@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -10,7 +10,6 @@ import {
   IMessageElement,
   IStep,
   IThread,
-  accessTokenState,
   nestMessages,
   sideViewState,
   useApi,
@@ -39,7 +38,6 @@ const { data: thread, error, isLoading } = useApi<IThread>(
     );
     const navigate = useNavigate()
     const setSideView = useSetRecoilState(sideViewState);
-  const accessToken = useRecoilValue(accessTokenState);
   const [steps, setSteps] = useState<IStep[]>([]);
   const apiClient = useContext(ChainlitContext);
   const { t } = useTranslation();
@@ -52,7 +50,7 @@ const { data: thread, error, isLoading } = useApi<IThread>(
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-        toast.promise(apiClient.setFeedback(feedback, accessToken), {
+        toast.promise(apiClient.setFeedback(feedback), {
           loading: 'Updating',
           success: (res) => {
             setSteps((prev) =>
@@ -83,7 +81,7 @@ const { data: thread, error, isLoading } = useApi<IThread>(
 
   const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
-        toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
+        toast.promise(apiClient.deleteFeedback(feedbackId), {
           loading: t('components.organisms.chat.Messages.index.updating'),
           success: () => {
             setSteps((prev) =>
