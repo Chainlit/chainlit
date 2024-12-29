@@ -15,11 +15,11 @@ export default function ElementSideView() {
 
     return (
       <Sheet open onOpenChange={(open) => !open && setSideViewElement(undefined)}>
-        <SheetContent side="left">
+        <SheetContent side="left" className="flex flex-col">
           <SheetHeader>
             <SheetTitle>{sideViewElement.name}</SheetTitle>
           </SheetHeader>
-          <div className="mt-4">
+          <div className="mt-4 overflow-y-auto flex-grow">
             <Element element={sideViewElement} />
           </div>
         </SheetContent>

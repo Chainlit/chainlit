@@ -24,11 +24,11 @@ export default function ElementSideView() {
   if (isMobile) {
     return (
       <Sheet open onOpenChange={(open) => !open && setSideViewElement(undefined)}>
-        <SheetContent className="md:hidden">
+        <SheetContent className="md:hidden flex flex-col">
           <SheetHeader>
             <SheetTitle>{sideViewElement.name}</SheetTitle>
           </SheetHeader>
-          <div className="mt-4">
+          <div className="mt-4 overflow-y-auto flex-grow">
             <Element element={sideViewElement} />
           </div>
         </SheetContent>
@@ -54,7 +54,9 @@ export default function ElementSideView() {
         <div className="text-lg font-semibold text-foreground">
           {sideViewElement.name}
         </div>
-        <Element element={sideViewElement} />
+        <div className="flex flex-col flex-grow overflow-y-auto">
+          <Element element={sideViewElement} />
+        </div>
       </ResizablePanel>
     </>
   )

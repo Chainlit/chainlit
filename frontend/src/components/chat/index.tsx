@@ -211,7 +211,11 @@ const Chat = () => {
             <MessagesContainer navigate={navigate} />
             </div>
           </ScrollContainer>
- 
+          <div className='flex flex-col mx-auto w-full p-4'
+            style={{
+              "maxWidth": layoutMaxWidth
+            }}
+      >
          <ChatFooter 
           fileSpec={fileSpec}
           onFileUpload={onFileUpload}
@@ -219,6 +223,7 @@ const Chat = () => {
           setAutoScroll={setAutoScroll}
           autoScroll={autoScroll}
          />
+         </div>
         </ErrorBoundary>
     </div>
   );
