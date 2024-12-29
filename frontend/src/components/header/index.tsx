@@ -11,10 +11,12 @@ import SidebarTrigger from './SidebarTrigger';
 import ChatProfiles from './ChatProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
 import ReadmeButton from './Readme';
+import { useNavigate } from 'react-router-dom';
 
 
 const Header = memo(() => {
   const { audioConnection } = useAudio();
+  const navigate = useNavigate();
   const {data} = useAuth()
   const {config} = useConfig()
   const {open, openMobile, isMobile} = useSidebar()
@@ -28,9 +30,9 @@ const Header = memo(() => {
             <div className='flex items-center'>
 
                 {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
-                {historyEnabled ? !sidebarOpen ? <NewChatButton /> : null : <NewChatButton />}
+                {historyEnabled ? !sidebarOpen ? <NewChatButton navigate={navigate} /> : null : <NewChatButton navigate={navigate} />}
 
-                <ChatProfiles />
+                <ChatProfiles navigate={navigate} />
                 </div>
 
       <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>

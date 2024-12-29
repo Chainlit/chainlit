@@ -12,6 +12,7 @@ export default function ChatWrapper() {
   useEffect(() => {
     if (session?.socket?.connected) return;
     connect({
+      // @ts-expect-error window typing
       transports: window.transports,
       userEnv: {},
       accessToken: `Bearer ${accessToken}`

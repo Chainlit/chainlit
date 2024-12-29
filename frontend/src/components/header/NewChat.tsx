@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { SquarePen } from 'lucide-react';
 import { useChatInteract } from '@chainlit/react-client';
 import {
   Dialog,
@@ -48,9 +46,12 @@ export const NewChatDialog = ({ open, handleClose, handleConfirm }: NewChatDialo
   );
 };
 
-const NewChatButton = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  navigate?: (to: string) => void;
+}
+
+const NewChatButton = ({navigate, ...buttonProps}: Props) => {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
   const { clear } = useChatInteract();
 
   const handleClickOpen = () => {
@@ -63,7 +64,7 @@ const NewChatButton = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => 
 
   const handleConfirm = () => {
     clear();
-    navigate('/');
+    navigate?.('/');
     handleClose();
   };
 
@@ -78,7 +79,7 @@ const NewChatButton = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => 
               id="new-chat-button"
               className='text-muted-foreground hover:text-muted-foreground'
               onClick={handleClickOpen}
-              {...props}
+              {...buttonProps}
             >
                             <EditSquare className="!size-6" />
 

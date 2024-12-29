@@ -310,7 +310,6 @@ def get_html_template():
     <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>
-{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}
 {f"window.transports = {json.dumps(config.project.transports)}; " if config.project.transports else "undefined"}
 </script>"""
 

@@ -7,7 +7,6 @@ from urllib.parse import unquote
 from starlette.requests import cookie_parser
 from typing_extensions import TypeAlias
 
-from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.chat_context import chat_context
 from chainlit.config import config

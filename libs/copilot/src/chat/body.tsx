@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Alert, Box } from '@mui/material';
-
-import { ErrorBoundary } from '@chainlit/app/src/components/atoms/ErrorBoundary';
-import ScrollContainer from '@chainlit/app/src/components/molecules/messages/ScrollContainer';
-import { TaskList } from '@chainlit/app/src/components/molecules/tasklist/TaskList';
-import DropScreen from '@chainlit/app/src/components/organisms/chat/dropScreen';
-import ChatSettingsModal from '@chainlit/app/src/components/organisms/chat/settings';
-import WelcomeScreen from '@chainlit/app/src/components/organisms/chat/welcomeScreen';
-import { useUpload } from '@chainlit/app/src/hooks';
+import { ErrorBoundary } from '@chainlit/app/src/components/ErrorBoundary';
+import ScrollContainer from '@chainlit/app/src/components/chat/ScrollContainer';
+import { TaskList } from '@chainlit/app/src/components/TaskList';
+import ChatSettingsModal from '@chainlit/app/src/components/ChatSettings';
+import MessagesContainer from '@chainlit/app/src/components/chat/MessagesContainer';
+import { useUpload } from '@chainlit/app/src/hooks/useUpload';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
   threadHistoryState,
@@ -19,18 +16,18 @@ import {
   useChatInteract,
   useConfig
 } from '@chainlit/react-client';
-import { sideViewState } from '@chainlit/react-client';
 
-import { ElementSideView } from 'components/ElementSideView';
-import { InputBox } from 'components/InputBox';
+import ElementSideView from 'components/ElementSideView';
 
-import Messages from './messages';
+import Alert from '@chainlit/app/src/components/Alert';
+import ChatFooter from '@chainlit/app/src/components/chat/Footer';
+import Translator from '@chainlit/app/src/components/i18n/Translator';
+import WelcomeScreen from '@/components/WelcomeScreen';
 
 const Chat = () => {
   const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
-  const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
@@ -147,78 +144,59 @@ const Chat = () => {
     }));
   }, []);
 
-  const enableMultiModalUpload =
+  const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
   return (
-    <Box
-      {...(enableMultiModalUpload
+    <div
+      {...(enableAttachments
         ? upload?.getRootProps({ className: 'dropzone' })
         : {})}
       // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
-      display="flex"
-      width="100%"
-      flexGrow={1}
-      overflow="auto"
+      className='flex w-full h-full flex-col overflow-y-auto'
+
     >
       {upload ? (
-        <>
           <input id="#upload-drop-input" {...upload.getInputProps()} />
-          {upload?.isDragActive ? <DropScreen /> : null}
-        </>
       ) : null}
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          height: '100%'
-        }}
+      <div
+      className='flex-grow flex flex-col overflow-y-auto'
       >
         {error ? (
-          <Box
-            sx={{
-              width: '100%',
-              mx: 'auto',
-              my: 2
-            }}
-          >
-            <Alert sx={{ mx: 2 }} id="session-error" severity="error">
-              Could not reach the server.
-            </Alert>
-          </Box>
+            <div
+            className="w-full mx-auto my-2"
+            >
+              <Alert className='mx-2' id="session-error" variant="error">
+                <Translator path="components.organisms.chat.index.couldNotReachServer" />
+              </Alert>
+            </div>
         ) : (
-          <Box mt={1} />
+          null
         )}
         <ChatSettingsModal />
-        <TaskList isMobile={true} />
         <ErrorBoundary>
           <ScrollContainer
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-            <WelcomeScreen hideLogo />
-            <Box my={1} />
-            <Messages />
+            <TaskList isMobile={true} isCopilot />
+            <WelcomeScreen />
+            <MessagesContainer />
           </ScrollContainer>
-          <InputBox
-            fileSpec={fileSpec}
-            onFileUpload={onFileUpload}
-            onFileUploadError={onFileUploadError}
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
-          />
+          <ChatFooter 
+          showIfEmptyThread
+          fileSpec={fileSpec}
+          onFileUpload={onFileUpload}
+          onFileUploadError={onFileUploadError}
+          setAutoScroll={setAutoScroll}
+          autoScroll={autoScroll}
+         />
         </ErrorBoundary>
-      </Box>
-      <ElementSideView
-        onClose={() => setSideViewElement(undefined)}
-        isOpen={!!sideViewElement}
-        element={sideViewElement}
-      />
-    </Box>
+      </div>
+      <ElementSideView />
+    </div>
   );
 };
 

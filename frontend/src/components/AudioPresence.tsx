@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
 
-import { Box, Typography } from '@mui/material';
-
 import { WavRenderer, useAudio } from '@chainlit/react-client';
 import { useTheme } from '@/components/ThemeProvider';
 import { hslToHex } from '@/lib/utils';
@@ -118,13 +116,13 @@ export default function AudioPresence({
   }, [height, width, barCount, barSpacing, foregroundColor, wavRecorder, isAiSpeaking]);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    <div className='flex items-center gap-1'>
       {type === 'server' && !isAiSpeaking ? (
-        <Typography fontSize="12px" color="text.secondary">
+        <div className='text-muted-foreground'>
           Listening
-        </Typography>
+        </div>
       ) : null}
       <canvas ref={canvasRef} />
-    </Box>
+    </div>
   );
 }

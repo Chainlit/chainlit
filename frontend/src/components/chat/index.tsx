@@ -208,7 +208,7 @@ const Chat = () => {
                         onFileUploadError={onFileUploadError}
                         setAutoScroll={setAutoScroll}
             />
-            <MessagesContainer />
+            <MessagesContainer navigate={navigate} />
             </div>
           </ScrollContainer>
  

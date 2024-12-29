@@ -52,7 +52,6 @@ const { data: thread, error, isLoading } = useApi<IThread>(
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-      try {
         toast.promise(apiClient.setFeedback(feedback, accessToken), {
           loading: 'Updating',
           success: (res) => {
@@ -78,16 +77,12 @@ const { data: thread, error, isLoading } = useApi<IThread>(
             return <span>{err.message}</span>;
           }
         });
-      } catch (err) {
-        console.log(err);
-      }
     },
     []
   );
 
   const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
-      try {
         toast.promise(apiClient.deleteFeedback(feedbackId, accessToken), {
           loading: t('components.organisms.chat.Messages.index.updating'),
           success: () => {
@@ -112,9 +107,6 @@ const { data: thread, error, isLoading } = useApi<IThread>(
             return <span>{err.message}</span>;
           }
         });
-      } catch (err) {
-        console.log(err);
-      }
     },
     []
   );

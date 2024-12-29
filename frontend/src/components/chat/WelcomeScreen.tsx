@@ -1,7 +1,6 @@
 import { FileSpec, useChatMessages } from "@chainlit/react-client";
 import { Logo } from "@/components/Logo";
 import MessageComposer from "./MessageComposer";
-import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 import Starters from "./Starters";
 import { useEffect, useState } from "react";
 import { cn, hasMessage } from "@/lib/utils";

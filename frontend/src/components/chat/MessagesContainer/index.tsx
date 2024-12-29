@@ -19,13 +19,15 @@ import {
 
 import { useTranslation } from 'components/i18n/Translator';
 
-import { useNavigate } from 'react-router-dom';
 import { MessageContext } from '@/contexts/MessageContext';
 import { Messages } from '@/components/chat/Messages';
 
-const MessagesContainer = (): JSX.Element => {
+interface Props {
+  navigate?: (to: string) => void;
+}
+
+const MessagesContainer = ({navigate}: Props) => {
   const apiClient = useContext(ChainlitContext);
-  const navigate = useNavigate();
   const { config } = useConfig();
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
@@ -97,7 +99,7 @@ const MessagesContainer = (): JSX.Element => {
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
 
-      if (element.display === 'side') {
+      if (element.display === 'side' || element.display === "page" && !navigate) {
         setSideView(element);
         return;
       }
@@ -108,7 +110,7 @@ const MessagesContainer = (): JSX.Element => {
         path += `?thread=${element.threadId}`;
       }
 
-      return navigate(element.display === 'page' ? path : '#');
+      return navigate?.(element.display === 'page' ? path : '#');
     },
     [setSideView, navigate]
   );

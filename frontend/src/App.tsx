@@ -31,11 +31,6 @@ type ThemOverride = {
 
 declare global {
   interface Window {
-    theme?: {
-      default: string;
-      light?: ThemOverride;
-      dark?: ThemOverride;
-    };
     transports?: string[]
   }
 }
@@ -81,8 +76,10 @@ function App() {
     }
   }
 
+  if(!configLoaded) return null
+
   return (
-    <ThemeProvider storageKey="vite-ui-theme">
+    <ThemeProvider storageKey="vite-ui-theme" defaultTheme={config.ui.default_theme}>
 
       <Toaster
         className="toast"

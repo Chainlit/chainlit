@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {size} from 'lodash';
 import { 
   Select,
@@ -23,13 +22,16 @@ import {
 import Markdown from '@/components/Markdown';
 import { NewChatDialog } from './NewChat';
 
-export default function ChatProfiles() {
+interface Props {
+  navigate?: (to: string) => void;
+}
+
+export default function ChatProfiles({navigate}: Props) {
     const apiClient = useContext(ChainlitContext);
     const { config } = useConfig();
     const { chatProfile, setChatProfile } = useChatSession();
     const { firstInteraction } = useChatMessages();
     const { clear } = useChatInteract();
-  const navigate = useNavigate()
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false)
 
@@ -44,7 +46,7 @@ export default function ChatProfiles() {
   const handleClose = () => {
     setOpenDialog(false)
     setNewChatProfile(null)
-    navigate('/')
+    navigate?.('/')
   }
 
   const handleConfirm = (newChatProfileWithoutConfirm?: string) => {

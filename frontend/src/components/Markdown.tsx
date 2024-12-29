@@ -117,7 +117,6 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
         },
         pre({ children, ...props }: any) {
             return <CodeSnippet {...props} />;
-
         },
         a({ children, ...props }) {
           const name = children as string;
@@ -214,7 +213,7 @@ const Markdown = ({ allowHtml, latex, refElements, className, children }: Props)
           return (
             <p
               {...omit(props, ['node'])}
-              className="leading-7 [&:not(:first-child)]:mt-4"
+              className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
             />
           );
         },

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Task, ITaskList } from './Task'
 import { useChatData } from '@chainlit/react-client';
+import { cn } from '@/lib/utils'
 
 
 interface HeaderProps {
@@ -24,9 +25,10 @@ const Header = ({ status }: HeaderProps) => {
 
 interface TaskListProps {
   isMobile: boolean
+  isCopilot?: boolean
 }
 
-const TaskList = ({ isMobile }: TaskListProps) => {
+const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   const { tasklists } = useChatData()
   const tasklist = tasklists[tasklists.length - 1]
 
@@ -61,7 +63,7 @@ const TaskList = ({ isMobile }: TaskListProps) => {
     const highlightedTask = tasks?.[highlightedTaskIndex]
 
     return (
-      <aside className="w-full md:hidden">
+      <aside className={cn("w-full", !isCopilot && "md:hidden")}>
         <Card>
           <Header status={content.status} />
           {highlightedTask && (

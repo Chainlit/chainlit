@@ -1,9 +1,13 @@
 import { useMemo } from "react";
 import { useChatSession, useConfig } from "@chainlit/react-client";
 import Starter from "./Starter";
+import { cn } from "@/lib/utils";
 
+interface Props {
+  className?: string
+}
 
-export default function Starters() {
+export default function Starters({className}: Props) {
     const { chatProfile } = useChatSession();
     const { config } = useConfig();
 
@@ -21,7 +25,7 @@ export default function Starters() {
 
     if(!starters?.length) return null;
 
-    return <div className="flex gap-2 justify-center flex-wrap">
+    return <div className={cn("flex gap-2 justify-center flex-wrap", className)}>
                   {starters?.map((starter, i) => (
                 <Starter key={i} starter={starter} />
             

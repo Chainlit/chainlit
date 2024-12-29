@@ -1,10 +1,8 @@
-import createCache from '@emotion/cache';
-import { CacheProvider } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 // @ts-expect-error inlined
-import clStyles from '@chainlit/app/src/App.css?inline';
+import clStyles from './src/index.css?inline';
 import { IStep } from '@chainlit/react-client';
 
 // @ts-expect-error inlined
@@ -37,25 +35,17 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
   shadowRootElement.id = 'cl-shadow-root';
   shadowContainer.appendChild(shadowRootElement);
 
-  const cache = createCache({
-    key: 'css',
-    prepend: true,
-    container: shadowContainer
-  });
-
   window.cl_shadowRootElement = shadowRootElement;
 
   root = ReactDOM.createRoot(shadowRootElement);
   root.render(
     <React.StrictMode>
-      <CacheProvider value={cache}>
         <style type="text/css">
           {clStyles}
           {hljsStyles}
           {sonnerCss}
         </style>
         <AppWrapper widgetConfig={config} />
-      </CacheProvider>
     </React.StrictMode>
   );
 };

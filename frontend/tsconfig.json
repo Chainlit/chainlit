@@ -21,7 +21,6 @@
     "paths": {
       "client-types/*": ["../../libs/react-client/dist"],
       "@/*": ["./*"]
-
     }
   },
   "include": ["./src"],
