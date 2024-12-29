@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useFormik } from 'formik';
 import { toast } from 'sonner';
-import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import {
   Card,
@@ -21,32 +22,43 @@ import { userEnvState } from '@/state/user';
 
 const Env = () => {
   const navigate = useNavigate();
-  const {config} = useConfig()
+  const { config } = useConfig();
   const [userEnv, setUserEnv] = useRecoilState(userEnvState);
-  const layoutMaxWidth = useLayoutMaxWidth()
-  const {t} = useTranslation()
+  const layoutMaxWidth = useLayoutMaxWidth();
+  const { t } = useTranslation();
   const requiredKeys = config?.userEnv || [];
 
+  // Create initial values object
   const initialValues: Record<string, string> = {};
-  const validationSchema: Record<string, any> = {};
-
-  requiredKeys.forEach((key, i) => {
+  requiredKeys.forEach((key) => {
     initialValues[key] = userEnv[key] || '';
-    validationSchema[key] = yup.string().required('Required');
   });
 
-  const schema = yup.object().shape(validationSchema);
-
-  const formik = useFormik({
-    initialValues,
-    validationSchema: schema,
-    onSubmit: async (values) => {
-      localStorage.setItem('userEnv', JSON.stringify(values));
-      setUserEnv(values);
-      toast.success(t('pages.Env.savedSuccessfully'));
-      navigate('/');
-    }
+  // Create dynamic Zod schema based on required keys
+  const schemaObject: Record<string, z.ZodString> = {};
+  requiredKeys.forEach((key) => {
+    schemaObject[key] = z.string().min(1, { message: 'Required' });
   });
+  const schema = z.object(schemaObject);
+
+  type FormValues = z.infer<typeof schema>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, touchedFields }
+  } = useForm<FormValues>({
+    defaultValues: initialValues,
+    resolver: zodResolver(schema),
+    mode: 'onBlur'
+  });
+
+  const onSubmit = async (values: FormValues) => {
+    localStorage.setItem('userEnv', JSON.stringify(values));
+    setUserEnv(values);
+    toast.success(t('pages.Env.savedSuccessfully'));
+    navigate('/');
+  };
 
   if (requiredKeys.length === 0) {
     navigate('/');
@@ -67,24 +79,21 @@ const Env = () => {
           </CardHeader>
           <CardContent>
             <Alert variant="info" className="mb-6">
-                {t('pages.Env.requiredApiKeysInfo')}
+              {t('pages.Env.requiredApiKeysInfo')}
             </Alert>
 
-            <form onSubmit={formik.handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {requiredKeys.map((key) => (
                 <div key={key} className="space-y-2">
                   <Label htmlFor={key}>{key}</Label>
                   <Input
                     id={key}
-                    name={key}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values[key]}
-                    className={formik.touched[key] && formik.errors[key] ? "border-red-500" : ""}
+                    {...register(key)}
+                    className={touchedFields[key] && errors[key] ? "border-red-500" : ""}
                   />
-                  {formik.touched[key] && formik.errors[key] && (
+                  {touchedFields[key] && errors[key] && (
                     <p className="text-sm text-red-500">
-                      {formik.errors[key]}
+                      {errors[key]?.message}
                     </p>
                   )}
                 </div>

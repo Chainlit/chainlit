@@ -1,4 +1,5 @@
-import { useFormik } from 'formik';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import mapValues from 'lodash/mapValues';
 import { useRecoilState } from 'recoil';
 import {
@@ -26,72 +27,78 @@ export default function ChatSettingsModal() {
     chatSettingsOpenState
   );
 
-  const formik = useFormik({
-    initialValues: chatSettingsValue,
-    enableReinitialize: true,
-    onSubmit: async () => undefined
+  const {
+    handleSubmit,
+    setValue,
+    reset,
+    watch
+  } = useForm({
+    defaultValues: chatSettingsValue
   });
 
+  // Reset form when default values change
+  useEffect(() => {
+    reset(chatSettingsValue);
+  }, [chatSettingsValue, reset]);
+
   const handleClose = () => setChatSettingsOpen(false);
-  const handleConfirm = () => {
-    const values = mapValues(formik.values, (x: TFormInputValue) =>
+
+  const handleConfirm = handleSubmit((data) => {
+    const processedValues = mapValues(data, (x: TFormInputValue) =>
       x !== '' ? x : null
     );
-    updateChatSettings(values);
-
+    updateChatSettings(processedValues);
     handleClose();
-  };
+  });
+
   const handleReset = () => {
-    formik.setValues(chatSettingsDefaultValue);
+    reset(chatSettingsDefaultValue);
   };
+
+  // Legacy setField compatibility layer
+  const handleChange = () => {
+  };
+
+  const setFieldValue = (field: string, value: any) => {
+    setValue(field, value);
+  };
+
+  const values = watch();
 
   return (
-<Dialog open={chatSettingsOpen} onOpenChange={handleClose}>
-<DialogContent className="min-w-[20vw] flex flex-col gap-4">
-
-      <DialogHeader>
-        <DialogTitle>
-          <Translator path="components.organisms.chat.settings.settingsPanel" />
-        </DialogTitle>
-      </DialogHeader>
-      <div className='flex flex-col gap-6'>
-        {chatSettingsInputs.map((input: any) => (
-          <FormInput
-            key={input.id}
-            element={{
-              ...input,
-              value: formik.values[input.id],
-              onChange: formik.handleChange,
-              setField: formik.setFieldValue
-            }}
-          />
-        ))}
+    <Dialog open={chatSettingsOpen} onOpenChange={handleClose}>
+      <DialogContent className="min-w-[20vw] flex flex-col gap-4">
+        <DialogHeader>
+          <DialogTitle>
+            <Translator path="components.organisms.chat.settings.settingsPanel" />
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-6">
+          {chatSettingsInputs.map((input: any) => (
+            <FormInput
+              key={input.id}
+              element={{
+                ...input,
+                value: values[input.id],
+                onChange: handleChange,
+                setField: setFieldValue
+              }}
+            />
+          ))}
         </div>
-              <DialogFooter>
-        <Button 
-          variant="outline" 
-          onClick={handleReset}
-        >
-          <Translator path="components.organisms.chat.settings.reset" />
-        </Button>
-        <div className="flex-1" />
-        <Button 
-          variant="ghost" 
-          onClick={handleClose}
-        >
-          <Translator path="components.organisms.chat.settings.cancel" />
-        </Button>
-        <Button 
-          onClick={handleConfirm}
-          id="confirm"
-          autoFocus
-        >
-          <Translator path="components.organisms.chat.settings.confirm" />
-        </Button>
-      </DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleReset}>
+            <Translator path="components.organisms.chat.settings.reset" />
+          </Button>
+          <div className="flex-1" />
+          <Button variant="ghost" onClick={handleClose}>
+            <Translator path="components.organisms.chat.settings.cancel" />
+          </Button>
+          <Button onClick={handleConfirm} id="confirm" autoFocus>
+            <Translator path="components.organisms.chat.settings.confirm" />
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
-
     </Dialog>
   );
 }

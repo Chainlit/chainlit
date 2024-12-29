@@ -47,11 +47,11 @@ const InputStateHandler = ({
               </Tooltip>
             </TooltipProvider>
           )}
-          {notificationsProps?.showBadge && notificationsProps.count && (
+          {notificationsProps?.showBadge && typeof notificationsProps.count === "number" ? (
             <Badge variant="outline" className='ml-auto'>
               {notificationsProps.count}
             </Badge>
-          )}
+          ): null}
         </label>
       )}
       <div className='flex flex-col gap-2'>

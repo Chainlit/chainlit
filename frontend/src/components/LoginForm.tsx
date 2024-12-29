@@ -4,11 +4,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Translator, { useTranslation } from 'components/i18n/Translator'
 import { ProviderButton } from "./ProviderButton"
-import { useFormik } from "formik"
-import * as yup from 'yup'
 import { useEffect, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import Alert from "./Alert"
+import { useForm } from "react-hook-form"
 
 interface Props {
   error?: string;
@@ -20,6 +19,11 @@ interface Props {
     callbackUrl: string
   ) => Promise<any>;
   onOAuthSignIn?: (provider: string, callbackUrl: string) => Promise<any>;
+}
+
+interface FormValues {
+  email: string;
+  password: string;
 }
 
 export function LoginForm({
@@ -35,43 +39,40 @@ export function LoginForm({
 
   const { t } = useTranslation();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, touchedFields }
+  } = useForm<FormValues>({
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  });
+
   useEffect(() => {
     setErrorState(error);
   }, [error]);
 
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: ''
-    },
-    validationSchema: yup.object({
-      email: yup
-        .string()
-        .required(t('components.molecules.auth.authLogin.form.emailRequired')),
-      password: yup
-        .string()
-        .required(t('components.molecules.auth.authLogin.form.passwordRequired'))
-    }),
-    onSubmit: async ({ email, password }) => {
-      if (!onPasswordSignIn) return;
-      
-      setLoading(true);
-      try {
-        await onPasswordSignIn(email, password, callbackUrl);
-      } catch (err) {
-        if (err instanceof Error) {
-          setErrorState(err.message);
-        }
-      } finally {
-        setLoading(false);
+  const onSubmit = async (data: FormValues) => {
+    if (!onPasswordSignIn) return;
+    
+    setLoading(true);
+    try {
+      await onPasswordSignIn(data.email, data.password, callbackUrl);
+    } catch (err) {
+      if (err instanceof Error) {
+        setErrorState(err.message);
       }
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
   const oAuthReady = onOAuthSignIn && providers.length;
 
   return (
-    <form onSubmit={formik.handleSubmit} className={cn("flex flex-col gap-6")}>
+    <form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6")}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">
           <Translator path="components.molecules.auth.authLogin.title" />
@@ -80,10 +81,10 @@ export function LoginForm({
 
       {errorState && (
         <Alert variant="error">
-            {t([
-              `components.molecules.auth.authLogin.error.${errorState.toLowerCase()}`,
-              `components.molecules.auth.authLogin.error.default`
-            ])}
+          {t([
+            `components.molecules.auth.authLogin.error.${errorState.toLowerCase()}`,
+            `components.molecules.auth.authLogin.error.default`
+          ])}
         </Alert>
       )}
 
@@ -97,13 +98,15 @@ export function LoginForm({
               <Input
                 id="email"
                 placeholder="m@example.com"
-                {...formik.getFieldProps('email')}
+                {...register('email', { 
+                  required: t('components.molecules.auth.authLogin.form.emailRequired')
+                })}
                 className={cn(
-                  formik.touched.email && formik.errors.email && "border-destructive"
+                  touchedFields.email && errors.email && "border-destructive"
                 )}
               />
-              {formik.touched.email && formik.errors.email && (
-                <p className="text-sm text-destructive">{formik.errors.email}</p>
+              {touchedFields.email && errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
 
@@ -117,9 +120,11 @@ export function LoginForm({
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  {...formik.getFieldProps('password')}
+                  {...register('password', {
+                    required: t('components.molecules.auth.authLogin.form.passwordRequired')
+                  })}
                   className={cn(
-                    formik.touched.password && formik.errors.password && "border-destructive"
+                    touchedFields.password && errors.password && "border-destructive"
                   )}
                 />
                 <Button
@@ -136,8 +141,8 @@ export function LoginForm({
                   )}
                 </Button>
               </div>
-              {formik.touched.password && formik.errors.password && (
-                <p className="text-sm text-destructive">{formik.errors.password}</p>
+              {touchedFields.password && errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
 
