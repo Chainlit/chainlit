@@ -183,7 +183,7 @@ const Chat = () => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
-                              <div className='flex flex-col mx-auto w-full flex-grow'
+                              <div className='flex flex-col mx-auto w-full flex-grow px-4 pt-4'
             style={{
               "maxWidth": layoutMaxWidth
             }}
@@ -193,7 +193,7 @@ const Chat = () => {
             <MessagesContainer />
             </div>
           </ScrollContainer>
-          <div className='flex flex-col mx-auto w-full'
+          <div className='flex flex-col mx-auto w-full px-4 pb-4'
             style={{
               "maxWidth": layoutMaxWidth
             }}

@@ -20,7 +20,7 @@ const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
 
   return (
     <div
-      className='flex align-center justify-between'
+      className='flex align-center justify-between p-4 pb-0'
     >
       <div className='flex items-center gap-1'>
         {hasChatProfiles ? <ChatProfiles /> : <Logo className='w-[100px]' />}

@@ -72,7 +72,7 @@ const Widget = ({ config, error }: Props) => {
         align="end"
         sideOffset={12}
         className={cn(
-          "flex flex-col",
+          "flex flex-col p-0",
           "transition-all duration-300 ease-in-out",
           expanded ? "w-[80vw]" : "w-[min(400px,80vw)]",
           "h-[min(730px,calc(100vh-150px))]",
@@ -86,7 +86,7 @@ const Widget = ({ config, error }: Props) => {
         <div className="flex flex-col h-full w-full">
           {error ? <Alert variant='error'>{error}</Alert> : <>
             <Header expanded={expanded} setExpanded={setExpanded} />
-          <div className="flex flex-grow pt-4 overflow-y-auto">
+          <div className="flex flex-grow overflow-y-auto">
             <ChatWrapper />
             </div>
           </>}
