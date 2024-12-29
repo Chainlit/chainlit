@@ -23,6 +23,7 @@ export default function App({ widgetConfig }: Props) {
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
   const [authError, setAuthError] = useState<string>()
+  const [fetchError, setFetchError] = useState<string>()
 
   useEffect(() => {
     apiClient
@@ -33,13 +34,14 @@ export default function App({ widgetConfig }: Props) {
         i18n.changeLanguage(languageInUse);
       })
       .catch((err) => {
-        console.error(err);
+        setFetchError(String(err))
       });
   }, []);
 
   const defaultTheme = widgetConfig.theme || data?.default_theme;
 
   useEffect(() => {
+    if(fetchError) return
     if(!isAuthenticated) {
       if(!widgetConfig.accessToken) {
         setAuthError("No authentication token provided.")
@@ -50,7 +52,7 @@ export default function App({ widgetConfig }: Props) {
     } else {
       setAuthError(undefined)
     }
-  }, [isAuthenticated, apiClient, setAuthError])
+  }, [isAuthenticated, apiClient, fetchError, setAuthError])
 
   return (
     <ThemeProvider storageKey="vite-ui-theme" defaultTheme={defaultTheme}>
@@ -58,7 +60,7 @@ export default function App({ widgetConfig }: Props) {
     className="toast"
     position="bottom-center"
   />
-      <Widget config={widgetConfig} authError={authError} />
+      <Widget config={widgetConfig} error={fetchError || authError} />
       </ThemeProvider>
   );
 }

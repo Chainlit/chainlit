@@ -20,12 +20,14 @@ import {
 import ElementSideView from 'components/ElementSideView';
 
 import Alert from '@chainlit/app/src/components/Alert';
+import { useLayoutMaxWidth } from '@chainlit/app/src/hooks/useLayoutMaxWidth';
 import ChatFooter from '@chainlit/app/src/components/chat/Footer';
 import Translator from '@chainlit/app/src/components/i18n/Translator';
 import WelcomeScreen from '@/components/WelcomeScreen';
 
 const Chat = () => {
   const { config } = useConfig();
+  const layoutMaxWidth = useLayoutMaxWidth();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -181,10 +183,21 @@ const Chat = () => {
             autoScroll={autoScroll}
             setAutoScroll={setAutoScroll}
           >
+                              <div className='flex flex-col mx-auto w-full flex-grow'
+            style={{
+              "maxWidth": layoutMaxWidth
+            }}
+      >
             <TaskList isMobile={true} isCopilot />
             <WelcomeScreen />
             <MessagesContainer />
+            </div>
           </ScrollContainer>
+          <div className='flex flex-col mx-auto w-full'
+            style={{
+              "maxWidth": layoutMaxWidth
+            }}
+      >
           <ChatFooter 
           showIfEmptyThread
           fileSpec={fileSpec}
@@ -193,6 +206,7 @@ const Chat = () => {
           setAutoScroll={setAutoScroll}
           autoScroll={autoScroll}
          />
+         </div>
         </ErrorBoundary>
       </div>
       <ElementSideView />

@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-// @ts-expect-error inlined
-import clStyles from './src/index.css?inline';
-import { IStep } from '@chainlit/react-client';
+import { type IStep } from '@chainlit/react-client';
 
-// @ts-expect-error inlined
-import sonnerCss from './sonner.css?inline';
-// @ts-expect-error inlined
-import hljsStyles from 'highlight.js/styles/monokai-sublime.css?inline';
+import './src/index.css';
+import './sonner.css';
+import 'highlight.js/styles/monokai-sublime.css';
 
 import AppWrapper from './src/appWrapper';
 import { IWidgetConfig } from './src/types';
@@ -30,21 +27,9 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
   container.id = id;
   document.body.appendChild(container);
 
-  const shadowContainer = container.attachShadow({ mode: 'open' });
-  const shadowRootElement = document.createElement('div');
-  shadowRootElement.id = 'cl-shadow-root';
-  shadowContainer.appendChild(shadowRootElement);
-
-  window.cl_shadowRootElement = shadowRootElement;
-
-  root = ReactDOM.createRoot(shadowRootElement);
+  root = ReactDOM.createRoot(container);
   root.render(
     <React.StrictMode>
-        <style type="text/css">
-          {clStyles}
-          {hljsStyles}
-          {sonnerCss}
-        </style>
         <AppWrapper widgetConfig={config} />
     </React.StrictMode>
   );

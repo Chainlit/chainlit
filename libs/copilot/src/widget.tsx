@@ -14,11 +14,11 @@ import Alert from '@chainlit/app/src/components/Alert';
 
 interface Props {
   config: IWidgetConfig;
-  authError?: string;
+  error?: string;
 }
 
 
-const Widget = ({ config, authError }: Props) => {
+const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -84,7 +84,7 @@ const Widget = ({ config, authError }: Props) => {
         )}
       >
         <div className="flex flex-col h-full w-full">
-          {authError ? <Alert variant='error'>{authError}</Alert> : <>
+          {error ? <Alert variant='error'>{error}</Alert> : <>
             <Header expanded={expanded} setExpanded={setExpanded} />
           <div className="flex flex-grow pt-4 overflow-y-auto">
             <ChatWrapper />
