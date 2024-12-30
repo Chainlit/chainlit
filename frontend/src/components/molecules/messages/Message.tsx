@@ -185,9 +185,9 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      {!isRunning && isAsk && (
+                      {!isRunning && isAsk ? (
                         <AskUploadButton onError={onError} />
-                      )}
+                      ) : null}
                       {actions?.length ? (
                         <MessageActions message={message} actions={actions} />
                       ) : null}
