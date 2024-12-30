@@ -29,9 +29,14 @@ async def on_all_actions_removed(_: cl.Action):
 async def main():
     actions = [
         cl.Action(id="test-action", name="test action", payload={"value": "test"}),
-        cl.Action(id="removable-action", name="removable action", payload={"value": "test"}),
         cl.Action(
-            id="label-action", name="label action", payload={"value": "test"}, label="Test Label"
+            id="removable-action", name="removable action", payload={"value": "test"}
+        ),
+        cl.Action(
+            id="label-action",
+            name="label action",
+            payload={"value": "test"},
+            label="Test Label",
         ),
         cl.Action(
             id="multiple-action-one",
@@ -45,7 +50,11 @@ async def main():
             payload={"value": "multiple action two"},
             label="multiple action two",
         ),
-        cl.Action(id="all-actions-removed", name="all actions removed", payload={"value": "test"}),
+        cl.Action(
+            id="all-actions-removed",
+            name="all actions removed",
+            payload={"value": "test"},
+        ),
     ]
     message = cl.Message("Hello, this is a test message!", actions=actions)
     cl.user_session.set("to_remove", message)
