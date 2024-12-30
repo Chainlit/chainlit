@@ -58,15 +58,16 @@ from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
+    CallActionRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
-    UpdateThreadRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
-    CallActionRequest,
+    UpdateThreadRequest,
 )
 from chainlit.user import PersistedUser, User
+
 from ._utils import is_path_inside
 
 mimetypes.add_type("application/javascript", ".js")
@@ -885,9 +886,9 @@ async def call_action(
 ):
     """Run an action."""
 
-    from chainlit.session import WebsocketSession
     from chainlit.action import Action
     from chainlit.context import init_ws_context
+    from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)

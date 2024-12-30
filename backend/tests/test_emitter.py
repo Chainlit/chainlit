@@ -109,13 +109,6 @@ async def test_set_chat_settings(emitter, mock_websocket_session):
     assert emitter.session.chat_settings == settings
 
 
-async def test_send_action_response(emitter, mock_websocket_session):
-    await emitter.send_action_response("test_id", True, "Success")
-    mock_websocket_session.emit.assert_called_once_with(
-        "action_response", {"id": "test_id", "status": True, "response": "Success"}
-    )
-
-
 async def test_update_token_count(emitter, mock_websocket_session):
     count = 100
     await emitter.update_token_count(count)
