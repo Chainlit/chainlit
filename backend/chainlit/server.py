@@ -788,7 +788,10 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    if current_user and not isinstance(current_user, PersistedUser):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    if not isinstance(current_user, PersistedUser):
         persisted_user = await data_layer.get_user(identifier=current_user.identifier)
         if not persisted_user:
             raise HTTPException(status_code=404, detail="User not found")
