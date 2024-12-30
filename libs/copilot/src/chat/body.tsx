@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Alert from '@chainlit/app/src/components/Alert';
 import ChatSettingsModal from '@chainlit/app/src/components/ChatSettings';
 import { ErrorBoundary } from '@chainlit/app/src/components/ErrorBoundary';
-import { TaskList } from '@chainlit/app/src/components/TaskList';
+import { TaskList } from '@chainlit/app/src/components/Tasklist';
 import ChatFooter from '@chainlit/app/src/components/chat/Footer';
 import MessagesContainer from '@chainlit/app/src/components/chat/MessagesContainer';
 import ScrollContainer from '@chainlit/app/src/components/chat/ScrollContainer';
