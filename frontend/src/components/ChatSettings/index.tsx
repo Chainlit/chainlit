@@ -1,22 +1,23 @@
+import mapValues from 'lodash/mapValues';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import mapValues from 'lodash/mapValues';
 import { useRecoilState } from 'recoil';
+
+import { useChatData, useChatInteract } from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
-import { useChatData, useChatInteract } from '@chainlit/react-client';
-
-import { FormInput, TFormInputValue } from './FormInput';
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Translator } from 'components/i18n';
 
 import { chatSettingsOpenState } from 'state/project';
+
+import { FormInput, TFormInputValue } from './FormInput';
 
 export default function ChatSettingsModal() {
   const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
@@ -27,12 +28,7 @@ export default function ChatSettingsModal() {
     chatSettingsOpenState
   );
 
-  const {
-    handleSubmit,
-    setValue,
-    reset,
-    watch
-  } = useForm({
+  const { handleSubmit, setValue, reset, watch } = useForm({
     defaultValues: chatSettingsValue
   });
 
@@ -56,8 +52,7 @@ export default function ChatSettingsModal() {
   };
 
   // Legacy setField compatibility layer
-  const handleChange = () => {
-  };
+  const handleChange = () => {};
 
   const setFieldValue = (field: string, value: any) => {
     setValue(field, value);
@@ -67,7 +62,10 @@ export default function ChatSettingsModal() {
 
   return (
     <Dialog open={chatSettingsOpen} onOpenChange={handleClose}>
-      <DialogContent id="chat-settings" className="min-w-[20vw] flex flex-col gap-4">
+      <DialogContent
+        id="chat-settings"
+        className="min-w-[20vw] flex flex-col gap-4"
+      >
         <DialogHeader>
           <DialogTitle>
             <Translator path="components.organisms.chat.settings.settingsPanel" />

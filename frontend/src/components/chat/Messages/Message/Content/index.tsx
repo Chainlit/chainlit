@@ -1,9 +1,11 @@
-import { memo } from 'react';
 import { prepareContent } from '@/lib/message';
+import { memo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
+
 import { CURSOR_PLACEHOLDER } from '@/components/BlinkingCursor';
 import Markdown from '@/components/Markdown';
+
 import { InlinedElements } from './InlinedElements';
 
 export interface Props {
@@ -30,21 +32,24 @@ const MessageContent = memo(
       content: outputContent,
       language: message.language
     });
-    
+
     const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
-      <p className='flex flex-col gap-2'>
-        {!isMessage ?           <div className='text-lg font-semibold leading-none tracking-tight'>Output</div> : null}
-      <Markdown
-        allowHtml={allowHtml}
-        latex={latex}
-        refElements={outputRefElements}
-      >
-        {output}
-      </Markdown>
+      <p className="flex flex-col gap-2">
+        {!isMessage ? (
+          <div className="text-lg font-semibold leading-none tracking-tight">
+            Output
+          </div>
+        ) : null}
+        <Markdown
+          allowHtml={allowHtml}
+          latex={latex}
+          refElements={outputRefElements}
+        >
+          {output}
+        </Markdown>
       </p>
-
     );
 
     let inputMarkdown;
@@ -66,28 +71,27 @@ const MessageContent = memo(
         });
 
       inputMarkdown = (
-        <p className='flex flex-col gap-2'>
-          <div className='text-lg font-semibold leading-none tracking-tight'>Input</div>
-        <Markdown
-          allowHtml={allowHtml}
-          latex={latex}
-          refElements={inputRefElements}
-        >
-{input}
-        </Markdown>
+        <p className="flex flex-col gap-2">
+          <div className="text-lg font-semibold leading-none tracking-tight">
+            Input
+          </div>
+          <Markdown
+            allowHtml={allowHtml}
+            latex={latex}
+            refElements={inputRefElements}
+          >
+            {input}
+          </Markdown>
         </p>
-
       );
     }
 
     const markdownContent = (
-      <div className='flex flex-col gap-4'>
+      <div className="flex flex-col gap-4">
         {inputMarkdown}
         {outputMarkdown}
-        </div>
+      </div>
     );
-
-
 
     return (
       <div className="message-content w-full flex flex-col gap-2">

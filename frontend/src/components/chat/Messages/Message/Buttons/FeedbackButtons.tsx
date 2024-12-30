@@ -1,37 +1,53 @@
-'use client'
+'use client';
 
-import { useCallback, useContext, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react'
-import { IStep, firstUserInteraction, useChatSession } from '@chainlit/react-client'
-import { MessageContext } from '@/contexts/MessageContext'
-import { useRecoilValue } from 'recoil'
+import { MessageContext } from '@/contexts/MessageContext';
+import { MessageCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { useCallback, useContext, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+
+import {
+  IStep,
+  firstUserInteraction,
+  useChatSession
+} from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 interface FeedbackButtonsProps {
-  message: IStep
+  message: IStep;
 }
 
-export function FeedbackButtons({
-  message
-}: FeedbackButtonsProps) {
-    const { onFeedbackUpdated, onFeedbackDeleted, showFeedbackButtons } = useContext(MessageContext);
+export function FeedbackButtons({ message }: FeedbackButtonsProps) {
+  const { onFeedbackUpdated, onFeedbackDeleted, showFeedbackButtons } =
+    useContext(MessageContext);
 
   const [feedback, setFeedback] = useState<number | undefined>(
     message.feedback?.value
-  )
+  );
   const [comment, setComment] = useState<string | undefined>(
     message.feedback?.comment
-  )
-  const [showDialog, setShowDialog] = useState<number>()
-  const [commentInput, setCommentInput] = useState<string>()
+  );
+  const [showDialog, setShowDialog] = useState<number>();
+  const [commentInput, setCommentInput] = useState<string>();
   const firstInteraction = useRecoilValue(firstUserInteraction);
   const { idToResume } = useChatSession();
 
   if (!showFeedbackButtons) {
-    return null
+    return null;
   }
 
   const handleFeedbackChange = useCallback(
@@ -41,18 +57,18 @@ export function FeedbackButtons({
           onFeedbackDeleted(
             message,
             () => {
-              setFeedback(undefined)
-              setComment(undefined)
+              setFeedback(undefined);
+              setComment(undefined);
             },
             message.feedback.id
-          )
+          );
         }
       } else if (onFeedbackUpdated) {
         onFeedbackUpdated(
           message,
           () => {
-            setFeedback(newFeedback)
-            setComment(newComment)
+            setFeedback(newFeedback);
+            setComment(newComment);
           },
           {
             ...(message.feedback || {}),
@@ -61,24 +77,24 @@ export function FeedbackButtons({
             value: newFeedback,
             comment: newComment
           }
-        )
+        );
       }
     },
     [message, onFeedbackDeleted, onFeedbackUpdated]
-  )
+  );
 
   const handleFeedbackClick = useCallback(
     (nextValue: number) => {
       if (feedback === nextValue) {
-        handleFeedbackChange(undefined)
+        handleFeedbackChange(undefined);
       } else {
-        setShowDialog(nextValue)
+        setShowDialog(nextValue);
       }
     },
     [feedback, handleFeedbackChange]
-  )
+  );
 
-  const isDisabled = message.streaming || !(firstInteraction || idToResume)
+  const isDisabled = message.streaming || !(firstInteraction || idToResume);
 
   return (
     <div className="flex items-center">
@@ -90,7 +106,11 @@ export function FeedbackButtons({
               size="icon"
               disabled={isDisabled}
               onClick={() => handleFeedbackClick(1)}
-              className={feedback === 1 ? 'text-green-600 positive-feedback-on' : 'text-muted-foreground positive-feedback-off'}
+              className={
+                feedback === 1
+                  ? 'text-green-600 positive-feedback-on'
+                  : 'text-muted-foreground positive-feedback-off'
+              }
             >
               <ThumbsUp className="h-4 w-4" />
             </Button>
@@ -107,9 +127,13 @@ export function FeedbackButtons({
               size="icon"
               disabled={isDisabled}
               onClick={() => handleFeedbackClick(0)}
-              className={feedback === 0 ? 'text-red-600 negative-feedback-on' : 'text-muted-foreground negative-feedback-off'}
+              className={
+                feedback === 0
+                  ? 'text-red-600 negative-feedback-on'
+                  : 'text-muted-foreground negative-feedback-off'
+              }
             >
-              <ThumbsDown  />
+              <ThumbsDown />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -125,11 +149,11 @@ export function FeedbackButtons({
                 size="icon"
                 disabled={isDisabled}
                 onClick={() => {
-                  setShowDialog(feedback)
-                  setCommentInput(comment)
+                  setShowDialog(feedback);
+                  setCommentInput(comment);
                 }}
               >
-                <MessageCircle  />
+                <MessageCircle />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -139,19 +163,18 @@ export function FeedbackButtons({
         )}
       </TooltipProvider>
 
-      <Dialog open={showDialog !== undefined} onOpenChange={() => setShowDialog(undefined)}>
+      <Dialog
+        open={showDialog !== undefined}
+        onOpenChange={() => setShowDialog(undefined)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {showDialog === 0 ? (
-                <ThumbsDown />
-              ) : (
-                <ThumbsUp />
-              )}
+              {showDialog === 0 ? <ThumbsDown /> : <ThumbsUp />}
               Add a comment
             </DialogTitle>
           </DialogHeader>
-          
+
           <Textarea
             value={commentInput}
             onChange={(e) => setCommentInput(e.target.value || undefined)}
@@ -161,13 +184,13 @@ export function FeedbackButtons({
 
           <DialogFooter>
             <Button
-            id="submit-feedback"
+              id="submit-feedback"
               onClick={() => {
                 if (showDialog !== undefined) {
-                  handleFeedbackChange(showDialog, commentInput)
+                  handleFeedbackChange(showDialog, commentInput);
                 }
-                setShowDialog(undefined)
-                setCommentInput(undefined)
+                setShowDialog(undefined);
+                setCommentInput(undefined);
               }}
             >
               Submit feedback
@@ -176,5 +199,5 @@ export function FeedbackButtons({
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

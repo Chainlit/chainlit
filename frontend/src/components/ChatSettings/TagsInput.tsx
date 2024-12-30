@@ -1,16 +1,19 @@
-import React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { InputStateHandler } from "./InputStateHandler";
-import { IInput } from "types/Input";
+import { X } from 'lucide-react';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+
+import { IInput } from 'types/Input';
+
+import { InputStateHandler } from './InputStateHandler';
 
 export type TagsInputProps = {
   placeholder?: string;
   value?: string[];
   setField?(field: string, value: string[], shouldValidate?: boolean): void;
 } & IInput &
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "color">;
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'color'>;
 
 export const TagsInput = ({
   description,
@@ -23,16 +26,16 @@ export const TagsInput = ({
   placeholder,
   ...rest
 }: TagsInputProps): JSX.Element => {
-  const [inputValue, setInputValue] = React.useState("");
+  const [inputValue, setInputValue] = React.useState('');
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && inputValue.trim()) {
+    if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
       if (!value.includes(inputValue.trim())) {
         const newTags = [...value, inputValue.trim()];
         setField?.(id, newTags, false);
       }
-      setInputValue("");
+      setInputValue('');
     }
   };
 

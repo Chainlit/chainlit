@@ -1,37 +1,39 @@
-import { useContext, useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { MessageContext } from 'contexts/MessageContext'
-import { useUpload } from 'hooks/useUpload'
-import { Upload } from "lucide-react"
-import { IFileRef, IAsk } from '@chainlit/react-client'
+import { MessageContext } from 'contexts/MessageContext';
+import { Upload } from 'lucide-react';
+import { useContext, useState } from 'react';
 
+import { IAsk, IFileRef } from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
+import { useUpload } from 'hooks/useUpload';
 
 interface UploadState {
-  progress: number
-  uploaded: boolean
-  cancel: () => void
-  fileRef?: IFileRef
+  progress: number;
+  uploaded: boolean;
+  cancel: () => void;
+  fileRef?: IFileRef;
 }
 
 interface _AskFileButtonProps {
-  askUser: IAsk
+  askUser: IAsk;
   uploadFile: (
     file: File,
     onProgress: (progress: number) => void
-  ) => { 
-    xhr: XMLHttpRequest
-    promise: Promise<IFileRef> 
-  }
-  onError: (error: string) => void
+  ) => {
+    xhr: XMLHttpRequest;
+    promise: Promise<IFileRef>;
+  };
+  onError: (error: string) => void;
 }
 
 const CircularProgress = ({ value }: { value: number }) => {
-  const size = 24
-  const strokeWidth = 2
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (value / 100) * circumference
+  const size = 24;
+  const strokeWidth = 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -65,63 +67,63 @@ const CircularProgress = ({ value }: { value: number }) => {
         />
       </svg>
     </div>
-  )
-}
+  );
+};
 
 const _AskFileButton = ({
   askUser,
   uploadFile,
   onError
 }: _AskFileButtonProps) => {
-  const [uploads, setUploads] = useState<UploadState[]>([])
+  const [uploads, setUploads] = useState<UploadState[]>([]);
 
-  const uploading = uploads.some((upload) => !upload.uploaded)
+  const uploading = uploads.some((upload) => !upload.uploaded);
   const progress = uploads.reduce(
     (acc, upload) => acc + upload.progress / uploads.length,
     0
-  )
+  );
 
   const onResolved = (files: File[]) => {
-    if (uploading) return
+    if (uploading) return;
 
-    const promises: Promise<IFileRef>[] = []
+    const promises: Promise<IFileRef>[] = [];
 
     const newUploads = files.map((file, index) => {
       const { xhr, promise } = uploadFile(file, (progress) => {
         setUploads((prev) =>
           prev.map((upload, i) => {
             if (i === index) {
-              return { ...upload, progress }
+              return { ...upload, progress };
             }
-            return upload
+            return upload;
           })
-        )
-      })
-      promises.push(promise)
-      return { progress: 0, uploaded: false, cancel: () => xhr.abort() }
-    })
+        );
+      });
+      promises.push(promise);
+      return { progress: 0, uploaded: false, cancel: () => xhr.abort() };
+    });
 
     Promise.all(promises)
       .then((fileRefs) => askUser.callback(fileRefs))
       .catch((error) => {
-        onError(`Failed to upload: ${error.message}`)
+        onError(`Failed to upload: ${error.message}`);
         setUploads((prev) => {
-          prev.forEach((u) => u.cancel())
-          return []
-        })
-      })
+          prev.forEach((u) => u.cancel());
+          return [];
+        });
+      });
 
-    setUploads(newUploads)
-  }
+    setUploads(newUploads);
+  };
 
   const upload = useUpload({
     spec: askUser.spec,
     onResolved: onResolved,
     onError: (error: string) => onError(error)
-  })
+  });
 
-  if (!upload) return null
-  const { getRootProps, getInputProps } = upload
+  if (!upload) return null;
+  const { getRootProps, getInputProps } = upload;
 
   return (
     <Card className="w-full mt-2">
@@ -131,9 +133,7 @@ const _AskFileButton = ({
       >
         <input id="ask-button-input" {...getInputProps()} />
         <div className="flex flex-col">
-          <p className="text-sm font-medium">
-            Drag and drop files here
-          </p>
+          <p className="text-sm font-medium">Drag and drop files here</p>
           <p className="text-sm text-muted-foreground">
             Limit {askUser.spec.max_size_mb}mb.
           </p>
@@ -155,21 +155,21 @@ const _AskFileButton = ({
         </Button>
       </div>
     </Card>
-  )
-}
+  );
+};
 
 interface AskFileButtonProps {
-  onError: (error: string) => void
+  onError: (error: string) => void;
 }
 
 const AskFileButton = ({ onError }: AskFileButtonProps) => {
-  const messageContext = useContext(MessageContext)
+  const messageContext = useContext(MessageContext);
 
   if (
     messageContext.askUser?.spec.type !== 'file' ||
     !messageContext?.uploadFile
   )
-    return null
+    return null;
 
   return (
     <_AskFileButton
@@ -177,7 +177,7 @@ const AskFileButton = ({ onError }: AskFileButtonProps) => {
       uploadFile={messageContext.uploadFile}
       askUser={messageContext.askUser}
     />
-  )
-}
+  );
+};
 
-export { AskFileButton }
+export { AskFileButton };

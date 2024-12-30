@@ -1,4 +1,3 @@
-import { useUpload } from '@/hooks/useUpload';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
@@ -14,20 +13,21 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
+import Alert from '@/components/Alert';
+import { TaskList } from '@/components/Tasklist';
 import { Translator } from 'components/i18n';
 import { useTranslation } from 'components/i18n/Translator';
 
+import { useUpload } from '@/hooks/useUpload';
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
 import { IAttachment, attachmentsState } from 'state/chat';
 
-import Alert from '@/components/Alert';
 import { ErrorBoundary } from '../ErrorBoundary';
-import ScrollContainer from './ScrollContainer';
-import WelcomeScreen from './WelcomeScreen';
-import { TaskList } from '@/components/Tasklist';
 import ChatFooter from './Footer';
 import MessagesContainer from './MessagesContainer';
+import ScrollContainer from './ScrollContainer';
+import WelcomeScreen from './WelcomeScreen';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -176,55 +176,52 @@ const Chat = () => {
       // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
-      className='flex w-full h-full flex-col relative'
+      className="flex w-full h-full flex-col relative"
     >
       {enableAttachments ? (
-          <input id="#upload-drop-input" {...upload.getInputProps()} />
+        <input id="#upload-drop-input" {...upload.getInputProps()} />
       ) : null}
 
-        {error ? (
+      {error ? (
+        <div className="w-full mx-auto my-2">
+          <Alert className="mx-2" id="session-error" variant="error">
+            <Translator path="components.organisms.chat.index.couldNotReachServer" />
+          </Alert>
+        </div>
+      ) : null}
+      <ErrorBoundary>
+        <ScrollContainer autoScroll={autoScroll} setAutoScroll={setAutoScroll}>
           <div
-          className="w-full mx-auto my-2"
-          >
-            <Alert className='mx-2' id="session-error" variant="error">
-              <Translator path="components.organisms.chat.index.couldNotReachServer" />
-            </Alert>
-          </div>
-        ) : null}
-        <ErrorBoundary>
-          <ScrollContainer
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
-          >
-                  <div className='flex flex-col mx-auto w-full flex-grow p-4'
+            className="flex flex-col mx-auto w-full flex-grow p-4"
             style={{
-              "maxWidth": layoutMaxWidth
+              maxWidth: layoutMaxWidth
             }}
-      >
+          >
             <TaskList isMobile={true} />
-            <WelcomeScreen 
-                        fileSpec={fileSpec}
-                        onFileUpload={onFileUpload}
-                        onFileUploadError={onFileUploadError}
-                        setAutoScroll={setAutoScroll}
+            <WelcomeScreen
+              fileSpec={fileSpec}
+              onFileUpload={onFileUpload}
+              onFileUploadError={onFileUploadError}
+              setAutoScroll={setAutoScroll}
             />
             <MessagesContainer navigate={navigate} />
-            </div>
-          </ScrollContainer>
-          <div className='flex flex-col mx-auto w-full p-4 pt-0'
-            style={{
-              "maxWidth": layoutMaxWidth
-            }}
-      >
-         <ChatFooter 
-          fileSpec={fileSpec}
-          onFileUpload={onFileUpload}
-          onFileUploadError={onFileUploadError}
-          setAutoScroll={setAutoScroll}
-          autoScroll={autoScroll}
-         />
-         </div>
-        </ErrorBoundary>
+          </div>
+        </ScrollContainer>
+        <div
+          className="flex flex-col mx-auto w-full p-4 pt-0"
+          style={{
+            maxWidth: layoutMaxWidth
+          }}
+        >
+          <ChatFooter
+            fileSpec={fileSpec}
+            onFileUpload={onFileUpload}
+            onFileUploadError={onFileUploadError}
+            setAutoScroll={setAutoScroll}
+            autoScroll={autoScroll}
+          />
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };

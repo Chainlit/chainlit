@@ -22,7 +22,7 @@ export interface IAuthConfig {
   passwordAuth: boolean;
   headerAuth: boolean;
   oauthProviders: string[];
-  default_theme?: "light" | "dark";
+  default_theme?: 'light' | 'dark';
 }
 
 export interface IChainlitConfig {
@@ -31,8 +31,8 @@ export interface IChainlitConfig {
     name: string;
     description?: string;
     font_family?: string;
-    default_theme?: "light" | "dark";
-    layout?: "default" | "wide";
+    default_theme?: 'light' | 'dark';
+    layout?: 'default' | 'wide';
     cot: 'hidden' | 'tool_call' | 'full';
     github?: string;
     custom_css?: string;

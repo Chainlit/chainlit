@@ -4,6 +4,7 @@ import { IWidgetConfig } from 'types';
 
 import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
 import { ChainlitContext } from '@chainlit/react-client';
+
 import App from './app';
 
 i18nSetupLocalization();
@@ -17,7 +18,7 @@ export default function AppWrapper({ widgetConfig }: Props) {
   return (
     <ChainlitContext.Provider value={apiClient}>
       <RecoilRoot>
-          <App widgetConfig={widgetConfig} />
+        <App widgetConfig={widgetConfig} />
       </RecoilRoot>
     </ChainlitContext.Provider>
   );

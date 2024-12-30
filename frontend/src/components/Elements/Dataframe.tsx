@@ -1,75 +1,78 @@
-import { useCallback, useMemo } from "react"
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
+  useReactTable
+} from '@tanstack/react-table';
+import { ArrowDown, ArrowUp } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { IDataframeElement } from '@chainlit/react-client';
+
+import Alert from '@/components/Alert';
+import { Loader } from '@/components/Loader';
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
+  PaginationPrevious
+} from '@/components/ui/pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
 
-import { useFetch } from "hooks/useFetch"
-import { Loader } from "@/components/Loader"
-import { IDataframeElement } from "@chainlit/react-client"
-import Alert from "@/components/Alert"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { useFetch } from 'hooks/useFetch';
 
 interface DataframeData {
-  index: (string | number)[]
-  columns: string[]
-  data: (string | number)[][]
+  index: (string | number)[];
+  columns: string[];
+  data: (string | number)[][];
 }
 
 const _DataframeElement = ({ data }: { data: DataframeData }) => {
-  const { index, columns, data: rowData } = data
+  const { index, columns, data: rowData } = data;
 
-  const tableColumns: ColumnDef<Record<string, string | number>>[] = useMemo(() => 
-    columns.map((col: string) => ({
-      accessorKey: col,
-      header: ({ column }) => {
-        const sort = column.getIsSorted()
-        return (
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => column.toggleSorting()}
-          >
-            {col}
-            {sort === "asc" && <ArrowUp className="ml-2 !size-3" />}
-            {sort === "desc" && <ArrowDown className="ml-2 !size-3" />}
-          </div>
-        )
-      },
-    })),
+  const tableColumns: ColumnDef<Record<string, string | number>>[] = useMemo(
+    () =>
+      columns.map((col: string) => ({
+        accessorKey: col,
+        header: ({ column }) => {
+          const sort = column.getIsSorted();
+          return (
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => column.toggleSorting()}
+            >
+              {col}
+              {sort === 'asc' && <ArrowUp className="ml-2 !size-3" />}
+              {sort === 'desc' && <ArrowDown className="ml-2 !size-3" />}
+            </div>
+          );
+        }
+      })),
     [columns]
-  )
+  );
 
-  const tableRows = useMemo(() => 
-    rowData.map((row, idx) => {
-      const rowObj: Record<string, string | number> = { id: index[idx] }
-      columns.forEach((col, colIdx) => {
-        rowObj[col] = row[colIdx]
-      })
-      return rowObj
-    }),
+  const tableRows = useMemo(
+    () =>
+      rowData.map((row, idx) => {
+        const rowObj: Record<string, string | number> = { id: index[idx] };
+        columns.forEach((col, colIdx) => {
+          rowObj[col] = row[colIdx];
+        });
+        return rowObj;
+      }),
     [rowData, columns, index]
-  )
+  );
 
   const table = useReactTable({
     data: tableRows,
@@ -79,8 +82,8 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: { pageSize: 10 }
-    },
-  })
+    }
+  });
 
   const renderPaginationItems = useCallback(() => {
     return Array.from({ length: table.getPageCount() }, (_, i) => (
@@ -92,8 +95,8 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
           {i + 1}
         </PaginationLink>
       </PaginationItem>
-    ))
-  }, [table.getPageCount(), table.getState().pagination.pageIndex])
+    ));
+  }, [table.getPageCount(), table.getState().pagination.pageIndex]);
 
   return (
     <div className="flex flex-col gap-2 h-full overflow-y-auto dataframe">
@@ -147,39 +150,50 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
           <PaginationItem>
             <PaginationPrevious
               onClick={() => table.previousPage()}
-              className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              className={
+                !table.getCanPreviousPage()
+                  ? 'pointer-events-none opacity-50'
+                  : 'cursor-pointer'
+              }
             />
           </PaginationItem>
           {renderPaginationItems()}
           <PaginationItem>
             <PaginationNext
               onClick={() => table.nextPage()}
-              className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              className={
+                !table.getCanNextPage()
+                  ? 'pointer-events-none opacity-50'
+                  : 'cursor-pointer'
+              }
             />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
     </div>
-  )
-}
+  );
+};
 
-function DataframeElement({element}: {element: IDataframeElement}) {
-  const { data, isLoading, error } = useFetch(element.url || null)
+function DataframeElement({ element }: { element: IDataframeElement }) {
+  const { data, isLoading, error } = useFetch(element.url || null);
 
   const jsonData = useMemo(() => {
-    if(data) return JSON.parse(data)
-  }, [data])
+    if (data) return JSON.parse(data);
+  }, [data]);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-full w-full bg-muted"><Loader /></div>
+    return (
+      <div className="flex items-center justify-center h-full w-full bg-muted">
+        <Loader />
+      </div>
+    );
   }
 
-  if(error) {
-    return <Alert variant="error">{error.message}</Alert>
+  if (error) {
+    return <Alert variant="error">{error.message}</Alert>;
   }
 
-  return <_DataframeElement data={jsonData} />
-
+  return <_DataframeElement data={jsonData} />;
 }
 
-export default DataframeElement
+export default DataframeElement;

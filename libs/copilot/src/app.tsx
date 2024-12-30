@@ -3,8 +3,8 @@ import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
 
+import { ThemeProvider } from '@chainlit/app/src/components/ThemeProvider';
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
-import {ThemeProvider} from '@chainlit/app/src/components/ThemeProvider';
 import { ChainlitContext, useAuth } from '@chainlit/react-client';
 
 interface Props {
@@ -22,8 +22,8 @@ export default function App({ widgetConfig }: Props) {
   const apiClient = useContext(ChainlitContext);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
-  const [authError, setAuthError] = useState<string>()
-  const [fetchError, setFetchError] = useState<string>()
+  const [authError, setAuthError] = useState<string>();
+  const [fetchError, setFetchError] = useState<string>();
 
   useEffect(() => {
     apiClient
@@ -34,33 +34,31 @@ export default function App({ widgetConfig }: Props) {
         i18n.changeLanguage(languageInUse);
       })
       .catch((err) => {
-        setFetchError(String(err))
+        setFetchError(String(err));
       });
   }, []);
 
   const defaultTheme = widgetConfig.theme || data?.default_theme;
 
   useEffect(() => {
-    if(fetchError) return
-    if(!isAuthenticated) {
-      if(!widgetConfig.accessToken) {
-        setAuthError("No authentication token provided.")
+    if (fetchError) return;
+    if (!isAuthenticated) {
+      if (!widgetConfig.accessToken) {
+        setAuthError('No authentication token provided.');
       } else {
-        apiClient.jwtAuth(widgetConfig.accessToken)
-        .catch((err) => setAuthError(String(err)))
+        apiClient
+          .jwtAuth(widgetConfig.accessToken)
+          .catch((err) => setAuthError(String(err)));
       }
     } else {
-      setAuthError(undefined)
+      setAuthError(undefined);
     }
-  }, [isAuthenticated, apiClient, fetchError, setAuthError])
+  }, [isAuthenticated, apiClient, fetchError, setAuthError]);
 
   return (
     <ThemeProvider storageKey="vite-ui-theme" defaultTheme={defaultTheme}>
-    <Toaster
-    className="toast"
-    position="bottom-center"
-  />
+      <Toaster className="toast" position="bottom-center" />
       <Widget config={widgetConfig} error={fetchError || authError} />
-      </ThemeProvider>
+    </ThemeProvider>
   );
 }

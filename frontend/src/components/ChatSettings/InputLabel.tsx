@@ -1,12 +1,14 @@
-import { InfoIcon } from "lucide-react";
+import { InfoIcon } from 'lucide-react';
+
+import { Label } from '@/components/ui/label';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
-import { NotificationCount, NotificationCountProps } from "./NotificationCount";
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+
+import { NotificationCount, NotificationCountProps } from './NotificationCount';
 
 interface InputLabelProps {
   id?: string;
@@ -24,10 +26,7 @@ const InputLabel = ({
   return (
     <div className="flex justify-between w-full">
       <div className="flex items-center gap-2">
-        <Label
-          htmlFor={id}
-          className="text-xs font-semibold text-gray-500"
-        >
+        <Label htmlFor={id} className="text-xs font-semibold text-gray-500">
           {label}
         </Label>
         {tooltip && (
@@ -43,9 +42,7 @@ const InputLabel = ({
           </TooltipProvider>
         )}
       </div>
-      {notificationsProps && (
-        <NotificationCount {...notificationsProps} />
-      )}
+      {notificationsProps && <NotificationCount {...notificationsProps} />}
     </div>
   );
 };

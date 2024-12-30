@@ -7,23 +7,26 @@ import { useAuthState } from './state';
 export const useUserManagement = () => {
   const { user, setUser } = useAuthState();
 
-  const { data: userData, error, isLoading, mutate: setUserFromAPI } = useApi<IUser>(
-    '/user'
-  );
+  const {
+    data: userData,
+    error,
+    isLoading,
+    mutate: setUserFromAPI
+  } = useApi<IUser>('/user');
 
   useEffect(() => {
     if (userData) {
       setUser(userData);
-    } else if(isLoading) {
-      setUser(undefined)
+    } else if (isLoading) {
+      setUser(undefined);
     }
   }, [userData, isLoading, setUser]);
 
   useEffect(() => {
-    if(error) {
-      setUser(null)
+    if (error) {
+      setUser(null);
     }
-  }, [error])
+  }, [error]);
 
   return { user, setUserFromAPI };
 };

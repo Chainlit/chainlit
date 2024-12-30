@@ -1,18 +1,27 @@
-import { useCallback, useContext } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import { ChainlitContext, IStarter, IStep, useAuth, useChatData, useChatInteract } from '@chainlit/react-client'
-import { Button } from "@/components/ui/button"
+import { useCallback, useContext } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+import {
+  ChainlitContext,
+  IStarter,
+  IStep,
+  useAuth,
+  useChatData,
+  useChatInteract
+} from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
 
 interface StarterProps {
-  starter: IStarter
+  starter: IStarter;
 }
 
 export default function Starter({ starter }: StarterProps) {
-  const apiClient = useContext(ChainlitContext)
-  const { sendMessage } = useChatInteract()
-  const { loading } = useChatData()
-  const { user } = useAuth()
-  
+  const apiClient = useContext(ChainlitContext);
+  const { sendMessage } = useChatInteract();
+  const { loading } = useChatData();
+  const { user } = useAuth();
+
   const onSubmit = useCallback(async () => {
     const message: IStep = {
       threadId: '',
@@ -21,10 +30,10 @@ export default function Starter({ starter }: StarterProps) {
       type: 'user_message',
       output: starter.message,
       createdAt: new Date().toISOString()
-    }
+    };
 
-    sendMessage(message, [])
-  }, [user, sendMessage, starter])
+    sendMessage(message, []);
+  }, [user, sendMessage, starter]);
 
   return (
     <Button
@@ -45,14 +54,11 @@ export default function Starter({ starter }: StarterProps) {
             }
             alt={starter.label}
           />
-        ) : null
-        }
-        <p
-          className="text-sm text-muted-foreground truncate"
-        >
+        ) : null}
+        <p className="text-sm text-muted-foreground truncate">
           {starter.label}
         </p>
       </div>
     </Button>
-  )
+  );
 }

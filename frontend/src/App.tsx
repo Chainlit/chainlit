@@ -2,18 +2,18 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { router } from 'router';
-import { Toaster } from "@/components/ui/sonner"
 
 import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
-import { userEnvState } from 'state/user';
-
-import { ThemeProvider } from './components/ThemeProvider';
 import ChatSettingsModal from './components/ChatSettings';
+import { ThemeProvider } from './components/ThemeProvider';
+import { Toaster } from '@/components/ui/sonner';
+
+import { userEnvState } from 'state/user';
 
 declare global {
   interface Window {
-    transports?: string[]
+    transports?: string[];
   }
 }
 
@@ -40,7 +40,7 @@ function App() {
     } else {
       connect({
         transports: window.transports,
-        userEnv,
+        userEnv
       });
     }
   }, [userEnv, isAuthenticated, connect, chatProfileOk]);
@@ -57,19 +57,17 @@ function App() {
     }
   }
 
-  if(!configLoaded && isAuthenticated) return null
+  if (!configLoaded && isAuthenticated) return null;
 
   return (
-    <ThemeProvider storageKey="vite-ui-theme" defaultTheme={data?.default_theme}>
+    <ThemeProvider
+      storageKey="vite-ui-theme"
+      defaultTheme={data?.default_theme}
+    >
+      <Toaster className="toast" position="top-right" />
 
-      <Toaster
-        className="toast"
-        position="top-right"
-      />
-
-        <ChatSettingsModal />
-        <RouterProvider router={router} />
-   
+      <ChatSettingsModal />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }

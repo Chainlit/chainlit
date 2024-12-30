@@ -80,7 +80,11 @@ export const Alert: React.FC<AlertProps> = ({
   return (
     <div
       id={id}
-      className={cn('border rounded-lg p-4 mb-4 alert', styles.container, className)}
+      className={cn(
+        'border rounded-lg p-4 mb-4 alert',
+        styles.container,
+        className
+      )}
     >
       <div className="flex">
         <div className={cn('flex-shrink-0', styles.icon)}>{icons[variant]}</div>

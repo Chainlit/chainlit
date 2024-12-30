@@ -1,9 +1,9 @@
-import { AudioElement } from '@/components/Elements/Audio';
 import type { IAudioElement } from '@chainlit/react-client';
 
+import { AudioElement } from '@/components/Elements/Audio';
 
 interface InlinedAudioListProps {
-  items: IAudioElement[]
+  items: IAudioElement[];
 }
 
 const InlinedAudioList = ({ items }: InlinedAudioListProps) => {
@@ -15,7 +15,7 @@ const InlinedAudioList = ({ items }: InlinedAudioListProps) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export { InlinedAudioList }
+export { InlinedAudioList };

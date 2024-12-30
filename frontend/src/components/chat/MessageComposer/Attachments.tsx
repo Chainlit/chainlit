@@ -1,21 +1,24 @@
+import { X } from 'lucide-react';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
-import { X } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+
 import { attachmentsState } from '@/state/chat';
+
 import { Attachment } from './Attachment';
 
-const CircularProgressButton = ({ 
-  progress, 
-  onClick, 
-  children 
-}: { 
+const CircularProgressButton = ({
+  progress,
+  onClick,
+  children
+}: {
   progress: number;
   onClick: () => void;
   children: React.ReactNode;
@@ -73,10 +76,7 @@ const Attachments = () => {
   if (attachments.length === 0) return null;
 
   return (
-    <div 
-      id="attachments"
-      className="flex flex-row flex-wrap gap-4 w-fit"
-    >
+    <div id="attachments" className="flex flex-row flex-wrap gap-4 w-fit">
       {attachments.map((attachment) => {
         const showProgress = !attachment.uploaded && attachment.cancel;
 
@@ -93,33 +93,30 @@ const Attachments = () => {
                   </CircularProgressButton>
                 </div>
               </TooltipTrigger>
-              <TooltipContent>
-                Cancel upload
-              </TooltipContent>
+              <TooltipContent>Cancel upload</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : null;
 
-        const remove = !showProgress && attachment.remove ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="absolute -right-2 -top-2">
-                  <Button
-                    size="icon"
-                    className="w-6 h-6 shadow-sm rounded-full border-4 bg-card hover:bg-card text-foreground border-accent"
-                    onClick={attachment.remove}
-                  >
-                    <X className="!size-3" />
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                Remove attachment
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : null;
+        const remove =
+          !showProgress && attachment.remove ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute -right-2 -top-2">
+                    <Button
+                      size="icon"
+                      className="w-6 h-6 shadow-sm rounded-full border-4 bg-card hover:bg-card text-foreground border-accent"
+                      onClick={attachment.remove}
+                    >
+                      <X className="!size-3" />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Remove attachment</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null;
 
         return (
           <Attachment

@@ -1,8 +1,10 @@
 import { type ITextElement, useConfig } from '@chainlit/react-client';
-import { useFetch } from 'hooks/useFetch';
-import { Skeleton } from "@/components/ui/skeleton";
-import Alert from "@/components/Alert";
+
+import Alert from '@/components/Alert';
 import Markdown from '@/components/Markdown';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import { useFetch } from 'hooks/useFetch';
 
 interface TextElementProps {
   element: ITextElement;
@@ -17,16 +19,12 @@ const TextElement = ({ element }: TextElementProps) => {
   let content = '';
 
   if (isLoading) {
-    return (
-        <Skeleton className="h-4 w-full" />
-    );
-  } 
-  
+    return <Skeleton className="h-4 w-full" />;
+  }
+
   if (error) {
     return (
-      <Alert variant="error">
-          An error occurred while loading the content
-      </Alert>
+      <Alert variant="error">An error occurred while loading the content</Alert>
     );
   }
 
@@ -39,9 +37,9 @@ const TextElement = ({ element }: TextElementProps) => {
   }
 
   return (
-      <Markdown allowHtml={allowHtml} latex={latex}>
-        {content}
-      </Markdown>
+    <Markdown allowHtml={allowHtml} latex={latex}>
+      {content}
+    </Markdown>
   );
 };
 

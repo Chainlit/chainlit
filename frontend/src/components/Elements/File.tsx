@@ -1,4 +1,5 @@
 import { type IFileElement } from '@chainlit/react-client';
+
 import { Attachment } from '@/components/chat/MessageComposer/Attachment';
 
 const FileElement = ({ element }: { element: IFileElement }) => {

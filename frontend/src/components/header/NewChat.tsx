@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
+
 import { useChatInteract } from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+  DialogTitle
+} from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+
 import { EditSquare } from '../icons/EditSquare';
 
 type NewChatDialogProps = {
@@ -23,14 +26,19 @@ type NewChatDialogProps = {
   handleConfirm: () => void;
 };
 
-export const NewChatDialog = ({ open, handleClose, handleConfirm }: NewChatDialogProps) => {
+export const NewChatDialog = ({
+  open,
+  handleClose,
+  handleConfirm
+}: NewChatDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent id="new-chat-dialog" className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create New Chat</DialogTitle>
           <DialogDescription>
-            This will clear your current chat history. Are you sure you want to continue?
+            This will clear your current chat history. Are you sure you want to
+            continue?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
@@ -50,7 +58,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   navigate?: (to: string) => void;
 }
 
-const NewChatButton = ({navigate, ...buttonProps}: Props) => {
+const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false);
   const { clear } = useChatInteract();
 
@@ -77,17 +85,14 @@ const NewChatButton = ({navigate, ...buttonProps}: Props) => {
               variant="ghost"
               size="icon"
               id="new-chat-button"
-              className='text-muted-foreground hover:text-muted-foreground'
+              className="text-muted-foreground hover:text-muted-foreground"
               onClick={handleClickOpen}
               {...buttonProps}
             >
-                            <EditSquare className="!size-6" />
-
+              <EditSquare className="!size-6" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            New Chat
-          </TooltipContent>
+          <TooltipContent>New Chat</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <NewChatDialog

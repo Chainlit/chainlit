@@ -1,17 +1,18 @@
+import { useConfig } from '@chainlit/react-client';
+
+import Markdown from '@/components/Markdown';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useConfig } from '@chainlit/react-client';
 import { Translator } from 'components/i18n';
-import Markdown from '@/components/Markdown';
 
 export default function ReadmeButton() {
-  const { config } = useConfig()
+  const { config } = useConfig();
 
   if (!config?.markdown) {
     return null;
@@ -20,10 +21,7 @@ export default function ReadmeButton() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button 
-          id="readme-button"
-          variant="ghost" 
-        >
+        <Button id="readme-button" variant="ghost">
           <Translator path="components.organisms.header.readme" />
         </Button>
       </DialogTrigger>
@@ -33,9 +31,13 @@ export default function ReadmeButton() {
             <Translator path="components.organisms.header.readme" />
           </DialogTitle>
         </DialogHeader>
-        <Markdown className='flex flex-col flex-grow overflow-y-auto' allowHtml={config?.features?.unsafe_allow_html} latex={config?.features?.latex}>
-            {config.markdown}
-          </Markdown>
+        <Markdown
+          className="flex flex-col flex-grow overflow-y-auto"
+          allowHtml={config?.features?.unsafe_allow_html}
+          latex={config?.features?.latex}
+        >
+          {config.markdown}
+        </Markdown>
       </DialogContent>
     </Dialog>
   );

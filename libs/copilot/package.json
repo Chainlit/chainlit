@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx",
-    "format": "prettier src/**/*.{ts,tsx} --write --loglevel error",
+    "format": "prettier 'src/**/*.{ts,tsx}' --write",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

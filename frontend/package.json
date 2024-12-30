@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
-    "format": "prettier src/**/*.{ts,tsx} --write --loglevel error",
+    "format": "prettier 'src/**/*.{ts,tsx,css}' --write",
     "test": "vitest run",
     "prepublishOnly": "pnpm run build && pnpm test"
   },

@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button"
+import { BugIcon } from 'lucide-react';
+
+import { IStep } from '@chainlit/react-client';
+
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { IStep } from "@chainlit/react-client";
-import { BugIcon } from "lucide-react";
-
-
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 interface DebugButtonProps {
   debugUrl: string;
@@ -29,12 +29,7 @@ const DebugButton = ({ step, debugUrl }: DebugButtonProps) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 p-0"
-            asChild
-          >
+          <Button variant="ghost" size="icon" className="h-9 w-9 p-0" asChild>
             <a href={href} target="_blank" rel="noopener noreferrer">
               <BugIcon />
             </a>

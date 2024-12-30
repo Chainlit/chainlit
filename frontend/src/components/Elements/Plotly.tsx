@@ -1,10 +1,11 @@
 import { Suspense, lazy } from 'react';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Skeleton } from '@/components/ui/skeleton';
+
 import { useFetch } from 'hooks/useFetch';
 
 import { type IPlotlyElement } from 'client-types/';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Plot = lazy(() => import('react-plotly.js'));
 
@@ -30,7 +31,7 @@ const _PlotlyElement = ({ element }: Props) => {
   }
 
   return (
-    <Suspense fallback={<Skeleton className='h-full rounded-md' />}>
+    <Suspense fallback={<Skeleton className="h-full rounded-md" />}>
       <Plot
         className={`${element.display}-plotly`}
         data={state.data}

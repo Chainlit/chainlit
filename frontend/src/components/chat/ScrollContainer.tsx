@@ -1,5 +1,6 @@
+import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
-import { cn } from "@/lib/utils";
+
 import { useChatMessages, useChatSession } from '@chainlit/react-client';
 
 interface Props {
@@ -39,10 +40,10 @@ export default function ScrollContainer({
   };
 
   return (
-    <div 
+    <div
       ref={ref}
       className={cn(
-        "relative flex flex-col flex-grow overflow-y-auto",
+        'relative flex flex-col flex-grow overflow-y-auto',
         className
       )}
       onScroll={handleScroll}

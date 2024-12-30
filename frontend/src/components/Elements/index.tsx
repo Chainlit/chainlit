@@ -3,11 +3,11 @@ import type { IMessageElement } from '@chainlit/react-client';
 import { AudioElement } from './Audio';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
+import { LazyDataframe } from './LazyDataframe';
 import { PDFElement } from './PDF';
 import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
 import { VideoElement } from './Video';
-import { LazyDataframe } from './LazyDataframe';
 
 interface ElementProps {
   element?: IMessageElement;

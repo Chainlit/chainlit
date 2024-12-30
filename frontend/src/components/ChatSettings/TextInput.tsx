@@ -1,15 +1,17 @@
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { InputStateHandler } from './InputStateHandler'
-import { IInput } from 'types/Input'
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-interface TextInputProps extends 
-  IInput,
-  Omit<React.InputHTMLAttributes<any>, 'id' | 'size'> {
-  setField?: (field: string, value: string, shouldValidate?: boolean) => void
-  value?: string
-  placeholder?: string
-  multiline?: boolean
+import { IInput } from 'types/Input';
+
+import { InputStateHandler } from './InputStateHandler';
+
+interface TextInputProps
+  extends IInput,
+    Omit<React.InputHTMLAttributes<any>, 'id' | 'size'> {
+  setField?: (field: string, value: string, shouldValidate?: boolean) => void;
+  value?: string;
+  placeholder?: string;
+  multiline?: boolean;
 }
 
 const TextInput = ({
@@ -24,8 +26,8 @@ const TextInput = ({
   setField,
   ...rest
 }: TextInputProps): JSX.Element => {
-  const InputComponent = multiline ? Textarea : Input
-  
+  const InputComponent = multiline ? Textarea : Input;
+
   return (
     <InputStateHandler
       description={description}
@@ -43,8 +45,8 @@ const TextInput = ({
         {...rest}
       />
     </InputStateHandler>
-  )
-}
+  );
+};
 
-export { TextInput }
-export type { TextInputProps }
+export { TextInput };
+export type { TextInputProps };

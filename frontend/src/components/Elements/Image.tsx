@@ -1,13 +1,15 @@
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from "@/lib/utils";
+
+import { IImageElement } from '@chainlit/react-client';
+
 import {
   Dialog,
   DialogContent,
   DialogOverlay,
-  DialogPortal,
-} from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import { IImageElement } from '@chainlit/react-client';
+  DialogPortal
+} from '@/components/ui/dialog';
 
 const ImageElement = ({ element }: { element: IImageElement }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -23,8 +25,8 @@ const ImageElement = ({ element }: { element: IImageElement }) => {
       <div className="rounded-sm bg-muted overflow-hidden">
         <img
           className={cn(
-            "mx-auto block max-w-full h-auto",
-            element.display === 'inline' && "cursor-pointer",
+            'mx-auto block max-w-full h-auto',
+            element.display === 'inline' && 'cursor-pointer',
             `${element.display}-image`
           )}
           src={element.url}
@@ -46,7 +48,7 @@ const ImageElement = ({ element }: { element: IImageElement }) => {
               >
                 <X className="h-6 w-6" />
               </button>
-              
+
               <img
                 src={element.url}
                 alt={element.name}

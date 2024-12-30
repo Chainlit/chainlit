@@ -1,22 +1,24 @@
-import * as React from "react"
-import { Switch } from "@/components/ui/switch"
-import { cn } from "@/lib/utils"
-import { InputStateHandler } from "./InputStateHandler"
+import { cn } from '@/lib/utils';
+import * as React from 'react';
+
+import { Switch } from '@/components/ui/switch';
+
+import { InputStateHandler } from './InputStateHandler';
 
 interface InputStateProps {
-  description?: string
-  hasError?: boolean
-  id: string
-  label?: string
-  tooltip?: string
-  children: React.ReactNode
+  description?: string;
+  hasError?: boolean;
+  id: string;
+  label?: string;
+  tooltip?: string;
+  children: React.ReactNode;
 }
 
 interface SwitchInputProps extends InputStateProps {
-  checked: boolean
-  disabled?: boolean
-  onChange: (checked: boolean) => void
-  setField?: (field: string, value: boolean, shouldValidate?: boolean) => void
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+  setField?: (field: string, value: boolean, shouldValidate?: boolean) => void;
 }
 
 const SwitchInput = ({
@@ -42,16 +44,16 @@ const SwitchInput = ({
         checked={checked}
         disabled={disabled}
         onCheckedChange={(checked) => {
-          setField?.(id, checked)
+          setField?.(id, checked);
         }}
         className={cn(
-          "data-[state=checked]:bg-primary",
-          hasError && "border-destructive"
+          'data-[state=checked]:bg-primary',
+          hasError && 'border-destructive'
         )}
       />
     </InputStateHandler>
-  )
-}
+  );
+};
 
-export { SwitchInput }
-export type { SwitchInputProps }
+export { SwitchInput };
+export type { SwitchInputProps };

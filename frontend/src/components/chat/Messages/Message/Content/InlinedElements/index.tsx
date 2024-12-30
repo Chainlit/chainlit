@@ -1,13 +1,13 @@
 import type { ElementType, IMessageElement } from '@chainlit/react-client';
 
-import { InlinedVideoList } from './InlinedVideoList';
 import { InlinedAudioList } from './InlinedAudioList';
 import { InlinedDataframeList } from './InlinedDataframeList';
-import { InlinedImageList } from './InlinedImageList';
-import { InlinedTextList } from './InlinedTextList';
-import { InlinedPlotlyList } from './InlinedPlotlyList';
-import { InlinedPDFList } from './InlinedPDFList';
 import { InlinedFileList } from './InlinedFileList';
+import { InlinedImageList } from './InlinedImageList';
+import { InlinedPDFList } from './InlinedPDFList';
+import { InlinedPlotlyList } from './InlinedPlotlyList';
+import { InlinedTextList } from './InlinedTextList';
+import { InlinedVideoList } from './InlinedVideoList';
 
 interface Props {
   elements: IMessageElement[];
@@ -41,7 +41,7 @@ const InlinedElements = ({ elements }: Props) => {
   );
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className="flex flex-col gap-4">
       {elementsByType.image?.length ? (
         <InlinedImageList items={elementsByType.image} />
       ) : null}

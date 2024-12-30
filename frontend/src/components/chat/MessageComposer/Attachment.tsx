@@ -1,6 +1,7 @@
 import React from 'react';
 import { DefaultExtensionType, FileIcon, defaultStyles } from 'react-file-icon';
-import { Card } from "@/components/ui/card";
+
+import { Card } from '@/components/ui/card';
 
 interface AttachmentProps {
   name: string;
@@ -9,7 +10,9 @@ interface AttachmentProps {
 }
 
 const Attachment: React.FC<AttachmentProps> = ({ name, mime, children }) => {
-  const extension = (mime ? mime.split('/').pop() : 'txt') as DefaultExtensionType;
+  const extension = (
+    mime ? mime.split('/').pop() : 'txt'
+  ) as DefaultExtensionType;
 
   return (
     <div className="relative h-[58px]">

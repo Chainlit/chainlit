@@ -1,9 +1,5 @@
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import {
-  authState,
-  threadHistoryState,
-  userState
-} from 'src/state';
+import { authState, threadHistoryState, userState } from 'src/state';
 
 export const useAuthState = () => {
   const [authConfig, setAuthConfig] = useRecoilState(authState);
@@ -15,6 +11,6 @@ export const useAuthState = () => {
     setAuthConfig,
     user,
     setUser,
-    setThreadHistory,
+    setThreadHistory
   };
 };

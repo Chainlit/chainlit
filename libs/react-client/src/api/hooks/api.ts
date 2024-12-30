@@ -2,12 +2,10 @@ import { useContext, useMemo } from 'react';
 import { ChainlitAPI } from 'src/api';
 import { ChainlitContext } from 'src/context';
 import useSWR, { SWRConfig, SWRConfiguration } from 'swr';
+
 import { useAuthState } from './auth/state';
 
-const fetcher = async (
-  client: ChainlitAPI,
-  endpoint: string,
-) => {
+const fetcher = async (client: ChainlitAPI, endpoint: string) => {
   const res = await client.get(endpoint);
   return res?.json();
 };
@@ -64,8 +62,8 @@ function useApi<T>(
 
             // Don't do automatic retry for 401 - it just means we're not logged in (yet).
             if (err.status === 401) {
-              setUser(null)
-              return
+              setUser(null);
+              return;
             }
 
             // Fall back to default behavior.

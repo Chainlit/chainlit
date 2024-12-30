@@ -1,7 +1,6 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { Button } from '@/components/ui/button';
 
 import {
   IStep,
@@ -10,9 +9,10 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { Translator } from 'components/i18n';
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 import { Pencil } from '@/components/icons/Pencil';
+import { Button } from '@/components/ui/button';
+import { Translator } from 'components/i18n';
 
 interface Props {
   message: IStep;
@@ -28,7 +28,7 @@ export default function UserMessage({
   const setMessages = useSetRecoilState(messagesState);
   const disabled = loading || !!askUser;
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('')
+  const [editValue, setEditValue] = useState('');
 
   const isEditable = !!config.config?.features.edit_message;
 
@@ -50,18 +50,15 @@ export default function UserMessage({
 
   return (
     <div className="flex flex-col w-full">
-      <div 
-        className="flex flex-row items-center gap-1 w-full group"
-      >
+      <div className="flex flex-row items-center gap-1 w-full group">
         {!isEditing && isEditable && (
           <Button
             variant="ghost"
             size="icon"
             className="edit-message ml-auto invisible group-hover:visible"
             onClick={() => {
-                setEditValue(message.output)
-                setIsEditing(true)
-
+              setEditValue(message.output);
+              setIsEditing(true);
             }}
             disabled={disabled}
           >
@@ -76,19 +73,16 @@ export default function UserMessage({
         >
           {isEditing ? (
             <div className="bg-accent rounded-3xl flex flex-col">
-                        <AutoResizeTextarea
+              <AutoResizeTextarea
                 id="edit-chat-input"
                 autoFocus
-        value={editValue} 
-        onChange={(e) => setEditValue(e.target.value)}
-        className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"
-        maxHeight={250}
- />
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"
+                maxHeight={250}
+              />
               <div className="flex justify-end gap-4">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setIsEditing(false)}
-                >
+                <Button variant="ghost" onClick={() => setIsEditing(false)}>
                   <Translator path="components.molecules.newChatDialog.cancel" />
                 </Button>
                 <Button

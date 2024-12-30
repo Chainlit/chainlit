@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Input } from '@/components/ui/input';
 
 export interface NotificationCountProps {
@@ -11,12 +12,8 @@ export interface NotificationCountProps {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   };
 }
-  
 
-const NotificationCount = ({
-  count,
-  inputProps
-}: NotificationCountProps) => {
+const NotificationCount = ({ count, inputProps }: NotificationCountProps) => {
   if (!count) return null;
 
   const renderBox = () => (

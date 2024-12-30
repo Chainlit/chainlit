@@ -1,43 +1,49 @@
 import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAudio, useAuth, useConfig } from '@chainlit/react-client';
 
-import { ThemeToggle } from './ThemeToggle';
-import ApiKeys from './ApiKeys';
-import NewChatButton from './NewChat';
 import AudioPresence from '@/components/AudioPresence';
-import UserNav from './UserNav';
-import SidebarTrigger from './SidebarTrigger';
-import ChatProfiles from './ChatProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
-import ReadmeButton from './Readme';
-import { useNavigate } from 'react-router-dom';
 
+import ApiKeys from './ApiKeys';
+import ChatProfiles from './ChatProfiles';
+import NewChatButton from './NewChat';
+import ReadmeButton from './Readme';
+import SidebarTrigger from './SidebarTrigger';
+import { ThemeToggle } from './ThemeToggle';
+import UserNav from './UserNav';
 
 const Header = memo(() => {
   const { audioConnection } = useAudio();
   const navigate = useNavigate();
-  const {data} = useAuth()
-  const {config} = useConfig()
-  const {open, openMobile, isMobile} = useSidebar()
+  const { data } = useAuth();
+  const { config } = useConfig();
+  const { open, openMobile, isMobile } = useSidebar();
 
-  const sidebarOpen = isMobile ? openMobile : open
+  const sidebarOpen = isMobile ? openMobile : open;
 
-  const historyEnabled = data?.requireLogin && config?.dataPersistence
+  const historyEnabled = data?.requireLogin && config?.dataPersistence;
 
   return (
-    <div className='p-3 flex h-[60px] items-center justify-between gap-2 relative' id="header">
-            <div className='flex items-center'>
+    <div
+      className="p-3 flex h-[60px] items-center justify-between gap-2 relative"
+      id="header"
+    >
+      <div className="flex items-center">
+        {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
+        {historyEnabled ? (
+          !sidebarOpen ? (
+            <NewChatButton navigate={navigate} />
+          ) : null
+        ) : (
+          <NewChatButton navigate={navigate} />
+        )}
 
-                {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
-                {historyEnabled ? !sidebarOpen ? <NewChatButton navigate={navigate} /> : null : <NewChatButton navigate={navigate} />}
+        <ChatProfiles navigate={navigate} />
+      </div>
 
-                <ChatProfiles navigate={navigate} />
-                </div>
-
-      <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
-
-
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         {audioConnection === 'on' ? (
           <AudioPresence
             type="server"
@@ -47,11 +53,10 @@ const Header = memo(() => {
             barSpacing={2}
           />
         ) : null}
-        </div>
-
+      </div>
 
       <div />
-      <div className='flex items-center gap-1'>
+      <div className="flex items-center gap-1">
         <ReadmeButton />
         <ApiKeys />
         <ThemeToggle />

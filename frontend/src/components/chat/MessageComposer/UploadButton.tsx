@@ -1,14 +1,15 @@
-import { PaperClip } from "@/components/icons/PaperClip";
-import { Button } from "@/components/ui/button";
+import { FileSpec, useConfig } from '@chainlit/react-client';
+
+import { PaperClip } from '@/components/icons/PaperClip';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useUpload } from "@/hooks/useUpload";
-import { FileSpec, useConfig } from "@chainlit/react-client";
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
+import { useUpload } from '@/hooks/useUpload';
 
 interface UploadButtonProps {
   disabled?: boolean;
@@ -17,14 +18,13 @@ interface UploadButtonProps {
   onFileUploadError: (error: string) => void;
 }
 
-
 export const UploadButton = ({
   disabled = false,
   fileSpec,
   onFileUpload,
   onFileUploadError
 }: UploadButtonProps) => {
-  const {config} = useConfig()
+  const { config } = useConfig();
   const upload = useUpload({
     spec: fileSpec,
     onResolved: (payloads: File[]) => onFileUpload(payloads),
@@ -35,7 +35,7 @@ export const UploadButton = ({
   if (!upload) return null;
   const { getRootProps, getInputProps } = upload;
 
-  if(!config?.features.spontaneous_file_upload) return null
+  if (!config?.features.spontaneous_file_upload) return null;
 
   return (
     <TooltipProvider>
@@ -48,7 +48,7 @@ export const UploadButton = ({
               {...getInputProps()}
             />
             <Button
-              id={disabled ? "upload-button-loading" : "upload-button"}
+              id={disabled ? 'upload-button-loading' : 'upload-button'}
               variant="ghost"
               size="icon"
               className="hover:bg-muted"

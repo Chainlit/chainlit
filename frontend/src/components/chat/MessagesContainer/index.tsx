@@ -1,3 +1,4 @@
+import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useMemo } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -16,16 +17,14 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { useTranslation } from 'components/i18n/Translator';
-
-import { MessageContext } from '@/contexts/MessageContext';
 import { Messages } from '@/components/chat/Messages';
+import { useTranslation } from 'components/i18n/Translator';
 
 interface Props {
   navigate?: (to: string) => void;
 }
 
-const MessagesContainer = ({navigate}: Props) => {
+const MessagesContainer = ({ navigate }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const { elements, askUser, loading, actions } = useChatData();
@@ -45,59 +44,57 @@ const MessagesContainer = ({navigate}: Props) => {
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-        toast.promise(apiClient.setFeedback(feedback), {
-          loading: t('components.organisms.chat.Messages.index.updating'),
-          success: (res) => {
-            setMessages((prev) =>
-              updateMessageById(prev, message.id, {
-                ...message,
-                feedback: {
-                  ...feedback,
-                  id: res.feedbackId
-                }
-              })
-            );
-            onSuccess();
-            return t(
-              'components.organisms.chat.Messages.index.feedbackUpdated'
-            );
-          },
-          error: (err) => {
-            return <span>{err.message}</span>;
-          }
-        });
+      toast.promise(apiClient.setFeedback(feedback), {
+        loading: t('components.organisms.chat.Messages.index.updating'),
+        success: (res) => {
+          setMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              feedback: {
+                ...feedback,
+                id: res.feedbackId
+              }
+            })
+          );
+          onSuccess();
+          return t('components.organisms.chat.Messages.index.feedbackUpdated');
+        },
+        error: (err) => {
+          return <span>{err.message}</span>;
+        }
+      });
     },
     []
   );
 
   const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
-        toast.promise(apiClient.deleteFeedback(feedbackId), {
-          loading: t('components.organisms.chat.Messages.index.updating'),
-          success: () => {
-            setMessages((prev) =>
-              updateMessageById(prev, message.id, {
-                ...message,
-                feedback: undefined
-              })
-            );
-            onSuccess();
-            return t(
-              'components.organisms.chat.Messages.index.feedbackUpdated'
-            );
-          },
-          error: (err) => {
-            return <span>{err.message}</span>;
-          }
-        });
+      toast.promise(apiClient.deleteFeedback(feedbackId), {
+        loading: t('components.organisms.chat.Messages.index.updating'),
+        success: () => {
+          setMessages((prev) =>
+            updateMessageById(prev, message.id, {
+              ...message,
+              feedback: undefined
+            })
+          );
+          onSuccess();
+          return t('components.organisms.chat.Messages.index.feedbackUpdated');
+        },
+        error: (err) => {
+          return <span>{err.message}</span>;
+        }
+      });
     },
     []
   );
 
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
-
-      if (element.display === 'side' || element.display === "page" && !navigate) {
+      if (
+        element.display === 'side' ||
+        (element.display === 'page' && !navigate)
+      ) {
         setSideView(element);
         return;
       }
@@ -117,45 +114,45 @@ const MessagesContainer = ({navigate}: Props) => {
 
   const enableFeedback = !!config?.dataPersistence;
 
-    // Memoize the context object since it's created on each render.
-    // This prevents unnecessary re-renders of children components when no props have changed.
-    const memoizedContext = useMemo(() => {
-        return {
-          uploadFile,
-          askUser,
-          allowHtml: config?.features?.unsafe_allow_html,
-          latex: config?.features?.latex,
-          loading,
-          showFeedbackButtons: enableFeedback,
-          uiName: config?.ui?.name || '',
-          cot: config?.ui?.cot || "hidden",
-          onElementRefClick,
-          onError,
-          onFeedbackUpdated,
-          onFeedbackDeleted
-        };
-      }, [
-        askUser,
-        enableFeedback,
-        loading,
-        config?.ui?.name,
-        config?.ui?.cot,
-        config?.features?.unsafe_allow_html,
-        onElementRefClick,
-        onError,
-        onFeedbackUpdated
-      ]);
+  // Memoize the context object since it's created on each render.
+  // This prevents unnecessary re-renders of children components when no props have changed.
+  const memoizedContext = useMemo(() => {
+    return {
+      uploadFile,
+      askUser,
+      allowHtml: config?.features?.unsafe_allow_html,
+      latex: config?.features?.latex,
+      loading,
+      showFeedbackButtons: enableFeedback,
+      uiName: config?.ui?.name || '',
+      cot: config?.ui?.cot || 'hidden',
+      onElementRefClick,
+      onError,
+      onFeedbackUpdated,
+      onFeedbackDeleted
+    };
+  }, [
+    askUser,
+    enableFeedback,
+    loading,
+    config?.ui?.name,
+    config?.ui?.cot,
+    config?.features?.unsafe_allow_html,
+    onElementRefClick,
+    onError,
+    onFeedbackUpdated
+  ]);
 
   return (
     <MessageContext.Provider value={memoizedContext}>
-    <Messages
-      indent={0}
-      messages={messages}
-      elements={elements}
-      actions={actions}
-    />
-  </MessageContext.Provider>
-  )
+      <Messages
+        indent={0}
+        messages={messages}
+        elements={elements}
+        actions={actions}
+      />
+    </MessageContext.Provider>
+  );
 };
 
 export default MessagesContainer;

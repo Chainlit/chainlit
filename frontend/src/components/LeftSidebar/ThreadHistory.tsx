@@ -1,14 +1,20 @@
+import { uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { uniqBy } from 'lodash';
+import { useRecoilState } from 'recoil';
 
 import {
-    ChainlitContext,
-    threadHistoryState,
-    useChatMessages
-  } from '@chainlit/react-client';
-  import { SidebarContent, SidebarGroup, SidebarMenu } from '@/components/ui/sidebar';
-import { useRecoilState } from 'recoil';
+  ChainlitContext,
+  threadHistoryState,
+  useChatMessages
+} from '@chainlit/react-client';
+
+import {
+  SidebarContent,
+  SidebarGroup,
+  SidebarMenu
+} from '@/components/ui/sidebar';
+
 import { ThreadList } from './ThreadList';
 
 const BATCH_SIZE = 20;
@@ -37,13 +43,14 @@ export function ThreadHistory() {
     const handleFirstInteraction = async () => {
       if (!firstInteraction) return;
 
-      const isActualResume = firstInteraction === 'resume' && 
+      const isActualResume =
+        firstInteraction === 'resume' &&
         messages[0]?.output.toLowerCase() !== 'resume';
 
       if (isActualResume) return;
 
       await fetchThreads(undefined, true);
-      
+
       const currentPage = new URL(window.location.href);
       if (threadId && currentPage.pathname === '/') {
         navigate(`/thread/${threadId}`);
@@ -84,7 +91,7 @@ export function ThreadHistory() {
       );
 
       if (allThreads) {
-        setThreadHistory(prev => ({
+        setThreadHistory((prev) => ({
           ...prev,
           pageInfo,
           threads: allThreads
@@ -110,7 +117,7 @@ export function ThreadHistory() {
   useEffect(() => {
     if (threadHistory?.pageInfo) {
       const { hasNextPage, endCursor } = threadHistory.pageInfo;
-      
+
       if (shouldLoadMore && !isLoadingMore && hasNextPage && endCursor) {
         fetchThreads(endCursor);
       }
@@ -118,26 +125,21 @@ export function ThreadHistory() {
   }, [shouldLoadMore, isLoadingMore, threadHistory]);
 
   return (
-    <SidebarContent onScroll={handleScroll} 
-    ref={scrollRef}>
-    <SidebarGroup>   
-    <SidebarMenu>
-  
-      {threadHistory ? (
-        <div 
-          className="flex-grow" 
-  
-        >
-          <ThreadList
-            threadHistory={threadHistory}
-            error={error}
-            isFetching={isFetching}
-            isLoadingMore={isLoadingMore}
-          />
-        </div>
-      ) : null}
-       </SidebarMenu>
-        </SidebarGroup>
-        </SidebarContent>
+    <SidebarContent onScroll={handleScroll} ref={scrollRef}>
+      <SidebarGroup>
+        <SidebarMenu>
+          {threadHistory ? (
+            <div className="flex-grow">
+              <ThreadList
+                threadHistory={threadHistory}
+                error={error}
+                isFetching={isFetching}
+                isLoadingMore={isLoadingMore}
+              />
+            </div>
+          ) : null}
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
   );
 }

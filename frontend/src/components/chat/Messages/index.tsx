@@ -1,10 +1,15 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
-import { type IAction, type IMessageElement, type IStep } from '@chainlit/react-client';
+import {
+  type IAction,
+  type IMessageElement,
+  type IStep
+} from '@chainlit/react-client';
+
+import BlinkingCursor from '@/components/BlinkingCursor';
 
 import { Message } from './Message';
-import BlinkingCursor from '@/components/BlinkingCursor';
 
 interface Props {
   messages: IStep[];
@@ -68,7 +73,9 @@ const Messages = memo(
                     scorableRun={scorableRun}
                   />
                 ) : null}
-                {showToolCoTLoader || showHiddenCoTLoader ? <BlinkingCursor /> : null}
+                {showToolCoTLoader || showHiddenCoTLoader ? (
+                  <BlinkingCursor />
+                ) : null}
               </>
             );
           } else {

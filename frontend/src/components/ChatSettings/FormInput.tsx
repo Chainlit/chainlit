@@ -1,10 +1,10 @@
 import { IInput } from 'types/Input';
 
+import { SelectInput, SelectInputProps } from './SelectInput';
 import { SliderInput, SliderInputProps } from './SliderInput';
 import { SwitchInput, SwitchInputProps } from './SwitchInput';
 import { TagsInput, TagsInputProps } from './TagsInput';
 import { TextInput, TextInputProps } from './TextInput';
-import { SelectInput, SelectInputProps } from './SelectInput';
 
 type TFormInputValue = string | number | boolean | string[] | undefined;
 
@@ -26,27 +26,15 @@ type TFormInput =
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element?.type) {
     case 'select':
-      return (
-        <SelectInput
-          {...element}
-          value={element.value ?? ''}
-        />
-      );
+      return <SelectInput {...element} value={element.value ?? ''} />;
     case 'slider':
       return <SliderInput {...element} value={element.value ?? 0} />;
     case 'tags':
       return <TagsInput {...element} value={element.value ?? []} />;
     case 'switch':
-      return (
-        <SwitchInput
-          {...element}
-          checked={!!element.value}
-        />
-      );
+      return <SwitchInput {...element} checked={!!element.value} />;
     case 'textinput':
-      return (
-        <TextInput {...element} value={element.value ?? ''} />
-      );
+      return <TextInput {...element} value={element.value ?? ''} />;
     case 'numberinput':
       return (
         <TextInput

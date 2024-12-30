@@ -1,28 +1,29 @@
-import * as React from "react"
+import { IInput } from '@/types';
+import * as React from 'react';
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { InputStateHandler } from "./InputStateHandler"
-import { IInput } from "@/types"
+  SelectValue
+} from '@/components/ui/select';
+
+import { InputStateHandler } from './InputStateHandler';
 
 interface SelectItemType {
-  label: string
-  icon?: React.ReactNode
-  notificationCount?: number
-  value: string | number
+  label: string;
+  icon?: React.ReactNode;
+  notificationCount?: number;
+  value: string | number;
 }
 
 interface SelectInputProps extends IInput {
-
-  items?: SelectItemType[]
-  value?: string | number
-  onChange: (value: string) => void
-  setField?: (field: string, value: string, shouldValidate?: boolean) => void
-  placeholder?: string
+  items?: SelectItemType[];
+  value?: string | number;
+  onChange: (value: string) => void;
+  setField?: (field: string, value: string, shouldValidate?: boolean) => void;
+  placeholder?: string;
 }
 
 const SelectInput = ({
@@ -36,8 +37,8 @@ const SelectInput = ({
   value,
   onChange,
   setField,
-  placeholder = "Select",
-  className,
+  placeholder = 'Select',
+  className
 }: SelectInputProps) => {
   return (
     <InputStateHandler
@@ -51,8 +52,8 @@ const SelectInput = ({
         disabled={disabled}
         value={value?.toString()}
         onValueChange={(v) => {
-          onChange(v)
-          setField?.(id, v)
+          onChange(v);
+          setField?.(id, v);
         }}
       >
         <SelectTrigger id={id} className={className}>
@@ -60,10 +61,7 @@ const SelectInput = ({
         </SelectTrigger>
         <SelectContent>
           {items.map((item) => (
-            <SelectItem
-              key={item.value}
-              value={item.value.toString()}
-            >
+            <SelectItem key={item.value} value={item.value.toString()}>
               <div className="flex items-center gap-2">
                 {item.icon}
                 <span>{item.label}</span>
@@ -79,7 +77,7 @@ const SelectInput = ({
       </Select>
     </InputStateHandler>
   );
-}
+};
 
-export { SelectInput }
-export type { SelectItemType, SelectInputProps }
+export { SelectInput };
+export type { SelectItemType, SelectInputProps };

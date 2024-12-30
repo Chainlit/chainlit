@@ -1,19 +1,23 @@
+import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext } from 'react';
 
+import {
+  type IAction,
+  type IMessageElement,
+  type IStep
+} from '@chainlit/react-client';
+
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-import { type IAction, type IMessageElement, type IStep } from '@chainlit/react-client';
-
 import { Messages } from '..';
-import { cn } from '@/lib/utils';
+import { AskActionButtons } from './AskActionButtons';
 import { AskFileButton } from './AskFileButton';
 import { MessageAvatar } from './Avatar';
 import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
-import UserMessage from './UserMessage';
 import Step from './Step';
-import { AskActionButtons } from './AskActionButtons';
+import UserMessage from './UserMessage';
 
 interface Props {
   message: IStep;
@@ -35,12 +39,7 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
-    const {
-      allowHtml,
-      cot,
-      latex,
-      onError
-    } = useContext(MessageContext);
+    const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
@@ -71,19 +70,20 @@ const Message = memo(
 
     return (
       <>
-        <div className="step my-2"
-        >
-          <div className='flex flex-col' style={{
-            maxWidth: indent ? '100%' : layoutMaxWidth,
-          }}>
-            <div className={cn('flex flex-grow pb-2')}
+        <div className="step my-2">
+          <div
+            className="flex flex-col"
+            style={{
+              maxWidth: indent ? '100%' : layoutMaxWidth
+            }}
+          >
+            <div
+              className={cn('flex flex-grow pb-2')}
               id={`step-${message.id}`}
             >
               {/* User message is displayed differently */}
               {isUserMessage ? (
-                <div
-                className='flex flex-col flex-grow max-w-full'
-                >
+                <div className="flex flex-col flex-grow max-w-full">
                   <UserMessage message={message}>
                     <MessageContent
                       elements={elements}
@@ -94,9 +94,7 @@ const Message = memo(
                   </UserMessage>
                 </div>
               ) : (
-                <div
-                  className="ai-message flex gap-4 w-full"
-                >
+                <div className="ai-message flex gap-4 w-full">
                   {!isStep || !indent ? (
                     <MessageAvatar author={message.name} />
                   ) : null}
@@ -124,9 +122,7 @@ const Message = memo(
                     </Step>
                   ) : (
                     // Display an assistant message
-                    <div
-                    className='flex flex-col items-start min-w-[150px] flex-grow gap-2'
-                    >
+                    <div className="flex flex-col items-start min-w-[150px] flex-grow gap-2">
                       <MessageContent
                         elements={elements}
                         message={message}
@@ -135,8 +131,11 @@ const Message = memo(
                       />
                       {!isRunning && isAsk && (
                         <>
-                        <AskFileButton onError={onError} />
-                        <AskActionButtons actions={actions} messageId={message.id} />
+                          <AskFileButton onError={onError} />
+                          <AskActionButtons
+                            actions={actions}
+                            messageId={message.id}
+                          />
                         </>
                       )}
                       <MessageButtons
