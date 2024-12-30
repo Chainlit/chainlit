@@ -77,7 +77,9 @@ const DeleteThreadButton = ({ threadId, onDelete }: Props) => {
             }
           }}
         >
-          <DialogTitle id="alert-dialog-title">{'Delete Thread?'}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">
+            <Translator path="components.organisms.threadHistory.sidebar.DeleteThreadButton.title" />
+          </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               <Translator path="components.organisms.threadHistory.sidebar.DeleteThreadButton.confirmMessage" />

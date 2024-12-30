@@ -176,6 +176,7 @@
             }
           },
           "DeleteThreadButton": {
+            "title": "Delete Thread?",
             "confirmMessage": "This will delete the thread as well as it's messages and elements.",
             "cancel": "Cancel",
             "confirm": "Confirm",
