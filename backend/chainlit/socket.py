@@ -372,6 +372,7 @@ async def audio_end(sid):
     finally:
         await context.emitter.task_end()
 
+
 @sio.on("chat_settings_change")
 async def change_settings(sid, settings: Dict[str, Any]):
     """Handle change settings submit from the UI."""

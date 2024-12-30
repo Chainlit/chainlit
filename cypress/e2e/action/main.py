@@ -70,4 +70,4 @@ async def main():
     ).send()
 
     if result is not None:
-        await cl.Message(f"Thanks for pressing: {result["payload"]['value']}").send()
+        await cl.Message(f"Thanks for pressing: {result['payload']['value']}").send()

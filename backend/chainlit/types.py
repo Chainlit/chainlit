@@ -201,6 +201,7 @@ class UpdateThreadRequest(BaseModel):
 class DeleteThreadRequest(BaseModel):
     threadId: str
 
+
 class DeleteFeedbackRequest(BaseModel):
     feedbackId: str
 
@@ -213,6 +214,7 @@ class GetThreadsRequest(BaseModel):
 class CallActionRequest(BaseModel):
     action: Dict
     sessionId: str
+
 
 class Theme(str, Enum):
     light = "light"

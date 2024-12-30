@@ -193,6 +193,7 @@ class Palette(DataClassJsonMixin):
     paper: Optional[str] = ""
     text: Optional[TextOptions] = None
 
+
 @dataclass
 class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None

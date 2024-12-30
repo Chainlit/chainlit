@@ -474,13 +474,10 @@ async def logout(request: Request, response: Response):
 async def jwt_auth(request: Request):
     """Login a user using a valid jwt."""
     from jwt import InvalidTokenError
-    
+
     auth_header: Optional[str] = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(
-            status_code=401,
-            detail="Authorization header missing"
-        )
+        raise HTTPException(status_code=401, detail="Authorization header missing")
 
     # Check if it starts with "Bearer "
     try:
@@ -488,22 +485,18 @@ async def jwt_auth(request: Request):
         if scheme.lower() != "bearer":
             raise HTTPException(
                 status_code=401,
-                detail="Invalid authentication scheme. Please use Bearer"
+                detail="Invalid authentication scheme. Please use Bearer",
             )
     except ValueError:
         raise HTTPException(
-            status_code=401,
-            detail="Invalid authorization header format"
+            status_code=401, detail="Invalid authorization header format"
         )
-    
+
     try:
         user = decode_jwt(token)
         return await _authenticate_user(user)
     except InvalidTokenError:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid token"
-        )
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @router.post("/auth/header")
@@ -863,6 +856,7 @@ async def rename_thread(
     await data_layer.update_thread(thread_id, name=payload.name)
     return JSONResponse(content={"success": True})
 
+
 @router.delete("/project/thread")
 async def delete_thread(
     request: Request,
@@ -894,13 +888,17 @@ async def call_action(
     from chainlit.session import WebsocketSession
     from chainlit.action import Action
     from chainlit.context import init_ws_context
+
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
 
     action = Action(**payload.action)
 
     if current_user:
-        if not context.session.user or context.session.user.identifier != current_user.identifier:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
             raise HTTPException(
                 status_code=401,
                 detail="You are not authorized to upload files for this session",
@@ -916,6 +914,7 @@ async def call_action(
         )
 
     return JSONResponse(content={"success": True})
+
 
 @router.post("/project/file")
 async def upload_file(
