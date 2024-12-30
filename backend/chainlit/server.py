@@ -788,7 +788,7 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    if not isinstance(current_user, PersistedUser):
+    if current_user and not isinstance(current_user, PersistedUser):
         persisted_user = await data_layer.get_user(identifier=current_user.identifier)
         if not persisted_user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -812,6 +812,9 @@ async def get_thread(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_thread(thread_id)
@@ -831,6 +834,9 @@ async def get_thread_element(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_element(thread_id, element_id)
@@ -849,6 +855,9 @@ async def rename_thread(
 
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     thread_id = payload.threadId
 
@@ -870,6 +879,9 @@ async def delete_thread(
 
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     thread_id = payload.threadId
 
