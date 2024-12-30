@@ -90,7 +90,7 @@ export function FeedbackButtons({
               size="icon"
               disabled={isDisabled}
               onClick={() => handleFeedbackClick(1)}
-              className={feedback === 1 ? 'text-green-600' : 'text-muted-foreground'}
+              className={feedback === 1 ? 'text-green-600 positive-feedback-on' : 'text-muted-foreground positive-feedback-off'}
             >
               <ThumbsUp className="h-4 w-4" />
             </Button>
@@ -107,7 +107,7 @@ export function FeedbackButtons({
               size="icon"
               disabled={isDisabled}
               onClick={() => handleFeedbackClick(0)}
-              className={feedback === 0 ? 'text-red-600' : 'text-muted-foreground'}
+              className={feedback === 0 ? 'text-red-600 negative-feedback-on' : 'text-muted-foreground negative-feedback-off'}
             >
               <ThumbsDown  />
             </Button>
@@ -161,6 +161,7 @@ export function FeedbackButtons({
 
           <DialogFooter>
             <Button
+            id="submit-feedback"
               onClick={() => {
                 if (showDialog !== undefined) {
                   handleFeedbackChange(showDialog, commentInput)

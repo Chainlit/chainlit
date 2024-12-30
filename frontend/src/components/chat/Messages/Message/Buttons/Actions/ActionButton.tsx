@@ -49,7 +49,7 @@ const ActionButton = ({ action }: ActionProps) => {
   
   if(ignore) return null
 
-  const button = <Button onClick={handleClick} size="sm" variant="ghost" className='text-muted-foreground' disabled={loading || isRunning}>
+  const button = <Button id={action.id} onClick={handleClick} size="sm" variant="ghost" className='text-muted-foreground' disabled={loading || isRunning}>
   {icon}
   {content}
   </Button>

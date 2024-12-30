@@ -55,7 +55,7 @@ const SelectInput = ({
           setField?.(id, v)
         }}
       >
-        <SelectTrigger className={className}>
+        <SelectTrigger id={id} className={className}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

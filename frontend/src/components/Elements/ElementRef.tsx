@@ -20,7 +20,8 @@ const ElementRef = ({ element }: ElementRefProps) => {
   // For other elements, return a clickable link
   return (
     <a
-      className={cn("cursor-pointer hover:underline text-primary")}
+      href="#"
+      className={cn("cursor-pointer hover:underline text-primary element-link")}
       onClick={() => onElementRefClick?.(element)}
     >
       {element.name}

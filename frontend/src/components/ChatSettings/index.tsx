@@ -67,7 +67,7 @@ export default function ChatSettingsModal() {
 
   return (
     <Dialog open={chatSettingsOpen} onOpenChange={handleClose}>
-      <DialogContent className="min-w-[20vw] flex flex-col gap-4">
+      <DialogContent id="chat-settings" className="min-w-[20vw] flex flex-col gap-4">
         <DialogHeader>
           <DialogTitle>
             <Translator path="components.organisms.chat.settings.settingsPanel" />

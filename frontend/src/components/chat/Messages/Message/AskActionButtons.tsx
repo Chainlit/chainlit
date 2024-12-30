@@ -23,7 +23,7 @@ const AskActionButton = ({ action }: {action: IAction}) => {
     return null
   }, [action])
 
-  const button = <Button onClick={() => {
+  const button = <Button id={action.id} onClick={() => {
     askUser?.callback(action)
   }} variant="outline" disabled={loading}>
   {icon}

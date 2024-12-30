@@ -49,11 +49,7 @@ export default function ChatProfiles({navigate}: Props) {
     navigate?.('/')
   }
 
-  const handleConfirm = (newChatProfileWithoutConfirm?: string) => {
-    const profile = newChatProfileWithoutConfirm || newChatProfile
-    if (!profile) {
-      throw new Error('Please select a profile before starting a new chat')
-    }
+  const handleConfirm = (profile: string) => {
     setChatProfile(profile)
     setNewChatProfile(null)
     clear()
@@ -84,7 +80,7 @@ export default function ChatProfiles({navigate}: Props) {
           }
         }}
       >
-        <SelectTrigger className="w-fit border-none bg-transparent text-muted-foreground font-semibold text-lg hover:bg-accent">
+        <SelectTrigger id="chat-profiles" className="w-fit border-none bg-transparent text-muted-foreground font-semibold text-lg hover:bg-accent">
           <SelectValue placeholder="Select profile" />
         </SelectTrigger>
         <SelectContent>
@@ -96,7 +92,7 @@ export default function ChatProfiles({navigate}: Props) {
             return (
               <HoverCard openDelay={100} closeDelay={0} key={profile.name}>
                 <HoverCardTrigger asChild>
-                  <SelectItem value={profile.name} className="cursor-pointer">
+                  <SelectItem data-test={`select-item:${profile.name}`} value={profile.name} className="cursor-pointer">
                     <div className="flex items-center gap-2">
                       {icon && (
                         <img
@@ -109,7 +105,7 @@ export default function ChatProfiles({navigate}: Props) {
                     </div>
                   </SelectItem>
                 </HoverCardTrigger>
-                <HoverCardContent side="right" 
+                <HoverCardContent side="right" id="chat-profile-description" 
                   align="start" 
                   className="w-80 overflow-visible"
                   sideOffset={10}>
@@ -122,7 +118,7 @@ export default function ChatProfiles({navigate}: Props) {
           })}
         </SelectContent>
       </Select>
-<NewChatDialog open={openDialog} handleClose={handleClose} handleConfirm={handleConfirm} />
+<NewChatDialog open={openDialog} handleClose={handleClose} handleConfirm={() => newChatProfile && handleConfirm(newChatProfile)} />
     
     </div>
   )

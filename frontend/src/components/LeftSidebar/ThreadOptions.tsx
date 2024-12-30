@@ -27,14 +27,14 @@ export default function ThreadOptions({onDelete, onRename, className}: Props) {
             </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-20" align="start" forceMount>
-      <DropdownMenuItem onClick={(e) => {
+      <DropdownMenuItem id="rename-thread" onClick={(e) => {
         e.stopPropagation()
         onRename()
       }}>
         Rename
         <Pencil className='ml-auto' />
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={(e) => {
+      <DropdownMenuItem id="delete-thread" onClick={(e) => {
         e.stopPropagation()
         onDelete()
       }} className="text-red-500 focus:text-red-500">

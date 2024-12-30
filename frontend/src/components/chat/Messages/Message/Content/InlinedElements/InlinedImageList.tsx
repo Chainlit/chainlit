@@ -8,7 +8,7 @@ interface Props {
 }
 
 const InlinedImageList = ({ items }: Props) => (
-    <QuiltedGrid 
+    <QuiltedGrid
     elements={items}
     renderElement={(ctx) => <ImageElement element={ctx.element} />}
   />

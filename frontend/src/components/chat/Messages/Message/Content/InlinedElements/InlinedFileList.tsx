@@ -8,7 +8,7 @@ interface Props {
 
 const InlinedFileList = ({ items }: Props) => {
   return (
-    <div className='flex items-center gap-1'>
+    <div className='flex items-center gap-2'>
       {items.map((file, i) => {
         return (
           <div key={i}>

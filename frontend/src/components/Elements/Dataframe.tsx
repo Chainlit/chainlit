@@ -96,7 +96,7 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
   }, [table.getPageCount(), table.getState().pagination.pageIndex])
 
   return (
-    <div className="flex flex-col gap-2 h-full overflow-y-auto">
+    <div className="flex flex-col gap-2 h-full overflow-y-auto dataframe">
       <div className="rounded-md border overflow-y-auto">
         <Table>
           <TableHeader>

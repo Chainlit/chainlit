@@ -26,6 +26,7 @@ export default function SubmitButton({disabled, onSubmit}: SubmitButtonProps) {
         <Tooltip>
           <TooltipTrigger asChild>
                   <Button
+                            id="stop-button"
                     onClick={stopTask}
                     size="icon"
                     className='rounded-full h-8 w-8'
@@ -43,6 +44,7 @@ export default function SubmitButton({disabled, onSubmit}: SubmitButtonProps) {
     <Tooltip>
     <TooltipTrigger asChild>
             <Button
+            id="chat-submit"
             disabled={disabled}
             onClick={onSubmit}
               size="icon"

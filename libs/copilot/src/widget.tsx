@@ -27,7 +27,8 @@ const Widget = ({ config, error }: Props) => {
   return (
     <Popover onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button 
+        <Button
+          id="chainlit-copilot-button"
           className={cn(
             "fixed h-16 w-16 rounded-full bottom-8 right-8 z-[20]",
             "transition-transform duration-300 ease-in-out",
@@ -83,7 +84,7 @@ const Widget = ({ config, error }: Props) => {
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
         )}
       >
-        <div className="flex flex-col h-full w-full">
+        <div id="chainlit-copilot" className="flex flex-col h-full w-full">
           {error ? <Alert variant='error'>{error}</Alert> : <>
             <Header expanded={expanded} setExpanded={setExpanded} />
           <div className="flex flex-grow overflow-y-auto">

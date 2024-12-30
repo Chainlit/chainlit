@@ -29,9 +29,9 @@ export default function ElementSideView() {
       >
         <SheetContent className="md:hidden flex flex-col">
           <SheetHeader>
-            <SheetTitle>{sideViewElement.name}</SheetTitle>
+            <SheetTitle id="side-view-title">{sideViewElement.name}</SheetTitle>
           </SheetHeader>
-          <div className="mt-4 overflow-y-auto flex-grow">
+          <div id="side-view-content" className="mt-4 overflow-y-auto flex-grow">
             <Element element={sideViewElement} />
           </div>
         </SheetContent>
@@ -54,10 +54,10 @@ export default function ElementSideView() {
           <X className="size-4" />
           <span className="sr-only">Close</span>
         </div>
-        <div className="text-lg font-semibold text-foreground">
+        <div id="side-view-title" className="text-lg font-semibold text-foreground">
           {sideViewElement.name}
         </div>
-        <div className="flex flex-col flex-grow overflow-y-auto">
+        <div id="side-view-content" className="flex flex-col flex-grow overflow-y-auto">
           <Element element={sideViewElement} />
         </div>
       </ResizablePanel>

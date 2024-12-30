@@ -26,7 +26,7 @@ type NewChatDialogProps = {
 export const NewChatDialog = ({ open, handleClose, handleConfirm }: NewChatDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent id="new-chat-dialog" className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create New Chat</DialogTitle>
           <DialogDescription>

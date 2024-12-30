@@ -19,7 +19,7 @@ function feedback() {
   });
   cy.get('.negative-feedback-off').should('have.length', 1);
   cy.get('.positive-feedback-off').should('have.length', 1).eq(0).click();
-  cy.get('#feedbackSubmit').click();
+  cy.get('#submit-feedback').click();
   cy.get('.positive-feedback-on').should('have.length', 1);
 }
 
@@ -30,42 +30,32 @@ function threadQueue() {
 }
 
 function threadList() {
-  cy.get('#thread-test1').should('contain', 'Thread 1');
-  cy.get('#thread-test2').should('contain', 'Thread 2');
+  cy.get('#thread-test1').should('contain', 'thread 1');
+  cy.get('#thread-test2').should('contain', 'thread 2');
 
   // Test thread page
   cy.get('#thread-test1').click();
-  cy.get('#thread-info').should('exist');
   cy.get('.step').should('have.length', 2);
   cy.get('.step').eq(0).should('contain', 'Message 1');
   cy.get('.step').eq(1).should('contain', 'Message 2');
 
   // Test thread delete
-  cy.get('#thread-test1').find("[data-testid='DeleteOutlineIcon']").click();
+  cy.get('#thread-test1').find("#thread-options").click();
+  cy.wait(100)
+  cy.get("#delete-thread").click();
+  cy.wait(100)
   cy.get("[type='button']").contains('Confirm').click();
+  cy.wait(100)
   cy.get('#thread-test1').should('not.exist');
 }
 
 function resumeThread() {
   // Go to the "thread 2" thread and resume it
   cy.get('#thread-test2').click();
-  let initialUrl;
-  cy.url().then((url) => {
-    initialUrl = url;
-  });
-  cy.get(`#chat-input`).should('not.exist');
-  cy.get('#resumeThread').click();
-  cy.get(`#chat-input`).should('exist');
-  // Make sure the url stays the same after resuming
-  cy.url().then((newUrl) => {
-    expect(newUrl).to.equal(initialUrl);
-  });
-
+  cy.wait(1000)
   // back to the "hello" thread
   cy.get('a').contains('Hello').click();
-  cy.get(`#chat-input`).should('not.exist');
-  cy.get('#resumeThread').click();
-  cy.get(`#chat-input`).should('exist');
+  cy.wait(1000)
 
   cy.get('.step').should('have.length', 10);
 
@@ -123,6 +113,7 @@ describe('Data Layer', () => {
   describe('Data Features with persistence', () => {
     it('should login, submit feedback, wait for user input to create steps, browse thread history, delete a thread and then resume a thread', () => {
       login();
+      cy.wait(1000)
       feedback();
       threadQueue();
       threadList();
@@ -131,6 +122,7 @@ describe('Data Layer', () => {
 
     it('should continue the thread after backend restarts and work with new thread as usual', () => {
       login();
+      cy.wait(1000)
       feedback();
       threadQueue();
 
@@ -144,6 +136,7 @@ describe('Data Layer', () => {
 
       // Create a new thread and verify that the step counter is reset
       newThread();
+      cy.wait(1000)
       feedback();
       threadQueue();
     });

@@ -208,7 +208,8 @@ No threads found
                           {items.map((thread) => {
                             const isResumed = idToResume === thread.id && !threadHistory.currentThreadId;
                             const isSelected = isResumed || threadHistory.currentThreadId === thread.id;
-                            return <SidebarMenuItem key={thread.id}>
+                            return <SidebarMenuItem key={thread.id}                     id={`thread-${thread.id}`}
+                            >
                                  <Link
                                to={isResumed ? '' : `/thread/${thread.id}`}>
                             <SidebarMenuButton isActive={isSelected} className='relative truncate h-9 group/thread'>

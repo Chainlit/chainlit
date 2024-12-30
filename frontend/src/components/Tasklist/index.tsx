@@ -61,7 +61,7 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
     const highlightedTask = tasks?.[highlightedTaskIndex]
 
     return (
-      <aside className={cn("w-full", !isCopilot && "md:hidden")}>
+      <aside className={cn("w-full tasklist-mobile", !isCopilot && "md:hidden")}>
         <Card>
           <Header status={content.status} />
           {highlightedTask && (
@@ -75,7 +75,7 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   }
 
   return (
-    <aside className="hidden max-w-96 flex-grow md:block overflow-y-auto ml-0 m-4">
+    <aside className="hidden tasklist max-w-96 flex-grow md:block overflow-y-auto ml-0 m-4">
       <Card className='overflow-y-auto h-full'>
         <Header status={content?.status} />
         <CardContent className='flex flex-col gap-2'>

@@ -127,6 +127,7 @@ const onPaste = useCallback((event: ClipboardEvent) => {
           </div>
         ) : null}
         <AutoResizeTextarea
+        id="chat-input"
         autoFocus
         value={value} 
         onPaste={onPaste}

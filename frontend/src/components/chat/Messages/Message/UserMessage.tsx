@@ -57,7 +57,7 @@ export default function UserMessage({
           <Button
             variant="ghost"
             size="icon"
-            className="ml-auto invisible group-hover:visible"
+            className="edit-message ml-auto invisible group-hover:visible"
             onClick={() => {
                 setEditValue(message.output)
                 setIsEditing(true)
