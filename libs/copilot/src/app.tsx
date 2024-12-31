@@ -3,9 +3,10 @@ import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
 
-import { ThemeProvider } from '@chainlit/app/src/components/ThemeProvider';
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { ChainlitContext, useAuth } from '@chainlit/react-client';
+
+import { ThemeProvider } from './ThemeProvider';
 
 interface Props {
   widgetConfig: IWidgetConfig;

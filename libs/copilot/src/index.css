@@ -2,20 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+#cl-shadow-root {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
+  color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
+#cl-shadow-root code {
   font-family: var(--font-mono);
 }
 
 @layer base {
-  :root {
+  #shadow-root-container {
     --font-sans: 'Inter', sans-serif;
     --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     --background: 0 0% 100%;
@@ -77,6 +78,7 @@ code {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --radius: 0.75rem;
     --sidebar-background: 0 0% 9%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -107,7 +109,7 @@ code {
   }
 }
 
-.loading-shimmer {
+#cl-shadow-root .loading-shimmer {
   background-position: -100% top;
   text-fill-color: transparent;
   -webkit-text-fill-color: transparent;

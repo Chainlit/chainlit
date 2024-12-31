@@ -18,16 +18,34 @@ export default function AppWrapper({ widgetConfig }: Props) {
   const [customThemeLoaded, setCustomThemeLoaded] = useState(false);
 
   useEffect(() => {
+    let fontLoaded = false;
+
     apiClient
       .get('/public/theme.json')
       .then(async (res) => {
         try {
           const customTheme = await res.json();
-          // todo handle fonts
+          if (customTheme.custom_fonts?.length) {
+            fontLoaded = true;
+            customTheme.custom_fonts.forEach((href: string) => {
+              const linkEl = document.createElement('link');
+              linkEl.rel = 'stylesheet';
+              linkEl.href = href;
+              window.cl_shadowRootElement.getRootNode().appendChild(linkEl);
+            });
+          }
           if (customTheme.variables) {
             window.theme = customTheme.variables;
           }
         } finally {
+          // If no custom font, default to Inter
+          if (!fontLoaded) {
+            const linkEl = document.createElement('link');
+            linkEl.rel = 'stylesheet';
+            linkEl.href =
+              'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap';
+            window.cl_shadowRootElement.getRootNode().appendChild(linkEl);
+          }
           setCustomThemeLoaded(true);
         }
       })
