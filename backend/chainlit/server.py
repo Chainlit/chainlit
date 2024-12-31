@@ -295,10 +295,8 @@ def get_html_template():
         is_path_inside(custom_theme_file_path, Path(public_dir))
         and custom_theme_file_path.is_file()
     ):
-        custom_theme = json.loads(
-            custom_theme_file_path.read_text(encoding="utf-8")
-        )
-    
+        custom_theme = json.loads(custom_theme_file_path.read_text(encoding="utf-8"))
+
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -337,7 +335,10 @@ def get_html_template():
 
     font = None
     if custom_theme and custom_theme.get("custom_fonts"):
-        font = "\n".join(f"""<link rel="stylesheet" href="{font}">""" for font in custom_theme.get("custom_fonts")) 
+        font = "\n".join(
+            f"""<link rel="stylesheet" href="{font}">"""
+            for font in custom_theme.get("custom_fonts")
+        )
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
