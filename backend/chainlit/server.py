@@ -47,9 +47,9 @@ from chainlit.config import (
     DEFAULT_HOST,
     FILES_DIRECTORY,
     PACKAGE_ROOT,
-    public_dir,
     config,
     load_module,
+    public_dir,
     reload_config,
 )
 from chainlit.data import get_data_layer
