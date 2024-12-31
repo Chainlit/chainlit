@@ -320,8 +320,8 @@ def get_html_template():
     <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>
-{f"window.theme = {json.dumps(custom_theme.get("variables"))}; " if custom_theme and custom_theme.get("variables") else "undefined"}
-{f"window.transports = {json.dumps(config.project.transports)}; " if config.project.transports else "undefined"}
+{f"window.theme = {json.dumps(custom_theme.get('variables'))};" if custom_theme and custom_theme.get("variables") else "undefined"}
+{f"window.transports = {json.dumps(config.project.transports)};" if config.project.transports else "undefined"}
 </script>"""
 
     css = None
