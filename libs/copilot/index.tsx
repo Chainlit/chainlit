@@ -16,6 +16,10 @@ let root: ReactDOM.Root | null = null;
 declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
+    theme?: {
+      light: Record<string, string>,
+      dark: Record<string, string>,
+    }
     mountChainlitWidget: (config: IWidgetConfig) => void;
     unmountChainlitWidget: () => void;
     sendChainlitMessage: (message: IStep) => void;

@@ -32,7 +32,6 @@ export const Secondary: Story = {
     widgetConfig: {
       chainlitServer: 'http://localhost:8000',
       theme: 'dark',
-      fontFamily: '"Nunito Sans"',
       button: {
         imageUrl:
           'https://steelbluemedia.com/wp-content/uploads/2019/06/new-google-favicon-512.png',

@@ -55,6 +55,7 @@ FILES_DIRECTORY = Path(APP_ROOT) / ".files"
 FILES_DIRECTORY.mkdir(exist_ok=True)
 
 config_dir = os.path.join(APP_ROOT, ".chainlit")
+public_dir = os.path.join(APP_ROOT, "public")
 config_file = os.path.join(config_dir, "config.toml")
 config_translation_dir = os.path.join(config_dir, "translations")
 
@@ -135,9 +136,6 @@ cot = "full"
 # Specify a Javascript file that can be used to customize the user interface.
 # The Javascript file can be served from the public directory.
 # custom_js = "/public/test.js"
-
-# Specify a custom font url.
-# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -230,7 +228,6 @@ class UISettings(DataClassJsonMixin):
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
-    custom_font: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend

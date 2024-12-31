@@ -3,7 +3,6 @@ export interface IWidgetConfig {
   showCot?: boolean;
   accessToken?: string;
   theme?: 'light' | 'dark';
-  fontFamily?: string;
   button?: {
     containerId?: string;
     imageUrl?: string;

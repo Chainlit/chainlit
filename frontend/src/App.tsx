@@ -14,6 +14,10 @@ import { userEnvState } from 'state/user';
 declare global {
   interface Window {
     transports?: string[];
+    theme?: {
+      light: Record<string, string>;
+      dark: Record<string, string>;
+    };
   }
 }
 

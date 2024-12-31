@@ -21,6 +21,7 @@ export function ThemeToggle({ className }: Props) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          id="theme-toggle"
           variant="ghost"
           size="icon"
           className={cn(

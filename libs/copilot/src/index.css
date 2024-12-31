@@ -5,18 +5,19 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: var(--font-mono);
 }
 
 @layer base {
   :root {
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     --background: 0 0% 100%;
     --foreground: 0 0% 5%;
     --card: 0 0% 100%;
@@ -63,7 +64,7 @@ code {
     --secondary: 0 0% 19%;
     --secondary-foreground: 210 40% 98%;
     --muted: 0 1% 26%;
-    --muted-foreground:0 0% 71%;
+    --muted-foreground: 0 0% 71%;
     --accent: 0 0% 26%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -98,11 +99,11 @@ code {
 
 @keyframes loading-shimmer {
   0% {
-      background-position: -100% top
+    background-position: -100% top;
   }
 
   to {
-      background-position: 250% top
+    background-position: 250% top;
   }
 }
 
@@ -110,12 +111,20 @@ code {
   background-position: -100% top;
   text-fill-color: transparent;
   -webkit-text-fill-color: transparent;
-  animation-delay: .3s;
+  animation-delay: 0.3s;
   animation-duration: 3s;
   animation-iteration-count: infinite;
   animation-name: loading-shimmer;
-  background: hsl(var(--muted-foreground)) gradient(linear,100% 0,0 0,from(hsl(var(--muted-foreground))),color-stop(.5,hsl(var(--foreground))),to(hsl(var(--muted-foreground))));
-  background: hsl(var(--muted-foreground)) -webkit-gradient(linear,100% 0,0 0,from(hsl(var(--muted-foreground))),color-stop(.5,hsl(var(--foreground))),to(hsl(var(--muted-foreground))));
+  background: hsl(var(--muted-foreground))
+    gradient(
+      linear,
+      100% 0,
+      0 0,
+      from(hsl(var(--muted-foreground))),
+      color-stop(0.5, hsl(var(--foreground))),
+      to(hsl(var(--muted-foreground)))
+    );
+  background: hsl(var(--muted-foreground)) -webkit-gradient(linear, 100% 0, 0 0, from(hsl(var(--muted-foreground))), color-stop(0.5, hsl(var(--foreground))), to(hsl(var(--muted-foreground))));
   background-clip: text;
   -webkit-background-clip: text;
   background-repeat: no-repeat;

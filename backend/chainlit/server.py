@@ -47,6 +47,7 @@ from chainlit.config import (
     DEFAULT_HOST,
     FILES_DIRECTORY,
     PACKAGE_ROOT,
+    public_dir,
     config,
     load_module,
     reload_config,
@@ -288,6 +289,16 @@ def get_html_template():
     """
     Get HTML template for the index view.
     """
+    custom_theme = None
+    custom_theme_file_path = Path(public_dir) / "theme.json"
+    if (
+        is_path_inside(custom_theme_file_path, Path(public_dir))
+        and custom_theme_file_path.is_file()
+    ):
+        custom_theme = json.loads(
+            custom_theme_file_path.read_text(encoding="utf-8")
+        )
+    
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -311,6 +322,7 @@ def get_html_template():
     <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>
+{f"window.theme = {json.dumps(custom_theme.get("variables"))}; " if custom_theme and custom_theme.get("variables") else "undefined"}
 {f"window.transports = {json.dumps(config.project.transports)}; " if config.project.transports else "undefined"}
 </script>"""
 
@@ -324,8 +336,8 @@ def get_html_template():
         js += f"""<script src="{config.ui.custom_js}" defer></script>"""
 
     font = None
-    if config.ui.custom_font:
-        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
+    if custom_theme and custom_theme.get("custom_fonts"):
+        font = "\n".join(f"""<link rel="stylesheet" href="{font}">""" for font in custom_theme.get("custom_fonts")) 
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 

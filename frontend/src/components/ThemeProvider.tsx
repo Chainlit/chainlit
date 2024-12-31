@@ -20,6 +20,20 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function applyThemeVariables(variant: 'dark' | 'light') {
+  if (!window.theme) return;
+
+  const variables = window.theme[variant];
+  if (!variables) return;
+
+  const root = window.document.documentElement;
+
+  // Apply new theme variables
+  Object.entries(variables).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
@@ -29,7 +43,6 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
-
   useEffect(() => {
     const root = window.document.documentElement;
 
@@ -42,7 +55,10 @@ export function ThemeProvider({
         : 'light';
 
       root.classList.add(systemTheme);
+      applyThemeVariables(systemTheme);
       return;
+    } else {
+      applyThemeVariables(theme);
     }
 
     root.classList.add(theme);
