@@ -64,7 +64,7 @@ class MessageBase(ABC):
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
-            content=_dict["output"],
+            content=_dict["content"],
             author=_dict.get("name", config.ui.name),
             type=type,  # type: ignore
             language=_dict.get("language"),
