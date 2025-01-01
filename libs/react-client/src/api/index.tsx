@@ -1,4 +1,4 @@
-import { IThread, IUser } from 'src/types';
+import { IElement, IThread, IUser } from 'src/types';
 
 import { IAction } from 'src/types/action';
 import { IFeedback } from 'src/types/feedback';
@@ -271,6 +271,18 @@ export class ChainlitAPI extends APIBase {
 
   async callAction(action: IAction, sessionId: string) {
     const res = await this.post(`/project/action`, { sessionId, action });
+
+    return res.json();
+  }
+
+  async updateElement(element: IElement, sessionId: string) {
+    const res = await this.put(`/project/element`, { sessionId, element });
+
+    return res.json();
+  }
+
+  async deleteElement(element: IElement, sessionId: string) {
+    const res = await this.delete(`/project/element`, { sessionId, element });
 
     return res.json();
   }

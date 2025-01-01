@@ -25,7 +25,7 @@ from chainlit.chat_settings import ChatSettings
 from chainlit.context import context
 from chainlit.element import (
     Audio,
-    Component,
+    CustomElement,
     Dataframe,
     File,
     Image,
@@ -127,8 +127,8 @@ __all__ = [
     "ChatProfile",
     "ChatSettings",
     "CompletionGeneration",
-    "Component",
     "CopilotFunction",
+    "CustomElement",
     "Dataframe",
     "ErrorMessage",
     "File",

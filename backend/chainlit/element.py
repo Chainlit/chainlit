@@ -42,7 +42,7 @@ ElementType = Literal[
     "file",
     "plotly",
     "dataframe",
-    "component",
+    "custom",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -117,6 +117,7 @@ class Element:
                 "display": self.display,
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
+                "props": getattr(self, "props", None),
                 "page": getattr(self, "page", None),
                 "autoPlay": getattr(self, "auto_play", None),
                 "playerConfig": getattr(self, "player_config", None),
@@ -388,14 +389,15 @@ class Dataframe(Element):
 
 
 @dataclass
-class Component(Element):
-    """Useful to send a custom component to the UI."""
+class CustomElement(Element):
+    """Useful to send a custom element to the UI."""
 
-    type: ClassVar[ElementType] = "component"
+    type: ClassVar[ElementType] = "custom"
     mime: str = "application/json"
     props: Dict = Field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.content = json.dumps(self.props)
+        self.updatable = True
 
         super().__post_init__()

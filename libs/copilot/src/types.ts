@@ -6,6 +6,6 @@ export interface IWidgetConfig {
   button?: {
     containerId?: string;
     imageUrl?: string;
-    tailwindClassname?: string;
+    className?: string;
   };
 }

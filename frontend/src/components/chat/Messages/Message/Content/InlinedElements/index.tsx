@@ -1,5 +1,6 @@
 import type { ElementType, IMessageElement } from '@chainlit/react-client';
 
+import { InlinedCustomElementList } from './InlineCustomElementList';
 import { InlinedAudioList } from './InlinedAudioList';
 import { InlinedDataframeList } from './InlinedDataframeList';
 import { InlinedFileList } from './InlinedFileList';
@@ -42,6 +43,9 @@ const InlinedElements = ({ elements }: Props) => {
 
   return (
     <div className="flex flex-col gap-4">
+      {elementsByType.custom?.length ? (
+        <InlinedCustomElementList items={elementsByType.custom} />
+      ) : null}
       {elementsByType.image?.length ? (
         <InlinedImageList items={elementsByType.image} />
       ) : null}

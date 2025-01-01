@@ -1,6 +1,7 @@
 import type { IMessageElement } from '@chainlit/react-client';
 
 import { AudioElement } from './Audio';
+import CustomElement from './CustomElementLoader';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
@@ -31,6 +32,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <PlotlyElement element={element} />;
     case 'dataframe':
       return <LazyDataframe element={element} />;
+    case 'custom':
+      return <CustomElement element={element} />;
     default:
       return null;
   }

@@ -216,6 +216,11 @@ class CallActionRequest(BaseModel):
     sessionId: str
 
 
+class ElementRequest(BaseModel):
+    element: Dict
+    sessionId: str
+
+
 class Theme(str, Enum):
     light = "light"
     dark = "dark"

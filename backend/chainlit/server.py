@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -27,7 +27,6 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
@@ -62,6 +61,7 @@ from chainlit.types import (
     CallActionRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    ElementRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
@@ -216,29 +216,59 @@ app.add_middleware(
 
 router = APIRouter(prefix=PREFIX)
 
-app.mount(
-    f"{PREFIX}/public",
-    StaticFiles(directory="public", check_dir=False),
-    name="public",
-)
 
-app.mount(
-    f"{PREFIX}/assets",
-    StaticFiles(
-        packages=[("chainlit", os.path.join(build_dir, "assets"))],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="assets",
-)
+@router.get("/public/{filename:path}")
+async def serve_public_file(
+    filename: str,
+):
+    """Serve a file from public dir."""
 
-app.mount(
-    f"{PREFIX}/copilot",
-    StaticFiles(
-        packages=[("chainlit", copilot_build_dir)],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="copilot",
-)
+    base_path = Path(public_dir)
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+
+@router.get("/assets/{filename:path}")
+async def serve_asset_file(
+    filename: str,
+):
+    """Serve a file from assets dir."""
+
+    base_path = Path(os.path.join(build_dir, "assets"))
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+
+@router.get("/copilot/{filename:path}")
+async def serve_copilot_file(
+    filename: str,
+):
+    """Serve a file from assets dir."""
+
+    base_path = Path(copilot_build_dir)
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 # -------------------------------------------------------------------------------
@@ -857,6 +887,97 @@ async def get_thread_element(
 
     res = await data_layer.get_element(thread_id, element_id)
     return JSONResponse(content=res)
+
+
+@router.put("/project/element")
+async def update_thread_element(
+    payload: ElementRequest,
+    current_user: UserParam,
+):
+    """Update a specific thread element."""
+
+    from chainlit.context import init_ws_context
+    from chainlit.element import CustomElement, ElementDict
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    element_dict = cast(ElementDict, payload.element)
+
+    if element_dict["type"] != "custom":
+        return {"success": False}
+
+    element = CustomElement(
+        id=element_dict["id"],
+        object_key=element_dict["objectKey"],
+        chainlit_key=element_dict["chainlitKey"],
+        url=element_dict["url"],
+        for_id=element_dict["forId"],
+        thread_id=element_dict["threadId"],
+        name=element_dict["name"],
+        props=element_dict["props"],
+        display=element_dict["display"],
+    )
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to update elements for this session",
+            )
+
+    await element.send(for_id=element.for_id)
+    return {"success": True}
+
+
+@router.delete("/project/element")
+async def delete_thread_element(
+    payload: ElementRequest,
+    current_user: UserParam,
+):
+    """Delete a specific thread element."""
+
+    from chainlit.context import init_ws_context
+    from chainlit.element import CustomElement, ElementDict
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    element_dict = cast(ElementDict, payload.element)
+
+    if element_dict["type"] != "custom":
+        return {"success": False}
+
+    element = CustomElement(
+        id=element_dict["id"],
+        object_key=element_dict["objectKey"],
+        chainlit_key=element_dict["chainlitKey"],
+        url=element_dict["url"],
+        for_id=element_dict["forId"],
+        thread_id=element_dict["threadId"],
+        name=element_dict["name"],
+        props=element_dict["props"],
+        display=element_dict["display"],
+    )
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to remove elements for this session",
+            )
+
+    await element.remove()
+
+    return {"success": True}
 
 
 @router.put("/project/thread")

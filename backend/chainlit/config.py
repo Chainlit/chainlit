@@ -80,9 +80,6 @@ cache = false
 # Authorized origins
 allow_origins = ["*"]
 
-# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-# follow_symlink = false
-
 [features]
 # Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
 unsafe_allow_html = false
@@ -289,8 +286,6 @@ class ProjectSettings(DataClassJsonMixin):
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
-    # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-    follow_symlink: bool = False
 
 
 @dataclass()

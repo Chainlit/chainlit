@@ -24,7 +24,7 @@ const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const customClassName = config?.button?.tailwindClassname || '';
+  const customClassName = config?.button?.className || '';
 
   return (
     <Popover onOpenChange={setIsOpen}>
@@ -74,7 +74,7 @@ const Widget = ({ config, error }: Props) => {
         sideOffset={12}
         className={cn(
           'flex flex-col p-0',
-          'transition-all duration-300 ease-in-out',
+          'transition-all duration-300 ease-in-out bg-background',
           expanded ? 'w-[80vw]' : 'w-[min(400px,80vw)]',
           'h-[min(730px,calc(100vh-150px))]',
           'overflow-hidden rounded-xl',
