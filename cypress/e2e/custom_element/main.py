@@ -1,8 +1,10 @@
 import chainlit as cl
 
+
 @cl.action_callback("test")
 async def on_test_action():
     await cl.Message(content="Executed test action!").send()
+
 
 @cl.on_chat_start
 async def on_start():
