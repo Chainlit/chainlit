@@ -21,19 +21,6 @@ import { Button } from '@/components/ui/button';
 
 const JsxParser = lazy(() => import('react-jsx-parser'));
 
-interface CustomElementProps extends Record<string, unknown> {
-  callAction: (action: IAction) => Promise<{ success: boolean }>;
-  updateElement: (
-    nextProps: Record<string, unknown>
-  ) => Promise<{ success: boolean }>;
-  deleteElement: () => Promise<{ success: boolean }>;
-}
-
-interface CustomElementLoaderProps {
-  sourceCode: string;
-  props: CustomElementProps;
-}
-
 export default function CustomElement({
   element
 }: {

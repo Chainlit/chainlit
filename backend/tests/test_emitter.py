@@ -27,6 +27,7 @@ async def test_send_element(
         "size": None,
         "language": None,
         "page": None,
+        "props": None,
         "autoPlay": None,
         "playerConfig": None,
         "forId": None,

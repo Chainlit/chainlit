@@ -60,6 +60,7 @@ class ElementDict(TypedDict):
     size: Optional[ElementSize]
     language: Optional[str]
     page: Optional[int]
+    props: Optional[Dict]
     autoPlay: Optional[bool]
     playerConfig: Optional[dict]
     forId: Optional[str]

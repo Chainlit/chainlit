@@ -913,10 +913,10 @@ async def update_thread_element(
         object_key=element_dict["objectKey"],
         chainlit_key=element_dict["chainlitKey"],
         url=element_dict["url"],
-        for_id=element_dict["forId"],
-        thread_id=element_dict["threadId"],
+        for_id=element_dict.get("forId") or "",
+        thread_id=element_dict.get("threadId") or "",
         name=element_dict["name"],
-        props=element_dict["props"],
+        props=element_dict.get("props") or {},
         display=element_dict["display"],
     )
 
@@ -930,7 +930,7 @@ async def update_thread_element(
                 detail="You are not authorized to update elements for this session",
             )
 
-    await element.send(for_id=element.for_id)
+    await element.send(for_id=element.for_id or "")
     return {"success": True}
 
 
@@ -958,10 +958,10 @@ async def delete_thread_element(
         object_key=element_dict["objectKey"],
         chainlit_key=element_dict["chainlitKey"],
         url=element_dict["url"],
-        for_id=element_dict["forId"],
-        thread_id=element_dict["threadId"],
+        for_id=element_dict.get("forId") or "",
+        thread_id=element_dict.get("threadId") or "",
         name=element_dict["name"],
-        props=element_dict["props"],
+        props=element_dict.get("props") or {},
         display=element_dict["display"],
     )
 

@@ -110,6 +110,7 @@ class LiteralToChainlitConverter:
             "autoPlay": metadata.get("autoPlay", None),
             "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
+            "props": metadata.get("props"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
             "forId": attachment.step_id,

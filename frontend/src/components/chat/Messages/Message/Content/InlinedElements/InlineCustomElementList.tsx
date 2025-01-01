@@ -8,7 +8,7 @@ interface Props {
 
 const InlinedCustomElementList = ({ items }: Props) => (
   <div className="flex flex-col gap-2">
-    {items.map((customElement, i) => {
+    {items.map((customElement) => {
       return <CustomElement key={customElement.id} element={customElement} />;
     })}
   </div>
