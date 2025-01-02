@@ -9,8 +9,7 @@ describe('User Env', () => {
     const key = 'TEST_KEY';
     const keyValue = 'TEST_VALUE';
 
-    cy.get('#env').should('exist');
-    cy.get(`.${key}`).should('exist').type(keyValue);
+    cy.get(`#${key}`).should('exist').type(keyValue);
 
     cy.get('#submit-env').should('exist').click();
 

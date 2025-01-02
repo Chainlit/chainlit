@@ -20,6 +20,7 @@
     "types": ["node"],
     "paths": {
       "client-types/*": ["../../libs/react-client/dist"],
+      "@/*": ["./*"]
     }
   },
   "include": ["./src"],
