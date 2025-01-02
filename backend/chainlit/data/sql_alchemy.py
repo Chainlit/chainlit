@@ -578,7 +578,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."generation" AS step_generation,
                 s."showInput" AS step_showinput,
                 s."language" AS step_language,
-                s."indent" AS step_indent,
                 f."value" AS feedback_value,
                 f."comment" AS feedback_comment,
                 f."id" AS feedback_id
@@ -666,7 +665,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         generation=step_feedback.get("step_generation"),
                         showInput=step_feedback.get("step_showinput"),
                         language=step_feedback.get("step_language"),
-                        indent=step_feedback.get("step_indent"),
                         feedback=feedback,
                     )
                     # Append the step to the steps list of the corresponding ThreadDict
