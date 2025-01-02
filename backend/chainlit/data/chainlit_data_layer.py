@@ -202,9 +202,9 @@ class ChainlitDataLayer(BaseDataLayer):
         query = """
         INSERT INTO "Element" (
             id, "threadId", "stepId", metadata, mime, name, "objectKey", url,
-            "chainlitKey", display, size, language, page
+            "chainlitKey", display, size, language, page, props
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
         )
         """
         params = {
@@ -229,6 +229,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "size": element.size,
             "language": element.language,
             "page": getattr(element, "page", None),
+            "props": json.dumps(getattr(element, "props", {})),
         }
         await self.execute_query(query, params)
 
@@ -263,6 +264,7 @@ class ChainlitDataLayer(BaseDataLayer):
             page=row["page"],
             autoPlay=row.get("autoPlay"),
             playerConfig=row.get("playerConfig"),
+            props=json.loads(row.get("props", "{}")),
         )
 
     @queue_until_user_message()
@@ -289,8 +291,6 @@ class ChainlitDataLayer(BaseDataLayer):
             if not thread_results:
                 await self.update_thread(thread_id=step_dict["threadId"])
 
-        now = await self.get_current_timestamp()
-
         if step_dict.get("parentId"):
             parent_query = 'SELECT id FROM "Step" WHERE id = $1'
             parent_results = await self.execute_query(
@@ -300,55 +300,56 @@ class ChainlitDataLayer(BaseDataLayer):
                 await self.create_step(
                     {
                         "id": step_dict["parentId"],
-                        "metadata": json.dumps(step_dict.get("metadata", {})),
+                        "metadata": step_dict.get("metadata", {}),
                         "type": "run",
-                        "start_time": now,
-                        "end_time": now,
-                        "variables": json.dumps(step_dict.get("variables", {})),
-                        "settings": json.dumps(step_dict.get("settings", {})),
-                        "tools": json.dumps(step_dict.get("tools", {})),
+                        "start_time": await self.get_current_timestamp(),
+                        "end_time": await self.get_current_timestamp(),
                     }
                 )
 
         query = """
         INSERT INTO "Step" (
             id, "threadId", "parentId", input, metadata, name, output,
-            type, "startTime", "endTime", variables, settings, tools,
-            "rootRunId"
+            type, "startTime", "endTime", "rootRunId", "showInput", "isError"
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         )
         ON CONFLICT (id) DO UPDATE SET
-            input = EXCLUDED.input,
-            metadata = EXCLUDED.metadata,
-            name = EXCLUDED.name,
-            output = EXCLUDED.output,
-            type = EXCLUDED.type,
-            "startTime" = EXCLUDED."startTime",
-            "endTime" = EXCLUDED."endTime",
-            variables = EXCLUDED.variables,
-            settings = EXCLUDED.settings,
-            tools = EXCLUDED.tools,
-            "rootRunId" = EXCLUDED."rootRunId"
+            "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
+            input = COALESCE(EXCLUDED.input, "Step".input),
+            metadata = COALESCE(EXCLUDED.metadata, "Step".metadata),
+            name = COALESCE(EXCLUDED.name, "Step".name),
+            output = COALESCE(EXCLUDED.output, "Step".output),
+            type = CASE 
+                WHEN EXCLUDED.type = 'run' THEN "Step".type 
+                ELSE EXCLUDED.type 
+            END,
+            "threadId" = COALESCE(EXCLUDED."threadId", "Step"."threadId"),
+            "endTime" = COALESCE(EXCLUDED."endTime", "Step"."endTime"),
+            "rootRunId" = COALESCE(EXCLUDED."rootRunId", "Step"."rootRunId"),
+            "showInput" = COALESCE(EXCLUDED."showInput", "Step"."showInput"),
+            "isError" = COALESCE(EXCLUDED."isError", "Step"."isError")
         """
 
-        start = step_dict.get("start")
-        end = step_dict.get("end")
+        timestamp = await self.get_current_timestamp()
+        created_at = step_dict.get("createdAt")
+        if created_at:
+            timestamp = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%S.%fZ")
+
         params = {
             "id": step_dict["id"],
             "thread_id": step_dict.get("threadId"),
             "parent_id": step_dict.get("parentId"),
-            "input": json.dumps(step_dict.get("input", {})),
+            "input": step_dict.get("input"),
             "metadata": json.dumps(step_dict.get("metadata", {})),
             "name": step_dict.get("name"),
-            "output": json.dumps(step_dict.get("output", {})),
+            "output": step_dict.get("output"),
             "type": step_dict["type"],
-            "start_time": datetime.strptime(start, ISO_FORMAT) if start else now,
-            "end_time": datetime.strptime(end, ISO_FORMAT) if end else now,
-            "variables": json.dumps(step_dict.get("variables", {})),
-            "settings": json.dumps(step_dict.get("settings", {})),
-            "tools": json.dumps(step_dict.get("tools", {})),
+            "start_time": timestamp,
+            "end_time": timestamp,
             "root_run_id": step_dict.get("rootRunId"),
+            "show_input": step_dict.get("showInput", "json"),
+            "is_error": step_dict.get("isError", False),
         }
         await self.execute_query(query, params)
 
@@ -360,11 +361,9 @@ class ChainlitDataLayer(BaseDataLayer):
             "endTime" = $2
         WHERE id = $3
         """
-        now = await self.get_current_timestamp()
-        end = step_dict.get("end")
         params = {
-            "output": json.dumps(step_dict.get("output", {})),
-            "end_time": datetime.strptime(end, ISO_FORMAT) if end else now,
+            "output": step_dict.get("output"),
+            "end_time": await self.get_current_timestamp(),
             "id": step_dict["id"],
         }
         await self.execute_query(query, params)
@@ -448,7 +447,7 @@ class ChainlitDataLayer(BaseDataLayer):
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],
-                metadata=thread["metadata"],
+                metadata=json.loads(thread["metadata"]),
                 steps=[],
                 elements=[],
                 tags=[],
@@ -501,7 +500,7 @@ class ChainlitDataLayer(BaseDataLayer):
             name=thread["name"],
             userId=str(thread["userId"]) if thread["userId"] else None,
             userIdentifier=thread["user_identifier"],
-            metadata=thread["metadata"],
+            metadata=json.loads(thread["metadata"]),
             steps=[self._convert_step_row_to_dict(step) for step in steps_results],
             elements=[
                 self._convert_element_row_to_dict(elem) for elem in elements_results
@@ -560,12 +559,16 @@ class ChainlitDataLayer(BaseDataLayer):
             type=row["type"],
             input=row.get("input", {}),
             output=row.get("output", {}),
-            metadata=row.get("metadata", {}),
+            metadata=json.loads(row.get("metadata", "{}")),
+            createdAt=row["createdAt"].isoformat() if row.get("createdAt") else None,
             start=row["startTime"].isoformat() if row.get("startTime") else None,
+            showInput=row.get("showInput"),
+            isError=row.get("isError"),
             end=row["endTime"].isoformat() if row.get("endTime") else None,
         )
 
     def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:
+        print(row)
         return ElementDict(
             id=str(row["id"]),
             threadId=str(row["threadId"]) if row.get("threadId") else None,
@@ -582,6 +585,7 @@ class ChainlitDataLayer(BaseDataLayer):
             page=row["page"],
             autoPlay=row.get("autoPlay"),
             playerConfig=row.get("playerConfig"),
+            props=json.loads(row.get("props") or "{}"),
         )
 
     async def build_debug_url(self) -> str:
