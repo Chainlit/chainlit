@@ -1,7 +1,7 @@
 import type { IMessageElement } from '@chainlit/react-client';
 
 import { AudioElement } from './Audio';
-import CustomElement from './CustomElementLoader';
+import CustomElement from './CustomElement';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
