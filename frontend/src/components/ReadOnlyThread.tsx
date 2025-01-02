@@ -46,7 +46,10 @@ const ReadOnlyThread = ({ id }: Props) => {
   const layoutMaxWidth = useLayoutMaxWidth();
 
   useEffect(() => {
-    if (!thread) return;
+    if (!thread) {
+      setSteps([]);
+      return;
+    }
     setSteps(thread.steps);
   }, [thread]);
 
@@ -78,7 +81,7 @@ const ReadOnlyThread = ({ id }: Props) => {
         }
       });
     },
-    []
+    [setSteps]
   );
 
   const onFeedbackDeleted = useCallback(
@@ -106,7 +109,7 @@ const ReadOnlyThread = ({ id }: Props) => {
         }
       });
     },
-    []
+    [setSteps]
   );
 
   const onElementRefClick = useCallback(
@@ -152,7 +155,8 @@ const ReadOnlyThread = ({ id }: Props) => {
     config?.features?.unsafe_allow_html,
     onElementRefClick,
     onError,
-    onFeedbackUpdated
+    onFeedbackUpdated,
+    onFeedbackDeleted
   ]);
 
   if (isLoading) {

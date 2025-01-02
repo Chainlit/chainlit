@@ -8,6 +8,7 @@ import {
 } from '@chainlit/react-client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
@@ -49,7 +50,7 @@ const MessageAvatar = ({ author, hide }: Props) => {
                 className="bg-transparent"
               />
               <AvatarFallback className="bg-transparent">
-                {author?.charAt(0).toUpperCase() || '?'}
+                <Skeleton className="h-full w-full rounded-full" />
               </AvatarFallback>
             </Avatar>
           </TooltipTrigger>
