@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useState
 } from 'react';
+import { toast } from 'sonner';
 
 import {
   ChainlitContext,
@@ -17,7 +18,8 @@ import {
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
-import { Button } from '@/components/ui/button';
+
+import * as Components from './Components';
 
 const JsxParser = lazy(() => import('react-jsx-parser'));
 
@@ -75,13 +77,14 @@ export default function CustomElement({
         blacklistedAttrs={[]}
         bindings={{
           props,
+          apiClient,
+          toast,
           Object,
           updateElement,
           deleteElement,
-          callAction,
-          React
+          callAction
         }}
-        components={{ Button }}
+        components={Components as any}
         jsx={sourceCode}
         renderError={({ error }) => (
           <Alert variant="error">{`Failed to render ${element.name}: ${error}`}</Alert>

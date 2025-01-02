@@ -1,6 +1,6 @@
 import type { ICustomElement } from '@chainlit/react-client';
 
-import CustomElement from '@/components/Elements/CustomElementLoader';
+import CustomElement from '@/components/Elements/CustomElement';
 
 interface Props {
   items: ICustomElement[];
