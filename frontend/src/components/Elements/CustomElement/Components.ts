@@ -16,6 +16,13 @@ export {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+export {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from '@/components/ui/carousel';
 export { Checkbox } from '@/components/ui/checkbox';
 export {
   Command,

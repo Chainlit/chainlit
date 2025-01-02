@@ -38,6 +38,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
+    "embla-carousel-react": "^8.5.1",
     "highlight.js": "^11.9.0",
     "i18next": "^23.7.16",
     "lodash": "^4.17.21",
