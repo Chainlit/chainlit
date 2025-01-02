@@ -47,6 +47,8 @@ export default function ThreadPage() {
               <Loader className="!size-6" />
             </div>
           )
+        ) : isCurrentThread ? (
+          <Chat />
         ) : (
           <ReadOnlyThread id={id!} />
         )}
