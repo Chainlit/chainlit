@@ -93,15 +93,6 @@ export default function ChatProfiles() {
     setAnchorEl(null);
   };
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
-    setNewChatProfile(newValue);
-    if (firstInteraction) {
-      setOpenDialog(true);
-    } else {
-      handleConfirm(newValue);
-    }
-  };
-
   return (
     <>
       <Popover
