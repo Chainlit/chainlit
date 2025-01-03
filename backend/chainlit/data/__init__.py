@@ -85,7 +85,7 @@ def get_data_layer():
                         bucket_name=bucket_name,
                     )
                 elif is_using_azure:
-                    from chainlit.data.storage_clients.azure import (
+                    from chainlit.data.storage_clients.azure_blob import (
                         AzureBlobStorageClient,
                     )
 
