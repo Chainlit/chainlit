@@ -1,13 +1,5 @@
-import {
-  Suspense,
-  lazy,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
-import { toast } from 'sonner';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Runner } from 'react-runner';
 
 import {
   ChainlitContext,
@@ -19,10 +11,7 @@ import {
 
 import Alert from '@/components/Alert';
 
-import * as Components from './Components';
-import Icon from './Icon';
-
-const JsxParser = lazy(() => import('react-jsx-parser'));
+import Imports from './Imports';
 
 export default function CustomElement({
   element
@@ -72,25 +61,19 @@ export default function CustomElement({
   if (!sourceCode) return null;
 
   return (
-    <Suspense fallback={null}>
-      <JsxParser
-        className={`${element.display}-custom`}
-        blacklistedAttrs={[]}
-        bindings={{
+    <div className={`${element.display}-custom`}>
+      <Runner
+        code={sourceCode}
+        scope={{
+          import: Imports,
           props,
           apiClient,
-          toast,
-          Object,
           updateElement,
           deleteElement,
           callAction
         }}
-        components={{ ...(Components as any), Icon }}
-        jsx={sourceCode}
-        renderError={({ error }) => (
-          <Alert variant="error">{`Failed to render ${element.name}: ${error}`}</Alert>
-        )}
+        onRendered={(error) => setError(error?.message)}
       />
-    </Suspense>
+    </div>
   );
 }

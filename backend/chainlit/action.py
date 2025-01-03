@@ -19,7 +19,7 @@ class Action(DataClassJsonMixin):
     label: str = ""
     # The tooltip of the action button. This is what the user will see when they hover the action.
     tooltip: str = ""
-    # The icon url for this action.
+    # The lucid icon name for this action.
     icon: Optional[str] = None
     # This should not be set manually, only used internally.
     forId: Optional[str] = None
