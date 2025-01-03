@@ -156,8 +156,8 @@ export default function ChatProfiles() {
 
       {/* Horizontal list of profiles */}
       <Box
+        id = "chat-profile-selector"
         sx={{
-          id: "chat-profile-selector",
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
@@ -166,10 +166,10 @@ export default function ChatProfiles() {
           gap: 1
         }}
       >
-
-        {items.map((item) => {
+        {items.map((item, index) => {
           const isActive = chatProfile === item.value;
           return (
+            <>
             <Box
               key={item.value}
               onMouseEnter={(e) => handleProfileMouseEnter(e, item.value)}
@@ -183,7 +183,8 @@ export default function ChatProfiles() {
                 borderRadius: 1,
                 backgroundColor: isActive ? 'primary.main' : 'transparent',
                 color: isActive ? '#ffffff' : 'inherit',
-                transition: 'background-color 0.3s ease'
+                transition: 'background-color 0.3s ease',
+                fontSize: '12px'
               }}
             >
               {item.icon && (
@@ -191,13 +192,24 @@ export default function ChatProfiles() {
                   component="span"
                   sx={{ display: 'inline-flex', mr: 1, alignItems: 'center' }}
                 >
-                  {item.icon}
+                {item.icon}
                 </Box>
               )}
               {item.label}
             </Box>
+            {index < items.length - 1 && (
+              <Box
+                sx={{
+                  width: '1px',
+                  height: '24px',
+                  backgroundColor: 'divider',
+                  mx: 1
+                }}
+              />
+            )}
+          </>
           );
-              })}
+        })}
       </Box>
       <NewChatDialog
         open={openDialog}
