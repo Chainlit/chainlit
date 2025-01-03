@@ -12,7 +12,6 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { SelectInput } from 'components/atoms/inputs';
 import { Markdown } from 'components/molecules/Markdown';
 
 import NewChatDialog from './newChatDialog';
