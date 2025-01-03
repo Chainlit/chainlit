@@ -319,6 +319,8 @@ def get_html_template():
     """
     Get HTML template for the index view.
     """
+    ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
     custom_theme = None
     custom_theme_file_path = Path(public_dir) / "theme.json"
     if (
