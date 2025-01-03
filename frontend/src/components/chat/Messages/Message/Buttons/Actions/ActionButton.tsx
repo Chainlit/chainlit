@@ -8,6 +8,7 @@ import {
   useChatSession
 } from '@chainlit/react-client';
 
+import Icon from '@/components/Icon';
 import { Loader } from '@/components/Loader';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,7 +38,7 @@ const ActionButton = ({ action }: ActionProps) => {
 
   const icon = useMemo(() => {
     if (isRunning) return <Loader />;
-    if (action.icon) return <img className="h-4 w-4" src={action.icon} />;
+    if (action.icon) return <Icon name={action.icon as any} />;
     return null;
   }, [action, isRunning]);
 

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Textarea } from '@/components/ui/textarea';
 
@@ -19,6 +19,7 @@ const AutoResizeTextarea = ({
   ...props
 }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -40,7 +41,7 @@ const AutoResizeTextarea = ({
   }, [props.value]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey && onEnter) {
+    if (event.key === 'Enter' && !event.shiftKey && onEnter && !isComposing) {
       event.preventDefault();
       onEnter(event);
     }
@@ -51,6 +52,8 @@ const AutoResizeTextarea = ({
       ref={textareaRef as any}
       {...props}
       onKeyDown={handleKeyDown}
+      onCompositionStart={() => setIsComposing(true)}
+      onCompositionEnd={() => setIsComposing(false)}
       className={cn(
         'p-0 min-h-6 rounded-none resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
         className
