@@ -21,7 +21,7 @@ export default function Step({
     return isRunning && step.start && !step.end && !step.isError;
   }, [step, isRunning]);
 
-  const hasOutput = step.output || step.steps?.length;
+  const hasContent = step.input || step.output || step.steps?.length;
   const isError = step.isError;
 
   const stepName = step.name;
@@ -32,7 +32,7 @@ export default function Step({
         className={cn(
           'flex items-center gap-1 group/step',
           isError && 'text-red-500',
-          hasOutput && 'cursor-pointer',
+          hasContent && 'cursor-pointer',
           !isRunning && 'text-muted-foreground hover:text-foreground',
           isRunning && 'loading-shimmer'
         )}
@@ -50,7 +50,7 @@ export default function Step({
             {stepName}
           </>
         )}
-        {hasOutput ? (
+        {hasContent ? (
           open ? (
             <ChevronUp className="invisible group-hover/step:visible !size-4" />
           ) : (
