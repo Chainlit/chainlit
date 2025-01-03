@@ -42,9 +42,7 @@ class AzureBlobStorageClient(BaseStorageClient):
             expiry=expiry_time,
         )
 
-        url = f"https://{self.storage_account}.blob.core.windows.net/{self.container_name}/{object_key}?{sas_token}"
-
-        return url
+        return f"https://{self.storage_account}.blob.core.windows.net/{self.container_name}/{object_key}?{sas_token}"
 
     async def upload_file(
         self,

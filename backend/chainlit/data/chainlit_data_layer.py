@@ -326,7 +326,7 @@ class ChainlitDataLayer(BaseDataLayer):
         timestamp = await self.get_current_timestamp()
         created_at = step_dict.get("createdAt")
         if created_at:
-            timestamp = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp = datetime.strptime(created_at, ISO_FORMAT)
 
         params = {
             "id": step_dict["id"],
