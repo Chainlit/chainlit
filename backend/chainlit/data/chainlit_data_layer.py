@@ -172,32 +172,23 @@ class ChainlitDataLayer(BaseDataLayer):
         if element.path:
             async with aiofiles.open(element.path, "rb") as f:
                 content = await f.read()
-        elif element.url:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(element.url) as response:
-                    if response.status == 200:
-                        content = await response.read()
-                    else:
-                        content = None
         elif element.content:
             content = element.content
-        else:
+        elif not element.url:
             raise ValueError("Element url, path or content must be provided")
-
-        if content is None:
-            raise ValueError("Content is None, cannot upload file")
 
         if element.thread_id:
             path = f"threads/{element.thread_id}/files/{element.name}"
         else:
             path = f"files/{element.name}"
 
-        await self.storage_client.upload_file(
-            object_key=path,
-            data=content,
-            mime=element.mime or "application/octet-stream",
-            overwrite=True,
-        )
+        if content is not None:
+            await self.storage_client.upload_file(
+                object_key=path,
+                data=content,
+                mime=element.mime or "application/octet-stream",
+                overwrite=True,
+            )
 
         query = """
         INSERT INTO "Element" (
@@ -498,7 +489,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         if self.storage_client is not None:
             for elem in elements_results:
-                if elem["objectKey"]:
+                if not elem["url"] and elem["objectKey"]:
                     elem["url"] = await self.storage_client.get_read_url(
                         object_key=elem["objectKey"],
                     )
