@@ -1,5 +1,5 @@
 import size from 'lodash/size';
-import { useContext, useState } from 'react';
+import { useContext, useState, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Box, Popover } from '@mui/material';
@@ -81,6 +81,31 @@ export default function ChatProfiles() {
     };
   });
 
+  const handleProfileMouseEnter = (event: MouseEvent<HTMLElement>, itemName: string) => {
+    const item = config.chatProfiles.find((profile) => profile.name === itemName);
+    if (!item) return;
+    setChatProfileDescription(item.markdown_description);
+    setAnchorEl(event.currentTarget);
+    setPopoverOpen(true);
+  };
+
+  const handleProfileMouseLeave = () => {
+    setPopoverOpen(false);
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = (itemValue: string) => {
+    setPopoverOpen(false);
+    setAnchorEl(null);
+
+    setNewChatProfile(itemValue);
+    if (firstInteraction) {
+      setOpenDialog(true);
+    } else {
+      handleConfirm(itemValue);
+    }
+  };
+
   return (
     <>
       <Popover
@@ -128,40 +153,52 @@ export default function ChatProfiles() {
           </Markdown>
         </Box>
       </Popover>
-      <SelectInput
-        value={chatProfile || ''}
-        items={items}
-        id="chat-profile-selector"
-        onItemMouseEnter={(event, itemName) => {
-          const item = config.chatProfiles.find(
-            (item) => item.name === itemName
+
+      {/* Horizontal list of profiles */}
+      <Box
+        sx={{
+          id: "chat-profile-selector",
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          gap: 1
+        }}
+      >
+
+        {items.map((item) => {
+          const isActive = chatProfile === item.value;
+          return (
+            <Box
+              key={item.value}
+              onMouseEnter={(e) => handleProfileMouseEnter(e, item.value)}
+              onMouseLeave={handleProfileMouseLeave}
+              onClick={() => handleProfileClick(item.value)}
+              sx={{
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: isActive ? 'primary.main' : 'transparent',
+                color: isActive ? '#ffffff' : 'inherit',
+                transition: 'background-color 0.3s ease'
+              }}
+            >
+              {item.icon && (
+                <Box
+                  component="span"
+                  sx={{ display: 'inline-flex', mr: 1, alignItems: 'center' }}
+                >
+                  {item.icon}
+                </Box>
+              )}
+              {item.label}
+            </Box>
           );
-          if (!item) return;
-          setChatProfileDescription(item.markdown_description);
-          setAnchorEl(event.currentTarget);
-          setPopoverOpen(true);
-        }}
-        onItemMouseLeave={() => setPopoverOpen(false)}
-        onChange={(e) => {
-          const newValue = e.target.value;
-
-          // Close the chat profile description when any selection is made
-          setPopoverOpen(false);
-          setAnchorEl(null);
-
-          // Handle user selection
-          setNewChatProfile(newValue);
-          if (firstInteraction) {
-            setOpenDialog(true);
-          } else {
-            handleConfirm(newValue);
-          }
-        }}
-        onClose={() => {
-          setPopoverOpen(false);
-          setAnchorEl(null);
-        }}
-      />
+              })}
+      </Box>
       <NewChatDialog
         open={openDialog}
         handleClose={handleClose}
