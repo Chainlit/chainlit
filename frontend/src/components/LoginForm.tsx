@@ -102,7 +102,7 @@ export function LoginForm({
               </Label>
               <Input
                 id="email"
-                placeholder="m@example.com"
+                placeholder="me@example.com"
                 {...register('email', {
                   required: t(
                     'components.molecules.auth.authLogin.form.emailRequired'

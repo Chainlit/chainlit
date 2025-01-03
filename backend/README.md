@@ -10,22 +10,10 @@
 
 Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
 
-- ✅ ChatGPT-like application
-- ✅ Embedded Chatbot & Software Copilot
-- ✅ Slack & Discord
-- ✅ Custom frontend (build your own agentic experience)
-- ✅ API Endpoint
-
 Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
-> [!NOTE]
-> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
->
-> Chainlit is developed and maintained by the Literal AI team, which is currently focused on expanding the capabilities of Literal AI. While we continue to support and maintain Chainlit, we are also committed to enabling the community to contribute, particularly in areas like integrations and data layers.
+https://github.com/user-attachments/assets/b3738aba-55c0-42fa-ac00-6efd1ee0d148
 
-<p align="center">
-    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" alt="Chainlit user interface" width="80%"></img>
-</p>
 
 ## Installation
 
@@ -92,24 +80,6 @@ chainlit run demo.py -w
 ```
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
-
-## 🎉 Key Features and Integrations
-
-Full documentation is available [here](https://docs.chainlit.io). Key features:
-
-- [💬 Multi Modal chats](https://docs.chainlit.io/advanced-features/multi-modal)
-- [💭 Chain of Thought visualization](https://docs.chainlit.io/concepts/step)
-- [💾 Data persistence + human feedback](https://docs.chainlit.io/data-persistence/overview)
-- [🐛 Debug Mode](https://docs.chainlit.io/data-persistence/enterprise#debug-mode)
-- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
-
-Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:
-
-- [LangChain](https://docs.chainlit.io/integrations/langchain)
-- [Llama Index](https://docs.chainlit.io/integrations/llama-index)
-- [Autogen](https://github.com/Chainlit/cookbook/tree/main/pyautogen)
-- [OpenAI Assistant](https://github.com/Chainlit/cookbook/tree/main/openai-assistant)
-- [Haystack](https://docs.chainlit.io/integrations/haystack)
 
 ## 📚 More Examples - Cookbook
 
