@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
-import aiohttp
 import asyncpg  # type: ignore
 
 from chainlit.data.base import BaseDataLayer
@@ -118,8 +117,8 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         query = """
-        INSERT INTO "Feedback" (id, "stepId", name, value, "valueLabel", comment, scorer)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO "Feedback" (id, "stepId", name, value, comment)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO UPDATE
         SET value = $4, comment = $6
         RETURNING id
@@ -130,9 +129,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "step_id": feedback.forId,
             "name": "user_feedback",
             "value": float(feedback.value),
-            "value_label": None,
             "comment": feedback.comment,
-            "scorer": None,
         }
         results = await self.execute_query(query, params)
         return str(results[0]["id"])
@@ -293,7 +290,7 @@ class ChainlitDataLayer(BaseDataLayer):
                 await self.create_step(
                     {
                         "id": step_dict["parentId"],
-                        "metadata": step_dict.get("metadata", {}),
+                        "metadata": {},
                         "type": "run",
                         "createdAt": step_dict.get("createdAt"),
                     }
@@ -302,14 +299,17 @@ class ChainlitDataLayer(BaseDataLayer):
         query = """
         INSERT INTO "Step" (
             id, "threadId", "parentId", input, metadata, name, output,
-            type, "startTime", "endTime", "rootRunId", "showInput", "isError"
+            type, "startTime", "endTime", "showInput", "isError"
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
             input = COALESCE(EXCLUDED.input, "Step".input),
-            metadata = COALESCE(EXCLUDED.metadata, "Step".metadata),
+            metadata = CASE 
+                WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata 
+                ELSE "Step".metadata 
+            END,
             name = COALESCE(EXCLUDED.name, "Step".name),
             output = COALESCE(EXCLUDED.output, "Step".output),
             type = CASE 
@@ -319,7 +319,6 @@ class ChainlitDataLayer(BaseDataLayer):
             "threadId" = COALESCE(EXCLUDED."threadId", "Step"."threadId"),
             "endTime" = COALESCE(EXCLUDED."endTime", "Step"."endTime"),
             "startTime" = LEAST(EXCLUDED."startTime", "Step"."startTime"),
-            "rootRunId" = COALESCE(EXCLUDED."rootRunId", "Step"."rootRunId"),
             "showInput" = COALESCE(EXCLUDED."showInput", "Step"."showInput"),
             "isError" = COALESCE(EXCLUDED."isError", "Step"."isError")
         """
@@ -340,7 +339,6 @@ class ChainlitDataLayer(BaseDataLayer):
             "type": step_dict["type"],
             "start_time": timestamp,
             "end_time": timestamp,
-            "root_run_id": step_dict.get("rootRunId"),
             "show_input": step_dict.get("showInput", "json"),
             "is_error": step_dict.get("isError", False),
         }
@@ -348,18 +346,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def update_step(self, step_dict: StepDict):
-        query = """
-        UPDATE "Step" SET
-            output = $1,
-            "endTime" = $2
-        WHERE id = $3
-        """
-        params = {
-            "output": step_dict.get("output"),
-            "end_time": await self.get_current_timestamp(),
-            "id": step_dict["id"],
-        }
-        await self.execute_query(query, params)
+        await self.create_step(step_dict)
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):

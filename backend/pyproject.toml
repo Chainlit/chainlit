@@ -133,6 +133,7 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
+azure-storage-blob="^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]

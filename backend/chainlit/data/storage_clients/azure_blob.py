@@ -19,7 +19,6 @@ class AzureBlobStorageClient(BaseStorageClient):
             f"AccountKey={storage_key};"
             f"EndpointSuffix=core.windows.net"
         )
-        print("connection_string", connection_string)
         self.service_client = AsyncBlobServiceClient.from_connection_string(
             connection_string
         )
