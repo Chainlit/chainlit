@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Union
 
-from azure.storage.blob import ContentSettings
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import BlobSasPermissions, ContentSettings, generate_blob_sas
 from azure.storage.blob.aio import BlobServiceClient as AsyncBlobServiceClient
 
-from chainlit.logger import logger
 from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.logger import logger
 
 
 class AzureBlobStorageClient(BaseStorageClient):
