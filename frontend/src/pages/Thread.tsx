@@ -47,7 +47,13 @@ export default function ThreadPage() {
             </div>
           )
         ) : null}
-        {config && !config.threadResumable ? <ReadOnlyThread id={id!} /> : null}
+        {config && !config.threadResumable ? (
+          isCurrentThread ? (
+            <Chat />
+          ) : (
+            <ReadOnlyThread id={id!} />
+          )
+        ) : null}
       </>
     </Page>
   );

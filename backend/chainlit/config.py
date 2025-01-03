@@ -112,13 +112,8 @@ name = "Assistant"
 
 # layout = "wide"
 
-# font_family = "Inter, sans-serif"
-
 # Description of the assistant. This is used for HTML tags.
 # description = ""
-
-# Large size content are by default collapsed for a cleaner ui
-default_collapse_content = true
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
