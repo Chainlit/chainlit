@@ -4,7 +4,8 @@ from typing import Any, Dict, Union
 from google.cloud import storage  # type: ignore
 from google.oauth2 import service_account
 
-from chainlit.data.storage_clients.base import BaseStorageClient
+from chainlit import make_async
+from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
 from chainlit.logger import logger
 
 
@@ -29,7 +30,15 @@ class GCSStorageClient(BaseStorageClient):
         self.bucket = self.client.bucket(bucket_name)
         logger.info("GCSStorageClient initialized")
 
-    async def upload_file(
+    def sync_get_read_url(self, object_key: str) -> str:
+        return self.bucket.blob(object_key).generate_signed_url(
+            version="v4", expiration=EXPIRY_TIME, method="GET"
+        )
+
+    async def get_read_url(self, object_key: str) -> str:
+        return await make_async(self.sync_get_read_url)(object_key)
+
+    def sync_upload_file(
         self,
         object_key: str,
         data: Union[bytes, str],
@@ -56,3 +65,14 @@ class GCSStorageClient(BaseStorageClient):
 
         except Exception as e:
             raise Exception(f"Failed to upload file to GCS: {e!s}")
+
+    async def upload_file(
+        self,
+        object_key: str,
+        data: Union[bytes, str],
+        mime: str = "application/octet-stream",
+        overwrite: bool = True,
+    ) -> Dict[str, Any]:
+        return await make_async(self.sync_upload_file)(
+            object_key, data, mime, overwrite
+        )

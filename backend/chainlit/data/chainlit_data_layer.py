@@ -248,10 +248,12 @@ class ChainlitDataLayer(BaseDataLayer):
             return None
 
         row = results[0]
+        metadata = json.loads(row.get("metadata", "{}"))
+
         return ElementDict(
             id=str(row["id"]),
             threadId=str(row["threadId"]),
-            type="file",
+            type=metadata.get("type", "file"),
             url=str(row["url"]),
             name=str(row["name"]),
             mime=str(row["mime"]),
@@ -494,6 +496,13 @@ class ChainlitDataLayer(BaseDataLayer):
             elements_query, {"thread_id": thread_id}
         )
 
+        if self.storage_client is not None:
+            for elem in elements_results:
+                if elem["objectKey"]:
+                    elem["url"] = await self.storage_client.get_read_url(
+                        object_key=elem["objectKey"],
+                    )
+
         return ThreadDict(
             id=str(thread["id"]),
             createdAt=thread["createdAt"].isoformat(),
@@ -568,10 +577,11 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
     def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:
+        metadata = json.loads(row.get("metadata", "{}"))
         return ElementDict(
             id=str(row["id"]),
             threadId=str(row["threadId"]) if row.get("threadId") else None,
-            type="file",
+            type=metadata.get("type", "file"),
             url=row["url"],
             name=row["name"],
             mime=row["mime"],

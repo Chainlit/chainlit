@@ -1,15 +1,19 @@
+from datetime import datetime, timedelta
 from typing import Any, Dict, Union
 
 from azure.storage.blob import ContentSettings
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from azure.storage.blob.aio import BlobServiceClient as AsyncBlobServiceClient
 
-from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.logger import logger
+from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
 
 
 class AzureBlobStorageClient(BaseStorageClient):
     def __init__(self, container_name: str, storage_account: str, storage_key: str):
         self.container_name = container_name
+        self.storage_account = storage_account
+        self.storage_key = storage_key
         connection_string = (
             f"DefaultEndpointsProtocol=https;"
             f"AccountName={storage_account};"
@@ -21,6 +25,28 @@ class AzureBlobStorageClient(BaseStorageClient):
             connection_string
         )
         logger.info("AzureBlobStorageClient initialized")
+
+    async def get_read_url(self, object_key: str) -> str:
+        if not self.storage_key:
+            raise Exception("Not using Azure Storage")
+
+        sas_permissions = BlobSasPermissions(read=True)
+        start_time = datetime.now()
+        expiry_time = start_time + timedelta(seconds=EXPIRY_TIME)
+
+        sas_token = generate_blob_sas(
+            account_name=self.storage_account,
+            container_name=self.container_name,
+            blob_name=object_key,
+            account_key=self.storage_key,
+            permission=sas_permissions,
+            start=start_time,
+            expiry=expiry_time,
+        )
+
+        url = f"https://{self.storage_account}.blob.core.windows.net/{self.container_name}/{object_key}?{sas_token}"
+
+        return url
 
     async def upload_file(
         self,
