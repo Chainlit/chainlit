@@ -302,8 +302,7 @@ class ChainlitDataLayer(BaseDataLayer):
                         "id": step_dict["parentId"],
                         "metadata": step_dict.get("metadata", {}),
                         "type": "run",
-                        "start_time": await self.get_current_timestamp(),
-                        "end_time": await self.get_current_timestamp(),
+                        "createdAt": step_dict.get("createdAt"),
                     }
                 )
 
@@ -326,6 +325,7 @@ class ChainlitDataLayer(BaseDataLayer):
             END,
             "threadId" = COALESCE(EXCLUDED."threadId", "Step"."threadId"),
             "endTime" = COALESCE(EXCLUDED."endTime", "Step"."endTime"),
+            "startTime" = LEAST(EXCLUDED."startTime", "Step"."startTime"),
             "rootRunId" = COALESCE(EXCLUDED."rootRunId", "Step"."rootRunId"),
             "showInput" = COALESCE(EXCLUDED."showInput", "Step"."showInput"),
             "isError" = COALESCE(EXCLUDED."isError", "Step"."isError")
@@ -568,7 +568,6 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
     def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:
-        print(row)
         return ElementDict(
             id=str(row["id"]),
             threadId=str(row["threadId"]) if row.get("threadId") else None,
