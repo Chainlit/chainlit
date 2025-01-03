@@ -2,7 +2,7 @@ import size from 'lodash/size';
 import { useContext, useState, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Box, Popover } from '@mui/material';
+import { Box, Popover, Tab, Tabs } from '@mui/material';
 
 import {
   ChainlitContext,
@@ -94,15 +94,12 @@ export default function ChatProfiles() {
     setAnchorEl(null);
   };
 
-  const handleProfileClick = (itemValue: string) => {
-    setPopoverOpen(false);
-    setAnchorEl(null);
-
-    setNewChatProfile(itemValue);
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
+    setNewChatProfile(newValue);
     if (firstInteraction) {
       setOpenDialog(true);
     } else {
-      handleConfirm(itemValue);
+      handleConfirm(newValue);
     }
   };
 
@@ -144,7 +141,8 @@ export default function ChatProfiles() {
         <Box
           p={2}
           sx={{
-            fontFamily: (theme) => theme.typography.fontFamily
+            fontFamily: (theme) => theme.typography.fontFamily,
+            fontSize: "12px"
           }}
           maxWidth="20rem"
         >
@@ -155,62 +153,59 @@ export default function ChatProfiles() {
       </Popover>
 
       {/* Horizontal list of profiles */}
-      <Box
-        id = "chat-profile-selector"
+      <Tabs
+        value={chatProfile || ''}
+        onChange={(event: React.SyntheticEvent, newValue: string) => {
+          setNewChatProfile(newValue);
+          if (firstInteraction) {
+            setOpenDialog(true);
+          } else {
+            handleConfirm(newValue);
+          }
+        }}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          gap: 1
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 1,
+          backgroundColor: 'background.paper',
+          p: 1,
+          '& .MuiTabs-flexContainer': {
+            alignItems: 'center'
+          }
         }}
       >
-        {items.map((item, index) => {
-          const isActive = chatProfile === item.value;
-          return (
-            <>
-            <Box
-              key={item.value}
-              onMouseEnter={(e) => handleProfileMouseEnter(e, item.value)}
-              onMouseLeave={handleProfileMouseLeave}
-              onClick={() => handleProfileClick(item.value)}
-              sx={{
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                p: 1,
-                borderRadius: 1,
-                backgroundColor: isActive ? 'primary.main' : 'transparent',
-                color: isActive ? '#ffffff' : 'inherit',
-                transition: 'background-color 0.3s ease',
-                fontSize: '12px'
-              }}
-            >
-              {item.icon && (
+        {items.map((item) => (
+          <Tab
+            key={item.value}
+            value={item.value}
+            disableRipple
+            label= {
+              <Box display="flex" alignItems="center">
+                {item.icon && (
                 <Box
                   component="span"
                   sx={{ display: 'inline-flex', mr: 1, alignItems: 'center' }}
                 >
                 {item.icon}
                 </Box>
-              )}
-              {item.label}
-            </Box>
-            {index < items.length - 1 && (
-              <Box
-                sx={{
-                  width: '1px',
-                  height: '24px',
-                  backgroundColor: 'divider',
-                  mx: 1
-                }}
-              />
-            )}
-          </>
-          );
-        })}
-      </Box>
+                )}
+                {item.label}
+              </Box>
+            }
+            onMouseEnter={(e) => handleProfileMouseEnter(e, item.value)}
+            onMouseLeave={handleProfileMouseLeave}
+            sx={{
+              textTransform: 'none', 
+              fontSize: '12px',
+              minWidth: 'fit-content',
+              padding: '0 12px',
+            }}
+          />
+        ))}
+      </Tabs>
       <NewChatDialog
         open={openDialog}
         handleClose={handleClose}
