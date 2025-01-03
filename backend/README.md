@@ -12,9 +12,8 @@ Chainlit is an open-source async Python framework which allows developers to bui
 
 Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
 
-<p align="center">
-    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" alt="Chainlit user interface" width="80%"></img>
-</p>
+https://github.com/user-attachments/assets/b3738aba-55c0-42fa-ac00-6efd1ee0d148
+
 
 ## Installation
 
