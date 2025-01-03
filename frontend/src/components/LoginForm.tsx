@@ -102,6 +102,7 @@ export function LoginForm({
               </Label>
               <Input
                 id="email"
+                autoFocus
                 placeholder="me@example.com"
                 {...register('email', {
                   required: t(
