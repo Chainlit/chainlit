@@ -1,4 +1,4 @@
-import React, {
+import {
   Suspense,
   lazy,
   useCallback,
@@ -20,6 +20,7 @@ import {
 import Alert from '@/components/Alert';
 
 import * as Components from './Components';
+import Icon from './Icon';
 
 const JsxParser = lazy(() => import('react-jsx-parser'));
 
@@ -84,7 +85,7 @@ export default function CustomElement({
           deleteElement,
           callAction
         }}
-        components={Components as any}
+        components={{ ...(Components as any), Icon }}
         jsx={sourceCode}
         renderError={({ error }) => (
           <Alert variant="error">{`Failed to render ${element.name}: ${error}`}</Alert>

@@ -94,7 +94,6 @@ class LiteralToChainlitConverter:
             "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
-            "indent": metadata.get("indent"),
             "language": metadata.get("language"),
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),

@@ -112,7 +112,7 @@ code {
   background-position: -100% top;
   text-fill-color: transparent;
   -webkit-text-fill-color: transparent;
-  animation-delay: 0.3s;
+  animation-delay: 0s;
   animation-duration: 3s;
   animation-iteration-count: infinite;
   animation-name: loading-shimmer;

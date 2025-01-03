@@ -62,7 +62,6 @@ class StepDict(TypedDict, total=False):
     generation: Optional[Dict]
     showInput: Optional[Union[bool, str]]
     language: Optional[str]
-    indent: Optional[int]
     feedback: Optional[FeedbackDict]
 
 

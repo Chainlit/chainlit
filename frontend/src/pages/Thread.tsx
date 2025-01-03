@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 
 import Page from 'pages/Page';
 
@@ -19,18 +19,17 @@ export default function ThreadPage() {
   const { id } = useParams();
   const { config } = useConfig();
 
-  const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
+  const setThreadHistory = useSetRecoilState(threadHistoryState);
 
   const { threadId } = useChatMessages();
 
   const isCurrentThread = threadId === id;
 
   useEffect(() => {
-    if (threadHistory?.currentThreadId !== id) {
-      setThreadHistory((prev) => {
-        return { ...prev, currentThreadId: id };
-      });
-    }
+    setThreadHistory((prev) => {
+      if (prev?.currentThreadId === id) return prev;
+      return { ...prev, currentThreadId: id };
+    });
   }, [id]);
 
   return (
@@ -47,11 +46,8 @@ export default function ThreadPage() {
               <Loader className="!size-6" />
             </div>
           )
-        ) : isCurrentThread ? (
-          <Chat />
-        ) : (
-          <ReadOnlyThread id={id!} />
-        )}
+        ) : null}
+        {config && !config.threadResumable ? <ReadOnlyThread id={id!} /> : null}
       </>
     </Page>
   );

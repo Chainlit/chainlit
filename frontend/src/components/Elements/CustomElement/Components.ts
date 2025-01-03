@@ -1,7 +1,13 @@
-export { Button } from '@/components/ui/button';
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 export { AspectRatio } from '@/components/ui/aspect-ratio';
 export { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 export { Badge } from '@/components/ui/badge';
+export { Button } from '@/components/ui/button';
 export {
   Card,
   CardContent,
