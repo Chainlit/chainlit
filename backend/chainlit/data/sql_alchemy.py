@@ -439,6 +439,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 url=element_dict.get("url"),
                 objectKey=element_dict.get("objectKey"),
                 name=element_dict["name"],
+                props=element_dict.get("props"),
                 display=element_dict["display"],
                 size=element_dict.get("size"),
                 language=element_dict.get("language"),
@@ -577,7 +578,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 s."generation" AS step_generation,
                 s."showInput" AS step_showinput,
                 s."language" AS step_language,
-                s."indent" AS step_indent,
                 f."value" AS feedback_value,
                 f."comment" AS feedback_comment,
                 f."id" AS feedback_id
@@ -665,7 +665,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         generation=step_feedback.get("step_generation"),
                         showInput=step_feedback.get("step_showinput"),
                         language=step_feedback.get("step_language"),
-                        indent=step_feedback.get("step_indent"),
                         feedback=feedback,
                     )
                     # Append the step to the steps list of the corresponding ThreadDict
@@ -689,6 +688,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         autoPlay=element.get("element_autoPlay"),
                         playerConfig=element.get("element_playerconfig"),
                         page=element.get("element_page"),
+                        props=element.get("element_props"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),
                     )

@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 import { expect, it } from 'vitest';
 
-import { MessageContent } from 'components/molecules/messages/components/MessageContent';
+import { MessageContent } from 'components/chat/Messages/Message/Content';
 
 // Import the toBeInTheDocument function
-import type { ITextElement } from 'client-types/';
+import type { ITextElement } from '@chainlit/react-client';
 
 it('renders the message content', () => {
   const { getByText } = render(
@@ -104,41 +104,3 @@ it('highlights sources containing regex characters correctly', () => {
   expect(getByRole('link', { name: 'source(12)' })).toBeInTheDocument();
   expect(getByRole('link', { name: 'page{12}' })).toBeInTheDocument();
 });
-
-// it('preserves the box size when collapsing', () => {
-//   const { getByRole } = render(
-//     <MessageContent
-//       message={{
-//         threadId: 'test',
-//         type: 'assistant_message',
-//         output: 'hello'.repeat(650),
-//         id: 'test2',
-//         name: 'Test',
-//         createdAt: 0
-//       }}
-//       elements={[
-//         {
-//           name: 'source_1',
-//           type: 'text',
-//           display: 'side',
-//           url: 'source_1'
-//         } as ITextElement,
-//         {
-//           name: 'source_12',
-//           display: 'side',
-//           type: 'text',
-//           url: 'hi'
-//         } as ITextElement,
-//         {
-//           name: 'source_121',
-//           display: 'side',
-//           type: 'text',
-//           url: 'hi'
-//         } as ITextElement
-//       ]}
-//       preserveSize
-//     />
-//   );
-
-//   expect(getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
-// });

@@ -142,14 +142,9 @@ export const firstUserInteraction = atom<string | undefined>({
   default: undefined
 });
 
-export const accessTokenState = atom<string | undefined>({
-  key: 'AccessToken',
-  default: undefined
-});
-
-export const userState = atom<IUser | null>({
+export const userState = atom<IUser | undefined | null>({
   key: 'User',
-  default: null
+  default: undefined
 });
 
 export const configState = atom<IChainlitConfig | undefined>({

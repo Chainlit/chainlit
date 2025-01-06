@@ -37,24 +37,20 @@ describe('Copilot', () => {
   it('should be able to embed the copilot', () => {
     const opts = { includeShadowDom: true };
     cy.get('#chainlit-copilot-button', opts).click();
-    cy.get('#chainlit-copilot-popover', opts).should('be.visible');
+    cy.get('#chainlit-copilot', opts).should('exist');
 
-    cy.get('#chainlit-copilot-popover', opts).within(() => {
-      cy.get('.step', opts).should('have.length', 1);
-      cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
-    });
+    cy.get('.step', opts).should('have.length', 1);
+    cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
 
     submitMessageCopilot('Call func!');
-    cy.get('#chainlit-copilot-popover', opts).within(() => {
-      cy.get('.step', opts).should('have.length', 5);
-      cy.contains('.step', 'Function called with: Call func!', opts).should(
-        'be.visible'
-      );
-      cy.contains(
-        '.step',
-        'System message received: Hello World!',
-        opts
-      ).should('be.visible');
-    });
+    cy.get('.step', opts).should('have.length', 5);
+    cy.contains('.step', 'Function called with: Call func!', opts).should(
+      'be.visible'
+    );
+    cy.contains(
+      '.step',
+      'System message received: Hello World!',
+      opts
+    ).should('be.visible');
   });
 });

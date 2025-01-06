@@ -10,7 +10,9 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { ElementView } from 'components/atoms/elements/ElementView';
+import Alert from '@/components/Alert';
+import { ElementView } from '@/components/ElementView';
+import { Loader } from '@/components/Loader';
 
 import { useQuery } from 'hooks/query';
 
@@ -27,7 +29,7 @@ export default function Element() {
 
   const dataPersistence = config?.dataPersistence;
 
-  const { data, error } = useApi<IMessageElement>(
+  const { data, isLoading, error } = useApi<IMessageElement>(
     id && threadId && dataPersistence
       ? `/project/thread/${threadId}/element/${id}`
       : null
@@ -45,13 +47,19 @@ export default function Element() {
     }
   }, [data, element, elements, id, threadId]);
 
-  if (!element || error) {
-    return null;
-  }
-
   return (
     <Page>
-      <ElementView element={element} onGoBack={() => navigate('/')} />
+      <>
+        {isLoading ? (
+          <div className="flex flex-grow justify-center items-center">
+            <Loader className="!size-6" />
+          </div>
+        ) : null}
+        {error ? <Alert variant="error">{error.message}</Alert> : null}
+        {element ? (
+          <ElementView element={element} onGoBack={() => navigate('/')} />
+        ) : null}
+      </>
     </Page>
   );
 }

@@ -8,8 +8,6 @@ interface IInput {
   id: string;
   label?: string;
   notificationsProps?: NotificationCountProps;
-  size?: 'small' | 'medium';
-  sx?: any;
   tooltip?: string;
 }
 
