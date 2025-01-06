@@ -1209,25 +1209,6 @@ async def get_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
-@router.get("/files/{filename:path}")
-async def serve_file(
-    filename: str,
-    current_user: UserParam,
-):
-    """Serve a file from the local filesystem."""
-
-    base_path = Path(config.project.local_fs_path).resolve()
-    file_path = (base_path / filename).resolve()
-
-    if not is_path_inside(file_path, base_path):
-        raise HTTPException(status_code=400, detail="Invalid filename")
-
-    if file_path.is_file():
-        return FileResponse(file_path)
-    else:
-        raise HTTPException(status_code=404, detail="File not found")
-
-
 @router.get("/favicon")
 async def get_favicon():
     """Get the favicon for the UI."""
