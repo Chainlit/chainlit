@@ -120,7 +120,7 @@ class ChainlitDataLayer(BaseDataLayer):
         INSERT INTO "Feedback" (id, "stepId", name, value, comment)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO UPDATE
-        SET value = $4, comment = $6
+        SET value = $4, comment = $5
         RETURNING id
         """
         feedback_id = feedback.id or str(uuid.uuid4())
