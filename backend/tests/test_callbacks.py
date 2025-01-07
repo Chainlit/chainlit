@@ -1,25 +1,17 @@
 from __future__ import annotations
 
-import pytest
-from chainlit.callbacks import password_auth_callback
-from chainlit.user import User
+from unittest.mock import AsyncMock, Mock
 
 from chainlit import config
+from chainlit.callbacks import password_auth_callback
+from chainlit.data.base import BaseDataLayer
+from chainlit.user import User
 
 
-@pytest.fixture
-def test_config(monkeypatch: pytest.MonkeyPatch):
-    test_config = config.load_config()
-
-    monkeypatch.setattr("chainlit.callbacks.config", test_config)
-
-    return test_config
-
-
-async def test_password_auth_callback(test_config):
+async def test_password_auth_callback(test_config: config.ChainlitConfig):
     @password_auth_callback
     async def auth_func(username: str, password: str) -> User | None:
-        if username == "testuser" and password == "testpass":
+        if username == "testuser" and password == "testpass":  # nosec B105
             return User(identifier="testuser")
         return None
 
@@ -36,9 +28,10 @@ async def test_password_auth_callback(test_config):
     assert result is None
 
 
-async def test_header_auth_callback(test_config):
-    from chainlit.callbacks import header_auth_callback
+async def test_header_auth_callback(test_config: config.ChainlitConfig):
     from starlette.datastructures import Headers
+
+    from chainlit.callbacks import header_auth_callback
 
     @header_auth_callback
     async def auth_func(headers: Headers) -> User | None:
@@ -66,11 +59,10 @@ async def test_header_auth_callback(test_config):
     assert result is None
 
 
-async def test_oauth_callback(test_config):
+async def test_oauth_callback(test_config: config.ChainlitConfig):
     from unittest.mock import patch
 
     from chainlit.callbacks import oauth_callback
-    from chainlit.config import config
     from chainlit.user import User
 
     # Mock the get_configured_oauth_providers function
@@ -86,7 +78,7 @@ async def test_oauth_callback(test_config):
             default_app_user: User,
             id_token: str | None = None,
         ) -> User | None:
-            if provider_id == "google" and token == "valid_token":
+            if provider_id == "google" and token == "valid_token":  # nosec B105
                 return User(identifier="oauth_user")
             return None
 
@@ -107,9 +99,8 @@ async def test_oauth_callback(test_config):
         assert result is None
 
 
-async def test_on_message(mock_chainlit_context, test_config):
+async def test_on_message(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_message
-    from chainlit.config import config
     from chainlit.message import Message
 
     async with mock_chainlit_context as context:
@@ -138,9 +129,8 @@ async def test_on_message(mock_chainlit_context, test_config):
         context.session.emit.assert_called()
 
 
-async def test_on_stop(mock_chainlit_context, test_config):
+async def test_on_stop(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_stop
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         stop_called = False
@@ -160,10 +150,11 @@ async def test_on_stop(mock_chainlit_context, test_config):
         assert stop_called
 
 
-async def test_action_callback(mock_chainlit_context, test_config):
+async def test_action_callback(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     from chainlit.action import Action
     from chainlit.callbacks import action_callback
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         action_handled = False
@@ -178,16 +169,17 @@ async def test_action_callback(mock_chainlit_context, test_config):
         assert "test_action" in test_config.code.action_callbacks
 
         # Call the registered callback
-        test_action = Action(name="test_action", value="test_value")
+        test_action = Action(name="test_action", payload={"value": "test_value"})
         await test_config.code.action_callbacks["test_action"](test_action)
 
         # Check that the action_handled flag was set
         assert action_handled
 
 
-async def test_on_settings_update(mock_chainlit_context, test_config):
+async def test_on_settings_update(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     from chainlit.callbacks import on_settings_update
-    from chainlit.config import config
 
     async with mock_chainlit_context:
         settings_updated = False
@@ -208,9 +200,8 @@ async def test_on_settings_update(mock_chainlit_context, test_config):
         assert settings_updated
 
 
-async def test_author_rename(test_config):
+async def test_author_rename(test_config: config.ChainlitConfig):
     from chainlit.callbacks import author_rename
-    from chainlit.config import config
 
     @author_rename
     async def rename_author(author: str) -> str:
@@ -239,9 +230,8 @@ async def test_author_rename(test_config):
     assert result == "Human"
 
 
-async def test_on_chat_start(mock_chainlit_context, test_config):
+async def test_on_chat_start(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_start
-    from chainlit.config import config
 
     async with mock_chainlit_context as context:
         chat_started = False
@@ -264,9 +254,10 @@ async def test_on_chat_start(mock_chainlit_context, test_config):
         context.session.emit.assert_called()
 
 
-async def test_on_chat_resume(mock_chainlit_context, test_config):
+async def test_on_chat_resume(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     from chainlit.callbacks import on_chat_resume
-    from chainlit.config import config
     from chainlit.types import ThreadDict
 
     async with mock_chainlit_context:
@@ -300,9 +291,10 @@ async def test_on_chat_resume(mock_chainlit_context, test_config):
         assert chat_resumed
 
 
-async def test_set_chat_profiles(mock_chainlit_context, test_config):
+async def test_set_chat_profiles(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     from chainlit.callbacks import set_chat_profiles
-    from chainlit.config import config
     from chainlit.types import ChatProfile
 
     async with mock_chainlit_context:
@@ -328,9 +320,8 @@ async def test_set_chat_profiles(mock_chainlit_context, test_config):
         assert result[0].markdown_description == "A test profile"
 
 
-async def test_set_starters(mock_chainlit_context, test_config):
+async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import set_starters
-    from chainlit.config import config
     from chainlit.types import Starter
 
     async with mock_chainlit_context:
@@ -359,9 +350,8 @@ async def test_set_starters(mock_chainlit_context, test_config):
         assert result[0].message == "Test Message"
 
 
-async def test_on_chat_end(mock_chainlit_context, test_config):
+async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_end
-    from chainlit.config import config
 
     async with mock_chainlit_context as context:
         chat_ended = False
@@ -382,3 +372,22 @@ async def test_on_chat_end(mock_chainlit_context, test_config):
 
         # Check that the emit method was called
         context.session.emit.assert_called()
+
+
+async def test_data_layer_config(
+    mock_data_layer: AsyncMock,
+    test_config: config.ChainlitConfig,
+    mock_get_data_layer: Mock,
+):
+    """Test whether we can properly configure a data layer."""
+
+    # Test that the callback is properly registered
+    assert test_config.code.data_layer is not None
+
+    # Call the registered callback
+    result = test_config.code.data_layer()
+
+    # Check that the result is an instance of MockDataLayer
+    assert isinstance(result, BaseDataLayer)
+
+    mock_get_data_layer.assert_called_once()

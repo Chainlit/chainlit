@@ -5,6 +5,9 @@ import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
+from literalai.helper import utc_now
+from literalai.observability.step import MessageStepType
+
 from chainlit.action import Action
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -22,8 +25,6 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai.helper import utc_now
-from literalai.step import MessageStepType
 
 
 class MessageBase(ABC):
@@ -42,7 +43,6 @@ class MessageBase(ABC):
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
     wait_for_answer = False
-    indent: Optional[int] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -59,7 +59,7 @@ class MessageBase(ABC):
     @classmethod
     def from_dict(self, _dict: StepDict):
         type = _dict.get("type", "assistant_message")
-        message = Message(
+        return Message(
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
@@ -67,9 +67,8 @@ class MessageBase(ABC):
             author=_dict.get("name", config.ui.name),
             type=type,  # type: ignore
             language=_dict.get("language"),
+            metadata=_dict.get("metadata", {}),
         )
-
-        return message
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {
@@ -86,7 +85,6 @@ class MessageBase(ABC):
             "streaming": self.streaming,
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
-            "indent": self.indent,
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
@@ -114,7 +112,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message update: {str(e)}")
+                logger.error(f"Failed to persist message update: {e!s}")
 
         await context.emitter.update_step(step_dict)
 
@@ -134,7 +132,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message deletion: {str(e)}")
+                logger.error(f"Failed to persist message deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -150,7 +148,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message creation: {str(e)}")
+                logger.error(f"Failed to persist message creation: {e!s}")
 
         return step_dict
 

@@ -6,12 +6,13 @@ from asyncio import CancelledError
 from typing import Callable
 
 import click
+from fastapi import FastAPI
+from packaging import version
+
 from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage
-from fastapi import FastAPI
-from packaging import version
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:

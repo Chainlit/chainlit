@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "1.2.0"
+version = "2.0.0"
 keywords = [
     'LLM',
     'Agents',
@@ -13,24 +13,38 @@ keywords = [
     'conversational ai',
 ]
 description = "Build Conversational AI."
-authors = ["Chainlit"]
-license = "Apache-2.0 license"
+authors = ["Willy Douhard", "Dan Andre Constantini"]
+license = "Apache-2.0"
+homepage = "https://chainlit.io/"
+documentation = "https://docs.chainlit.io/"
+classifiers = [
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Communications :: Chat",
+    "Programming Language :: JavaScript",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Environment :: Web Environment"
+]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
-exclude = ["**/frontend/**/*", "**/copilot/**/**/"]
-include = ["**/frontend/dist/**/*", "**/copilot/dist/**/*"]
+exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
+include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
 chainlit = 'chainlit.cli:cli'
 
+[tool.poetry.build]
+script = "build.py"
+
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.607"
+literalai = "0.0.623"
 dataclasses_json = "^0.6.7"
-fastapi = ">=0.110.1,<0.113"
-starlette = "^0.37.2"
+fastapi = ">=0.115.3,<0.116"
+starlette = "^0.41.2"
 uvicorn = "^0.25.0"
 python-socketio = "^5.11.0"
 aiofiles = "^23.1.0"
@@ -46,7 +60,7 @@ watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
-python-multipart = "^0.0.9"
+python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
 numpy = "^1.26"
 
@@ -58,7 +72,7 @@ pytest = "^8.3.2"
 pytest-asyncio = "^0.23.8"
 pytest-cov = "^5.0.0"
 openai = "^1.11.1"
-langchain = "^0.1.5"
+langchain = "^0.2.4"
 llama-index = "^0.10.45"
 tenacity = "^8.4.1"
 transformers = "^4.38"
@@ -69,19 +83,21 @@ slack_bolt = "^1.18.1"
 discord = "^2.3.2"
 botbuilder-core = "^4.15.0"
 aiosqlite = "^0.20.0"
+pandas = "^2.2.2"
+moto = "^5.0.14"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.8.0"
-isort = "^5.13.2"
+ruff = "^0.8.0"
 
 [tool.poetry.group.mypy]
 optional = true
 
 [tool.poetry.group.mypy.dependencies]
-mypy = "^1.7.1"
+mypy = "^1.13"
 types-requests = "^2.31.0.2"
 types-aiofiles = "^23.1.0.5"
 mypy-boto3-dynamodb = "^1.34.113"
+pandas-stubs = { version = "^2.2.2", python = ">=3.9" }
 
 [tool.mypy]
 python_version = "3.9"
@@ -101,9 +117,9 @@ module = [
     "uptrace",
     "syncer",
     "azure.storage.filedatalake",
+    "google-cloud-storage"
 ]
 ignore_missing_imports = true
-
 
 
 
@@ -117,7 +133,8 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
-
+azure-storage-blob="^12.24.0"
+google-cloud-storage = "^2.19.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -127,3 +144,13 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "LOG", "UP", "T10", "ISC", "ICN", "LOG", "G", "PIE", "PT", "Q", "RSE", "FURB", "RUF"]
+ignore = ["E712", "E501", "UP006", "UP035","PIE790", "RUF005", "RUF006", "RUF012", "ISC001"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

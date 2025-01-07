@@ -27,7 +27,7 @@ describe('Chat profiles', () => {
         'starting chat with admin using the GPT-3.5 chat profile'
       );
 
-    cy.get('#chat-profile-selector').parent().click();
+    cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:GPT-3.5"]').should('exist');
     cy.get('[data-test="select-item:GPT-4"]').should('exist');
     cy.get('[data-test="select-item:GPT-5"]').should('exist');
@@ -37,8 +37,9 @@ describe('Chat profiles', () => {
     cy.get('[data-test="select-item:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.wait(1000);
-    cy.get('#starter-ask-for-help').should('exist').click();
+    cy.wait(1000)
+
+    cy.get('#starter-ask-for-help').should('not.be.disabled').click();
 
     cy.get('.step')
       .should('have.length', 2)
@@ -61,7 +62,7 @@ describe('Chat profiles', () => {
 
     submitMessage('hello');
     cy.get('.step').should('have.length', 2).eq(0).should('contain', 'hello');
-    cy.get('#chat-profile-selector').parent().click();
+    cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:GPT-5"]').click();
     cy.get('#confirm').click();
 
@@ -75,10 +76,10 @@ describe('Chat profiles', () => {
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');
 
-    cy.get('#chat-profile-selector').parent().click();
+    cy.get('#chat-profiles').click();
 
     // Force hover over GPT-4 profile to show description
-    cy.get('[data-test="select-item:GPT-4"]').trigger('mouseover', { force: true });
+    cy.get('[data-test="select-item:GPT-4"]').focus()
 
     // Wait for the popover to appear and check its content
     cy.get('#chat-profile-description').within(() => {
@@ -112,6 +113,8 @@ describe('Chat profiles', () => {
     // Select GPT-4 profile
     cy.get('[data-test="select-item:GPT-4"]').click();
 
+    cy.wait(1000)
+
     // Verify the profile has been changed
     submitMessage('hello');
     cy.get('.step')
@@ -121,6 +124,5 @@ describe('Chat profiles', () => {
         'contain',
         'starting chat with admin using the GPT-4 chat profile'
       );
-
   });
 });

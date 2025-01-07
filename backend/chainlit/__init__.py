@@ -14,6 +14,9 @@ if env_found:
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
 
+from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
+from pydantic.dataclasses import dataclass
+
 import chainlit.input_widget as input_widget
 from chainlit.action import Action
 from chainlit.cache import cache
@@ -22,7 +25,8 @@ from chainlit.chat_settings import ChatSettings
 from chainlit.context import context
 from chainlit.element import (
     Audio,
-    Component,
+    CustomElement,
+    Dataframe,
     File,
     Image,
     Pdf,
@@ -43,21 +47,21 @@ from chainlit.message import (
 )
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
-from chainlit.types import AudioChunk, ChatProfile, Starter
+from chainlit.types import ChatProfile, InputAudioChunk, OutputAudioChunk, Starter
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
 from chainlit.version import __version__
-from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
-from pydantic.dataclasses import dataclass
 
 from .callbacks import (
     action_callback,
     author_rename,
+    data_layer,
     header_auth_callback,
     oauth_callback,
     on_audio_chunk,
     on_audio_end,
+    on_audio_start,
     on_chat_end,
     on_chat_resume,
     on_chat_start,
@@ -65,7 +69,9 @@ from .callbacks import (
     on_message,
     on_settings_update,
     on_stop,
+    on_window_message,
     password_auth_callback,
+    send_window_message,
     set_chat_profiles,
     set_starters,
 )
@@ -111,77 +117,73 @@ __getattr__ = make_module_getattr(
 )
 
 __all__ = [
-    "__version__",
-    "ChatProfile",
-    "Starter",
-    "user_session",
-    "chat_context",
-    "CopilotFunction",
-    "AudioChunk",
     "Action",
-    "User",
-    "PersistedUser",
+    "AskActionMessage",
+    "AskFileMessage",
+    "AskUserMessage",
+    "AsyncLangchainCallbackHandler",
     "Audio",
-    "Pdf",
-    "Plotly",
-    "Image",
-    "Text",
-    "Component",
-    "Pyplot",
+    "ChatGeneration",
+    "ChatProfile",
+    "ChatSettings",
+    "CompletionGeneration",
+    "CopilotFunction",
+    "CustomElement",
+    "Dataframe",
+    "ErrorMessage",
     "File",
+    "GenerationMessage",
+    "HaystackAgentCallbackHandler",
+    "Image",
+    "InputAudioChunk",
+    "LangchainCallbackHandler",
+    "LlamaIndexCallbackHandler",
+    "Message",
+    "OutputAudioChunk",
+    "Pdf",
+    "PersistedUser",
+    "Plotly",
+    "Pyplot",
+    "Starter",
+    "Step",
     "Task",
     "TaskList",
     "TaskStatus",
+    "Text",
+    "User",
     "Video",
-    "ChatSettings",
-    "input_widget",
-    "Message",
-    "ErrorMessage",
-    "AskUserMessage",
-    "AskActionMessage",
-    "AskFileMessage",
-    "Step",
-    "step",
-    "ChatGeneration",
-    "CompletionGeneration",
-    "GenerationMessage",
-    "on_logout",
-    "on_chat_start",
-    "on_chat_end",
-    "on_chat_resume",
-    "on_stop",
+    "__version__",
     "action_callback",
     "author_rename",
-    "on_settings_update",
-    "password_auth_callback",
-    "header_auth_callback",
-    "sleep",
-    "run_sync",
-    "make_async",
     "cache",
+    "chat_context",
     "context",
-    "LangchainCallbackHandler",
-    "AsyncLangchainCallbackHandler",
-    "LlamaIndexCallbackHandler",
-    "HaystackAgentCallbackHandler",
-    "instrument_openai",
-    "instrument_mistralai",
-    "password_auth_callback",
+    "data_layer",
     "header_auth_callback",
+    "input_widget",
+    "instrument_mistralai",
+    "instrument_openai",
+    "make_async",
     "oauth_callback",
-    "on_logout",
-    "on_message",
-    "on_chat_start",
-    "on_chat_resume",
-    "set_chat_profiles",
-    "set_starters",
-    "on_chat_end",
     "on_audio_chunk",
     "on_audio_end",
-    "author_rename",
-    "on_stop",
-    "action_callback",
+    "on_audio_start",
+    "on_chat_end",
+    "on_chat_resume",
+    "on_chat_start",
+    "on_logout",
+    "on_message",
     "on_settings_update",
+    "on_stop",
+    "on_window_message",
+    "password_auth_callback",
+    "run_sync",
+    "send_window_message",
+    "set_chat_profiles",
+    "set_starters",
+    "sleep",
+    "step",
+    "user_session",
 ]
 
 

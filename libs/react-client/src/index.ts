@@ -11,3 +11,5 @@ export * from './state';
 export * from './utils/message';
 
 export { Socket } from 'socket.io-client';
+
+export { WavRenderer } from './wavtools/wav_renderer';

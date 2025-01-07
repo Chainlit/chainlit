@@ -2,6 +2,9 @@ import asyncio
 import uuid
 from typing import Any, Dict, List, Literal, Optional, Union, cast
 
+from literalai.helper import utc_now
+from socketio.exceptions import TimeoutError
+
 from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.data import get_data_layer
@@ -16,11 +19,10 @@ from chainlit.types import (
     FileDict,
     FileReference,
     MessagePayload,
+    OutputAudioChunk,
     ThreadDict,
 )
 from chainlit.user import PersistedUser
-from literalai.helper import utc_now
-from socketio.exceptions import TimeoutError
 
 
 class BaseChainlitEmitter:
@@ -50,6 +52,18 @@ class BaseChainlitEmitter:
 
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
+        pass
+
+    async def update_audio_connection(self, state: Literal["on", "off"]):
+        """Audio connection signaling."""
+        pass
+
+    async def send_audio_chunk(self, chunk: OutputAudioChunk):
+        """Stub method to send an audio chunk to the UI."""
+        pass
+
+    async def send_audio_interrupt(self):
+        """Stub method to interrupt the current audio response."""
         pass
 
     async def send_step(self, step_dict: StepDict):
@@ -114,10 +128,8 @@ class BaseChainlitEmitter:
         """Stub method to set chat settings."""
         pass
 
-    async def send_action_response(
-        self, id: str, status: bool, response: Optional[str] = None
-    ):
-        """Send an action response to the UI."""
+    async def send_window_message(self, data: Any):
+        """Stub method to send custom data to the host window."""
         pass
 
 
@@ -156,6 +168,18 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def resume_thread(self, thread_dict: ThreadDict):
         """Send a thread to the UI to resume it"""
         return self.emit("resume_thread", thread_dict)
+
+    async def update_audio_connection(self, state: Literal["on", "off"]):
+        """Audio connection signaling."""
+        await self.emit("audio_connection", state)
+
+    async def send_audio_chunk(self, chunk: OutputAudioChunk):
+        """Send an audio chunk to the UI."""
+        await self.emit("audio_chunk", chunk)
+
+    async def send_audio_interrupt(self):
+        """Method to interrupt the current audio response."""
+        await self.emit("audio_interrupt", {})
 
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
@@ -258,9 +282,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
             # End the task temporarily so that the User can answer the prompt
             await self.task_end()
 
-            final_res: Optional[
-                Union["StepDict", "AskActionResponse", List["FileDict"]]
-            ] = None
+            final_res: Optional[Union[StepDict, AskActionResponse, List[FileDict]]] = (
+                None
+            )
 
             if user_res:
                 interaction: Union[str, None] = None
@@ -295,7 +319,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 elif spec.type == "action":
                     action_res = cast(AskActionResponse, user_res)
                     final_res = action_res
-                    interaction = action_res["value"]
+                    interaction = action_res["name"]
 
                 if not self.session.has_first_interaction and interaction:
                     self.session.has_first_interaction = True
@@ -361,9 +385,6 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def set_chat_settings(self, settings: Dict[str, Any]):
         self.session.chat_settings = settings
 
-    def send_action_response(
-        self, id: str, status: bool, response: Optional[str] = None
-    ):
-        return self.emit(
-            "action_response", {"id": id, "status": status, "response": response}
-        )
+    def send_window_message(self, data: Any):
+        """Send custom data to the host window."""
+        return self.emit("window_message", data)

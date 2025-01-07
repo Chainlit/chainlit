@@ -1,8 +1,13 @@
 import inspect
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
+from fastapi import Request, Response
+from starlette.datastructures import Headers
+
 from chainlit.action import Action
 from chainlit.config import config
+from chainlit.context import context
+from chainlit.data.base import BaseDataLayer
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
@@ -10,13 +15,11 @@ from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
-from fastapi import Request, Response
-from starlette.datastructures import Headers
 
 
 @trace
 def password_auth_callback(
-    func: Callable[[str, str], Awaitable[Optional[User]]]
+    func: Callable[[str, str], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
@@ -38,7 +41,7 @@ def password_auth_callback(
 
 @trace
 def header_auth_callback(
-    func: Callable[[Headers], Awaitable[Optional[User]]]
+    func: Callable[[Headers], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
@@ -124,6 +127,33 @@ def on_message(func: Callable) -> Callable:
 
 
 @trace
+async def send_window_message(data: Any):
+    """
+    Send custom data to the host window via a window.postMessage event.
+
+    Args:
+        data (Any): The data to send with the event.
+    """
+    await context.emitter.send_window_message(data)
+
+
+@trace
+def on_window_message(func: Callable[[str], Any]) -> Callable:
+    """
+    Hook to react to javascript postMessage events coming from the UI.
+
+    Args:
+        func (Callable[[str], Any]): The function to be called when a window message is received.
+                                     Takes the message content as a string parameter.
+
+    Returns:
+        Callable[[str], Any]: The decorated on_window_message function.
+    """
+    config.code.on_window_message = wrap_user_function(func)
+    return func
+
+
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -177,7 +207,7 @@ def set_chat_profiles(
 
 @trace
 def set_starters(
-    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
@@ -210,12 +240,25 @@ def on_chat_end(func: Callable) -> Callable:
 
 
 @trace
+def on_audio_start(func: Callable) -> Callable:
+    """
+    Hook to react to the user initiating audio.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_audio_start = wrap_user_function(func, with_task=False)
+    return func
+
+
+@trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
     Hook to react to the audio chunks being sent.
 
     Args:
-        chunk (AudioChunk): The audio chunk being sent.
+        chunk (InputAudioChunk): The audio chunk being sent.
 
     Returns:
         Callable[], Any]: The decorated hook.
@@ -230,9 +273,6 @@ def on_audio_end(func: Callable) -> Callable:
     """
     Hook to react to the audio stream ending. This is called after the last audio chunk is sent.
 
-    Args:
-    elements ([List[Element]): The files that were uploaded before starting the audio stream (if any).
-
     Returns:
         Callable[], Any]: The decorated hook.
     """
@@ -245,7 +285,7 @@ def on_audio_end(func: Callable) -> Callable:
 
 @trace
 def author_rename(
-    func: Callable[[str], Awaitable[str]]
+    func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
@@ -285,7 +325,7 @@ def action_callback(name: str) -> Callable:
     """
 
     def decorator(func: Callable[[Action], Any]):
-        config.code.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        config.code.action_callbacks[name] = wrap_user_function(func, with_task=False)
         return func
 
     return decorator
@@ -305,4 +345,18 @@ def on_settings_update(
     """
 
     config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
+def data_layer(
+    func: Callable[[], BaseDataLayer],
+) -> Callable[[], BaseDataLayer]:
+    """
+    Hook to configure custom data layer.
+    """
+
+    # We don't use wrap_user_function here because:
+    # 1. We don't need to support async here and;
+    # 2. We don't want to change the API for get_data_layer() to be async, everywhere (at this point).
+    config.code.data_layer = func
     return func

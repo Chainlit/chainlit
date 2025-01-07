@@ -14,11 +14,7 @@ export interface ChatProfile {
 
 export interface IAudioConfig {
   enabled: boolean;
-  min_decibels: number;
-  initial_silence_timeout: number;
-  silence_timeout: number;
-  chunk_duration: number;
-  max_duration: number;
+  sample_rate: number;
 }
 
 export interface IAuthConfig {
@@ -26,6 +22,7 @@ export interface IAuthConfig {
   passwordAuth: boolean;
   headerAuth: boolean;
   oauthProviders: string[];
+  default_theme?: 'light' | 'dark';
 }
 
 export interface IChainlitConfig {
@@ -33,10 +30,11 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
+    font_family?: string;
+    default_theme?: 'light' | 'dark';
+    layout?: 'default' | 'wide';
     cot: 'hidden' | 'tool_call' | 'full';
-    default_collapse_content?: boolean;
     github?: string;
-    theme: any;
     custom_css?: string;
     custom_js?: string;
     custom_font?: string;

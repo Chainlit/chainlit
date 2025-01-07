@@ -6,7 +6,9 @@ export type IElement =
   | IAudioElement
   | IVideoElement
   | IFileElement
-  | IPlotlyElement;
+  | IPlotlyElement
+  | IDataframeElement
+  | ICustomElement;
 
 export type IMessageElement =
   | IImageElement
@@ -15,7 +17,9 @@ export type IMessageElement =
   | IAudioElement
   | IVideoElement
   | IFileElement
-  | IPlotlyElement;
+  | IPlotlyElement
+  | IDataframeElement
+  | ICustomElement;
 
 export type ElementType = IElement['type'];
 export type IElementSize = 'small' | 'medium' | 'large';
@@ -66,6 +70,12 @@ export interface IFileElement extends TMessageElement<'file'> {
   type: 'file';
 }
 
-export interface IPlotlyElement extends TMessageElement<'plotly'> {}
+export type IPlotlyElement = TMessageElement<'plotly'>;
 
-export interface ITasklistElement extends TElement<'tasklist'> {}
+export type ITasklistElement = TElement<'tasklist'>;
+
+export type IDataframeElement = TMessageElement<'dataframe'>;
+
+export interface ICustomElement extends TMessageElement<'custom'> {
+  props: Record<string, unknown>;
+}

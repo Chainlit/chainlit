@@ -3,17 +3,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@chainlit/react-client';
 
-import { useQuery } from 'hooks/query';
-
 export default function AuthCallback() {
-  const query = useQuery();
-  const { user, setAccessToken } = useAuth();
+  const { user, setUserFromAPI } = useAuth();
   const navigate = useNavigate();
 
+  // Fetch user in cookie-based oauth.
   useEffect(() => {
-    const token = query.get('access_token');
-    setAccessToken(token);
-  }, [query]);
+    if (!user) setUserFromAPI();
+  }, []);
 
   useEffect(() => {
     if (user) {

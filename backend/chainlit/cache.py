@@ -1,5 +1,7 @@
+import importlib.util
 import os
 import threading
+from typing import Any
 
 from chainlit.config import config
 from chainlit.logger import logger
@@ -8,11 +10,7 @@ from chainlit.logger import logger
 def init_lc_cache():
     use_cache = config.project.cache is True and config.run.no_cache is False
 
-    if use_cache:
-        try:
-            import langchain
-        except ImportError:
-            return
+    if use_cache and importlib.util.find_spec("langchain") is not None:
         from langchain.cache import SQLiteCache
         from langchain.globals import set_llm_cache
 
@@ -25,7 +23,7 @@ def init_lc_cache():
                 )
 
 
-_cache = {}
+_cache: dict[tuple, Any] = {}
 _cache_lock = threading.Lock()
 
 

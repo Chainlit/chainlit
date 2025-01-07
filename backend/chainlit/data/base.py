@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from chainlit.types import (
     Feedback,
@@ -104,18 +104,4 @@ class BaseDataLayer(ABC):
 
     @abstractmethod
     async def build_debug_url(self) -> str:
-        pass
-
-
-class BaseStorageClient(ABC):
-    """Base class for non-text data persistence like Azure Data Lake, S3, Google Storage, etc."""
-
-    @abstractmethod
-    async def upload_file(
-        self,
-        object_key: str,
-        data: Union[bytes, str],
-        mime: str = "application/octet-stream",
-        overwrite: bool = True,
-    ) -> Dict[str, Any]:
         pass

@@ -11,8 +11,10 @@ import aiofiles
 import aiohttp
 import boto3  # type: ignore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+
 from chainlit.context import context
-from chainlit.data.base import BaseDataLayer, BaseStorageClient
+from chainlit.data.base import BaseDataLayer
+from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
@@ -28,8 +30,9 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 if TYPE_CHECKING:
-    from chainlit.element import Element
     from mypy_boto3_dynamodb import DynamoDBClient
+
+    from chainlit.element import Element
 
 
 _logger = logger.getChild("DynamoDB")
@@ -92,6 +95,10 @@ class DynamoDBDataLayer(BaseDataLayer):
             ExpressionAttributeNames=expression_attribute_names,
             ExpressionAttributeValues=self._serialize_item(expression_attribute_values),
         )
+
+    @property
+    def context(self):
+        return context
 
     async def get_user(self, identifier: str) -> Optional["PersistedUser"]:
         _logger.info("DynamoDB: get_user identifier=%s", identifier)
@@ -241,7 +248,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         if not element.mime:
             element.mime = "application/octet-stream"
 
-        context_user = context.session.user
+        context_user = self.context.session.user
         user_folder = getattr(context_user, "id", "unknown")
         file_object_key = f"{user_folder}/{element.thread_id}/{element.id}"
 
@@ -293,7 +300,7 @@ class DynamoDBDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
-        thread_id = context.session.thread_id
+        thread_id = self.context.session.thread_id
         _logger.info(
             "DynamoDB: delete_element thread=%s element=%s", thread_id, element_id
         )
@@ -349,7 +356,7 @@ class DynamoDBDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
-        thread_id = context.session.thread_id
+        thread_id = self.context.session.thread_id
         _logger.info("DynamoDB: delete_feedback thread=%s step=%s", thread_id, step_id)
 
         self.client.delete_item(
@@ -397,7 +404,7 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         BATCH_ITEM_SIZE = 25  # pylint: disable=invalid-name
         for i in range(0, len(delete_requests), BATCH_ITEM_SIZE):
-            chunk = delete_requests[i : i + BATCH_ITEM_SIZE]  # noqa: E203
+            chunk = delete_requests[i : i + BATCH_ITEM_SIZE]
             response = self.client.batch_write_item(
                 RequestItems={
                     self.table_name: chunk,  # type: ignore
@@ -405,7 +412,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             )
 
             backoff_time = 1
-            while "UnprocessedItems" in response and response["UnprocessedItems"]:
+            while response.get("UnprocessedItems"):
                 backoff_time *= 2
                 # Cap the backoff time at 32 seconds & add jitter
                 delay = min(backoff_time, 32) + random.uniform(0, 1)

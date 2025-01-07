@@ -58,3 +58,6 @@ dist-ssr
 
 .aider*
 .coverage
+
+backend/README.md
+backend/.dmypy.json

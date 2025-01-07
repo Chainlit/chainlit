@@ -3,34 +3,24 @@ import json
 import mimetypes
 import shutil
 import uuid
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional, Union
 
 import aiofiles
+
 from chainlit.logger import logger
+from chainlit.types import FileReference
 
 if TYPE_CHECKING:
-    from chainlit.message import Message
-    from chainlit.step import Step
-    from chainlit.types import FileDict, FileReference
+    from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
 
 ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
 
 class JSONEncoderIgnoreNonSerializable(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, o):
         try:
-            return super(JSONEncoderIgnoreNonSerializable, self).default(obj)
+            return super().default(o)
         except TypeError:
             return None
 
@@ -86,7 +76,7 @@ class BaseSession:
         self.chat_profile = chat_profile
         self.http_referer = http_referer
 
-        self.files = {}  # type: Dict[str, "FileDict"]
+        self.files: Dict[str, FileDict] = {}
 
         self.id = id
 
@@ -104,7 +94,7 @@ class BaseSession:
         mime: str,
         path: Optional[str] = None,
         content: Optional[Union[bytes, str]] = None,
-    ) -> "FileReference":
+    ) -> FileReference:
         if not path and not content:
             raise ValueError(
                 "Either path or content must be provided to persist a file"
@@ -123,9 +113,10 @@ class BaseSession:
 
         if path:
             # Copy the file from the given path
-            async with aiofiles.open(path, "rb") as src, aiofiles.open(
-                file_path, "wb"
-            ) as dst:
+            async with (
+                aiofiles.open(path, "rb") as src,
+                aiofiles.open(file_path, "wb") as dst,
+            ):
                 await dst.write(await src.read())
         elif content:
             # Write the provided content to the file
