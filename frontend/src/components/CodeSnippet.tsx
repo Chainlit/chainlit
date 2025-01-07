@@ -29,7 +29,7 @@ const HighlightedCode = ({ language, children }: CodeSnippetProps) => {
     <pre className="m-0">
       <code
         ref={codeRef}
-        className={`language-${language} font-mono text-sm rounded-b-lg block`}
+        className={`language-${language} font-mono text-sm rounded-b-md block`}
       >
         {children}
       </code>
@@ -51,7 +51,7 @@ interface CodeProps {
   };
 }
 
-export default function CodeSnippet({ children, ...props }: CodeProps) {
+export default function CodeSnippet({ ...props }: CodeProps) {
   const codeChildren = props.node?.children?.[0];
   const className = codeChildren?.properties?.className?.[0];
   const match = /language-(\w+)/.exec(className || '');
@@ -64,8 +64,8 @@ export default function CodeSnippet({ children, ...props }: CodeProps) {
   ) : null;
 
   const nonHighlightedCode = showSyntaxHighlighter ? null : (
-    <div className="rounded-lg p-2 min-h-20 overflow-x-auto bg-accent">
-      <code className="whitespace-pre-wrap">{children}</code>
+    <div className="p-2 rounded-b-md min-h-20 overflow-x-auto bg-accent">
+      <code className="whitespace-pre-wrap">{code}</code>
     </div>
   );
 

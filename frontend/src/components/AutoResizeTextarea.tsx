@@ -35,7 +35,7 @@ const AutoResizeTextarea = ({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea || !maxHeight) return;
-    textarea.style.height = 'auto';
+    textarea.style.height = '40px';
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
     textarea.style.height = `${newHeight}px`;
   }, [props.value]);
@@ -55,7 +55,7 @@ const AutoResizeTextarea = ({
       onCompositionStart={() => setIsComposing(true)}
       onCompositionEnd={() => setIsComposing(false)}
       className={cn(
-        'p-0 min-h-6 rounded-none resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+        'p-0 min-h-[40px] h-[40px] rounded-none resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
         className
       )}
       placeholder={placeholder}
