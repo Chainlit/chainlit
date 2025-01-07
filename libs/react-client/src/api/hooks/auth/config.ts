@@ -5,7 +5,7 @@ import { useApi } from '../api';
 import { useAuthState } from './state';
 
 export const useAuthConfig = () => {
-  const { authConfig, setAuthConfig, cookieAuth } = useAuthState();
+  const { authConfig, setAuthConfig } = useAuthState();
   const { data: authConfigData, isLoading } = useApi<IAuthConfig>(
     authConfig ? null : '/auth/config'
   );
@@ -16,5 +16,5 @@ export const useAuthConfig = () => {
     }
   }, [authConfigData, setAuthConfig]);
 
-  return { authConfig, isLoading, cookieAuth };
+  return { authConfig, isLoading };
 };

@@ -4,7 +4,8 @@ import chainlit as cl
 
 
 @cl.header_auth_callback
-def header_auth_callback(headers) -> Optional[cl.User]:
+async def header_auth_callback(headers) -> Optional[cl.User]:
+    await cl.sleep(1)
     if headers.get("test-header"):
         return cl.User(identifier="admin")
     else:

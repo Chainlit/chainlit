@@ -186,12 +186,16 @@ class AskFileResponse:
 
 class AskActionResponse(TypedDict):
     name: str
-    value: str
+    payload: Dict
     label: str
-    description: str
+    tooltip: str
     forId: str
     id: str
-    collapsed: bool
+
+
+class UpdateThreadRequest(BaseModel):
+    threadId: str
+    name: str
 
 
 class DeleteThreadRequest(BaseModel):
@@ -205,6 +209,16 @@ class DeleteFeedbackRequest(BaseModel):
 class GetThreadsRequest(BaseModel):
     pagination: Pagination
     filter: ThreadFilter
+
+
+class CallActionRequest(BaseModel):
+    action: Dict
+    sessionId: str
+
+
+class ElementRequest(BaseModel):
+    element: Dict
+    sessionId: str
 
 
 class Theme(str, Enum):

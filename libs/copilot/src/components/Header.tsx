@@ -1,13 +1,11 @@
-import { IconButton, Stack } from '@mui/material';
+import { Maximize, Minimize } from 'lucide-react';
 
-import ExpandIcon from '@chainlit/app/src/assets/expand';
-import MinimizeIcon from '@chainlit/app/src/assets/minimize';
-import { Logo } from '@chainlit/app/src/components/atoms/logo';
-import AudioPresence from '@chainlit/app/src/components/organisms/chat/inputBox/AudioPresence';
-import { useAudio } from '@chainlit/react-client/src';
-
-import ChatProfiles from './ChatProfiles';
-import NewChatButton from './NewChatButton';
+import AudioPresence from '@chainlit/app/src/components/AudioPresence';
+import { Logo } from '@chainlit/app/src/components/Logo';
+import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
+import NewChatButton from '@chainlit/app/src/components/header/NewChat';
+import { Button } from '@chainlit/app/src/components/ui/button';
+import { useAudio, useConfig } from '@chainlit/react-client';
 
 interface Props {
   expanded: boolean;
@@ -15,28 +13,17 @@ interface Props {
 }
 
 const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
+  const { config } = useConfig();
   const { audioConnection } = useAudio();
 
+  const hasChatProfiles = !!config?.chatProfiles.length;
+
   return (
-    <Stack
-      px={2}
-      py={1.5}
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      bgcolor="background.paper"
-    >
-      <Stack direction="row" alignItems="center" spacing={0.5}>
-        <Logo style={{ maxHeight: '25px' }} />
-        <IconButton onClick={() => setExpanded(!expanded)}>
-          {expanded ? (
-            <MinimizeIcon sx={{ width: 16, height: 16 }} />
-          ) : (
-            <ExpandIcon sx={{ width: 16, height: 16 }} />
-          )}
-        </IconButton>
-      </Stack>
-      <Stack direction="row" alignItems="center" spacing={1}>
+    <div className="flex align-center justify-between p-4 pb-0">
+      <div className="flex items-center gap-1">
+        {hasChatProfiles ? <ChatProfiles /> : <Logo className="w-[100px]" />}
+      </div>
+      <div className="flex items-center">
         {audioConnection === 'on' ? (
           <AudioPresence
             type="server"
@@ -46,10 +33,20 @@ const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
             barSpacing={2}
           />
         ) : null}
-        <ChatProfiles />
-        <NewChatButton />
-      </Stack>
-    </Stack>
+        <NewChatButton className="text-muted-foreground mt-[1.5px]" />
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? (
+            <Minimize className="!size-5 text-muted-foreground" />
+          ) : (
+            <Maximize className="!size-5 text-muted-foreground" />
+          )}
+        </Button>
+      </div>
+    </div>
   );
 };
 

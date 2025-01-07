@@ -28,9 +28,6 @@ describe('Action', () => {
     cy.get('.step').eq(4).should('contain', 'Executed removable action!');
     cy.get("[id='removable-action']").should('not.exist');
 
-    // Click on "multiple action one" in the action drawer, should remove the correct action button
-    cy.get("[id='actions-drawer-button']").should('exist');
-    cy.get("[id='actions-drawer-button']").click();
     cy.get('.step').should('have.length', 5);
 
     cy.get("[id='multiple-action-one']").should('exist');
@@ -42,8 +39,6 @@ describe('Action', () => {
 
     // Click on "multiple action two", should remove the correct action button
     cy.get('.step').should('have.length', 6);
-    cy.get("[id='actions-drawer-button']").click();
-    cy.get("[id='multiple-action-two']").should('exist');
     cy.get("[id='multiple-action-two']").click();
     cy.get('.step')
       .eq(6)
@@ -56,6 +51,5 @@ describe('Action', () => {
     cy.get('.step').eq(7).should('contain', 'All actions have been removed!');
     cy.get("[id='all-actions-removed']").should('not.exist');
     cy.get("[id='test-action']").should('not.exist');
-    cy.get("[id='actions-drawer-button']").should('not.exist');
   });
 });

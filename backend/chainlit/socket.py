@@ -7,7 +7,6 @@ from urllib.parse import unquote
 from starlette.requests import cookie_parser
 from typing_extensions import TypeAlias
 
-from chainlit.action import Action
 from chainlit.auth import get_current_user, require_login
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -82,15 +81,6 @@ def load_user_env(user_env):
     return user_env
 
 
-def _get_token_from_auth(auth: dict) -> Optional[str]:
-    # Not using cookie auth, return token.
-    token = auth.get("token")
-    if token:
-        return token.split(" ")[1]
-
-    return None
-
-
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
     if cookie_header := environ.get("HTTP_COOKIE", None):
         cookies = cookie_parser(cookie_header)
@@ -101,10 +91,6 @@ def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
 
 def _get_token(environ: WSGIEnvironment, auth: dict) -> Optional[str]:
     """Take WSGI environ, return access token."""
-
-    if not config.project.cookie_auth:
-        return _get_token_from_auth(auth)
-
     return _get_token_from_cookie(environ)
 
 
@@ -385,42 +371,6 @@ async def audio_end(sid):
         ).send()
     finally:
         await context.emitter.task_end()
-
-
-async def process_action(action: Action):
-    callback = config.code.action_callbacks.get(action.name)
-    if callback:
-        res = await callback(action)
-        return res
-    else:
-        logger.warning("No callback found for action %s", action.name)
-
-
-@sio.on("action_call")
-async def call_action(sid, action):
-    """Handle an action call from the UI."""
-    context = init_ws_context(sid)
-
-    action = Action(**action)
-
-    try:
-        if not context.session.has_first_interaction:
-            context.session.has_first_interaction = True
-            asyncio.create_task(context.emitter.init_thread(action.name))
-        res = await process_action(action)
-        await context.emitter.send_action_response(
-            id=action.id, status=True, response=res if isinstance(res, str) else None
-        )
-
-    except asyncio.CancelledError:
-        await context.emitter.send_action_response(
-            id=action.id, status=False, response="Action interrupted by the user"
-        )
-    except Exception as e:
-        logger.exception(e)
-        await context.emitter.send_action_response(
-            id=action.id, status=False, response="An error occurred"
-        )
 
 
 @sio.on("chat_settings_change")

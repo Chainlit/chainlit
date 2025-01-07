@@ -59,8 +59,7 @@ const ChatComponent = () => {
     connect({
       userEnv: {
         /* user environment variables */
-      },
-      accessToken: 'Bearer YOUR_ACCESS_TOKEN' // Optional Chainlit auth token
+      }
     });
 
     return () => {

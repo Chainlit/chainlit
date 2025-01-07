@@ -21,8 +21,8 @@ export interface IAuthConfig {
   requireLogin: boolean;
   passwordAuth: boolean;
   headerAuth: boolean;
-  cookieAuth: boolean;
   oauthProviders: string[];
+  default_theme?: 'light' | 'dark';
 }
 
 export interface IChainlitConfig {
@@ -30,10 +30,11 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
+    font_family?: string;
+    default_theme?: 'light' | 'dark';
+    layout?: 'default' | 'wide';
     cot: 'hidden' | 'tool_call' | 'full';
-    default_collapse_content?: boolean;
     github?: string;
-    theme: any;
     custom_css?: string;
     custom_js?: string;
     custom_font?: string;

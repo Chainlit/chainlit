@@ -1,7 +1,6 @@
 import { runTestServer } from '../../support/testUtils';
 
 function openReadme() {
-  cy.get('#open-sidebar-button').click();
   cy.get('#readme-button').click();
 }
 
