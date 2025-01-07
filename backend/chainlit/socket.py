@@ -1,6 +1,5 @@
 import asyncio
 import json
-import time
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 from urllib.parse import unquote
 
@@ -258,8 +257,6 @@ async def process_message(session: WebsocketSession, payload: MessagePayload):
         message = await context.emitter.process_message(payload)
 
         if config.code.on_message:
-            # Sleep 1ms to make sure any children step starts after the message step start
-            time.sleep(0.001)
             await config.code.on_message(message)
     except asyncio.CancelledError:
         pass
