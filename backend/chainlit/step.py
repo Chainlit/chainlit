@@ -1,7 +1,6 @@
 import asyncio
 import inspect
 import json
-import time
 import uuid
 from copy import deepcopy
 from functools import wraps
@@ -192,7 +191,6 @@ class Step:
         thread_id: Optional[str] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
-        time.sleep(0.001)
         self._input = ""
         self._output = ""
         self.thread_id = thread_id or context.session.thread_id
