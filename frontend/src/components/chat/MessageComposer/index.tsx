@@ -143,7 +143,7 @@ export default function MessageComposer({
         onPaste={onPaste}
         onEnter={submit}
         onChange={(e) => setValue(e.target.value)}
-        className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"
+        className="bg-transparent placeholder:text-base placeholder:font-medium text-base"
         maxHeight={250}
         placeholder={t('components.organisms.chat.inputBox.input.placeholder')}
       />
