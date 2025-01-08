@@ -25,6 +25,7 @@ declare global {
     };
     mountChainlitWidget: (config: IWidgetConfig) => void;
     unmountChainlitWidget: () => void;
+    toggleChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
   }
 }
