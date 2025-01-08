@@ -271,7 +271,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_HYBRID_TENANT_ID"),
             "response_type": "code id_token",
-            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
+            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid offline_access",
             "response_mode": "form_post",
             "nonce": nonce,
         }
@@ -296,10 +296,12 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             json = response.json()
 
             token = json["access_token"]
+            refresh_token = json.get("refresh_token")
             if not token:
                 raise HTTPException(
                     status_code=400, detail="Failed to get the access token"
                 )
+            self._refresh_token = refresh_token
             return token
 
     async def get_user_info(self, token: str):
@@ -328,7 +330,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
+                metadata={"image": azure_user.get("image"), "provider": "azure-ad", "refresh_token": getattr(self, "_refresh_token", None)},
             )
             return (azure_user, user)
 
