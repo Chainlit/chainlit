@@ -1058,6 +1058,10 @@ async def call_action(
 
     callback = config.code.action_callbacks.get(action.name)
     if callback:
+        if not context.session.has_first_interaction:
+            context.session.has_first_interaction = True
+            asyncio.create_task(context.emitter.init_thread(action.name))
+
         await callback(action)
     else:
         raise HTTPException(
