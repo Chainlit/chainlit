@@ -213,9 +213,9 @@ async def main():
 
 
 @cl.on_message
-async def handle_message(msg: cl.Message):
+async def handle_message():
     # Wait for queue to be flushed
-    await cl.sleep(1)
+    await cl.sleep(2)
     await send_count()
     async with cl.Step(type="tool", name="thinking") as step:
         step.output = "Thinking..."
