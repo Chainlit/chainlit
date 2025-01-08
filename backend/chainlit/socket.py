@@ -257,6 +257,7 @@ async def process_message(session: WebsocketSession, payload: MessagePayload):
         message = await context.emitter.process_message(payload)
 
         if config.code.on_message:
+            await asyncio.sleep(0.001)
             await config.code.on_message(message)
     except asyncio.CancelledError:
         pass

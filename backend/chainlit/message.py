@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
@@ -217,6 +218,7 @@ class Message(MessageBase):
         parent_id: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
+        time.sleep(0.001)
         self.language = language
         if isinstance(content, dict):
             try:

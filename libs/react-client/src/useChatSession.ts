@@ -327,7 +327,7 @@ const useChatSession = () => {
         }
       });
     },
-    [setSession, sessionId, chatProfile]
+    [setSession, sessionId, idToResume, chatProfile]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);

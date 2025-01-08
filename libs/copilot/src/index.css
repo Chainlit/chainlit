@@ -113,20 +113,20 @@
   background-position: -100% top;
   text-fill-color: transparent;
   -webkit-text-fill-color: transparent;
-  animation-delay: 0.3s;
-  animation-duration: 3s;
+  animation-delay: 0s;
+  animation-duration: 4s;
   animation-iteration-count: infinite;
   animation-name: loading-shimmer;
-  background: hsl(var(--muted-foreground))
+  background: hsl(var(--muted))
     gradient(
       linear,
       100% 0,
       0 0,
-      from(hsl(var(--muted-foreground))),
+      from(hsl(var(--muted))),
       color-stop(0.5, hsl(var(--foreground))),
-      to(hsl(var(--muted-foreground)))
+      to(hsl(var(--muted)))
     );
-  background: hsl(var(--muted-foreground)) -webkit-gradient(linear, 100% 0, 0 0, from(hsl(var(--muted-foreground))), color-stop(0.5, hsl(var(--foreground))), to(hsl(var(--muted-foreground))));
+  background: hsl(var(--muted)) -webkit-gradient(linear, 100% 0, 0 0, from(hsl(var(--muted))), color-stop(0.5, hsl(var(--foreground))), to(hsl(var(--muted))));
   background-clip: text;
   -webkit-background-clip: text;
   background-repeat: no-repeat;
