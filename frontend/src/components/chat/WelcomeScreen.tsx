@@ -1,9 +1,16 @@
 import { cn, hasMessage } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
-import { FileSpec, useChatMessages } from '@chainlit/react-client';
+import {
+  ChainlitContext,
+  FileSpec,
+  useChatMessages,
+  useChatSession,
+  useConfig
+} from '@chainlit/react-client';
 
 import { Logo } from '@/components/Logo';
+import Markdown from '@/components/Markdown';
 
 import MessageComposer from './MessageComposer';
 import Starters from './Starters';
@@ -16,12 +23,44 @@ interface Props {
 }
 
 export default function WelcomeScreen(props: Props) {
+  const apiClient = useContext(ChainlitContext);
+  const { config } = useConfig();
+  const { chatProfile } = useChatSession();
   const { messages } = useChatMessages();
   const [isVisible, setIsVisible] = useState(false);
+
+  const chatProfiles = config?.chatProfiles;
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  const logo = useMemo(() => {
+    if (chatProfile && chatProfiles) {
+      const currentChatProfile = chatProfiles.find(
+        (cp) => cp.name === chatProfile
+      );
+      if (currentChatProfile?.icon) {
+        return (
+          <div className="flex flex-col gap-2 mb-2 items-center">
+            <img
+              className="h-16 w-16 rounded-full"
+              src={
+                currentChatProfile?.icon.startsWith('/public')
+                  ? apiClient.buildEndpoint(currentChatProfile?.icon)
+                  : currentChatProfile?.icon
+              }
+            />
+            {currentChatProfile?.markdown_description ? (
+              <Markdown>{currentChatProfile.markdown_description}</Markdown>
+            ) : null}
+          </div>
+        );
+      }
+    }
+
+    return <Logo className="w-[200px] mb-2" />;
+  }, [chatProfiles, chatProfile]);
 
   if (hasMessage(messages)) return null;
 
@@ -32,7 +71,7 @@ export default function WelcomeScreen(props: Props) {
         isVisible && 'opacity-100'
       )}
     >
-      <Logo className="w-[200px] mb-2" />
+      {logo}
       <MessageComposer {...props} />
       <Starters />
     </div>

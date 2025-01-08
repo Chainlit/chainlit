@@ -167,7 +167,7 @@ export default function MessageComposer({
               <Settings className="!size-6" />
             </Button>
           )}
-          <VoiceButton />
+          <VoiceButton disabled={disabled} />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton onSubmit={submit} disabled={disabled || !value} />
