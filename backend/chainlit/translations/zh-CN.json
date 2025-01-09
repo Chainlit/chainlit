@@ -144,6 +144,10 @@
             "failed": "失败",
             "feedbackUpdated": "反馈更新",
             "updating": "正在更新"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {
