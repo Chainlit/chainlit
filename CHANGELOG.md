@@ -4,6 +4,20 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.1] - 2025-01-09
+
+### Added
+- `window.toggleChainlitCopilot()` to toggle the copilot
+
+### Fixed
+- Chat profiles icon and description should now be displayed on the welcome screen
+- Action should be able to trigger the first interaction
+- Raw code blocks should now be displayed correctly
+- TextInput for chat settings should now work
+- Upload attachement button should not be displayed when upload is disabled
+- Removed unused numpy dependency
+
+
 ## [2.0.0] - 2025-01-06
 
 The Chainlit UI (including the copilot) has been completely re-written with Shadcn/Tailwind. This brings several advantages:
