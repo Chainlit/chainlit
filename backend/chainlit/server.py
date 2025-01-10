@@ -1123,11 +1123,14 @@ def validate_file_upload(file: UploadFile):
     Raises:
         ValueError: If the file is not allowed.
     """
-    if config.features.spontaneous_file_upload is None:
-        """Default for a missing config is to allow the fileupload without any restrictions"""
-        return
-    if config.features.spontaneous_file_upload.enabled is False:
-        raise ValueError("File upload is not enabled")
+    # TODO: This logic/endpoint is shared across spontaneous uploads and the AskFileMessage API.
+    # Commenting this check until we find a better solution
+
+    # if config.features.spontaneous_file_upload is None:
+    #     """Default for a missing config is to allow the fileupload without any restrictions"""
+    #     return
+    # if not config.features.spontaneous_file_upload.enabled:
+    #     raise ValueError("File upload is not enabled")
 
     validate_file_mime_type(file)
     validate_file_size(file)
