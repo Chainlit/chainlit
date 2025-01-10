@@ -1143,10 +1143,15 @@ def validate_file_mime_type(file: UploadFile):
     Raises:
         ValueError: If the file type is not allowed.
     """
-    accept = config.features.spontaneous_file_upload.accept
-    if accept is None:
+
+    if (
+        config.features.spontaneous_file_upload is None
+        or config.features.spontaneous_file_upload.accept is None
+    ):
         "Accept is not configured, allowing all file types"
         return
+
+    accept = config.features.spontaneous_file_upload.accept
 
     assert isinstance(accept, List) or isinstance(accept, dict), (
         "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
@@ -1174,7 +1179,10 @@ def validate_file_size(file: UploadFile):
     Raises:
         ValueError: If the file size is too large.
     """
-    if config.features.spontaneous_file_upload.max_size_mb is None:
+    if (
+        config.features.spontaneous_file_upload is None
+        or config.features.spontaneous_file_upload.max_size_mb is None
+    ):
         return
 
     if (
