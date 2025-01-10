@@ -21,6 +21,7 @@ import {
   isAiSpeakingState,
   loadingState,
   messagesState,
+  resumeThreadErrorState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -72,6 +73,8 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
+  const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
 
@@ -192,6 +195,10 @@ const useChatSession = () => {
             (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
           )
         );
+      });
+
+      socket.on('resume_thread_error', (error?: string) => {
+        setThreadResumeError(error);
       });
 
       socket.on('new_message', (message: IStep) => {

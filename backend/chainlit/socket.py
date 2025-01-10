@@ -187,6 +187,8 @@ async def connection_successful(sid):
 
             await context.emitter.resume_thread(thread)
             return
+        else:
+            await context.emitter.send_resume_thread_error("Thread not found.")
 
     if config.code.on_chat_start:
         task = asyncio.create_task(config.code.on_chat_start())
