@@ -20,7 +20,6 @@ import {
 
 import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 
-import Alert from './Alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Loader } from './Loader';
 import { Messages } from './chat/Messages';
@@ -33,7 +32,7 @@ const ReadOnlyThread = ({ id }: Props) => {
   const { config } = useConfig();
   const {
     data: thread,
-    error,
+    error: threadError,
     isLoading
   } = useApi<IThread>(id ? `/project/thread/${id}` : null, {
     revalidateOnFocus: false
@@ -52,6 +51,13 @@ const ReadOnlyThread = ({ id }: Props) => {
     }
     setSteps(thread.steps);
   }, [thread]);
+
+  useEffect(() => {
+    if (threadError) {
+      navigate('/');
+      toast.error('Failed to load thread: ' + threadError.message);
+    }
+  }, [threadError]);
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
@@ -173,8 +179,6 @@ const ReadOnlyThread = ({ id }: Props) => {
 
   return (
     <div className="flex w-full flex-col flex-grow relative overflow-y-auto">
-      {error ? <Alert variant="error">{error.message}</Alert> : null}
-
       <ErrorBoundary>
         <MessageContext.Provider value={memoizedContext}>
           <div
