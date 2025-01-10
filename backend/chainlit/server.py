@@ -1123,11 +1123,14 @@ def validate_file_upload(file: UploadFile):
     Raises:
         ValueError: If the file is not allowed.
     """
-    if config.features.spontaneous_file_upload is None:
-        """Default for a missing config is to allow the fileupload without any restrictions"""
-        return
-    if config.features.spontaneous_file_upload.enabled is False:
-        raise ValueError("File upload is not enabled")
+    # TODO: This logic/endpoint is shared across spontaneous uploads and the AskFileMessage API.
+    # Commenting this check until we find a better solution
+
+    # if config.features.spontaneous_file_upload is None:
+    #     """Default for a missing config is to allow the fileupload without any restrictions"""
+    #     return
+    # if not config.features.spontaneous_file_upload.enabled:
+    #     raise ValueError("File upload is not enabled")
 
     validate_file_mime_type(file)
     validate_file_size(file)
@@ -1140,14 +1143,19 @@ def validate_file_mime_type(file: UploadFile):
     Raises:
         ValueError: If the file type is not allowed.
     """
-    accept = config.features.spontaneous_file_upload.accept
-    if accept is None:
+
+    if (
+        config.features.spontaneous_file_upload is None
+        or config.features.spontaneous_file_upload.accept is None
+    ):
         "Accept is not configured, allowing all file types"
         return
 
-    assert (
-        isinstance(accept, List) or isinstance(accept, dict)
-    ), "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+    accept = config.features.spontaneous_file_upload.accept
+
+    assert isinstance(accept, List) or isinstance(accept, dict), (
+        "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+    )
 
     if isinstance(accept, List):
         for pattern in accept:
@@ -1171,7 +1179,10 @@ def validate_file_size(file: UploadFile):
     Raises:
         ValueError: If the file size is too large.
     """
-    if config.features.spontaneous_file_upload.max_size_mb is None:
+    if (
+        config.features.spontaneous_file_upload is None
+        or config.features.spontaneous_file_upload.max_size_mb is None
+    ):
         return
 
     if (
