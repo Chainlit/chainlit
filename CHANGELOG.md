@@ -4,6 +4,20 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.2] - 2025-01-10
+
+### Added
+
+- `http_cookie` is now available in the user session and websocket session
+
+### Fixed
+- Chat profile description on the welcome screen now supports custom html and latex
+- Thread history batch size has been increased to 35 to ensure scroll on a taller screens
+- Chat settings modal should now scroll if too tall
+- Errors in thread resume (like thread not found) now properly redirects to the the home page
+- Elements like Dataframe, Plotly or text should now load correctly from cloud storages
+- AskFileMessage is now usable even if spontaneous uploads are disabled
+
 ## [2.0.1] - 2025-01-09
 
 ### Added
