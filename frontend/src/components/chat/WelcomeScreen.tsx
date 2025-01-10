@@ -31,6 +31,9 @@ export default function WelcomeScreen(props: Props) {
 
   const chatProfiles = config?.chatProfiles;
 
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -52,7 +55,9 @@ export default function WelcomeScreen(props: Props) {
               }
             />
             {currentChatProfile?.markdown_description ? (
-              <Markdown>{currentChatProfile.markdown_description}</Markdown>
+              <Markdown allowHtml={allowHtml} latex={latex}>
+                {currentChatProfile.markdown_description}
+              </Markdown>
             ) : null}
           </div>
         );
