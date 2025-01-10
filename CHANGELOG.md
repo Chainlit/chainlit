@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Errors in thread resume (like thread not found) now properly redirects to the the home page
 - Elements like Dataframe, Plotly or text should now load correctly from cloud storages
 - AskFileMessage is now usable even if spontaneous uploads are disabled
+- Remove element objects from cloud storage on thread removal (Official & SQLAlchemy data layers)
+- Fix custom element `props` storage for SQL Alchemy data layer
 
 ## [2.0.1] - 2025-01-09
 
