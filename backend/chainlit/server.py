@@ -1148,9 +1148,9 @@ def validate_file_mime_type(file: UploadFile):
         "Accept is not configured, allowing all file types"
         return
 
-    assert (
-        isinstance(accept, List) or isinstance(accept, dict)
-    ), "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+    assert isinstance(accept, List) or isinstance(accept, dict), (
+        "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
+    )
 
     if isinstance(accept, List):
         for pattern in accept:

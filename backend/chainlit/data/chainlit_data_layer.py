@@ -523,7 +523,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         # Build the query dynamically based on available fields
         columns = [f'"{k}"' for k in data.keys()]
-        placeholders = [f"${i+1}" for i in range(len(data))]
+        placeholders = [f"${i + 1}" for i in range(len(data))]
         values = list(data.values())
 
         update_sets = [f'"{k}" = EXCLUDED."{k}"' for k in data.keys() if k != "id"]
