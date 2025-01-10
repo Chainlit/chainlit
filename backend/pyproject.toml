@@ -41,7 +41,7 @@ script = "build.py"
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.0.623"
+literalai = "0.1.103"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.115.3,<0.116"
 starlette = "^0.41.2"
@@ -86,7 +86,7 @@ pandas = "^2.2.2"
 moto = "^5.0.14"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.8.0"
+ruff = "^0.9.0"
 
 [tool.poetry.group.mypy]
 optional = true
