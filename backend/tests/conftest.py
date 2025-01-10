@@ -35,6 +35,7 @@ def mock_session_factory(persisted_test_user: PersistedUser) -> Callable[..., Mo
         mock.chat_settings = kwargs.get("chat_settings", {})
         mock.chat_profile = kwargs.get("chat_profile", None)
         mock.http_referer = kwargs.get("http_referer", None)
+        mock.http_cookie = kwargs.get("http_cookie", None)
         mock.client_type = kwargs.get("client_type", "webapp")
         mock.languages = kwargs.get("languages", ["en"])
         mock.thread_id = kwargs.get("thread_id", "test_thread_id")
