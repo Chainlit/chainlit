@@ -47,10 +47,11 @@ function threadList() {
   cy.get("[type='button']").contains('Confirm').click();
   cy.wait(100);
   cy.get('#thread-test1').should('not.exist');
+  // Close the thread options popover
+  cy.get('body').type('{esc}');
 }
 
 function resumeThread() {
-  cy.wait(1000);
   // Go to the "thread 2" thread and resume it
   cy.get('#thread-test2').click();
   cy.wait(1000);
