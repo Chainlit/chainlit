@@ -28,6 +28,11 @@ export const threadIdToResumeState = atom<string | undefined>({
   default: undefined
 });
 
+export const resumeThreadErrorState = atom<string | undefined>({
+  key: 'ResumeThreadErrorState',
+  default: undefined
+});
+
 export const chatProfileState = atom<string | undefined>({
   key: 'ChatProfile',
   default: undefined
