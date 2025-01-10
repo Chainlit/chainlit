@@ -260,10 +260,21 @@ class ChainlitDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         query = """
+        SELECT * FROM "Element"
+        WHERE id = $1
+        """
+        elements = await self.execute_query(query, {"id": element_id})
+
+        if self.storage_client is not None and len(elements) > 0:
+            if elements[0]["objectKey"]:
+                await self.storage_client.delete_file(
+                    object_key=elements[0]["objectKey"]
+                )
+        query = """
         DELETE FROM "Element" 
         WHERE id = $1
         """
-        params = {"element_id": element_id}
+        params = {"id": element_id}
 
         if thread_id:
             query += ' AND "threadId" = $2'
@@ -375,6 +386,19 @@ class ChainlitDataLayer(BaseDataLayer):
         return results[0]["identifier"]
 
     async def delete_thread(self, thread_id: str):
+        elements_query = """
+        SELECT * FROM "Element" 
+        WHERE "threadId" = $1
+        """
+        elements_results = await self.execute_query(
+            elements_query, {"thread_id": thread_id}
+        )
+
+        if self.storage_client is not None:
+            for elem in elements_results:
+                if elem["objectKey"]:
+                    await self.storage_client.delete_file(object_key=elem["objectKey"])
+
         await self.execute_query(
             'DELETE FROM "Thread" WHERE id = $1', {"thread_id": thread_id}
         )
