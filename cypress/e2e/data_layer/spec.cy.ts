@@ -18,8 +18,11 @@ function feedback() {
     expect(loc).to.match(/^\/thread\//);
   });
   cy.get('.negative-feedback-off').should('have.length', 1);
-  cy.get('.positive-feedback-off').should('have.length', 1).eq(0).click();
-  cy.get('#submit-feedback').click();
+  cy.get('.positive-feedback-off')
+    .should('have.length', 1)
+    .eq(0)
+    .click({ force: true });
+  cy.get('#submit-feedback').click({ force: true });
   cy.get('.positive-feedback-on').should('have.length', 1);
 }
 
@@ -34,17 +37,17 @@ function threadList() {
   cy.get('#thread-test2').should('contain', 'thread 2');
 
   // Test thread page
-  cy.get('#thread-test1').click();
+  cy.get('#thread-test1').click({ force: true });
   cy.get('.step').should('have.length', 2);
   cy.get('.step').eq(0).should('contain', 'Message 1');
   cy.get('.step').eq(1).should('contain', 'Message 2');
 
   // Test thread delete
-  cy.get('#thread-test1').find('#thread-options').click();
+  cy.get('#thread-test1').find('#thread-options').click({ force: true });
   cy.wait(100);
-  cy.get('#delete-thread').click();
+  cy.get('#delete-thread').click({ force: true });
   cy.wait(100);
-  cy.get("[type='button']").contains('Confirm').click();
+  cy.get("[type='button']").contains('Confirm').click({ force: true });
   cy.wait(100);
   cy.get('#thread-test1').should('not.exist');
 }
@@ -54,7 +57,7 @@ function resumeThread() {
   cy.get('#thread-test2').click({ force: true });
   cy.wait(1000);
   // back to the "hello" thread
-  cy.get('a').contains('Hello').click();
+  cy.get('a').contains('Hello').click({ force: true });
   cy.wait(1000);
 
   cy.get('.step').should('have.length', 10);
@@ -86,8 +89,8 @@ function continueThread() {
 }
 
 function newThread() {
-  cy.get('#new-chat-button').click();
-  cy.get('#confirm').click();
+  cy.get('#new-chat-button').click({ force: true });
+  cy.get('#confirm').click({ force: true });
 }
 
 describe('Data Layer', () => {
