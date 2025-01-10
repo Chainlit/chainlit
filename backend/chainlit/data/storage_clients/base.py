@@ -18,5 +18,9 @@ class BaseStorageClient(ABC):
         pass
 
     @abstractmethod
+    async def delete_file(self, object_key: str) -> bool:
+        pass
+
+    @abstractmethod
     async def get_read_url(self, object_key: str) -> str:
         pass
