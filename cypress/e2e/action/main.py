@@ -28,26 +28,33 @@ async def on_all_actions_removed(_: cl.Action):
 @cl.on_chat_start
 async def main():
     actions = [
-        cl.Action(id="test-action", name="test action", value="test"),
-        cl.Action(id="removable-action", name="removable action", value="test"),
+        cl.Action(id="test-action", name="test action", payload={"value": "test"}),
         cl.Action(
-            id="label-action", name="label action", value="test", label="Test Label"
+            id="removable-action", name="removable action", payload={"value": "test"}
+        ),
+        cl.Action(
+            id="label-action",
+            name="label action",
+            payload={"value": "test"},
+            label="Test Label",
         ),
         cl.Action(
             id="multiple-action-one",
             name="multiple actions",
-            value="multiple action one",
+            payload={"value": "multiple action one"},
             label="multiple action one",
-            collapsed=True,
         ),
         cl.Action(
             id="multiple-action-two",
             name="multiple actions",
-            value="multiple action two",
+            payload={"value": "multiple action two"},
             label="multiple action two",
-            collapsed=True,
         ),
-        cl.Action(id="all-actions-removed", name="all actions removed", value="test"),
+        cl.Action(
+            id="all-actions-removed",
+            name="all actions removed",
+            payload={"value": "test"},
+        ),
     ]
     message = cl.Message("Hello, this is a test message!", actions=actions)
     cl.user_session.set("to_remove", message)
@@ -59,17 +66,17 @@ async def main():
             cl.Action(
                 id="first-action",
                 name="first_action",
-                value="first-action",
+                payload={"value": "first-action"},
                 label="First action",
             ),
             cl.Action(
                 id="second-action",
                 name="second_action",
-                value="second-action",
+                payload={"value": "second-action"},
                 label="Second action",
             ),
         ],
     ).send()
 
     if result is not None:
-        await cl.Message(f"Thanks for pressing: {result['value']}").send()
+        await cl.Message(f"Thanks for pressing: {result['payload']['value']}").send()

@@ -4,6 +4,52 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.1] - 2025-01-09
+
+### Added
+- `window.toggleChainlitCopilot()` to toggle the copilot
+
+### Fixed
+- Chat profiles icon and description should now be displayed on the welcome screen
+- Action should be able to trigger the first interaction
+- Raw code blocks should now be displayed correctly
+- TextInput for chat settings should now work
+- Upload attachement button should not be displayed when upload is disabled
+- Removed unused numpy dependency
+
+
+## [2.0.0] - 2025-01-06
+
+The Chainlit UI (including the copilot) has been completely re-written with Shadcn/Tailwind. This brings several advantages:
+1. The codebase is simpler and more contribution friendly.
+2. It enabled the new custom element feature.
+3. The theme customisation is more powerful.
+
+### Added
+- Custom Elements (code your own elements)
+- `Cmd+k` thread search
+- Thread rename
+- Official PostGres open source data layer
+- New `@data_layer` decorator for configuring custom data layers declaratively
+
+### Changed
+- Authentication is now based on cookies. Cross Origins are disallowed unless added in `allow_origins` in the `config.toml` file
+- No longer need to click on `resume` to resume a thread
+- **[breaking]**: Theme customisation is now handled in `public/theme.json` instead of `config.toml`.
+- **[breaking]**: Changed fields on the `Action` class:
+  - The `value` field has replaced with `payload` which accepts a Python dict
+  - The `description` field has been renamed `tooltip`
+  - The field `icon` has been added
+  - The `collapsed` field has been removed.
+- **[breaking]**: Completely revamped audio implementation (#1401, #1410):
+  - Replaced `AudioChunk` with `InputAudioChunk` and `OutputAudioChunk`
+  - Changed default audio sampling rate from 44100 to 24000
+  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
+
+### Fixed
+
+- Autoscaling of Chainlit app behind a load balancer should now work. Don't forget to enable sticky sessions
+
 ## [2.1.dev0] - 2024-11-14
 
 Pre-release: developer preview.

@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional
+from typing import Dict, Optional
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic import Field
@@ -13,18 +13,18 @@ from chainlit.telemetry import trace_event
 class Action(DataClassJsonMixin):
     # Name of the action, this should be used in the action_callback
     name: str
-    # The value associated with the action. This is useful to differentiate between multiple actions with the same name.
-    value: str
-    # The label of the action. This is what the user will see. If not provided the name will be used.
+    # The parameters to call this action with.
+    payload: Dict
+    # The label of the action. This is what the user will see.
     label: str = ""
-    # The description of the action. This is what the user will see when they hover the action.
-    description: str = ""
+    # The tooltip of the action button. This is what the user will see when they hover the action.
+    tooltip: str = ""
+    # The lucid icon name for this action.
+    icon: Optional[str] = None
     # This should not be set manually, only used internally.
     forId: Optional[str] = None
     # The ID of the action
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    # Show the action in a drawer menu
-    collapsed: bool = False
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")

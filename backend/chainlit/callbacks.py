@@ -325,7 +325,7 @@ def action_callback(name: str) -> Callable:
     """
 
     def decorator(func: Callable[[Action], Any]):
-        config.code.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        config.code.action_callbacks[name] = wrap_user_function(func, with_task=False)
         return func
 
     return decorator

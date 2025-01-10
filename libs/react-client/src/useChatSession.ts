@@ -78,20 +78,17 @@ const useChatSession = () => {
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {
     if (session?.socket) {
-      session.socket.auth["threadId"] =
-        currentThreadId || '';
+      session.socket.auth['threadId'] = currentThreadId || '';
     }
   }, [currentThreadId]);
 
   const _connect = useCallback(
     ({
       transports,
-      userEnv,
-      accessToken
+      userEnv
     }: {
-      transports?: string[]
+      transports?: string[];
       userEnv: Record<string, string>;
-      accessToken?: string;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -105,14 +102,12 @@ const useChatSession = () => {
         withCredentials: true,
         transports,
         auth: {
-              token: accessToken,
-              clientType: client.type,
-              sessionId,
-              threadId: idToResume || '',
-              userEnv: JSON.stringify(userEnv),
-              chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
-          }
-        
+          clientType: client.type,
+          sessionId,
+          threadId: idToResume || '',
+          userEnv: JSON.stringify(userEnv),
+          chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
+        }
       });
       setSession((old) => {
         old?.socket?.removeAllListeners();
@@ -332,7 +327,7 @@ const useChatSession = () => {
         }
       });
     },
-    [setSession, sessionId, chatProfile]
+    [setSession, sessionId, idToResume, chatProfile]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);

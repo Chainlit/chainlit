@@ -1,15 +1,14 @@
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
-import { Alert, Box, Stack } from '@mui/material';
-
 import { sideViewState, useAuth, useConfig } from '@chainlit/react-client';
 
-import { ElementSideView } from 'components/atoms/elements';
-import { Translator } from 'components/i18n';
-import { TaskList } from 'components/molecules/tasklist/TaskList';
-import { Header } from 'components/organisms/header';
-import { SideBar } from 'components/organisms/sidebar';
+import ElementSideView from '@/components/ElementSideView';
+import LeftSidebar from '@/components/LeftSidebar';
+import { TaskList } from '@/components/Tasklist';
+import { Header } from '@/components/header';
+import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 import { userEnvState } from 'state/user';
 
@@ -18,8 +17,8 @@ type Props = {
 };
 
 const Page = ({ children }: Props) => {
-  const { isAuthenticated, isReady } = useAuth();
   const { config } = useConfig();
+  const { data } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const sideViewElement = useRecoilValue(sideViewState);
 
@@ -29,37 +28,36 @@ const Page = ({ children }: Props) => {
     }
   }
 
-  if (isReady && !isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  // Question: isn't isAuthenticated unreachable here?
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%'
-      }}
+  const content = (
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="flex flex-row h-full w-full"
     >
-      {!isAuthenticated ? (
-        <Alert severity="error">
-          <Translator path="pages.Page.notPartOfProject" />
-        </Alert>
+      <ResizablePanel
+        className="flex flex-col h-full w-full"
+        minSize={60}
+        defaultSize={50}
+      >
+        <Header />
+        <div className="flex flex-row flex-grow overflow-auto">{children}</div>
+      </ResizablePanel>
+      {sideViewElement ? <ElementSideView /> : <TaskList isMobile={false} />}
+    </ResizablePanelGroup>
+  );
+
+  const historyEnabled = config?.dataPersistence && data?.requireLogin;
+
+  return (
+    <SidebarProvider>
+      {historyEnabled ? (
+        <>
+          <LeftSidebar />
+          <SidebarInset className="max-h-svh">{content}</SidebarInset>
+        </>
       ) : (
-        <Stack direction="row" height="100%" width="100%">
-          <SideBar />
-          <Stack flexGrow={1}>
-            <Header />
-            <Stack direction="row" flexGrow={1} overflow="auto">
-              {children}
-            </Stack>
-          </Stack>
-          {sideViewElement ? null : <TaskList isMobile={false} />}
-          <ElementSideView />
-        </Stack>
+        <div className="h-screen w-screen flex">{content}</div>
       )}
-    </Box>
+    </SidebarProvider>
   );
 };
 

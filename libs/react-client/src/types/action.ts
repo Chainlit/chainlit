@@ -1,12 +1,12 @@
 export interface IAction {
-  description?: string;
+  label: string;
   forId: string;
   id: string;
-  label?: string;
+  payload: Record<string, unknown>;
   name: string;
   onClick: () => void;
-  value: string;
-  collapsed: boolean;
+  tooltip: string;
+  icon?: string;
 }
 
 export interface ICallFn {

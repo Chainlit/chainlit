@@ -1,7 +1,7 @@
 import useSWR, { SWRResponse } from 'swr';
 
 const fetcher = async (url: string): Promise<any> => {
-  const response = await fetch(url);
+  const response = await fetch(url, { credentials: 'include' });
 
   if (!response.ok) {
     throw new Error('Network response was not ok');

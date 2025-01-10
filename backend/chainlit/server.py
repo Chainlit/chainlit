@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -27,13 +27,12 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
 from typing_extensions import Annotated
 from watchfiles import awatch
 
-from chainlit.auth import create_jwt, get_configuration, get_current_user
+from chainlit.auth import create_jwt, decode_jwt, get_configuration, get_current_user
 from chainlit.auth.cookie import (
     clear_auth_cookie,
     clear_oauth_state_cookie,
@@ -49,6 +48,7 @@ from chainlit.config import (
     PACKAGE_ROOT,
     config,
     load_module,
+    public_dir,
     reload_config,
 )
 from chainlit.data import get_data_layer
@@ -58,11 +58,14 @@ from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
+    CallActionRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    ElementRequest,
     GetThreadsRequest,
     Theme,
     UpdateFeedbackRequest,
+    UpdateThreadRequest,
 )
 from chainlit.user import PersistedUser, User
 
@@ -213,29 +216,59 @@ app.add_middleware(
 
 router = APIRouter(prefix=PREFIX)
 
-app.mount(
-    f"{PREFIX}/public",
-    StaticFiles(directory="public", check_dir=False),
-    name="public",
-)
 
-app.mount(
-    f"{PREFIX}/assets",
-    StaticFiles(
-        packages=[("chainlit", os.path.join(build_dir, "assets"))],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="assets",
-)
+@router.get("/public/{filename:path}")
+async def serve_public_file(
+    filename: str,
+):
+    """Serve a file from public dir."""
 
-app.mount(
-    f"{PREFIX}/copilot",
-    StaticFiles(
-        packages=[("chainlit", copilot_build_dir)],
-        follow_symlink=config.project.follow_symlink,
-    ),
-    name="copilot",
-)
+    base_path = Path(public_dir)
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+
+@router.get("/assets/{filename:path}")
+async def serve_asset_file(
+    filename: str,
+):
+    """Serve a file from assets dir."""
+
+    base_path = Path(os.path.join(build_dir, "assets"))
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+
+@router.get("/copilot/{filename:path}")
+async def serve_copilot_file(
+    filename: str,
+):
+    """Serve a file from assets dir."""
+
+    base_path = Path(copilot_build_dir)
+    file_path = (base_path / filename).resolve()
+
+    if not is_path_inside(file_path, base_path):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    if file_path.is_file():
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 # -------------------------------------------------------------------------------
@@ -286,6 +319,16 @@ def get_html_template():
     """
     Get HTML template for the index view.
     """
+    ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
+    custom_theme = None
+    custom_theme_file_path = Path(public_dir) / "theme.json"
+    if (
+        is_path_inside(custom_theme_file_path, Path(public_dir))
+        and custom_theme_file_path.is_file()
+    ):
+        custom_theme = json.loads(custom_theme_file_path.read_text(encoding="utf-8"))
+
     PLACEHOLDER = "<!-- TAG INJECTION PLACEHOLDER -->"
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
@@ -309,8 +352,8 @@ def get_html_template():
     <meta property="og:root_path" content="{ROOT_PATH}">"""
 
     js = f"""<script>
-{f"window.theme = {json.dumps(config.ui.theme.to_dict())}; " if config.ui.theme else ""}
-{f"window.transports = {json.dumps(config.project.transports)}; " if config.project.transports else "undefined"}
+{f"window.theme = {json.dumps(custom_theme.get('variables'))};" if custom_theme and custom_theme.get("variables") else "undefined"}
+{f"window.transports = {json.dumps(config.project.transports)};" if config.project.transports else "undefined"}
 </script>"""
 
     css = None
@@ -323,8 +366,11 @@ def get_html_template():
         js += f"""<script src="{config.ui.custom_js}" defer></script>"""
 
     font = None
-    if config.ui.custom_font:
-        font = f"""<link rel="stylesheet" href="{config.ui.custom_font}">"""
+    if custom_theme and custom_theme.get("custom_fonts"):
+        font = "\n".join(
+            f"""<link rel="stylesheet" href="{font}">"""
+            for font in custom_theme.get("custom_fonts")
+        )
 
     index_html_file_path = os.path.join(build_dir, "index.html")
 
@@ -375,13 +421,6 @@ async def auth(request: Request):
 
 def _get_response_dict(access_token: str) -> dict:
     """Get the response dictionary for the auth response."""
-
-    if not config.project.cookie_auth:
-        # Legacy auth
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-        }
 
     return {"success": True}
 
@@ -444,8 +483,7 @@ async def _authenticate_user(
 
     response = _get_auth_response(access_token, redirect_to_callback)
 
-    if config.project.cookie_auth:
-        set_auth_cookie(response, access_token)
+    set_auth_cookie(response, access_token)
 
     return response
 
@@ -470,13 +508,41 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
 @router.post("/logout")
 async def logout(request: Request, response: Response):
     """Logout the user by calling the on_logout callback."""
-    if config.project.cookie_auth:
-        clear_auth_cookie(response)
+    clear_auth_cookie(response)
 
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
 
     return {"success": True}
+
+
+@router.post("/auth/jwt")
+async def jwt_auth(request: Request):
+    """Login a user using a valid jwt."""
+    from jwt import InvalidTokenError
+
+    auth_header: Optional[str] = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+
+    # Check if it starts with "Bearer "
+    try:
+        scheme, token = auth_header.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication scheme. Please use Bearer",
+            )
+    except ValueError:
+        raise HTTPException(
+            status_code=401, detail="Invalid authorization header format"
+        )
+
+    try:
+        user = decode_jwt(token)
+        return await _authenticate_user(user)
+    except InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @router.post("/auth/header")
@@ -635,7 +701,7 @@ async def oauth_azure_hf_callback(
     return response
 
 
-GenericUser = Union[User, PersistedUser]
+GenericUser = Union[User, PersistedUser, None]
 UserParam = Annotated[GenericUser, Depends(get_current_user)]
 
 
@@ -767,6 +833,9 @@ async def get_user_threads(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     if not isinstance(current_user, PersistedUser):
         persisted_user = await data_layer.get_user(identifier=current_user.identifier)
         if not persisted_user:
@@ -791,6 +860,9 @@ async def get_thread(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_thread(thread_id)
@@ -810,10 +882,128 @@ async def get_thread_element(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_element(thread_id, element_id)
     return JSONResponse(content=res)
+
+
+@router.put("/project/element")
+async def update_thread_element(
+    payload: ElementRequest,
+    current_user: UserParam,
+):
+    """Update a specific thread element."""
+
+    from chainlit.context import init_ws_context
+    from chainlit.element import CustomElement, ElementDict
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    element_dict = cast(ElementDict, payload.element)
+
+    if element_dict["type"] != "custom":
+        return {"success": False}
+
+    element = CustomElement(
+        id=element_dict["id"],
+        object_key=element_dict["objectKey"],
+        chainlit_key=element_dict["chainlitKey"],
+        url=element_dict["url"],
+        for_id=element_dict.get("forId") or "",
+        thread_id=element_dict.get("threadId") or "",
+        name=element_dict["name"],
+        props=element_dict.get("props") or {},
+        display=element_dict["display"],
+    )
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to update elements for this session",
+            )
+
+    await element.send(for_id=element.for_id or "")
+    return {"success": True}
+
+
+@router.delete("/project/element")
+async def delete_thread_element(
+    payload: ElementRequest,
+    current_user: UserParam,
+):
+    """Delete a specific thread element."""
+
+    from chainlit.context import init_ws_context
+    from chainlit.element import CustomElement, ElementDict
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    element_dict = cast(ElementDict, payload.element)
+
+    if element_dict["type"] != "custom":
+        return {"success": False}
+
+    element = CustomElement(
+        id=element_dict["id"],
+        object_key=element_dict["objectKey"],
+        chainlit_key=element_dict["chainlitKey"],
+        url=element_dict["url"],
+        for_id=element_dict.get("forId") or "",
+        thread_id=element_dict.get("threadId") or "",
+        name=element_dict["name"],
+        props=element_dict.get("props") or {},
+        display=element_dict["display"],
+    )
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to remove elements for this session",
+            )
+
+    await element.remove()
+
+    return {"success": True}
+
+
+@router.put("/project/thread")
+async def rename_thread(
+    request: Request,
+    payload: UpdateThreadRequest,
+    current_user: UserParam,
+):
+    """Rename a thread."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    thread_id = payload.threadId
+
+    await is_thread_author(current_user.identifier, thread_id)
+
+    await data_layer.update_thread(thread_id, name=payload.name)
+    return JSONResponse(content={"success": True})
 
 
 @router.delete("/project/thread")
@@ -829,11 +1019,56 @@ async def delete_thread(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     thread_id = payload.threadId
 
     await is_thread_author(current_user.identifier, thread_id)
 
     await data_layer.delete_thread(thread_id)
+    return JSONResponse(content={"success": True})
+
+
+@router.post("/project/action")
+async def call_action(
+    payload: CallActionRequest,
+    current_user: UserParam,
+):
+    """Run an action."""
+
+    from chainlit.action import Action
+    from chainlit.context import init_ws_context
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    action = Action(**payload.action)
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="You are not authorized to upload files for this session",
+            )
+
+    callback = config.code.action_callbacks.get(action.name)
+    if callback:
+        if not context.session.has_first_interaction:
+            context.session.has_first_interaction = True
+            asyncio.create_task(context.emitter.init_thread(action.name))
+
+        await callback(action)
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No callback found for action {action.name}",
+        )
+
     return JSONResponse(content={"success": True})
 
 
@@ -954,14 +1189,6 @@ async def get_file(
     current_user: UserParam,
 ):
     """Get a file from the session files directory."""
-
-    if not config.project.cookie_auth:
-        # We cannot make this work safely without cookie auth, so disable it.
-        raise HTTPException(
-            status_code=404,
-            detail="File downloads unavailable.",
-        )
-
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(session_id) if session_id else None
@@ -982,25 +1209,6 @@ async def get_file(
     if file_id in session.files:
         file = session.files[file_id]
         return FileResponse(file["path"], media_type=file["type"])
-    else:
-        raise HTTPException(status_code=404, detail="File not found")
-
-
-@router.get("/files/{filename:path}")
-async def serve_file(
-    filename: str,
-    current_user: UserParam,
-):
-    """Serve a file from the local filesystem."""
-
-    base_path = Path(config.project.local_fs_path).resolve()
-    file_path = (base_path / filename).resolve()
-
-    if not is_path_inside(file_path, base_path):
-        raise HTTPException(status_code=400, detail="Invalid filename")
-
-    if file_path.is_file():
-        return FileResponse(file_path)
     else:
         raise HTTPException(status_code=404, detail="File not found")
 

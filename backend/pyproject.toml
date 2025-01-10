@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.0rc1"
+version = "2.0.1"
 keywords = [
     'LLM',
     'Agents',
@@ -60,9 +60,8 @@ watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = "^23.1"
-python-multipart = "^0.0.9"
+python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
-numpy = "^1.26"
 
 [tool.poetry.group.tests]
 optional = true
@@ -117,6 +116,7 @@ module = [
     "uptrace",
     "syncer",
     "azure.storage.filedatalake",
+    "google-cloud-storage"
 ]
 ignore_missing_imports = true
 
@@ -132,6 +132,8 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
+azure-storage-blob="^12.24.0"
+google-cloud-storage = "^2.19.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -147,7 +149,7 @@ target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "LOG", "UP", "T10", "ISC", "ICN", "LOG", "G", "PIE", "PT", "Q", "RSE", "FURB", "RUF"]
-ignore = ["E712", "E501", "UP006", "UP035","PIE790", "PT004", "RUF005", "RUF006", "RUF012", "ISC001"]
+ignore = ["E712", "E501", "UP006", "UP035","PIE790", "RUF005", "RUF006", "RUF012", "ISC001"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

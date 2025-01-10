@@ -1,6 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
+  "ignorePatterns": ["**/*.jsx"],
   "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",

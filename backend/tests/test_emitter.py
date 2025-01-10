@@ -27,6 +27,7 @@ async def test_send_element(
         "size": None,
         "language": None,
         "page": None,
+        "props": None,
         "autoPlay": None,
         "playerConfig": None,
         "forId": None,
@@ -107,13 +108,6 @@ async def test_set_chat_settings(emitter, mock_websocket_session):
     settings = {"key": "value"}
     emitter.set_chat_settings(settings)
     assert emitter.session.chat_settings == settings
-
-
-async def test_send_action_response(emitter, mock_websocket_session):
-    await emitter.send_action_response("test_id", True, "Success")
-    mock_websocket_session.emit.assert_called_once_with(
-        "action_response", {"id": "test_id", "status": True, "response": "Success"}
-    )
 
 
 async def test_update_token_count(emitter, mock_websocket_session):

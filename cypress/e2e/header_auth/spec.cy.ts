@@ -11,7 +11,7 @@ describe('Header auth', () => {
 
   describe('without an authorization header', () => {
     it('should display an alert message', () => {
-      cy.get('.MuiAlert-message').should('exist');
+      cy.get('.alert').should('exist');
     });
   });
 
@@ -41,7 +41,7 @@ describe('Header auth', () => {
       });
 
       it('should not display an alert message', () => {
-        cy.get('.MuiAlert-message').should('not.exist');
+        cy.get('.alert').should('not.exist');
       });
 
       it("should display 'Hello admin'", () => {
@@ -51,12 +51,11 @@ describe('Header auth', () => {
 
     shouldBeLoggedIn();
 
-    // TODO: passing locally but failing on the CI
-    // it('should request and have access to /user', () => {
-    //   cy.wait('@user').then((interception) => {
-    //     expect(interception.response.statusCode).to.equal(200);
-    //   });
-    // });
+    it('should request and have access to /user', () => {
+      cy.wait('@user').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+    });
 
     describe('after reloading', () => {
       before(() => {
