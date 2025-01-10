@@ -64,7 +64,6 @@ describe('Header auth', () => {
     describe('after reloading', () => {
       beforeEach(() => {
         cy.reload();
-        setupInterceptors();
       });
 
       shouldBeLoggedIn();
