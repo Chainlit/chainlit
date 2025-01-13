@@ -35,7 +35,7 @@ export const UploadButton = ({
   if (!upload) return null;
   const { getRootProps, getInputProps } = upload;
 
-  if (!config?.features.spontaneous_file_upload) return null;
+  if (!config?.features.spontaneous_file_upload?.enabled) return null;
 
   return (
     <TooltipProvider>

@@ -33,8 +33,8 @@ export default function Step({
           'flex items-center gap-1 group/step',
           isError && 'text-red-500',
           hasContent && 'cursor-pointer',
-          !isRunning && 'text-muted-foreground hover:text-foreground',
-          isRunning && 'loading-shimmer'
+          !using && 'text-muted-foreground hover:text-foreground',
+          using && 'loading-shimmer'
         )}
         onClick={() => setOpen(!open)}
         id={`step-${stepName}`}

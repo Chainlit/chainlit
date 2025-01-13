@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageCircle, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Alert from '@chainlit/app/src/components/Alert';
 import { Button } from '@chainlit/app/src/components/ui/button';
@@ -24,10 +24,18 @@ const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
+
+    return () => {
+      window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
+    };
+  }, []);
+
   const customClassName = config?.button?.className || '';
 
   return (
-    <Popover onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           id="chainlit-copilot-button"

@@ -16,7 +16,7 @@ describe('Header auth', () => {
   });
 
   describe('with authorization header set', () => {
-    beforeEach(() => {
+    const setupInterceptors = () => {
       cy.intercept('/auth/header', (req) => {
         req.headers['test-header'] = 'test header value';
         req.continue();
@@ -26,6 +26,10 @@ describe('Header auth', () => {
       cy.wait('@auth').then(() => {
         cy.intercept('GET', '/user').as('user');
       });
+    };
+
+    beforeEach(() => {
+      setupInterceptors();
     });
 
     const shouldBeLoggedIn = () => {
@@ -58,7 +62,7 @@ describe('Header auth', () => {
     });
 
     describe('after reloading', () => {
-      before(() => {
+      beforeEach(() => {
         cy.reload();
       });
 

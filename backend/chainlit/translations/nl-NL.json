@@ -144,6 +144,10 @@
                         "failed": "mislukt",
                         "feedbackUpdated": "Feedback bijgewerkt",
                         "updating": "Bijwerken"
+                    },
+                    "copyButton": {
+                        "copyToClipboard": "Copy to clipboard",
+                        "copied": "Copied!"
                     }
                 },
                 "dropScreen": {

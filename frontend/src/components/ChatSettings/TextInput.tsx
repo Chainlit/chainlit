@@ -40,9 +40,9 @@ const TextInput = ({
         disabled={disabled}
         id={id}
         name={id}
+        {...rest}
         onChange={(e) => setField?.(id, e.target.value)}
         className={`text-sm font-normal my-0.5 ${className ?? ''}`}
-        {...rest}
       />
     </InputStateHandler>
   );

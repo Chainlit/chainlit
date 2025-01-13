@@ -145,6 +145,10 @@
             "failed": "failed",
             "feedbackUpdated": "Feedback updated",
             "updating": "Updating"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {

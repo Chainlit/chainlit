@@ -146,6 +146,10 @@
             "failed": "ব্যর্থ",
             "feedbackUpdated": "ফিডব্যাক আপডেট হয়েছে",
             "updating": "আধুনিকীকরণ"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {
