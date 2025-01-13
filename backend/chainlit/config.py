@@ -18,7 +18,8 @@ from typing import (
 
 import tomli
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import Field, dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -35,7 +36,11 @@ if TYPE_CHECKING:
     from chainlit.message import Message
     from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
     from chainlit.user import User
-
+else:
+    # Pydantic needs to resolve forward annotations. Because all of these are used
+    # within `typing.Callable`, alias to `Any` as Pydantic does not perform validation
+    # of callable argument/return types anyway.
+    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Any  # fmt: off
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -50,6 +55,7 @@ FILES_DIRECTORY = Path(APP_ROOT) / ".files"
 FILES_DIRECTORY.mkdir(exist_ok=True)
 
 config_dir = os.path.join(APP_ROOT, ".chainlit")
+public_dir = os.path.join(APP_ROOT, "public")
 config_file = os.path.join(config_dir, "config.toml")
 config_translation_dir = os.path.join(config_dir, "translations")
 
@@ -73,9 +79,6 @@ cache = false
 
 # Authorized origins
 allow_origins = ["*"]
-
-# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-# follow_symlink = false
 
 [features]
 # Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
@@ -105,11 +108,12 @@ edit_message = true
 # Name of the assistant.
 name = "Assistant"
 
+# default_theme = "dark"
+
+# layout = "wide"
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
-
-# Large size content are by default collapsed for a cleaner ui
-default_collapse_content = true
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
@@ -125,9 +129,6 @@ cot = "full"
 # The Javascript file can be served from the public directory.
 # custom_js = "/public/test.js"
 
-# Specify a custom font url.
-# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
-
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
@@ -135,36 +136,6 @@ cot = "full"
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
-
-[UI.theme]
-    default = "dark"
-    #layout = "wide"
-    #font_family = "Inter, sans-serif"
-# Override default MUI light theme. (Check theme.ts)
-[UI.theme.light]
-    #background = "#FAFAFA"
-    #paper = "#FFFFFF"
-
-    [UI.theme.light.primary]
-        #main = "#F80061"
-        #dark = "#980039"
-        #light = "#FFE7EB"
-    [UI.theme.light.text]
-        #primary = "#212121"
-        #secondary = "#616161"
-
-# Override default MUI dark theme. (Check theme.ts)
-[UI.theme.dark]
-    #background = "#FAFAFA"
-    #paper = "#FFFFFF"
-
-    [UI.theme.dark.primary]
-        #main = "#F80061"
-        #dark = "#980039"
-        #light = "#FFE7EB"
-    [UI.theme.dark.text]
-        #primary = "#EEEEEE"
-        #secondary = "#BDBDBD"
 
 [meta]
 generated_by = "{__version__}"
@@ -213,15 +184,6 @@ class Palette(DataClassJsonMixin):
     text: Optional[TextOptions] = None
 
 
-@dataclass()
-class Theme(DataClassJsonMixin):
-    font_family: Optional[str] = None
-    default: Optional[Literal["light", "dark"]] = "dark"
-    layout: Optional[Literal["default", "wide"]] = "default"
-    light: Optional[Palette] = None
-    dark: Optional[Palette] = None
-
-
 @dataclass
 class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None
@@ -251,14 +213,13 @@ class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
-    # Large size content are by default collapsed for a cleaner ui
-    default_collapse_content: bool = True
+    font_family: Optional[str] = None
+    default_theme: Optional[Literal["light", "dark"]] = "dark"
+    layout: Optional[Literal["default", "wide"]] = "default"
     github: Optional[str] = None
-    theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
-    custom_font: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend
@@ -287,6 +248,7 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
+    on_window_message: Optional[Callable[[str], Any]] = None
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
@@ -305,6 +267,8 @@ class CodeSettings:
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
+    # Socket.io client transports option
+    transports: Optional[List[str]] = None
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
@@ -317,8 +281,6 @@ class ProjectSettings(DataClassJsonMixin):
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
-    # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-    follow_symlink: bool = False
 
 
 @dataclass()
@@ -399,7 +361,7 @@ def init_config(log=False):
             dst = os.path.join(config_translation_dir, file)
             if not os.path.exists(dst):
                 src = os.path.join(TRANSLATIONS_DIR, file)
-                with open(src, "r", encoding="utf-8") as f:
+                with open(src, encoding="utf-8") as f:
                     translation = json.load(f)
                     with open(dst, "w", encoding="utf-8") as f:
                         json.dump(translation, f, indent=4)
@@ -514,7 +476,7 @@ def load_config():
 def lint_translations():
     # Load the ground truth (en-US.json file from chainlit source code)
     src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
-    with open(src, "r", encoding="utf-8") as f:
+    with open(src, encoding="utf-8") as f:
         truth = json.load(f)
 
         # Find the local app translations
@@ -522,7 +484,7 @@ def lint_translations():
             if file.endswith(".json"):
                 # Load the translation file
                 to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, "r", encoding="utf-8") as f:
+                with open(to_lint, encoding="utf-8") as f:
                     translation = json.load(f)
 
                     # Lint the translation file

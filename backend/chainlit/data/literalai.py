@@ -94,7 +94,6 @@ class LiteralToChainlitConverter:
             "input": input,
             "output": output,
             "showInput": metadata.get("showInput", False),
-            "indent": metadata.get("indent"),
             "language": metadata.get("language"),
             "isError": bool(step.error),
             "waitForAnswer": metadata.get("waitForAnswer", False),
@@ -110,6 +109,7 @@ class LiteralToChainlitConverter:
             "autoPlay": metadata.get("autoPlay", None),
             "playerConfig": metadata.get("playerConfig", None),
             "page": metadata.get("page"),
+            "props": metadata.get("props"),
             "size": metadata.get("size"),
             "type": metadata.get("type", "file"),
             "forId": attachment.step_id,
@@ -349,11 +349,9 @@ class LiteralDataLayer(BaseDataLayer):
     async def create_step(self, step_dict: "StepDict"):
         metadata = dict(
             step_dict.get("metadata", {}),
-            **{
-                "waitForAnswer": step_dict.get("waitForAnswer"),
-                "language": step_dict.get("language"),
-                "showInput": step_dict.get("showInput"),
-            },
+            waitForAnswer=step_dict.get("waitForAnswer"),
+            language=step_dict.get("language"),
+            showInput=step_dict.get("showInput"),
         )
 
         step: LiteralStepDict = {

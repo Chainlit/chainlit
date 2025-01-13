@@ -4,6 +4,85 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.2] - 2025-01-10
+
+### Added
+
+- `http_cookie` is now available in the user session and websocket session
+
+### Fixed
+- Chat profile description on the welcome screen now supports custom html and latex
+- Thread history batch size has been increased to 35 to ensure scroll on a taller screens
+- Chat settings modal should now scroll if too tall
+- Errors in thread resume (like thread not found) now properly redirects to the the home page
+- Elements like Dataframe, Plotly or text should now load correctly from cloud storages
+- AskFileMessage is now usable even if spontaneous uploads are disabled
+- Remove element objects from cloud storage on thread removal (Official & SQLAlchemy data layers)
+- Fix custom element `props` storage for SQL Alchemy data layer
+
+## [2.0.1] - 2025-01-09
+
+### Added
+- `window.toggleChainlitCopilot()` to toggle the copilot
+
+### Fixed
+- Chat profiles icon and description should now be displayed on the welcome screen
+- Action should be able to trigger the first interaction
+- Raw code blocks should now be displayed correctly
+- TextInput for chat settings should now work
+- Upload attachement button should not be displayed when upload is disabled
+- Removed unused numpy dependency
+
+
+## [2.0.0] - 2025-01-06
+
+The Chainlit UI (including the copilot) has been completely re-written with Shadcn/Tailwind. This brings several advantages:
+1. The codebase is simpler and more contribution friendly.
+2. It enabled the new custom element feature.
+3. The theme customisation is more powerful.
+
+### Added
+- Custom Elements (code your own elements)
+- `Cmd+k` thread search
+- Thread rename
+- Official PostGres open source data layer
+- New `@data_layer` decorator for configuring custom data layers declaratively
+
+### Changed
+- Authentication is now based on cookies. Cross Origins are disallowed unless added in `allow_origins` in the `config.toml` file
+- No longer need to click on `resume` to resume a thread
+- **[breaking]**: Theme customisation is now handled in `public/theme.json` instead of `config.toml`.
+- **[breaking]**: Changed fields on the `Action` class:
+  - The `value` field has replaced with `payload` which accepts a Python dict
+  - The `description` field has been renamed `tooltip`
+  - The field `icon` has been added
+  - The `collapsed` field has been removed.
+- **[breaking]**: Completely revamped audio implementation (#1401, #1410):
+  - Replaced `AudioChunk` with `InputAudioChunk` and `OutputAudioChunk`
+  - Changed default audio sampling rate from 44100 to 24000
+  - Removed several audio configuration options (`min_decibels`, `initial_silence_timeout`, `silence_timeout`, `chunk_duration`, `max_duration`)
+
+### Fixed
+
+- Autoscaling of Chainlit app behind a load balancer should now work. Don't forget to enable sticky sessions
+
+## [2.1.dev0] - 2024-11-14
+
+Pre-release: developer preview.
+
+### Added
+- New `@data_layer` decorator for configuring custom data layers declaratively
+- Unit tests for `get_data_layer()` and `@data_layer` functionality
+
+### Changed
+- Data layer configuration system now prioritizes `@data_layer` decorator over environment variables
+- Data layer initialization is now more explicit and testable through the decorator pattern
+- Updated example code in `/cypress/e2e/custom_data_layer` and `/cypress/e2e/data_layer` to use the new decorator
+
+### Developer Experience
+- Improved test infrastructure with new fixtures for data layer mocking
+- Added comprehensive tests for data layer configuration scenarios
+
 ## [1.3.2] - 2024-11-08
 
 ### Security Advisory

@@ -2,13 +2,13 @@ import uuid
 from pathlib import Path
 
 import pytest
-from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
-from chainlit.data.storage_clients.base import BaseStorageClient
-from chainlit.element import Text
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from chainlit import User
+from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
+from chainlit.data.storage_clients.base import BaseStorageClient
+from chainlit.element import Text
 
 
 @pytest.fixture
@@ -120,7 +120,7 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
     # Create SQLAlchemyDataLayer instance
     data_layer = SQLAlchemyDataLayer(conninfo, storage_provider=mock_storage_client)
 
-    yield data_layer
+    return data_layer
 
 
 async def test_create_and_get_element(

@@ -40,7 +40,7 @@ async def mock_literal_client(monkeypatch: pytest.MonkeyPatch):
     client = Mock(spec=AsyncLiteralClient)
     client.api = AsyncMock(spec=AsyncLiteralAPI)
     monkeypatch.setattr("literalai.AsyncLiteralClient", client)
-    yield client
+    return client
 
 
 @pytest.fixture

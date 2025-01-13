@@ -1,7 +1,8 @@
 from typing import Dict, Literal, Optional, TypedDict
 
 from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import Field, dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 Provider = Literal[
     "credentials",

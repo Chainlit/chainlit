@@ -79,7 +79,7 @@ T = TypeVar("T", covariant=True)
 class HasFromDict(Protocol[T]):
     @classmethod
     def from_dict(cls, obj_dict: Any) -> T:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 @dataclass
@@ -168,10 +168,12 @@ class InputAudioChunk:
     elapsedTime: float
     data: bytes
 
+
 class OutputAudioChunk(TypedDict):
     track: str
     mimeType: str
     data: bytes
+
 
 @dataclass
 class AskFileResponse:
@@ -184,12 +186,16 @@ class AskFileResponse:
 
 class AskActionResponse(TypedDict):
     name: str
-    value: str
+    payload: Dict
     label: str
-    description: str
+    tooltip: str
     forId: str
     id: str
-    collapsed: bool
+
+
+class UpdateThreadRequest(BaseModel):
+    threadId: str
+    name: str
 
 
 class DeleteThreadRequest(BaseModel):
@@ -203,6 +209,16 @@ class DeleteFeedbackRequest(BaseModel):
 class GetThreadsRequest(BaseModel):
     pagination: Pagination
     filter: ThreadFilter
+
+
+class CallActionRequest(BaseModel):
+    action: Dict
+    sessionId: str
+
+
+class ElementRequest(BaseModel):
+    element: Dict
+    sessionId: str
 
 
 class Theme(str, Enum):

@@ -1,93 +1,112 @@
-import PopOver from 'popover';
-import { useState } from 'react';
-import { IWidgetConfig } from 'types';
+import { cn } from '@/lib/utils';
+import { MessageCircle, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import CloseIcon from '@mui/icons-material/Close';
-import Box from '@mui/material/Box';
-import Fab from '@mui/material/Fab';
-import Fade from '@mui/material/Fade';
+import Alert from '@chainlit/app/src/components/Alert';
+import { Button } from '@chainlit/app/src/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@chainlit/app/src/components/ui/popover';
 
-import MessageCircleIcon from '@chainlit/app/src/assets/MessageCircle';
+import Header from './components/Header';
+
+import ChatWrapper from './chat';
+import { IWidgetConfig } from './types';
 
 interface Props {
   config: IWidgetConfig;
+  error?: string;
 }
 
-export default function Widget({ config }: Props) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
-  const customStyle = config.button?.style || {};
-  const buttonHeight = customStyle.height || customStyle.size || '60px';
-  const style = {
-    width: customStyle.width || customStyle.size || '60px',
-    height: buttonHeight,
-    bgcolor: customStyle.bgcolor || '#F80061',
-    color: customStyle.color || 'white',
-    '&:hover': {
-      bgcolor: customStyle.bgcolorHover || '#DA0054'
-    },
-    borderColor: customStyle.borderColor || 'transparent',
-    borderWidth: customStyle.borderWidth || '0px',
-    borderStyle: customStyle.borderStyle || 'solid',
-    borderRadius: customStyle.borderRadius || '50%',
-    boxShadow: customStyle.boxShadow || '0 4px 10px 0 rgba(0,0,0,.05)!important'
-  };
+const Widget = ({ config, error }: Props) => {
+  const [expanded, setExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const isPopoverOpen = Boolean(anchorEl);
+  useEffect(() => {
+    window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
+
+    return () => {
+      window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
+    };
+  }, []);
+
+  const customClassName = config?.button?.className || '';
 
   return (
-    <>
-      <PopOver anchorEl={anchorEl} buttonHeight={buttonHeight} />
-      <Fab
-        disableRipple
-        aria-label="open copilot"
-        id="chainlit-copilot-button"
-        sx={{
-          minHeight: 'auto',
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          zIndex: 1000,
-          ...style
-        }}
-        onClick={(event: React.MouseEvent<HTMLElement>) =>
-          setAnchorEl(anchorEl ? null : event.currentTarget)
-        }
-      >
-        <Fade in={!isPopoverOpen} timeout={300}>
-          <Box
-            position={'absolute'}
-            top={0}
-            left={0}
-            bottom={0}
-            right={0}
-            p={1.5}
-          >
-            {config.button?.imageUrl ? (
-              <img width="100%" src={config.button?.imageUrl} />
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id="chainlit-copilot-button"
+          className={cn(
+            'fixed h-16 w-16 rounded-full bottom-8 right-8 z-[20]',
+            'transition-transform duration-300 ease-in-out',
+            customClassName
+          )}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {config?.button?.imageUrl ? (
+              <img
+                width="100%"
+                src={config.button.imageUrl}
+                alt="Chat bubble icon"
+                className={cn(
+                  'transition-opacity',
+                  isOpen ? 'opacity-0' : 'opacity-100'
+                )}
+              />
             ) : (
-              <MessageCircleIcon
-                color="inherit"
-                sx={{ width: '90%', height: '90%' }}
+              <MessageCircle
+                className={cn(
+                  '!size-7 transition-opacity',
+                  isOpen ? 'opacity-0' : 'opacity-100'
+                )}
               />
             )}
-          </Box>
-        </Fade>
-        <Fade in={isPopoverOpen} timeout={300}>
-          <Box
-            position={'absolute'}
-            top={0}
-            left={0}
-            bottom={0}
-            right={0}
-            p={1.5}
-            display={'flex'}
-            alignItems={'center'}
-            justifyContent={'center'}
-          >
-            <CloseIcon color="inherit" sx={{ width: '90%', height: '90%' }} />
-          </Box>
-        </Fade>
-      </Fab>
-    </>
+            <X
+              className={cn(
+                'absolute !size-7 transition-all',
+                isOpen ? 'rotate-0 scale-100' : 'rotate-90 scale-0'
+              )}
+            />
+          </div>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+        side="top"
+        align="end"
+        sideOffset={12}
+        className={cn(
+          'flex flex-col p-0',
+          'transition-all duration-300 ease-in-out bg-background',
+          expanded ? 'w-[80vw]' : 'w-[min(400px,80vw)]',
+          'h-[min(730px,calc(100vh-150px))]',
+          'overflow-hidden rounded-xl',
+          'shadow-lg',
+          'z-50',
+          'animate-in fade-in-0 zoom-in-95',
+          'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
+        )}
+      >
+        <div id="chainlit-copilot" className="flex flex-col h-full w-full">
+          {error ? (
+            <Alert variant="error">{error}</Alert>
+          ) : (
+            <>
+              <Header expanded={expanded} setExpanded={setExpanded} />
+              <div className="flex flex-grow overflow-y-auto">
+                <ChatWrapper />
+              </div>
+            </>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
-}
+};
+
+export default Widget;

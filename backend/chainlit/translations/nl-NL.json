@@ -1,0 +1,229 @@
+{
+    "components": {
+        "atoms": {
+            "buttons": {
+                "userButton": {
+                    "menu": {
+                        "settings": "Instellingen",
+                        "settingsKey": "I",
+                        "APIKeys": "API-sleutels",
+                        "logout": "Uitloggen"
+                    }
+                }
+            }
+        },
+        "molecules": {
+            "newChatButton": {
+                "newChat": "Nieuwe Chat"
+            },
+            "tasklist": {
+                "TaskList": {
+                    "title": "\ud83d\uddd2\ufe0f Takenlijst",
+                    "loading": "Laden...",
+                    "error": "Er is een fout opgetreden"
+                }
+            },
+            "attachments": {
+                "cancelUpload": "Upload annuleren",
+                "removeAttachment": "Bijlage verwijderen"
+            },
+            "newChatDialog": {
+                "createNewChat": "Nieuwe chat maken?",
+                "clearChat": "Dit zal de huidige berichten wissen en een nieuwe chat starten.",
+                "cancel": "Annuleren",
+                "confirm": "Bevestigen"
+            },
+            "settingsModal": {
+                "settings": "Instellingen",
+                "expandMessages": "Berichten uitbreiden",
+                "hideChainOfThought": "Gedachtenketen verbergen",
+                "darkMode": "Donkere modus"
+            },
+            "detailsButton": {
+                "using": "Gebruikt",
+                "used": "Gebruikt"
+            },
+            "auth": {
+                "authLogin": {
+                    "title": "Log in om toegang te krijgen tot de app.",
+                    "form": {
+                        "email": "E-mailadres",
+                        "password": "Wachtwoord",
+                        "noAccount": "Nog geen account?",
+                        "alreadyHaveAccount": "Al een account?",
+                        "signup": "Registreren",
+                        "signin": "Inloggen",
+                        "or": "OF",
+                        "continue": "Doorgaan",
+                        "forgotPassword": "Wachtwoord vergeten?",
+                        "passwordMustContain": "Uw wachtwoord moet bevatten:",
+                        "emailRequired": "e-mail is een verplicht veld",
+                        "passwordRequired": "wachtwoord is een verplicht veld"
+                    },
+                    "error": {
+                        "default": "Inloggen niet mogelijk.",
+                        "signin": "Probeer in te loggen met een ander account.",
+                        "oauthsignin": "Probeer in te loggen met een ander account.",
+                        "redirect_uri_mismatch": "De omleidings-URI komt niet overeen met de oauth-appconfiguratie.",
+                        "oauthcallbackerror": "Probeer in te loggen met een ander account.",
+                        "oauthcreateaccount": "Probeer in te loggen met een ander account.",
+                        "emailcreateaccount": "Probeer in te loggen met een ander account.",
+                        "callback": "Probeer in te loggen met een ander account.",
+                        "oauthaccountnotlinked": "Om uw identiteit te bevestigen, log in met hetzelfde account dat u oorspronkelijk gebruikte.",
+                        "emailsignin": "De e-mail kon niet worden verzonden.",
+                        "emailverify": "Verifieer uw e-mail, een nieuwe e-mail is verzonden.",
+                        "credentialssignin": "Inloggen mislukt. Controleer of de verstrekte gegevens correct zijn.",
+                        "sessionrequired": "Log in om toegang te krijgen tot deze pagina."
+                    }
+                },
+                "authVerifyEmail": {
+                    "almostThere": "Bijna daar! We hebben een e-mail gestuurd naar ",
+                    "verifyEmailLink": "Klik op de link in die e-mail om uw registratie te voltooien.",
+                    "didNotReceive": "Kun je de e-mail niet vinden?",
+                    "resendEmail": "E-mail opnieuw verzenden",
+                    "goBack": "Ga terug",
+                    "emailSent": "E-mail succesvol verzonden.",
+                    "verifyEmail": "Verifieer uw e-mailadres"
+                },
+                "providerButton": {
+                    "continue": "Doorgaan met {{provider}}",
+                    "signup": "Aanmelden met {{provider}}"
+                },
+                "authResetPassword": {
+                    "newPasswordRequired": "Nieuw wachtwoord is een verplicht veld",
+                    "passwordsMustMatch": "Wachtwoorden moeten overeenkomen",
+                    "confirmPasswordRequired": "Bevestig wachtwoord is een verplicht veld",
+                    "newPassword": "Nieuw wachtwoord",
+                    "confirmPassword": "Bevestig wachtwoord",
+                    "resetPassword": "Wachtwoord resetten"
+                },
+                "authForgotPassword": {
+                    "email": "E-mailadres",
+                    "emailRequired": "e-mail is een verplicht veld",
+                    "emailSent": "Controleer het e-mailadres {{email}} voor instructies om uw wachtwoord te resetten.",
+                    "enterEmail": "Voer uw e-mailadres in en we sturen u instructies om uw wachtwoord te resetten.",
+                    "resendEmail": "E-mail opnieuw verzenden",
+                    "continue": "Doorgaan",
+                    "goBack": "Ga terug"
+                }
+            }
+        },
+        "organisms": {
+            "chat": {
+                "history": {
+                    "index": {
+                        "showHistory": "Geschiedenis tonen",
+                        "lastInputs": "Laatste invoer",
+                        "noInputs": "Zo leeg...",
+                        "loading": "Laden..."
+                    }
+                },
+                "inputBox": {
+                    "input": {
+                        "placeholder": "Typ uw bericht hier..."
+                    },
+                    "speechButton": {
+                        "start": "Opname starten",
+                        "stop": "Opname stoppen"
+                    },
+                    "SubmitButton": {
+                        "sendMessage": "Bericht verzenden",
+                        "stopTask": "Taak stoppen"
+                    },
+                    "UploadButton": {
+                        "attachFiles": "Bestanden toevoegen"
+                    },
+                    "waterMark": {
+                        "text": "Gebouwd met"
+                    }
+                },
+                "Messages": {
+                    "index": {
+                        "running": "Bezig",
+                        "executedSuccessfully": "succesvol uitgevoerd",
+                        "failed": "mislukt",
+                        "feedbackUpdated": "Feedback bijgewerkt",
+                        "updating": "Bijwerken"
+                    }
+                },
+                "dropScreen": {
+                    "dropYourFilesHere": "Sleep uw bestanden hierheen"
+                },
+                "index": {
+                    "failedToUpload": "Uploaden mislukt",
+                    "cancelledUploadOf": "Upload geannuleerd van",
+                    "couldNotReachServer": "Server niet bereikbaar",
+                    "continuingChat": "Vervolg van eerdere chat"
+                },
+                "settings": {
+                    "settingsPanel": "Instellingenpaneel",
+                    "reset": "Resetten",
+                    "cancel": "Annuleren",
+                    "confirm": "Bevestigen"
+                }
+            },
+            "threadHistory": {
+                "sidebar": {
+                    "filters": {
+                        "FeedbackSelect": {
+                            "feedbackAll": "Feedback: Alles",
+                            "feedbackPositive": "Feedback: Positief",
+                            "feedbackNegative": "Feedback: Negatief"
+                        },
+                        "SearchBar": {
+                            "search": "Zoeken"
+                        }
+                    },
+                    "DeleteThreadButton": {
+                        "confirmMessage": "Dit verwijdert de thread evenals de berichten en elementen.",
+                        "cancel": "Annuleren",
+                        "confirm": "Bevestigen",
+                        "deletingChat": "Chat verwijderen",
+                        "chatDeleted": "Chat verwijderd"
+                    },
+                    "index": {
+                        "pastChats": "Vorige Chats"
+                    },
+                    "ThreadList": {
+                        "empty": "Leeg...",
+                        "today": "Vandaag",
+                        "yesterday": "Gisteren",
+                        "previous7days": "Afgelopen 7 dagen",
+                        "previous30days": "Afgelopen 30 dagen"
+                    },
+                    "TriggerButton": {
+                        "closeSidebar": "Zijbalk sluiten",
+                        "openSidebar": "Zijbalk openen"
+                    }
+                },
+                "Thread": {
+                    "backToChat": "Terug naar chat",
+                    "chatCreatedOn": "Deze chat is aangemaakt op"
+                }
+            },
+            "header": {
+                "chat": "Chat",
+                "readme": "Readme"
+            }
+        }
+    },
+    "hooks": {
+        "useLLMProviders": {
+            "failedToFetchProviders": "Kan providers niet ophalen:"
+        }
+    },
+    "pages": {
+        "Design": {},
+        "Env": {
+            "savedSuccessfully": "Succesvol opgeslagen",
+            "requiredApiKeys": "Vereiste API-sleutels",
+            "requiredApiKeysInfo": "Om deze app te gebruiken, zijn de volgende API-sleutels vereist. De sleutels worden opgeslagen in de lokale opslag van uw apparaat."
+        },
+        "Page": {
+            "notPartOfProject": "U maakt geen deel uit van dit project."
+        },
+        "ResumeButton": {
+            "resumeChat": "Chat hervatten"
+        }
+    }
+}

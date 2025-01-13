@@ -9,6 +9,7 @@ import uvicorn
 nest_asyncio.apply()
 
 # ruff: noqa: E402
+from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
     BACKEND_ROOT,
@@ -24,7 +25,18 @@ from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
 from chainlit.telemetry import trace_event
-from chainlit.utils import check_file, ensure_jwt_secret
+from chainlit.utils import check_file
+
+
+def assert_app():
+    if (
+        not config.code.on_chat_start
+        and not config.code.on_message
+        and not config.code.on_audio_chunk
+    ):
+        raise Exception(
+            "You need to configure at least one of on_chat_start, on_message or on_audio_chunk callback"
+        )
 
 
 # Create the main command group for Chainlit CLI
@@ -66,6 +78,7 @@ def run_chainlit(target: str):
     load_module(config.run.module_name)
 
     ensure_jwt_secret()
+    assert_app()
 
     # Create the chainlit.md file if it doesn't exist
     init_markdown(config.root)

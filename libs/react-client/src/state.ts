@@ -28,6 +28,11 @@ export const threadIdToResumeState = atom<string | undefined>({
   default: undefined
 });
 
+export const resumeThreadErrorState = atom<string | undefined>({
+  key: 'ResumeThreadErrorState',
+  default: undefined
+});
+
 export const chatProfileState = atom<string | undefined>({
   key: 'ChatProfile',
   default: undefined
@@ -142,14 +147,9 @@ export const firstUserInteraction = atom<string | undefined>({
   default: undefined
 });
 
-export const accessTokenState = atom<string | undefined>({
-  key: 'AccessToken',
-  default: undefined
-});
-
-export const userState = atom<IUser | null>({
+export const userState = atom<IUser | undefined | null>({
   key: 'User',
-  default: null
+  default: undefined
 });
 
 export const configState = atom<IChainlitConfig | undefined>({

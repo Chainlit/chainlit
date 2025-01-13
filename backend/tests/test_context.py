@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+
 from chainlit.context import (
     ChainlitContext,
     ChainlitContextException,

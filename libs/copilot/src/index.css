@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#cl-shadow-root {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#cl-shadow-root code {
+  font-family: var(--font-mono);
+}
+
+@layer base {
+  #shadow-root-container {
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 340 92% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 36%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 340 92% 52%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 0 0% 13%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 18%;
+    --card-foreground: 210 40% 98%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 340 92% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 19%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 0 1% 26%;
+    --muted-foreground: 0 0% 71%;
+    --accent: 0 0% 26%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 1% 26%;
+    --input: 0 1% 26%;
+    --ring: 340 92% 52%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 13%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -100% top;
+  }
+
+  to {
+    background-position: 250% top;
+  }
+}
+
+#cl-shadow-root .loading-shimmer {
+  background-position: -100% top;
+  text-fill-color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation-delay: 0s;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-name: loading-shimmer;
+  background: hsl(var(--muted))
+    gradient(
+      linear,
+      100% 0,
+      0 0,
+      from(hsl(var(--muted))),
+      color-stop(0.5, hsl(var(--foreground))),
+      to(hsl(var(--muted)))
+    );
+  background: hsl(var(--muted)) -webkit-gradient(linear, 100% 0, 0 0, from(hsl(var(--muted))), color-stop(0.5, hsl(var(--foreground))), to(hsl(var(--muted))));
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-repeat: no-repeat;
+  background-size: 50% 200%;
+}
