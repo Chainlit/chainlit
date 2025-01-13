@@ -26,7 +26,6 @@ class GCSStorageClient(BaseStorageClient):
         )
 
         self.client = storage.Client(project=project_id, credentials=credentials)
-        self.bucket_name = bucket_name
         self.bucket = self.client.bucket(bucket_name)
         logger.info("GCSStorageClient initialized")
 
@@ -60,7 +59,7 @@ class GCSStorageClient(BaseStorageClient):
 
             return {
                 "object_key": object_key,
-                "url": f"gs://{self.bucket_name}/{object_key}",
+                "url": f"gs://{self.bucket.name}/{object_key}",
             }
 
         except Exception as e:
@@ -76,3 +75,14 @@ class GCSStorageClient(BaseStorageClient):
         return await make_async(self.sync_upload_file)(
             object_key, data, mime, overwrite
         )
+
+    def sync_delete_file(self, object_key: str) -> bool:
+        try:
+            self.bucket.blob(object_key).delete()
+            return True
+        except Exception as e:
+            logger.warn(f"GCSStorageClient, delete_file error: {e}")
+            return False
+
+    async def delete_file(self, object_key: str) -> bool:
+        return await make_async(self.sync_delete_file)(object_key)

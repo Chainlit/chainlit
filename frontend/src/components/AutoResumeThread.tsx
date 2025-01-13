@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
+  resumeThreadErrorState,
   useChatInteract,
   useChatSession,
   useConfig
@@ -17,6 +19,9 @@ export default function AutoResumeThread({ id }: Props) {
   const { config } = useConfig();
   const { clear, setIdToResume } = useChatInteract();
   const { session, idToResume } = useChatSession();
+  const [resumeThreadError, setResumeThreadError] = useRecoilState(
+    resumeThreadErrorState
+  );
 
   useEffect(() => {
     if (!config?.threadResumable) return;
@@ -33,8 +38,17 @@ export default function AutoResumeThread({ id }: Props) {
     }
     if (session?.error) {
       toast.error("Couldn't resume chat");
+      navigate('/');
     }
   }, [session, idToResume, id]);
+
+  useEffect(() => {
+    if (resumeThreadError) {
+      toast.error("Couldn't resume chat: " + resumeThreadError);
+      navigate('/');
+      setResumeThreadError(undefined);
+    }
+  }, [resumeThreadError]);
 
   return null;
 }

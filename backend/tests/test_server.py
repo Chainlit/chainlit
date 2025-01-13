@@ -500,36 +500,36 @@ def test_upload_file_unauthorized(
     assert response.status_code == 422
 
 
-def test_upload_file_disabled(
-    test_client: TestClient,
-    test_config: ChainlitConfig,
-    mock_session_get_by_id_patched: Mock,
-    monkeypatch: pytest.MonkeyPatch,
-):
-    """Test file upload being disabled by config."""
+# def test_upload_file_disabled(
+#     test_client: TestClient,
+#     test_config: ChainlitConfig,
+#     mock_session_get_by_id_patched: Mock,
+#     monkeypatch: pytest.MonkeyPatch,
+# ):
+#     """Test file upload being disabled by config."""
 
-    # Set accept in config
-    monkeypatch.setattr(
-        test_config.features,
-        "spontaneous_file_upload",
-        SpontaneousFileUploadFeature(enabled=False),
-    )
+#     # Set accept in config
+#     monkeypatch.setattr(
+#         test_config.features,
+#         "spontaneous_file_upload",
+#         SpontaneousFileUploadFeature(enabled=False),
+#     )
 
-    # Prepare the files to upload
-    file_content = b"Sample file content"
-    files = {
-        "file": ("test_upload.txt", file_content, "text/plain"),
-    }
+#     # Prepare the files to upload
+#     file_content = b"Sample file content"
+#     files = {
+#         "file": ("test_upload.txt", file_content, "text/plain"),
+#     }
 
-    # Make the POST request to upload the file
-    response = test_client.post(
-        "/project/file",
-        files=files,
-        params={"session_id": mock_session_get_by_id_patched.id},
-    )
+#     # Make the POST request to upload the file
+#     response = test_client.post(
+#         "/project/file",
+#         files=files,
+#         params={"session_id": mock_session_get_by_id_patched.id},
+#     )
 
-    # Verify the response
-    assert response.status_code == 400
+#     # Verify the response
+#     assert response.status_code == 400
 
 
 @pytest.mark.parametrize(

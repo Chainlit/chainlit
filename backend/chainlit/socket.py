@@ -136,6 +136,7 @@ async def connect(sid, environ, auth):
 
     client_type = auth.get("clientType")
     http_referer = environ.get("HTTP_REFERER")
+    http_cookie = environ.get("HTTP_COOKIE")
     url_encoded_chat_profile = auth.get("chatProfile")
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
@@ -154,6 +155,7 @@ async def connect(sid, environ, auth):
         thread_id=auth.get("threadId"),
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
+        http_cookie=http_cookie,
     )
 
     trace_event("connection_successful")
@@ -187,6 +189,8 @@ async def connection_successful(sid):
 
             await context.emitter.resume_thread(thread)
             return
+        else:
+            await context.emitter.send_resume_thread_error("Thread not found.")
 
     if config.code.on_chat_start:
         task = asyncio.create_task(config.code.on_chat_start())
