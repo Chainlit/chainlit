@@ -1,9 +1,11 @@
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
 import * as ReactHookForm from 'react-hook-form';
+import * as Recoil from 'recoil';
 import * as Sonner from 'sonner';
 import * as Zod from 'zod';
-import * as Recoil from 'recoil';
+
+import * as ChainlitReactClient from '@chainlit/react-client';
 
 import * as AccordionComponents from '@/components/ui/accordion';
 import * as AspectRatioComponents from '@/components/ui/aspect-ratio';
@@ -38,6 +40,7 @@ const Imports = {
   sonner: Sonner,
   zod: Zod,
   recoil: Recoil,
+  '@chainlit/react-client': ChainlitReactClient,
   'react-hook-form': ReactHookForm,
   'lucide-react': LucideIcons,
   '@/components/ui/accordion': AccordionComponents,
