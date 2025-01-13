@@ -777,14 +777,16 @@ async def test_update_step(
 
 def test_steptype_to_steptype():
     assert (
-        LiteralToChainlitConverter.steptype_to_steptype("user_message") == "user_message"
+        LiteralToChainlitConverter.steptype_to_steptype("user_message")
+        == "user_message"
     )
     assert (
         LiteralToChainlitConverter.steptype_to_steptype("assistant_message")
         == "assistant_message"
     )
     assert (
-        LiteralToChainlitConverter.steptype_to_steptype("system_message") == "system_message"
+        LiteralToChainlitConverter.steptype_to_steptype("system_message")
+        == "system_message"
     )
     assert LiteralToChainlitConverter.steptype_to_steptype("tool") == "tool"
     assert LiteralToChainlitConverter.steptype_to_steptype(None) == "undefined"
