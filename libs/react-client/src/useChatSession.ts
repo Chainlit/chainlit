@@ -21,6 +21,7 @@ import {
   isAiSpeakingState,
   loadingState,
   messagesState,
+  resumeThreadErrorState,
   sessionIdState,
   sessionState,
   tasklistState,
@@ -72,26 +73,25 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
+  const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
 
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {
     if (session?.socket) {
-      session.socket.auth["threadId"] =
-        currentThreadId || '';
+      session.socket.auth['threadId'] = currentThreadId || '';
     }
   }, [currentThreadId]);
 
   const _connect = useCallback(
     ({
       transports,
-      userEnv,
-      accessToken
+      userEnv
     }: {
-      transports?: string[]
+      transports?: string[];
       userEnv: Record<string, string>;
-      accessToken?: string;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -105,14 +105,12 @@ const useChatSession = () => {
         withCredentials: true,
         transports,
         auth: {
-              token: accessToken,
-              clientType: client.type,
-              sessionId,
-              threadId: idToResume || '',
-              userEnv: JSON.stringify(userEnv),
-              chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
-          }
-        
+          clientType: client.type,
+          sessionId,
+          threadId: idToResume || '',
+          userEnv: JSON.stringify(userEnv),
+          chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
+        }
       });
       setSession((old) => {
         old?.socket?.removeAllListeners();
@@ -197,6 +195,10 @@ const useChatSession = () => {
             (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
           )
         );
+      });
+
+      socket.on('resume_thread_error', (error?: string) => {
+        setThreadResumeError(error);
       });
 
       socket.on('new_message', (message: IStep) => {
@@ -332,7 +334,7 @@ const useChatSession = () => {
         }
       });
     },
-    [setSession, sessionId, chatProfile]
+    [setSession, sessionId, idToResume, chatProfile]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);

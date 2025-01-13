@@ -5,16 +5,13 @@ import { useApi, useAuth } from './api';
 import { configState } from './state';
 import { IChainlitConfig } from './types';
 
-const useConfig = (accessToken?: string) => {
+const useConfig = () => {
   const [config, setConfig] = useRecoilState(configState);
   const { isAuthenticated } = useAuth();
   const language = navigator.language || 'en-US';
 
   const { data, error, isLoading } = useApi<IChainlitConfig>(
-    !config && isAuthenticated
-      ? `/project/settings?language=${language}`
-      : null,
-    { token: accessToken }
+    !config && isAuthenticated ? `/project/settings?language=${language}` : null
   );
 
   useEffect(() => {

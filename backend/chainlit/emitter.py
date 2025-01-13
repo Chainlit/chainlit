@@ -50,6 +50,10 @@ class BaseChainlitEmitter:
         """Stub method to resume a thread."""
         pass
 
+    async def send_resume_thread_error(self, error: str):
+        """Stub method to send a resume thread error."""
+        pass
+
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
         pass
@@ -128,12 +132,6 @@ class BaseChainlitEmitter:
         """Stub method to set chat settings."""
         pass
 
-    async def send_action_response(
-        self, id: str, status: bool, response: Optional[str] = None
-    ):
-        """Send an action response to the UI."""
-        pass
-
     async def send_window_message(self, data: Any):
         """Stub method to send custom data to the host window."""
         pass
@@ -174,6 +172,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def resume_thread(self, thread_dict: ThreadDict):
         """Send a thread to the UI to resume it"""
         return self.emit("resume_thread", thread_dict)
+
+    def send_resume_thread_error(self, error: str):
+        """Send a thread resume error to the UI"""
+        return self.emit("resume_thread_error", error)
 
     async def update_audio_connection(self, state: Literal["on", "off"]):
         """Audio connection signaling."""
@@ -325,7 +327,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 elif spec.type == "action":
                     action_res = cast(AskActionResponse, user_res)
                     final_res = action_res
-                    interaction = action_res["value"]
+                    interaction = action_res["name"]
 
                 if not self.session.has_first_interaction and interaction:
                     self.session.has_first_interaction = True
@@ -390,13 +392,6 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     def set_chat_settings(self, settings: Dict[str, Any]):
         self.session.chat_settings = settings
-
-    def send_action_response(
-        self, id: str, status: bool, response: Optional[str] = None
-    ):
-        return self.emit(
-            "action_response", {"id": id, "status": status, "response": response}
-        )
 
     def send_window_message(self, data: Any):
         """Send custom data to the host window."""

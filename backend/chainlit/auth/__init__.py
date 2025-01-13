@@ -38,10 +38,10 @@ def get_configuration():
         "requireLogin": require_login(),
         "passwordAuth": config.code.password_auth_callback is not None,
         "headerAuth": config.code.header_auth_callback is not None,
-        "cookieAuth": config.project.cookie_auth,
         "oauthProviders": (
             get_configured_oauth_providers() if is_oauth_enabled() else []
         ),
+        "default_theme": config.ui.default_theme,
     }
 
 

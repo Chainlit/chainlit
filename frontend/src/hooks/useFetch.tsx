@@ -1,23 +1,32 @@
+import { useContext } from 'react';
 import useSWR, { SWRResponse } from 'swr';
 
-const fetcher = async (url: string): Promise<any> => {
-  const response = await fetch(url);
+import { ChainlitContext } from '@chainlit/react-client';
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
+const fetcher =
+  (isChainlitRequest: boolean) =>
+  async (url: string): Promise<any> => {
+    const fetchOptions: RequestInit = {
+      ...(isChainlitRequest && { credentials: 'include' })
+    };
 
-  // Check if the response is JSON
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return response.json();
-  } else {
-    // If it's not JSON, return the raw response body
-    return response.text();
-  }
-};
+    const response = await fetch(url, fetchOptions);
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const contentType = response.headers.get('content-type');
+    return contentType?.includes('application/json')
+      ? response.json()
+      : response.text();
+  };
 
 const useFetch = (endpoint: string | null): SWRResponse<any, Error> => {
-  return useSWR<any, Error>(endpoint, fetcher);
+  const apiClient = useContext(ChainlitContext);
+  const isChainlitRequest = endpoint?.startsWith(apiClient.httpEndpoint);
+
+  return useSWR<any, Error>(endpoint, fetcher(!!isChainlitRequest));
 };
+
 export { useFetch };

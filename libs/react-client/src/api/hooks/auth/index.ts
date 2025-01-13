@@ -2,18 +2,15 @@ import { IAuthConfig, IUser } from 'src/types';
 
 import { useAuthConfig } from './config';
 import { useSessionManagement } from './sessionManagement';
-import { useAuthState } from './state';
-import { useTokenManagement } from './tokenManagement';
 import { useUserManagement } from './userManagement';
 
 export const useAuth = () => {
-  const { authConfig, cookieAuth } = useAuthConfig();
+  const { authConfig } = useAuthConfig();
   const { logout } = useSessionManagement();
   const { user, setUserFromAPI } = useUserManagement();
-  const { accessToken } = useAuthState();
-  const { handleSetAccessToken } = useTokenManagement();
 
-  const isReady = !!authConfig;
+  const isReady =
+    !!authConfig && (!authConfig.requireLogin || user !== undefined);
 
   if (authConfig && !authConfig.requireLogin) {
     return {
@@ -21,11 +18,8 @@ export const useAuth = () => {
       user: null,
       isReady,
       isAuthenticated: true,
-      accessToken: '',
       logout: () => Promise.resolve(),
-      setAccessToken: () => {},
-      setUserFromAPI: () => Promise.resolve(),
-      cookieAuth
+      setUserFromAPI: () => Promise.resolve()
     };
   }
 
@@ -34,11 +28,8 @@ export const useAuth = () => {
     user,
     isReady,
     isAuthenticated: !!user,
-    accessToken,
     logout,
-    setAccessToken: handleSetAccessToken,
-    setUserFromAPI,
-    cookieAuth
+    setUserFromAPI
   };
 };
 

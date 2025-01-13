@@ -59,8 +59,7 @@ const ChatComponent = () => {
     connect({
       userEnv: {
         /* user environment variables */
-      },
-      accessToken: 'Bearer YOUR_ACCESS_TOKEN' // Optional Chainlit auth token
+      }
     });
 
     return () => {
@@ -93,7 +92,7 @@ const MessagesComponent = () => {
   return (
     <div>
       {messages.map((message) => (
-        <p key={message.id}>{message.content}</p>
+        <p key={message.id}>{message.output}</p>
       ))}
     </div>
   );
@@ -159,12 +158,12 @@ const InteractionComponent = () => {
   const { sendMessage, replyMessage } = useChatInteract();
 
   const handleSendMessage = () => {
-    const message = { content: 'Hello, World!', id: 'message-id' };
+    const message = { output: 'Hello, World!', id: 'message-id' };
     sendMessage(message);
   };
 
   const handleReplyMessage = () => {
-    const message = { content: 'Replying to your message', id: 'reply-id' };
+    const message = { output: 'Replying to your message', id: 'reply-id' };
     replyMessage(message);
   };
 

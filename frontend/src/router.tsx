@@ -1,5 +1,5 @@
+import getRouterBasename from '@/lib/router';
 import { Navigate, createBrowserRouter } from 'react-router-dom';
-import getRouterBasename from 'utils/router';
 
 import AuthCallback from 'pages/AuthCallback';
 import Element from 'pages/Element';

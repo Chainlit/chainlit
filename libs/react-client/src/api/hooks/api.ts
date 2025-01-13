@@ -1,16 +1,12 @@
 import { useContext, useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
 import { ChainlitAPI } from 'src/api';
 import { ChainlitContext } from 'src/context';
-import { accessTokenState } from 'src/state';
 import useSWR, { SWRConfig, SWRConfiguration } from 'swr';
 
-const fetcher = async (
-  client: ChainlitAPI,
-  endpoint: string,
-  token?: string
-) => {
-  const res = await client.get(endpoint, token);
+import { useAuthState } from './auth/state';
+
+const fetcher = async (client: ChainlitAPI, endpoint: string) => {
+  const res = await client.get(endpoint);
   return res?.json();
 };
 
@@ -39,7 +35,7 @@ const cloneClient = (client: ChainlitAPI): ChainlitAPI => {
  * - Memoized fetcher function to prevent unnecessary rerenders
  *
  * @param path - API endpoint path or null to disable the request
- * @param config - Optional SWR configuration and token override
+ * @param config - Optional SWR configuration
  * @returns SWR response object containing:
  *          - data: The fetched data
  *          - error: Any error that occurred
@@ -47,29 +43,28 @@ const cloneClient = (client: ChainlitAPI): ChainlitAPI => {
  *          - mutate: Function to mutate the cached data
  *
  * @example
- * const { data, error, isValidating } = useApi<UserData>('/user', {
- *   token: accessToken
- * });
+ * const { data, error, isValidating } = useApi<UserData>('/user');
  */
 function useApi<T>(
   path?: string | null,
-  { token, ...swrConfig }: SWRConfiguration & { token?: string } = {}
+  { ...swrConfig }: SWRConfiguration = {}
 ) {
   const client = useContext(ChainlitContext);
-  let accessToken = useRecoilValue(accessTokenState);
-  accessToken = token || accessToken;
+  const { setUser } = useAuthState();
 
   // Memoize the fetcher function to avoid recreating it on every render
   const memoizedFetcher = useMemo(
     () =>
-      ([url, token]: [url: string, token: string]) => {
+      ([url]: [url: string]) => {
         if (!swrConfig.onErrorRetry) {
           swrConfig.onErrorRetry = (...args) => {
             const [err] = args;
 
             // Don't do automatic retry for 401 - it just means we're not logged in (yet).
-            // TODO: Consider setUser(null) if (user)
-            if (err.status === 401) return;
+            if (err.status === 401) {
+              setUser(null);
+              return;
+            }
 
             // Fall back to default behavior.
             return SWRConfig.defaultValue.onErrorRetry(...args);
@@ -78,15 +73,15 @@ function useApi<T>(
 
         const useApiClient = cloneClient(client);
         useApiClient.on401 = useApiClient.onError = undefined;
-        return fetcher(useApiClient, url, token);
+        return fetcher(useApiClient, url);
       },
     [client]
   );
 
   // Use a stable key for useSWR
   const swrKey = useMemo(() => {
-    return path ? [path, accessToken] : null;
-  }, [path, accessToken]);
+    return path ? [path] : null;
+  }, [path]);
 
   return useSWR<T, Error>(swrKey, memoizedFetcher, swrConfig);
 }

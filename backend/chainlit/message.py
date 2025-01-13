@@ -43,7 +43,6 @@ class MessageBase(ABC):
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
     wait_for_answer = False
-    indent: Optional[int] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -86,7 +85,6 @@ class MessageBase(ABC):
             "streaming": self.streaming,
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
-            "indent": self.indent,
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
@@ -542,7 +540,7 @@ class AskActionMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {res["label"]}'
+            self.content = f"**Selected:** {res['label']}"
 
         self.wait_for_answer = False
 

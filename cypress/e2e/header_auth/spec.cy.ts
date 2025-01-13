@@ -11,12 +11,12 @@ describe('Header auth', () => {
 
   describe('without an authorization header', () => {
     it('should display an alert message', () => {
-      cy.get('.MuiAlert-message').should('exist');
+      cy.get('.alert').should('exist');
     });
   });
 
   describe('with authorization header set', () => {
-    beforeEach(() => {
+    const setupInterceptors = () => {
       cy.intercept('/auth/header', (req) => {
         req.headers['test-header'] = 'test header value';
         req.continue();
@@ -26,6 +26,10 @@ describe('Header auth', () => {
       cy.wait('@auth').then(() => {
         cy.intercept('GET', '/user').as('user');
       });
+    };
+
+    beforeEach(() => {
+      setupInterceptors();
     });
 
     const shouldBeLoggedIn = () => {
@@ -41,7 +45,7 @@ describe('Header auth', () => {
       });
 
       it('should not display an alert message', () => {
-        cy.get('.MuiAlert-message').should('not.exist');
+        cy.get('.alert').should('not.exist');
       });
 
       it("should display 'Hello admin'", () => {
@@ -58,7 +62,7 @@ describe('Header auth', () => {
     });
 
     describe('after reloading', () => {
-      before(() => {
+      beforeEach(() => {
         cy.reload();
       });
 
