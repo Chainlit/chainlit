@@ -17,7 +17,7 @@ import {
 
 import { ThreadList } from './ThreadList';
 
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 35;
 let _scrollTop = 0;
 
 export function ThreadHistory() {

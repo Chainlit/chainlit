@@ -13,14 +13,13 @@ _cookie_samesite = cast(
     os.environ.get("CHAINLIT_COOKIE_SAMESITE", "lax"),
 )
 
-assert (
-    _cookie_samesite
-    in [
-        "lax",
-        "strict",
-        "none",
-    ]
-), "Invalid value for CHAINLIT_COOKIE_SAMESITE. Must be one of 'lax', 'strict' or 'none'."
+assert _cookie_samesite in [
+    "lax",
+    "strict",
+    "none",
+], (
+    "Invalid value for CHAINLIT_COOKIE_SAMESITE. Must be one of 'lax', 'strict' or 'none'."
+)
 _cookie_secure = _cookie_samesite == "none"
 
 _auth_cookie_lifetime = 60 * 60  # 1 hour

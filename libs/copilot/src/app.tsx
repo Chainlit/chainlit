@@ -15,6 +15,7 @@ interface Props {
 declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
+    toggleChainlitCopilot: () => void;
     theme?: {
       light: Record<string, string>;
       dark: Record<string, string>;
