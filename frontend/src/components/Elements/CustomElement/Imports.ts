@@ -3,6 +3,7 @@ import React from 'react';
 import * as ReactHookForm from 'react-hook-form';
 import * as Sonner from 'sonner';
 import * as Zod from 'zod';
+import * as Recoil from 'recoil';
 
 import * as AccordionComponents from '@/components/ui/accordion';
 import * as AspectRatioComponents from '@/components/ui/aspect-ratio';
@@ -36,6 +37,7 @@ const Imports = {
   react: React,
   sonner: Sonner,
   zod: Zod,
+  recoil: Recoil,
   'react-hook-form': ReactHookForm,
   'lucide-react': LucideIcons,
   '@/components/ui/accordion': AccordionComponents,
