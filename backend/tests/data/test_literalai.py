@@ -992,7 +992,7 @@ def test_step_to_step():
     assert isinstance(chainlit_step, Step)
     assert chainlit_step.id == "test_step_id"
     assert chainlit_step.thread_id == "test_thread_id"
-    assert chainlit_step.type == "undefined"
+    assert chainlit_step.type == "user_message"
     assert chainlit_step.name == "Test Step"
     assert chainlit_step.input == "test input"
     assert chainlit_step.output == "test output"
