@@ -932,7 +932,7 @@ async def update_thread_element(
                 detail="You are not authorized to update elements for this session",
             )
 
-    await element.send(for_id=element.for_id or "")
+    await element.update()
     return {"success": True}
 
 

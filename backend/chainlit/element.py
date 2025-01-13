@@ -399,6 +399,8 @@ class CustomElement(Element):
 
     def __post_init__(self) -> None:
         self.content = json.dumps(self.props)
+        super().__post_init__()
         self.updatable = True
 
-        super().__post_init__()
+    async def update(self):
+        await super().send(self.for_id)
