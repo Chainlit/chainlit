@@ -136,7 +136,7 @@ azure-storage-blob="^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core==1.9.1"]
 build-backend = "poetry.core.masonry.api"
 
 
