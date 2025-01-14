@@ -120,5 +120,5 @@ azure-storage-file-datalake = "^12.14.0"
 
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core==1.9.1"]
 build-backend = "poetry.core.masonry.api"
