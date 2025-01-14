@@ -25,7 +25,7 @@ declare global {
 function App() {
   const { config } = useConfig();
 
-  const { isAuthenticated, data } = useAuth();
+  const { isAuthenticated, data, isReady } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
   const { connect, chatProfile, setChatProfile } = useChatSession();
 
@@ -38,7 +38,7 @@ function App() {
     : false;
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !isReady) {
       return;
     } else if (!chatProfileOk) {
       return;
@@ -48,7 +48,7 @@ function App() {
         userEnv
       });
     }
-  }, [userEnv, isAuthenticated, connect, chatProfileOk]);
+  }, [userEnv, isAuthenticated, connect, isReady, chatProfileOk]);
 
   if (configLoaded && config.chatProfiles.length && !chatProfile) {
     // Autoselect the first default chat profile
