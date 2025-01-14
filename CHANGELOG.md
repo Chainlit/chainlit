@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Translation for the copy button
 
 ### Fixed
+- The official data layer should not overwrite elements anymore
 - A bug where resuming a thread would not load the thread
 - Prevent authentication before the app is fully loaded
 - Installing Chainlit from github should work again
