@@ -241,7 +241,11 @@ class AzureADOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad", "refresh_token": getattr(self, "_refresh_token", None)},
+                metadata={
+                    "image": azure_user.get("image"),
+                    "provider": "azure-ad",
+                    "refresh_token": getattr(self, "_refresh_token", None),
+                },
             )
             return (azure_user, user)
 
@@ -330,7 +334,11 @@ class AzureADHybridOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad", "refresh_token": getattr(self, "_refresh_token", None)},
+                metadata={
+                    "image": azure_user.get("image"),
+                    "provider": "azure-ad",
+                    "refresh_token": getattr(self, "_refresh_token", None),
+                },
             )
             return (azure_user, user)
 
