@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const hasMessage = (messages: IStep[]): boolean => {
-  const validTypes = ['user_message', 'assistant_message'];
+  const validTypes = ['user_message', 'assistant_message', 'tool'];
   return messages.some(
     (message) =>
       validTypes.includes(message.type) || hasMessage(message.steps || [])
