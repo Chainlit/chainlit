@@ -175,9 +175,9 @@ class ChainlitDataLayer(BaseDataLayer):
             raise ValueError("Element url, path or content must be provided")
 
         if element.thread_id:
-            path = f"threads/{element.thread_id}/files/{element.name}"
+            path = f"threads/{element.thread_id}/files/{element.id}"
         else:
-            path = f"files/{element.name}"
+            path = f"files/{element.id}"
 
         if content is not None:
             await self.storage_client.upload_file(
