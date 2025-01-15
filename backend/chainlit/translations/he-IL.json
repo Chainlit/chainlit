@@ -146,6 +146,10 @@
             "failed": "נכשל",
             "feedbackUpdated": "משוב עודכן",
             "updating": "מעדכן"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {

@@ -146,6 +146,10 @@
             "failed": "പരാജയപ്പെട്ടു",
             "feedbackUpdated": "ഫീഡ്ബാക്ക് അപ് ഡേറ്റുചെയ് തു",
             "updating": "അപ് ഡേറ്റ്"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {

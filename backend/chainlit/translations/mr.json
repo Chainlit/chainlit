@@ -146,6 +146,10 @@
             "failed": "अपयशी ठरले",
             "feedbackUpdated": "अभिप्राय अद्ययावत",
             "updating": "अद्ययावत करणे"
+          },
+          "copyButton": {
+            "copyToClipboard": "Copy to clipboard",
+            "copied": "Copied!"
           }
         },
         "dropScreen": {

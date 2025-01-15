@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { useTranslation } from '@/components/i18n/Translator';
 
 interface Props {
   content: unknown;
@@ -17,6 +18,7 @@ interface Props {
 
 const CopyButton = ({ content, className }: Props) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
 
   const copyToClipboard = async () => {
     try {
@@ -55,7 +57,7 @@ const CopyButton = ({ content, className }: Props) => {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{copied ? 'Copied!' : 'Copy to clipboard'}</p>
+          <p>{copied ? t('components.organisms.chat.Messages.copyButton.copied') : t('components.organisms.chat.Messages.copyButton.copyToClipboard')}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
