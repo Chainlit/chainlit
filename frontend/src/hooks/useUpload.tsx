@@ -38,7 +38,14 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
   if (Array.isArray(accept)) {
     accept.forEach((a) => {
       if (typeof a === 'string') {
-        dzAccept[a] = [];
+        // Handle wildcard MIME types
+        const [type, subtype] = a.split('/');
+        if (subtype === '*') {
+          // Set an empty array for wildcard types to make react-dropzone accept all files of this type
+          dzAccept[`${type}/*`] = [];
+        } else {
+          dzAccept[a] = [];
+        }
       }
     });
   } else if (typeof accept === 'object') {
