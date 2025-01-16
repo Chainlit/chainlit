@@ -11,6 +11,7 @@ import {
   useChatSession
 } from '@chainlit/react-client';
 
+import Translator from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -116,7 +117,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Helpful</p>
+            <Translator path="components.organisms.chat.Messages.feedbackButton.helpful" />
           </TooltipContent>
         </Tooltip>
 
@@ -137,7 +138,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Not helpful</p>
+            <Translator path="components.organisms.chat.Messages.feedbackButton.notHelpful" />
           </TooltipContent>
         </Tooltip>
 
@@ -157,7 +158,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit feedback</p>
+              <Translator path="components.organisms.chat.Messages.feedbackButton.editFeedback" />
             </TooltipContent>
           </Tooltip>
         )}
@@ -171,7 +172,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {showDialog === 0 ? <ThumbsDown /> : <ThumbsUp />}
-              Add a comment
+              <Translator path="components.organisms.chat.Messages.feedbackDialog.dialogTitle" />
             </DialogTitle>
           </DialogHeader>
 
@@ -193,7 +194,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
                 setCommentInput(undefined);
               }}
             >
-              Submit feedback
+              <Translator path="components.organisms.chat.Messages.feedbackDialog.submitButton" />
             </Button>
           </DialogFooter>
         </DialogContent>
