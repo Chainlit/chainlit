@@ -119,7 +119,6 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     from chainlit.config import config, load_module
     from chainlit.server import app as chainlit_app
 
-    config.run.root_path = path
     config.run.debug = os.environ.get("CHAINLIT_DEBUG", False)
 
     check_file(target)
