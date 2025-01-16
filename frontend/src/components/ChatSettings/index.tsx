@@ -64,24 +64,26 @@ export default function ChatSettingsModal() {
     <Dialog open={chatSettingsOpen} onOpenChange={handleClose}>
       <DialogContent
         id="chat-settings"
-        className="min-w-[20vw] max-h-[85vh] overflow-y-auto flex flex-col gap-6"
+        className="min-w-[20vw] max-h-[85vh] flex flex-col gap-6"
       >
         <DialogHeader>
           <DialogTitle>
             <Translator path="components.organisms.chat.settings.settingsPanel" />
           </DialogTitle>
         </DialogHeader>
-        {chatSettingsInputs.map((input: any) => (
-          <FormInput
-            key={input.id}
-            element={{
-              ...input,
-              value: values[input.id],
-              onChange: handleChange,
-              setField: setFieldValue
-            }}
-          />
-        ))}
+        <div className="flex flex-col flex-grow overflow-y-auto gap-6">
+          {chatSettingsInputs.map((input: any) => (
+            <FormInput
+              key={input.id}
+              element={{
+                ...input,
+                value: values[input.id],
+                onChange: handleChange,
+                setField: setFieldValue
+              }}
+            />
+          ))}
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleReset}>
             <Translator path="components.organisms.chat.settings.reset" />
