@@ -96,6 +96,15 @@ edit_message = true
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
+    # Define accepted file types using MIME types
+    # Examples:
+    # 1. For specific file types:
+    #    accept = ["image/jpeg", "image/png", "application/pdf"]
+    # 2. For all files of certain type:
+    #    accept = ["image/*", "audio/*", "video/*"]
+    # 3. For specific file extensions:
+    #    accept = { "application/octet-stream" = [".xyz", ".pdb"] }
+    # Note: Using "*/*" is not recommended as it may cause browser warnings
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
