@@ -144,6 +144,19 @@
                         "failed": "失敗",
                         "feedbackUpdated": "フィードバックが更新されました",
                         "updating": "更新中"
+                    },
+                    "copyButton": {
+                        "copyToClipboard": "クリップボードにコピー",
+                        "copied": "コピーしました！"
+                    },
+                    "feedbackButton": {
+                        "helpful": "役に立った",
+                        "notHelpful": "役に立たなかった",
+                        "editFeedback": "フィードバックを編集"
+                    },
+                    "feedbackDialog": {
+                        "dialogTitle": "コメントを追加",
+                        "submitButton": "フィードバックを送信"
                     }
                 },
                 "dropScreen": {
