@@ -103,7 +103,7 @@ edit_message = true
     # 2. For all files of certain type:
     #    accept = ["image/*", "audio/*", "video/*"]
     # 3. For specific file extensions:
-    #    accept = { "application/octet-stream" = [".xyz", ".pdb"] }
+    #    accept = {{ "application/octet-stream" = [".xyz", ".pdb"] }}
     # Note: Using "*/*" is not recommended as it may cause browser warnings
     accept = ["*/*"]
     max_files = 20
