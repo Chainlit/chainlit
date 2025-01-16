@@ -1,5 +1,4 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { cn } from '@/lib/utils';
 import { useContext } from 'react';
 
 import type { IMessageElement } from '@chainlit/react-client';
@@ -20,7 +19,7 @@ const ElementRef = ({ element }: ElementRefProps) => {
   return (
     <a
       href="#"
-      className={cn('cursor-pointer hover:underline text-primary element-link')}
+      className="cursor-pointer uppercase -translate-y-px inline-flex items-center rounded-xl bg-muted px-1.5 text-[0.7rem] font-medium text-muted-foreground element-link hover:bg-primary hover:text-primary-foreground h-[22px]"
       onClick={() => onElementRefClick?.(element)}
     >
       {element.name}
