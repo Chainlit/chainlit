@@ -350,7 +350,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "type": step_dict["type"],
             "start_time": timestamp,
             "end_time": timestamp,
-            "show_input": step_dict.get("showInput", "json"),
+            "show_input": str(step_dict.get("showInput", "json")),
             "is_error": step_dict.get("isError", False),
         }
         await self.execute_query(query, params)
