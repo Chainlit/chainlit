@@ -150,6 +150,15 @@
           "copyButton": {
             "copyToClipboard": "Copy to clipboard",
             "copied": "Copied!"
+          },
+          "feedbackButton": {
+            "helpful": "Helpful",
+            "notHelpful": "Not helpful",
+            "editFeedback": "Edit feedback"
+          },
+          "feedbackDialog": {
+            "dialogTitle": "Add a comment",
+            "submitButton": "Submit feedback"
           }
         },
         "dropScreen": {
