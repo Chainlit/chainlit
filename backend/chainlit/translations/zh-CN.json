@@ -124,7 +124,8 @@
           },
           "speechButton": {
             "start": "开始录音",
-            "stop": "停止录音"
+            "stop": "停止录音",
+            "loading": "连接中"
           },
           "SubmitButton": {
             "sendMessage": "发送消息",
@@ -146,8 +147,8 @@
             "updating": "正在更新"
           },
           "copyButton": {
-            "copyToClipboard": "Copy to clipboard",
-            "copied": "Copied!"
+            "copyToClipboard": "拷贝到剪贴板",
+            "copied": "已拷贝！"
           }
         },
         "dropScreen": {
