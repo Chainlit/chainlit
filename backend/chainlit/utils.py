@@ -116,8 +116,6 @@ def check_file(target: str):
 
 
 def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
-    os.environ["CHAINLIT_ROOT_PATH"] = path
-    os.environ["CHAINLIT_SUBMOUNT"] = "true"
     from chainlit.config import config, load_module
     from chainlit.server import app as chainlit_app
 
