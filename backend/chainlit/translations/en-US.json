@@ -113,7 +113,7 @@
       "chat": {
         "askFileButton": {
           "dragAndDrop": "Drag and drop files here",
-          "sizeLimit": "Limit {0}mb.",
+          "sizeLimit": "Limit {{size}}mb.",
           "browseFiles": "Browse Files"
         },
         "history": {
