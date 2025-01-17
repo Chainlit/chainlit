@@ -1,3 +1,4 @@
+import { RAGProvider } from '@/contexts/RAGContext';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
@@ -65,15 +66,17 @@ function App() {
   if (!configLoaded && isAuthenticated) return null;
 
   return (
-    <ThemeProvider
-      storageKey="vite-ui-theme"
-      defaultTheme={data?.default_theme}
-    >
-      <Toaster className="toast" position="top-right" />
+    <RAGProvider>
+      <ThemeProvider
+        storageKey="vite-ui-theme"
+        defaultTheme={data?.default_theme}
+      >
+        <Toaster className="toast" position="top-right" />
 
-      <ChatSettingsModal />
-      <RouterProvider router={router} />
-    </ThemeProvider>
+        <ChatSettingsModal />
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </RAGProvider>
   );
 }
 

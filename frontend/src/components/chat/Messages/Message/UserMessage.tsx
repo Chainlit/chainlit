@@ -44,7 +44,11 @@ export default function UserMessage({
         return slice;
       });
       setIsEditing(false);
-      editMessage({ ...message, output: editValue });
+      editMessage({
+        ...message,
+        output: editValue,
+        metadata: message.metadata
+      });
     }
   };
 

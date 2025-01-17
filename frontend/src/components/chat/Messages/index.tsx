@@ -1,5 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext } from 'react';
+import { Fragment, memo, useContext } from 'react';
 
 import {
   type IAction,
@@ -61,10 +61,9 @@ const Messages = memo(
             const scorableRun =
               !isRunning && m.name !== 'on_chat_start' ? m : undefined;
             return (
-              <>
+              <Fragment key={m.id}>
                 {m.steps?.length ? (
                   <Messages
-                    key={m.id}
                     messages={m.steps}
                     elements={elements}
                     actions={actions}
@@ -76,7 +75,7 @@ const Messages = memo(
                 {showToolCoTLoader || showHiddenCoTLoader ? (
                   <BlinkingCursor />
                 ) : null}
-              </>
+              </Fragment>
             );
           } else {
             // Score the current run
