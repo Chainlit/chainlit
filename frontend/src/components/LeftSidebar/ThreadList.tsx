@@ -232,7 +232,7 @@ export function ThreadList({
               onChange={(e) => {
                 setThreadNewName(e.target.value);
               }}
-              placeholder={<Translator path="components.organisms.threadHistory.threadList.RenameDialog.namePlaceholder" />}
+              placeholder="Enter new name"
               autoFocus
             />
           </div>
