@@ -192,7 +192,7 @@ export function ThreadList({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Translator path="components.organisms.threadHistory.sideBar.ThreadList.DeleteDialog.title" />
+              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.title" />
             </AlertDialogTitle>
             <AlertDialogDescription>
               <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.description" />
