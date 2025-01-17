@@ -111,6 +111,11 @@
     },
     "organisms": {
       "chat": {
+        "askFileButton": {
+          "dragAndDrop": "Drag and drop files here",
+          "sizeLimit": "Limit {0}mb.",
+          "browseFiles": "Browse Files"
+        }
         "history": {
           "index": {
             "showHistory": "Show history",
