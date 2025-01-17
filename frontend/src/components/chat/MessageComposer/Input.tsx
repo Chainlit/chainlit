@@ -73,7 +73,7 @@ const Input = forwardRef<InputMethods, Props>(
         commandSpan.remove();
       }
 
-      return clone.textContent || '';
+      return clone.textContent?.replace('\u200B', '') || '';
     };
 
     const reset = () => {
@@ -159,12 +159,25 @@ const Input = forwardRef<InputMethods, Props>(
             }
           }
 
-          // Place cursor after the command span
+          // Create a text node after the command span if none exists
+          if (!newCommandBlock.nextSibling) {
+            content.appendChild(document.createTextNode('\u200B')); // Zero-width space
+          }
+
+          // Ensure cursor is placed after the command span
           const selection = window.getSelection();
           const range = document.createRange();
+
+          // Set cursor after the command span
           range.setStartAfter(newCommandBlock);
           range.collapse(true);
+
+          // Apply the selection
           selection?.removeAllRanges();
+          selection?.addRange(range);
+
+          // Force focus on the content editable
+          content.focus();
           selection?.addRange(range);
 
           // Trigger onChange with content excluding command
@@ -217,7 +230,7 @@ const Input = forwardRef<InputMethods, Props>(
       }
 
       // If there's no real content, remove the <br>
-      if (!fullContent.trim()) {
+      if (!fullContent.trim() || fullContent.trim() === '\u200B') {
         e.currentTarget.innerHTML = '';
       }
     };
