@@ -133,9 +133,14 @@ const _AskFileButton = ({
       >
         <input id="ask-button-input" {...getInputProps()} />
         <div className="flex flex-col">
-          <p className="text-sm font-medium">Drag and drop files here</p>
+          <p className="text-sm font-medium">
+            <Translator path="components.organisms.chat.askFileButton.dragAndDrop" />
+          </p>
           <p className="text-sm text-muted-foreground">
-            Limit {askUser.spec.max_size_mb}mb.
+            <Translator 
+              path="components.organisms.chat.askFileButton.sizeLimit" 
+              params={[askUser.spec.max_size_mb]}
+            />
           </p>
         </div>
         <Button
@@ -149,7 +154,7 @@ const _AskFileButton = ({
           ) : (
             <>
               <Upload className="w-4 h-4 mr-2" />
-              Browse Files
+              <Translator path="components.organisms.chat.askFileButton.browseFiles" />
             </>
           )}
         </Button>
