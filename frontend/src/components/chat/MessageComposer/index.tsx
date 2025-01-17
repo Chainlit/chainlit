@@ -86,6 +86,8 @@ export default function MessageComposer({
         }
       };
 
+      console.log('Message before sending:', message);
+
       const fileReferences = attachments
         ?.filter((a) => !!a.serverId)
         .map((a) => ({ id: a.serverId! }));
@@ -104,13 +106,17 @@ export default function MessageComposer({
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        metadata: {
+          ragIndex: ragIndex // Include RAG index in metadata
+        }
       };
+      console.log('Reply before sending:', message);
 
       replyMessage(message);
       setAutoScroll(true);
     },
-    [user, replyMessage]
+    [user, replyMessage, ragIndex]
   );
 
   const submit = useCallback(() => {
