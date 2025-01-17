@@ -28,10 +28,11 @@
         "removeAttachment": "Remove attachment"
       },
       "newChatDialog": {
-        "createNewChat": "Create new chat?",
-        "clearChat": "This will clear the current messages and start a new chat.",
-        "cancel": "Cancel",
-        "confirm": "Confirm"
+        "title": "Create New Chat",
+        "description": "This will clear your current chat history. Are you sure you want to continue?",
+        "cancelButton": "Cancel",
+        "confirmButton": "Confirm",
+        "tooltip": "New Chat"
       },
       "settingsModal": {
         "settings": "Settings",
@@ -110,6 +111,11 @@
     },
     "organisms": {
       "chat": {
+        "askFileButton": {
+          "dragAndDrop": "Drag and drop files here",
+          "sizeLimit": "Limit:",
+          "browseFiles": "Browse Files"
+        },
         "history": {
           "index": {
             "showHistory": "Show history",
@@ -203,7 +209,27 @@
             "today": "Today",
             "yesterday": "Yesterday",
             "previous7days": "Previous 7 days",
-            "previous30days": "Previous 30 days"
+            "previous30days": "Previous 30 days",
+            "noThreads": "No threads found",
+            "DeleteDialog": {  
+               "title": "Confirm deletion", 
+               "description": "This action cannot be undone",
+               "cancel": "Cancel",
+               "confirm": "Confirm"
+             },
+             "RenameDialog": {  
+               "title": "Rename Thread",
+               "description": "Enter a new name for this thread",
+               "nameLabel": "Name",
+               "namePlaceholder": "Enter new name",
+               "cancel": "Cancel",
+               "confirm": "Rename"
+             },
+             "RenameThreadButton": {
+               "renamingThread": "Renaming thread",
+               "threadRenamed": "Thread renamed!"
+             },
+             "untitledConversation": "Untitled Conversation"
           },
           "TriggerButton": {
             "closeSidebar": "Close sidebar",
