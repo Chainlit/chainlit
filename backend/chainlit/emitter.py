@@ -315,6 +315,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     if get_data_layer():
                         coros = [
                             File(
+                                id=file["id"],
                                 name=file["name"],
                                 path=str(file["path"]),
                                 mime=file["type"],

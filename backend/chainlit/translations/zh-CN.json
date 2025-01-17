@@ -149,6 +149,15 @@
           "copyButton": {
             "copyToClipboard": "拷贝到剪贴板",
             "copied": "已拷贝！"
+          },
+          "feedbackButton": {
+            "helpful": "Helpful",
+            "notHelpful": "Not helpful",
+            "editFeedback": "Edit feedback"
+          },
+          "feedbackDialog": {
+            "dialogTitle": "Add a comment",
+            "submitButton": "Submit feedback"
           }
         },
         "dropScreen": {
