@@ -7,6 +7,7 @@ import {
   useSetRecoilState
 } from 'recoil';
 import io from 'socket.io-client';
+import { toast } from 'sonner';
 import {
   actionState,
   askUserState,
@@ -331,6 +332,31 @@ const useChatSession = () => {
       socket.on('window_message', (data: any) => {
         if (window.parent) {
           window.parent.postMessage(data, '*');
+        }
+      });
+
+      socket.on('toast', (data: { type: string; message: string }) => {
+        if (!data.message) {
+          console.warn('No message received for toast.');
+          return;
+        }
+
+        switch (data.type) {
+          case 'info':
+            toast.info(data.message);
+            break;
+          case 'error':
+            toast.error(data.message);
+            break;
+          case 'success':
+            toast.success(data.message);
+            break;
+          case 'warning':
+            toast.warning(data.message);
+            break;
+          default:
+            toast(data.message);
+            break;
         }
       });
     },
