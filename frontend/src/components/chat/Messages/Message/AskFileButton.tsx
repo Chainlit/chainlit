@@ -137,10 +137,7 @@ const _AskFileButton = ({
             <Translator path="components.organisms.chat.askFileButton.dragAndDrop" />
           </p>
           <p className="text-sm text-muted-foreground">
-            <Translator 
-              path="components.organisms.chat.askFileButton.sizeLimit" 
-              values={{ size: askUser.spec.max_size_mb }}
-            />
+            <Translator path="components.organisms.chat.askFileButton.sizeLimit" /> {askUser.spec.max_size_mb}mb
           </p>
         </div>
         <Button
