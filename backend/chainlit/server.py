@@ -1062,14 +1062,14 @@ async def call_action(
             context.session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread(action.name))
 
-        await callback(action)
+        response = await callback(action)
     else:
         raise HTTPException(
             status_code=404,
             detail=f"No callback found for action {action.name}",
         )
 
-    return JSONResponse(content={"success": True})
+    return JSONResponse(content={"success": True, "response": response})
 
 
 @router.post("/project/file")
