@@ -28,10 +28,11 @@
         "removeAttachment": "Remove attachment"
       },
       "newChatDialog": {
-        "createNewChat": "Create new chat?",
-        "clearChat": "This will clear the current messages and start a new chat.",
-        "cancel": "Cancel",
-        "confirm": "Confirm"
+        "title": "Create New Chat",
+        "description": "This will clear your current chat history. Are you sure you want to continue?",
+        "cancelButton": "Cancel",
+        "confirmButton": "Confirm",
+        "tooltip": "New Chat"
       },
       "settingsModal": {
         "settings": "Settings",
