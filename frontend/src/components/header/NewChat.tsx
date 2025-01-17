@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { EditSquare } from '../icons/EditSquare';
-
+import { Translator } from '@/components/i18n';
 type NewChatDialogProps = {
   open: boolean;
   handleClose: () => void;
@@ -35,18 +35,19 @@ export const NewChatDialog = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent id="new-chat-dialog" className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Chat</DialogTitle>
+          <DialogTitle>
+            <Translator path="components.molecules.newChatDialog.title" />
+          </DialogTitle>
           <DialogDescription>
-            This will clear your current chat history. Are you sure you want to
-            continue?
+            <Translator path="components.molecules.newChatDialog.description" />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={handleClose}>
-            Cancel
+            <Translator path="components.molecules.newChatDialog.cancelButton" />
           </Button>
           <Button variant="default" onClick={handleConfirm} id="confirm">
-            Confirm
+            <Translator path="components.molecules.newChatDialog.confirmButton" />
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -92,7 +93,9 @@ const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
               <EditSquare className="!size-6" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>
+            <Translator path="components.molecules.newChatDialog.tooltip" />
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <NewChatDialog
