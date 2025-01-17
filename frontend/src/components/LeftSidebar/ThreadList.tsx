@@ -175,10 +175,10 @@ export function ThreadList({
 
   const getTimeGroupLabel = (group: string) => {
     const labels = {
-      Today: 'Today',
-      Yesterday: 'Yesterday',
-      'Previous 7 days': 'Last 7 Days',
-      'Previous 30 days': 'Last 30 Days'
+      Today: <Translator path="components.organisms.threadHistory.sidebar.ThreadList.today" />,
+      Yesterday: <Translator path="components.organisms.threadHistory.sidebar.ThreadList.yesterday" />,
+      'Previous 7 days': <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous7days" />,
+      'Previous 30 days': <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous30days" />
     };
     return labels[group as keyof typeof labels] || group;
   };
