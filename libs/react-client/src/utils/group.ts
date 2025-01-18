@@ -3,19 +3,28 @@ import { IThread } from 'src/types';
 export const groupByDate = (data: IThread[]) => {
   const groupedData: { [key: string]: IThread[] } = {};
   
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate()
+  );
   
   [...data].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).forEach((item) => {
-    const threadDate = new Date(item.createdAt);
-    threadDate.setHours(0, 0, 0, 0);
+    const date = new Date(item.createdAt);
+    const threadDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
     
     const daysDiff = Math.floor((today.getTime() - threadDate.getTime()) / 86400000);
     
     let category: string;
-    if (daysDiff === 0) {
+    if (daysDiff < 0) {  // 添加这个判断
+      category = 'Today';
+    } else if (daysDiff === 0) {
       category = 'Today';
     } else if (daysDiff === 1) {
       category = 'Yesterday';
