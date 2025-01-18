@@ -159,9 +159,12 @@ const Input = forwardRef<InputMethods, Props>(
             }
           }
 
+          let textNode;
+
           // Create a text node after the command span if none exists
           if (!newCommandBlock.nextSibling) {
-            content.appendChild(document.createTextNode('\u200B')); // Zero-width space
+            textNode = document.createTextNode('\u200B');
+            content.appendChild(textNode); // Zero-width space
           }
 
           // Ensure cursor is placed after the command span
@@ -169,7 +172,7 @@ const Input = forwardRef<InputMethods, Props>(
           const range = document.createRange();
 
           // Set cursor after the command span
-          range.setStartAfter(newCommandBlock);
+          range.setStartAfter(textNode || newCommandBlock);
           range.collapse(true);
 
           // Apply the selection
@@ -308,7 +311,7 @@ const Input = forwardRef<InputMethods, Props>(
                       key={command.id}
                       onSelect={() => handleCommandSelect(command)}
                       className={cn(
-                        'cursor-pointer flex items-center space-x-2 p-2',
+                        'cursor-pointer command-item flex items-center space-x-2 p-2',
                         index === selectedIndex ? 'bg-accent' : ''
                       )}
                     >

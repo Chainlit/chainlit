@@ -31,7 +31,7 @@ interface Props {
 export const CommandButton = ({ disabled = false, onCommandSelect }: Props) => {
   const commands = useRecoilValue(commandsState);
 
-  if (!commands) return null;
+  if (!commands.length) return null;
 
   return (
     <Popover>
@@ -63,11 +63,11 @@ export const CommandButton = ({ disabled = false, onCommandSelect }: Props) => {
         <Command className="rounded-lg border shadow-md">
           <CommandList>
             <CommandGroup>
-              {commands.map((command, index) => (
+              {commands.map((command) => (
                 <CommandItem
                   key={command.id}
                   onSelect={() => onCommandSelect(command)}
-                  className="cursor-pointer flex items-center space-x-2 p-2"
+                  className="command-item cursor-pointer flex items-center space-x-2 p-2"
                 >
                   <Icon
                     name={command.icon}

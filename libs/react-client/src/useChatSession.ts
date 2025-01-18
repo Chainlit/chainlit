@@ -15,6 +15,7 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  commandsState,
   currentThreadIdState,
   elementState,
   firstUserInteraction,
@@ -32,6 +33,7 @@ import {
 } from 'src/state';
 import {
   IAction,
+  ICommand,
   IElement,
   IMessageElement,
   IStep,
@@ -65,6 +67,7 @@ const useChatSession = () => {
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
+  const setCommands = useSetRecoilState(commandsState);
 
   const setElements = useSetRecoilState(elementState);
   const setTasklists = useSetRecoilState(tasklistState);
@@ -275,6 +278,10 @@ const useChatSession = () => {
       socket.on('chat_settings', (inputs: any) => {
         setChatSettingsInputs(inputs);
         resetChatSettingsValue();
+      });
+
+      socket.on('set_commands', (commands: ICommand[]) => {
+        setCommands(commands);
       });
 
       socket.on('element', (element: IElement) => {

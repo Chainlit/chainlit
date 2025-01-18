@@ -97,7 +97,9 @@ export default function UserMessage({
           ) : (
             <div className="flex flex-col">
               {message.command ? (
-                <div className="font-bold text-[#08f]">{message.command}</div>
+                <div className="font-bold text-[#08f] command-span">
+                  {message.command}
+                </div>
               ) : null}
               {children}
             </div>

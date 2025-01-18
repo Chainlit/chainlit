@@ -71,23 +71,7 @@ export const messagesState = atom<IStep[]>({
 
 export const commandsState = atom<ICommand[]>({
   key: 'Commands',
-  default: [
-    {
-      id: 'Picture',
-      icon: 'image',
-      description: 'Use DALL-E'
-    },
-    {
-      id: 'Search',
-      icon: 'globe',
-      description: 'Find on the web'
-    },
-    {
-      id: 'Canvas',
-      icon: 'pen-line',
-      description: 'Collaborate on writing and code'
-    }
-  ]
+  default: []
 });
 
 export const tokenCountState = atom<number>({
