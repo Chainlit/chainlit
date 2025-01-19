@@ -9,13 +9,13 @@ export const groupByDate = (data: IThread[]) => {
   [...data].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).forEach((item) => {
-    const threadDate = new Date(item.createdAt);
+    const threadDate = new Date(item.createdAt.replace('Z', ''));
     threadDate.setHours(0, 0, 0, 0);
     
     const daysDiff = Math.floor((today.getTime() - threadDate.getTime()) / 86400000);
     
     let category: string;
-    if (daysDiff === 0) {
+    if (daysDiff <= 0) {
       category = 'Today';
     } else if (daysDiff === 1) {
       category = 'Yesterday';
