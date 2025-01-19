@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from uuid import UUID
 
 from langchain.callbacks.tracers.base import BaseTracer
@@ -592,7 +592,13 @@ class LangchainTracer(BaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output, _ = output
+            current_step.output = (
+                output[0]
+                if isinstance(output, Sequence)
+                and not isinstance(output, str)
+                and len(output)
+                else output
+            )
             current_step.end = utc_now()
             self._run_sync(current_step.update())
 
