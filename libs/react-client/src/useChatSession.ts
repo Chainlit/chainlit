@@ -335,52 +335,30 @@ const useChatSession = () => {
         }
       });
 
-      socket.on(
-        'toast',
-        (data: {
-          type: string;
-          message: string;
-          duration: number;
-          closeButton: boolean;
-        }) => {
-          if (!data.message) {
-            console.warn('No message received for toast.');
-            return;
-          }
-
-          switch (data.type) {
-            case 'success':
-              toast.success(data.message, {
-                duration: data.duration,
-                closeButton: data.closeButton
-              });
-              break;
-            case 'error':
-              toast.error(data.message, {
-                duration: data.duration,
-                closeButton: data.closeButton
-              });
-              break;
-            case 'warning':
-              toast.warning(data.message, {
-                duration: data.duration,
-                closeButton: data.closeButton
-              });
-              break;
-            case 'info':
-              toast.info(data.message, {
-                duration: data.duration,
-                closeButton: data.closeButton
-              });
-              break;
-            default:
-              toast(data.message, {
-                duration: data.duration,
-                closeButton: data.closeButton
-              });
-          }
+      socket.on('toast', (data: { type: string; message: string }) => {
+        if (!data.message) {
+          console.warn('No message received for toast.');
+          return;
         }
-      );
+
+        switch (data.type) {
+          case 'info':
+            toast.info(data.message);
+            break;
+          case 'error':
+            toast.error(data.message);
+            break;
+          case 'success':
+            toast.success(data.message);
+            break;
+          case 'warning':
+            toast.warning(data.message);
+            break;
+          default:
+            toast(data.message);
+            break;
+        }
+      });
     },
     [setSession, sessionId, idToResume, chatProfile]
   );
