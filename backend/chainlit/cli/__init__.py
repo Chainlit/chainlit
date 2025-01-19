@@ -86,7 +86,7 @@ def run_chainlit(target: str):
     # Initialize the LangChain cache if installed and enabled
     init_lc_cache()
 
-    log_level = "debug" if config.run.debug else "error"
+    log_level = "warning" if config.run.debug else "error"
 
     # Start the server
     async def start():
