@@ -335,7 +335,7 @@ const useChatSession = () => {
         }
       });
 
-      socket.on('toast', (data: { type: string; message: string }) => {
+      socket.on('toast', (data: { message: string; type: string }) => {
         if (!data.message) {
           console.warn('No message received for toast.');
           return;

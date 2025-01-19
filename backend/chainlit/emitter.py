@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Any, Dict, List, Literal, Optional, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Union, cast, get_args
 
 from literalai.helper import utc_now
 from socketio.exceptions import TimeoutError
@@ -405,4 +405,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     def send_toast(self, message: str, type: Optional[ToastType] = "info"):
         """Send a toast message to the UI."""
+        # check that the type is valid using ToastType
+        if type not in get_args(ToastType):
+            raise ValueError(f"Invalid toast type: {type}")
         return self.emit("toast", {"message": message, "type": type})
