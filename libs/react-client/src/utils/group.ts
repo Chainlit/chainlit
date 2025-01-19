@@ -9,7 +9,7 @@ export const groupByDate = (data: IThread[]) => {
   [...data].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).forEach((item) => {
-    const threadDate = new Date(item.createdAt.replace('Z', ''));
+    const threadDate = new Date(typeof item.createdAt === 'string' ? item.createdAt.replace('Z', '') : item.createdAt);
     threadDate.setHours(0, 0, 0, 0);
     
     const daysDiff = Math.floor((today.getTime() - threadDate.getTime()) / 86400000);
