@@ -229,6 +229,10 @@
                "renamingThread": "Renaming thread",
                "threadRenamed": "Thread renamed!"
              },
+             "ThreadOptions": {
+               "rename": "Rename",
+               "delete": "Delete"
+             },
              "untitledConversation": "Untitled Conversation"
           },
           "TriggerButton": {
