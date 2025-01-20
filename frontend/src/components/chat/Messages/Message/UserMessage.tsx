@@ -95,7 +95,14 @@ export default function UserMessage({
               </div>
             </div>
           ) : (
-            children
+            <div className="flex flex-col">
+              {message.command ? (
+                <div className="font-bold text-[#08f] command-span">
+                  {message.command}
+                </div>
+              ) : null}
+              {children}
+            </div>
           )}
         </div>
       </div>

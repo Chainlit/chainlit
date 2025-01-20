@@ -2,10 +2,10 @@ import { IThread } from 'src/types';
 
 export const groupByDate = (data: IThread[]) => {
   const groupedData: { [key: string]: IThread[] } = {};
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   [...data].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).forEach((item) => {

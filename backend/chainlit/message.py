@@ -38,6 +38,7 @@ class MessageBase(ABC):
     fail_on_persist_error: bool = False
     persisted = False
     is_error = False
+    command: Optional[str] = None
     parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
@@ -65,6 +66,7 @@ class MessageBase(ABC):
             created_at=_dict["createdAt"],
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
+            command=_dict.get("command"),
             type=type,  # type: ignore
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
@@ -76,6 +78,7 @@ class MessageBase(ABC):
             "threadId": self.thread_id,
             "parentId": self.parent_id,
             "createdAt": self.created_at,
+            "command": self.command,
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
@@ -216,6 +219,7 @@ class Message(MessageBase):
         tags: Optional[List[str]] = None,
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
+        command: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
@@ -238,6 +242,9 @@ class Message(MessageBase):
 
         if parent_id:
             self.parent_id = str(parent_id)
+
+        if command:
+            self.command = str(command)
 
         if created_at:
             self.created_at = created_at
