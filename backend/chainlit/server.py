@@ -508,7 +508,7 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
 @router.post("/logout")
 async def logout(request: Request, response: Response):
     """Logout the user by calling the on_logout callback."""
-    clear_auth_cookie(response)
+    clear_auth_cookie(request, response)
 
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
