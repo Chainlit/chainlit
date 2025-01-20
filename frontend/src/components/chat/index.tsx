@@ -46,7 +46,13 @@ const Chat = () => {
       max_size_mb:
         config?.features?.spontaneous_file_upload?.max_size_mb || 500,
       max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
-      accept: config?.features?.spontaneous_file_upload?.accept || ['*/*']
+      accept: config?.features?.spontaneous_file_upload?.accept || {
+         'application/*': [],  // All application files
+         'audio/*': [],       // All audio files
+         'image/*': [],       // All image files 
+         'text/*': [],        // All text files
+         'video/*': []        // All video files
+      }
     }),
     [config]
   );
