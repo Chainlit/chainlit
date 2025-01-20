@@ -1,269 +1,187 @@
 {
-  "components": {
-    "atoms": {
-      "buttons": {
-        "userButton": {
-          "menu": {
-            "settings": "Settings",
-            "settingsKey": "S",
-            "APIKeys": "API Keys",
-            "logout": "Logout"
-          }
+  "common": {
+    "actions": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "goBack": "Go Back",
+      "reset": "Reset",
+      "submit": "Submit"
+    },
+    "status": {
+      "loading": "Loading...",
+      "error": {
+        "default": "An error occurred",
+        "serverConnection": "Could not reach the server"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login to access the app",
+      "form": {
+        "email": {
+          "label": "Email address",
+          "required": "email is a required field"
+        },
+        "password": {
+          "label": "Password",
+          "required": "password is a required field"
+        },
+        "actions": {
+          "signin": "Sign In"
+        },
+        "alternativeText": {
+          "or": "OR"
         }
+      },
+      "errors": {
+        "default": "Unable to sign in",
+        "signin": "Try signing in with a different account",
+        "oauthSignin": "Try signing in with a different account",
+        "redirectUriMismatch": "The redirect URI is not matching the oauth app configuration",
+        "oauthCallback": "Try signing in with a different account",
+        "oauthCreateAccount": "Try signing in with a different account",
+        "emailCreateAccount": "Try signing in with a different account",
+        "callback": "Try signing in with a different account",
+        "oauthAccountNotLinked": "To confirm your identity, sign in with the same account you used originally",
+        "emailSignin": "The e-mail could not be sent",
+        "emailVerify": "Please verify your email, a new email has been sent",
+        "credentialsSignin": "Sign in failed. Check the details you provided are correct",
+        "sessionRequired": "Please sign in to access this page"
       }
     },
-    "molecules": {
-      "newChatButton": {
-        "newChat": "New Chat"
-      },
-      "tasklist": {
-        "TaskList": {
-          "title": "🗒️ Task List",
-          "loading": "Loading...",
-          "error": "An error occurred"
-        }
-      },
-      "attachments": {
-        "cancelUpload": "Cancel upload",
-        "removeAttachment": "Remove attachment"
-      },
-      "newChatDialog": {
-        "title": "Create New Chat",
-        "description": "This will clear your current chat history. Are you sure you want to continue?",
-        "cancelButton": "Cancel",
-        "confirmButton": "Confirm",
-        "tooltip": "New Chat"
-      },
-      "settingsModal": {
-        "settings": "Settings",
-        "expandMessages": "Expand Messages",
-        "hideChainOfThought": "Hide Chain of Thought",
-        "darkMode": "Dark Mode"
-      },
-      "detailsButton": {
+    "provider": {
+      "continue": "Continue with {{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "Type your message here...",
+      "actions": {
+        "send": "Send message",
+        "stop": "Stop Task",
+        "attachFiles": "Attach files"
+      }
+    },
+    "speech": {
+      "start": "Start recording",
+      "stop": "Stop recording",
+      "connecting": "Connecting"
+    },
+    "fileUpload": {
+      "dragDrop": "Drag and drop files here",
+      "browse": "Browse Files",
+      "sizeLimit": "Limit:",
+      "errors": {
+        "failed": "Failed to upload",
+        "cancelled": "Cancelled upload of"
+      }
+    },
+    "messages": {
+      "status": {
         "using": "Using",
         "used": "Used"
       },
-      "auth": {
-        "authLogin": {
-          "title": "Login to access the app.",
-          "form": {
-            "email": "Email address",
-            "password": "Password",
-            "noAccount": "Don't have an account?",
-            "alreadyHaveAccount": "Already have an account?",
-            "signup": "Sign Up",
-            "signin": "Sign In",
-            "or": "OR",
-            "continue": "Continue",
-            "forgotPassword": "Forgot password?",
-            "passwordMustContain": "Your password must contain:",
-            "emailRequired": "email is a required field",
-            "passwordRequired": "password is a required field"
-          },
-          "error": {
-            "default": "Unable to sign in.",
-            "signin": "Try signing in with a different account.",
-            "oauthsignin": "Try signing in with a different account.",
-            "redirect_uri_mismatch": "The redirect URI is not matching the oauth app configuration.",
-            "oauthcallbackerror": "Try signing in with a different account.",
-            "oauthcreateaccount": "Try signing in with a different account.",
-            "emailcreateaccount": "Try signing in with a different account.",
-            "callback": "Try signing in with a different account.",
-            "oauthaccountnotlinked": "To confirm your identity, sign in with the same account you used originally.",
-            "emailsignin": "The e-mail could not be sent.",
-            "emailverify": "Please verify your email, a new email has been sent.",
-            "credentialssignin": "Sign in failed. Check the details you provided are correct.",
-            "sessionrequired": "Please sign in to access this page."
-          }
+      "actions": {
+        "copy": {
+          "button": "Copy to clipboard",
+          "success": "Copied!"
+        }
+      },
+      "feedback": {
+        "positive": "Helpful",
+        "negative": "Not helpful",
+        "edit": "Edit feedback",
+        "dialog": {
+          "title": "Add a comment",
+          "submit": "Submit feedback"
         },
-        "authVerifyEmail": {
-          "almostThere": "You're almost there! We've sent an email to ",
-          "verifyEmailLink": "Please click on the link in that email to complete your signup.",
-          "didNotReceive": "Can't find the email?",
-          "resendEmail": "Resend email",
-          "goBack": "Go Back",
-          "emailSent": "Email sent successfully.",
-          "verifyEmail": "Verify your email address"
-        },
-        "providerButton": {
-          "continue": "Continue with {{provider}}",
-          "signup": "Sign up with {{provider}}"
-        },
-        "authResetPassword": {
-          "newPasswordRequired": "New password is a required field",
-          "passwordsMustMatch": "Passwords must match",
-          "confirmPasswordRequired": "Confirm password is a required field",
-          "newPassword": "New password",
-          "confirmPassword": "Confirm password",
-          "resetPassword": "Reset Password"
-        },
-        "authForgotPassword": {
-          "email": "Email address",
-          "emailRequired": "email is a required field",
-          "emailSent": "Please check the email address {{email}} for instructions to reset your password.",
-          "enterEmail": "Enter your email address and we will send you instructions to reset your password.",
-          "resendEmail": "Resend email",
-          "continue": "Continue",
-          "goBack": "Go Back"
+        "status": {
+          "updating": "Updating",
+          "updated": "Feedback updated"
         }
       }
     },
-    "organisms": {
-      "chat": {
-        "askFileButton": {
-          "dragAndDrop": "Drag and drop files here",
-          "sizeLimit": "Limit:",
-          "browseFiles": "Browse Files"
-        },
-        "history": {
-          "index": {
-            "showHistory": "Show history",
-            "lastInputs": "Last Inputs",
-            "noInputs": "Such empty...",
-            "loading": "Loading..."
-          }
-        },
-        "inputBox": {
-          "input": {
-            "placeholder": "Type your message here..."
-          },
-          "speechButton": {
-            "start": "Start recording",
-            "stop": "Stop recording",
-            "loading": "Connecting"
-          },
-          "SubmitButton": {
-            "sendMessage": "Send message",
-            "stopTask": "Stop Task"
-          },
-          "UploadButton": {
-            "attachFiles": "Attach files"
-          },
-          "waterMark": {
-            "text": "Built with"
-          }
-        },
-        "Messages": {
-          "index": {
-            "running": "Running",
-            "executedSuccessfully": "executed successfully",
-            "failed": "failed",
-            "feedbackUpdated": "Feedback updated",
-            "updating": "Updating"
-          },
-          "copyButton": {
-            "copyToClipboard": "Copy to clipboard",
-            "copied": "Copied!"
-          },
-          "feedbackButton": {
-            "helpful": "Helpful",
-            "notHelpful": "Not helpful",
-            "editFeedback": "Edit feedback"
-          },
-          "feedbackDialog": {
-            "dialogTitle": "Add a comment",
-            "submitButton": "Submit feedback"
-          }
-        },
-        "dropScreen": {
-          "dropYourFilesHere": "Drop your files here"
-        },
-        "index": {
-          "failedToUpload": "Failed to upload",
-          "cancelledUploadOf": "Cancelled upload of",
-          "couldNotReachServer": "Could not reach the server",
-          "continuingChat": "Continuing previous chat"
-        },
-        "settings": {
-          "settingsPanel": "Settings panel",
-          "reset": "Reset",
-          "cancel": "Cancel",
-          "confirm": "Confirm"
-        }
+    "history": {
+      "title": "Last Inputs",
+      "empty": "Such empty...",
+      "show": "Show history"
+    },
+    "settings": {
+      "title": "Settings panel"
+    },
+    "watermark": "Built with"
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "Past Chats",
+      "filters": {
+        "search": "Search"
       },
-      "threadHistory": {
-        "sidebar": {
-          "filters": {
-            "FeedbackSelect": {
-              "feedbackAll": "Feedback: All",
-              "feedbackPositive": "Feedback: Positive",
-              "feedbackNegative": "Feedback: Negative"
-            },
-            "SearchBar": {
-              "search": "Search"
+      "timeframes": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "previous7days": "Previous 7 days",
+        "previous30days": "Previous 30 days"
+      },
+      "empty": "No threads found",
+      "actions": {
+        "close": "Close sidebar",
+        "open": "Open sidebar"
+      }
+    },
+    "thread": {
+      "untitled": "Untitled Conversation",
+      "actions": {
+        "delete": {
+          "title": "Confirm deletion",
+          "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",
+          "success": "Chat deleted",
+          "inProgress": "Deleting chat"
+        },
+        "rename": {
+          "title": "Rename Thread",
+          "description": "Enter a new name for this thread",
+          "form": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Enter new name"
             }
           },
-          "DeleteThreadButton": {
-            "confirmMessage": "This will delete the thread as well as its messages and elements.",
-            "cancel": "Cancel",
-            "confirm": "Confirm",
-            "deletingChat": "Deleting chat",
-            "chatDeleted": "Chat deleted"
-          },
-          "index": {
-            "pastChats": "Past Chats"
-          },
-          "ThreadList": {
-            "empty": "Empty...",
-            "today": "Today",
-            "yesterday": "Yesterday",
-            "previous7days": "Previous 7 days",
-            "previous30days": "Previous 30 days",
-            "noThreads": "No threads found",
-            "DeleteDialog": {  
-               "title": "Confirm deletion", 
-               "description": "This action cannot be undone",
-               "cancel": "Cancel",
-               "confirm": "Confirm"
-             },
-             "RenameDialog": {  
-               "title": "Rename Thread",
-               "description": "Enter a new name for this thread",
-               "nameLabel": "Name",
-               "namePlaceholder": "Enter new name",
-               "cancel": "Cancel",
-               "confirm": "Rename"
-             },
-             "RenameThreadButton": {
-               "renamingThread": "Renaming thread",
-               "threadRenamed": "Thread renamed!"
-             },
-             "untitledConversation": "Untitled Conversation"
-          },
-          "TriggerButton": {
-            "closeSidebar": "Close sidebar",
-            "openSidebar": "Open sidebar"
-          }
-        },
-        "Thread": {
-          "backToChat": "Go back to chat",
-          "chatCreatedOn": "This chat was created on"
+          "success": "Thread renamed!",
+          "inProgress": "Renaming thread"
         }
-      },
-      "header": {
-        "chat": "Chat",
-        "readme": "Readme"
       }
     }
   },
-  "hooks": {
-    "useLLMProviders": {
-      "failedToFetchProviders": "Failed to fetch providers:"
+  "navigation": {
+    "header": {
+      "chat": "Chat",
+      "readme": "Readme"
+    },
+    "newChat": {
+      "button": "New Chat",
+      "dialog": {
+        "title": "Create New Chat",
+        "description": "This will clear your current chat history. Are you sure you want to continue?",
+        "tooltip": "New Chat"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "Settings",
+        "settingsKey": "S",
+        "apiKeys": "API Keys",
+        "logout": "Logout"
+      }
     }
   },
-  "pages": {
-    "Design": {},
-    "Env": {
-      "savedSuccessfully": "Saved successfully",
-      "requiredApiKeys": "Required API Keys",
-      "requiredApiKeysInfo": "To use this app, the following API keys are required. The keys are stored on your device's local storage."
-    },
-    "Page": {
-      "notPartOfProject": "You are not part of this project."
-    },
-    "ResumeButton": {
-      "resumeChat": "Resume Chat"
+  "apiKeys": {
+    "title": "Required API Keys",
+    "description": "To use this app, the following API keys are required. The keys are stored on your device's local storage.",
+    "success": {
+      "saved": "Saved successfully"
     }
   }
 }

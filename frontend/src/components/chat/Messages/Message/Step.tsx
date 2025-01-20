@@ -41,13 +41,11 @@ export default function Step({
       >
         {using ? (
           <>
-            <Translator path="components.molecules.detailsButton.using" />{' '}
-            {stepName}
+            <Translator path="messages.status.using" /> {stepName}
           </>
         ) : (
           <>
-            <Translator path="components.molecules.detailsButton.used" />{' '}
-            {stepName}
+            <Translator path="messages.status.used" /> {stepName}
           </>
         )}
         {hasContent ? (

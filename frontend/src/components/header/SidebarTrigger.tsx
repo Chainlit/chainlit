@@ -31,9 +31,9 @@ export default function SidebarTrigger() {
         <TooltipContent>
           <p>
             {open ? (
-              <Translator path="components.organisms.threadHistory.sidebar.TriggerButton.closeSidebar" />
+              <Translator path="threadHistory.sidebar.actions.close" />
             ) : (
-              <Translator path="components.organisms.threadHistory.sidebar.TriggerButton.openSidebar" />
+              <Translator path="threadHistory.sidebar.actions.open" />
             )}
           </p>
         </TooltipContent>

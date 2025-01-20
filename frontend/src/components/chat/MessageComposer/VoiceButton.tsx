@@ -78,13 +78,13 @@ const VoiceButton = ({ disabled }: Props) => {
               <Translator
                 path={
                   audioConnection === 'on'
-                    ? 'components.organisms.chat.inputBox.speechButton.stop'
+                    ? 'chat.speech.stop'
                     : audioConnection === 'off'
-                    ? 'components.organisms.chat.inputBox.speechButton.start'
-                    : 'components.organisms.chat.inputBox.speechButton.loading'
+                    ? 'chat.speech.start'
+                    : 'chat.speech.connecting'
                 }
                 suffix=" (P)"
-              />{' '}
+              />
             </p>
           </TooltipContent>
         </Tooltip>

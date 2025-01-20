@@ -1,243 +1,187 @@
 {
-  "components": {
-    "atoms": {
-      "buttons": {
-        "userButton": {
-          "menu": {
-            "settings": "设置",
-            "settingsKey": "S",
-            "APIKeys": "API 密钥",
-            "logout": "登出"
-          }
+  "common": {
+    "actions": {
+      "cancel": "取消",
+      "confirm": "确认",
+      "continue": "继续",
+      "goBack": "返回",
+      "reset": "重置",
+      "submit": "提交"
+    },
+    "status": {
+      "loading": "加载中...",
+      "error": {
+        "default": "发生错误",
+        "serverConnection": "无法连接到服务器"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "登录以访问应用",
+      "form": {
+        "email": {
+          "label": "电子邮箱",
+          "required": "邮箱是必填项"
+        },
+        "password": {
+          "label": "密码",
+          "required": "密码是必填项"
+        },
+        "actions": {
+          "signin": "登录"
+        },
+        "alternativeText": {
+          "or": "或"
+        }
+      },
+      "errors": {
+        "default": "无法登录",
+        "signin": "请尝试使用其他账号登录",
+        "oauthSignin": "请尝试使用其他账号登录",
+        "redirectUriMismatch": "重定向URI与OAuth应用配置不匹配",
+        "oauthCallback": "请尝试使用其他账号登录",
+        "oauthCreateAccount": "请尝试使用其他账号登录",
+        "emailCreateAccount": "请尝试使用其他账号登录",
+        "callback": "请尝试使用其他账号登录",
+        "oauthAccountNotLinked": "为确认您的身份，请使用原始账号登录",
+        "emailSignin": "邮件发送失败",
+        "emailVerify": "请验证您的邮箱，新的验证邮件已发送",
+        "credentialsSignin": "登录失败。请检查您提供的信息是否正确",
+        "sessionRequired": "请登录以访问此页面"
+      }
+    },
+    "provider": {
+      "continue": "继续使用{{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "在此输入您的消息...",
+      "actions": {
+        "send": "发送消息",
+        "stop": "停止任务",
+        "attachFiles": "附加文件"
+      }
+    },
+    "speech": {
+      "start": "开始录音",
+      "stop": "停止录音",
+      "connecting": "连接中"
+    },
+    "fileUpload": {
+      "dragDrop": "将文件拖放到这里",
+      "browse": "浏览文件",
+      "sizeLimit": "限制：",
+      "errors": {
+        "failed": "上传失败",
+        "cancelled": "已取消上传"
+      }
+    },
+    "messages": {
+      "status": {
+        "using": "使用中",
+        "used": "已使用"
+      },
+      "actions": {
+        "copy": {
+          "button": "复制到剪贴板",
+          "success": "已复制！"
+        }
+      },
+      "feedback": {
+        "positive": "有帮助",
+        "negative": "没有帮助",
+        "edit": "编辑反馈",
+        "dialog": {
+          "title": "添加评论",
+          "submit": "提交反馈"
+        },
+        "status": {
+          "updating": "更新中",
+          "updated": "反馈已更新"
         }
       }
     },
-    "molecules": {
-      "newChatButton": {
-        "newChat": "新建对话"
+    "history": {
+      "title": "最近输入",
+      "empty": "空空如也...",
+      "show": "显示历史"
+    },
+    "settings": {
+      "title": "设置面板"
+    },
+    "watermark": "技术支持"
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "历史对话",
+      "filters": {
+        "search": "搜索"
       },
-      "tasklist": {
-        "TaskList": {
-          "title": "\ud83d\uddd2\ufe0f 任务列表",
-          "loading": "加载中...",
-          "error": "发生错误"
-        }
+      "timeframes": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "previous7days": "过去7天",
+        "previous30days": "过去30天"
       },
-      "attachments": {
-        "cancelUpload": "取消上传",
-        "removeAttachment": "移除附件"
-      },
-      "newChatDialog": {
-        "createNewChat": "创建新对话？",
-        "clearChat": "这将清除当前消息并开始新的对话。",
-        "cancel": "取消",
-        "confirm": "确认"
-      },
-      "settingsModal": {
-        "settings": "设置",
-        "expandMessages": "展开消息",
-        "hideChainOfThought": "隐藏思考链",
-        "darkMode": "暗色模式"
-      },
-      "detailsButton": {
-        "using": "使用",
-        "used": "已用"
-      },
-      "auth": {
-        "authLogin": {
-          "title": "登录以访问应用。",
+      "empty": "未找到对话",
+      "actions": {
+        "close": "关闭侧边栏",
+        "open": "打开侧边栏"
+      }
+    },
+    "thread": {
+      "untitled": "未命名对话",
+      "actions": {
+        "delete": {
+          "title": "确认删除",
+          "description": "这将删除该对话及其所有消息和元素。此操作无法撤销",
+          "success": "对话已删除",
+          "inProgress": "正在删除对话"
+        },
+        "rename": {
+          "title": "重命名对话",
+          "description": "为此对话输入新名称",
           "form": {
-            "email": "电子邮箱地址",
-            "password": "密码",
-            "noAccount": "没有账户？",
-            "alreadyHaveAccount": "已有账户？",
-            "signup": "注册",
-            "signin": "登录",
-            "or": "或者",
-            "continue": "继续",
-            "forgotPassword": "忘记密码？",
-            "passwordMustContain": "您的密码必须包含：",
-            "emailRequired": "电子邮箱是必填项",
-            "passwordRequired": "密码是必填项"
-          },
-          "error": {
-            "default": "无法登录。",
-            "signin": "尝试使用不同的账户登录。",
-            "oauthsignin": "尝试使用不同的账户登录。",
-            "redirect_uri_mismatch": "重定向URI与OAuth应用配置不匹配。",
-            "oauthcallbackerror": "尝试使用不同的账户登录。",
-            "oauthcreateaccount": "尝试使用不同的账户登录。",
-            "emailcreateaccount": "尝试使用不同的账户登录。",
-            "callback": "尝试使用不同的账户登录。",
-            "oauthaccountnotlinked": "为了验证您的身份，请使用最初使用的同一账户登录。",
-            "emailsignin": "无法发送邮件。",
-            "emailverify": "请验证您的电子邮件，已发送一封新邮件。",
-            "credentialssignin": "登录失败。请检查您提供的详细信息是否正确。",
-            "sessionrequired": "请登录以访问此页面。"
-          }
-        },
-        "authVerifyEmail": {
-          "almostThere": "您快成功了！我们已向 ",
-          "verifyEmailLink": "请单击该邮件中的链接以完成注册。",
-          "didNotReceive": "没找到邮件？",
-          "resendEmail": "重新发送邮件",
-          "goBack": "返回",
-          "emailSent": "邮件已成功发送。",
-          "verifyEmail": "验证您的电子邮件地址"
-        },
-        "providerButton": {
-          "continue": "使用{{provider}}继续",
-          "signup": "使用{{provider}}注册"
-        },
-        "authResetPassword": {
-          "newPasswordRequired": "新密码是必填项",
-          "passwordsMustMatch": "密码必须一致",
-          "confirmPasswordRequired": "确认密码是必填项",
-          "newPassword": "新密码",
-          "confirmPassword": "确认密码",
-          "resetPassword": "重置密码"
-        },
-        "authForgotPassword": {
-          "email": "电子邮箱地址",
-          "emailRequired": "电子邮箱是必填项",
-          "emailSent": "请检查电子邮箱{{email}}以获取重置密码的指示。",
-          "enterEmail": "请输入您的电子邮箱地址，我们将发送重置密码的指示。",
-          "resendEmail": "重新发送邮件",
-          "continue": "继续",
-          "goBack": "返回"
-        }
-      }
-    },
-    "organisms": {
-      "chat": {
-        "history": {
-          "index": {
-            "showHistory": "显示历史",
-            "lastInputs": "最后输入",
-            "noInputs": "如此空旷...",
-            "loading": "加载中..."
-          }
-        },
-        "inputBox": {
-          "input": {
-            "placeholder": "在这里输入您的消息..."
-          },
-          "speechButton": {
-            "start": "开始录音",
-            "stop": "停止录音",
-            "loading": "连接中"
-          },
-          "SubmitButton": {
-            "sendMessage": "发送消息",
-            "stopTask": "停止任务"
-          },
-          "UploadButton": {
-            "attachFiles": "附加文件"
-          },
-          "waterMark": {
-            "text": "使用"
-          }
-        },
-        "Messages": {
-          "index": {
-            "running": "运行中",
-            "executedSuccessfully": "执行成功",
-            "failed": "失败",
-            "feedbackUpdated": "反馈更新",
-            "updating": "正在更新"
-          },
-          "copyButton": {
-            "copyToClipboard": "拷贝到剪贴板",
-            "copied": "已拷贝！"
-          },
-          "feedbackButton": {
-            "helpful": "Helpful",
-            "notHelpful": "Not helpful",
-            "editFeedback": "Edit feedback"
-          },
-          "feedbackDialog": {
-            "dialogTitle": "Add a comment",
-            "submitButton": "Submit feedback"
-          }
-        },
-        "dropScreen": {
-          "dropYourFilesHere": "在这里拖放您的文件"
-        },
-        "index": {
-          "failedToUpload": "上传失败",
-          "cancelledUploadOf": "取消上传",
-          "couldNotReachServer": "无法连接到服务器",
-          "continuingChat": "继续之前的对话"
-        },
-        "settings": {
-          "settingsPanel": "设置面板",
-          "reset": "重置",
-          "cancel": "取消",
-          "confirm": "确认"
-        }
-      },
-      "threadHistory": {
-        "sidebar": {
-          "filters": {
-            "FeedbackSelect": {
-              "feedbackAll": "反馈：全部",
-              "feedbackPositive": "反馈：正面",
-              "feedbackNegative": "反馈：负面"
-            },
-            "SearchBar": {
-              "search": "搜索"
+            "name": {
+              "label": "名称",
+              "placeholder": "输入新名称"
             }
           },
-          "DeleteThreadButton": {
-            "confirmMessage": "这将删除线程及其消息和元素。",
-            "cancel": "取消",
-            "confirm": "确认",
-            "deletingChat": "删除对话",
-            "chatDeleted": "对话已删除"
-          },
-          "index": {
-            "pastChats": "过往对话"
-          },
-          "ThreadList": {
-            "empty": "空的...",
-            "today": "今天",
-            "yesterday": "昨天",
-            "previous7days": "前7天",
-            "previous30days": "前30天"
-          },
-          "TriggerButton": {
-            "closeSidebar": "关闭侧边栏",
-            "openSidebar": "打开侧边栏"
-          }
-        },
-        "Thread": {
-          "backToChat": "返回对话",
-          "chatCreatedOn": "此对话创建于"
+          "success": "对话已重命名！",
+          "inProgress": "正在重命名对话"
         }
-      },
-      "header": {
-        "chat": "对话",
-        "readme": "说明"
       }
     }
   },
-  "hooks": {
-    "useLLMProviders": {
-      "failedToFetchProviders": "获取提供者失败:"
+  "navigation": {
+    "header": {
+      "chat": "聊天",
+      "readme": "说明"
+    },
+    "newChat": {
+      "button": "新建对话",
+      "dialog": {
+        "title": "创建新对话",
+        "description": "这将清除您当前的聊天记录。确定要继续吗？",
+        "tooltip": "新建对话"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "设置",
+        "settingsKey": "S",
+        "apiKeys": "API密钥",
+        "logout": "退出登录"
+      }
     }
   },
-  "pages": {
-    "Design": {},
-    "Env": {
-      "savedSuccessfully": "保存成功",
-      "requiredApiKeys": "必需的API密钥",
-      "requiredApiKeysInfo": "要使用此应用，需要以下API密钥。这些密钥存储在您的设备本地存储中。"
-    },
-    "Page": {
-      "notPartOfProject": "您不是此项目的一部分。"
-    },
-    "ResumeButton": {
-      "resumeChat": "恢复对话"
+  "apiKeys": {
+    "title": "所需API密钥",
+    "description": "使用此应用需要以下API密钥。这些密钥存储在您设备的本地存储中。",
+    "success": {
+      "saved": "保存成功"
     }
   }
 }

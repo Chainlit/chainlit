@@ -93,7 +93,7 @@ const ReadOnlyThread = ({ id }: Props) => {
   const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
       toast.promise(apiClient.deleteFeedback(feedbackId), {
-        loading: t('components.organisms.chat.Messages.index.updating'),
+        loading: t('chat.messages.feedback.status.updating'),
         success: () => {
           setSteps((prev) =>
             prev.map((step) => {
@@ -108,7 +108,7 @@ const ReadOnlyThread = ({ id }: Props) => {
           );
 
           onSuccess();
-          return t('components.organisms.chat.Messages.index.feedbackUpdated');
+          return t('chat.messages.feedback.status.updated');
         },
         error: (err) => {
           return <span>{err.message}</span>;

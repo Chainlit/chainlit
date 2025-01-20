@@ -1,5 +1,6 @@
 import { FileSpec, useConfig } from '@chainlit/react-client';
 
+import { Translator } from '@/components/i18n';
 import { PaperClip } from '@/components/icons/PaperClip';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,7 +61,9 @@ export const UploadButton = ({
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Attach files</p>
+          <p>
+            <Translator path="chat.input.actions.attachFiles" />
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

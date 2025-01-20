@@ -83,14 +83,14 @@ export default function UserMessage({
               />
               <div className="flex justify-end gap-4">
                 <Button variant="ghost" onClick={() => setIsEditing(false)}>
-                  <Translator path="components.molecules.newChatDialog.cancel" />
+                  <Translator path="common.actions.cancel" />
                 </Button>
                 <Button
                   className="confirm-edit"
                   disabled={disabled}
                   onClick={handleEdit}
                 >
-                  <Translator path="components.molecules.newChatDialog.confirm" />
+                  <Translator path="common.actions.confirm" />
                 </Button>
               </div>
             </div>
