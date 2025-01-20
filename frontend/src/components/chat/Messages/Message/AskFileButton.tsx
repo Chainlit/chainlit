@@ -4,9 +4,10 @@ import { useContext, useState } from 'react';
 
 import { IAsk, IFileRef } from '@chainlit/react-client';
 
+import { Translator } from '@/components/i18n';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Translator } from '@/components/i18n';
+
 import { useUpload } from 'hooks/useUpload';
 
 interface UploadState {
@@ -134,10 +135,11 @@ const _AskFileButton = ({
         <input id="ask-button-input" {...getInputProps()} />
         <div className="flex flex-col">
           <p className="text-sm font-medium">
-            <Translator path="components.molecules.chat.askFileButton.dragAndDrop" />
+            <Translator path="chat.fileUpload.dragDrop" />
           </p>
           <p className="text-sm text-muted-foreground">
-            <Translator path="components.molecules.chat.askFileButton.sizeLimit" /> {askUser.spec.max_size_mb}mb
+            <Translator path="chat.fileUpload.sizeLimit" />{' '}
+            {askUser.spec.max_size_mb}mb
           </p>
         </div>
         <Button
@@ -151,7 +153,7 @@ const _AskFileButton = ({
           ) : (
             <>
               <Upload className="w-4 h-4 mr-2" />
-              <Translator path="components.molecules.chat.askFileButton.browseFiles" />
+              <Translator path="chat.fileUpload.browse" />
             </>
           )}
         </Button>

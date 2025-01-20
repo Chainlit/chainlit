@@ -117,7 +117,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <Translator path="components.organisms.chat.Messages.feedbackButton.helpful" />
+            <Translator path="chat.messages.feedback.positive" />
           </TooltipContent>
         </Tooltip>
 
@@ -138,7 +138,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <Translator path="components.organisms.chat.Messages.feedbackButton.notHelpful" />
+            <Translator path="chat.messages.feedback.negative" />
           </TooltipContent>
         </Tooltip>
 
@@ -158,7 +158,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <Translator path="components.organisms.chat.Messages.feedbackButton.editFeedback" />
+              <Translator path="chat.messages.feedback.edit" />
             </TooltipContent>
           </Tooltip>
         )}
@@ -172,7 +172,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {showDialog === 0 ? <ThumbsDown /> : <ThumbsUp />}
-              <Translator path="components.organisms.chat.Messages.feedbackDialog.dialogTitle" />
+              <Translator path="chat.messages.feedback.dialog.title" />
             </DialogTitle>
           </DialogHeader>
 
@@ -194,7 +194,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
                 setCommentInput(undefined);
               }}
             >
-              <Translator path="components.organisms.chat.Messages.feedbackDialog.submitButton" />
+              <Translator path="chat.messages.feedback.dialog.submit" />
             </Button>
           </DialogFooter>
         </DialogContent>
