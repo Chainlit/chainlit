@@ -6,7 +6,7 @@ import { IAsk, IFileRef } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Translator } from '@/components/i18n';
+import { Translator } from '../../../i18n';
 import { useUpload } from 'hooks/useUpload';
 
 interface UploadState {
