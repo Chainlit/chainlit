@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { EditSquare } from '../icons/EditSquare';
-import { Translator } from '@/components/i18n';
+import { Translator } from '../i18n';
 type NewChatDialogProps = {
   open: boolean;
   handleClose: () => void;
