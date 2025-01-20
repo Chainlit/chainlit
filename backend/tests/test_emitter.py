@@ -144,7 +144,9 @@ async def test_send_toast(
 ) -> None:
     message = "This is a test message"
     await emitter.send_toast(message)
-    mock_websocket_session.emit.assert_called_once_with("toast", message)
+    mock_websocket_session.emit.assert_called_once_with(
+        "toast", {"message": message, "type": "info"}
+    )
 
 
 async def test_send_toast_with_type(
