@@ -173,7 +173,7 @@
           "failedToUpload": "上传失败",
           "cancelledUploadOf": "取消上传",
           "couldNotReachServer": "无法连接到服务器",
-          "continuingChat": "继续之前的"
+          "continuingChat": "继续之前的对话"
         },
         "settings": {
           "settingsPanel": "设置面板",
@@ -198,11 +198,11 @@
             "confirmMessage": "这将删除线程及其消息和元素。",
             "cancel": "取消",
             "confirm": "确认",
-            "deletingChat": "删除",
-            "chatDeleted": "已删除"
+            "deletingChat": "删除对话",
+            "chatDeleted": "对话已删除"
           },
           "index": {
-            "pastChats": "过往"
+            "pastChats": "过往对话"
           },
           "ThreadList": {
             "empty": "空的...",
@@ -241,12 +241,12 @@
           }
         },
         "Thread": {
-          "backToChat": "返回",
-          "chatCreatedOn": "此创建于"
+          "backToChat": "返回对话",
+          "chatCreatedOn": "此对话创建于"
         }
       },
       "header": {
-        "chat": "",
+        "chat": "对话",
         "readme": "说明"
       }
     }
@@ -267,7 +267,7 @@
       "notPartOfProject": "您不是此项目的一部分。"
     },
     "ResumeButton": {
-      "resumeChat": "恢复"
+      "resumeChat": "恢复对话"
     }
   }
 }
