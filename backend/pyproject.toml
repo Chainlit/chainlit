@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.0.3"
+version = "2.0.4"
 keywords = [
     'LLM',
     'Agents',
@@ -45,7 +45,7 @@ literalai = "0.1.103"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.115.3,<0.116"
 starlette = "^0.41.2"
-uvicorn = "^0.25.0"
+uvicorn = ">=0.25.0"
 python-socketio = "^5.11.0"
 aiofiles = "^23.1.0"
 syncer = "^2.0.3"
@@ -59,7 +59,7 @@ uptrace = "^1.22.0"
 watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
-packaging = "^23.1"
+packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
 

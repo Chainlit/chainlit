@@ -4,6 +4,22 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.4] - 2025-01-17
+
+### Added
+- Overhaul element reference link styling
+- Japanese translations
+- Improved Chinese translations
+- Translations for feedback buttons
+
+
+### Fixed
+- Cookie max age should now correctly use the config `user_session_timeout` field
+- Thread grouping in the chat history should now correctly handle timezones
+- File from `AskFileMessage` should now share ID with the data layer
+- Data layer boolean casting issues
+- Chat settings modal scrolling issue
+
 ## [2.0.3] - 2025-01-14
 
 ### Added
