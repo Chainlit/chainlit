@@ -106,7 +106,7 @@ const Attachments = () => {
                   <div className="absolute -right-2 -top-2">
                     <Button
                       size="icon"
-                      className="w-6 h-6 shadow-sm rounded-full border-4 bg-card hover:bg-card text-foreground border-accent"
+                      className="w-6 h-6 shadow-sm rounded-full border-4 bg-card hover:bg-card text-foreground light:border-muted"
                       onClick={attachment.remove}
                     >
                       <X className="!size-3" />

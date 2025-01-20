@@ -144,7 +144,7 @@ const _AskFileButton = ({
           id={uploading ? 'ask-upload-button-loading' : 'ask-upload-button'}
           disabled={uploading}
           className="ml-auto"
-          variant={uploading ? "ghost" : "default"}
+          variant={uploading ? 'ghost' : 'default'}
         >
           {uploading ? (
             <CircularProgress value={progress} />
