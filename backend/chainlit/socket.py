@@ -8,8 +8,8 @@ from typing_extensions import TypeAlias
 
 from chainlit.auth import (
     get_current_user,
-    require_login,
     reconstruct_token_from_cookies,
+    require_login,
 )
 from chainlit.chat_context import chat_context
 from chainlit.config import config
