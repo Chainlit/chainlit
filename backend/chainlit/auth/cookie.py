@@ -75,6 +75,7 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
 
         return token
 
+
 def reconstruct_token_from_cookies(request_cookies: dict) -> Optional[str]:
     """
     Read all chunk cookies and reconstruct the token
@@ -92,7 +93,8 @@ def reconstruct_token_from_cookies(request_cookies: dict) -> Optional[str]:
 
     joined = "".join(chunk_parts)
 
-    return joined if joined != '' else None
+    return joined if joined != "" else None
+
 
 def set_auth_cookie(response: Response, token: str):
     """

@@ -80,4 +80,9 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
     return await authenticate_user(token)
 
 
-__all__ = ["create_jwt", "get_configuration", "get_current_user", "reconstruct_token_from_cookies"]
+__all__ = [
+    "create_jwt",
+    "get_configuration",
+    "get_current_user",
+    "reconstruct_token_from_cookies",
+]
