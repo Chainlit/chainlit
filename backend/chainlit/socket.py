@@ -7,6 +7,7 @@ from starlette.requests import cookie_parser
 from typing_extensions import TypeAlias
 
 from chainlit.auth import get_current_user, require_login
+from chainlit.auth.cookie import _auth_cookie_name
 from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import init_ws_context
@@ -83,7 +84,7 @@ def load_user_env(user_env):
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
     if cookie_header := environ.get("HTTP_COOKIE", None):
         cookies = cookie_parser(cookie_header)
-        return cookies.get("access_token", None)
+        return cookies.get(_auth_cookie_name, None)
 
     return None
 

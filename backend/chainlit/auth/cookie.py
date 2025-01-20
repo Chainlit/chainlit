@@ -25,6 +25,8 @@ assert _cookie_samesite in [
 _cookie_secure = _cookie_samesite == "none"
 
 _state_cookie_lifetime = 3 * 60  # 3m
+# TODO: Prefix with __Host- to use in conjunction with the partitioned cookie as described here
+# [CHIPS](https://github.com/privacycg/CHIPS/blob/main/README.md)
 _auth_cookie_name = "access_token"
 _state_cookie_name = "oauth_state"
 
@@ -89,6 +91,14 @@ def set_auth_cookie(response: Response, token: str):
         samesite=_cookie_samesite,
         max_age=config.project.user_session_timeout,
     )
+    if _cookie_secure:
+        # Set partitioned cookie to avoid cookie rejection errors
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#partitioned
+        # TODO: Use FastAPI native methods once it supports partitioned cookie
+        # https://github.com/fastapi/fastapi/discussions/11285
+        response.headers["Set-Cookie"] = (
+            response.headers["Set-Cookie"] + "; Partitioned"
+        )
 
 
 def clear_auth_cookie(response: Response):
@@ -107,6 +117,14 @@ def set_oauth_state_cookie(response: Response, token: str):
         secure=_cookie_secure,
         max_age=_state_cookie_lifetime,
     )
+    if _cookie_secure:
+        # Set partitioned cookie to avoid cookie rejection errors
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#partitioned
+        # TODO: Use FastAPI native methods once it supports partitioned cookie
+        # https://github.com/fastapi/fastapi/discussions/11285
+        response.headers["Set-Cookie"] = (
+            response.headers["Set-Cookie"] + "; Partitioned"
+        )
 
 
 def validate_oauth_state_cookie(request: Request, state: str):

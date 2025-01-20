@@ -200,6 +200,7 @@ def chainlit_run(
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
         # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
+        os.environ["CHAINLIT_COOKIE_SAMESITE"] = "none"
     else:
         trace_event("chainlit run")
 
