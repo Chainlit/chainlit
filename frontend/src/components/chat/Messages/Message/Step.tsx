@@ -41,11 +41,11 @@ export default function Step({
       >
         {using ? (
           <>
-            <Translator path="messages.status.using" /> {stepName}
+            <Translator path="chat.messages.status.using" /> {stepName}
           </>
         ) : (
           <>
-            <Translator path="messages.status.used" /> {stepName}
+            <Translator path="chat.messages.status.used" /> {stepName}
           </>
         )}
         {hasContent ? (
