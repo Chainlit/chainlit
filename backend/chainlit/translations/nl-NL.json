@@ -28,10 +28,11 @@
                 "removeAttachment": "Bijlage verwijderen"
             },
             "newChatDialog": {
-                "createNewChat": "Nieuwe chat maken?",
-                "clearChat": "Dit zal de huidige berichten wissen en een nieuwe chat starten.",
-                "cancel": "Annuleren",
-                "confirm": "Bevestigen"
+                "title": "Create New Chat",
+                "description": "This will clear your current chat history. Are you sure you want to continue?",
+                "cancelButton": "Cancel",
+                "confirmButton": "Confirm",
+                "tooltip": "New Chat"
             },
             "settingsModal": {
                 "settings": "Instellingen",
@@ -110,6 +111,11 @@
         },
         "organisms": {
             "chat": {
+                "askFileButton": {
+                    "dragAndDrop": "Drag and drop files here",
+                    "sizeLimit": "Limit:",
+                    "browseFiles": "Browse Files"
+                },
                 "history": {
                     "index": {
                         "showHistory": "Geschiedenis tonen",
@@ -202,7 +208,31 @@
                         "today": "Vandaag",
                         "yesterday": "Gisteren",
                         "previous7days": "Afgelopen 7 dagen",
-                        "previous30days": "Afgelopen 30 dagen"
+                        "previous30days": "Afgelopen 30 dagen",
+                        "noThreads": "No threads found",
+                        "DeleteDialog": {
+                            "title": "Confirm deletion",
+                            "description": "This action cannot be undone",
+                            "cancel": "Cancel",
+                            "confirm": "Confirm"
+                        },
+                        "RenameDialog": {
+                            "title": "Rename Thread",
+                            "description": "Enter a new name for this thread",
+                            "nameLabel": "Name",
+                            "namePlaceholder": "Enter new name",
+                            "cancel": "Cancel",
+                            "confirm": "Rename"
+                        },
+                        "RenameThreadButton": {
+                            "renamingThread": "Renaming thread",
+                            "threadRenamed": "Thread renamed!"
+                        },
+                         "ThreadOptions": {
+                           "rename": "Rename",
+                           "delete": "Delete"
+                         },
+                        "untitledConversation": "Untitled Conversation"
                     },
                     "TriggerButton": {
                         "closeSidebar": "Zijbalk sluiten",
