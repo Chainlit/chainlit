@@ -28,10 +28,11 @@
         "removeAttachment": "移除附件"
       },
       "newChatDialog": {
-        "createNewChat": "创建新对话？",
-        "clearChat": "这将清除当前消息并开始新的对话。",
-        "cancel": "取消",
-        "confirm": "确认"
+        "title": "创建新对话",
+        "description": "这将清除您当前的聊天历史记录。您确定要继续吗？",
+        "cancelButton": "取消",
+        "confirmButton": "确认",
+        "tooltip": "新建对话"
       },
       "settingsModal": {
         "settings": "设置",
@@ -110,6 +111,11 @@
     },
     "organisms": {
       "chat": {
+        "askFileButton": {
+          "dragAndDrop": "将文件拖放到此处。",
+          "sizeLimit": "限制：",
+          "browseFiles": "浏览文件"
+        },
         "history": {
           "index": {
             "showHistory": "显示历史",
@@ -151,13 +157,13 @@
             "copied": "已拷贝！"
           },
           "feedbackButton": {
-            "helpful": "Helpful",
-            "notHelpful": "Not helpful",
-            "editFeedback": "Edit feedback"
+            "helpful": "有帮助",
+            "notHelpful": "没有帮助",
+            "editFeedback": "编辑反馈"
           },
           "feedbackDialog": {
-            "dialogTitle": "Add a comment",
-            "submitButton": "Submit feedback"
+            "dialogTitle": "添加评论",
+            "submitButton": "提交反馈"
           }
         },
         "dropScreen": {
@@ -167,7 +173,7 @@
           "failedToUpload": "上传失败",
           "cancelledUploadOf": "取消上传",
           "couldNotReachServer": "无法连接到服务器",
-          "continuingChat": "继续之前的对话"
+          "continuingChat": "继续之前的"
         },
         "settings": {
           "settingsPanel": "设置面板",
@@ -192,18 +198,42 @@
             "confirmMessage": "这将删除线程及其消息和元素。",
             "cancel": "取消",
             "confirm": "确认",
-            "deletingChat": "删除对话",
-            "chatDeleted": "对话已删除"
+            "deletingChat": "删除",
+            "chatDeleted": "已删除"
           },
           "index": {
-            "pastChats": "过往对话"
+            "pastChats": "过往"
           },
           "ThreadList": {
             "empty": "空的...",
             "today": "今天",
             "yesterday": "昨天",
             "previous7days": "前7天",
-            "previous30days": "前30天"
+            "previous30days": "前30天",
+            "noThreads": "未找到会话线程",
+            "DeleteDialog": {
+              "title": "确认删除",
+              "description": "此操作无法撤销。",
+              "cancel": "取消",
+              "confirm": "确认"
+            },
+            "RenameDialog": {
+              "title": "重命名会话",
+              "description": "输入此会话的新名称。",
+              "nameLabel": "名称",
+              "namePlaceholder": "输入新名称",
+              "cancel": "取消",
+              "confirm": "重命名"
+            },
+            "RenameThreadButton": {
+              "renamingThread": "正在重命名会话",
+              "threadRenamed": "会话已重命名！"
+            },
+            "ThreadOptions": {
+              "rename": "重命名",
+              "delete": "删除"
+            },
+            "untitledConversation": "无标题对话"
           },
           "TriggerButton": {
             "closeSidebar": "关闭侧边栏",
@@ -211,12 +241,12 @@
           }
         },
         "Thread": {
-          "backToChat": "返回对话",
-          "chatCreatedOn": "此对话创建于"
+          "backToChat": "返回",
+          "chatCreatedOn": "此创建于"
         }
       },
       "header": {
-        "chat": "对话",
+        "chat": "",
         "readme": "说明"
       }
     }
@@ -237,7 +267,7 @@
       "notPartOfProject": "您不是此项目的一部分。"
     },
     "ResumeButton": {
-      "resumeChat": "恢复对话"
+      "resumeChat": "恢复"
     }
   }
 }
