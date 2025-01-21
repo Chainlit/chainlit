@@ -133,6 +133,10 @@
     },
     "thread": {
       "untitled": "未命名对话",
+      "menu": {
+          "rename": "重命名",
+          "delete": "删除"
+        },
       "actions": {
         "delete": {
           "title": "确认删除",

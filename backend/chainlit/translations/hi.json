@@ -133,6 +133,10 @@
     },
     "thread": {
       "untitled": "शीर्षकहीन वार्तालाप",
+      "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
       "actions": {
         "delete": {
           "title": "हटाने की पुष्टि करें",
