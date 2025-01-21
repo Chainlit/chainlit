@@ -52,7 +52,6 @@ export default function MessageComposer({
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
   const onPaste = useCallback((event: ClipboardEvent) => {
-    event.preventDefault();
     if (event.clipboardData && event.clipboardData.items) {
       const items = Array.from(event.clipboardData.items);
 
@@ -62,6 +61,8 @@ export default function MessageComposer({
         // Skip file handling if text data is present
         return;
       }
+
+      event.preventDefault();
 
       // If no text data, check for files (e.g., images)
       items.forEach((item) => {
