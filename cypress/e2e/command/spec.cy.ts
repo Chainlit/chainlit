@@ -17,7 +17,9 @@ describe('Command', () => {
 
     cy.get("#command-button").should("exist")
 
-    cy.get(".step").eq(1).should("have.text", "Command: Search")
+    cy.get(".step").eq(1).invoke('text').then((text) => {
+      expect(text.trim()).to.equal("Command: Search")
+    })
 
     cy.get(`#chat-input`).type("/pic")
     cy.get(".command-item").should('have.length', 1);
