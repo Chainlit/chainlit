@@ -12,9 +12,11 @@ import { visit } from 'unist-util-visit';
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   Table,
   TableBody,
   TableCell,
