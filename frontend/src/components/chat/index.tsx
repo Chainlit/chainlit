@@ -41,12 +41,26 @@ const Chat = () => {
   const uploadFileRef = useRef(uploadFile);
   const navigate = useNavigate();
 
+  // Update file upload MIME types to use standard format following Mozilla's guidelines: @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
+  // Instead of using '*/*' which may cause MIME type warnings, we specify exact MIME type categories:
+  // - 'application/*' - for general files
+  // - 'audio/*' - for audio files
+  // - 'image/*' - for image files
+  // - 'text/*' - for text files
+  // - 'video/*' - for video files
+  // This provides better type safety and clearer file type expectations.
   const fileSpec = useMemo(
     () => ({
       max_size_mb:
         config?.features?.spontaneous_file_upload?.max_size_mb || 500,
       max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
-      accept: config?.features?.spontaneous_file_upload?.accept || ['*/*']
+      accept: config?.features?.spontaneous_file_upload?.accept || {
+        'application/*': [], // All application files
+        'audio/*': [], // All audio files
+        'image/*': [], // All image files
+        'text/*': [], // All text files
+        'video/*': [] // All video files
+      }
     }),
     [config]
   );
@@ -97,9 +111,9 @@ const Chat = () => {
           })
           .catch((error) => {
             toast.error(
-              `${t('components.organisms.chat.index.failedToUpload')} ${
-                file.name
-              }: ${error.message}`
+              `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
+                error.message
+              }`
             );
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
@@ -113,11 +127,7 @@ const Chat = () => {
           size: file.size,
           uploadProgress: 0,
           cancel: () => {
-            toast.info(
-              `${t('components.organisms.chat.index.cancelledUploadOf')} ${
-                file.name
-              }`
-            );
+            toast.info(`${t('chat.fileUpload.errors.cancelled')} ${file.name}`);
             xhr.abort();
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
@@ -185,7 +195,7 @@ const Chat = () => {
       {error ? (
         <div className="w-full mx-auto my-2">
           <Alert className="mx-2" id="session-error" variant="error">
-            <Translator path="components.organisms.chat.index.couldNotReachServer" />
+            <Translator path="common.status.errors.serverConnection" />
           </Alert>
         </div>
       ) : null}

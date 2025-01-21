@@ -530,13 +530,15 @@ class ChainlitDataLayer(BaseDataLayer):
         if self.show_logger:
             logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
+        thread_name = truncate(
+            name
+            if name is not None
+            else (metadata.get("name") if metadata and "name" in metadata else None)
+        )
+
         data = {
             "id": thread_id,
-            "name": (
-                name
-                if name is not None
-                else (metadata.get("name") if metadata and "name" in metadata else None)
-            ),
+            "name": thread_name,
             "userId": user_id,
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
@@ -606,3 +608,7 @@ class ChainlitDataLayer(BaseDataLayer):
         """Cleanup database connections"""
         if self.pool:
             await self.pool.close()
+
+
+def truncate(text: Optional[str], max_length: int = 255) -> Optional[str]:
+    return None if text is None else text[:max_length]
