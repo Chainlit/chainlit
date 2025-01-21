@@ -23,7 +23,7 @@
     "preserveConstEnums": true,
     "removeComments": true,
     "skipLibCheck": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "strictNullChecks": true,
     "target": "es5",
     "types": ["node", "react"],
