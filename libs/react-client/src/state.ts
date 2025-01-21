@@ -3,6 +3,8 @@ import { DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ICommand } from './types/command';
+
 import {
   IAction,
   IAsk,
@@ -64,6 +66,11 @@ export const actionState = atom<IAction[]>({
 export const messagesState = atom<IStep[]>({
   key: 'Messages',
   dangerouslyAllowMutability: true,
+  default: []
+});
+
+export const commandsState = atom<ICommand[]>({
+  key: 'Commands',
   default: []
 });
 

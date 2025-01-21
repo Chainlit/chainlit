@@ -7,6 +7,8 @@ from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.status import HTTP_401_UNAUTHORIZED
 
+from chainlit.config import config
+
 """ Module level cookie settings. """
 _cookie_samesite = cast(
     Literal["lax", "strict", "none"],
@@ -22,7 +24,6 @@ assert _cookie_samesite in [
 )
 _cookie_secure = _cookie_samesite == "none"
 
-_auth_cookie_lifetime = 60 * 60  # 1 hour
 _state_cookie_lifetime = 3 * 60  # 3m
 _auth_cookie_name = "access_token"
 _state_cookie_name = "oauth_state"
@@ -86,7 +87,7 @@ def set_auth_cookie(response: Response, token: str):
         httponly=True,
         secure=_cookie_secure,
         samesite=_cookie_samesite,
-        max_age=_auth_cookie_lifetime,
+        max_age=config.project.user_session_timeout,
     )
 
 

@@ -69,7 +69,7 @@ const ProviderButton = ({
   return (
     <Button type="button" variant="outline" onClick={onClick}>
       {renderProviderIcon(provider.toLowerCase())}
-      {t('components.molecules.auth.providerButton.continue', {
+      {t('auth.provider.continue', {
         provider: getProviderName(provider)
       })}
     </Button>

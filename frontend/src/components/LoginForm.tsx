@@ -80,15 +80,15 @@ export function LoginForm({
     >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">
-          <Translator path="components.molecules.auth.authLogin.title" />
+          <Translator path="auth.login.title" />
         </h1>
       </div>
 
       {errorState && (
         <Alert variant="error">
           {t([
-            `components.molecules.auth.authLogin.error.${errorState.toLowerCase()}`,
-            `components.molecules.auth.authLogin.error.default`
+            `auth.login.errors.${errorState.toLowerCase()}`,
+            `auth.login.errors.default`
           ])}
         </Alert>
       )}
@@ -98,16 +98,14 @@ export function LoginForm({
           <>
             <div className="grid gap-2">
               <Label htmlFor="email">
-                <Translator path="components.molecules.auth.authLogin.form.email" />
+                <Translator path="auth.login.form.email.label" />
               </Label>
               <Input
                 id="email"
                 autoFocus
                 placeholder="me@example.com"
                 {...register('email', {
-                  required: t(
-                    'components.molecules.auth.authLogin.form.emailRequired'
-                  )
+                  required: t('auth.login.form.email.required')
                 })}
                 className={cn(
                   touchedFields.email && errors.email && 'border-destructive'
@@ -123,7 +121,7 @@ export function LoginForm({
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">
-                  <Translator path="components.molecules.auth.authLogin.form.password" />
+                  <Translator path="auth.login.form.password.label" />
                 </Label>
               </div>
               <div className="relative">
@@ -131,9 +129,7 @@ export function LoginForm({
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   {...register('password', {
-                    required: t(
-                      'components.molecules.auth.authLogin.form.passwordRequired'
-                    )
+                    required: t('auth.login.form.password.required')
                   })}
                   className={cn(
                     touchedFields.password &&
@@ -163,7 +159,7 @@ export function LoginForm({
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              <Translator path="components.molecules.auth.authLogin.form.continue" />
+              <Translator path="auth.login.form.actions.signin" />
             </Button>
           </>
         )}
@@ -171,7 +167,7 @@ export function LoginForm({
         {onPasswordSignIn && oAuthReady ? (
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
             <span className="relative z-10 bg-background px-2 text-muted-foreground">
-              <Translator path="components.molecules.auth.authLogin.form.or" />
+              <Translator path="auth.login.form.alternativeText.or" />
             </span>
           </div>
         ) : null}

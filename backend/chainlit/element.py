@@ -95,7 +95,7 @@ class Element:
     for_id: Optional[str] = None
     # The language, if relevant
     language: Optional[str] = None
-    # Mime type, infered based on content if not provided
+    # Mime type, inferred based on content if not provided
     mime: Optional[str] = None
 
     def __post_init__(self) -> None:

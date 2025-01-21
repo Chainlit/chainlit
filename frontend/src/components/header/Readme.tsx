@@ -25,7 +25,7 @@ export default function ReadmeButton() {
     <Dialog>
       <DialogTrigger asChild>
         <Button id="readme-button" variant="ghost">
-          <Translator path="components.organisms.header.readme" />
+          <Translator path="navigation.header.readme" />
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col h-screen w-screen max-w-screen max-h-screen border-none !rounded-none overflow-y-auto">
@@ -37,7 +37,7 @@ export default function ReadmeButton() {
         >
           <DialogHeader>
             <DialogTitle>
-              <Translator path="components.organisms.header.readme" />
+              <Translator path="navigation.header.readme" />
             </DialogTitle>
           </DialogHeader>
           <Markdown

@@ -1,25 +1,29 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import { Runner } from 'react-runner';
+import { useRecoilValue } from 'recoil';
 
 import {
   ChainlitContext,
   IAction,
   ICustomElement,
   IElement,
-  useChatSession
+  sessionIdState
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
 
 import Imports from './Imports';
 
-export default function CustomElement({
-  element
-}: {
-  element: ICustomElement;
-}) {
+const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   const apiClient = useContext(ChainlitContext);
-  const { sessionId } = useChatSession();
+  const sessionId = useRecoilValue(sessionIdState);
 
   const [sourceCode, setSourceCode] = useState<string>();
   const [error, setError] = useState<string>();
@@ -76,4 +80,6 @@ export default function CustomElement({
       />
     </div>
   );
-}
+});
+
+export default CustomElement;
