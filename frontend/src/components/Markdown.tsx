@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
-import { useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
@@ -230,18 +230,18 @@ const Markdown = ({
           );
         },
         p(props) {
-          return (
-            <p
-              {...omit(props, ['node'])}
-              className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
-            />
+          const containsBlockElement = React.Children.toArray(props.children).some(
+            child => 
+              React.isValidElement(child) && 
+              (/^h[1-6]$/.test((child.type as string)) || child.type === 'p')
           );
-        },
-        table({ children, ...props }) {
-          return (
-            <Card className="[&:not(:first-child)]:mt-2 [&:not(:last-child)]:mb-2">
-              <Table {...(props as any)}>{children}</Table>
-            </Card>
+          
+          const commonClassNames = "leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words";
+          
+          return containsBlockElement ? (
+            <div {...omit(props, ['node'])} className={commonClassNames} />
+          ) : (
+            <p {...omit(props, ['node'])} className={commonClassNames} />
           );
         },
         thead({ children, ...props }) {
