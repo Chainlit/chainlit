@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { Ellipsis, Trash } from 'lucide-react';
 
 import { Pencil } from '@/components/icons/Pencil';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,22 +23,18 @@ export default function ThreadOptions({
 }: Props) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          id="thread-options"
-          className={cn(
-            'focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-muted-foreground',
-            className
-          )}
-        >
-          <Ellipsis />
-        </Button>
+      <DropdownMenuTrigger className={cn(
+        buttonVariants({ variant: 'ghost', size: 'icon' }),
+        'focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-muted-foreground',
+        className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+      id="thread-options"
+      >
+        <Ellipsis />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-20" align="start" forceMount>
         <DropdownMenuItem
