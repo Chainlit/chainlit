@@ -46,7 +46,7 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
 
     async def __call__(self, request: Request) -> Optional[str]:
         # First try to get the token from the cookie
-        token = reconstruct_token_from_cookies(request.cookies)
+        token = get_token_from_cookies(request.cookies)
 
         # If no cookie, try the Authorization header as fallback
         if not token:
@@ -76,7 +76,7 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
         return token
 
 
-def reconstruct_token_from_cookies(request_cookies: dict) -> Optional[str]:
+def get_token_from_cookies(cookies: dict[str, str]) -> Optional[str]:
     """
     Read all chunk cookies and reconstruct the token
     """
@@ -86,9 +86,9 @@ def reconstruct_token_from_cookies(request_cookies: dict) -> Optional[str]:
     i = 0
     while True:
         cookie_key = f"{_auth_cookie_name}_{i}"
-        if cookie_key not in request_cookies:
+        if cookie_key not in cookies:
             break
-        chunk_parts.append(request_cookies[cookie_key])
+        chunk_parts.append(cookies[cookie_key])
         i += 1
 
     joined = "".join(chunk_parts)
@@ -96,16 +96,26 @@ def reconstruct_token_from_cookies(request_cookies: dict) -> Optional[str]:
     return joined if joined != "" else None
 
 
-def set_auth_cookie(response: Response, token: str):
+def set_auth_cookie(response: Response, token: str, request: Optional[Request] = None):
     """
     Helper function to set the authentication cookie with secure parameters
+    and remove any leftover chunks from a previously larger token.
     """
-
     _chunk_size = 3000
-    # Split the token into multiple chunks of up to _chunk_size
     chunks = [token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)]
 
-    # For each chunk, set a separate cookie: auth_chunk_0, auth_chunk_1, etc.
+    # First, delete any old leftover chunk cookies.
+    # If we have the request, we can see exactly which chunk cookies exist.
+    if request is not None:
+        i = 0
+        while True:
+            old_key = f"{_auth_cookie_name}_{i}"
+            if old_key not in request.cookies:
+                break
+            response.delete_cookie(key=old_key, path="/")
+            i += 1
+
+    # Now set the new chunks
     for i, chunk in enumerate(chunks):
         cookie_key = f"{_auth_cookie_name}_{i}"
         response.set_cookie(
@@ -116,7 +126,6 @@ def set_auth_cookie(response: Response, token: str):
             samesite=_cookie_samesite,
             max_age=config.project.user_session_timeout,
         )
-
 
 def clear_auth_cookie(request: Request, response: Response):
     """
