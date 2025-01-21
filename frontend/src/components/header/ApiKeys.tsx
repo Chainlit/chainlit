@@ -34,7 +34,7 @@ export default function ApiKeys() {
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            <Translator path="components.atoms.buttons.userButton.menu.APIKeys" />
+            <Translator path="navigation.user.menu.apiKeys" />
           </p>
         </TooltipContent>
       </Tooltip>

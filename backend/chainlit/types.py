@@ -249,6 +249,15 @@ class ChatProfile(DataClassJsonMixin):
 FeedbackStrategy = Literal["BINARY"]
 
 
+class CommandDict(TypedDict):
+    # The identifier of the command, will be displayed in the UI
+    id: str
+    # The description of the command, will be displayed in the UI
+    description: str
+    # The lucide icon name
+    icon: str
+
+
 class FeedbackDict(TypedDict):
     forId: str
     id: Optional[str]

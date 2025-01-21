@@ -16,6 +16,7 @@ from chainlit.step import StepDict
 from chainlit.types import (
     AskActionResponse,
     AskSpec,
+    CommandDict,
     FileDict,
     FileReference,
     MessagePayload,
@@ -130,6 +131,10 @@ class BaseChainlitEmitter:
 
     async def set_chat_settings(self, settings: dict):
         """Stub method to set chat settings."""
+        pass
+
+    async def set_commands(self, commands: List[CommandDict]):
+        """Stub method to send the available commands to the UI."""
         pass
 
     async def send_window_message(self, data: Any):
@@ -393,6 +398,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
 
     def set_chat_settings(self, settings: Dict[str, Any]):
         self.session.chat_settings = settings
+
+    def set_commands(self, commands: List[CommandDict]):
+        """Send the available commands to the UI."""
+        return self.emit(
+            "set_commands",
+            commands,
+        )
 
     def send_window_message(self, data: Any):
         """Send custom data to the host window."""
