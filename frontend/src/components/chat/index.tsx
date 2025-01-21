@@ -55,12 +55,11 @@ const Chat = () => {
         config?.features?.spontaneous_file_upload?.max_size_mb || 500,
       max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
       accept: config?.features?.spontaneous_file_upload?.accept || {
-         'application/*': [],  // All application files
-         'audio/*': [],       // All audio files
-         'image/*': [],       // All image files 
-         'text/*': [],        // All text files
-         'video/*': []        // All video files
-        
+        'application/*': [], // All application files
+        'audio/*': [], // All audio files
+        'image/*': [], // All image files
+        'text/*': [], // All text files
+        'video/*': [] // All video files
       }
     }),
     [config]
@@ -112,9 +111,9 @@ const Chat = () => {
           })
           .catch((error) => {
             toast.error(
-              `${t('components.organisms.chat.index.failedToUpload')} ${
-                file.name
-              }: ${error.message}`
+              `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
+                error.message
+              }`
             );
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
@@ -128,11 +127,7 @@ const Chat = () => {
           size: file.size,
           uploadProgress: 0,
           cancel: () => {
-            toast.info(
-              `${t('components.organisms.chat.index.cancelledUploadOf')} ${
-                file.name
-              }`
-            );
+            toast.info(`${t('chat.fileUpload.errors.cancelled')} ${file.name}`);
             xhr.abort();
             setAttachments((prev) =>
               prev.filter((attachment) => attachment.id !== id)
@@ -200,7 +195,7 @@ const Chat = () => {
       {error ? (
         <div className="w-full mx-auto my-2">
           <Alert className="mx-2" id="session-error" variant="error">
-            <Translator path="components.organisms.chat.index.couldNotReachServer" />
+            <Translator path="common.status.errors.serverConnection" />
           </Alert>
         </div>
       ) : null}

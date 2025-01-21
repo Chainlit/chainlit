@@ -57,13 +57,7 @@ const CopyButton = ({ content, className }: Props) => {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {copied
-              ? t('components.organisms.chat.Messages.copyButton.copied')
-              : t(
-                  'components.organisms.chat.Messages.copyButton.copyToClipboard'
-                )}
-          </p>
+          <p>{copied ? t('actions.copy.success') : t('actions.copy.button')}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
