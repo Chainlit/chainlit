@@ -133,6 +133,10 @@
       },
       "thread": {
         "untitled": "無題の会話",
+        "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
         "actions": {
           "delete": {
             "title": "削除の確認",
