@@ -68,7 +68,7 @@ export default function ChatSettingsModal() {
       >
         <DialogHeader>
           <DialogTitle>
-            <Translator path="components.organisms.chat.settings.settingsPanel" />
+            <Translator path="chat.settings.title" />
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col flex-grow overflow-y-auto gap-6">
@@ -86,14 +86,14 @@ export default function ChatSettingsModal() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleReset}>
-            <Translator path="components.organisms.chat.settings.reset" />
+            <Translator path="common.actions.reset" />
           </Button>
           <div className="flex-1" />
           <Button variant="ghost" onClick={handleClose}>
-            <Translator path="components.organisms.chat.settings.cancel" />
+            <Translator path="common.actions.cancel" />
           </Button>
           <Button onClick={handleConfirm} id="confirm" autoFocus>
-            <Translator path="components.organisms.chat.settings.confirm" />
+            <Translator path="common.actions.confirm" />
           </Button>
         </DialogFooter>
       </DialogContent>

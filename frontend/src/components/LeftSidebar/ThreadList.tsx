@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { map, size } from 'lodash';
 import { useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -63,6 +64,7 @@ export function ThreadList({
   isFetching,
   isLoadingMore
 }: ThreadListProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { idToResume } = useChatSession();
   const { clear } = useChatInteract();
@@ -92,7 +94,7 @@ export function ThreadList({
   if (!threadHistory || size(threadHistory?.timeGroupedThreads) === 0) {
     return (
       <Alert variant="info" className="m-3">
-        <Translator path="components.organisms.threadHistory.sidebar.ThreadList.noThreads" />
+        <Translator path="threadHistory.sidebar.empty" />
       </Alert>
     );
   }
@@ -102,7 +104,7 @@ export function ThreadList({
 
     toast.promise(apiClient.deleteThread(threadIdToDelete), {
       loading: (
-        <Translator path="components.organisms.threadHistory.sidebar.DeleteThreadButton.deletingChat" />
+        <Translator path="threadHistory.thread.actions.delete.inProgress" />
       ),
       success: () => {
         if (
@@ -119,7 +121,7 @@ export function ThreadList({
           threads: prev?.threads?.filter((t) => t.id !== threadIdToDelete)
         }));
         return (
-          <Translator path="components.organisms.threadHistory.sidebar.DeleteThreadButton.chatDeleted" />
+          <Translator path="threadHistory.thread.actions.delete.success" />
         );
       },
       error: (err) => {
@@ -137,7 +139,7 @@ export function ThreadList({
 
     toast.promise(apiClient.renameThread(threadIdToRename, threadNewName), {
       loading: (
-        <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameThreadButton.renamingThread" />
+        <Translator path="threadHistory.thread.actions.rename.inProgress" />
       ),
       success: () => {
         setThreadNewName(undefined);
@@ -159,9 +161,11 @@ export function ThreadList({
           }
           return next;
         });
-        return <div>
-          <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameThreadButton.threadRenamed" />
-        </div>;
+        return (
+          <div>
+            <Translator path="threadHistory.thread.actions.rename.success" />
+          </div>
+        );
       },
       error: (err) => {
         if (err instanceof ClientError) {
@@ -175,10 +179,16 @@ export function ThreadList({
 
   const getTimeGroupLabel = (group: string) => {
     const labels = {
-      Today: <Translator path="components.organisms.threadHistory.sidebar.ThreadList.today" />,
-      Yesterday: <Translator path="components.organisms.threadHistory.sidebar.ThreadList.yesterday" />,
-      'Previous 7 days': <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous7days" />,
-      'Previous 30 days': <Translator path="components.organisms.threadHistory.sidebar.ThreadList.previous30days" />
+      Today: <Translator path="threadHistory.sidebar.timeframes.today" />,
+      Yesterday: (
+        <Translator path="threadHistory.sidebar.timeframes.yesterday" />
+      ),
+      'Previous 7 days': (
+        <Translator path="threadHistory.sidebar.timeframes.previous7days" />
+      ),
+      'Previous 30 days': (
+        <Translator path="threadHistory.sidebar.timeframes.previous30days" />
+      )
     };
     return labels[group as keyof typeof labels] || group;
   };
@@ -192,18 +202,18 @@ export function ThreadList({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.title" />
+              <Translator path="threadHistory.thread.actions.delete.title" />
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.description" />
+              <Translator path="threadHistory.thread.actions.delete.description" />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 sm:gap-0">
             <AlertDialogCancel className="mt-0">
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.cancel" />
+              <Translator path="common.actions.cancel" />
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteThread}>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.DeleteDialog.confirm" />
+              <Translator path="common.actions.confirm" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -215,15 +225,15 @@ export function ThreadList({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameDialog.title" />
+              <Translator path="threadHistory.thread.actions.rename.title" />
             </DialogTitle>
             <DialogDescription>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameDialog.description" />
+              <Translator path="threadHistory.thread.actions.rename.description" />
             </DialogDescription>
           </DialogHeader>
           <div className="my-6">
             <Label htmlFor="name" className="text-right">
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameDialog.nameLabel" />
+              <Translator path="threadHistory.thread.actions.rename.form.name.label" />
             </Label>
             <Input
               id="name"
@@ -232,7 +242,9 @@ export function ThreadList({
               onChange={(e) => {
                 setThreadNewName(e.target.value);
               }}
-              placeholder="Enter new name"
+              placeholder={t(
+                'threadHistory.thread.actions.rename.form.name.placeholder'
+              )}
               autoFocus
             />
           </div>
@@ -242,10 +254,10 @@ export function ThreadList({
               variant="outline"
               onClick={() => setThreadIdToRename(undefined)}
             >
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameDialog.cancel" />
+              <Translator path="common.actions.cancel" />
             </Button>
             <Button type="button" onClick={handleRenameThread}>
-              <Translator path="components.organisms.threadHistory.sidebar.ThreadList.RenameDialog.confirm" />
+              <Translator path="common.actions.confirm" />
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -267,7 +279,9 @@ export function ThreadList({
                         isActive={isSelected}
                         className="relative truncate h-9 group/thread"
                       >
-                        {thread.name || (<Translator path="components.organisms.threadHistory.sidebar.ThreadList.untitledConversation" />)}
+                        {thread.name || (
+                          <Translator path="threadHistory.thread.untitled" />
+                        )}
                         <div
                           className={cn(
                             'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
