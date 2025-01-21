@@ -1,4 +1,3 @@
-import { size } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 
 import {
