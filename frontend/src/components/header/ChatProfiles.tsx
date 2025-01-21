@@ -1,5 +1,5 @@
 import { size } from 'lodash';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import {
   ChainlitContext,
@@ -38,9 +38,11 @@ export default function ChatProfiles({ navigate }: Props) {
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  if (!chatProfile && size(config?.chatProfiles) > 0) {
-    setChatProfile(config?.chatProfiles[0].name);
-  }
+  useEffect(() => {
+    if (!chatProfile && config?.chatProfiles && config.chatProfiles.length > 0) {
+      setChatProfile(config?.chatProfiles?.[0]?.name);
+    }
+  }, [chatProfile, config?.chatProfiles, setChatProfile]);
 
   if (typeof config === 'undefined' || config.chatProfiles.length <= 1) {
     return null;
@@ -58,14 +60,6 @@ export default function ChatProfiles({ navigate }: Props) {
     clear();
     handleClose();
   };
-
-  if (!chatProfile && config?.chatProfiles?.length > 0) {
-    setChatProfile(config.chatProfiles[0].name);
-  }
-
-  if (!config || config.chatProfiles.length <= 1) {
-    return null;
-  }
 
   const allowHtml = config?.features?.unsafe_allow_html;
   const latex = config?.features?.latex;
