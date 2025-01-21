@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useChatInteract } from '@chainlit/react-client';
 
+import { Translator } from '@/components/i18n';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { EditSquare } from '../icons/EditSquare';
-import { Translator } from '@/components/i18n';
+
 type NewChatDialogProps = {
   open: boolean;
   handleClose: () => void;
@@ -36,18 +37,18 @@ export const NewChatDialog = ({
       <DialogContent id="new-chat-dialog" className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            <Translator path="components.molecules.newChatDialog.title" />
+            <Translator path="navigation.newChat.dialog.title" />
           </DialogTitle>
           <DialogDescription>
-            <Translator path="components.molecules.newChatDialog.description" />
+            <Translator path="navigation.newChat.dialog.description" />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={handleClose}>
-            <Translator path="components.molecules.newChatDialog.cancelButton" />
+            <Translator path="common.actions.cancel" />
           </Button>
           <Button variant="default" onClick={handleConfirm} id="confirm">
-            <Translator path="components.molecules.newChatDialog.confirmButton" />
+            <Translator path="common.actions.confirm" />
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -94,7 +95,7 @@ const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <Translator path="components.molecules.newChatDialog.tooltip" />
+            <Translator path="navigation.newChat.dialog.tooltip" />
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

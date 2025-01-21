@@ -156,7 +156,7 @@ export default function MessageComposer({
         onChange={setValue}
         onPaste={onPaste}
         onEnter={submit}
-        placeholder={t('components.organisms.chat.inputBox.input.placeholder')}
+        placeholder={t('chat.input.placeholder')}
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
