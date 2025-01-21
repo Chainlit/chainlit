@@ -133,6 +133,10 @@
       },
       "thread": {
         "untitled": "Naamloos gesprek",
+        "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
         "actions": {
           "delete": {
             "title": "Verwijdering bevestigen",

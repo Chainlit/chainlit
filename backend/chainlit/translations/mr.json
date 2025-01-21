@@ -133,6 +133,10 @@
     },
     "thread": {
       "untitled": "शीर्षकविरहित संभाषण",
+      "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
       "actions": {
         "delete": {
           "title": "हटविण्याची पुष्टी करा",

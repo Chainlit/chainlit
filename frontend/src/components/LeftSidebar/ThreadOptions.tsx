@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Ellipsis, Trash } from 'lucide-react';
-
+import { Translator } from '../i18n';
 import { Pencil } from '@/components/icons/Pencil';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -44,7 +44,7 @@ export default function ThreadOptions({
             onRename();
           }}
         >
-          Rename
+          <Translator path="threadHistory.thread.menu.rename" />
           <Pencil className="ml-auto" />
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -55,7 +55,7 @@ export default function ThreadOptions({
           }}
           className="text-red-500 focus:text-red-500"
         >
-          Delete
+          <Translator path="threadHistory.thread.menu.delete" />
           <Trash className="ml-auto" />
         </DropdownMenuItem>
       </DropdownMenuContent>

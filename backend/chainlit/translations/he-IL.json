@@ -133,6 +133,10 @@
     },
     "thread": {
       "untitled": "שיחה ללא כותרת",
+      "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
       "actions": {
         "delete": {
           "title": "אשר מחיקה",
