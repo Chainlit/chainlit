@@ -133,6 +133,10 @@
     },
     "thread": {
       "untitled": "పేరు లేని సంభాషణ",
+      "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
       "actions": {
         "delete": {
           "title": "తొలగింపును నిర్ధారించండి",
