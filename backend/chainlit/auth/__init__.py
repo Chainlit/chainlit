@@ -7,7 +7,7 @@ from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.oauth_providers import get_configured_oauth_providers
 
-from .cookie import OAuth2PasswordBearerWithCookie, get_token_from_cookies
+from .cookie import OAuth2PasswordBearerWithCookie, get_token_from_cookies, set_auth_cookie, clear_auth_cookie
 from .jwt import create_jwt, decode_jwt, get_jwt_secret
 
 reuseable_oauth = OAuth2PasswordBearerWithCookie(tokenUrl="/login", auto_error=False)
@@ -85,4 +85,6 @@ __all__ = [
     "get_configuration",
     "get_current_user",
     "get_token_from_cookies",
+    "set_auth_cookie",
+    "clear_auth_cookie"
 ]

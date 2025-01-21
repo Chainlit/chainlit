@@ -127,6 +127,7 @@ def set_auth_cookie(response: Response, token: str, request: Optional[Request] =
             max_age=config.project.user_session_timeout,
         )
 
+
 def clear_auth_cookie(request: Request, response: Response):
     """
     Helper function to clear the authentication cookie
