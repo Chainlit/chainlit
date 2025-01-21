@@ -4,6 +4,18 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.5] - 2025-01-21
+
+### Added
+
+- Chat GPT like commands
+- Translation options. The translation schema has been simplified
+
+### Fixed
+
+- Warnings around file upload mime types
+- `uvicorn` and `packaging` version requirement have been relaxed
+
 ## [2.0.4] - 2025-01-17
 
 ### Added
