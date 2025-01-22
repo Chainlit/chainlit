@@ -1,7 +1,7 @@
 [build]
   base = "frontend/"
   command = "pnpm --filter @chainlit/app... run build"
-  publish = "frontend/dist"
+  publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
