@@ -1,6 +1,4 @@
 import os
-import math
-
 from typing import Literal, Optional, cast
 
 from fastapi import Request, Response
