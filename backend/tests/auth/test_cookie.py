@@ -10,14 +10,15 @@ from chainlit.auth import (
     set_auth_cookie,
 )
 
+
 @pytest.fixture
 def test_app():
     app = FastAPI()
 
     @app.post("/set-cookie")
-    async def set_cookie_endpoint(token: str = Form()):
+    async def set_cookie_endpoint(request: Request, token: str = Form()):
         response = Response()
-        set_auth_cookie(response, token)
+        set_auth_cookie(request, response, token)
         return response
 
     @app.get("/get-token")
@@ -37,6 +38,24 @@ def test_app():
 @pytest.fixture
 def client(test_app):
     return TestClient(test_app)
+
+
+def test_short_token(client):
+    """Test with a <3000 shorter token."""
+
+    # Set a short token
+    short_token = "x" * 1000
+    set_response = client.post("/set-cookie", data={"token": short_token})
+    assert set_response.status_code == 200
+
+    # Verify cookies were set
+    cookies = set_response.cookies
+    assert cookies
+
+    # Read back the token using client's cookie jar
+    get_response = client.get("/get-token")
+    assert get_response.status_code == 200
+    assert get_response.json()["token"] == short_token
 
 
 def test_set_and_read_4kb_token(client):
@@ -63,7 +82,7 @@ def test_overwrite_shorter_token(client):
     # Set initial long token
     long_token = "LONG" * 1000  # 4000 characters
     client.post("/set-cookie", data={"token": long_token})
-    
+
     # Verify initial chunks exist
     first_cookies = client.cookies
     assert len([k for k in first_cookies if k.startswith("access_token_")]) > 1
@@ -86,7 +105,7 @@ def test_clear_auth_cookie(client):
     """Test cookie clearing removes all chunks."""
     # Set initial token
     client.post("/set-cookie", data={"token": "x" * 4000})
-    
+
     # Verify cookies exist
     assert len(client.cookies) > 0
 

@@ -96,28 +96,35 @@ def get_token_from_cookies(cookies: dict[str, str]) -> Optional[str]:
     return joined if joined != "" else None
 
 
-def set_auth_cookie(response: Response, token: str, request: Optional[Request] = None):
+def set_auth_cookie(request: Request, response: Response, token: str):
     """
     Helper function to set the authentication cookie with secure parameters
     and remove any leftover chunks from a previously larger token.
     """
+
     _chunk_size = 3000
-    chunks = [token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)]
 
-    # First, delete any old leftover chunk cookies.
-    # If we have the request, we can see exactly which chunk cookies exist.
-    if request is not None:
-        i = 0
-        while True:
-            old_key = f"{_auth_cookie_name}_{i}"
-            if old_key not in request.cookies:
-                break
-            response.delete_cookie(key=old_key, path="/")
-            i += 1
+    needed_chunks = [
+        token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)
+    ]
 
-    # Now set the new chunks
-    for i, chunk in enumerate(chunks):
+    # Delete any stale cookies beyond what we'll be setting
+    i = 0
+    while cookie_key := "{_auth_cookie_name}_{i}":
+        if cookie_key not in request.cookies:
+            break
+
+        if i > len(needed_chunks) - 2:
+            print("Deleting", cookie_key)
+            response.delete_cookie(key=cookie_key, path="/")
+
+        i += 1
+
+    # Set the new chunks
+    for i, chunk in enumerate(needed_chunks):
         cookie_key = f"{_auth_cookie_name}_{i}"
+        print("Setting", cookie_key)
+
         response.set_cookie(
             key=cookie_key,
             value=chunk,

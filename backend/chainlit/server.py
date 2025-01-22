@@ -455,7 +455,7 @@ def _get_oauth_redirect_error(error: str) -> Response:
 
 
 async def _authenticate_user(
-    user: Optional[User], redirect_to_callback: bool = False
+    request: Request, user: Optional[User], redirect_to_callback: bool = False
 ) -> Response:
     """Authenticate a user and return the response."""
 
@@ -478,13 +478,17 @@ async def _authenticate_user(
 
     response = _get_auth_response(access_token, redirect_to_callback)
 
-    set_auth_cookie(response, access_token)
+    set_auth_cookie(request, response, access_token)
 
     return response
 
 
 @router.post("/login")
-async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(
+    request: Request,
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+):
     """
     Login a user using the password auth callback.
     """
@@ -497,7 +501,7 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
         form_data.username, form_data.password
     )
 
-    return await _authenticate_user(user)
+    return await _authenticate_user(request, user)
 
 
 @router.post("/logout")
@@ -535,7 +539,7 @@ async def jwt_auth(request: Request):
 
     try:
         user = decode_jwt(token)
-        return await _authenticate_user(user)
+        return await _authenticate_user(request, user)
     except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -551,7 +555,7 @@ async def header_auth(request: Request):
 
     user = await config.code.header_auth_callback(request.headers)
 
-    return await _authenticate_user(user)
+    return await _authenticate_user(request, user)
 
 
 @router.get("/auth/oauth/{provider_id}")
@@ -640,7 +644,7 @@ async def oauth_callback(
         provider_id, token, raw_user_data, default_user
     )
 
-    response = await _authenticate_user(user, redirect_to_callback=True)
+    response = await _authenticate_user(request, user, redirect_to_callback=True)
 
     clear_oauth_state_cookie(response)
 
@@ -689,7 +693,7 @@ async def oauth_azure_hf_callback(
         provider_id, token, raw_user_data, default_user, id_token
     )
 
-    response = await _authenticate_user(user, redirect_to_callback=True)
+    response = await _authenticate_user(request, user, redirect_to_callback=True)
 
     clear_oauth_state_cookie(response)
 
