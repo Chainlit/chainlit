@@ -23,6 +23,8 @@ overrides:
   vite@>=4.0.0 <=4.5.3: '>=4.5.4'
   rollup@>=3.0.0 <3.29.5: '>=3.29.5'
   cookie@<0.7.0: '>=0.7.0'
+  cross-spawn@>=7.0.0 <7.0.5: '>=7.0.5'
+  nanoid@<3.3.8: '>=3.3.8'
 
 importers:
 
@@ -1337,8 +1339,8 @@ packages:
       typescript:
         optional: true
 
-  cross-spawn@7.0.3:
-    resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
+  cross-spawn@7.0.6:
+    resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
   css.escape@1.5.1:
@@ -1850,9 +1852,9 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@3.3.7:
-    resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+  nanoid@5.0.9:
+    resolution: {integrity: sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   neo-async@2.6.2:
@@ -3727,7 +3729,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.2.2
 
-  cross-spawn@7.0.3:
+  cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
       shebang-command: 2.0.0
@@ -3887,7 +3889,7 @@ snapshots:
 
   execa@5.1.1:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       get-stream: 6.0.1
       human-signals: 2.1.0
       is-stream: 2.0.1
@@ -3942,7 +3944,7 @@ snapshots:
 
   foreground-child@3.1.1:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
   form-data@4.0.0:
@@ -4234,7 +4236,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.7: {}
+  nanoid@5.0.9: {}
 
   neo-async@2.6.2: {}
 
@@ -4395,7 +4397,7 @@ snapshots:
 
   postcss@8.4.49:
     dependencies:
-      nanoid: 3.3.7
+      nanoid: 5.0.9
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
