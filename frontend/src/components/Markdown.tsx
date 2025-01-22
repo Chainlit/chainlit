@@ -8,7 +8,8 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
-
+import { remarkAlert, alertComponents } from './Markdown_Alert';
+import remarkDirective from 'remark-directive';
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -102,7 +103,7 @@ const Markdown = ({
   }, [allowHtml, latex]);
 
   const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
+    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any, remarkDirective as any, remarkAlert];
 
     if (latex) {
       remarkPlugins = [...remarkPlugins, remarkMath as any];
@@ -116,6 +117,7 @@ const Markdown = ({
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
       components={{
+        ...alertComponents,
         code(props) {
           return (
             <code
