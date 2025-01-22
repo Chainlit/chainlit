@@ -179,7 +179,7 @@ class Element:
         elif type == "video":
             return Video(
                 player_config=_dict.get("playerConfig"),
-                **common_params, # type: ignore
+                **common_params,  # type: ignore
             )
 
         elif type == "text":
