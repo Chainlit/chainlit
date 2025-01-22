@@ -3,6 +3,7 @@ name: CI
 on:
   workflow_call:
   workflow_dispatch:
+  merge_group:
   pull_request:
     branches: [main, dev, 'release/**']
   push:
@@ -26,7 +27,12 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     name: Run CI
+    if: always()  # This ensures the job always runs
     needs: [lint-backend, pytest, lint-ui, e2e-tests]
     steps:
-      - name: Done
-        run: echo "Done"
+      # Propagate failure
+      - name: Check dependent jobs
+        if: contains(needs.*.result, 'success') != true || contains(needs.*.result, 'skipped')
+        run: |
+          echo "Not all required jobs succeeded"
+          exit 1
