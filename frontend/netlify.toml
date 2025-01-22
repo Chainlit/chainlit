@@ -1,0 +1,21 @@
+[build]
+  base = "frontend/"
+  command = "pnpm --filter @chainlit/app... run build"
+  publish = "frontend/dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--version"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  framework = "vite"
+  targetPort = 5173
+
+[functions]
+  node_bundler = "esbuild"
