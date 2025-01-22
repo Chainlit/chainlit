@@ -1,5 +1,5 @@
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Form
 from fastapi.testclient import TestClient
 from starlette.requests import Request
 from starlette.responses import Response
@@ -15,7 +15,7 @@ def test_app():
     app = FastAPI()
 
     @app.post("/set-cookie")
-    async def set_cookie_endpoint(token: str):
+    async def set_cookie_endpoint(token: str = Form()):
         response = Response()
         set_auth_cookie(response, token)
         return response
@@ -43,7 +43,7 @@ def test_set_and_read_4kb_token(client):
     """Test full cookie lifecycle using actual client cookie handling."""
     # Set a 4KB token
     token_4kb = "x" * 4000
-    set_response = client.post("/set-cookie", json=token_4kb)
+    set_response = client.post("/set-cookie", data={"token": token_4kb})
     assert set_response.status_code == 200
 
     # Verify cookies were set
@@ -62,7 +62,7 @@ def test_overwrite_shorter_token(client):
     """Test cookie chunk cleanup when replacing a large token with a smaller one."""
     # Set initial long token
     long_token = "LONG" * 1000  # 4000 characters
-    client.post("/set-cookie", json=long_token)
+    client.post("/set-cookie", data={"token": long_token})
     
     # Verify initial chunks exist
     first_cookies = client.cookies
@@ -70,7 +70,7 @@ def test_overwrite_shorter_token(client):
 
     # Set shorter token (should clear previous chunks)
     short_token = "SHORT"
-    client.post("/set-cookie", json=short_token)
+    client.post("/set-cookie", data={"token": short_token})
 
     # Verify new cookie state
     final_response = client.get("/get-token")
@@ -85,7 +85,7 @@ def test_overwrite_shorter_token(client):
 def test_clear_auth_cookie(client):
     """Test cookie clearing removes all chunks."""
     # Set initial token
-    client.post("/set-cookie", json="x" * 4000)
+    client.post("/set-cookie", data={"token": "x" * 4000})
     
     # Verify cookies exist
     assert len(client.cookies) > 0
