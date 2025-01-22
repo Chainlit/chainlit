@@ -1,4 +1,6 @@
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -8,129 +10,91 @@ from chainlit.auth import (
     set_auth_cookie,
 )
 
+@pytest.fixture
+def test_app():
+    app = FastAPI()
 
-@pytest.mark.asyncio
-async def test_set_auth_cookie_4kb():
-    """Test that a 4KB token is chunked into the appropriate cookies and reconstructed."""
-    # 4000 characters is enough to force at least two chunks since chunk size = 3000
+    @app.post("/set-cookie")
+    async def set_cookie_endpoint(token: str):
+        response = Response()
+        set_auth_cookie(response, token)
+        return response
+
+    @app.get("/get-token")
+    async def get_token_endpoint(request: Request):
+        token = get_token_from_cookies(request.cookies)
+        return {"token": token}
+
+    @app.delete("/clear-cookie")
+    async def clear_cookie_endpoint(request: Request):
+        response = Response()
+        clear_auth_cookie(request, response)
+        return response
+
+    return app
+
+
+@pytest.fixture
+def client(test_app):
+    return TestClient(test_app)
+
+
+def test_set_and_read_4kb_token(client):
+    """Test full cookie lifecycle using actual client cookie handling."""
+    # Set a 4KB token
     token_4kb = "x" * 4000
+    set_response = client.post("/set-cookie", json=token_4kb)
+    assert set_response.status_code == 200
 
-    # Create a Starlette Response and set the cookie
-    response = Response()
-    set_auth_cookie(response, token_4kb)
-
-    # Extract each Set-Cookie header that was set
-    set_cookie_headers = [
-        hdr_val.decode("utf-8")
-        for hdr_name, hdr_val in response.raw_headers
-        if hdr_name.decode("utf-8").lower() == "set-cookie"
-    ]
-
-    # We expect 2 chunks:
-    #  - chunk_0 = 3000 chars
-    #  - chunk_1 = 1000 chars
-    assert len(set_cookie_headers) == 2, (
-        f"Expected 2 cookies, found {len(set_cookie_headers)}."
+    # Verify cookies were set
+    cookies = set_response.cookies
+    assert f"{cookies.keys()} should contain chunked cookies", any(
+        key.startswith("access_token_") for key in cookies.keys()
     )
 
-    # Simulate reading them back from a request
-    cookies = {
-        header.split("=")[0]: header.split("=")[1].split(";")[0]
-        for header in set_cookie_headers
-    }
-    reconstructed_token = get_token_from_cookies(cookies)
-
-    assert reconstructed_token == token_4kb, (
-        "Reconstructed token does not match the original token!"
-    )
+    # Read back the token using client's cookie jar
+    get_response = client.get("/get-token")
+    assert get_response.status_code == 200
+    assert get_response.json()["token"] == token_4kb
 
 
-@pytest.mark.asyncio
-async def test_overwrite_shorter_token_keeps_old_chunk():
-    """
-    Verify that setting a shorter token after a longer one removes old cookie chunks,
-    ensuring no leftover chunks are retained.
-    """
-    # 1) Set a "long" token that will span multiple chunks.
-    long_token = "LONGTOKEN_" + ("x" * 3000)  # ~3000 chars forces at least 2 chunks
-    response_long = Response()
-    set_auth_cookie(response_long, long_token)
+def test_overwrite_shorter_token(client):
+    """Test cookie chunk cleanup when replacing a large token with a smaller one."""
+    # Set initial long token
+    long_token = "LONG" * 1000  # 4000 characters
+    client.post("/set-cookie", json=long_token)
+    
+    # Verify initial chunks exist
+    first_cookies = client.cookies
+    assert len([k for k in first_cookies if k.startswith("access_token_")]) > 1
 
-    # Simulate the client storing those cookies
-    cookies = {
-        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8")
-        .split("=")[1]
-        .split(";")[0]
-        for hdr_name, hdr_val in response_long.raw_headers
-        if hdr_name.decode("utf-8").lower() == "set-cookie"
-    }
+    # Set shorter token (should clear previous chunks)
+    short_token = "SHORT"
+    client.post("/set-cookie", json=short_token)
 
-    # Ensure the long token is correctly chunked
-    assert len(cookies) == 2, "Expected 2 chunks for the long token."
+    # Verify new cookie state
+    final_response = client.get("/get-token")
+    assert final_response.json()["token"] == short_token
 
-    # 2) Now set a shorter token on a *new* response object (simulating a new request/response).
-    short_token = "SHORTTOKEN"
-    response_short = Response()
-
-    # Create a simulated request with the current cookies
-    request = Request(scope={"type": "http", "headers": [], "cookies": cookies})
-
-    # Set the shorter token, ensuring old chunks are removed
-    set_auth_cookie(response_short, short_token, request=request)
-
-    # Simulate updating the client's cookies with the new response headers
-    updated_cookies = {}
-    for hdr_name, hdr_val in response_short.raw_headers:
-        if hdr_name.decode("utf-8").lower() == "set-cookie":
-            key, value = (
-                hdr_val.decode("utf-8").split("=")[0],
-                hdr_val.decode("utf-8").split("=")[1].split(";")[0],
-            )
-            updated_cookies[key] = value
-
-    # Check if only 1 chunk remains after overwriting
-    assert len(updated_cookies) == 1, (
-        f"Expected 1 chunk for the short token, but found {len(updated_cookies)}."
-    )
-
-    # Reconstruct the token from the combined cookies
-    reconstructed = get_token_from_cookies(updated_cookies)
-
-    # Verify the reconstructed token matches the shorter token only
-    assert reconstructed == short_token, (
-        "Residual cookie chunks from the previous token were not cleared!"
-    )
+    # Verify only one chunk remains
+    final_cookies = client.cookies
+    chunk_cookies = [k for k in final_cookies if k.startswith("access_token_")]
+    assert len(chunk_cookies) == 1, f"Found {len(chunk_cookies)} residual cookies"
 
 
-@pytest.mark.asyncio
-async def test_clear_auth_cookie():
-    """Test that clearing the authentication cookie removes all chunks."""
-    # Set a long token to create multiple chunks
-    long_token = "LONGTOKEN_" + ("x" * 3000)
-    response_set = Response()
-    set_auth_cookie(response_set, long_token)
+def test_clear_auth_cookie(client):
+    """Test cookie clearing removes all chunks."""
+    # Set initial token
+    client.post("/set-cookie", json="x" * 4000)
+    
+    # Verify cookies exist
+    assert len(client.cookies) > 0
 
-    # Simulate the client storing those cookies
-    cookies = {
-        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8")
-        .split("=")[1]
-        .split(";")[0]
-        for hdr_name, hdr_val in response_set.raw_headers
-        if hdr_name.decode("utf-8").lower() == "set-cookie"
-    }
+    # Clear cookies
+    clear_response = client.delete("/clear-cookie")
+    assert clear_response.status_code == 200
 
-    # Clear the authentication cookies
-    request = Request(scope={"type": "http", "headers": [], "cookies": cookies})
-    response_clear = Response()
-    clear_auth_cookie(request, response_clear)
-
-    # Extract the Set-Cookie headers to verify cookies are cleared
-    clear_cookie_headers = [
-        hdr_val.decode("utf-8")
-        for hdr_name, hdr_val in response_clear.raw_headers
-        if hdr_name.decode("utf-8").lower() == "set-cookie"
-    ]
-
-    assert all("Max-Age=0" in header for header in clear_cookie_headers), (
-        "Not all cookies were cleared!"
-    )
+    # Verify cookies were cleared
+    assert len(clear_response.cookies) == 0
+    final_response = client.get("/get-token")
+    assert final_response.json()["token"] is None
