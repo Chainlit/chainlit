@@ -20,7 +20,7 @@ export default function ElementSideView() {
         <SheetHeader>
           <SheetTitle>{sideView.title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 overflow-y-auto flex-grow">
+        <div className="mt-4 overflow-y-auto flex-grow flex flex-col gap-4">
           {sideView.elements.map((e) => (
             <Element key={e.id} element={e} />
           ))}
