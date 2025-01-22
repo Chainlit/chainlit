@@ -4,9 +4,10 @@ import { useContext, useState } from 'react';
 
 import { IAsk, IFileRef } from '@chainlit/react-client';
 
+import { Translator } from '@/components/i18n';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Translator } from '@/components/i18n';
+
 import { useUpload } from 'hooks/useUpload';
 
 interface UploadState {
@@ -134,24 +135,25 @@ const _AskFileButton = ({
         <input id="ask-button-input" {...getInputProps()} />
         <div className="flex flex-col">
           <p className="text-sm font-medium">
-            <Translator path="components.organisms.chat.askFileButton.dragAndDrop" />
+            <Translator path="chat.fileUpload.dragDrop" />
           </p>
           <p className="text-sm text-muted-foreground">
-            <Translator path="components.organisms.chat.askFileButton.sizeLimit" /> {askUser.spec.max_size_mb}mb
+            <Translator path="chat.fileUpload.sizeLimit" />{' '}
+            {askUser.spec.max_size_mb}mb
           </p>
         </div>
         <Button
           id={uploading ? 'ask-upload-button-loading' : 'ask-upload-button'}
           disabled={uploading}
           className="ml-auto"
-          variant={uploading ? "ghost" : "default"}
+          variant={uploading ? 'ghost' : 'default'}
         >
           {uploading ? (
             <CircularProgress value={progress} />
           ) : (
             <>
               <Upload className="w-4 h-4 mr-2" />
-              <Translator path="components.organisms.chat.askFileButton.browseFiles" />
+              <Translator path="chat.fileUpload.browse" />
             </>
           )}
         </Button>

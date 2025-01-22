@@ -59,10 +59,8 @@ const CopyButton = ({ content, className }: Props) => {
         <TooltipContent>
           <p>
             {copied
-              ? t('components.organisms.chat.Messages.copyButton.copied')
-              : t(
-                  'components.organisms.chat.Messages.copyButton.copyToClipboard'
-                )}
+              ? t('chat.messages.actions.copy.success')
+              : t('chat.messages.actions.copy.button')}
           </p>
         </TooltipContent>
       </Tooltip>

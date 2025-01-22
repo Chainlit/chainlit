@@ -19,6 +19,7 @@ export interface IStep {
   threadId?: string;
   parentId?: string;
   isError?: boolean;
+  command?: string;
   showInput?: boolean | string;
   waitForAnswer?: boolean;
   input?: string;
