@@ -1,4 +1,6 @@
 import os
+import math
+
 from typing import Literal, Optional, cast
 
 from fastapi import Request, Response
@@ -104,24 +106,14 @@ def set_auth_cookie(request: Request, response: Response, token: str):
 
     _chunk_size = 3000
 
-    needed_chunks = [
-        token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)
-    ]
+    existing_cookies = {
+        k for k in request.cookies.keys() if k.startswith(_auth_cookie_name)
+    }
 
-    # Delete any stale cookies beyond what we'll be setting
-    i = 0
-    while cookie_key := "{_auth_cookie_name}_{i}":
-        if cookie_key not in request.cookies:
-            break
-
-        if i > len(needed_chunks) - 2:
-            print("Deleting", cookie_key)
-            response.delete_cookie(key=cookie_key, path="/")
-
-        i += 1
+    chunks = [token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)]
 
     # Set the new chunks
-    for i, chunk in enumerate(needed_chunks):
+    for i, chunk in enumerate(chunks):
         cookie_key = f"{_auth_cookie_name}_{i}"
         print("Setting", cookie_key)
 
@@ -133,6 +125,12 @@ def set_auth_cookie(request: Request, response: Response, token: str):
             samesite=_cookie_samesite,
             max_age=config.project.user_session_timeout,
         )
+
+        existing_cookies.discard(cookie_key)
+
+    for cookie_key in existing_cookies:
+        print("Deleting", cookie_key)
+        response.delete_cookie(key=cookie_key, path="/")
 
 
 def clear_auth_cookie(request: Request, response: Response):
