@@ -91,5 +91,5 @@ __all__ = [
     "get_configuration",
     "get_current_user",
     "get_token_from_cookies",
-    "set_auth_cookie"
+    "set_auth_cookie",
 ]

@@ -29,7 +29,9 @@ async def test_set_auth_cookie_4kb():
     # We expect 2 chunks:
     #  - chunk_0 = 3000 chars
     #  - chunk_1 = 1000 chars
-    assert len(set_cookie_headers) == 2, f"Expected 2 cookies, found {len(set_cookie_headers)}."
+    assert len(set_cookie_headers) == 2, (
+        f"Expected 2 cookies, found {len(set_cookie_headers)}."
+    )
 
     # Simulate reading them back from a request
     cookies = {
@@ -38,9 +40,10 @@ async def test_set_auth_cookie_4kb():
     }
     reconstructed_token = get_token_from_cookies(cookies)
 
-    assert (
-        reconstructed_token == token_4kb
-    ), "Reconstructed token does not match the original token!"
+    assert reconstructed_token == token_4kb, (
+        "Reconstructed token does not match the original token!"
+    )
+
 
 @pytest.mark.asyncio
 async def test_overwrite_shorter_token_keeps_old_chunk():
@@ -55,7 +58,9 @@ async def test_overwrite_shorter_token_keeps_old_chunk():
 
     # Simulate the client storing those cookies
     cookies = {
-        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8").split("=")[1].split(";")[0]
+        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8")
+        .split("=")[1]
+        .split(";")[0]
         for hdr_name, hdr_val in response_long.raw_headers
         if hdr_name.decode("utf-8").lower() == "set-cookie"
     }
@@ -77,20 +82,24 @@ async def test_overwrite_shorter_token_keeps_old_chunk():
     updated_cookies = {}
     for hdr_name, hdr_val in response_short.raw_headers:
         if hdr_name.decode("utf-8").lower() == "set-cookie":
-            key, value = hdr_val.decode("utf-8").split("=")[0], hdr_val.decode("utf-8").split("=")[1].split(";")[0]
+            key, value = (
+                hdr_val.decode("utf-8").split("=")[0],
+                hdr_val.decode("utf-8").split("=")[1].split(";")[0],
+            )
             updated_cookies[key] = value
 
     # Check if only 1 chunk remains after overwriting
-    assert len(updated_cookies) == 1, f"Expected 1 chunk for the short token, but found {len(updated_cookies)}."
+    assert len(updated_cookies) == 1, (
+        f"Expected 1 chunk for the short token, but found {len(updated_cookies)}."
+    )
 
     # Reconstruct the token from the combined cookies
     reconstructed = get_token_from_cookies(updated_cookies)
 
     # Verify the reconstructed token matches the shorter token only
-    assert (
-        reconstructed == short_token
-    ), "Residual cookie chunks from the previous token were not cleared!"
-
+    assert reconstructed == short_token, (
+        "Residual cookie chunks from the previous token were not cleared!"
+    )
 
 
 @pytest.mark.asyncio
@@ -103,7 +112,9 @@ async def test_clear_auth_cookie():
 
     # Simulate the client storing those cookies
     cookies = {
-        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8").split("=")[1].split(";")[0]
+        hdr_val.decode("utf-8").split("=")[0]: hdr_val.decode("utf-8")
+        .split("=")[1]
+        .split(";")[0]
         for hdr_name, hdr_val in response_set.raw_headers
         if hdr_name.decode("utf-8").lower() == "set-cookie"
     }
