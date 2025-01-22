@@ -50,7 +50,8 @@ def test_short_token(client):
 
     # Verify cookies were set
     cookies = set_response.cookies
-    assert cookies
+    assert cookies, "No cookies set"
+    assert "access_token" in cookies, f"No chunking for short cookies: {cookies}"
 
     # Read back the token using client's cookie jar
     get_response = client.get("/get-token")
@@ -60,6 +61,7 @@ def test_short_token(client):
 
 def test_set_and_read_4kb_token(client):
     """Test full cookie lifecycle using actual client cookie handling."""
+
     # Set a 4KB token
     token_4kb = "x" * 4000
     set_response = client.post("/set-cookie", data={"token": token_4kb})
@@ -74,10 +76,37 @@ def test_set_and_read_4kb_token(client):
     # Read back the token using client's cookie jar
     get_response = client.get("/get-token")
     assert get_response.status_code == 200
-    assert get_response.json()["token"] == token_4kb
+
+    response_token = get_response.json()["token"]
+    assert len(response_token) == len(token_4kb)
+    assert response_token == token_4kb
 
 
-def test_overwrite_shorter_token(client):
+def test_overwrite_shorter_token_chunked(client):
+    """Test cookie chunk cleanup when replacing a large token with a smaller one."""
+    # Set initial long token
+    long_token = "LONG" * 2000  # 8000 characters
+    client.post("/set-cookie", data={"token": long_token})
+
+    # Verify initial chunks exist
+    first_cookies = client.cookies
+    assert len([k for k in first_cookies if k.startswith("access_token_")]) > 1
+
+    # Set shorter token (should clear previous chunks)
+    short_token = "SHORT" * 1000  # 4000 characters
+    client.post("/set-cookie", data={"token": short_token})
+
+    # Verify new cookie state
+    final_response = client.get("/get-token")
+    assert final_response.json()["token"] == short_token
+
+    # Verify only two chunks remain
+    final_cookies = client.cookies
+    chunk_cookies = [k for k in final_cookies if k.startswith("access_token_")]
+    assert len(chunk_cookies) == 2, f"Found {len(chunk_cookies)} residual cookies"
+
+
+def test_overwrite_shorter_token_unchunked(client):
     """Test cookie chunk cleanup when replacing a large token with a smaller one."""
     # Set initial long token
     long_token = "LONG" * 1000  # 4000 characters
@@ -95,10 +124,10 @@ def test_overwrite_shorter_token(client):
     final_response = client.get("/get-token")
     assert final_response.json()["token"] == short_token
 
-    # Verify only one chunk remains
+    # Verify no chunks remain
     final_cookies = client.cookies
     chunk_cookies = [k for k in final_cookies if k.startswith("access_token_")]
-    assert len(chunk_cookies) == 1, f"Found {len(chunk_cookies)} residual cookies"
+    assert len(chunk_cookies) == 0, f"Found {len(chunk_cookies)} residual cookies"
 
 
 def test_clear_auth_cookie(client):
