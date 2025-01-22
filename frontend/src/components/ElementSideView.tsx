@@ -1,8 +1,10 @@
-import { X } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { useState, useEffect } from 'react';
+
 import { sideViewState } from '@chainlit/react-client';
 
+import { Card, CardContent } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
 import {
   Sheet,
@@ -10,11 +12,11 @@ import {
   SheetHeader,
   SheetTitle
 } from '@/components/ui/sheet';
-import { Card, CardContent } from '@/components/ui/card';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { Element } from './Elements';
+import { Button } from './ui/button';
 
 export default function ElementSideView() {
   const [sideView, setSideView] = useRecoilState(sideViewState);
@@ -36,21 +38,18 @@ export default function ElementSideView() {
 
   if (isMobile) {
     return (
-      <Sheet
-        open
-        onOpenChange={(open) => !open && setSideView(undefined)}
-      >
+      <Sheet open onOpenChange={(open) => !open && setSideView(undefined)}>
         <SheetContent className="md:hidden flex flex-col">
           <SheetHeader>
             <SheetTitle id="side-view-title">{sideView.title}</SheetTitle>
           </SheetHeader>
           <div
             id="side-view-content"
-            className="mt-4 overflow-y-auto flex-grow"
+            className="mt-4 overflow-y-auto flex-grow flex flex-col gap-4"
           >
-                   {sideView.elements.map((e) => (
-          <Element key={e.id} element={e} />
-          ))}
+            {sideView.elements.map((e) => (
+              <Element key={e.id} element={e} />
+            ))}
           </div>
         </SheetContent>
       </Sheet>
@@ -70,22 +69,23 @@ export default function ElementSideView() {
         <aside className="relative flex-grow overflow-y-auto mr-4 mb-4">
           <Card className="overflow-y-auto h-full">
             <div
-              onClick={() => setSideView(undefined)}
-              className="absolute cursor-pointer right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            >
-              <X className="size-4" />
-              <span className="sr-only">Close</span>
-            </div>
-            <div
               id="side-view-title"
-              className="text-lg font-semibold text-foreground px-6 pt-4"
+              className="text-lg font-semibold text-foreground px-6 py-4 flex items-center"
             >
+              <Button
+                className="-ml-2"
+                onClick={() => setSideView(undefined)}
+                size="icon"
+                variant="ghost"
+              >
+                <ArrowLeft />
+              </Button>
               {sideView.title}
             </div>
-            <CardContent id="side-view-content" className="flex flex-col gap-2">
-            {sideView.elements.map((e) => (
-          <Element key={e.id} element={e} />
-          ))}
+            <CardContent id="side-view-content" className="flex flex-col gap-4">
+              {sideView.elements.map((e) => (
+                <Element key={e.id} element={e} />
+              ))}
             </CardContent>
           </Card>
         </aside>

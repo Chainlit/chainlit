@@ -22,7 +22,7 @@ export default function ElementSideView() {
         </SheetHeader>
         <div className="mt-4 overflow-y-auto flex-grow">
           {sideView.elements.map((e) => (
-          <Element key={e.id} element={e} />
+            <Element key={e.id} element={e} />
           ))}
         </div>
       </SheetContent>

@@ -95,7 +95,7 @@ const MessagesContainer = ({ navigate }: Props) => {
         element.display === 'side' ||
         (element.display === 'page' && !navigate)
       ) {
-        setSideView({title: element.name, elements: [element]});
+        setSideView({ title: element.name, elements: [element] });
         return;
       }
 
