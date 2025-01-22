@@ -89,23 +89,18 @@ def run_chainlit(target: str):
     log_level = "debug" if config.run.debug else "error"
 
     # Start the server
-    async def start():
-        config = uvicorn.Config(
-            app,
-            host=host,
-            port=port,
-            ws=ws_protocol,
-            log_level=log_level,
-            ws_per_message_deflate=ws_per_message_deflate,
-            ssl_keyfile=ssl_keyfile,
-            ssl_certfile=ssl_certfile,
-        )
-        server = uvicorn.Server(config)
-        await server.serve()
-
-    # Run the asyncio event loop instead of uvloop to enable re entrance
-    asyncio.run(start())
-    # uvicorn.run(app, host=host, port=port, log_level=log_level)
+    uvicorn_config = uvicorn.Config(
+        app,
+        host=host,
+        port=port,
+        ws=ws_protocol,
+        log_level=log_level,
+        ws_per_message_deflate=ws_per_message_deflate,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
+    )
+    server = uvicorn.Server(uvicorn_config)
+    server.run()
 
 
 # Define the "run" command for Chainlit CLI
