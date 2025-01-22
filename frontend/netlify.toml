@@ -1,12 +1,12 @@
 [build]
-  base = "/"
-  command = "cd frontend && pnpm install && pnpm build"
-  publish = "frontend/dist"
-  functions = "frontend/netlify/functions"
+  command = "./netlify.sh"
+  publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--version"
+  NPM_VERSION = "10.2.4"
+  PNPM_VERSION = "8.6.12"
 
 [[redirects]]
   from = "/*"
