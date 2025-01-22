@@ -74,22 +74,18 @@ from ._utils import is_path_inside
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
-ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
-IS_SUBMOUNT = os.environ.get("CHAINLIT_SUBMOUNT", "") == "true"
-# If the app is a submount, no need to set the prefix
-PREFIX = ROOT_PATH if ROOT_PATH and not IS_SUBMOUNT else ""
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
     host = config.run.host
     port = config.run.port
+    root_path = config.run.root_path
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}{ROOT_PATH}"
+        url = f"http://localhost:{port}{root_path}"
     else:
-        url = f"http://{host}:{port}{ROOT_PATH}"
+        url = f"http://{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -204,7 +200,7 @@ asgi_app = socketio.ASGIApp(
     socketio_path="",
 )
 
-app.mount(f"{PREFIX}/ws/socket.io", asgi_app)
+app.mount("/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -214,7 +210,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter(prefix=PREFIX)
+router = APIRouter()
 
 
 @router.get("/public/{filename:path}")
@@ -315,11 +311,11 @@ def replace_between_tags(
     return re.sub(pattern, start_tag + replacement + end_tag, text, flags=re.DOTALL)
 
 
-def get_html_template():
+def get_html_template(root_path):
     """
     Get HTML template for the index view.
     """
-    ROOT_PATH = os.environ.get("CHAINLIT_ROOT_PATH", "")
+    root_path = root_path.rstrip("/")  # Avoid duplicated / when joining with root path.
 
     custom_theme = None
     custom_theme_file_path = Path(public_dir) / "theme.json"
@@ -349,7 +345,7 @@ def get_html_template():
     <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="{meta_image_url}">
     <meta property="og:url" content="{url}">
-    <meta property="og:root_path" content="{ROOT_PATH}">"""
+    <meta property="og:root_path" content="{root_path}">"""
 
     js = f"""<script>
 {f"window.theme = {json.dumps(custom_theme.get('variables'))};" if custom_theme and custom_theme.get("variables") else "undefined"}
@@ -385,9 +381,8 @@ def get_html_template():
             content = replace_between_tags(
                 content, "<!-- FONT START -->", "<!-- FONT END -->", font
             )
-        if ROOT_PATH:
-            content = content.replace('href="/', f'href="{ROOT_PATH}/')
-            content = content.replace('src="/', f'src="{ROOT_PATH}/')
+        content = content.replace('href="/', f'href="{root_path}/')
+        content = content.replace('src="/', f'src="{root_path}/')
         return content
 
 
@@ -460,7 +455,7 @@ def _get_oauth_redirect_error(error: str) -> Response:
 
 
 async def _authenticate_user(
-    user: Optional[User], redirect_to_callback: bool = False
+    request: Request, user: Optional[User], redirect_to_callback: bool = False
 ) -> Response:
     """Authenticate a user and return the response."""
 
@@ -483,13 +478,17 @@ async def _authenticate_user(
 
     response = _get_auth_response(access_token, redirect_to_callback)
 
-    set_auth_cookie(response, access_token)
+    set_auth_cookie(request, response, access_token)
 
     return response
 
 
 @router.post("/login")
-async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(
+    request: Request,
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+):
     """
     Login a user using the password auth callback.
     """
@@ -502,13 +501,13 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
         form_data.username, form_data.password
     )
 
-    return await _authenticate_user(user)
+    return await _authenticate_user(request, user)
 
 
 @router.post("/logout")
 async def logout(request: Request, response: Response):
     """Logout the user by calling the on_logout callback."""
-    clear_auth_cookie(response)
+    clear_auth_cookie(request, response)
 
     if config.code.on_logout:
         return await config.code.on_logout(request, response)
@@ -540,7 +539,7 @@ async def jwt_auth(request: Request):
 
     try:
         user = decode_jwt(token)
-        return await _authenticate_user(user)
+        return await _authenticate_user(request, user)
     except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -556,7 +555,7 @@ async def header_auth(request: Request):
 
     user = await config.code.header_auth_callback(request.headers)
 
-    return await _authenticate_user(user)
+    return await _authenticate_user(request, user)
 
 
 @router.get("/auth/oauth/{provider_id}")
@@ -645,7 +644,7 @@ async def oauth_callback(
         provider_id, token, raw_user_data, default_user
     )
 
-    response = await _authenticate_user(user, redirect_to_callback=True)
+    response = await _authenticate_user(request, user, redirect_to_callback=True)
 
     clear_oauth_state_cookie(response)
 
@@ -694,7 +693,7 @@ async def oauth_azure_hf_callback(
         provider_id, token, raw_user_data, default_user, id_token
     )
 
-    response = await _authenticate_user(user, redirect_to_callback=True)
+    response = await _authenticate_user(request, user, redirect_to_callback=True)
 
     clear_oauth_state_cookie(response)
 
@@ -1298,9 +1297,9 @@ def status_check():
 
 
 @router.get("/{full_path:path}")
-async def serve():
-    html_template = get_html_template()
+async def serve(request: Request):
     """Serve the UI files."""
+    html_template = get_html_template(request.scope["root_path"])
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response
