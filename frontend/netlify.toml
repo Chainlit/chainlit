@@ -1,8 +1,8 @@
 [build]
-  base = "frontend/"
-  command = "pnpm --filter @chainlit/app... run build"
-  publish = "dist"
-  functions = "netlify/functions"
+  base = "/"
+  command = "cd frontend && pnpm install && pnpm build"
+  publish = "frontend/dist"
+  functions = "frontend/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
