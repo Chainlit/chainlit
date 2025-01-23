@@ -196,7 +196,7 @@ const AlertComponent = ({
 export const MarkdownAlert = () => {
   return (tree: any) => {
     visit(tree, 'text', (node) => {
-      const regex = /^:::\s*(\w+)\n([\s\S]*?)\n:::/i;
+      const regex = /^:::\s*([\w-]+)\n([\s\S]*?)\n:::/i;
       const match = node.value.match(regex);
 
       if (match) {
