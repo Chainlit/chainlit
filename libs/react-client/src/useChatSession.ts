@@ -25,6 +25,7 @@ import {
   resumeThreadErrorState,
   sessionIdState,
   sessionState,
+  sideViewState,
   tasklistState,
   threadIdToResumeState,
   tokenCountState,
@@ -68,7 +69,7 @@ const useChatSession = () => {
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
   const setCommands = useSetRecoilState(commandsState);
-
+  const setSideView = useSetRecoilState(sideViewState);
   const setElements = useSetRecoilState(elementState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
@@ -282,6 +283,30 @@ const useChatSession = () => {
 
       socket.on('set_commands', (commands: ICommand[]) => {
         setCommands(commands);
+      });
+
+      socket.on('set_sidebar_title', (title: string) => {
+        setSideView((prev) => {
+          return { title, elements: prev?.elements || [] };
+        });
+      });
+
+      socket.on('set_sidebar_elements', (elements: IMessageElement[]) => {
+        if (!elements.length) {
+          setSideView(undefined);
+        } else {
+          elements.forEach((element) => {
+            if (!element.url && element.chainlitKey) {
+              element.url = client.getElementUrl(
+                element.chainlitKey,
+                sessionId
+              );
+            }
+          });
+          setSideView((prev) => {
+            return { title: prev?.title || '', elements: elements };
+          });
+        }
       });
 
       socket.on('element', (element: IElement) => {

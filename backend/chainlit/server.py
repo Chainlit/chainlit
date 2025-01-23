@@ -898,7 +898,7 @@ async def update_thread_element(
     """Update a specific thread element."""
 
     from chainlit.context import init_ws_context
-    from chainlit.element import CustomElement, ElementDict
+    from chainlit.element import Element, ElementDict
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -909,17 +909,7 @@ async def update_thread_element(
     if element_dict["type"] != "custom":
         return {"success": False}
 
-    element = CustomElement(
-        id=element_dict["id"],
-        object_key=element_dict["objectKey"],
-        chainlit_key=element_dict["chainlitKey"],
-        url=element_dict["url"],
-        for_id=element_dict.get("forId") or "",
-        thread_id=element_dict.get("threadId") or "",
-        name=element_dict["name"],
-        props=element_dict.get("props") or {},
-        display=element_dict["display"],
-    )
+    element = Element.from_dict(element_dict)
 
     if current_user:
         if (
