@@ -17,7 +17,8 @@ export default defineConfig({
       react: path.resolve(__dirname, './node_modules/react'),
       'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts'),
       lodash: path.resolve(__dirname, './node_modules/lodash'),
-      recoil: path.resolve(__dirname, './node_modules/recoil')
+      recoil: path.resolve(__dirname, './node_modules/recoil'),
+      'remark-directive': path.resolve(__dirname, './node_modules/remark-directive')
     }
   }
 });
