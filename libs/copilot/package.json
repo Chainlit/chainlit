@@ -29,7 +29,8 @@
     "sonner": "^1.2.3",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "remark-directive": "^3.0.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^8.4.7",
