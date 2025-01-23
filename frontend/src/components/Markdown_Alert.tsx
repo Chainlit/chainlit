@@ -196,7 +196,7 @@ const AlertComponent = ({
 export const MarkdownAlert = () => {
   return (tree: any) => {
     visit(tree, 'text', (node) => {
-      const regex = /^:::\s*(\w+)\n([\s\S]*?)\n:::/;
+      const regex = /^:::\s*(\w+)\n([\s\S]*?)\n:::/i;
       const match = node.value.match(regex);
 
       if (match) {
@@ -204,7 +204,7 @@ export const MarkdownAlert = () => {
         node.type = 'element';
         node.data = {
           hName: 'Alert',
-          hProperties: { variant: type }
+          hProperties: { variant: type.toLowerCase() }
         };
         node.children = [{ type: 'text', value: content.trim() }];
       }
