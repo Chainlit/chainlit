@@ -54,7 +54,6 @@
   "dependencies": {
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
-    "remark-directive": "^3.0.1",
     "socket.io-client": "^4.7.2",
     "swr": "^2.2.2",
     "uuid": "^9.0.0"

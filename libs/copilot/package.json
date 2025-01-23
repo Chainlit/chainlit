@@ -26,7 +26,6 @@
     "react-dom": "^18.3.1",
     "react-i18next": "^14.0.0",
     "recoil": "^0.7.7",
-    "remark-directive": "^3.0.1",
     "sonner": "^1.2.3",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",

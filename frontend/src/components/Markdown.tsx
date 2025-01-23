@@ -5,13 +5,11 @@ import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
-// add alert components
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
 
-// add directive components
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -29,7 +27,7 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
-import { alertComponents, remarkAlert } from './Markdown_Alert';
+import { MarkdownAlert, alertComponents } from './Markdown_Alert';
 
 interface Props {
   allowHtml?: boolean;
@@ -110,7 +108,7 @@ const Markdown = ({
       cursorPlugin,
       remarkGfm as any,
       remarkDirective as any,
-      remarkAlert
+      MarkdownAlert
     ];
 
     if (latex) {

@@ -192,8 +192,8 @@ const AlertComponent = ({
     </div>
   );
 };
-// remarkAlert plugin
-export const remarkAlert = () => {
+// MarkdownAlert plugin
+export const MarkdownAlert = () => {
   return (tree: any) => {
     visit(tree, 'text', (node) => {
       const regex = /^:::\s*(\w+)\n([\s\S]*?)\n:::/;
