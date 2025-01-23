@@ -57,6 +57,9 @@
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.0"
   },
+  "peerDependencies": {
+    "remark-directive": "^3.0.0"
+  },
   "pnpm": {
     "overrides": {
       "vite@>=4.4.0 <4.4.12": ">=4.4.12",
