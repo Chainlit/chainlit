@@ -130,7 +130,7 @@ class Element:
         return _dict
 
     @classmethod
-    def from_dict(cls, _dict: ElementDict):
+    def from_dict(cls, e_dict: ElementDict):
         """
         Create an Element instance from a dictionary representation.
 
@@ -140,17 +140,17 @@ class Element:
         Returns:
             Element: An instance of the appropriate Element subclass
         """
-        element_id = _dict.get("id", str(uuid.uuid4()))
-        for_id = _dict.get("forId")
-        name = _dict.get("name", "")
-        type = _dict.get("type", "file")
-        path = str(_dict.get("path")) if _dict.get("path") else None
-        url = str(_dict.get("url")) if _dict.get("url") else None
-        content = str(_dict.get("content")) if _dict.get("content") else None
-        object_key = _dict.get("objectKey")
-        chainlit_key = _dict.get("chainlitKey")
-        display = _dict.get("display", "inline")
-        mime_type = _dict.get("type", "")
+        element_id = e_dict.get("id", str(uuid.uuid4()))
+        for_id = e_dict.get("forId")
+        name = e_dict.get("name", "")
+        type = e_dict.get("type", "file")
+        path = str(e_dict.get("path")) if e_dict.get("path") else None
+        url = str(e_dict.get("url")) if e_dict.get("url") else None
+        content = str(e_dict.get("content")) if e_dict.get("content") else None
+        object_key = e_dict.get("objectKey")
+        chainlit_key = e_dict.get("chainlitKey")
+        display = e_dict.get("display", "inline")
+        mime_type = e_dict.get("type", "")
 
         # Common parameters for all element types
         common_params = {
@@ -168,37 +168,38 @@ class Element:
 
         # Image handling (excluding SVG which is treated as a file)
         if type == "image" and "svg" not in mime_type:
-            return Image(size="medium", **common_params)  # type: ignore
+            return Image(size="medium", **common_params)  # type: ignore[arg-type]
 
         elif type == "pdf":
-            return Pdf(page=_dict.get("page"), **common_params)  # type: ignore
+            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
 
         elif type == "audio":
-            return Audio(auto_play=_dict.get("autoPlay", False), **common_params)  # type: ignore
+            return Audio(auto_play=e_dict.get("autoPlay", False), **common_params)  # type: ignore[arg-type]
 
         elif type == "video":
             return Video(
-                player_config=_dict.get("playerConfig"),
-                **common_params,  # type: ignore
+                player_config=e_dict.get("playerConfig"),
+                **common_params,  # type: ignore[arg-type]
             )
 
         elif type == "text":
-            return Text(language=_dict.get("language"), **common_params)  # type: ignore
+            return Text(language=e_dict.get("language"), **common_params)  # type: ignore[arg-type]
 
         elif type == "tasklist":
-            return TaskList(**common_params)  # type: ignore
+            return TaskList(**common_params)  # type: ignore[arg-type]
         elif type == "plotly":
-            return Plotly(size=_dict.get("size", "medium"), **common_params)  # type: ignore
+            return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
         elif type == "dataframe":
-            return Dataframe(size=_dict.get("size", "large"), **common_params)  # type: ignore
+            return Dataframe(size=e_dict.get("size", "large"), **common_params)  # type: ignore[arg-type]
         elif type == "custom":
-            return CustomElement(props=_dict.get("props", {}), **common_params)  # type: ignore
+            return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
-            return File(**common_params)  # type: ignore
+            return File(**common_params) # type: ignore[arg-type]
 
     @classmethod
     def infer_type_from_mime(cls, mime_type: str):
+        """Infer the element type from a mime type. Useful to know which element to instantiate from a file upload."""
         if "image" in mime_type:
             return "image"
 
@@ -218,8 +219,7 @@ class Element:
         if self.persisted and not self.updatable:
             return True
 
-        data_layer = get_data_layer()
-        if data_layer and persist:
+        if data_layer := get_data_layer() and persist:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
