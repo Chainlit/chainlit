@@ -27,7 +27,7 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
-import { MarkdownAlert, alertComponents } from './Markdown_Alert';
+import { MarkdownAlert, alertComponents } from './MarkdownAlert';
 
 interface Props {
   allowHtml?: boolean;
