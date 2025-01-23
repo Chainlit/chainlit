@@ -20,7 +20,8 @@ export default defineConfig({
           entryFileNames: 'index.js',
           inlineDynamicImports: true
         }
-      ]
+      ],
+      external: ['remark-directive']
     }
   },
   resolve: {
@@ -36,7 +37,8 @@ export default defineConfig({
       'react-i18next': path.resolve(__dirname, './node_modules/react-i18next'),
       'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts'),
       lodash: path.resolve(__dirname, './node_modules/lodash'),
-      recoil: path.resolve(__dirname, './node_modules/recoil')
+      recoil: path.resolve(__dirname, './node_modules/recoil'),
+      'remark-directive': path.resolve(__dirname, './node_modules/remark-directive')
     }
   }
 });
