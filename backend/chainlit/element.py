@@ -195,7 +195,7 @@ class Element:
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
-            return File(**common_params) # type: ignore[arg-type]
+            return File(**common_params)  # type: ignore[arg-type]
 
     @classmethod
     def infer_type_from_mime(cls, mime_type: str):
