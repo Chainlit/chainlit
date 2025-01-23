@@ -219,7 +219,7 @@ class Element:
         if self.persisted and not self.updatable:
             return True
 
-        if data_layer := get_data_layer() and persist:
+        if (data_layer := get_data_layer()) and persist:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
