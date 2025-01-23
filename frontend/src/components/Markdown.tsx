@@ -5,10 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+// add alert components
+import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
 
+// add directive components
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -26,6 +29,7 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
+import { alertComponents, remarkAlert } from './Markdown_Alert';
 
 interface Props {
   allowHtml?: boolean;
@@ -102,7 +106,12 @@ const Markdown = ({
   }, [allowHtml, latex]);
 
   const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
+    let remarkPlugins: PluggableList = [
+      cursorPlugin,
+      remarkGfm as any,
+      remarkDirective as any,
+      remarkAlert
+    ];
 
     if (latex) {
       remarkPlugins = [...remarkPlugins, remarkMath as any];
@@ -116,6 +125,7 @@ const Markdown = ({
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
       components={{
+        ...alertComponents, // add alert components
         code(props) {
           return (
             <code
