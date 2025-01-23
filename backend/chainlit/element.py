@@ -24,7 +24,6 @@ from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
-from chainlit.types import FileDict
 
 mime_types = {
     "text": "text/plain",
@@ -48,11 +47,12 @@ ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
 
 
-class ElementDict(TypedDict):
+class ElementDict(TypedDict, total=False):
     id: str
     threadId: Optional[str]
     type: ElementType
     chainlitKey: Optional[str]
+    path: Optional[str]
     url: Optional[str]
     objectKey: Optional[str]
     name: str
@@ -130,31 +130,96 @@ class Element:
         return _dict
 
     @classmethod
-    def from_dict(self, _dict: FileDict):
-        type = _dict.get("type", "")
-        if "image" in type and "svg" not in type:
-            return Image(
-                id=_dict.get("id", str(uuid.uuid4())),
-                name=_dict.get("name", ""),
-                path=str(_dict.get("path")),
-                chainlit_key=_dict.get("id"),
-                display="inline",
-                mime=type,
-            )
-        else:
-            return File(
-                id=_dict.get("id", str(uuid.uuid4())),
-                name=_dict.get("name", ""),
-                path=str(_dict.get("path")),
-                chainlit_key=_dict.get("id"),
-                display="inline",
-                mime=type,
+    def from_dict(cls, e_dict: ElementDict):
+        """
+        Create an Element instance from a dictionary representation.
+
+        Args:
+            _dict (ElementDict): Dictionary containing element data
+
+        Returns:
+            Element: An instance of the appropriate Element subclass
+        """
+        element_id = e_dict.get("id", str(uuid.uuid4()))
+        for_id = e_dict.get("forId")
+        name = e_dict.get("name", "")
+        type = e_dict.get("type", "file")
+        path = str(e_dict.get("path")) if e_dict.get("path") else None
+        url = str(e_dict.get("url")) if e_dict.get("url") else None
+        content = str(e_dict.get("content")) if e_dict.get("content") else None
+        object_key = e_dict.get("objectKey")
+        chainlit_key = e_dict.get("chainlitKey")
+        display = e_dict.get("display", "inline")
+        mime_type = e_dict.get("type", "")
+
+        # Common parameters for all element types
+        common_params = {
+            "id": element_id,
+            "for_id": for_id,
+            "name": name,
+            "content": content,
+            "path": path,
+            "url": url,
+            "object_key": object_key,
+            "chainlit_key": chainlit_key,
+            "display": display,
+            "mime": mime_type,
+        }
+
+        # Image handling (excluding SVG which is treated as a file)
+        if type == "image" and "svg" not in mime_type:
+            return Image(size="medium", **common_params)  # type: ignore[arg-type]
+
+        elif type == "pdf":
+            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
+
+        elif type == "audio":
+            return Audio(auto_play=e_dict.get("autoPlay", False), **common_params)  # type: ignore[arg-type]
+
+        elif type == "video":
+            return Video(
+                player_config=e_dict.get("playerConfig"),
+                **common_params,  # type: ignore[arg-type]
             )
 
-    async def _create(self) -> bool:
+        elif type == "text":
+            return Text(language=e_dict.get("language"), **common_params)  # type: ignore[arg-type]
+
+        elif type == "tasklist":
+            return TaskList(**common_params)  # type: ignore[arg-type]
+        elif type == "plotly":
+            return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
+        elif type == "dataframe":
+            return Dataframe(size=e_dict.get("size", "large"), **common_params)  # type: ignore[arg-type]
+        elif type == "custom":
+            return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+        else:
+            # Default to File for any other type
+            return File(**common_params)  # type: ignore[arg-type]
+
+    @classmethod
+    def infer_type_from_mime(cls, mime_type: str):
+        """Infer the element type from a mime type. Useful to know which element to instantiate from a file upload."""
+        if "image" in mime_type:
+            return "image"
+
+        elif mime_type == "application/pdf":
+            return "pdf"
+
+        elif "audio" in mime_type:
+            return "audio"
+
+        elif "video" in mime_type:
+            return "video"
+
+        else:
+            return "file"
+
+    async def _create(self, persist=True) -> bool:
         if self.persisted and not self.updatable:
             return True
-        if data_layer := get_data_layer():
+
+        if data_layer := get_data_layer() and persist:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
@@ -179,10 +244,7 @@ class Element:
             await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 
-    async def send(self, for_id: str):
-        if self.persisted and not self.updatable:
-            return
-
+    async def send(self, for_id: str, persist=True):
         self.for_id = for_id
 
         if not self.mime:
@@ -195,7 +257,7 @@ class Element:
             elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
-        await self._create()
+        await self._create(persist=persist)
 
         if not self.url and not self.chainlit_key:
             raise ValueError("Must provide url or chainlit key to send element")

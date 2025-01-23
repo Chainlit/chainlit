@@ -121,7 +121,7 @@ const ReadOnlyThread = ({ id }: Props) => {
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
       if (element.display === 'side') {
-        setSideView(element);
+        setSideView({ title: element.name, elements: [element] });
         return;
       }
 
