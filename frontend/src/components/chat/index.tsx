@@ -195,7 +195,7 @@ const Chat = () => {
       {error ? (
         <div className="w-full mx-auto my-2">
           <Alert className="mx-2" id="session-error" variant="error">
-            <Translator path="common.status.errors.serverConnection" />
+            <Translator path="common.status.error.serverConnection" />
           </Alert>
         </div>
       ) : null}
