@@ -270,8 +270,22 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 for file in file_refs
                 if file["id"] in self.session.files
             ]
-            file_elements = [Element.from_dict(file) for file in files]
-            message.elements = file_elements
+
+            elements = [
+                Element.from_dict(
+                    {
+                        "id": file["id"],
+                        "name": file["name"],
+                        "path": str(file["path"]),
+                        "chainlitKey": file["id"],
+                        "display": "inline",
+                        "type": Element.infer_type_from_mime(file["type"]),
+                    }
+                )
+                for file in files
+            ]
+
+            message.elements = elements
 
             async def send_elements():
                 for element in message.elements:

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Ellipsis, Trash } from 'lucide-react';
-import { Translator } from '../i18n';
+
 import { Pencil } from '@/components/icons/Pencil';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+
+import { Translator } from '../i18n';
 
 interface Props {
   onDelete: () => void;
