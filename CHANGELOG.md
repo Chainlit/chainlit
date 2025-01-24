@@ -4,6 +4,18 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.6] - 2025-01-24
+
+### Added
+
+- The element sidebar is now controllable from the python code
+
+### Fixed
+- The auth cookie no longer has a maximal size
+- Pasting text in the chat input should now work
+- Long text in AskAction buttons are now gracefully displayed
+- Server connection error translation path
+
 ## [2.0.5] - 2025-01-21
 
 ### Added
