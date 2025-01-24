@@ -174,7 +174,7 @@ const AlertComponent = ({
   const style = variantStyles[variant];
   const Icon = style.Icon;
 
-  console.log('AlertComponent rendering:', variant, children); // 调试日志
+  // console.log('AlertComponent rendering:', variant, children);
 
   return (
     <div className={cn('rounded-lg p-4 mb-4', style.container)}>
