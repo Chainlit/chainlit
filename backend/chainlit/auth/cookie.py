@@ -46,7 +46,7 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
 
     async def __call__(self, request: Request) -> Optional[str]:
         # First try to get the token from the cookie
-        token = request.cookies.get(_auth_cookie_name)
+        token = get_token_from_cookies(request.cookies)
 
         # If no cookie, try the Authorization header as fallback
         if not token:
@@ -76,26 +76,100 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
         return token
 
 
-def set_auth_cookie(response: Response, token: str):
+def _get_chunked_cookie(cookies: dict[str, str], name: str) -> Optional[str]:
+    # Gather all auth_chunk_i cookies, sorted by their index
+    chunk_parts = []
+
+    i = 0
+    while True:
+        cookie_key = f"{_auth_cookie_name}_{i}"
+        if cookie_key not in cookies:
+            break
+
+        print("Reading chunk", cookie_key)
+        chunk_parts.append(cookies[cookie_key])
+        i += 1
+
+    joined = "".join(chunk_parts)
+
+    return joined if joined != "" else None
+
+
+def get_token_from_cookies(cookies: dict[str, str]) -> Optional[str]:
+    """
+    Read all chunk cookies and reconstruct the token
+    """
+
+    print("Found cookies", cookies.keys())
+
+    # Default/unchunked cookies
+    if value := cookies.get(_auth_cookie_name):
+        print("Returning unchunked", _auth_cookie_name, value)
+        return value
+
+    return _get_chunked_cookie(cookies, _auth_cookie_name)
+
+
+def set_auth_cookie(request: Request, response: Response, token: str):
     """
     Helper function to set the authentication cookie with secure parameters
+    and remove any leftover chunks from a previously larger token.
     """
 
-    response.set_cookie(
-        key=_auth_cookie_name,
-        value=token,
-        httponly=True,
-        secure=_cookie_secure,
-        samesite=_cookie_samesite,
-        max_age=config.project.user_session_timeout,
-    )
+    _chunk_size = 3000
+
+    existing_cookies = {
+        k for k in request.cookies.keys() if k.startswith(_auth_cookie_name)
+    }
+
+    if len(token) > _chunk_size:
+        chunks = [token[i : i + _chunk_size] for i in range(0, len(token), _chunk_size)]
+
+        for i, chunk in enumerate(chunks):
+            k = f"{_auth_cookie_name}_{i}"
+
+            print("Setting", k)
+
+            response.set_cookie(
+                key=k,
+                value=chunk,
+                httponly=True,
+                secure=_cookie_secure,
+                samesite=_cookie_samesite,
+                max_age=config.project.user_session_timeout,
+            )
+
+            existing_cookies.discard(k)
+    else:
+        # Default (shorter cookies)
+        response.set_cookie(
+            key=_auth_cookie_name,
+            value=token,
+            httponly=True,
+            secure=_cookie_secure,
+            samesite=_cookie_samesite,
+            max_age=config.project.user_session_timeout,
+        )
+
+        existing_cookies.discard(_auth_cookie_name)
+
+    # Delete remaining prior cookies/cookie chunks
+    for k in existing_cookies:
+        print("Deleting", k)
+        response.delete_cookie(key=k, path="/")
 
 
-def clear_auth_cookie(response: Response):
+def clear_auth_cookie(request: Request, response: Response):
     """
     Helper function to clear the authentication cookie
     """
-    response.delete_cookie(key=_auth_cookie_name, path="/")
+
+    existing_cookies = {
+        k for k in request.cookies.keys() if k.startswith(_auth_cookie_name)
+    }
+
+    for k in existing_cookies:
+        response.delete_cookie(key=k, path="/")
 
 
 def set_oauth_state_cookie(response: Response, token: str):
