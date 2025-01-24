@@ -86,7 +86,6 @@ def _get_chunked_cookie(cookies: dict[str, str], name: str) -> Optional[str]:
         if cookie_key not in cookies:
             break
 
-        print("Reading chunk", cookie_key)
         chunk_parts.append(cookies[cookie_key])
         i += 1
 
@@ -100,11 +99,8 @@ def get_token_from_cookies(cookies: dict[str, str]) -> Optional[str]:
     Read all chunk cookies and reconstruct the token
     """
 
-    print("Found cookies", cookies.keys())
-
     # Default/unchunked cookies
     if value := cookies.get(_auth_cookie_name):
-        print("Returning unchunked", _auth_cookie_name, value)
         return value
 
     return _get_chunked_cookie(cookies, _auth_cookie_name)
@@ -127,8 +123,6 @@ def set_auth_cookie(request: Request, response: Response, token: str):
 
         for i, chunk in enumerate(chunks):
             k = f"{_auth_cookie_name}_{i}"
-
-            print("Setting", k)
 
             response.set_cookie(
                 key=k,
@@ -155,7 +149,6 @@ def set_auth_cookie(request: Request, response: Response, token: str):
 
     # Delete remaining prior cookies/cookie chunks
     for k in existing_cookies:
-        print("Deleting", k)
         response.delete_cookie(key=k, path="/")
 
 
