@@ -219,7 +219,7 @@ class Element:
         if self.persisted and not self.updatable:
             return True
 
-        if data_layer := get_data_layer() and persist:
+        if (data_layer := get_data_layer()) and persist:
             try:
                 asyncio.create_task(data_layer.create_element(self))
             except Exception as e:
@@ -240,7 +240,7 @@ class Element:
     async def remove(self):
         trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
-        if data_layer and self.persisted:
+        if data_layer:
             await data_layer.delete_element(self.id, self.thread_id)
         await context.emitter.emit("remove_element", {"id": self.id})
 

@@ -19,13 +19,13 @@ jobs:
       - name: Lint with ruff
         uses: astral-sh/ruff-action@v1
         with:
-          version: '0.9.0'
+          version-file: "backend/pyproject.toml"
           src: ${{ env.BACKEND_DIR }}
           changed-files: "true"
       - name: Check formatting with ruff
         uses: astral-sh/ruff-action@v1
         with:
-          version: '0.9.0'
+          version-file: "backend/pyproject.toml"
           src: ${{ env.BACKEND_DIR }}
           changed-files: "true"
           args: "format --check"
