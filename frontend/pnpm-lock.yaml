@@ -248,9 +248,6 @@ importers:
       jsdom:
         specifier: ^22.1.0
         version: 22.1.0
-      mdast-util-directive:
-        specifier: ^3.1.0
-        version: 3.1.0
       postcss:
         specifier: ^8.4.49
         version: 8.4.49
@@ -263,9 +260,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
       vite:
         specifier: ^5.4.14
         version: 5.4.14(@types/node@20.5.7)
@@ -3260,9 +3254,9 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@5.0.9:
-    resolution: {integrity: sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q==}
-    engines: {node: ^18 || >=20}
+  nanoid@3.3.8:
+    resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
   native-promise-only@0.8.1:
@@ -7749,7 +7743,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@5.0.9: {}
+  nanoid@3.3.8: {}
 
   native-promise-only@0.8.1: {}
 
@@ -7997,7 +7991,7 @@ snapshots:
 
   postcss@8.4.49:
     dependencies:
-      nanoid: 5.0.9
+      nanoid: 3.3.8
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
