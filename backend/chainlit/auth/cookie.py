@@ -100,11 +100,8 @@ def get_token_from_cookies(cookies: dict[str, str]) -> Optional[str]:
     Read all chunk cookies and reconstruct the token
     """
 
-    print("Found cookies", cookies.keys())
-
     # Default/unchunked cookies
     if value := cookies.get(_auth_cookie_name):
-        print("Returning unchunked", _auth_cookie_name, value)
         return value
 
     return _get_chunked_cookie(cookies, _auth_cookie_name)
