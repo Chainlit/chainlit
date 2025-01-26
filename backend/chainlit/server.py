@@ -82,10 +82,15 @@ async def lifespan(app: FastAPI):
     port = config.run.port
     root_path = config.run.root_path
 
-    if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}{root_path}"
+    if config.run.ssl_cert and config.run.ssl_key:
+        protocol = "https"
     else:
-        url = f"http://{host}:{port}{root_path}"
+        protocol = "http"
+
+    if host == DEFAULT_HOST:
+        url = f"{protocol}://localhost:{port}{root_path}"
+    else:
+        url = f"{protocol}//{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
