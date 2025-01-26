@@ -5,9 +5,9 @@ from chainlit.context import context
 from chainlit.element import ElementBased
 
 
-class Sidebar:
-    """Helper class to open/close the sidebar server side.
-    The sidebar accepts a title and list of elements."""
+class ElementSidebar:
+    """Helper class to open/close the element sidebar server side.
+    The element sidebar accepts a title and list of elements."""
 
     @staticmethod
     async def set_title(title: str):

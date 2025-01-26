@@ -12,15 +12,15 @@ async def start():
         cl.Text(content="Here is a page text document", name="text2"),
     ]
 
-    await cl.Sidebar.set_elements(elements)
-    await cl.Sidebar.set_title("Test title")
+    await cl.ElementSidebar.set_elements(elements)
+    await cl.ElementSidebar.set_title("Test title")
 
 
 @cl.on_message
 async def message(msg: cl.Message):
-    await cl.Sidebar.set_elements([cl.Text(content="Text changed!")])
-    await cl.Sidebar.set_title("Title changed!")
+    await cl.ElementSidebar.set_elements([cl.Text(content="Text changed!")])
+    await cl.ElementSidebar.set_title("Title changed!")
 
     await cl.sleep(2)
 
-    await cl.Sidebar.set_elements([])
+    await cl.ElementSidebar.set_elements([])
