@@ -45,7 +45,7 @@ export default function ElementSideView() {
           </SheetHeader>
           <div
             id="side-view-content"
-            className="mt-4 overflow-y-auto flex-grow flex flex-col gap-4"
+            className="mt-4 overflow-y-auto flex-grow flex flex-grow flex-col gap-4"
           >
             {sideView.elements.map((e) => (
               <Element key={e.id} element={e} />
@@ -67,7 +67,7 @@ export default function ElementSideView() {
         }`}
       >
         <aside className="relative flex-grow overflow-y-auto mr-4 mb-4">
-          <Card className="overflow-y-auto h-full">
+          <Card className="overflow-y-auto h-full flex flex-col">
             <div
               id="side-view-title"
               className="text-lg font-semibold text-foreground px-6 py-4 flex items-center"
@@ -82,7 +82,10 @@ export default function ElementSideView() {
               </Button>
               {sideView.title}
             </div>
-            <CardContent id="side-view-content" className="flex flex-col gap-4">
+            <CardContent
+              id="side-view-content"
+              className="flex flex-col flex-grow gap-4"
+            >
               {sideView.elements.map((e) => (
                 <Element key={e.id} element={e} />
               ))}
