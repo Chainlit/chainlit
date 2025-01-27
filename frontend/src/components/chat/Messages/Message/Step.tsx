@@ -50,9 +50,9 @@ export default function Step({
         )}
         {hasContent ? (
           open ? (
-            <ChevronUp className="invisible group-hover/step:visible !size-4 ml-0.5" />
+            <ChevronUp className="invisible group-hover/step:visible !size-4 ml-1" />
           ) : (
-            <ChevronDown className="invisible group-hover/step:visible !size-4 ml-0.5" />
+            <ChevronDown className="invisible group-hover/step:visible !size-4 ml-1" />
           )
         ) : null}
       </p>
