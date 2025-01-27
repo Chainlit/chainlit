@@ -94,6 +94,8 @@ const Input = forwardRef<InputMethods, Props>(
     useEffect(() => {
       if (!contentEditableRef.current) return;
 
+      contentEditableRef.current.focus();
+
       mutationObserverRef.current = new MutationObserver((mutations) => {
         if (isUpdatingRef.current) return;
 
