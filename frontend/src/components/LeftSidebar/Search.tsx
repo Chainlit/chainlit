@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -27,6 +28,7 @@ import { Translator } from 'components/i18n';
 import { Kbd } from '../Kbd';
 
 export default function SearchChats() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +110,7 @@ export default function SearchChats() {
       </TooltipProvider>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput
-          placeholder="Search conversations..."
+          placeholder={t('threadHistory.sidebar.filters.placeholder')}
           value={searchQuery}
           onValueChange={setSearchQuery}
         />
@@ -118,7 +120,9 @@ export default function SearchChats() {
               <Loader />
             </CommandEmpty>
           ) : Object.keys(groupedThreads).length === 0 ? (
-            <CommandEmpty>No conversations found.</CommandEmpty>
+            <CommandEmpty>
+              <Translator path="threadHistory.sidebar.empty" />
+            </CommandEmpty>
           ) : (
             Object.entries(groupedThreads).map(([monthYear, monthThreads]) => (
               <CommandGroup
