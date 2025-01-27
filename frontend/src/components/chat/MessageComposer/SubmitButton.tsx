@@ -44,7 +44,7 @@ export default function SubmitButton({
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              <Translator path="components.organisms.chat.inputBox.SubmitButton.stopTask" />
+              <Translator path="chat.input.actions.stop" />
             </p>
           </TooltipContent>
         </Tooltip>
@@ -63,7 +63,7 @@ export default function SubmitButton({
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              <Translator path="components.organisms.chat.inputBox.SubmitButton.sendMessage" />
+              <Translator path="chat.input.actions.send" />
             </p>
           </TooltipContent>
         </Tooltip>

@@ -4,6 +4,73 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.602] - 2025-01-27
+
+### Fixed
+
+- Chat input should now auto focus
+- When unfolding a step, the `Output` title should only show if there is an input to display
+
+## [2.0.601] - 2025-01-25
+
+### Fixed
+
+- Element sidebar should take full height
+
+## [2.0.6] - 2025-01-24
+
+### Added
+
+- The element sidebar is now controllable from the python code
+
+### Fixed
+- The auth cookie no longer has a maximal size
+- Pasting text in the chat input should now work
+- Long text in AskAction buttons are now gracefully displayed
+- Server connection error translation path
+
+## [2.0.5] - 2025-01-21
+
+### Added
+
+- Chat GPT like commands
+- Translation options. The translation schema has been simplified
+
+### Fixed
+
+- Warnings around file upload mime types
+- `uvicorn` and `packaging` version requirement have been relaxed
+
+## [2.0.4] - 2025-01-17
+
+### Added
+- Overhaul element reference link styling
+- Japanese translations
+- Improved Chinese translations
+- Translations for feedback buttons
+
+
+### Fixed
+- Cookie max age should now correctly use the config `user_session_timeout` field
+- Thread grouping in the chat history should now correctly handle timezones
+- File from `AskFileMessage` should now share ID with the data layer
+- Data layer boolean casting issues
+- Chat settings modal scrolling issue
+
+## [2.0.3] - 2025-01-14
+
+### Added
+
+- `CustomElement.update()` to update a custom element props server side
+- Translation for the copy button
+
+### Fixed
+- The official data layer should not overwrite elements anymore
+- A bug where resuming a thread would not load the thread
+- Prevent authentication before the app is fully loaded
+- Installing Chainlit from github should work again
+- `tool` steps should count as a thread start
+
 ## [2.0.2] - 2025-01-10
 
 ### Added

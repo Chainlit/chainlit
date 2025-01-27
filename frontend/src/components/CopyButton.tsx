@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -17,6 +18,7 @@ interface Props {
 
 const CopyButton = ({ content, className }: Props) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
 
   const copyToClipboard = async () => {
     try {
@@ -55,7 +57,11 @@ const CopyButton = ({ content, className }: Props) => {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{copied ? 'Copied!' : 'Copy to clipboard'}</p>
+          <p>
+            {copied
+              ? t('chat.messages.actions.copy.success')
+              : t('chat.messages.actions.copy.button')}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

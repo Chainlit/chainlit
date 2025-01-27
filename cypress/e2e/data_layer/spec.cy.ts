@@ -44,7 +44,7 @@ function threadList() {
   cy.wait(100);
   cy.get('#delete-thread').click();
   cy.wait(100);
-  cy.get("[type='button']").contains('Confirm').click();
+  cy.get("[role='alertdialog'] button.bg-primary").click();
   cy.wait(100);
   cy.get('#thread-test1').should('not.exist');
   // Close the thread options popover

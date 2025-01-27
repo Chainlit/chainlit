@@ -39,8 +39,6 @@ from chainlit.user import PersistedUser, User
 class LiteralToChainlitConverter:
     @classmethod
     def steptype_to_steptype(cls, step_type: Optional[StepType]) -> TrueStepType:
-        if step_type in ["user_message", "assistant_message", "system_message"]:
-            return "undefined"
         return cast(TrueStepType, step_type or "undefined")
 
     @classmethod

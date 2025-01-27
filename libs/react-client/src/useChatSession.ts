@@ -15,6 +15,7 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  commandsState,
   currentThreadIdState,
   elementState,
   firstUserInteraction,
@@ -24,6 +25,7 @@ import {
   resumeThreadErrorState,
   sessionIdState,
   sessionState,
+  sideViewState,
   tasklistState,
   threadIdToResumeState,
   tokenCountState,
@@ -32,6 +34,7 @@ import {
 } from 'src/state';
 import {
   IAction,
+  ICommand,
   IElement,
   IMessageElement,
   IStep,
@@ -65,7 +68,8 @@ const useChatSession = () => {
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
-
+  const setCommands = useSetRecoilState(commandsState);
+  const setSideView = useSetRecoilState(sideViewState);
   const setElements = useSetRecoilState(elementState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
@@ -275,6 +279,34 @@ const useChatSession = () => {
       socket.on('chat_settings', (inputs: any) => {
         setChatSettingsInputs(inputs);
         resetChatSettingsValue();
+      });
+
+      socket.on('set_commands', (commands: ICommand[]) => {
+        setCommands(commands);
+      });
+
+      socket.on('set_sidebar_title', (title: string) => {
+        setSideView((prev) => {
+          return { title, elements: prev?.elements || [] };
+        });
+      });
+
+      socket.on('set_sidebar_elements', (elements: IMessageElement[]) => {
+        if (!elements.length) {
+          setSideView(undefined);
+        } else {
+          elements.forEach((element) => {
+            if (!element.url && element.chainlitKey) {
+              element.url = client.getElementUrl(
+                element.chainlitKey,
+                sessionId
+              );
+            }
+          });
+          setSideView((prev) => {
+            return { title: prev?.title || '', elements: elements };
+          });
+        }
       });
 
       socket.on('element', (element: IElement) => {

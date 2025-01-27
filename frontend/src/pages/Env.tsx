@@ -54,7 +54,7 @@ const Env = () => {
   const onSubmit = async (values: FormValues) => {
     localStorage.setItem('userEnv', JSON.stringify(values));
     setUserEnv(values);
-    toast.success(t('pages.Env.savedSuccessfully'));
+    toast.success(t('apiKeys.success.saved'));
     navigate('/');
   };
 
@@ -72,12 +72,12 @@ const Env = () => {
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="text-lg font-bold">
-              {t('pages.Env.requiredApiKeys')}
+              {t('apiKeys.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert variant="info" className="mb-6">
-              {t('pages.Env.requiredApiKeysInfo')}
+              {t('apiKeys.description')}
             </Alert>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

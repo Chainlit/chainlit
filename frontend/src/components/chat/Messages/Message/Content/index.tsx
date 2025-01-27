@@ -33,11 +33,13 @@ const MessageContent = memo(
       language: message.language
     });
 
+    const displayInput = message.input && message.showInput;
+
     const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
       <p className="flex flex-col gap-2">
-        {!isMessage ? (
+        {!isMessage && displayInput ? (
           <div className="text-lg font-semibold leading-none tracking-tight">
             Output
           </div>
@@ -54,7 +56,7 @@ const MessageContent = memo(
 
     let inputMarkdown;
 
-    if (message.input && message.showInput) {
+    if (displayInput) {
       const inputContent =
         message.streaming && message.input
           ? message.input + CURSOR_PLACEHOLDER
