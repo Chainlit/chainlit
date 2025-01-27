@@ -23,7 +23,7 @@ export default function WaterMark() {
       }}
     >
       <div className="text-xs text-muted-foreground">
-        <Translator path="components.organisms.chat.inputBox.waterMark.text" />
+        <Translator path="chat.watermark" />
       </div>
       <Logo
         style={{

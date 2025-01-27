@@ -175,9 +175,9 @@ class ChainlitDataLayer(BaseDataLayer):
             raise ValueError("Element url, path or content must be provided")
 
         if element.thread_id:
-            path = f"threads/{element.thread_id}/files/{element.name}"
+            path = f"threads/{element.thread_id}/files/{element.id}"
         else:
-            path = f"files/{element.name}"
+            path = f"files/{element.id}"
 
         if content is not None:
             await self.storage_client.upload_file(
@@ -194,6 +194,8 @@ class ChainlitDataLayer(BaseDataLayer):
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
         )
+        ON CONFLICT (id) DO UPDATE SET
+            props = EXCLUDED.props
         """
         params = {
             "id": element.id,
@@ -350,7 +352,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "type": step_dict["type"],
             "start_time": timestamp,
             "end_time": timestamp,
-            "show_input": step_dict.get("showInput", "json"),
+            "show_input": str(step_dict.get("showInput", "json")),
             "is_error": step_dict.get("isError", False),
         }
         await self.execute_query(query, params)
@@ -530,13 +532,15 @@ class ChainlitDataLayer(BaseDataLayer):
         if self.show_logger:
             logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
+        thread_name = truncate(
+            name
+            if name is not None
+            else (metadata.get("name") if metadata and "name" in metadata else None)
+        )
+
         data = {
             "id": thread_id,
-            "name": (
-                name
-                if name is not None
-                else (metadata.get("name") if metadata and "name" in metadata else None)
-            ),
+            "name": thread_name,
             "userId": user_id,
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
@@ -606,3 +610,7 @@ class ChainlitDataLayer(BaseDataLayer):
         """Cleanup database connections"""
         if self.pool:
             await self.pool.close()
+
+
+def truncate(text: Optional[str], max_length: int = 255) -> Optional[str]:
+    return None if text is None else text[:max_length]

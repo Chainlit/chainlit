@@ -203,9 +203,21 @@ async def download_discord_files(
         session.files[file["id"]] for file in file_refs if file["id"] in session.files
     ]
 
-    file_elements = [Element.from_dict(file_dict) for file_dict in files_dicts]
+    elements = [
+        Element.from_dict(
+            {
+                "id": file["id"],
+                "name": file["name"],
+                "path": str(file["path"]),
+                "chainlitKey": file["id"],
+                "display": "inline",
+                "type": Element.infer_type_from_mime(file["type"]),
+            }
+        )
+        for file in files_dicts
+    ]
 
-    return file_elements
+    return elements
 
 
 def clean_content(message: discord.Message):

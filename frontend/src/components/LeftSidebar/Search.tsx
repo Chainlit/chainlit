@@ -100,7 +100,7 @@ export default function SearchChats() {
           </TooltipTrigger>
           <TooltipContent>
             <div className="flex flex-col items-center">
-              <Translator path="components.organisms.threadHistory.sidebar.filters.SearchBar.search" />
+              <Translator path="threadHistory.sidebar.filters.search" />
               <Kbd>Cmd+k</Kbd>
             </div>
           </TooltipContent>

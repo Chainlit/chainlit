@@ -80,7 +80,7 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   }
 
   return (
-    <aside className="hidden tasklist max-w-96 flex-grow md:block overflow-y-auto ml-0 m-4">
+    <aside className="hidden tasklist max-w-96 flex-grow md:block overflow-y-auto mr-4 mb-4">
       <Card className="overflow-y-auto h-full">
         <Header status={content?.status} />
         <CardContent className="flex flex-col gap-2">

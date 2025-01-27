@@ -45,6 +45,7 @@ from chainlit.message import (
     ErrorMessage,
     Message,
 )
+from chainlit.sidebar import ElementSidebar
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
 from chainlit.types import ChatProfile, InputAudioChunk, OutputAudioChunk, Starter
@@ -130,6 +131,7 @@ __all__ = [
     "CopilotFunction",
     "CustomElement",
     "Dataframe",
+    "ElementSidebar",
     "ErrorMessage",
     "File",
     "GenerationMessage",

@@ -10,18 +10,20 @@ import {
 import { sideViewState } from '@chainlit/react-client';
 
 export default function ElementSideView() {
-  const [sideViewElement, setSideViewElement] = useRecoilState(sideViewState);
+  const [sideView, setSideView] = useRecoilState(sideViewState);
 
-  if (!sideViewElement) return null;
+  if (!sideView) return null;
 
   return (
-    <Sheet open onOpenChange={(open) => !open && setSideViewElement(undefined)}>
+    <Sheet open onOpenChange={(open) => !open && setSideView(undefined)}>
       <SheetContent side="left" className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>{sideViewElement.name}</SheetTitle>
+          <SheetTitle>{sideView.title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 overflow-y-auto flex-grow">
-          <Element element={sideViewElement} />
+        <div className="mt-4 overflow-y-auto flex-grow flex flex-col gap-4">
+          {sideView.elements.map((e) => (
+            <Element key={e.id} element={e} />
+          ))}
         </div>
       </SheetContent>
     </Sheet>

@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
+import { Translator } from '../i18n';
+
 interface Props {
   onDelete: () => void;
   onRename: () => void;
@@ -48,7 +50,7 @@ export default function ThreadOptions({
             onRename();
           }}
         >
-          Rename
+          <Translator path="threadHistory.thread.menu.rename" />
           <Pencil className="ml-auto" />
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -59,7 +61,7 @@ export default function ThreadOptions({
           }}
           className="text-red-500 focus:text-red-500"
         >
-          Delete
+          <Translator path="threadHistory.thread.menu.delete" />
           <Trash className="ml-auto" />
         </DropdownMenuItem>
       </DropdownMenuContent>
