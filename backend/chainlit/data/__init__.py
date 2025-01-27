@@ -1,6 +1,7 @@
 import os
 import warnings
 from typing import Optional
+from chainlit.telemetry import trace_event
 
 from .base import BaseDataLayer
 from .utils import (
@@ -30,13 +31,15 @@ def get_data_layer():
                 # When @data_layer is configured, call it to get data layer.
                 _data_layer = config.code.data_layer()
             elif database_url := os.environ.get("DATABASE_URL"):
-                # Default to Chainlit data layer if DATABASE_URL specified.
                 from .chainlit_data_layer import ChainlitDataLayer
+                
+                trace_event(f"Init Chainlit official data layer")
 
                 if os.environ.get("LITERAL_API_KEY"):
                     warnings.warn(
                         "Both LITERAL_API_KEY and DATABASE_URL specified. Ignoring Literal AI data layer and relying on data layer pointing to DATABASE_URL."
                     )
+
                 bucket_name = os.environ.get("BUCKET_NAME")
 
                 # AWS S3
@@ -101,6 +104,8 @@ def get_data_layer():
             elif api_key := os.environ.get("LITERAL_API_KEY"):
                 # When LITERAL_API_KEY is defined, use Literal AI data layer
                 from .literalai import LiteralDataLayer
+
+                trace_event(f"Init Literal AI data layer")
 
                 # support legacy LITERAL_SERVER variable as fallback
                 server = os.environ.get("LITERAL_API_URL") or os.environ.get(
