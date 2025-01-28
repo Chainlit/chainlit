@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Any, Dict, List, Literal, Optional, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Union, cast, get_args
 
 from literalai.helper import utc_now
 from socketio.exceptions import TimeoutError
@@ -22,6 +22,7 @@ from chainlit.types import (
     MessagePayload,
     OutputAudioChunk,
     ThreadDict,
+    ToastType,
 )
 from chainlit.user import PersistedUser
 
@@ -139,6 +140,10 @@ class BaseChainlitEmitter:
 
     async def send_window_message(self, data: Any):
         """Stub method to send custom data to the host window."""
+        pass
+
+    def send_toast(self, message: str, type: Optional[ToastType] = "info"):
+        """Stub method to send a toast message to the UI."""
         pass
 
 
@@ -423,3 +428,10 @@ class ChainlitEmitter(BaseChainlitEmitter):
     def send_window_message(self, data: Any):
         """Send custom data to the host window."""
         return self.emit("window_message", data)
+
+    def send_toast(self, message: str, type: Optional[ToastType] = "info"):
+        """Send a toast message to the UI."""
+        # check that the type is valid using ToastType
+        if type not in get_args(ToastType):
+            raise ValueError(f"Invalid toast type: {type}")
+        return self.emit("toast", {"message": message, "type": type})
