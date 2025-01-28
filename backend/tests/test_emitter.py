@@ -137,3 +137,29 @@ async def test_stream_start(
     }
     await emitter.stream_start(step_dict)
     mock_websocket_session.emit.assert_called_once_with("stream_start", step_dict)
+
+
+async def test_send_toast(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    message = "This is a test message"
+    await emitter.send_toast(message)
+    mock_websocket_session.emit.assert_called_once_with(
+        "toast", {"message": message, "type": "info"}
+    )
+
+
+async def test_send_toast_with_type(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    message = "This is a test message"
+    await emitter.send_toast(message, type="error")
+    mock_websocket_session.emit.assert_called_once_with(
+        "toast", {"message": message, "type": "error"}
+    )
+
+
+async def test_send_toast_invalid_type(emitter: ChainlitEmitter) -> None:
+    message = "This is a test message"
+    with pytest.raises(ValueError, match="Invalid toast type: invalid"):
+        await emitter.send_toast(message, type="invalid")  # type: ignore[arg-type]
