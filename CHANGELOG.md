@@ -4,6 +4,19 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.602] - 2025-01-27
+
+### Fixed
+
+- Chat input should now auto focus
+- When unfolding a step, the `Output` title should only show if there is an input to display
+
+## [2.0.601] - 2025-01-25
+
+### Fixed
+
+- Element sidebar should take full height
+
 ## [2.0.6] - 2025-01-24
 
 ### Added
