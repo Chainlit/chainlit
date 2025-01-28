@@ -135,7 +135,9 @@ export default function SearchChats() {
                       navigate(`/thread/${thread.id}`);
                     }}
                   >
-                    {thread.name || 'Untitled Conversation'}
+                    <div className="line-clamp-2">
+                      {thread.name || 'Untitled Conversation'}
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
