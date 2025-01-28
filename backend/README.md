@@ -91,7 +91,7 @@ Tell us what you would like to see added in Chainlit using the Github issues or 
 
 As an open-source initiative in a rapidly evolving domain, we welcome contributions, be it through the addition of new features or the improvement of documentation.
 
-For detailed information on how to contribute, see [here](.github/CONTRIBUTING.md).
+For detailed information on how to contribute, see [here](/CONTRIBUTING.md).
 
 ## 📃 License
 
