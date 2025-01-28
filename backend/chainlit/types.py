@@ -25,6 +25,7 @@ from pydantic.dataclasses import dataclass
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
 ]
+ToastType = Literal["info", "success", "warning", "error"]
 
 
 class ThreadDict(TypedDict):
