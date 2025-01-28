@@ -89,7 +89,10 @@ const Widget = ({ config, error }: Props) => {
           'shadow-lg',
           'z-50',
           'animate-in fade-in-0 zoom-in-95',
-          'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
+          'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+          expanded
+            ? 'copilot-container-expanded'
+            : 'copilot-container-collapsed'
         )}
       >
         <div id="chainlit-copilot" className="flex flex-col h-full w-full">

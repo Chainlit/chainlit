@@ -17,6 +17,16 @@ export default function AppWrapper({ widgetConfig }: Props) {
   const apiClient = makeApiClient(widgetConfig.chainlitServer);
   const [customThemeLoaded, setCustomThemeLoaded] = useState(false);
 
+  function completeInitialization() {
+    if (widgetConfig.customCssUrl) {
+      const linkEl = document.createElement('link');
+      linkEl.rel = 'stylesheet';
+      linkEl.href = widgetConfig.customCssUrl;
+      window.cl_shadowRootElement.getRootNode().appendChild(linkEl);
+    }
+    setCustomThemeLoaded(true);
+  }
+
   useEffect(() => {
     let fontLoaded = false;
 
@@ -46,10 +56,10 @@ export default function AppWrapper({ widgetConfig }: Props) {
               'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap';
             window.cl_shadowRootElement.getRootNode().appendChild(linkEl);
           }
-          setCustomThemeLoaded(true);
+          completeInitialization();
         }
       })
-      .catch(() => setCustomThemeLoaded(true));
+      .catch(() => completeInitialization());
   }, []);
 
   if (!customThemeLoaded) return null;
