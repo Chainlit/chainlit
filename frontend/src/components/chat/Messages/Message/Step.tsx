@@ -30,7 +30,7 @@ export default function Step({
     <div className="flex flex-col flex-grow w-0">
       <p
         className={cn(
-          'flex items-center group/step',
+          'flex items-center gap-1 group/step',
           isError && 'text-red-500',
           hasContent && 'cursor-pointer',
           !using && 'text-muted-foreground hover:text-foreground',
@@ -50,9 +50,9 @@ export default function Step({
         )}
         {hasContent ? (
           open ? (
-            <ChevronUp className="invisible group-hover/step:visible !size-4 ml-1" />
+            <ChevronUp className="invisible group-hover/step:visible !size-4" />
           ) : (
-            <ChevronDown className="invisible group-hover/step:visible !size-4 ml-1" />
+            <ChevronDown className="invisible group-hover/step:visible !size-4" />
           )
         ) : null}
       </p>

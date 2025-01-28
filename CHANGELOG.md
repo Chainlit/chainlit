@@ -4,6 +4,16 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.603] - 2025-01-28
+
+### Added
+
+- Data layer initialization to the telemetry
+
+### Fixed
+
+- Gap between the word `Used` and tool name in step name
+
 ## [2.0.602] - 2025-01-27
 
 ### Fixed
