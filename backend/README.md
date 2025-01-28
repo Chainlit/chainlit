@@ -6,6 +6,8 @@
 [![GitHub Contributors](https://img.shields.io/github/contributors/chainlit/chainlit)](https://github.com/chainlit/chainlit/graphs/contributors)
 [![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
 
+<a href="https://trendshift.io/repositories/6708" target="_blank"><img src="https://trendshift.io/api/badge/repositories/6708" alt="Chainlit%2Fchainlit | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 **Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
 
 Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
