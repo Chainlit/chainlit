@@ -637,6 +637,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         for thread in user_threads:
             thread_id = thread["thread_id"]
             if thread_id is not None:
+                # SQLite returns JSON as string, we most convert it.
+                thread_metadata = thread.get("thread_metadata", {})
+                if isinstance(thread_metadata, str):
+                    thread_metadata = json.loads(thread_metadata)
                 thread_dicts[thread_id] = ThreadDict(
                     id=thread_id,
                     createdAt=thread["thread_createdat"],
@@ -644,7 +648,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     userId=thread["user_id"],
                     userIdentifier=thread["user_identifier"],
                     tags=thread["thread_tags"],
-                    metadata=thread["thread_metadata"],
+                    metadata=thread_metadata,
                     steps=[],
                     elements=[],
                 )
@@ -661,6 +665,10 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                             value=step_feedback["feedback_value"],
                             comment=step_feedback.get("feedback_comment"),
                         )
+                    # SQLite returns JSON as string, we most convert it.
+                    step_metadata = step_feedback.get("step_metadata", {})
+                    if isinstance(step_metadata, str):
+                        step_metadata = json.loads(step_metadata)
                     step_dict = StepDict(
                         id=step_feedback["step_id"],
                         name=step_feedback["step_name"],
@@ -670,11 +678,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         streaming=step_feedback.get("step_streaming", False),
                         waitForAnswer=step_feedback.get("step_waitforanswer"),
                         isError=step_feedback.get("step_iserror"),
-                        metadata=(
-                            step_feedback["step_metadata"]
-                            if step_feedback.get("step_metadata") is not None
-                            else {}
-                        ),
+                        metadata=step_metadata,
                         tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
