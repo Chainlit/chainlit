@@ -38,7 +38,7 @@ const MessageContent = memo(
     const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
-      <div className="flex flex-col gap-2">  {/* change to div */}
+      <div className="flex flex-col gap-2">
         {!isMessage && displayInput ? (
           <div className="text-lg font-semibold leading-none tracking-tight">
             Output
@@ -73,7 +73,7 @@ const MessageContent = memo(
         });
 
       inputMarkdown = (
-        <div className="flex flex-col gap-2">  {/* change to div */}
+        <div className="flex flex-col gap-2">
           <div className="text-lg font-semibold leading-none tracking-tight">
             Input
           </div>

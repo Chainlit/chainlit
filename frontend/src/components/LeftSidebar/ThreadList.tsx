@@ -278,14 +278,16 @@ export function ThreadList({
                       <Link to={isResumed ? '' : `/thread/${thread.id}`}>
                         <SidebarMenuButton
                           isActive={isSelected}
-                          className="relative truncate h-9 group/thread pr-10" // 添加右边距给 ThreadOptions 留空间
+                          className="relative truncate h-9 group/thread pr-10"
                         >
                           {thread.name || (
                             <Translator path="threadHistory.thread.untitled" />
                           )}
-                          <div className={cn(
-                            'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
-                          )} />
+                          <div
+                            className={cn(
+                              'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
+                            )}
+                          />
                         </SidebarMenuButton>
                       </Link>
                       <ThreadOptions

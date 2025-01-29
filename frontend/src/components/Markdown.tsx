@@ -13,12 +13,8 @@ import { visit } from 'unist-util-visit';
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -240,14 +236,17 @@ const Markdown = ({
           );
         },
         p(props) {
-          const containsBlockElement = React.Children.toArray(props.children).some(
-            child => 
-              React.isValidElement(child) && 
-              (/^h[1-6]$/.test((child.type as string)) || child.type === 'p')
+          const containsBlockElement = React.Children.toArray(
+            props.children
+          ).some(
+            (child) =>
+              React.isValidElement(child) &&
+              (/^h[1-6]$/.test(child.type as string) || child.type === 'p')
           );
-          
-          const commonClassNames = "leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words";
-          
+
+          const commonClassNames =
+            'leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words';
+
           return containsBlockElement ? (
             <div {...omit(props, ['node'])} className={commonClassNames} />
           ) : (
