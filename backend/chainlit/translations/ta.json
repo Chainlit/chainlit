@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "கடந்த உரையாடல்கள்",
       "filters": {
-        "search": "தேடு"
+        "search": "தேடு",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "இன்று",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "உரையாடல்",
-      "readme": "படிக்கவும்"
+      "readme": "படிக்கவும்",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "புதிய உரையாடல்",

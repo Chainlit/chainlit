@@ -117,7 +117,8 @@
       "sidebar": {
         "title": "過去のチャット",
         "filters": {
-          "search": "検索"
+          "search": "検索",
+          "placeholder": "Search conversations..."
         },
         "timeframes": {
           "today": "今日",
@@ -162,7 +163,12 @@
     "navigation": {
       "header": {
         "chat": "チャット",
-        "readme": "説明書"
+        "readme": "説明書",
+        "theme": {
+          "light": "Light Theme",
+          "dark": "Dark Theme",
+          "system": "Follow System"
+        }
       },
       "newChat": {
         "button": "新規チャット",

@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "历史对话",
       "filters": {
-        "search": "搜索"
+        "search": "搜索",
+        "placeholder": "搜索会话..."
       },
       "timeframes": {
         "today": "今天",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "聊天",
-      "readme": "说明"
+      "readme": "说明",
+      "theme": {
+        "light": "浅色主题",
+        "dark": "深色主题",
+        "system": "跟随系统"
+      }
     },
     "newChat": {
       "button": "新建对话",

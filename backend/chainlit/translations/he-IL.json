@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "צ'אטים קודמים",
       "filters": {
-        "search": "חיפוש"
+        "search": "חיפוש",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "היום",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "צ'אט",
-      "readme": "קרא אותי"
+      "readme": "קרא אותי",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "צ'אט חדש",

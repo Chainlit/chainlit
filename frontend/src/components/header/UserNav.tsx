@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Translator } from 'components/i18n';
 
 export default function UserNav() {
   const { user, logout } = useAuth();
@@ -40,7 +41,7 @@ export default function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout(true)}>
-          Log out
+          <Translator path="navigation.user.menu.logout" />
           <LogOut className="ml-auto" />
         </DropdownMenuItem>
       </DropdownMenuContent>

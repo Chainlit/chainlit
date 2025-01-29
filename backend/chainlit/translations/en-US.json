@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "Past Chats",
       "filters": {
-        "search": "Search"
+        "search": "Search",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "Today",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "Chat",
-      "readme": "Readme"
+      "readme": "Readme",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "New Chat",

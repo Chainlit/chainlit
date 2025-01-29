@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "पिछली चैट",
       "filters": {
-        "search": "खोजें"
+        "search": "खोजें",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "आज",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "चैट",
-      "readme": "रीडमी"
+      "readme": "रीडमी",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "नई चैट",

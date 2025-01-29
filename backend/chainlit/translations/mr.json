@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "मागील चॅट्स",
       "filters": {
-        "search": "शोधा"
+        "search": "शोधा",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "आज",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "चॅट",
-      "readme": "वाचा"
+      "readme": "वाचा",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "नवीन चॅट",

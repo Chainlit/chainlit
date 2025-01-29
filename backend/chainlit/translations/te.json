@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "గత చాట్‌లు",
       "filters": {
-        "search": "వెతకండి"
+        "search": "వెతకండి",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "ఈరోజు",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "చాట్",
-      "readme": "చదవండి"
+      "readme": "చదవండి",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "కొత్త చాట్",

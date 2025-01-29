@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "മുൻ ചാറ്റുകൾ",
       "filters": {
-        "search": "തിരയുക"
+        "search": "തിരയുക",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "ഇന്ന്",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "ചാറ്റ്",
-      "readme": "വായിക്കുക"
+      "readme": "വായിക്കുക",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "പുതിയ ചാറ്റ്",

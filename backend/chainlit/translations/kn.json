@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "ಹಿಂದಿನ ಸಂಭಾಷಣೆಗಳು",
       "filters": {
-        "search": "ಹುಡುಕಿ"
+        "search": "ಹುಡುಕಿ",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "ಇಂದು",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "ಸಂಭಾಷಣೆ",
-      "readme": "ಓದಿ"
+      "readme": "ಓದಿ",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "ಹೊಸ ಸಂಭಾಷಣೆ",

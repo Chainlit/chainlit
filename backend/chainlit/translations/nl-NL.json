@@ -117,7 +117,8 @@
       "sidebar": {
         "title": "Eerdere chats",
         "filters": {
-          "search": "Zoeken"
+          "search": "Zoeken",
+          "placeholder": "Search conversations..."
         },
         "timeframes": {
           "today": "Vandaag",
@@ -162,7 +163,12 @@
     "navigation": {
       "header": {
         "chat": "Chat",
-        "readme": "Leesmij"
+        "readme": "Leesmij",
+        "theme": {
+          "light": "Light Theme",
+          "dark": "Dark Theme",
+          "system": "Follow System"
+        }
       },
       "newChat": {
         "button": "Nieuwe chat",
