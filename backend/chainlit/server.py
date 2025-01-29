@@ -447,9 +447,7 @@ def _get_oauth_redirect_error(request: Request, error: str) -> Response:
             "error": error,
         }
     )
-    response = RedirectResponse(
-        url=str(request.url_for("login")) + "?" + params
-    )
+    response = RedirectResponse(url=str(request.url_for("login")) + "?" + params)
     return response
 
 
