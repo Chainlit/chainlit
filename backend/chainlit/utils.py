@@ -6,8 +6,10 @@ from asyncio import CancelledError
 from typing import Callable
 
 import click
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from packaging import version
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
@@ -127,5 +129,14 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     load_module(config.run.module_name)
 
     ensure_jwt_secret()
+
+    class ChainlitMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            if not request.url.path.startswith("/chainlit"):
+                return JSONResponse(status_code=404, content={"detail": "Not found"})
+
+            return await call_next(request)
+
+    chainlit_app.add_middleware(ChainlitMiddleware)
 
     app.mount(path, chainlit_app)

@@ -449,7 +449,7 @@ def _get_oauth_redirect_error(error: str) -> Response:
     )
     response = RedirectResponse(
         # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login?{params}",  # Shouldn't there be {root_path} here?
+        url=f"{config.run.root_path.rstrip('/')}/login?{params}",
     )
     return response
 
