@@ -131,6 +131,17 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     ensure_jwt_secret()
 
     class ChainlitMiddleware(BaseHTTPMiddleware):
+        """Middleware to handle path routing for submounted Chainlit applications.
+
+        When Chainlit is submounted within a larger FastAPI application, its default route
+        `@router.get("/{full_path:path}")` can conflict with the main app's routing. This
+        middleware ensures requests are only forwarded to Chainlit if they match the
+        designated subpath, preventing routing collisions.
+
+        If a request's path doesn't start with the configured subpath, the middleware
+        returns a 404 response instead of forwarding to Chainlit's default route.
+        """
+
         async def dispatch(self, request: Request, call_next):
             if not request.url.path.startswith(path):
                 return JSONResponse(status_code=404, content={"detail": "Not found"})
