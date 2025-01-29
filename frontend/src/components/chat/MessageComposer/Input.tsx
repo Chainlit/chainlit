@@ -73,7 +73,15 @@ const Input = forwardRef<InputMethods, Props>(
         commandSpan.remove();
       }
 
-      return clone.textContent?.replace('\u200B', '') || '';
+      return (
+        clone.innerHTML
+          ?.replace(/<br\s*\/?>/g, '\n') // Convert <br> to newlines
+          .replace(/<div>/g, '\n') // Convert <div> to newlines
+          .replace(/<\/div>/g, '') // Remove closing div tags
+          .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
+          .replace(/<[^>]*>/g, '') // Remove any other HTML tags
+          .replace('\u200B', '') || ''
+      );
     };
 
     const reset = () => {
@@ -209,10 +217,49 @@ const Input = forwardRef<InputMethods, Props>(
       const textarea = contentEditableRef.current;
       if (!textarea || !onPaste) return;
 
-      textarea.addEventListener('paste', onPaste);
+      const _onPaste = (event: ClipboardEvent) => {
+        event.preventDefault();
+
+        const text = event.clipboardData
+          ?.getData('text/plain')
+          .replace(/\n/g, '<br>');
+        if (text) {
+          const selection = window.getSelection();
+          if (selection?.rangeCount) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+
+            // Insert the HTML content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            const fragment = document.createDocumentFragment();
+            while (tempDiv.firstChild) {
+              fragment.appendChild(tempDiv.firstChild);
+            }
+            range.insertNode(fragment);
+
+            // Move cursor to end of pasted content
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            // Force focus back to the content editable
+            textarea.focus();
+            textarea.scrollTop = textarea.scrollHeight;
+          }
+
+          // Trigger input event to update state
+          const inputEvent = new Event('input', { bubbles: true });
+          textarea.dispatchEvent(inputEvent);
+        }
+
+        onPaste(event);
+      };
+
+      textarea.addEventListener('paste', _onPaste);
 
       return () => {
-        textarea.removeEventListener('paste', onPaste);
+        textarea.removeEventListener('paste', _onPaste);
       };
     }, [onPaste]);
 
