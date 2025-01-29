@@ -117,7 +117,8 @@
     "sidebar": {
       "title": "గత చాట్‌లు",
       "filters": {
-        "search": "వెతకండి"
+        "search": "వెతకండి",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "ఈరోజు",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "చాట్",
-      "readme": "చదవండి"
+      "readme": "చదవండి",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "కొత్త చాట్",
@@ -187,5 +193,22 @@
     "success": {
       "saved": "విజయవంతంగా సేవ్ చేయబడింది"
     }
+  },
+  "alerts": {
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
   }
 }
