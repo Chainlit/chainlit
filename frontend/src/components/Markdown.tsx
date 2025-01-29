@@ -13,8 +13,10 @@ import { visit } from 'unist-util-visit';
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
+  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -270,6 +272,13 @@ const Markdown = ({
             );
           }
           return <p {...omit(props, ['node'])} className={commonClassNames} />;
+        },
+        table({ children, ...props }) {
+          return (
+            <Card className="[&:not(:first-child)]:mt-2 [&:not(:last-child)]:mb-2">
+              <Table {...(props as any)}>{children}</Table>
+            </Card>
+          );
         },
         thead({ children, ...props }) {
           return <TableHeader {...(props as any)}>{children}</TableHeader>;
