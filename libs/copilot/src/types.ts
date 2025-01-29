@@ -8,4 +8,5 @@ export interface IWidgetConfig {
     imageUrl?: string;
     className?: string;
   };
+  customCssUrl?: string;
 }
