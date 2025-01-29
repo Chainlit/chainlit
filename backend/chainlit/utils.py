@@ -132,7 +132,7 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
 
     class ChainlitMiddleware(BaseHTTPMiddleware):
         async def dispatch(self, request: Request, call_next):
-            if not request.url.path.startswith("/chainlit"):
+            if not request.url.path.startswith(path):
                 return JSONResponse(status_code=404, content={"detail": "Not found"})
 
             return await call_next(request)
