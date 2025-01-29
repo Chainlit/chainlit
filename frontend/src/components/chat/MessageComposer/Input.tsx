@@ -209,9 +209,15 @@ const Input = forwardRef<InputMethods, Props>(
       }
     }, [selectedCommand, onChange]);
 
-    const filteredCommands = commands.filter((command) =>
-      command.id.toLowerCase().startsWith(commandInput.toLowerCase().slice(1))
-    );
+    const normalizedInput = commandInput.toLowerCase().slice(1);
+
+    const filteredCommands = commands
+      .filter((command) => command.id.toLowerCase().includes(normalizedInput))
+      .sort((a, b) => {
+        const indexA = a.id.toLowerCase().indexOf(normalizedInput);
+        const indexB = b.id.toLowerCase().indexOf(normalizedInput);
+        return indexA - indexB;
+      });
 
     useEffect(() => {
       const textarea = contentEditableRef.current;
