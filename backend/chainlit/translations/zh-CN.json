@@ -193,5 +193,22 @@
     "success": {
       "saved": "保存成功"
     }
+  },
+  "alerts": {
+    "info": "信息",
+    "note": "注释",
+    "tip": "提示",
+    "important": "重要",
+    "warning": "警告",
+    "caution": "注意",
+    "debug": "调试",
+    "example": "示例",
+    "success": "成功",
+    "help": "帮助",
+    "idea": "想法",
+    "pending": "待处理",
+    "security": "安全",
+    "beta": "测试",
+    "best-practice": "最佳实践"
   }
 }
