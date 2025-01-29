@@ -238,20 +238,38 @@ const Markdown = ({
         p(props) {
           const containsBlockElement = React.Children.toArray(
             props.children
-          ).some(
-            (child) =>
-              React.isValidElement(child) &&
-              (/^h[1-6]$/.test(child.type as string) || child.type === 'p')
-          );
+          ).some((child) => {
+            if (!React.isValidElement(child)) return false;
+            if (/^h[1-6]$/.test(child.type as string) || child.type === 'p') {
+              return true;
+            }
+            if (
+              child.props?.['data-type'] === 'Alert' ||
+              (typeof child.type === 'function' &&
+                child.type.name === 'AlertComponent')
+            ) {
+              return true;
+            }
+            if (React.isValidElement(child) && child.props?.children) {
+              return React.Children.toArray(child.props.children).some(
+                (grandChild) =>
+                  React.isValidElement(grandChild) &&
+                  (grandChild.type === 'div' ||
+                    (typeof grandChild.type === 'string' &&
+                      grandChild.type.toLowerCase() === 'div'))
+              );
+            }
+            return false;
+          });
 
           const commonClassNames =
             'leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words';
-
-          return containsBlockElement ? (
-            <div {...omit(props, ['node'])} className={commonClassNames} />
-          ) : (
-            <p {...omit(props, ['node'])} className={commonClassNames} />
-          );
+          if (containsBlockElement) {
+            return (
+              <div {...omit(props, ['node'])} className={commonClassNames} />
+            );
+          }
+          return <p {...omit(props, ['node'])} className={commonClassNames} />;
         },
         thead({ children, ...props }) {
           return <TableHeader {...(props as any)}>{children}</TableHeader>;
