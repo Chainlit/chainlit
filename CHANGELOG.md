@@ -4,6 +4,21 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.1.0] - 2025-01-30
+
+### Added
+
+- You can now send toasts with `cl.context.emitter.send_toast`
+- Markdown now supports alerts
+- Theme options are now translatable
+- Copilot can now load custom css
+
+### Fixed
+
+- Mounting Chainlit as a sub app should no longer break the parent's app endpoints
+- Pasting text in the chat input should now remove extra formatting and preserve new lines
+
+
 ## [2.0.603] - 2025-01-28
 
 ### Added
