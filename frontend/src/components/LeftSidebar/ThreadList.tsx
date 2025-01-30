@@ -274,11 +274,11 @@ export function ThreadList({
                   isResumed || threadHistory.currentThreadId === thread.id;
                 return (
                   <SidebarMenuItem key={thread.id} id={`thread-${thread.id}`}>
-                    <div className="relative">
+                    <div className="relative group/thread">
                       <Link to={isResumed ? '' : `/thread/${thread.id}`}>
                         <SidebarMenuButton
                           isActive={isSelected}
-                          className="relative truncate h-9 group/thread pr-10"
+                          className="relative truncate h-9"
                         >
                           {thread.name || (
                             <Translator path="threadHistory.thread.untitled" />
@@ -297,7 +297,7 @@ export function ThreadList({
                           setThreadNewName(thread.name);
                         }}
                         className={cn(
-                          'absolute z-20 right-0 top-0 h-full bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
+                          'absolute z-20 top-0 right-0 h-9 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
                           isSelected && 'bg-sidebar-accent opacity-100'
                         )}
                       />
