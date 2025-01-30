@@ -146,6 +146,12 @@ cot = "full"
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
+# Specify optional one or more custom links in the header.
+# [[UI.header_links]]
+#     name = "Issues"
+#     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
+#     url = "https://github.com/Chainlit/chainlit/issues"
+
 [meta]
 generated_by = "{__version__}"
 """
@@ -217,6 +223,13 @@ class FeaturesSettings(DataClassJsonMixin):
     edit_message: bool = True
 
 
+@dataclass
+class HeaderLink(DataClassJsonMixin):
+    name: str
+    icon_url: str
+    url: str
+
+
 @dataclass()
 class UISettings(DataClassJsonMixin):
     name: str
@@ -233,6 +246,8 @@ class UISettings(DataClassJsonMixin):
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
+    # Optional header links
+    header_links: Optional[List[HeaderLink]] = None
 
 
 @dataclass()
