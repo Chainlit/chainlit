@@ -274,34 +274,32 @@ export function ThreadList({
                   isResumed || threadHistory.currentThreadId === thread.id;
                 return (
                   <SidebarMenuItem key={thread.id} id={`thread-${thread.id}`}>
-                    <div className="relative group/thread">
-                      <Link to={isResumed ? '' : `/thread/${thread.id}`}>
-                        <SidebarMenuButton
-                          isActive={isSelected}
-                          className="relative truncate h-9"
-                        >
-                          {thread.name || (
-                            <Translator path="threadHistory.thread.untitled" />
-                          )}
-                          <div
-                            className={cn(
-                              'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
-                            )}
-                          />
-                        </SidebarMenuButton>
-                      </Link>
-                      <ThreadOptions
-                        onDelete={() => setThreadIdToDelete(thread.id)}
-                        onRename={() => {
-                          setThreadIdToRename(thread.id);
-                          setThreadNewName(thread.name);
-                        }}
-                        className={cn(
-                          'absolute z-20 top-0 right-0 h-9 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
-                          isSelected && 'bg-sidebar-accent opacity-100'
+                    <Link to={isResumed ? '' : `/thread/${thread.id}`}>
+                      <SidebarMenuButton
+                        isActive={isSelected}
+                        className="relative truncate h-9 group/thread"
+                      >
+                        {thread.name || (
+                          <Translator path="threadHistory.thread.untitled" />
                         )}
-                      />
-                    </div>
+                        <div
+                          className={cn(
+                            'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
+                          )}
+                        />
+                        <ThreadOptions
+                          onDelete={() => setThreadIdToDelete(thread.id)}
+                          onRename={() => {
+                            setThreadIdToRename(thread.id);
+                            setThreadNewName(thread.name);
+                          }}
+                          className={cn(
+                            'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
+                            isSelected && 'bg-sidebar-accent opacity-100'
+                          )}
+                        />
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 );
               })}
