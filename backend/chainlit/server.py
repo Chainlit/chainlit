@@ -440,17 +440,14 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
     return JSONResponse(response_dict)
 
 
-def _get_oauth_redirect_error(error: str) -> Response:
+def _get_oauth_redirect_error(request: Request, error: str) -> Response:
     """Get the redirect response for an OAuth error."""
     params = urllib.parse.urlencode(
         {
             "error": error,
         }
     )
-    response = RedirectResponse(
-        # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login?{params}",  # Shouldn't there be {root_path} here?
-    )
+    response = RedirectResponse(url=str(request.url_for("login")) + "?" + params)
     return response
 
 
@@ -617,7 +614,7 @@ async def oauth_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(error)
+        return _get_oauth_redirect_error(request, error)
 
     if not code or not state:
         raise HTTPException(
@@ -676,7 +673,7 @@ async def oauth_azure_hf_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(error)
+        return _get_oauth_redirect_error(request, error)
 
     if not code:
         raise HTTPException(
