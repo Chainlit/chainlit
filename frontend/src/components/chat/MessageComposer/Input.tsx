@@ -24,6 +24,7 @@ interface Props {
   autoFocus?: boolean;
   placeholder?: string;
   selectedCommand?: ICommand;
+  disabled?: boolean;
   setSelectedCommand: (command: ICommand | undefined) => void;
   onChange: (value: string) => void;
   onPaste?: (event: any) => void;
@@ -41,6 +42,7 @@ const Input = forwardRef<InputMethods, Props>(
       id,
       className,
       autoFocus,
+      disabled,
       selectedCommand,
       setSelectedCommand,
       onChange,
@@ -338,8 +340,8 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
-          data-placeholder={placeholder}
+          contentEditable={!disabled}
+          data-placeholder={disabled ? : '' : placeholder}
           className={cn(
             'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
             className
