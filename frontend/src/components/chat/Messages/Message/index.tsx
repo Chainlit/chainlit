@@ -129,7 +129,7 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      {!isRunning && isAsk && (
+                      {!isRunning && isAsk ? (
                         <>
                           <AskFileButton onError={onError} />
                           <AskActionButtons
@@ -137,7 +137,7 @@ const Message = memo(
                             messageId={message.id}
                           />
                         </>
-                      )}
+                      ) : null}
                       <MessageButtons
                         message={message}
                         actions={actions}
