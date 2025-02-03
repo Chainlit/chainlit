@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Ensure SAS token start time is set to UTC
 - Prevent showing 0's on resumed thread if AskAction/File was used
 - Remove 22px element ref height
+- Update Microsoft OAuth offline_access scope to be fully qualified with the prefix
 
 ## [2.1.0] - 2025-01-30
 
