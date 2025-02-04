@@ -179,7 +179,10 @@ export default function MessageComposer({
           <VoiceButton disabled={disabled} />
         </div>
         <div className="flex items-center gap-1">
-          <SubmitButton onSubmit={submit} disabled={disabled || !value} />
+          <SubmitButton
+            onSubmit={submit}
+            disabled={disabled || !value.trim()}
+          />
         </div>
       </div>
     </div>
