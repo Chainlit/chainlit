@@ -80,7 +80,8 @@ export default function MessageComposer({
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        metadata: { location: window.location.href }
       };
 
       const fileReferences = attachments
@@ -101,7 +102,8 @@ export default function MessageComposer({
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        metadata: { location: window.location.href }
       };
 
       replyMessage(message);
@@ -178,7 +180,10 @@ export default function MessageComposer({
           <VoiceButton disabled={disabled} />
         </div>
         <div className="flex items-center gap-1">
-          <SubmitButton onSubmit={submit} disabled={disabled || !value} />
+          <SubmitButton
+            onSubmit={submit}
+            disabled={disabled || !value.trim()}
+          />
         </div>
       </div>
     </div>
