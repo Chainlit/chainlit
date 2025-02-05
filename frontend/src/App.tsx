@@ -41,7 +41,7 @@ function App() {
     if (!isAuthenticated || !isReady || !chatProfileOk) {
       return;
     }
-    
+
     connect({
       transports: window.transports,
       userEnv
@@ -49,7 +49,12 @@ function App() {
   }, [userEnv, isAuthenticated, connect, isReady, chatProfileOk]);
 
   useEffect(() => {
-    if (!configLoaded || !config || !config.chatProfiles?.length || chatProfile) {
+    if (
+      !configLoaded ||
+      !config ||
+      !config.chatProfiles?.length ||
+      chatProfile
+    ) {
       return;
     }
 
