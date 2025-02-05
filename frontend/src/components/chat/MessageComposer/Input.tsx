@@ -351,7 +351,7 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable={!disabled}
+          {...(!disabled && { contentEditable: true })}          
           data-placeholder={disabled ? '' : placeholder}
           className={cn(
             'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
