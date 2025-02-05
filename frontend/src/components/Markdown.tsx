@@ -238,45 +238,12 @@ const Markdown = ({
           );
         },
         p(props) {
-          const containsBlockElement = useMemo(
-            () =>
-              React.Children.toArray(props.children).some((child) => {
-                if (!React.isValidElement(child)) return false;
-                if (
-                  /^h[1-6]$/.test(child.type as string) ||
-                  child.type === 'p'
-                ) {
-                  return true;
-                }
-                if (
-                  child.props?.['data-type'] === 'Alert' ||
-                  (typeof child.type === 'function' &&
-                    child.type.name === 'AlertComponent')
-                ) {
-                  return true;
-                }
-                if (React.isValidElement(child) && child.props?.children) {
-                  return React.Children.toArray(child.props.children).some(
-                    (grandChild) =>
-                      React.isValidElement(grandChild) &&
-                      (grandChild.type === 'div' ||
-                        (typeof grandChild.type === 'string' &&
-                          grandChild.type.toLowerCase() === 'div'))
-                  );
-                }
-                return false;
-              }),
-            [props.children]
+          return (
+            <div
+              {...omit(props, ['node'])}
+              className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
+            />
           );
-
-          const commonClassNames =
-            'leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words';
-          if (containsBlockElement) {
-            return (
-              <div {...omit(props, ['node'])} className={commonClassNames} />
-            );
-          }
-          return <p {...omit(props, ['node'])} className={commonClassNames} />;
         },
         table({ children, ...props }) {
           return (
