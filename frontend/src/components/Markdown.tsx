@@ -239,9 +239,10 @@ const Markdown = ({
         },
         p(props) {
           return (
-            <p
+            <div
               {...omit(props, ['node'])}
               className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
+              role="article"
             />
           );
         },

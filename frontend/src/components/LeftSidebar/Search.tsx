@@ -17,6 +17,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command';
+import { DialogTitle } from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
@@ -109,6 +110,9 @@ export default function SearchChats() {
         </Tooltip>
       </TooltipProvider>
       <CommandDialog open={open} onOpenChange={setOpen}>
+        <DialogTitle className="sr-only">
+          {t('threadHistory.sidebar.filters.search')}
+        </DialogTitle>
         <CommandInput
           placeholder={t('threadHistory.sidebar.filters.placeholder')}
           value={searchQuery}
