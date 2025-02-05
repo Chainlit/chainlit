@@ -151,6 +151,7 @@ export default function MessageComposer({
         onPaste={onPaste}
         onEnter={submit}
         placeholder={t('chat.input.placeholder')}
+        disabled={disabled}
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">

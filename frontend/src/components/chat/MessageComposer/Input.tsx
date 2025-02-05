@@ -21,6 +21,7 @@ import {
 interface Props {
   id?: string;
   className?: string;
+  disabled?: boolean;
   autoFocus?: boolean;
   placeholder?: string;
   selectedCommand?: ICommand;
@@ -51,6 +52,7 @@ const Input = forwardRef<InputMethods, Props>(
       className,
       autoFocus,
       selectedCommand,
+      disabled,
       setSelectedCommand,
       onChange,
       onEnter,
@@ -349,7 +351,7 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
+          contentEditable={!disabled}
           data-placeholder={placeholder}
           className={cn(
             'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
