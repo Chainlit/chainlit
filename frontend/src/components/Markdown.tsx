@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
-import React, { useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
@@ -242,6 +242,7 @@ const Markdown = ({
             <div
               {...omit(props, ['node'])}
               className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
+              role="paragraph"
             />
           );
         },
