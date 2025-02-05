@@ -34,6 +34,7 @@ export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
                     ? apiClient.buildEndpoint(iconUrl)
                     : iconUrl
                 }
+                className={'h-6 w-6'}
                 alt={name}
               />
             </a>
