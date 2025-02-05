@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     // THIS MUST BE AT ROOT, if you set baseurl in sub-package it breaks intellisense jump to
+    "composite": true,
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
