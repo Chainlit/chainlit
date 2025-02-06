@@ -183,7 +183,7 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/offline_access",
+            "scope": "https://graph.microsoft.com/User.Read offline_access",
             "response_mode": "query",
         }
 
@@ -275,7 +275,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_HYBRID_TENANT_ID"),
             "response_type": "code id_token",
-            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid https://graph.microsoft.com/offline_access",
+            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid offline_access",
             "response_mode": "form_post",
             "nonce": nonce,
         }
