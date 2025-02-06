@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 import type { ElementType, IMessageElement } from '@chainlit/react-client';
 
 import { InlinedCustomElementList } from './InlineCustomElementList';
@@ -12,9 +14,10 @@ import { InlinedVideoList } from './InlinedVideoList';
 
 interface Props {
   elements: IMessageElement[];
+  className?: string;
 }
 
-const InlinedElements = ({ elements }: Props) => {
+const InlinedElements = ({ elements, className }: Props) => {
   if (!elements.length) {
     return null;
   }
@@ -42,7 +45,7 @@ const InlinedElements = ({ elements }: Props) => {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn('flex flex-col gap-4', className)}>
       {elementsByType.custom?.length ? (
         <InlinedCustomElementList items={elementsByType.custom} />
       ) : null}

@@ -147,6 +147,7 @@ const MessagesContainer = ({ navigate }: Props) => {
     <MessageContext.Provider value={memoizedContext}>
       <Messages
         indent={0}
+        isRunning={loading}
         messages={messages}
         elements={elements}
         actions={actions}

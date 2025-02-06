@@ -1,8 +1,10 @@
+import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 import {
+  IMessageElement,
   IStep,
   messagesState,
   useChatInteract,
@@ -14,12 +16,16 @@ import { Pencil } from '@/components/icons/Pencil';
 import { Button } from '@/components/ui/button';
 import { Translator } from 'components/i18n';
 
+import { InlinedElements } from './Content/InlinedElements';
+
 interface Props {
   message: IStep;
+  elements: IMessageElement[];
 }
 
 export default function UserMessage({
   message,
+  elements,
   children
 }: React.PropsWithChildren<Props>) {
   const config = useConfig();
@@ -29,6 +35,12 @@ export default function UserMessage({
   const disabled = loading || !!askUser;
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+
+  const inlineElements = useMemo(() => {
+    return elements.filter(
+      (el) => el.forId === message.id && el.display === 'inline'
+    );
+  }, [message.id, elements]);
 
   const isEditable = !!config.config?.features.edit_message;
 
@@ -49,7 +61,9 @@ export default function UserMessage({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-1">
+      <InlinedElements elements={inlineElements} className="items-end" />
+
       <div className="flex flex-row items-center gap-1 w-full group">
         {!isEditing && isEditable && (
           <Button
@@ -66,13 +80,15 @@ export default function UserMessage({
           </Button>
         )}
         <div
-          className={`px-5 py-2.5 relative bg-accent rounded-3xl
-            ${isEditing ? 'w-full' : 'max-w-[70%]'}
-            ${isEditing ? 'flex-grow' : 'flex-grow-0'}
-            ${isEditable ? '' : 'ml-auto'}`}
+          className={cn(
+            'px-5 py-2.5 relative bg-accent rounded-3xl',
+            inlineElements.length ? 'rounded-tr-lg' : '',
+            isEditing ? 'w-full flex-grow' : 'max-w-[70%] flex-grow-0',
+            isEditable ? '' : 'ml-auto'
+          )}
         >
           {isEditing ? (
-            <div className="bg-accent rounded-3xl flex flex-col">
+            <div className="bg-accent flex flex-col">
               <AutoResizeTextarea
                 id="edit-chat-input"
                 autoFocus

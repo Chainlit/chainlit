@@ -4,6 +4,25 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.1.2] - 2025-02-05
+
+### Fixed
+- The default loader should now be displayed if the chat is running and no response is yet sent
+- Pasting HTML in the chat input show now work
+- React warnings and accessibility issues
+- Command filtering now works with `includes` instead of `startWith`
+- The submit button should be disabled in the chat input is empty
+
+## [2.1.1] - 2025-02-03
+
+### Fixed
+
+- Reintroduce including URL location after UI refactor
+- Ensure SAS token start time is set to UTC
+- Prevent showing 0's on resumed thread if AskAction/File was used
+- Remove 22px element ref height
+- Update Microsoft OAuth offline_access scope to be fully qualified with the prefix
+
 ## [2.1.0] - 2025-01-30
 
 ### Added

@@ -84,9 +84,9 @@ const Message = memo(
               {/* User message is displayed differently */}
               {isUserMessage ? (
                 <div className="flex flex-col flex-grow max-w-full">
-                  <UserMessage message={message}>
+                  <UserMessage message={message} elements={elements}>
                     <MessageContent
-                      elements={elements}
+                      elements={[]}
                       message={message}
                       allowHtml={allowHtml}
                       latex={latex}
@@ -129,7 +129,7 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      {!isRunning && isAsk && (
+                      {!isRunning && isAsk ? (
                         <>
                           <AskFileButton onError={onError} />
                           <AskActionButtons
@@ -137,7 +137,7 @@ const Message = memo(
                             messageId={message.id}
                           />
                         </>
-                      )}
+                      ) : null}
                       <MessageButtons
                         message={message}
                         actions={actions}

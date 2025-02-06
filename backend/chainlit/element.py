@@ -166,12 +166,8 @@ class Element:
             "mime": mime_type,
         }
 
-        # Image handling (excluding SVG which is treated as a file)
-        if type == "image" and "svg" not in mime_type:
+        if type == "image":
             return Image(size="medium", **common_params)  # type: ignore[arg-type]
-
-        elif type == "pdf":
-            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
 
         elif type == "audio":
             return Audio(auto_play=e_dict.get("autoPlay", False), **common_params)  # type: ignore[arg-type]
@@ -182,15 +178,9 @@ class Element:
                 **common_params,  # type: ignore[arg-type]
             )
 
-        elif type == "text":
-            return Text(language=e_dict.get("language"), **common_params)  # type: ignore[arg-type]
-
-        elif type == "tasklist":
-            return TaskList(**common_params)  # type: ignore[arg-type]
         elif type == "plotly":
             return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
-        elif type == "dataframe":
-            return Dataframe(size=e_dict.get("size", "large"), **common_params)  # type: ignore[arg-type]
+
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
         else:

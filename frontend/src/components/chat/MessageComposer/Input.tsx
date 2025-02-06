@@ -34,6 +34,15 @@ export interface InputMethods {
   reset: () => void;
 }
 
+const escapeHtml = (unsafe: string) => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const Input = forwardRef<InputMethods, Props>(
   (
     {
@@ -209,9 +218,15 @@ const Input = forwardRef<InputMethods, Props>(
       }
     }, [selectedCommand, onChange]);
 
-    const filteredCommands = commands.filter((command) =>
-      command.id.toLowerCase().startsWith(commandInput.toLowerCase().slice(1))
-    );
+    const normalizedInput = commandInput.toLowerCase().slice(1);
+
+    const filteredCommands = commands
+      .filter((command) => command.id.toLowerCase().includes(normalizedInput))
+      .sort((a, b) => {
+        const indexA = a.id.toLowerCase().indexOf(normalizedInput);
+        const indexB = b.id.toLowerCase().indexOf(normalizedInput);
+        return indexA - indexB;
+      });
 
     useEffect(() => {
       const textarea = contentEditableRef.current;
@@ -220,10 +235,12 @@ const Input = forwardRef<InputMethods, Props>(
       const _onPaste = (event: ClipboardEvent) => {
         event.preventDefault();
 
-        const text = event.clipboardData
-          ?.getData('text/plain')
-          .replace(/\n/g, '<br>');
-        if (text) {
+        const textData = event.clipboardData?.getData('text/plain');
+
+        if (textData) {
+          const escapedText = escapeHtml(textData);
+          const textWithNewLines = escapedText.replace(/\n/g, '<br>');
+
           const selection = window.getSelection();
           if (selection?.rangeCount) {
             const range = selection.getRangeAt(0);
@@ -231,7 +248,7 @@ const Input = forwardRef<InputMethods, Props>(
 
             // Insert the HTML content
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = text;
+            tempDiv.innerHTML = textWithNewLines;
             const fragment = document.createDocumentFragment();
             while (tempDiv.firstChild) {
               fragment.appendChild(tempDiv.firstChild);

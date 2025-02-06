@@ -333,7 +333,6 @@ def get_html_template(root_path):
     default_meta_image_url = (
         "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
     )
-    url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
     favicon_path = "/favicon"
 
@@ -344,7 +343,7 @@ def get_html_template(root_path):
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="{meta_image_url}">
-    <meta property="og:url" content="{url}">
+    <meta property="og:url" content="{default_url}">
     <meta property="og:root_path" content="{root_path}">"""
 
     js = f"""<script>
