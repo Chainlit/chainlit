@@ -367,6 +367,11 @@ def get_html_template(root_path):
             for font in custom_theme.get("custom_fonts")
         )
 
+    if config.ui.custom_bookmark_icon:
+        tags += (
+            f"""<link rel="apple-touch-icon" href="{config.ui.custom_bookmark_icon}">"""
+        )
+
     index_html_file_path = os.path.join(build_dir, "index.html")
 
     with open(index_html_file_path, encoding="utf-8") as f:

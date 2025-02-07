@@ -138,6 +138,9 @@ cot = "full"
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
+# Specify a custom ios home screen bookmark icon url.
+# custom_bookmark_icon = "/public/bookmark.png"
+
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
@@ -228,6 +231,8 @@ class UISettings(DataClassJsonMixin):
     custom_js: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
+    # Optional custom ios home screen bookmark icon
+    custom_bookmark_icon: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
 
