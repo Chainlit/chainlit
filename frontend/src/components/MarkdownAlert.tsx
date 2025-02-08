@@ -174,8 +174,6 @@ const AlertComponent = ({
   const style = variantStyles[variant];
   const Icon = style.Icon;
 
-  // console.log('AlertComponent rendering:', variant, children);
-
   return (
     <div className={cn('rounded-lg p-4 mb-4', style.container)}>
       <div className="flex">

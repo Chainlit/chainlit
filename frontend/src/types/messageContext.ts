@@ -13,6 +13,7 @@ interface IMessageContext {
   ) => { xhr: XMLHttpRequest; promise: Promise<IFileRef> };
   cot: 'hidden' | 'tool_call' | 'full';
   askUser?: IAsk;
+  editable: boolean;
   loading: boolean;
   showFeedbackButtons: boolean;
   uiName: string;

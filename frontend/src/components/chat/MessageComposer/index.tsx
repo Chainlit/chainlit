@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,14 +29,14 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
-  setAutoScroll: (autoScroll: boolean) => void;
+  autoScrollRef: MutableRefObject<boolean>;
 }
 
 export default function MessageComposer({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  setAutoScroll
+  autoScrollRef
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
@@ -88,7 +88,9 @@ export default function MessageComposer({
         ?.filter((a) => !!a.serverId)
         .map((a) => ({ id: a.serverId! }));
 
-      setAutoScroll(true);
+      if (autoScrollRef) {
+        autoScrollRef.current = true;
+      }
       sendMessage(message, fileReferences);
     },
     [user, sendMessage]
@@ -107,7 +109,9 @@ export default function MessageComposer({
       };
 
       replyMessage(message);
-      setAutoScroll(true);
+      if (autoScrollRef) {
+        autoScrollRef.current = true;
+      }
     },
     [user, replyMessage]
   );
