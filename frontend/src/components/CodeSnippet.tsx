@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import hljs from 'highlight.js';
 import { useEffect, useRef } from 'react';
 
@@ -64,7 +65,9 @@ export default function CodeSnippet({ ...props }: CodeProps) {
   ) : null;
 
   const nonHighlightedCode = showSyntaxHighlighter ? null : (
-    <div className="p-2 rounded-b-md min-h-20 overflow-x-auto bg-accent">
+    <div
+      className={cn('rounded-b-md overflow-x-auto bg-accent', code && 'p-2')}
+    >
       <code className="whitespace-pre-wrap">{code}</code>
     </div>
   );

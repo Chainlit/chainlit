@@ -1,5 +1,11 @@
 import { cn, hasMessage } from '@/lib/utils';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 
 import {
   ChainlitContext,
@@ -19,7 +25,7 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
-  setAutoScroll: (autoScroll: boolean) => void;
+  autoScrollRef: MutableRefObject<boolean>;
 }
 
 export default function WelcomeScreen(props: Props) {
