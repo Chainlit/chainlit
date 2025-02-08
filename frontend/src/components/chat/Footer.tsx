@@ -6,7 +6,6 @@ import { FileSpec, useChatMessages } from '@chainlit/react-client';
 import WaterMark from '@/components/WaterMark';
 
 import MessageComposer from './MessageComposer';
-import ScrollDownButton from './ScrollDownButton';
 
 interface Props {
   fileSpec: FileSpec;
@@ -22,11 +21,6 @@ export default function ChatFooter({ showIfEmptyThread, ...props }: Props) {
 
   return (
     <div className={cn('relative flex flex-col items-center gap-2 w-full')}>
-      {!props.autoScrollRef.current ? (
-        <ScrollDownButton
-          onClick={() => (props.autoScrollRef.current = true)}
-        />
-      ) : null}
       <MessageComposer {...props} />
       <WaterMark />
     </div>
