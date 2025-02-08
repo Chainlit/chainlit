@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAudio, useAuth, useConfig } from '@chainlit/react-client';
 
 import AudioPresence from '@/components/AudioPresence';
+import ButtonLink from '@/components/ButtonLink';
 import { useSidebar } from '@/components/ui/sidebar';
 
 import ApiKeys from './ApiKeys';
@@ -24,6 +25,8 @@ const Header = memo(() => {
   const sidebarOpen = isMobile ? openMobile : open;
 
   const historyEnabled = data?.requireLogin && config?.dataPersistence;
+
+  const links = config?.ui?.header_links || [];
 
   return (
     <div
@@ -59,6 +62,9 @@ const Header = memo(() => {
       <div className="flex items-center gap-1">
         <ReadmeButton />
         <ApiKeys />
+        {links && (
+           links.map(link => <ButtonLink name={link.name} iconUrl={link.icon_url} url={link.url}/>)
+        )}
         <ThemeToggle />
         <UserNav />
       </div>
