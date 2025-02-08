@@ -7,8 +7,7 @@ import {
   IMessageElement,
   IStep,
   messagesState,
-  useChatInteract,
-  useConfig
+  useChatInteract
 } from '@chainlit/react-client';
 
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
@@ -28,8 +27,7 @@ export default function UserMessage({
   elements,
   children
 }: React.PropsWithChildren<Props>) {
-  const config = useConfig();
-  const { askUser, loading } = useContext(MessageContext);
+  const { askUser, loading, editable } = useContext(MessageContext);
   const { editMessage } = useChatInteract();
   const setMessages = useSetRecoilState(messagesState);
   const disabled = loading || !!askUser;
@@ -41,8 +39,6 @@ export default function UserMessage({
       (el) => el.forId === message.id && el.display === 'inline'
     );
   }, [message.id, elements]);
-
-  const isEditable = !!config.config?.features.edit_message;
 
   const handleEdit = () => {
     if (editValue) {
@@ -65,7 +61,7 @@ export default function UserMessage({
       <InlinedElements elements={inlineElements} className="items-end" />
 
       <div className="flex flex-row items-center gap-1 w-full group">
-        {!isEditing && isEditable && (
+        {!isEditing && editable && (
           <Button
             variant="ghost"
             size="icon"
@@ -84,7 +80,7 @@ export default function UserMessage({
             'px-5 py-2.5 relative bg-accent rounded-3xl',
             inlineElements.length ? 'rounded-tr-lg' : '',
             isEditing ? 'w-full flex-grow' : 'max-w-[70%] flex-grow-0',
-            isEditable ? '' : 'ml-auto'
+            editable ? '' : 'ml-auto'
           )}
         >
           {isEditing ? (
