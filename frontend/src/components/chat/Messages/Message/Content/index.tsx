@@ -39,7 +39,7 @@ const MessageContent = memo(
 
     const outputMarkdown = (
       <>
-        {!isMessage && displayInput ? (
+        {!isMessage && displayInput && message.output ? (
           <div className="font-medium">Output</div>
         ) : null}
         <Markdown
