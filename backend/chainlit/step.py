@@ -84,7 +84,7 @@ def step(
     tags: Optional[List[str]] = None,
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
-    default_open: bool = False
+    default_open: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
