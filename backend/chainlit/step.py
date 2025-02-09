@@ -62,6 +62,7 @@ class StepDict(TypedDict, total=False):
     end: Optional[str]
     generation: Optional[Dict]
     showInput: Optional[Union[bool, str]]
+    defaultOpen: Optional[bool]
     language: Optional[str]
     feedback: Optional[FeedbackDict]
 
@@ -83,6 +84,7 @@ def step(
     tags: Optional[List[str]] = None,
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
+    default_open: bool = False
 ):
     """Step decorator for async and sync functions."""
 
@@ -105,6 +107,7 @@ def step(
                     tags=tags,
                     language=language,
                     show_input=show_input,
+                    default_open=default_open,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
@@ -132,6 +135,7 @@ def step(
                     tags=tags,
                     language=language,
                     show_input=show_input,
+                    default_open=default_open,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
@@ -176,6 +180,7 @@ class Step:
     end: Union[str, None]
     generation: Optional[BaseGeneration]
     language: Optional[str]
+    default_open: Optional[bool]
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
 
@@ -189,6 +194,7 @@ class Step:
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
+        default_open: Optional[bool] = False,
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
     ):
@@ -207,6 +213,7 @@ class Step:
         self.parent_id = parent_id
 
         self.language = language
+        self.default_open = default_open
         self.generation = None
         self.elements = elements or []
 
@@ -295,6 +302,7 @@ class Step:
             "start": self.start,
             "end": self.end,
             "language": self.language,
+            "defaultOpen": self.default_open,
             "showInput": self.show_input,
             "generation": self.generation.to_dict() if self.generation else None,
         }

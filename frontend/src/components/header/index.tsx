@@ -62,9 +62,14 @@ const Header = memo(() => {
       <div className="flex items-center gap-1">
         <ReadmeButton />
         <ApiKeys />
-        {links && (
-           links.map(link => <ButtonLink name={link.name} iconUrl={link.icon_url} url={link.url}/>)
-        )}
+        {links &&
+          links.map((link) => (
+            <ButtonLink
+              name={link.name}
+              iconUrl={link.icon_url}
+              url={link.url}
+            />
+          ))}
         <ThemeToggle />
         <UserNav />
       </div>

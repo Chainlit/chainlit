@@ -58,7 +58,12 @@ export default function Step({
 
   return (
     <div className="flex flex-col flex-grow w-0">
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue={step.defaultOpen ? step.id : undefined}
+        className="w-full"
+      >
         <AccordionItem value={step.id} className="border-none">
           <AccordionTrigger
             className={cn(
