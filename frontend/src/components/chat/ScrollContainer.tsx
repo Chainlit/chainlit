@@ -26,7 +26,7 @@ export default function ScrollContainer({
 
     ref.current.scrollTo({
       top: ref.current.scrollHeight,
-      behavior: 'instant'
+      behavior: 'smooth'
     });
 
     if (autoScrollRef) {
