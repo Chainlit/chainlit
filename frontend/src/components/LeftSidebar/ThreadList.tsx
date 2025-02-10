@@ -113,13 +113,11 @@ export function ThreadList({
         <Translator path="threadHistory.thread.actions.delete.inProgress" />
       ),
       success: () => {
-        if (threadIdToDelete === threadHistory.currentThreadId) {
-          navigate('/');
-        }
         setThreadHistory((prev) => ({
           ...prev,
           threads: prev?.threads?.filter((t) => t.id !== threadIdToDelete)
         }));
+        navigate('/');
         return (
           <Translator path="threadHistory.thread.actions.delete.success" />
         );
