@@ -101,18 +101,18 @@ export function ThreadList({
 
   const handleDeleteThread = () => {
     if (!threadIdToDelete) return;
+    if (
+      threadIdToDelete === idToResume ||
+      threadIdToDelete === currentThreadId
+    ) {
+      clear();
+    }
 
     toast.promise(apiClient.deleteThread(threadIdToDelete), {
       loading: (
         <Translator path="threadHistory.thread.actions.delete.inProgress" />
       ),
       success: () => {
-        if (
-          threadIdToDelete === idToResume ||
-          threadIdToDelete === currentThreadId
-        ) {
-          clear();
-        }
         if (threadIdToDelete === threadHistory.currentThreadId) {
           navigate('/');
         }
