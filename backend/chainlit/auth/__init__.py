@@ -50,7 +50,7 @@ def get_configuration():
         "ui": {
             "login_page_image": config.ui.login_page_image,
             "login_page_image_filter": config.ui.login_page_image_filter,
-        }
+        },
     }
 
 

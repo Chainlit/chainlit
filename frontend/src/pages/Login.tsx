@@ -64,7 +64,6 @@ export default function Login() {
   }, [query]);
 
   useEffect(() => {
-    console.log('UI config:', config?.ui);
     if (!config) {
       return;
     }
