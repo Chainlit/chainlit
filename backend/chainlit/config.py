@@ -249,6 +249,9 @@ class UISettings(DataClassJsonMixin):
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
+    # Optional custom background image for login page
+    login_page_image: Optional[str] = None
+    login_page_image_filter: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend
