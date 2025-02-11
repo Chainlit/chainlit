@@ -64,6 +64,7 @@ export default function Login() {
   }, [query]);
 
   useEffect(() => {
+    console.log('UI config:', config?.ui);
     if (!config) {
       return;
     }
@@ -103,9 +104,15 @@ export default function Login() {
       {!config?.headerAuth ? (
         <div className="relative hidden bg-muted lg:block">
           <img
-            src={apiClient.buildEndpoint('/favicon')}
+            src={
+              config?.ui?.login_page_image ||
+              apiClient.buildEndpoint('/favicon')
+            }
             alt="Image"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            className={`absolute inset-0 h-full w-full object-cover ${
+              config?.ui?.login_page_image_filter ||
+              'dark:brightness-[0.2] dark:grayscale'
+            }`}
           />
         </div>
       ) : null}
