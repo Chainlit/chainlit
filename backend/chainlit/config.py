@@ -135,6 +135,16 @@ cot = "full"
 # The Javascript file can be served from the public directory.
 # custom_js = "/public/test.js"
 
+# Custom login page image, relative to public directory or external URL
+# login_page_image = "/custom-background.jpg"
+
+# Custom login page image filter (optional)
+# Examples:
+# For dark mode only (default): "dark:brightness-[0.2] dark:grayscale"
+# For both modes: "grayscale"
+# No filter: ""
+# login_page_image_filter = "dark:grayscale"
+
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
