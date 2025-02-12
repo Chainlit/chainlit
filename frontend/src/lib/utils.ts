@@ -26,22 +26,30 @@ export const generateFilterStyle = (filter?: string): string => {
     'opacity': (value) => `opacity(${value})`
   };
 
+  const baseFilters: string[] = [];
+  const lightFilters: string[] = [];
+  const darkFilters: string[] = [];
   const filters = filter.split(' ');
-  const cssFilters = filters
-    .map(f => {
-      const match = f.match(/^(?:light:|dark:)?(\w+)-\[(.+?)\]$/);
-      if (match) {
-        const [_, filterName, value] = match;
-        const transformer = filterMap[filterName];
-        if (transformer) {
-          return transformer(value);
+  filters.forEach(f => {
+    const match = f.match(/^(light:|dark:)?(\w+)-\[(.+?)\]$/);
+    if (match) {
+      const [_, themePrefix, filterName, value] = match;
+      const transformer = filterMap[filterName];
+      if (transformer) {
+        const cssFilter = transformer(value);
+        if (themePrefix === 'dark:') {
+          darkFilters.push(cssFilter);
+        } else if (themePrefix === 'light:') {
+          lightFilters.push(cssFilter);
+        } else {
+          baseFilters.push(cssFilter);
         }
       }
-      return '';
-    })
-    .filter(Boolean);
+    }
+  });
+  const isDark = document.documentElement.classList.contains('dark');
 
-  return cssFilters.join(' ');
+  return (baseFilters.join(' ') + ' ' + (isDark ? darkFilters.join(' ') : lightFilters.join(' '))).trim();
 };
 
 export function hslToHex(hslStr: string): string {
