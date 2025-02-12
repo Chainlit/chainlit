@@ -139,11 +139,36 @@ cot = "full"
 # login_page_image = "/custom-background.jpg"
 
 # Custom login page image filter (optional)
-# Examples:
-# For dark mode only (default): "dark:brightness-[0.2] dark:grayscale"
-# For both modes: "grayscale"
-# No filter: ""
-# login_page_image_filter = "dark:grayscale"
+# Supported filter types:
+# - brightness: Adjusts the brightness, range 0-1 or higher, 1 is original brightness
+#   Example: brightness-[0.5] dims by half, brightness-[1.5] increases by 50%
+#
+# - contrast: Adjusts the contrast, range 0-1 or higher, 1 is original contrast
+#   Example: contrast-[1.5] increases contrast, contrast-[0.7] reduces contrast
+#
+# - opacity: Adjusts transparency, range 0-1, 1 is fully opaque
+#   Example: opacity-[0.8] sets 80% opacity
+#
+# - grayscale: Adjusts grayscale effect, range 0-1, 1 is full grayscale
+#   Example: grayscale-[0.5] adds 50% grayscale effect
+#
+# - blur: Adds blur effect, value in pixels
+#   Example: blur-[10px] adds 10 pixel blur
+#
+# Multiple filters can be combined with spaces
+# Use dark: prefix to apply in dark mode only
+# Use light: prefix to apply in light mode only
+#
+# Common combinations:
+# 1. Soft dark mode effect:
+# login_page_image_filter = "dark:brightness-[0.6] dark:grayscale-[0.3]"
+#
+# 2. High contrast artistic effect:
+# login_page_image_filter = "contrast-[1.4] dark:contrast-[1.6] dark:brightness-[0.5]"
+#
+# 3. Frosted glass effect:
+# login_page_image_filter = "blur-[8px] brightness-[1.1] dark:brightness-[0.7]"
+login_page_image_filter = "dark:brightness-[0.2] dark:grayscale"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"

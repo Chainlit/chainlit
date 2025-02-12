@@ -15,6 +15,35 @@ export const hasMessage = (messages: IStep[]): boolean => {
   );
 };
 
+export const generateFilterStyle = (filter?: string): string => {
+  if (!filter) return '';
+
+  const filterMap: Record<string, (value: string) => string> = {
+    'blur': (value) => `blur(${value})`,
+    'brightness': (value) => `brightness(${value})`,
+    'contrast': (value) => `contrast(${value})`,
+    'grayscale': (value) => `grayscale(${value})`,
+    'opacity': (value) => `opacity(${value})`
+  };
+
+  const filters = filter.split(' ');
+  const cssFilters = filters
+    .map(f => {
+      const match = f.match(/^(?:light:|dark:)?(\w+)-\[(.+?)\]$/);
+      if (match) {
+        const [_, filterName, value] = match;
+        const transformer = filterMap[filterName];
+        if (transformer) {
+          return transformer(value);
+        }
+      }
+      return '';
+    })
+    .filter(Boolean);
+
+  return cssFilters.join(' ');
+};
+
 export function hslToHex(hslStr: string): string {
   // Parse HSL string
   const values = hslStr
