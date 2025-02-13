@@ -1,3 +1,4 @@
+import { generateFilterStyle } from '@/lib/utils';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -5,7 +6,7 @@ import { LoginForm } from '@/components/LoginForm';
 import { Logo } from '@/components/Logo';
 
 import { useQuery } from 'hooks/query';
-import { generateFilterStyle } from '@/lib/utils';
+
 import { ChainlitContext, useAuth } from 'client-types/*';
 
 export const LoginError = new Error(
@@ -104,7 +105,7 @@ export default function Login() {
         </div>
       </div>
       {!config?.headerAuth ? (
-        <div className="relative hidden bg-muted lg:block">
+        <div className="relative hidden bg-muted lg:block overflow-hidden">
           <img
             src={
               config?.ui?.login_page_image ||
