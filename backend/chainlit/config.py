@@ -74,7 +74,7 @@ session_timeout = 3600
 # Duration (in seconds) of the user session expiry
 user_session_timeout = 1296000  # 15 days
 
-# Enable third parties caching (e.g LangChain cache)
+# Enable third parties caching (e.g., LangChain cache)
 cache = false
 
 # Authorized origins
@@ -131,12 +131,12 @@ cot = "full"
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
-# Specify a Javascript file that can be used to customize the user interface.
-# The Javascript file can be served from the public directory.
+# Specify a JavaScript file that can be used to customize the user interface.
+# The JavaScript file can be served from the public directory.
 # custom_js = "/public/test.js"
 
 # Custom login page image, relative to public directory or external URL
-# login_page_image = "/custom-background.jpg"
+# login_page_image = "/public/custom-background.jpg"
 
 # Custom login page image filter (optional)
 # Supported filter types:
@@ -176,7 +176,7 @@ login_page_image_filter = "dark:brightness-[0.2] dark:grayscale"
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
-# custom_build = "./public/build"
+# custom_build = "./public/dist"
 
 # Specify optional one or more custom links in the header.
 # [[UI.header_links]]
