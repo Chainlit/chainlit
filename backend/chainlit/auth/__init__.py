@@ -46,7 +46,7 @@ def get_configuration():
         "oauthProviders": (
             get_configured_oauth_providers() if is_oauth_enabled() else []
         ),
-        "default_theme": config.ui.default_theme
+        "default_theme": config.ui.default_theme,
     }
 
 
