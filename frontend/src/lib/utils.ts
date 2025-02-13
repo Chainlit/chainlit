@@ -16,9 +16,37 @@ export const hasMessage = (messages: IStep[]): boolean => {
 };
 
 export const generateFilterStyle = (filter?: string): string => {
+  interface FilterValidationRules {
+    min: number;
+    max: number;
+  }
+
+  type FilterName =
+    | 'brightness'
+    | 'contrast'
+    | 'opacity'
+    | 'grayscale'
+    | 'blur'
+    | 'saturate'
+    | 'sepia'
+    | 'hue-rotate'
+    | 'invert';
+
   if (!filter) return '';
 
-  const filterMap: Record<string, (value: string) => string> = {
+  const filterValidationRules: Record<FilterName, FilterValidationRules> = {
+    brightness: { min: 0, max: 2 },
+    contrast: { min: 0, max: 2 },
+    opacity: { min: 0, max: 1 },
+    grayscale: { min: 0, max: 1 },
+    blur: { min: 0, max: 50 },
+    saturate: { min: 0, max: 2 },
+    sepia: { min: 0, max: 1 },
+    'hue-rotate': { min: 0, max: 360 },
+    invert: { min: 0, max: 1 }
+  };
+
+  const filterMap: Record<FilterName, (value: string) => string> = {
     blur: (value) => `blur(${value.includes('px') ? value : value + 'px'})`,
     brightness: (value) => `brightness(${value})`,
     contrast: (value) => `contrast(${value})`,
@@ -39,15 +67,28 @@ export const generateFilterStyle = (filter?: string): string => {
     const match = f.match(/^(light:|dark:)?(\w+-rotate|\w+)-\[(.+?)\]$/);
     if (match) {
       const [_, themePrefix, filterName, value] = match;
-      const transformer = filterMap[filterName];
-      if (transformer) {
-        const cssFilter = transformer(value);
-        if (themePrefix === 'dark:') {
-          darkFilters.push(cssFilter);
-        } else if (themePrefix === 'light:') {
-          lightFilters.push(cssFilter);
+      if (!(filterName in filterValidationRules)) {
+        console.warn(`Invalid filter name: ${filterName}`);
+        return;
+      }
+      const rule = filterValidationRules[filterName as FilterName];
+      const transformer = filterMap[filterName as FilterName];
+
+      if (rule && transformer) {
+        const numValue = parseFloat(value);
+        if (numValue >= rule.min && numValue <= rule.max) {
+          const cssFilter = transformer(value);
+          if (themePrefix === 'dark:') {
+            darkFilters.push(cssFilter);
+          } else if (themePrefix === 'light:') {
+            lightFilters.push(cssFilter);
+          } else {
+            baseFilters.push(cssFilter);
+          }
         } else {
-          baseFilters.push(cssFilter);
+          console.warn(
+            `Invalid value for ${filterName}: ${value}. Must be between ${rule.min} and ${rule.max}.`
+          );
         }
       }
     }
