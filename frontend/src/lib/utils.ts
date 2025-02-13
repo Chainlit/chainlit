@@ -19,19 +19,24 @@ export const generateFilterStyle = (filter?: string): string => {
   if (!filter) return '';
 
   const filterMap: Record<string, (value: string) => string> = {
-    'blur': (value) => `blur(${value})`,
-    'brightness': (value) => `brightness(${value})`,
-    'contrast': (value) => `contrast(${value})`,
-    'grayscale': (value) => `grayscale(${value})`,
-    'opacity': (value) => `opacity(${value})`
+    blur: (value) => `blur(${value.includes('px') ? value : value + 'px'})`,
+    brightness: (value) => `brightness(${value})`,
+    contrast: (value) => `contrast(${value})`,
+    grayscale: (value) => `grayscale(${value})`,
+    opacity: (value) => `opacity(${value})`,
+    saturate: (value) => `saturate(${value})`,
+    sepia: (value) => `sepia(${value})`,
+    'hue-rotate': (value) =>
+      `hue-rotate(${value.includes('deg') ? value : value + 'deg'})`,
+    invert: (value) => `invert(${value})`
   };
 
   const baseFilters: string[] = [];
   const lightFilters: string[] = [];
   const darkFilters: string[] = [];
   const filters = filter.split(' ');
-  filters.forEach(f => {
-    const match = f.match(/^(light:|dark:)?(\w+)-\[(.+?)\]$/);
+  filters.forEach((f) => {
+    const match = f.match(/^(light:|dark:)?(\w+-rotate|\w+)-\[(.+?)\]$/);
     if (match) {
       const [_, themePrefix, filterName, value] = match;
       const transformer = filterMap[filterName];
@@ -47,9 +52,13 @@ export const generateFilterStyle = (filter?: string): string => {
       }
     }
   });
-  const isDark = document.documentElement.classList.contains('dark');
+  const isDark = localStorage.getItem('vite-ui-theme') === 'dark';
 
-  return (baseFilters.join(' ') + ' ' + (isDark ? darkFilters.join(' ') : lightFilters.join(' '))).trim();
+  return (
+    baseFilters.join(' ') +
+    ' ' +
+    (isDark ? darkFilters.join(' ') : lightFilters.join(' '))
+  ).trim();
 };
 
 export function hslToHex(hslStr: string): string {

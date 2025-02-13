@@ -138,36 +138,29 @@ cot = "full"
 # Custom login page image, relative to public directory or external URL
 # login_page_image = "/public/custom-background.jpg"
 
-# Custom login page image filter (optional)
-# Supported filter types:
-# - brightness: Adjusts the brightness, range 0-1 or higher, 1 is original brightness
-#   Example: brightness-[0.5] dims by half, brightness-[1.5] increases by 50%
+# Custom login page image filter
+# Supported filter types with value ranges:
+# - brightness: [0-2], 1 is original, <1 dims, >1 brightens
+# - contrast: [0-2], 1 is original, <1 reduces, >1 increases
+# - opacity: [0-1], 0 transparent, 1 fully opaque
+# - grayscale: [0-1], 0 original, 1 full grayscale
+# - blur: [0-50], pixel blur radius (px optional)
+# - saturate: [0-2], 1 is original, <1 desaturates, >1 intensifies
+# - sepia: [0-1], 0 original, 1 full sepia tone
+# - hue-rotate: [0-360], color hue rotation (deg optional)
+# - invert: [0-1], 0 original, 1 full color inversion
 #
-# - contrast: Adjusts the contrast, range 0-1 or higher, 1 is original contrast
-#   Example: contrast-[1.5] increases contrast, contrast-[0.7] reduces contrast
+# Syntax: [light:|dark:]filter_name-[value]
 #
-# - opacity: Adjusts transparency, range 0-1, 1 is fully opaque
-#   Example: opacity-[0.8] sets 80% opacity
+# Examples:
+# 1. Soft dark mode with blur and reduced brightness:
+# login_page_image_filter = "dark:brightness-[0.7] dark:blur-[5] dark:grayscale-[0.3]"
 #
-# - grayscale: Adjusts grayscale effect, range 0-1, 1 is full grayscale
-#   Example: grayscale-[0.5] adds 50% grayscale effect
+# 2. Color transformation with hue rotation:
+# login_page_image_filter = "dark:hue-rotate-[90] dark:saturate-[1.2] dark:contrast-[1.1]"
 #
-# - blur: Adds blur effect, value in pixels
-#   Example: blur-[10px] adds 10 pixel blur
-#
-# Multiple filters can be combined with spaces
-# Use dark: prefix to apply in dark mode only
-# Use light: prefix to apply in light mode only
-#
-# Common combinations:
-# 1. Soft dark mode effect:
-# login_page_image_filter = "dark:brightness-[0.6] dark:grayscale-[0.3]"
-#
-# 2. High contrast artistic effect:
-# login_page_image_filter = "contrast-[1.4] dark:contrast-[1.6] dark:brightness-[0.5]"
-#
-# 3. Frosted glass effect:
-# login_page_image_filter = "blur-[8px] brightness-[1.1] dark:brightness-[0.7]"
+# 3. Artistic cinematic effect (Recommended):
+# login_page_image_filter = "dark:brightness-[0.8] dark:sepia-[0.4] dark:blur-[3] dark:contrast-[1.2]"
 login_page_image_filter = "dark:brightness-[0.2] dark:grayscale"
 
 # Specify a custom meta image url.
@@ -176,7 +169,7 @@ login_page_image_filter = "dark:brightness-[0.2] dark:grayscale"
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
-# custom_build = "./public/dist"
+# custom_build = "./public/build"
 
 # Specify optional one or more custom links in the header.
 # [[UI.header_links]]
