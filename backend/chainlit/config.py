@@ -140,15 +140,15 @@ cot = "full"
 
 # Custom login page image filter
 # Supported filter types with value ranges:
-# - brightness: [0-2], 1 is original, <1 dims, >1 brightens
-# - contrast: [0-2], 1 is original, <1 reduces, >1 increases
-# - opacity: [0-1], 0 transparent, 1 fully opaque
-# - grayscale: [0-1], 0 original, 1 full grayscale
-# - blur: [0-50], pixel blur radius (px optional)
-# - saturate: [0-2], 1 is original, <1 desaturates, >1 intensifies
-# - sepia: [0-1], 0 original, 1 full sepia tone
-# - hue-rotate: [0-360], color hue rotation (deg optional)
-# - invert: [0-1], 0 original, 1 full color inversion
+# - brightness-[0-2], 1 is original, <1 dims, >1 brightens
+# - contrast-[0-2], 1 is original, <1 reduces, >1 increases
+# - opacity-[0-1], 0 transparent, 1 fully opaque
+# - grayscale-[0-1], 0 original, 1 full grayscale
+# - blur-[0-50px], pixel blur radius (px optional)
+# - saturate-[0-2], 1 is original, <1 desaturates, >1 intensifies
+# - sepia-[0-1], 0 original, 1 full sepia tone
+# - hue-rotate-[0-360deg], color hue rotation (deg optional)
+# - invert-[0-1], 0 original, 1 full color inversion
 #
 # Syntax: [light:|dark:]filter_name-[value]
 #
