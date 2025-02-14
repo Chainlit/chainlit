@@ -20,10 +20,12 @@ export default function ScrollContainer({
   const ref = useRef<HTMLDivElement>(null);
   const { messages } = useChatMessages();
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const scrollToBottom = () => {
     if (!ref.current) return;
 
+    setIsScrolling(true);
     ref.current.scrollTo({
       top: ref.current.scrollHeight,
       behavior: 'smooth'
@@ -34,6 +36,9 @@ export default function ScrollContainer({
     }
 
     setShowScrollButton(false);
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, 500);
   };
 
   useEffect(() => {
@@ -44,7 +49,7 @@ export default function ScrollContainer({
   }, [messages]);
 
   const handleScroll = () => {
-    if (!ref.current) return;
+    if (!ref.current || isScrolling) return;
 
     const { scrollTop, scrollHeight, clientHeight } = ref.current;
     const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
