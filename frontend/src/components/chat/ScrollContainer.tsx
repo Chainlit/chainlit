@@ -31,6 +31,9 @@ export default function ScrollContainer({
       const currentScrollTop = ref.current.scrollTop;
       if (currentScrollTop === prevScrollTop) {
         setIsScrolling(false);
+        const { scrollTop, scrollHeight, clientHeight } = ref.current;
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+        setShowScrollButton(!atBottom);
       } else {
         checkScrollEnd();
       }
