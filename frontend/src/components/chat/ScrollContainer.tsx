@@ -22,6 +22,21 @@ export default function ScrollContainer({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
 
+  const checkScrollEnd = () => {
+    if (!ref.current) return;
+
+    const prevScrollTop = ref.current.scrollTop;
+    setTimeout(() => {
+      if (!ref.current) return;
+      const currentScrollTop = ref.current.scrollTop;
+      if (currentScrollTop === prevScrollTop) {
+        setIsScrolling(false);
+      } else {
+        checkScrollEnd();
+      }
+    }, 100);
+  };
+
   const scrollToBottom = () => {
     if (!ref.current) return;
 
@@ -36,9 +51,7 @@ export default function ScrollContainer({
     }
 
     setShowScrollButton(false);
-    setTimeout(() => {
-      setIsScrolling(false);
-    }, 500);
+    checkScrollEnd();
   };
 
   useEffect(() => {
