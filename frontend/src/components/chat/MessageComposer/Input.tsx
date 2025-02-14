@@ -89,6 +89,9 @@ const Input = forwardRef<InputMethods, Props>(
           .replace(/<\/div>/g, '') // Remove closing div tags
           .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
           .replace(/<[^>]*>/g, '') // Remove any other HTML tags
+          .replace(/&lt;/g, '<') // Convert &lt; back to
+          .replace(/&gt;/g, '>') // Convert &gt; back to >
+          .replace(/&amp;/g, '&')
           .replace('\u200B', '') || ''
       );
     };
@@ -288,11 +291,11 @@ const Input = forwardRef<InputMethods, Props>(
 
       // For command detection, use the full content including command input
       const fullContent = e.currentTarget.textContent || '';
-      const lastWord = fullContent.split(' ').pop() || '';
+      const words = fullContent.split(' ');
 
-      if (lastWord.startsWith('/')) {
+      if (words.length === 1 && words[0].startsWith('/')) {
         setShowCommands(true);
-        setCommandInput(lastWord);
+        setCommandInput(words[0]);
       } else {
         setShowCommands(false);
         setCommandInput('');
