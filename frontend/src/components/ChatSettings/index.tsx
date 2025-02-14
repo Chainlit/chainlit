@@ -1,9 +1,10 @@
 import mapValues from 'lodash/mapValues';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
+import { chatSettingsValueState } from '@chainlit/react-client/src/state';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,20 +32,25 @@ export default function ChatSettingsModal() {
   const { handleSubmit, setValue, reset, watch } = useForm({
     defaultValues: chatSettingsValue
   });
+  const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
 
   // Reset form when default values change
   useEffect(() => {
     reset(chatSettingsValue);
   }, [chatSettingsValue, reset]);
 
-  const handleClose = () => setChatSettingsOpen(false);
+  const handleClose = () => {
+    reset(chatSettingsValue);
+    setChatSettingsOpen(false);
+  };
 
   const handleConfirm = handleSubmit((data) => {
     const processedValues = mapValues(data, (x: TFormInputValue) =>
       x !== '' ? x : null
     );
     updateChatSettings(processedValues);
-    handleClose();
+    setChatSettingsValue(processedValues);
+    setChatSettingsOpen(false);
   });
 
   const handleReset = () => {
