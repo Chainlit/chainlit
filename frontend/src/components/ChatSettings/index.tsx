@@ -3,13 +3,17 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
-import { useChatData, useChatInteract } from '@chainlit/react-client';
-import { chatSettingsValueState } from '@chainlit/react-client';
+import {
+  chatSettingsValueState,
+  useChatData,
+  useChatInteract
+} from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -76,6 +80,9 @@ export default function ChatSettingsModal() {
           <DialogTitle>
             <Translator path="chat.settings.title" />
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Customize your chat settings here
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col flex-grow overflow-y-auto gap-6">
           {chatSettingsInputs.map((input: any) => (
