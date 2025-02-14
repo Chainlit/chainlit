@@ -43,9 +43,11 @@ export default function ChatSettingsModal() {
     reset(chatSettingsValue);
   }, [chatSettingsValue, reset]);
 
-  const handleClose = () => {
-    reset(chatSettingsValue);
-    setChatSettingsOpen(false);
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      reset(chatSettingsValue);
+      setChatSettingsOpen(false);
+    }
   };
 
   const handleConfirm = handleSubmit((data) => {
@@ -102,7 +104,7 @@ export default function ChatSettingsModal() {
             <Translator path="common.actions.reset" />
           </Button>
           <div className="flex-1" />
-          <Button variant="ghost" onClick={handleClose}>
+          <Button variant="ghost" onClick={() => handleClose(false)}>
             <Translator path="common.actions.cancel" />
           </Button>
           <Button onClick={handleConfirm} id="confirm" autoFocus>
