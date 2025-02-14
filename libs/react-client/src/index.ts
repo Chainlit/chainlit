@@ -7,7 +7,6 @@ export * from './useConfig';
 export * from './api';
 export * from './types';
 export * from './context';
-export * from './state';
 export * from './utils/message';
 
 export { Socket } from 'socket.io-client';
