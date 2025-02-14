@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { useChatData, useChatInteract } from '@chainlit/react-client';
-import { chatSettingsValueState } from '@chainlit/react-client/src/state';
+import { chatSettingsValueState } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
 import {
