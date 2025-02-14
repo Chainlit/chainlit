@@ -1,5 +1,3 @@
-'use client';
-
 import { MessageContext } from '@/contexts/MessageContext';
 import { MessageCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useCallback, useContext, useState } from 'react';
