@@ -4,6 +4,17 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.2.1] - 2025-02-14
+
+### Added
+
+- `default_open` parameter to the step decorator/class
+
+### Fixed
+- Input should not replace <,>,&
+- Starters should be disabled if no ws connection
+- Prevent orphaned thread record when deleting active conversation
+
 ## [2.2.0] - 2025-02-08
 
 ### Added
