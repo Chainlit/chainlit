@@ -113,7 +113,8 @@ export default function Login() {
             }
             alt="Image"
             className="absolute inset-0 h-full w-full object-cover"
-            style={{ filter: filterStyle }}
+            style={{ filter: filterStyle }},
+            clipPath: 'inset(0)'
           />
         </div>
       ) : null}
