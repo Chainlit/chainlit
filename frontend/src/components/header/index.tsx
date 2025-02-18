@@ -63,8 +63,9 @@ const Header = memo(() => {
         <ReadmeButton />
         <ApiKeys />
         {links &&
-          links.map((link) => (
+          links.map((link, index) => (
             <ButtonLink
+              key={`${link.name}-${link.url}-${index}`}
               name={link.name}
               iconUrl={link.icon_url}
               url={link.url}
