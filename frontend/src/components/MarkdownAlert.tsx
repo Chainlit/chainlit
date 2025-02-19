@@ -40,7 +40,8 @@ export const AlertTypes = [
   'pending',
   'security',
   'beta',
-  'best-practice' // 'your-new-type';
+  'best-practice'
+  // 'your-new-type';
 ] as const;
 export type AlertVariant = (typeof AlertTypes)[number];
 // Styles and icon configuration
