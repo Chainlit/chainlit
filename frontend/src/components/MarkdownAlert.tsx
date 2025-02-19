@@ -20,6 +20,10 @@ import { visit } from 'unist-util-visit';
 
 import { useTranslation } from '@/components/i18n/Translator';
 
+export interface AlertProps {
+  variant: AlertVariant;
+  children?: React.ReactNode;
+}
 // Alert type definition
 export type AlertVariant =
   | 'info'

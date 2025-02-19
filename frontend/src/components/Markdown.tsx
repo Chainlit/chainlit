@@ -28,6 +28,7 @@ import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
 import {
+  type AlertProps,
   type AlertVariant,
   MarkdownAlert,
   alertComponents
