@@ -25,24 +25,24 @@ export interface AlertProps {
   children?: React.ReactNode;
 }
 // Alert type definition
-export type AlertVariant =
-  | 'info'
-  | 'note'
-  | 'tip'
-  | 'important'
-  | 'warning'
-  | 'caution' // Basic alerts
-  | 'debug'
-  | 'example' // Development related
-  | 'success'
-  | 'help'
-  | 'idea' // Functional alerts
-  | 'pending'
-  | 'security'
-  | 'beta'
-  | 'best-practice'; // Status alerts
-// | 'your-new-type'; // we can add new types here later, but remember to update translation.json file under "alerts".
-
+export const AlertTypes = [
+  'info',
+  'note',
+  'tip',
+  'important',
+  'warning',
+  'caution',
+  'debug',
+  'example',
+  'success',
+  'help',
+  'idea',
+  'pending',
+  'security',
+  'beta',
+  'best-practice' // 'your-new-type';
+] as const;
+export type AlertVariant = (typeof AlertTypes)[number];
 // Styles and icon configuration
 const variantStyles = {
   // Basic alerts
@@ -206,12 +206,21 @@ export const MarkdownAlert = () => {
         node.type = 'element';
         node.data = {
           hName: 'Alert',
-          hProperties: { variant: type.toLowerCase() }
+          hProperties: { variant: normalizeAlertType(type) }
         };
         node.children = [{ type: 'text', value: content.trim() }];
       }
     });
   };
+};
+export const normalizeAlertType = (type: string): AlertVariant => {
+  if (!type) return 'info';
+  const normalized = type.toLowerCase().replace(/[-_\s]/g, '-');
+  if (!AlertTypes.includes(normalized as AlertVariant)) {
+    console.warn(`Invalid alert type "${type}", falling back to "info"`);
+    return 'info';
+  }
+  return normalized as AlertVariant;
 };
 
 export const alertComponents = {

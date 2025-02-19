@@ -29,9 +29,9 @@ import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
 import {
   type AlertProps,
-  type AlertVariant,
   MarkdownAlert,
-  alertComponents
+  alertComponents,
+  normalizeAlertType
 } from './MarkdownAlert';
 
 interface Props {
@@ -278,10 +278,8 @@ const Markdown = ({
           type,
           children,
           ...props
-        }: AlertProps & { type?: AlertVariant }) => {
-          const alertType = type
-            ? normalizeAlertType(type)
-            : normalizeAlertType((props.variant as string) || 'info');
+        }: AlertProps & { type?: string }) => {
+          const alertType = normalizeAlertType(type || props.variant || 'info');
           return alertComponents.Alert({ variant: alertType, children });
         },
         blinkingCursor: () => <BlinkingCursor whitespace />
@@ -291,8 +289,5 @@ const Markdown = ({
     </ReactMarkdown>
   );
 };
-const normalizeAlertType = (type: string): AlertVariant => {
-  const normalized = type.toLowerCase().replace(/[-_\s]/g, '-');
-  return normalized as AlertVariant;
-};
+
 export default Markdown;
