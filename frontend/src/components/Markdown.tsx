@@ -27,7 +27,11 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
-import { MarkdownAlert, alertComponents } from './MarkdownAlert';
+import {
+  type AlertVariant,
+  MarkdownAlert,
+  alertComponents
+} from './MarkdownAlert';
 
 interface Props {
   allowHtml?: boolean;
@@ -269,6 +273,16 @@ const Markdown = ({
           return <TableBody {...(props as any)}>{children}</TableBody>;
         },
         // @ts-expect-error custom plugin
+        alert: ({
+          type,
+          children,
+          ...props
+        }: AlertProps & { type?: AlertVariant }) => {
+          const alertType = type
+            ? normalizeAlertType(type)
+            : normalizeAlertType((props.variant as string) || 'info');
+          return alertComponents.Alert({ variant: alertType, children });
+        },
         blinkingCursor: () => <BlinkingCursor whitespace />
       }}
     >
@@ -276,5 +290,8 @@ const Markdown = ({
     </ReactMarkdown>
   );
 };
-
+const normalizeAlertType = (type: string): AlertVariant => {
+  const normalized = type.toLowerCase().replace(/[-_\s]/g, '-');
+  return normalized as AlertVariant;
+};
 export default Markdown;

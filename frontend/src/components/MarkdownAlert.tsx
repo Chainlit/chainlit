@@ -21,7 +21,7 @@ import { visit } from 'unist-util-visit';
 import { useTranslation } from '@/components/i18n/Translator';
 
 // Alert type definition
-type AlertVariant =
+export type AlertVariant =
   | 'info'
   | 'note'
   | 'tip'
