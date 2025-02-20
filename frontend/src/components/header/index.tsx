@@ -5,10 +5,10 @@ import { useAudio, useAuth, useConfig } from '@chainlit/react-client';
 
 import AudioPresence from '@/components/AudioPresence';
 import ButtonLink from '@/components/ButtonLink';
+import CustomChatProfileView from '@/components/header/CustomChatProfileView';
 import { useSidebar } from '@/components/ui/sidebar';
 
 import ApiKeys from './ApiKeys';
-import ChatProfiles from './ChatProfiles';
 import NewChatButton from './NewChat';
 import ReadmeButton from './Readme';
 import SidebarTrigger from './SidebarTrigger';
@@ -43,7 +43,8 @@ const Header = memo(() => {
           <NewChatButton navigate={navigate} />
         )}
 
-        <ChatProfiles navigate={navigate} />
+        <CustomChatProfileView />
+        {/* <ChatProfiles navigate={navigate} /> */}
       </div>
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

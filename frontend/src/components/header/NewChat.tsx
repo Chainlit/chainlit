@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 
-import { useChatInteract } from '@chainlit/react-client';
+import { useChatInteract, useChatSession } from '@chainlit/react-client';
 
+import CustomChatProfileSelector from '@/components/header/CustomChatPorfileSelector';
 import { Translator } from '@/components/i18n';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,12 +26,16 @@ type NewChatDialogProps = {
   open: boolean;
   handleClose: () => void;
   handleConfirm: () => void;
+  selectedChatProfile: string | undefined;
+  setSelectedChatProfile: Dispatch<SetStateAction<string | undefined>>;
 };
 
 export const NewChatDialog = ({
   open,
   handleClose,
-  handleConfirm
+  handleConfirm,
+  selectedChatProfile,
+  setSelectedChatProfile
 }: NewChatDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -43,7 +48,11 @@ export const NewChatDialog = ({
             <Translator path="navigation.newChat.dialog.description" />
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex-col gap-2 sm:gap-0">
+          <CustomChatProfileSelector
+            selectedChatProfile={selectedChatProfile}
+            setSelectedChatProfile={setSelectedChatProfile}
+          />
           <Button variant="outline" onClick={handleClose}>
             <Translator path="common.actions.cancel" />
           </Button>
@@ -63,6 +72,10 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false);
   const { clear } = useChatInteract();
+  const { chatProfile, setChatProfile } = useChatSession();
+  const [selectedChatProfile, setSelectedChatProfile] = useState<
+    string | undefined
+  >(chatProfile);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -73,6 +86,7 @@ const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
   };
 
   const handleConfirm = () => {
+    setChatProfile(selectedChatProfile);
     clear();
     navigate?.('/');
     handleClose();
@@ -103,6 +117,8 @@ const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
         open={open}
         handleClose={handleClose}
         handleConfirm={handleConfirm}
+        selectedChatProfile={selectedChatProfile}
+        setSelectedChatProfile={setSelectedChatProfile}
       />
     </div>
   );
