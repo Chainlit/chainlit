@@ -274,6 +274,7 @@ const Markdown = ({
           return <TableBody {...(props as any)}>{children}</TableBody>;
         },
         // @ts-expect-error custom plugin
+        blinkingCursor: () => <BlinkingCursor whitespace />,
         alert: ({
           type,
           children,
@@ -281,8 +282,7 @@ const Markdown = ({
         }: AlertProps & { type?: string }) => {
           const alertType = normalizeAlertType(type || props.variant || 'info');
           return alertComponents.Alert({ variant: alertType, children });
-        },
-        blinkingCursor: () => <BlinkingCursor whitespace />
+        }
       }}
     >
       {children}
