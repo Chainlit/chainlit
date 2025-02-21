@@ -65,7 +65,7 @@ const InputStateHandler = ({
           ) : null}
         </label>
       )}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 p-2">
         {children}
         {description && (
           <div className="text-sm text-muted-foreground">{description}</div>
