@@ -25,7 +25,7 @@ assert _cookie_samesite in [
 _cookie_secure = _cookie_samesite == "none"
 
 _state_cookie_lifetime = 3 * 60  # 3m
-_auth_cookie_name = "access_token"
+_auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
 
 
