@@ -135,6 +135,9 @@ cot = "full"
 # The Javascript file can be served from the public directory.
 # custom_js = "/public/test.js"
 
+# The style of alert boxes. Can be "classic" or "modern".
+alert_style = "classic"
+
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
@@ -239,6 +242,7 @@ class UISettings(DataClassJsonMixin):
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
+    alert_style: Optional[Literal["classic", "modern"]] = "classic"
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend

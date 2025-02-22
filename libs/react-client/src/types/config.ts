@@ -38,6 +38,7 @@ export interface IChainlitConfig {
     custom_css?: string;
     custom_js?: string;
     custom_font?: string;
+    alert_style?: 'classic' | 'modern';
     custom_meta_image_url?: string;
     header_links?: { name: string; icon_url: string; url: string }[];
   };
