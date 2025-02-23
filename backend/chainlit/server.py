@@ -210,6 +210,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_additional_response_headers(request: Request, call_next):
+    response = await call_next(request)
+
+    additional_headers = config.project.additional_response_headers or {}
+    for key, val in additional_headers.items():
+        response.headers[key] = str(val)
+
+    return response
+
 router = APIRouter()
 
 

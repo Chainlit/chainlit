@@ -302,6 +302,8 @@ class ProjectSettings(DataClassJsonMixin):
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
+    # Additional response headers to include
+    additional_response_headers: Optional[dict] = None
 
 
 @dataclass()
