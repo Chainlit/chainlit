@@ -18,6 +18,7 @@ class OAuthProvider:
     authorize_url: str
     authorize_params: Dict[str, str]
     default_prompt: Optional[str] = None
+    refresh_token: Optional[str] = None
 
     def is_configured(self):
         return all([os.environ.get(env) for env in self.env])
@@ -42,6 +43,9 @@ class OAuthProvider:
             return prompt
 
         return self.default_prompt
+
+    async def revoke_token(self, token: str, token_hint: str = "") -> None:
+        raise NotImplementedError
 
 
 class GithubOAuthProvider(OAuthProvider):
@@ -112,9 +116,11 @@ class GoogleOAuthProvider(OAuthProvider):
         self.client_id = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
         self.authorize_params = {
-            "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+            "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/cloud-platform  https://www.googleapis.com/auth/userinfo.email",
             "response_type": "code",
             "access_type": "offline",
+            "include_granted_scopes": "true",
+            "prompt": "consent",
         }
 
         if prompt := self.get_prompt():
@@ -142,6 +148,7 @@ class GoogleOAuthProvider(OAuthProvider):
                     request=response.request,
                     response=response,
                 )
+            self.refresh_token = json.get("refresh_token")
             return token
 
     async def get_user_info(self, token: str):
@@ -157,6 +164,20 @@ class GoogleOAuthProvider(OAuthProvider):
                 metadata={"image": google_user["picture"], "provider": "google"},
             )
             return (google_user, user)
+
+    async def revoke_token(self, token: str, type_hint: str = "refresh_token"):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "token_type_hint": type_hint,
+            "token": token,
+        }
+        async with httpx.AsyncClient() as client:
+            revoke_response = await client.post(
+                "https://oauth2.googleapis.com/revoke",
+                data=payload,
+            )
+            revoke_response.raise_for_status()
 
 
 class AzureADOAuthProvider(OAuthProvider):

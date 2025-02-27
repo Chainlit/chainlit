@@ -28,6 +28,17 @@ def create_jwt(data: User) -> str:
     return encoded_jwt
 
 
+def encode_client_side_session(client_side_session: Dict[str, Any]):
+    client_side_session.update(
+        {
+            "exp": datetime.now(timezone.utc)
+            + timedelta(seconds=config.project.user_session_timeout),
+            "iat": datetime.now(timezone.utc),
+        }
+    )
+    return pyjwt.encode(client_side_session, get_jwt_secret(), algorithm="HS256")
+
+
 def decode_jwt(token: str) -> User:
     dict = pyjwt.decode(
         token,
@@ -37,3 +48,14 @@ def decode_jwt(token: str) -> User:
     )
     del dict["exp"]
     return User(**dict)
+
+
+def decode_client_side_session(encoded_client_side_session: str) -> Dict[str, Any]:
+    client_side_session = pyjwt.decode(
+        encoded_client_side_session,
+        get_jwt_secret(),
+        algorithms=["HS256"],
+        options={"verify_signature": True},
+    )
+    del client_side_session["exp"]
+    return client_side_session

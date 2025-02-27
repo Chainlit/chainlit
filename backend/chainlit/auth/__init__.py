@@ -1,6 +1,7 @@
 import os
 
 from fastapi import Depends, HTTPException
+from fastapi import Request, Response
 
 from chainlit.config import config
 from chainlit.data import get_data_layer
@@ -12,8 +13,17 @@ from .cookie import (
     clear_auth_cookie,
     get_token_from_cookies,
     set_auth_cookie,
+    set_client_side_session_cookie,
+    get_client_side_session_from_cookies,
+    delete_client_side_session_cookie,
 )
-from .jwt import create_jwt, decode_jwt, get_jwt_secret
+from .jwt import (
+    create_jwt,
+    decode_jwt,
+    get_jwt_secret,
+    encode_client_side_session,
+    decode_client_side_session,
+)
 
 reuseable_oauth = OAuth2PasswordBearerWithCookie(tokenUrl="/login", auto_error=False)
 
@@ -85,6 +95,27 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
     return await authenticate_user(token)
 
 
+def update_client_side_session(
+    request: Request, response: Response, data: dict[str, object]
+):
+    client_side_session = get_client_side_session(request) or {}
+    client_side_session.update(data)
+    set_client_side_session_cookie(
+        response, encode_client_side_session(client_side_session)
+    )
+
+
+def get_client_side_session(request: Request):
+    encoded_client_side_session = get_client_side_session_from_cookies(request.cookies)
+    return encoded_client_side_session and decode_client_side_session(
+        encoded_client_side_session
+    )
+
+
+def clear_client_side_session(response: Response):
+    delete_client_side_session_cookie(response)
+
+
 __all__ = [
     "clear_auth_cookie",
     "create_jwt",
@@ -92,4 +123,7 @@ __all__ = [
     "get_current_user",
     "get_token_from_cookies",
     "set_auth_cookie",
+    "update_client_side_session",
+    "get_client_side_session",
+    "clear_client_side_session",
 ]

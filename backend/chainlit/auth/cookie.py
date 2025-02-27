@@ -19,14 +19,13 @@ assert _cookie_samesite in [
     "lax",
     "strict",
     "none",
-], (
-    "Invalid value for CHAINLIT_COOKIE_SAMESITE. Must be one of 'lax', 'strict' or 'none'."
-)
+], "Invalid value for CHAINLIT_COOKIE_SAMESITE. Must be one of 'lax', 'strict' or 'none'."
 _cookie_secure = _cookie_samesite == "none"
 
 _state_cookie_lifetime = 3 * 60  # 3m
 _auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
+_client_side_session_cookie_name = "session_data"
 
 
 class OAuth2PasswordBearerWithCookie(SecurityBase):
@@ -188,3 +187,24 @@ def validate_oauth_state_cookie(request: Request, state: str):
 def clear_oauth_state_cookie(response: Response):
     """Oauth complete, delete state token."""
     response.delete_cookie(_state_cookie_name)  # Do we set path here?
+
+
+def set_client_side_session_cookie(
+    response: Response, encoded_client_side_session: str
+):
+    response.set_cookie(
+        _client_side_session_cookie_name,
+        encoded_client_side_session,
+        httponly=True,
+        samesite=_cookie_samesite,
+        secure=_cookie_secure,
+        max_age=config.project.user_session_timeout,
+    )
+
+
+def get_client_side_session_from_cookies(cookies: dict[str, str]):
+    return cookies.get(_client_side_session_cookie_name)
+
+
+def delete_client_side_session_cookie(response: Response):
+    response.delete_cookie(_client_side_session_cookie_name)

@@ -66,6 +66,8 @@ class BaseSession:
         http_referer: Optional[str] = None,
         # Cookie
         http_cookie: Optional[str] = None,
+        # Client-side Session
+        client_side_session: Optional[Dict[str, Any]] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -84,6 +86,8 @@ class BaseSession:
         self.id = id
 
         self.chat_settings: Dict[str, Any] = {}
+
+        self.client_side_session: Optional[Dict[str, Any]] = client_side_session
 
     @property
     def files_dir(self):
@@ -234,6 +238,8 @@ class WebsocketSession(BaseSession):
         http_referer: Optional[str] = None,
         # Cookie
         http_cookie: Optional[str] = None,
+        # Client-side Session
+        client_side_session: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(
             id=id,
@@ -245,6 +251,7 @@ class WebsocketSession(BaseSession):
             chat_profile=chat_profile,
             http_referer=http_referer,
             http_cookie=http_cookie,
+            client_side_session=client_side_session,
         )
 
         self.socket_id = socket_id
