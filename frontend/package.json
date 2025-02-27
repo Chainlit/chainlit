@@ -7,6 +7,7 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "vite build",
+    "build:watch": "tsc && vite build --watch",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
     "format": "prettier 'src/**/*.{ts,tsx,css}' --write",
