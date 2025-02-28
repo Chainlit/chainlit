@@ -14,6 +14,7 @@ interface Props {
   setAutoScroll: (autoScroll: boolean) => void;
   autoScroll: boolean;
   showIfEmptyThread?: boolean;
+  submitProxy?: (text: string, submitFunction: (text: string) => void) => void;
 }
 
 export default function ChatFooter({

@@ -142,7 +142,6 @@ const MessagesContainer = ({ navigate }: Props) => {
     onError,
     onFeedbackUpdated
   ]);
-
   return (
     <MessageContext.Provider value={memoizedContext}>
       <Messages

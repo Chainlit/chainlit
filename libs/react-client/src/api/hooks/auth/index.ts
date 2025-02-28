@@ -7,7 +7,7 @@ import { useUserManagement } from './userManagement';
 export const useAuth = () => {
   const { authConfig } = useAuthConfig();
   const { logout } = useSessionManagement();
-  const { user, setUserFromAPI } = useUserManagement();
+  const { user, setUserFromAPI,setUser } = useUserManagement();
 
   const isReady =
     !!authConfig && (!authConfig.requireLogin || user !== undefined);
@@ -19,7 +19,8 @@ export const useAuth = () => {
       isReady,
       isAuthenticated: true,
       logout: () => Promise.resolve(),
-      setUserFromAPI: () => Promise.resolve()
+      setUserFromAPI: () => Promise.resolve(),
+      setUser
     };
   }
 
@@ -29,7 +30,8 @@ export const useAuth = () => {
     isReady,
     isAuthenticated: !!user,
     logout,
-    setUserFromAPI
+    setUserFromAPI,
+    setUser
   };
 };
 

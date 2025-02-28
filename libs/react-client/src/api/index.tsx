@@ -48,7 +48,7 @@ export class APIBase {
     public type: 'webapp' | 'copilot' | 'teams' | 'slack' | 'discord',
     public on401?: () => void,
     public onError?: (error: ClientError) => void
-  ) {}
+  ) { }
 
   buildEndpoint(path: string) {
     if (this.httpEndpoint.endsWith('/')) {
@@ -117,13 +117,16 @@ export class APIBase {
         headers['Content-Type'] = 'application/json';
         body = data ? JSON.stringify(data) : null;
       }
+      headers['Access-Control-Allow-Origin'] = '*';
+      headers['Access-Control-Allow-Credentials'] = 'true';
 
       const res = await fetch(this.buildEndpoint(path), {
         method,
         credentials: 'include',
         headers,
         signal,
-        body
+        body,
+        mode: 'cors'
       });
 
       if (!res.ok) {

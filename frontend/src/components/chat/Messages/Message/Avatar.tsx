@@ -8,20 +8,21 @@ import {
 } from '@chainlit/react-client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import BlinkingCursor from '@/components/BlinkingCursor';
 
 interface Props {
   author?: string;
+  content?: string;
   hide?: boolean;
 }
 
-const MessageAvatar = ({ author, hide }: Props) => {
+const MessageAvatar = ({ author, hide, content }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
@@ -38,19 +39,16 @@ const MessageAvatar = ({ author, hide }: Props) => {
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
   }, [apiClient, selectedChatProfile, config, author]);
 
+  const authorInitial = author ? author.charAt(0).toUpperCase() : '?';
+
   return (
-    <span className={cn('inline-block', hide && 'invisible')}>
+    <span className={cn(content == '' ? 'flex items-center' : 'inline-block', hide && 'invisible')}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Avatar className="h-6 w-6 mt-[2px]">
-              <AvatarImage
-                src={avatarUrl}
-                alt={`Avatar for ${author || 'default'}`}
-                className="bg-transparent"
-              />
-              <AvatarFallback className="bg-transparent">
-                <Skeleton className="h-full w-full rounded-full" />
+            <Avatar className="h-6 w-6 mt-[2px] mr-2">
+              <AvatarFallback className="bg-gray-200 text-gray-700 font-semibold flex items-center justify-center">
+                {authorInitial}
               </AvatarFallback>
             </Avatar>
           </TooltipTrigger>
@@ -59,6 +57,7 @@ const MessageAvatar = ({ author, hide }: Props) => {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      {content == '' && <BlinkingCursor />}
     </span>
   );
 };

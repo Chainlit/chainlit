@@ -1,10 +1,11 @@
+import { useContext } from 'react';
 import {
   useChatData,
   useChatInteract,
   useChatMessages
 } from '@chainlit/react-client';
 
-import { Send } from '@/components/icons/Send';
+import { Send } from 'lucide-react';
 import { Stop } from '@/components/icons/Stop';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Translator } from 'components/i18n';
 
+import { WidgetContext } from '@chainlit/copilot/src/context';
 interface SubmitButtonProps {
   disabled?: boolean;
   onSubmit: () => void;
@@ -24,6 +26,7 @@ export default function SubmitButton({
   disabled,
   onSubmit
 }: SubmitButtonProps) {
+  const { evoya } = useContext(WidgetContext);
   const { loading } = useChatData();
   const { firstInteraction } = useChatMessages();
   const { stopTask } = useChatInteract();
@@ -37,9 +40,10 @@ export default function SubmitButton({
               id="stop-button"
               onClick={stopTask}
               size="icon"
-              className="rounded-full h-8 w-8"
+              variant="outline"
+              className="rounded-full h-8 w-8 hover:bg-muted"
             >
-              <Stop className="!size-6" />
+              <Stop className="!size-5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -56,9 +60,10 @@ export default function SubmitButton({
               disabled={disabled}
               onClick={onSubmit}
               size="icon"
-              className="rounded-full h-8 w-8"
+              variant="ghost"
+              className="rounded-full h-8 w-8 hover:bg-muted"
             >
-              <Send className="!size-6" />
+              <Send className="!size-5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

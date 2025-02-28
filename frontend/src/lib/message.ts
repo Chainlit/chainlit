@@ -13,6 +13,27 @@ const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
+function escapeBrackets(text: string) {
+  const pattern =
+    /(```[\s\S]*?```|`.*?`)|\\\[([\s\S]*?[^\\])\\\]|\\\((.*?)\\\)|(\${1})/g;
+  const res = text.replace(
+    pattern,
+    (match, codeBlock, squareBracket, roundBracket, dollarSign) => {
+      if (codeBlock) {
+        return codeBlock;
+      } else if (squareBracket) {
+        return `$$${squareBracket}$$`;
+      } else if (roundBracket) {
+        return `$${roundBracket}$`;
+      } else if (dollarSign) {
+        return '\\$';
+      }
+      return match;
+    },
+  );
+  return res;
+}
+
 export const prepareContent = ({
   elements,
   content,
@@ -34,6 +55,7 @@ export const prepareContent = ({
     : undefined;
 
   let preparedContent = content ? content.trim() : '';
+  preparedContent = escapeBrackets(preparedContent);
   const inlinedElements = elements.filter(
     (e) => isForIdMatch(id, e?.forId) && e.display === 'inline'
   );

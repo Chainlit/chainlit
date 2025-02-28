@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,19 +25,23 @@ import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
 
+import { WidgetContext } from '@chainlit/copilot/src/context';
 interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   setAutoScroll: (autoScroll: boolean) => void;
+  submitProxy?: (text: string, submitFunction: (text: string) => void) => void;
 }
 
 export default function MessageComposer({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  setAutoScroll
+  setAutoScroll,
+  submitProxy
 }: Props) {
+  const { evoya } = useContext(WidgetContext);
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
   const [selectedCommand, setSelectedCommand] = useState<ICommand>();
@@ -112,7 +116,24 @@ export default function MessageComposer({
     [user, replyMessage]
   );
 
-  const submit = useCallback(() => {
+  const submit = async () => {
+    if (submitProxy) {
+      submitProxy(value, (text: string) => {
+        if (askUser) {
+          onReply(text);
+        } else {
+          onSubmit(text, attachments);
+        }
+        setAttachments([]);
+        setValue('');
+        inputRef.current?.reset();
+      });
+    } else {
+      submitMessage();
+    }
+  }
+
+  const submitMessage = useCallback(() => {
     if (disabled || (value === '' && attachments.length === 0)) {
       return;
     }
@@ -135,23 +156,26 @@ export default function MessageComposer({
   ]);
 
   return (
-    <div className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col">
+    <div className={`bg-accent p-3 px-4 w-full ${(evoya && evoya.type == 'dashboard') || evoya==undefined ? "min-h-24 rounded-3xl":"rounded-full"} flex flex-col`}>
       {attachments.length > 0 ? (
         <div className="mb-1">
           <Attachments />
         </div>
       ) : null}
-      <Input
-        ref={inputRef}
-        id="chat-input"
-        autoFocus
-        selectedCommand={selectedCommand}
-        setSelectedCommand={setSelectedCommand}
-        onChange={setValue}
-        onPaste={onPaste}
-        onEnter={submit}
-        placeholder={t('chat.input.placeholder')}
-      />
+      {((evoya && evoya?.type == 'dashboard') || evoya==undefined) &&
+        <Input
+          ref={inputRef}
+          id="chat-input"
+          autoFocus
+          selectedCommand={selectedCommand}
+          setSelectedCommand={setSelectedCommand}
+          onChange={setValue}
+          onEnter={submit}
+          onPaste={onPaste}
+          submitProxy={submitProxy}
+          placeholder={t('chat.input.placeholder', 'Type your message here...')}
+        />
+      }
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
           <UploadButton
@@ -178,6 +202,21 @@ export default function MessageComposer({
           )}
           <VoiceButton disabled={disabled} />
         </div>
+        {evoya && evoya?.type  != 'dashboard' &&
+          <Input
+            ref={inputRef}
+            id="chat-input"
+            autoFocus
+            selectedCommand={selectedCommand}
+            setSelectedCommand={setSelectedCommand}
+            onChange={setValue}
+            onEnter={submit}
+            onPaste={onPaste}
+            submitProxy={submitProxy}
+            placeholder={t('chat.input.placeholder', 'Type your message here...')}
+            className={'min-h-0'}
+          />
+        }
         <div className="flex items-center gap-1">
           <SubmitButton
             onSubmit={submit}

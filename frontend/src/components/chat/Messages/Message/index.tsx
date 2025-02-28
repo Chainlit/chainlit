@@ -39,6 +39,7 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
+    
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const isAsk = message.waitForAnswer;
@@ -96,7 +97,9 @@ const Message = memo(
               ) : (
                 <div className="ai-message flex gap-4 w-full">
                   {!isStep || !indent ? (
-                    <MessageAvatar author={message.name} />
+                    <>
+                      <MessageAvatar author={message.name} content={message.output} />
+                    </>
                   ) : null}
                   {/* Display the step and its children */}
                   {isStep ? (

@@ -2,18 +2,21 @@ import { makeApiClient } from 'api';
 import { useEffect, useState } from 'react';
 import { RecoilRoot } from 'recoil';
 import { IWidgetConfig } from 'types';
+import { EvoyaConfig } from './src/evoya/types';
 
 import { i18nSetupLocalization } from '@chainlit/app/src/i18n';
 import { ChainlitContext } from '@chainlit/react-client';
+import { WidgetContext } from './context';
 
 import App from './app';
 
 i18nSetupLocalization();
 interface Props {
   widgetConfig: IWidgetConfig;
+  evoya: EvoyaConfig;
 }
 
-export default function AppWrapper({ widgetConfig }: Props) {
+export default function AppWrapper({ widgetConfig, evoya }: Props) {
   const apiClient = makeApiClient(widgetConfig.chainlitServer);
   const [customThemeLoaded, setCustomThemeLoaded] = useState(false);
 
@@ -66,9 +69,16 @@ export default function AppWrapper({ widgetConfig }: Props) {
 
   return (
     <ChainlitContext.Provider value={apiClient}>
-      <RecoilRoot>
-        <App widgetConfig={widgetConfig} />
-      </RecoilRoot>
+      <WidgetContext.Provider 
+        value={{
+          accessToken: widgetConfig.accessToken,
+          evoya
+        }} 
+      >
+        <RecoilRoot>
+          <App widgetConfig={widgetConfig}  />
+        </RecoilRoot>
+      </WidgetContext.Provider>
     </ChainlitContext.Provider>
   );
 }

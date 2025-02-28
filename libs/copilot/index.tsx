@@ -12,6 +12,7 @@ import hljscss from 'highlight.js/styles/monokai-sublime.css?inline';
 
 import AppWrapper from './src/appWrapper';
 import { IWidgetConfig } from './src/types';
+import { EvoyaConfig } from './src/evoya/types';
 
 const id = 'chainlit-copilot';
 let root: ReactDOM.Root | null = null;
@@ -23,22 +24,33 @@ declare global {
       light: Record<string, string>;
       dark: Record<string, string>;
     };
-    mountChainlitWidget: (config: IWidgetConfig) => void;
+    mountChainlitWidget: (config: IWidgetConfig,  evoya: EvoyaConfig) => void;
     unmountChainlitWidget: () => void;
     toggleChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
   }
 }
 
-window.mountChainlitWidget = (config: IWidgetConfig) => {
+window.mountChainlitWidget = (config: IWidgetConfig, evoya: EvoyaConfig) => {
   const container = document.createElement('div');
   container.id = id;
-  document.body.appendChild(container);
+
+  if (evoya.container !== null) {
+    container.style.height = '100%';
+    container.style.width = '100%';
+    evoya.container.appendChild(container);
+  } else {
+    document.body.appendChild(container);
+  }
 
   const shadowContainer = container.attachShadow({ mode: 'open' });
   const shadowRootElement = document.createElement('div');
   shadowRootElement.id = 'cl-shadow-root';
   shadowContainer.appendChild(shadowRootElement);
+  if (evoya.container !== null) {
+    shadowRootElement.style.height = '100%';
+    shadowRootElement.style.width = '100%';
+  }
 
   window.cl_shadowRootElement = shadowRootElement;
 
@@ -48,13 +60,14 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
       <style type="text/css">{tailwindcss.toString()}</style>
       <style type="text/css">{sonnercss.toString()}</style>
       <style type="text/css">{hljscss.toString()}</style>
-      <AppWrapper widgetConfig={config} />
+      <AppWrapper widgetConfig={config} evoya={evoya} />
     </React.StrictMode>
   );
 };
 
 window.unmountChainlitWidget = () => {
   root?.unmount();
+  document.getElementById(id)?.remove();
 };
 
 window.sendChainlitMessage = () => {

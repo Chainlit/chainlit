@@ -17,4 +17,5 @@ export interface IUser {
   identifier: string;
   display_name?: string;
   metadata: IUserMetadata;
+  config?: any;
 }

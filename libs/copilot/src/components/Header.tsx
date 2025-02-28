@@ -1,27 +1,93 @@
-import { Maximize, Minimize } from 'lucide-react';
+import { useContext, useState, useEffect } from 'react';
 
-import AudioPresence from '@chainlit/app/src/components/AudioPresence';
-import { Logo } from '@chainlit/app/src/components/Logo';
-import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
-import NewChatButton from '@chainlit/app/src/components/header/NewChat';
+import { useRecoilValue } from 'recoil';
+import { Maximize2, Minimize, X } from 'lucide-react';
+
+import { ChainlitContext } from '@chainlit/react-client';
 import { Button } from '@chainlit/app/src/components/ui/button';
-import { useAudio, useConfig } from '@chainlit/react-client';
+import { Logo } from '@chainlit/app/src/components/Logo';
+import { firstUserInteraction, } from '@chainlit/react-client';
+import AudioPresence from '@chainlit/app/src/components/AudioPresence';
+import NewChatButton from '@chainlit/app/src/components/header/NewChat';
+import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
+import { useAudio, useConfig, useChatData, sessionIdState } from '@chainlit/react-client';
 
+import { WidgetContext } from '@/context';
+
+import ShareSessionButton from '@/evoya/ShareSessionButton';
+import FavoriteSessionButton from '@/evoya/FavoriteSessionButton';
+import DashboardSidebarButton from '@/evoya/DashboardSidebarButton';
+import PrivacyShieldToggle from '@/evoya/privacyShield/PrivacyShieldToggle';
+
+const sessionTokenKey = 'session_token';
 interface Props {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
+  isPopup: boolean
 }
 
-const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
+const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
+  const { loading } = useChatData();
   const { config } = useConfig();
   const { audioConnection } = useAudio();
 
-  const hasChatProfiles = !!config?.chatProfiles.length;
+  const apiClient = useContext(ChainlitContext);
+  const { accessToken, evoya } = useContext(WidgetContext);
+  const sessionId = useRecoilValue(sessionIdState);
+  const firstInteraction = useRecoilValue(firstUserInteraction);
+
+  const hasChatProfiles = !!config?.chatProfiles?.length;
+
+  const [sessionUuid, setSessionUuid] = useState(evoya?.session_uuid ?? '');
+
+  const getSessionUuid = async () => {
+    try {
+      const sessionResponse = await apiClient.get(`/chat_session_uuid/${sessionId}/`, accessToken);
+      const sessionJson = await sessionResponse.json();
+      setSessionUuid(sessionJson.session_uuid);
+      localStorage.setItem(sessionTokenKey, sessionJson.session_uuid);
+      document.cookie = `${sessionTokenKey}=${sessionJson.session_uuid};path=/`;
+      console.log('session_token', sessionJson.session_uuid);
+    } catch (e) {
+      return;
+    }
+  }
+
+  useEffect(() => {
+    if (!sessionUuid && firstInteraction && !loading) {
+      getSessionUuid();
+      window.dispatchEvent(new CustomEvent('reload-chat-sidebar'));
+
+    }
+  }, [firstInteraction, loading,evoya])
+
 
   return (
-    <div className="flex align-center justify-between p-4 pb-0">
-      <div className="flex items-center gap-1">
-        {hasChatProfiles ? <ChatProfiles /> : <Logo className="w-[100px]" />}
+    <div style={evoya.type !== 'dashboard' ? { backgroundColor: evoya.chainlitConfig.style.bgcolor } : {}}
+      className={`flex align-center justify-between p-4 border-b border-[#f4f4f4] rounded-t-xl`}>
+      <div className="flex items-center gap-3">
+        {hasChatProfiles ? <ChatProfiles /> : ''}
+        {evoya?.type === 'dashboard' ? (<>
+          <DashboardSidebarButton />
+          <NewChatButton />
+          <PrivacyShieldToggle />
+        </>) : (
+          evoya?.headerConfig && evoya?.headerConfig?.text_header
+            ?
+            <div className="text-left leading-[1.25]">
+              <h2
+                className={evoya?.headerConfig?.text_header?.font || ""}
+                style={{
+                  fontSize: evoya?.headerConfig?.text_header?.size,
+                  color: evoya?.headerConfig?.text_header?.color,
+                }}
+              >
+                {evoya?.headerConfig?.text_header?.title}
+              </h2>
+            </div>
+            : evoya?.logo && <img src={evoya.logo} style={{ height: '25px', width: 'auto' }} />
+        )}
+        {evoya?.headerConfig?.showSessionButton && <NewChatButton />}
       </div>
       <div className="flex items-center">
         {audioConnection === 'on' ? (
@@ -33,16 +99,23 @@ const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
             barSpacing={2}
           />
         ) : null}
-        <NewChatButton className="text-muted-foreground mt-[1.5px]" />
+
+        {(evoya?.type === 'dashboard' && sessionUuid) && (
+          <>
+            <FavoriteSessionButton sessionUuid={sessionUuid} />
+            <ShareSessionButton sessionUuid={sessionUuid} />
+          </>
+        )}
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => setExpanded(!expanded)}
+          className='hover:bg-transparent'
+          onClick={() => { setExpanded(!expanded); window.dispatchEvent(new CustomEvent('copilot-open-modal')); }}
         >
           {expanded ? (
-            <Minimize className="!size-5 text-muted-foreground" />
+            <X className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
           ) : (
-            <Maximize className="!size-5 text-muted-foreground" />
+            !isPopup && <Maximize2 className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
           )}
         </Button>
       </div>
