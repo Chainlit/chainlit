@@ -74,6 +74,7 @@ from ._utils import is_path_inside
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
+PREFIX = os.environ.get("CHAINLIT_ROOT_PATH", "")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -200,7 +201,7 @@ asgi_app = socketio.ASGIApp(
     socketio_path="",
 )
 
-app.mount("/ws/socket.io", asgi_app)
+app.mount(f"{PREFIX}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -210,7 +211,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+router = APIRouter(prefix=PREFIX)
 
 
 @router.get("/public/{filename:path}")
