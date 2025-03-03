@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import urllib.parse
+import uuid
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -195,10 +196,37 @@ app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
-asgi_app = socketio.ASGIApp(
-    socketio_server=sio,
-    socketio_path="",
-)
+
+class WebSocketASGIWrapper:
+    def __init__(self, asgi_app):
+        self.asgi_app = asgi_app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "websocket":
+            session_id = str(uuid.uuid4())
+
+            async def wrapped_send(message):
+                if message["type"] == "websocket.accept":
+                    message.setdefault("headers", []).append(
+                        (
+                            b"set-cookie",
+                            f"X-Chainlit-Session-id={session_id}; Path=/; HttpOnly; Secure; SameSite=None".encode(),
+                        )
+                    )
+                await send(message)
+
+            await self.asgi_app(scope, receive, wrapped_send)
+        else:
+            await self.asgi_app(scope, receive, send)
+
+
+base_asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
+
+if config.project.enable_session_cookie:
+    asgi_app = WebSocketASGIWrapper(base_asgi_app)
+else:
+    asgi_app = base_asgi_app
+
 
 app.mount("/ws/socket.io", asgi_app)
 

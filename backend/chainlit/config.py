@@ -291,6 +291,9 @@ class ProjectSettings(DataClassJsonMixin):
     # Socket.io client transports option
     transports: Optional[List[str]] = None
     enable_telemetry: bool = True
+    # Enable session affinity by inserting a session ID cookie (X-Session-ID)
+    # for load balancers that require client-provided session persistence (e.g., Istio).
+    enable_session_cookie: bool = False
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
