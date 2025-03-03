@@ -391,6 +391,23 @@ const useChatSession = () => {
             break;
         }
       });
+
+      socket.on('set-cookie', (data) => {
+        fetch(`/set-session-cookie?session_id=${data.session_id}`, {
+          method: 'GET',
+          credentials: 'include'
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log('Session cookie set successfully');
+            } else {
+              console.error('Failed to set session cookie');
+            }
+          })
+          .catch((error) => {
+            console.error('Error setting session cookie:', error);
+          });
+      });
     },
     [setSession, sessionId, idToResume, chatProfile]
   );

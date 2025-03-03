@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import urllib.parse
-import uuid
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -196,37 +195,7 @@ app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
-
-class WebSocketASGIWrapper:
-    def __init__(self, asgi_app):
-        self.asgi_app = asgi_app
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] == "websocket":
-            session_id = str(uuid.uuid4())
-
-            async def wrapped_send(message):
-                if message["type"] == "websocket.accept":
-                    message.setdefault("headers", []).append(
-                        (
-                            b"set-cookie",
-                            f"X-Chainlit-Session-id={session_id}; Path=/; HttpOnly; Secure; SameSite=None".encode(),
-                        )
-                    )
-                await send(message)
-
-            await self.asgi_app(scope, receive, wrapped_send)
-        else:
-            await self.asgi_app(scope, receive, send)
-
-
-base_asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
-
-if config.project.enable_session_cookie:
-    asgi_app = WebSocketASGIWrapper(base_asgi_app)
-else:
-    asgi_app = base_asgi_app
-
+asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 app.mount("/ws/socket.io", asgi_app)
 
@@ -328,6 +297,25 @@ if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
 # -------------------------------------------------------------------------------
 #                               HTTP HANDLERS
 # -------------------------------------------------------------------------------
+
+
+@app.get("/set-session-cookie")
+async def set_session_cookie(session_id: str, response: Response, request: Request):
+    secure_cookie = request.client is not None and request.client.host not in [
+        "127.0.0.1",
+        "localhost",
+    ]
+
+    response.set_cookie(
+        key="X-Chainlit-Session-id",
+        value=session_id,
+        path="/",
+        httponly=True,
+        secure=secure_cookie,
+        samesite="none",
+    )
+
+    return {"message": "Session cookie set"}
 
 
 def replace_between_tags(
