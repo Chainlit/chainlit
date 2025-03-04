@@ -69,7 +69,7 @@ def run_chainlit(target: str):
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path
-    
+
     from chainlit.server import app
 
     check_file(target)
