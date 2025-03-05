@@ -109,13 +109,13 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
         <Button
           size="icon"
           variant="ghost"
-          className='hover:bg-transparent'
+          className={ evoya?.type !== 'dashboard' && 'hover:bg-transparent'}
           onClick={() => { setExpanded(!expanded); window.dispatchEvent(new CustomEvent('copilot-open-modal')); }}
         >
           {expanded ? (
             <X className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
           ) : (
-            !isPopup && <Maximize2 className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
+            !isPopup && <Maximize2 className={`!size-5 text-muted-foreground`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
           )}
         </Button>
       </div>

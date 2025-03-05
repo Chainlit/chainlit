@@ -22,7 +22,7 @@ import { Translator } from '@chainlit/app/src/components/i18n';
 import { EvoyaShareLink } from './types';
 import { useContext, useState, useRef } from 'react';
 
-import { MdShare } from "react-icons/md";
+import { Share2 } from 'lucide-react';
 
 import {
   Tooltip,
@@ -260,7 +260,7 @@ export default function ShareSessionButton({ sessionUuid }: Props) {
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <MdShare />
+              <Share2 fill='#5c5c5c' className="!size-5 text-muted-foreground" strokeWidth={1.25} />
             </TooltipTrigger>
             <TooltipContent>
               <p>

@@ -117,9 +117,7 @@ export class APIBase {
         headers['Content-Type'] = 'application/json';
         body = data ? JSON.stringify(data) : null;
       }
-      headers['Access-Control-Allow-Origin'] = '*';
-      headers['Access-Control-Allow-Credentials'] = 'true';
-
+      
       const res = await fetch(this.buildEndpoint(path), {
         method,
         credentials: 'include',

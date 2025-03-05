@@ -41,7 +41,7 @@ export default function App({ widgetConfig }: Props) {
     if (evoya.reset) {
       clear();
     }
-  }, [config, isAuthenticated, evoya, user]);
+  }, [evoya]);
 
 
   useEffect(() => {
@@ -93,8 +93,8 @@ export default function App({ widgetConfig }: Props) {
     const userData = await apiClient
       .getUser(widgetConfig.accessToken)
       .catch((err) => setAuthError(String(err)));
-    clear()
     setUser(userData)
+    setTimeout(clear(), 1500)
   }
 
   return (

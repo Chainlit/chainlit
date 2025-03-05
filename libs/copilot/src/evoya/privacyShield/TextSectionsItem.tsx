@@ -45,9 +45,9 @@ const TextSectionsItem = ({ section, isActive, setActive, toggleAnon, setEdit }:
         key={section.id}
         onMouseEnter={mouseEnter}
         onMouseLeave={mouseLeave}
-        className={`inline bg-white px-3 py-1 rounded-3xl  w-fit border focus:outline-none cursor-pointer 
-        ${section.isAnon ? `flex border-green-500 text-green-500 hover:bg-green-500 hover:text-white ${isActive && 'bg-green-500 text-white'}`
-            : `flex border-red-500 text-red-500 hover:bg-red-500 hover:text-white ${isActive && 'bg-red-500 text-white'}`} text-xs space-x-1 hover:border-opacity-80`}
+        className={`inline-flex bg-white px-3 py-1 rounded-3xl  w-fit border focus:outline-none cursor-pointer 
+        ${section.isAnon ? ` border-green-500 text-green-500 hover:bg-green-500 hover:text-white ${isActive && 'bg-green-500 text-white'}`
+            : ` border-red-500 text-red-500 hover:bg-red-500 hover:text-white ${isActive && 'bg-red-500 text-white'}`} text-xs space-x-1 hover:border-opacity-80`}
       >
         <span onClick={click}>{section.isAnon ? section.anonString : section.string}</span>
         {!section.isLocked && showEdit && (

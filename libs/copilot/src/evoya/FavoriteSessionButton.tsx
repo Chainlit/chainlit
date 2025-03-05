@@ -1,9 +1,8 @@
 import { useContext, useState } from 'react';
 import { toast } from 'sonner';
 import { MdOutlineStar } from "react-icons/md";
-import { MdOutlineStarBorder } from "react-icons/md";
+import { Star } from 'lucide-react';
 import { Translator } from '@chainlit/app/src/components/i18n';
-import { EvoyaConfig } from '@/evoya/types';
 import {
   Tooltip,
   TooltipContent,
@@ -13,7 +12,6 @@ import {
 import { Button } from '@chainlit/app/src/components/ui/button';
 import { WidgetContext } from '@/context';
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
-import { LoaderCircle } from "lucide-react";
 interface Props {
   sessionUuid: string;
 }
@@ -89,7 +87,7 @@ const FavoriteSessionButton = ({ sessionUuid }: Props): JSX.Element => {
           <Tooltip>
             <TooltipTrigger asChild>
               {
-                isFavorite ? <MdOutlineStar className="!size-5 text-muted-foreground" /> : <MdOutlineStarBorder className="!size-5 text-muted-foreground" />
+                isFavorite ? <Star fill='#5c5c5c' className="!size-5 text-muted-foreground" /> : <Star className="!size-5 text-muted-foreground" />
               }
             </TooltipTrigger>
             <TooltipContent>
