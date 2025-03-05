@@ -30,7 +30,6 @@ const Page = ({ children }: Props) => {
 
   const mainContent = (
     <div className="flex flex-col h-full w-full">
-      <Header />
       <ResizablePanelGroup
         direction="horizontal"
         className="flex flex-row flex-grow"

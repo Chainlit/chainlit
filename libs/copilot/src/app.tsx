@@ -2,11 +2,14 @@ import { useContext, useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 import { IWidgetConfig } from 'types';
 import Widget from 'widget';
+import { useRecoilState } from 'recoil';
 
 import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
-import { ChainlitContext, useAuth } from '@chainlit/react-client';
+import { ChainlitContext, useAuth, useChatInteract, configState } from '@chainlit/react-client';
 
 import { ThemeProvider } from './ThemeProvider';
+import WidgetEmbedded from './widgetEmbed';
+import { WidgetContext } from './context';
 
 interface Props {
   widgetConfig: IWidgetConfig;
@@ -24,12 +27,36 @@ declare global {
 }
 
 export default function App({ widgetConfig }: Props) {
-  const { isAuthenticated, data } = useAuth();
+  const { isAuthenticated, data, user,setUser } = useAuth();
+  const [config, setConfig] = useRecoilState(configState);
+  const { evoya } = useContext(WidgetContext)
   const apiClient = useContext(ChainlitContext);
   const { i18n } = useTranslation();
   const languageInUse = navigator.language || 'en-US';
   const [authError, setAuthError] = useState<string>();
   const [fetchError, setFetchError] = useState<string>();
+  const { clear } = useChatInteract();
+
+  useEffect(() => {
+    if (evoya.reset) {
+      clear();
+    }
+  }, [evoya]);
+
+
+  useEffect(() => {
+    if (config && config?.ui && config?.ui?.cot !== 'hidden') {
+      setConfig({
+        ...config,
+        ...{
+          ui: {
+            ...config?.ui,
+            cot: 'hidden'
+          }
+        }
+      });
+    }
+  }, [config]);
 
   useEffect(() => {
     apiClient
@@ -44,7 +71,7 @@ export default function App({ widgetConfig }: Props) {
       });
   }, []);
 
-  const defaultTheme = widgetConfig.theme || data?.default_theme;
+  const defaultTheme = widgetConfig.theme || 'light';
 
   useEffect(() => {
     if (fetchError) return;
@@ -54,6 +81,7 @@ export default function App({ widgetConfig }: Props) {
       } else {
         apiClient
           .jwtAuth(widgetConfig.accessToken)
+          .then((res) => getUserWithAuth())
           .catch((err) => setAuthError(String(err)));
       }
     } else {
@@ -61,10 +89,18 @@ export default function App({ widgetConfig }: Props) {
     }
   }, [isAuthenticated, apiClient, fetchError, setAuthError]);
 
+  const getUserWithAuth = async () => {
+    const userData = await apiClient
+      .getUser(widgetConfig.accessToken)
+      .catch((err) => setAuthError(String(err)));
+    setUser(userData)
+    setTimeout(clear(), 1500)
+  }
+
   return (
     <ThemeProvider storageKey="vite-ui-theme" defaultTheme={defaultTheme}>
-      <Toaster className="toast" position="bottom-center" />
-      <Widget config={widgetConfig} error={fetchError || authError} />
+      <Toaster richColors className="toast" position="top-right" />
+      {evoya.type === 'default' ? <Widget config={widgetConfig} error={fetchError || authError} /> : <WidgetEmbedded />}
     </ThemeProvider>
   );
 }

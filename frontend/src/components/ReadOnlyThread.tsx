@@ -177,6 +177,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     return null;
   }
 
+
   return (
     <div className="flex w-full flex-col flex-grow relative overflow-y-auto">
       <ErrorBoundary>

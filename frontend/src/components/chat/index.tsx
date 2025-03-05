@@ -37,7 +37,7 @@ const Chat = () => {
 
   const [autoScroll, setAutoScroll] = useState(true);
   const { error, disabled } = useChatData();
-  const { uploadFile } = useChatInteract();
+  const { uploadFile, clear, message } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
   const navigate = useNavigate();
 
@@ -174,6 +174,7 @@ const Chat = () => {
         currentThreadId: threadId
       }));
     }
+    clear()
   }, []);
 
   const enableAttachments =

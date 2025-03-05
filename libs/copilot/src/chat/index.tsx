@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect,useContext } from 'react';
 
 import { useChatInteract, useChatSession } from '@chainlit/react-client';
 
 import ChatBody from './body';
+import { WidgetContext } from '@/context';
 
 export default function ChatWrapper() {
+  const { accessToken } = useContext(WidgetContext);
   const { connect, session } = useChatSession();
   const { sendMessage } = useChatInteract();
   useEffect(() => {
@@ -12,7 +14,8 @@ export default function ChatWrapper() {
     connect({
       // @ts-expect-error window typing
       transports: window.transports,
-      userEnv: {}
+      userEnv: {},
+      accessToken: `Bearer ${accessToken}`
     });
   }, [connect]);
 

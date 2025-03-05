@@ -246,19 +246,56 @@ const Input = forwardRef<InputMethods, Props>(
             const range = selection.getRangeAt(0);
             range.deleteContents();
 
-            // Insert the HTML content
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = textWithNewLines;
-            const fragment = document.createDocumentFragment();
-            while (tempDiv.firstChild) {
-              fragment.appendChild(tempDiv.firstChild);
-            }
-            range.insertNode(fragment);
+            // Find the shadow root and chat input
+            const shadowHost = document.getElementById('chainlit-copilot');
+            if (shadowHost) {
+              const shadowRoot = shadowHost.shadowRoot;
+              if (shadowRoot) {
+                const chatInput = shadowRoot.querySelector('#chat-input');
 
-            // Move cursor to end of pasted content
-            range.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(range);
+                if (chatInput) {
+                  // Ensure there's a single container inside #chat-input
+                  let contentDiv = chatInput.querySelector('.pasted-content');
+                  if (!contentDiv) {
+                    contentDiv = document.createElement('div');
+                    contentDiv.classList.add('pasted-content');
+                    chatInput.appendChild(contentDiv);
+                  }
+
+                  // Append the new content inside the existing container
+                  contentDiv.innerHTML += textWithNewLines;
+
+                  // Move cursor to the end of content inside shadow DOM
+                  const newRange = document.createRange();
+                  newRange.selectNodeContents(contentDiv);
+                  newRange.collapse(false);
+
+                  const newSelection = shadowRoot.getSelection() || window.getSelection();
+                  newSelection?.removeAllRanges();
+                  newSelection?.addRange(newRange);
+
+                  chatInput.focus();
+                }
+              }
+            } else {
+              // Insert normally if shadow DOM is not used
+              let contentDiv = textarea.querySelector('.pasted-content');
+              if (!contentDiv) {
+                contentDiv = document.createElement('div');
+                contentDiv.classList.add('pasted-content');
+                textarea.appendChild(contentDiv);
+              }
+              contentDiv.innerHTML += textWithNewLines;
+
+              // Move cursor to the end
+              const newRange = document.createRange();
+              newRange.selectNodeContents(contentDiv);
+              newRange.collapse(false);
+
+              const newSelection = window.getSelection();
+              newSelection?.removeAllRanges();
+              newSelection?.addRange(newRange);
+            }
 
             // Force focus back to the content editable
             textarea.focus();
@@ -279,6 +316,7 @@ const Input = forwardRef<InputMethods, Props>(
         textarea.removeEventListener('paste', _onPaste);
       };
     }, [onPaste]);
+
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
       if (isUpdatingRef.current) return;

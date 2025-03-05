@@ -8,6 +8,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr()],
   build: {
+    // sourcemap:true,
     rollupOptions: {
       input: {
         copilot: path.resolve(__dirname, 'index.tsx')
@@ -15,7 +16,7 @@ export default defineConfig({
       output: [
         {
           name: 'copilot',
-          dir: 'dist',
+          dir: '/mnt/d/client_works/avaia-chat/src/avaia_chat/public/copilot',
           format: 'iife',
           entryFileNames: 'index.js',
           inlineDynamicImports: true
@@ -27,6 +28,7 @@ export default defineConfig({
     alias: {
       // To prevent conflicts with packages in @chainlit/app, we need to specify the resolution paths for these dependencies.
       react: path.resolve(__dirname, './node_modules/react'),
+      '@chainlit/copilot': path.resolve(__dirname, ''),
       '@chainlit': path.resolve(__dirname, './node_modules/@chainlit'),
       postcss: path.resolve(__dirname, './node_modules/postcss'),
       tailwindcss: path.resolve(__dirname, './node_modules/tailwindcss'),
@@ -36,7 +38,7 @@ export default defineConfig({
       'react-i18next': path.resolve(__dirname, './node_modules/react-i18next'),
       'usehooks-ts': path.resolve(__dirname, './node_modules/usehooks-ts'),
       lodash: path.resolve(__dirname, './node_modules/lodash'),
-      recoil: path.resolve(__dirname, './node_modules/recoil')
+      recoil: path.resolve(__dirname, './node_modules/recoil'),
     }
   }
 });

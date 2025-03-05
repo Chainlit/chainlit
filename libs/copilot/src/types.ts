@@ -3,6 +3,7 @@ export interface IWidgetConfig {
   showCot?: boolean;
   accessToken?: string;
   theme?: 'light' | 'dark';
+  isEmbedded?:boolean;
   button?: {
     containerId?: string;
     imageUrl?: string;

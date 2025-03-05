@@ -41,8 +41,11 @@
     "embla-carousel-react": "^8.5.1",
     "highlight.js": "^11.9.0",
     "i18next": "^23.7.16",
+    "js-base64": "^3.7.7",
     "lodash": "^4.17.21",
     "lucide-react": "^0.468.0",
+    "mermaid": "^11.4.1",
+    "pako": "^2.1.0",
     "plotly.js": "^2.27.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -58,6 +61,7 @@
     "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^6.15.0",
     "react-runner": "^1.0.5",
+    "react-vega": "^7.6.0",
     "recoil": "^0.7.7",
     "rehype-katex": "^7.0.0",
     "rehype-raw": "^7.0.0",
@@ -90,7 +94,7 @@
     "autoprefixer": "^10.4.20",
     "immutable": "^4.3.4",
     "jsdom": "^22.1.0",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.1",
     "tailwindcss": "^3.4.16",
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
@@ -115,6 +119,9 @@
       "rollup@>=3.0.0 <3.29.5": ">=3.29.5",
       "rollup@>=4.0.0 <4.22.4": ">=4.22.4",
       "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
-        }
+    }
+  },
+  "peerDependencies": {
+    "@chainlit/copilot": "workspace:^"
   }
 }

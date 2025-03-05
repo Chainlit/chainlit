@@ -132,3 +132,11 @@
   background-repeat: no-repeat;
   background-size: 50% 200%;
 }
+
+.copilot-container-expanded{
+  position: fixed;
+  inset: 10px;
+  width: 98.8vw;
+  height: 97.5vh;
+  z-index: 1000;
+}

@@ -1,5 +1,5 @@
 import { prepareContent } from '@/lib/message';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
 
@@ -7,6 +7,8 @@ import { CURSOR_PLACEHOLDER } from '@/components/BlinkingCursor';
 import Markdown from '@/components/Markdown';
 
 import { InlinedElements } from './InlinedElements';
+
+import { usePrivacyShield } from '@chainlit/copilot/src/evoya/privacyShield/usePrivacyShield';
 
 export interface Props {
   elements: IMessageElement[];
@@ -23,13 +25,21 @@ const MessageContent = memo(
         : message.output;
 
     const {
+      transformOutput,
+    } = usePrivacyShield();
+
+    const messageTrans = useMemo<string>(() => {
+      return transformOutput(outputContent);
+    }, [message])
+
+    const {
       preparedContent: output,
       inlinedElements: outputInlinedElements,
       refElements: outputRefElements
     } = prepareContent({
       elements,
       id: message.id,
-      content: outputContent,
+      content: messageTrans,
       language: message.language
     });
 
@@ -45,7 +55,7 @@ const MessageContent = memo(
           </div>
         ) : null}
         <Markdown
-          allowHtml={allowHtml}
+          allowHtml={true}
           latex={latex}
           refElements={outputRefElements}
         >

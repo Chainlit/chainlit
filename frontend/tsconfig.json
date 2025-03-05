@@ -21,6 +21,8 @@
     "types": ["node"],
     "paths": {
       "client-types/*": ["../../libs/react-client/dist"],
+      "evoya/*": ["../../libs/copilot/src/evoya/*"],
+      "context": ["../../libs/copilot/src/context"],
       "@/*": ["./*"]
     }
   },

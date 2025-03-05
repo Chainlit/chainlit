@@ -23,6 +23,7 @@ export default function Login() {
     if (json?.success != true) throw LoginError;
 
     // Validate login cookie and get user data.
+
     setUserFromAPI();
   };
 

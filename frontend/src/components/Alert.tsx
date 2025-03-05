@@ -86,7 +86,7 @@ export const Alert: React.FC<AlertProps> = ({
         className
       )}
     >
-      <div className="flex">
+      <div className="flex items-center">
         <div className={cn('flex-shrink-0', styles.icon)}>{icons[variant]}</div>
         <div className="ml-3">
           <p className={cn('text-sm', styles.text)}>{children}</p>

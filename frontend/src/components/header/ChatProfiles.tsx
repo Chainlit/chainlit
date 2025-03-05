@@ -22,7 +22,6 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { NewChatDialog } from './NewChat';
 
 interface Props {
   navigate?: (to: string) => void;

@@ -1,5 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useState, useEffect } from 'react';
 
 import {
   type IAction,
@@ -38,9 +38,28 @@ const hasAssistantMessage = (step: IStep): boolean => {
   );
 };
 
+const checkToolStep = (step: IStep): boolean => {
+  return step.steps?.some((s) => s.type === 'tool' && s.end == null || checkToolStep(s)) || false;
+};
+
 const Messages = memo(
   ({ messages, elements, actions, indent, isRunning, scorableRun }: Props) => {
     const messageContext = useContext(MessageContext);
+
+    const [isToolLoading, setToolLoading] = useState(false);
+
+    useEffect(() => {
+      const getLoaderState = messages.some(checkToolStep);
+      if (isToolLoading || getLoaderState) {
+        setToolLoading(false);
+      }
+      const timeout = setTimeout(() => {
+        setToolLoading(getLoaderState);
+      }, 700);
+      return () => clearTimeout(timeout);
+
+    }, [messages]);
+
     return (
       <>
         {messages.map((m) => {
@@ -73,8 +92,12 @@ const Messages = memo(
                   />
                 ) : null}
                 {showToolCoTLoader || showHiddenCoTLoader ? (
-                  <BlinkingCursor />
+                  <div id='cursor-bliner'>
+                    <BlinkingCursor />
+                  </div>
+
                 ) : null}
+
               </React.Fragment>
             );
           } else {

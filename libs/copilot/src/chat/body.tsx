@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState,useContext } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,9 +23,20 @@ import {
 
 import WelcomeScreen from '@/components/WelcomeScreen';
 import ElementSideView from 'components/ElementSideView';
+import PrivacyShield from '@/evoya/privacyShield';
+import { usePrivacyShield } from '@/evoya/privacyShield/usePrivacyShield';
+import { WidgetContext } from '@/context';
+
+interface ChatFunctions {
+  submit: (text: string) => void;
+}
+const chatFunctions: ChatFunctions = {
+  submit: () => {}
+}
 
 const Chat = () => {
   const { config } = useConfig();
+  const { evoya } = useContext(WidgetContext);
   const layoutMaxWidth = useLayoutMaxWidth();
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
@@ -148,6 +159,20 @@ const Chat = () => {
   const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
+    const {
+      getPrivacySections,
+      enabled,
+      enabledVisual,
+      sections,
+    } = usePrivacyShield();
+    const submitFunction = (text: string) => {
+      chatFunctions.submit(text);
+    }
+    const submitProxy = async (text: string, submitFunc: (text: string) => void) => {
+      chatFunctions.submit = submitFunc;
+      getPrivacySections(text);
+    }
+
   return (
     <div
       {...(enableAttachments
@@ -199,10 +224,14 @@ const Chat = () => {
               onFileUploadError={onFileUploadError}
               setAutoScroll={setAutoScroll}
               autoScroll={autoScroll}
+              submitProxy={enabled ? submitProxy : undefined}
             />
           </div>
         </ErrorBoundary>
       </div>
+      {evoya?.type === 'dashboard' && (
+        <PrivacyShield submit={submitFunction} />
+      )}
       <ElementSideView />
     </div>
   );

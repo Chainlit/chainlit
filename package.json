@@ -34,5 +34,9 @@
       "braces@<3.0.3": ">=3.0.3",
       "micromatch@<4.0.8": ">=4.0.8"
     }
+  },
+  "dependencies": {
+    "pnpm": "^10.3.0",
+    "react-icons": "^5.4.0"
   }
 }

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
@@ -9,6 +9,7 @@ import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
+import { VegaLite } from 'react-vega';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
@@ -28,6 +29,9 @@ import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
 import { MarkdownAlert, alertComponents } from './MarkdownAlert';
+import { MermaidDiagram } from './Mermaid';
+
+import ResponseTextItem from '@chainlit/copilot/src/evoya/privacyShield/ResponseTextItem';
 
 interface Props {
   allowHtml?: boolean;
@@ -98,7 +102,7 @@ const Markdown = ({
       rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
     }
     if (latex) {
-      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
+      rehypePlugins = [[rehypeKatex as any, { output: 'mathml' }], ...rehypePlugins];
     }
     return rehypePlugins;
   }, [allowHtml, latex]);
@@ -123,7 +127,15 @@ const Markdown = ({
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
       components={{
-        ...alertComponents, // add alert components
+        ...alertComponents,
+        span({ children, ...props }) {
+          if (props.node?.properties.dataPrivacyComponent) {
+            return (
+              <ResponseTextItem sectionId={props.node?.properties.dataPrivacyComponent.toString()} />
+            );
+          }
+          return <span {...props}>{children}</span>;
+        },
         code(props) {
           return (
             <code
@@ -133,6 +145,24 @@ const Markdown = ({
           );
         },
         pre({ children, ...props }: any) {
+          try {
+            if (children && isValidElement(children)) {
+              const { className, children: rawContent } = children?.props || {};
+              if (className?.includes('-vega')) {
+                const vegaSpec = JSON.parse(rawContent);
+                return <VegaLite spec={vegaSpec} data={vegaSpec.data} />;
+              } else if (className?.includes('-json')) {
+                const jsonContent = JSON.parse(rawContent);
+                if (jsonContent.$schema?.includes('vega.github.io')) {
+                  return <VegaLite spec={jsonContent} data={jsonContent.data} />;
+                }
+              } else if (className?.includes('-mermaid')) {
+                return <MermaidDiagram>{rawContent}</MermaidDiagram>;
+              }
+            }
+          } catch (e) {
+            return <CodeSnippet {...props} />;
+          }
           return <CodeSnippet {...props} />;
         },
         a({ children, ...props }) {
@@ -154,14 +184,11 @@ const Markdown = ({
         },
         img: (image: any) => {
           return (
-            <div className="sm:max-w-sm md:max-w-md">
-              <AspectRatio
-                ratio={16 / 9}
-                className="bg-muted rounded-md overflow-hidden"
-              >
+            <div className="relative sm:max-w-sm md:max-w-md">
+              <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
                 <img
                   src={
-                    image.src.startsWith('/public')
+                    image.src.startsWith("/public")
                       ? apiClient.buildEndpoint(image.src)
                       : image.src
                   }
