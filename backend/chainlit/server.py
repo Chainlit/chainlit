@@ -191,7 +191,7 @@ def get_build_dir(local_target: str, packaged_target: str) -> str:
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path=config.run.root_path)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
