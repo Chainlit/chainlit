@@ -2,6 +2,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any, TYPE_CHECKING
 from pydantic import BaseModel
 from semantic_kernel.filters import FilterTypes
+from chainlit import Step
 
 if TYPE_CHECKING:
     from semantic_kernel import Kernel
@@ -56,7 +57,7 @@ class SemanticKernelFilter(BaseModel):
         if len(arguments) == 0:
             return ''
         input_dict = {}
-        for key, value in context.arguments.items():
+        for key, value in arguments.items():
             if isinstance(value, BaseModel):
                 if key == "ChatHistory":
                     input_dict[key] = value.model_dump_json(
@@ -83,7 +84,7 @@ class SemanticKernelFilter(BaseModel):
         ):
             await next(context)
             return
-        async with cl.Step(
+        async with Step(
             type="tool", name=context.function.fully_qualified_name
         ) as step:
             step.input = self.parse_arguments(context.arguments)
