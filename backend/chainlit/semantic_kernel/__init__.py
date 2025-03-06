@@ -1,0 +1,94 @@
+from collections.abc import Awaitable, Callable
+from typing import Any, TYPE_CHECKING
+from pydantic import BaseModel
+from semantic_kernel.filters import FilterTypes
+
+if TYPE_CHECKING:
+    from semantic_kernel import Kernel
+    from semantic_kernel.filters import FunctionInvocationContext
+    from semantic_kernel.functions import KernelArguments
+
+class SemanticKernelFilter(BaseModel):
+    """Semantic Kernel Filter for Chainlit.
+
+    This filter wraps any function calls that are executed and will capture the input and output of that function
+    as a Chainlit step.
+
+    After creating the filter, just call `.add_to_kernel` method with your kernel.
+
+    Args:
+        excluded_plugins: a list of plugin_names that will be excluded from displaying steps.
+        excluded_functions: a list of function names that will be excluded from displaying steps.
+
+    Methods:
+        add_to_kernel: this method takes a Kernel and adds the filter to that kernel.
+        parse_arguments: this method is called with KernelArguments used for the function
+            it can be subclassed to customize how to represent the input arguments.
+
+    Example::
+
+        filter = SemanticKernelFilter()
+        filter.add_to_kernel(kernel)
+    """
+
+    excluded_plugins: list[str] | None = None
+    excluded_functions: list[str] | None = None
+
+    def add_to_kernel(self, kernel: 'Kernel') -> None:
+        """Adds the filter to the provided kernel.
+
+        Args:
+            kernel: the Kernel to add the filter to.
+        """
+        kernel.add_filter(FilterTypes.FUNCTION_INVOCATION, self._function_invocation_filter)
+
+    def parse_arguments(self, arguments: "KernelArguments") -> dict[str, Any] | str:
+        """Parse the KernelArguments used for the function.
+        
+        This function can be subclassed to easily adopt how the input arguments are displayed.
+
+        Args:
+            arguments: KernelArguments
+
+        Returns:
+            a dict or string with the input.        
+        """
+        if len(arguments) == 0:
+            return ''
+        input_dict = {}
+        for key, value in context.arguments.items():
+            if isinstance(value, BaseModel):
+                if key == "ChatHistory":
+                    input_dict[key] = value.model_dump_json(
+                        indent=4, exclude_none=True, by_alias=True
+                    )
+                else:
+                    input_dict[key] = value.model_dump(
+                        exclude_none=True, by_alias=True
+                    )
+            else:
+                input_dict[key] = value
+        return input_dict
+
+    async def _function_invocation_filter(
+        self,
+        context: 'FunctionInvocationContext',
+        next: Callable[['FunctionInvocationContext'], Awaitable[None]],
+    ):
+        if (
+            self.excluded_plugins
+            and context.function.plugin_name in self.excluded_plugins
+        ) or (
+            self.excluded_functions and context.function.name in self.excluded_functions
+        ):
+            await next(context)
+            return
+        async with cl.Step(
+            type="tool", name=context.function.fully_qualified_name
+        ) as step:
+            step.input = self.parse_arguments(context.arguments)
+            await step.send()
+            await next(context)
+            if context.result:
+                step.output = context.result.value
+            await step.update()
