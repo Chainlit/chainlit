@@ -150,10 +150,7 @@ def set_auth_cookie(request: Request, response: Response, token: str):
     # Delete remaining prior cookies/cookie chunks
     for k in existing_cookies:
         response.delete_cookie(
-            key=k,
-            path="/",
-            secure=_cookie_secure,
-            samesite=_cookie_samesite
+            key=k, path="/", secure=_cookie_secure, samesite=_cookie_samesite
         )
 
 
@@ -168,10 +165,7 @@ def clear_auth_cookie(request: Request, response: Response):
 
     for k in existing_cookies:
         response.delete_cookie(
-            key=k,
-            path="/",
-            secure=_cookie_secure,
-            samesite=_cookie_samesite
+            key=k, path="/", secure=_cookie_secure, samesite=_cookie_samesite
         )
 
 
