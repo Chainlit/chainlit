@@ -1152,7 +1152,9 @@ def validate_file_mime_type(file: UploadFile):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
-                    if file.filename is not None and file.filename.endswith(extension):
+                    if file.filename is not None and file.filename.lower().endswith(
+                        extension.lower()
+                    ):
                         return
     raise ValueError("File type not allowed")
 
