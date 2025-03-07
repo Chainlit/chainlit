@@ -21,7 +21,7 @@ import { IAttachment, attachmentsState } from 'state/chat';
 import { Attachments } from './Attachments';
 import CommandButton from './CommandButton';
 import Input, { InputMethods } from './Input';
-import McpButton from './McpButton';
+import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
