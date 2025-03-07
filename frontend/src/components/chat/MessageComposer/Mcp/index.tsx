@@ -60,7 +60,7 @@ const McpButton = ({ disabled }: Props) => {
                   <Plug className="!size-5" />
                 )}
                 {connectedMcps.length > 0 && (
-                  <span className="absolute -top-0 -right-0 bg-primary text-primary-foreground text-[8px] font-medium rounded-full w-3 h-3 flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 bg-primary text-primary-foreground text-[8px] font-medium rounded-full w-3 h-3 flex items-center justify-center">
                     {connectedMcps.length}
                   </span>
                 )}
@@ -74,7 +74,7 @@ const McpButton = ({ disabled }: Props) => {
       </DialogTrigger>
       <DialogContent
         id="mcp-servers"
-        className="min-w-[50vw] min-h-[50vh] max-h-[85vh] flex flex-col gap-6 bg-background"
+        className="min-w-[50vw] max-h-[85vh] flex flex-col gap-6 bg-background"
       >
         <DialogHeader>
           <DialogTitle>MCP Servers</DialogTitle>

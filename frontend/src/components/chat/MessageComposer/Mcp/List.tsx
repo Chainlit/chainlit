@@ -11,6 +11,7 @@ import {
   sessionIdState
 } from '@chainlit/react-client';
 
+import CopyButton from '@/components/CopyButton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,9 +116,12 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
           )}
           {mcp.clientType === 'stdio' ? 'Command' : 'URL'}
         </div>
-        <p className="text-sm truncate max-w-full bg-muted px-2 py-1 rounded font-mono">
-          {mcp.command || mcp.url || 'N/A'}
-        </p>
+        <div className="flex items-center w-full bg-accent px-3 py-1 rounded gap-2">
+          <pre className="text-sm font-mono flex-grow truncate">
+            {mcp.command || mcp.url || 'N/A'}
+          </pre>
+          <CopyButton content={mcp.command || mcp.url} />
+        </div>
       </div>
 
       <div className="font-medium text-sm text-muted-foreground flex items-center">
