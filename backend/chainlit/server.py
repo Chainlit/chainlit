@@ -82,7 +82,7 @@ async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
     host = config.run.host
     port = config.run.port
-    root_path = config.run.root_path
+    root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
 
     if host == DEFAULT_HOST:
         url = f"http://localhost:{port}{root_path}"
@@ -193,7 +193,7 @@ def get_build_dir(local_target: str, packaged_target: str) -> str:
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-app = FastAPI(lifespan=lifespan, root_path=config.run.root_path)
+app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
@@ -202,7 +202,8 @@ asgi_app = socketio.ASGIApp(
     socketio_path="",
 )
 
-app.mount("/ws/socket.io", asgi_app)
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -212,7 +213,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+router = APIRouter(prefix=config.run.root_path)
 
 
 @router.get("/public/{filename:path}")
@@ -1303,7 +1305,9 @@ def validate_file_mime_type(file: UploadFile):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
-                    if file.filename is not None and file.filename.endswith(extension):
+                    if file.filename is not None and file.filename.lower().endswith(
+                        extension.lower()
+                    ):
                         return
     raise ValueError("File type not allowed")
 
@@ -1436,7 +1440,7 @@ def status_check():
 @router.get("/{full_path:path}")
 async def serve(request: Request):
     """Serve the UI files."""
-    html_template = get_html_template(request.scope["root_path"])
+    html_template = get_html_template(os.getenv("CHAINLIT_ROOT_PATH", ""))
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response

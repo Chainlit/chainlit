@@ -81,7 +81,7 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
           .connectSseMCP(sessionId, serverName, serverUrl)
           .then(async ({ success, mcp }) => {
             if (success && mcp) {
-              setMcps((prev) => [...prev, mcp]);
+              setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
             resetForm();
             onSuccess();

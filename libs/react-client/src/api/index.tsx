@@ -254,6 +254,12 @@ export class ChainlitAPI extends APIBase {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
+          return;
+        }
+        const contentType = xhr.getResponseHeader('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          const response = JSON.parse(xhr.responseText);
+          reject(response.detail);
         } else {
           reject('Upload failed');
         }

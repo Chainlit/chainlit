@@ -54,7 +54,7 @@ export const McpList = ({ onAddNewClick }: McpListProps) => {
       );
     }
 
-    setMcps((prev) => prev.filter((mcp) => mcp.name !== mcp.name));
+    setMcps((prev) => prev.filter((_mcp) => _mcp.name !== mcp.name));
   };
 
   if (!mcps || mcps.length === 0) {

@@ -48,7 +48,7 @@ fastapi = ">=0.115.3,<0.116"
 starlette = "^0.41.2"
 uvicorn = ">=0.25.0"
 python-socketio = "^5.11.0"
-aiofiles = "^23.1.0"
+aiofiles = ">=23.1.0,<25.0.0"
 syncer = "^2.0.3"
 asyncer = "^0.0.7"
 mcp = "^1.3.0"
@@ -57,7 +57,7 @@ click = "^8.1.3"
 tomli = "^2.0.1"
 pydantic = ">=2.7.2,<3"
 python-dotenv = "^1.0.0"
-uptrace = "^1.22.0"
+uptrace = "^1.29.0"
 watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
@@ -119,6 +119,8 @@ module = [
     "google-cloud-storage"
 ]
 ignore_missing_imports = true
+
+
 
 
 

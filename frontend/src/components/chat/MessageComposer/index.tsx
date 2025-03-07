@@ -19,7 +19,8 @@ import { chatSettingsOpenState } from '@/state/project';
 import { IAttachment, attachmentsState } from 'state/chat';
 
 import { Attachments } from './Attachments';
-import CommandButton from './CommandButton';
+import CommandButtons from './CommandButtons';
+import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
 import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
@@ -183,6 +184,11 @@ export default function MessageComposer({
           )}
           <McpButton disabled={disabled} />
           <VoiceButton disabled={disabled} />
+          <CommandButtons
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton

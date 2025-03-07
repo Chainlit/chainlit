@@ -74,7 +74,7 @@ const McpButton = ({ disabled }: Props) => {
       </DialogTrigger>
       <DialogContent
         id="mcp-servers"
-        className="min-w-[50vw] max-h-[85vh] flex flex-col gap-6 bg-background"
+        className="min-w-[50vw] max-h-[85vh] flex flex-col gap-6 bg-background overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle>MCP Servers</DialogTitle>
@@ -87,7 +87,7 @@ const McpButton = ({ disabled }: Props) => {
 
           <TabsContent
             value="add"
-            className="flex flex-col flex-grow overflow-y-auto gap-6 p-1"
+            className="flex flex-col flex-grow gap-6 p-1"
           >
             <McpAddForm
               onSuccess={() => setActiveTab('list')}
