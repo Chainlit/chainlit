@@ -42,7 +42,7 @@ export const CommandButtons = ({
                 className={cn(
                   'p-2 h-9 text-[13px] font-medium rounded-full',
                   selectedCommandId === command.id &&
-                    'border-transparent text-[#08f] bg-[#DAEEFF] hover:bg-[#BDDCF4] dark:bg-[#2A4A6D] dark:text-[#48AAFF] dark:hover:bg-[#1A416A]'
+                    'border-transparent text-[#08f] hover:text-[#08f] bg-[#DAEEFF] hover:bg-[#BDDCF4] dark:bg-[#2A4A6D] dark:text-[#48AAFF] dark:hover:bg-[#1A416A]'
                 )}
                 onClick={() =>
                   selectedCommandId === command.id
