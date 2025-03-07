@@ -47,7 +47,7 @@ fastapi = ">=0.115.3,<0.116"
 starlette = "^0.41.2"
 uvicorn = ">=0.25.0"
 python-socketio = "^5.11.0"
-aiofiles = "^23.1.0"
+aiofiles = ">=23.1.0,<25.0.0"
 syncer = "^2.0.3"
 asyncer = "^0.0.7"
 nest-asyncio = "^1.6.0"
@@ -119,6 +119,8 @@ module = [
     "google-cloud-storage"
 ]
 ignore_missing_imports = true
+
+
 
 
 
