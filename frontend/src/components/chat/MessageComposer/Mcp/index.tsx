@@ -1,4 +1,3 @@
-// McpButton.jsx
 import { Plug } from 'lucide-react';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { McpAddForm } from './AddForm';
+import AnimatedPlugIcon from './AnimatedPlugIcon';
 import { McpList } from './List';
 
 interface Props {
@@ -38,6 +38,10 @@ const McpButton = ({ disabled }: Props) => {
 
   if (!isEnabled) return null;
 
+  const connectedMcps = mcps.filter((mcp) => mcp.status === 'connected');
+
+  const mcpLoading = mcps.find((mcp) => mcp.status === 'connecting');
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
@@ -50,10 +54,14 @@ const McpButton = ({ disabled }: Props) => {
                 size="icon"
                 className="hover:bg-muted relative"
               >
-                <Plug className="!size-5" />
-                {mcps?.length > 0 && (
+                {mcpLoading ? (
+                  <AnimatedPlugIcon className="!size-5" />
+                ) : (
+                  <Plug className="!size-5" />
+                )}
+                {connectedMcps.length > 0 && (
                   <span className="absolute -top-0 -right-0 bg-primary text-primary-foreground text-[8px] font-medium rounded-full w-3 h-3 flex items-center justify-center">
-                    {mcps.length}
+                    {connectedMcps.length}
                   </span>
                 )}
               </Button>

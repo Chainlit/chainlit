@@ -300,7 +300,7 @@ class ProjectSettings(DataClassJsonMixin):
     lc_cache_path: Optional[str] = None
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
-    session_timeout: int = 3600
+    session_timeout: int = 300
     # Duration (in seconds) of the user session expiry
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)

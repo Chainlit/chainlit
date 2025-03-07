@@ -1,7 +1,8 @@
 export interface IMcp {
-    name: string;
-    tools: [{name: string}]
-    clientType: "sse" | "stdio"
-    command?: string
-    url?: string
+  name: string;
+  tools: [{ name: string }];
+  status: 'connected' | 'connecting' | 'failed';
+  clientType: 'sse' | 'stdio';
+  command?: string;
+  url?: string;
 }

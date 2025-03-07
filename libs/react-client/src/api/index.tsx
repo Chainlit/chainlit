@@ -288,17 +288,27 @@ export class ChainlitAPI extends APIBase {
   }
 
   async connectStdioMCP(sessionId: string, name: string, fullCommand: string) {
-    const res = await this.post(`/mcp`, { sessionId, name, fullCommand, clientType: "stdio" });
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      fullCommand,
+      clientType: 'stdio'
+    });
     return res.json();
   }
 
   async connectSseMCP(sessionId: string, name: string, url: string) {
-    const res = await this.post(`/mcp`, { sessionId, name, url, clientType: "sse" });
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      clientType: 'sse'
+    });
     return res.json();
   }
 
   async disconnectMcp(sessionId: string, name: string) {
-    const res = await this.delete(`/mcp`, { sessionId, name});
+    const res = await this.delete(`/mcp`, { sessionId, name });
     return res.json();
   }
 

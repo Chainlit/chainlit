@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Link, SquareTerminal, Trash2, Wrench } from 'lucide-react';
 import { useContext, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -35,22 +36,24 @@ export const McpList = ({ onAddNewClick }: McpListProps) => {
   const [mcps, setMcps] = useRecoilState(mcpState);
   const [isLoading, setIsLoading] = useState(false);
 
-  const deleteMcp = (mcpName: string) => {
-    setIsLoading(true);
+  const deleteMcp = (mcp: IMcp) => {
+    if (mcp.status === 'connected') {
+      setIsLoading(true);
 
-    toast.promise(
-      apiClient
-        .disconnectMcp(sessionId, mcpName)
-        .then(() => {
-          setMcps((prev) => prev.filter((mcp) => mcp.name !== mcpName));
-        })
-        .finally(() => setIsLoading(false)),
-      {
-        loading: 'Removing MCP...',
-        success: () => 'MCP removed!',
-        error: (err) => <span>{err.message}</span>
-      }
-    );
+      toast.promise(
+        apiClient
+          .disconnectMcp(sessionId, mcp.name)
+          .then(() => {})
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Removing MCP...',
+          success: () => 'MCP removed!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    }
+
+    setMcps((prev) => prev.filter((mcp) => mcp.name !== mcp.name));
   };
 
   if (!mcps || mcps.length === 0) {
@@ -80,7 +83,7 @@ export const McpList = ({ onAddNewClick }: McpListProps) => {
 
 interface McpItemProps {
   mcp: IMcp;
-  onDelete: (name: string) => void;
+  onDelete: (mcp: IMcp) => void;
   isLoading: boolean;
 }
 
@@ -89,15 +92,18 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
     <div className="border rounded-lg p-4 flex flex-col gap-3">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-green-500" />
+          <div
+            className={cn(
+              'h-2 w-2 rounded-full',
+              mcp.status === 'connected' && 'bg-green-500',
+              mcp.status === 'connecting' && 'bg-yellow-500',
+              mcp.status === 'failed' && 'bg-red-500'
+            )}
+          />
           <h3 className="font-medium">{mcp.name}</h3>
           <Badge variant="outline">{mcp.clientType}</Badge>
         </div>
-        <DeleteMcpButton
-          mcpName={mcp.name}
-          onDelete={onDelete}
-          disabled={isLoading}
-        />
+        <DeleteMcpButton mcp={mcp} onDelete={onDelete} disabled={isLoading} />
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -131,16 +137,12 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
 };
 
 interface DeleteMcpButtonProps {
-  mcpName: string;
-  onDelete: (name: string) => void;
+  mcp: IMcp;
+  onDelete: (mcp: IMcp) => void;
   disabled: boolean;
 }
 
-const DeleteMcpButton = ({
-  mcpName,
-  onDelete,
-  disabled
-}: DeleteMcpButtonProps) => {
+const DeleteMcpButton = ({ mcp, onDelete, disabled }: DeleteMcpButtonProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -157,7 +159,7 @@ const DeleteMcpButton = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will disconnect the MCP server "{mcpName}". This action cannot
+            This will disconnect the MCP server "{mcp.name}". This action cannot
             be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -167,7 +169,7 @@ const DeleteMcpButton = ({
           </AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => onDelete(mcpName)}
+            onClick={() => onDelete(mcp)}
           >
             <Translator path="common.actions.confirm" />
           </AlertDialogAction>
