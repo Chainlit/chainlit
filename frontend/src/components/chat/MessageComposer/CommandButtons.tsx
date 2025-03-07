@@ -29,7 +29,7 @@ export const CommandButtons = ({
   if (!commandButtons.length) return null;
 
   return (
-    <div className="flex gap-2 ml-1">
+    <div className="flex gap-2 ml-1 flex-wrap">
       <TooltipProvider>
         {commandButtons.map((command) => (
           <Tooltip>
