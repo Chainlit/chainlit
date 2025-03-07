@@ -180,7 +180,7 @@ class MessageBase(ABC):
         """
         if not token:
             return
-        
+
         if is_sequence:
             self.content = token
         else:
