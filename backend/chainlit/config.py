@@ -214,6 +214,7 @@ class AudioFeature(DataClassJsonMixin):
 class FeaturesSettings(DataClassJsonMixin):
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
+    mcp: bool = False
     latex: bool = False
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
@@ -273,6 +274,8 @@ class CodeSettings:
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
+    on_mcp_connect: Optional[Callable] = None
+    on_mcp_disconnect: Optional[Callable] = None
 
     author_rename: Optional[Callable[[str], Awaitable[str]]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None

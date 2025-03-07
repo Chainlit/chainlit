@@ -21,6 +21,7 @@ import { IAttachment, attachmentsState } from 'state/chat';
 import { Attachments } from './Attachments';
 import CommandButton from './CommandButton';
 import Input, { InputMethods } from './Input';
+import McpButton from './McpButton';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
@@ -180,6 +181,7 @@ export default function MessageComposer({
               <Settings className="!size-6" />
             </Button>
           )}
+          <McpButton disabled={disabled} />
           <VoiceButton disabled={disabled} />
         </div>
         <div className="flex items-center gap-1">

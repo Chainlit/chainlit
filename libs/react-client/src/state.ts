@@ -15,6 +15,7 @@ import {
   IStep,
   ITasklistElement,
   IUser,
+  IMcp,
   ThreadHistory
 } from './types';
 import { groupByDate } from './utils/group';
@@ -212,4 +213,9 @@ export const sideViewState = atom<
 export const currentThreadIdState = atom<string | undefined>({
   key: 'CurrentThreadId',
   default: undefined
+});
+
+export const mcpState = atom<IMcp[]>({
+  key: 'Mcp',
+  default: []
 });

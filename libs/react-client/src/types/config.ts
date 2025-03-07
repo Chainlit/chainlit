@@ -52,6 +52,7 @@ export interface IChainlitConfig {
     unsafe_allow_html?: boolean;
     latex?: boolean;
     edit_message?: boolean;
+    mcp?: boolean;
   };
   debugUrl?: string;
   userEnv: string[];
