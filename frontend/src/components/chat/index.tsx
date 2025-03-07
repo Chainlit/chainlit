@@ -112,7 +112,9 @@ const Chat = () => {
           .catch((error) => {
             toast.error(
               `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
-                error.message
+                typeof error === 'object' && error !== null
+                  ? error.message ?? error
+                  : error
               }`
             );
             setAttachments((prev) =>
