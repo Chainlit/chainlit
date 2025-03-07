@@ -27,7 +27,12 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
-import { MarkdownAlert, alertComponents } from './MarkdownAlert';
+import {
+  type AlertProps,
+  MarkdownAlert,
+  alertComponents,
+  normalizeAlertType
+} from './MarkdownAlert';
 
 interface Props {
   allowHtml?: boolean;
@@ -269,7 +274,15 @@ const Markdown = ({
           return <TableBody {...(props as any)}>{children}</TableBody>;
         },
         // @ts-expect-error custom plugin
-        blinkingCursor: () => <BlinkingCursor whitespace />
+        blinkingCursor: () => <BlinkingCursor whitespace />,
+        alert: ({
+          type,
+          children,
+          ...props
+        }: AlertProps & { type?: string }) => {
+          const alertType = normalizeAlertType(type || props.variant || 'info');
+          return alertComponents.Alert({ variant: alertType, children });
+        }
       }}
     >
       {children}
