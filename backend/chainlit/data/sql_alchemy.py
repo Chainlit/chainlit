@@ -345,8 +345,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Steps ######
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
-
-        await self.update_thread(step_dict["threadId"])  
+        await self.update_thread(step_dict["threadId"])
 
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
