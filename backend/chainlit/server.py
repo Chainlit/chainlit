@@ -1105,7 +1105,7 @@ async def connect_mcp(
                     )
                 elif payload.clientType == "stdio":
                     command, args = validate_npx_command(payload.fullCommand)
-                    mcp_connection = StdioMcpConnection( # type: ignore[no-redef]
+                    mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
                         command=command, args=args, name=payload.name
                     )  # type: StdioMcpConnection
 
