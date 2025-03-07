@@ -5,6 +5,7 @@ import { useContext, useState } from 'react';
 import { IAsk, IFileRef } from '@chainlit/react-client';
 
 import { Translator } from '@/components/i18n';
+import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -76,6 +77,8 @@ const _AskFileButton = ({
   uploadFile,
   onError
 }: _AskFileButtonProps) => {
+  const { t } = useTranslation();
+
   const [uploads, setUploads] = useState<UploadState[]>([]);
 
   const uploading = uploads.some((upload) => !upload.uploaded);
@@ -107,7 +110,13 @@ const _AskFileButton = ({
     Promise.all(promises)
       .then((fileRefs) => askUser.callback(fileRefs))
       .catch((error) => {
-        onError(`Failed to upload: ${error.message}`);
+        onError(
+          `${t('chat.fileUpload.errors.failed')}: ${
+            typeof error === 'object' && error !== null
+              ? error.message ?? error
+              : error
+          }`
+        );
         setUploads((prev) => {
           prev.forEach((u) => u.cancel());
           return [];

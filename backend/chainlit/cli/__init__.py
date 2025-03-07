@@ -48,8 +48,6 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
-    from chainlit.server import app
-
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
     root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
@@ -71,6 +69,8 @@ def run_chainlit(target: str):
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path
+
+    from chainlit.server import app
 
     check_file(target)
     # Load the module provided by the user

@@ -190,7 +190,7 @@ def get_build_dir(local_target: str, packaged_target: str) -> str:
 build_dir = get_build_dir("frontend", "frontend")
 copilot_build_dir = get_build_dir(os.path.join("libs", "copilot"), "copilot")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path=config.run.root_path)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
@@ -1151,7 +1151,9 @@ def validate_file_mime_type(file: UploadFile):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
-                    if file.filename is not None and file.filename.endswith(extension):
+                    if file.filename is not None and file.filename.lower().endswith(
+                        extension.lower()
+                    ):
                         return
     raise ValueError("File type not allowed")
 
