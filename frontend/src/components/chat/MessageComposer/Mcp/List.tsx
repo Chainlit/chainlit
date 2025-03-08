@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
-import { Link, SquareTerminal, Trash2, Wrench } from 'lucide-react';
+import { Link, RefreshCw, SquareTerminal, Trash2, Wrench } from 'lucide-react';
 import { useContext, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -104,7 +104,10 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
           <h3 className="font-medium">{mcp.name}</h3>
           <Badge variant="outline">{mcp.clientType}</Badge>
         </div>
-        <DeleteMcpButton mcp={mcp} onDelete={onDelete} disabled={isLoading} />
+        <div className="flex items-center">
+          <ReconnectMcpButton mcp={mcp} />
+          <DeleteMcpButton mcp={mcp} onDelete={onDelete} disabled={isLoading} />
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -180,5 +183,90 @@ const DeleteMcpButton = ({ mcp, onDelete, disabled }: DeleteMcpButtonProps) => {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+};
+
+const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
+  const apiClient = useContext(ChainlitContext);
+  const setMcps = useSetRecoilState(mcpState);
+  const sessionId = useRecoilValue(sessionIdState);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const reconnectMcp = () => {
+    setIsLoading(true);
+
+    setMcps((prev) =>
+      prev.map((existingMcp) => {
+        if (existingMcp.name === mcp.name) {
+          return {
+            ...existingMcp,
+            status: 'connecting'
+          };
+        }
+        return existingMcp;
+      })
+    );
+
+    const updateMcpStatus = (success: boolean, updatedMcp?: any) => {
+      setMcps((prev) =>
+        prev.map((existingMcp) => {
+          if (existingMcp.name === mcp.name) {
+            return {
+              ...existingMcp,
+              status: success ? 'connected' : 'failed',
+              tools: updatedMcp ? updatedMcp.tools : existingMcp.tools
+            };
+          }
+          return existingMcp;
+        })
+      );
+    };
+
+    if (mcp.clientType === 'stdio') {
+      toast.promise(
+        apiClient
+          .connectStdioMCP(sessionId, mcp.name, mcp.command!)
+          .then(async ({ success, mcp: updatedMcp }) => {
+            updateMcpStatus(success, updatedMcp);
+          })
+          .catch(() => {
+            updateMcpStatus(false);
+          })
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Reconnecting MCP...',
+          success: () => 'MCP reconnected!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    } else {
+      toast.promise(
+        apiClient
+          .connectSseMCP(sessionId, mcp.name, mcp.url!)
+          .then(async ({ success, mcp: updatedMcp }) => {
+            updateMcpStatus(success, updatedMcp);
+          })
+          .catch(() => {
+            updateMcpStatus(false);
+          })
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Reconnecting MCP...',
+          success: () => 'MCP reconnected!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      disabled={isLoading}
+      onClick={reconnectMcp}
+    >
+      <RefreshCw className="h-4 w-4" />
+    </Button>
   );
 };

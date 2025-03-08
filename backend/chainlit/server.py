@@ -1089,61 +1089,65 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    callback = config.code.on_mcp_connect
-    if callback:
+    on_mcp_connect = config.code.on_mcp_connect
+    if on_mcp_connect:
         if payload.name in session.mcp_sessions:
-            return JSONResponse(content={"success": False})
-        else:
+            old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
+            if on_mcp_disconnect := config.code.on_mcp_disconnect:
+                await on_mcp_disconnect(payload.name, old_client_session)
             try:
-                exit_stack = AsyncExitStack()
+                await old_exit_stack.aclose()
+            except Exception:
+                pass
 
-                if payload.clientType == "sse":
-                    mcp_connection = SseMcpConnection(
-                        url=payload.url, name=payload.name
-                    )  # type: SseMcpConnection
+        try:
+            exit_stack = AsyncExitStack()
 
-                    transport = await exit_stack.enter_async_context(
-                        sse_client(url=mcp_connection.url)
-                    )
-                elif payload.clientType == "stdio":
-                    command, args = validate_npx_command(payload.fullCommand)
-                    mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
-                        command=command, args=args, name=payload.name
-                    )  # type: StdioMcpConnection
+            if payload.clientType == "sse":
+                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
 
-                    # Create the server parameters
-                    server_params = StdioServerParameters(
-                        command=command,
-                        args=args,
-                        env=None,
-                    )
+                transport = await exit_stack.enter_async_context(
+                    sse_client(url=mcp_connection.url)
+                )
+            elif payload.clientType == "stdio":
+                command, args = validate_npx_command(payload.fullCommand)
+                mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
+                    command=command, args=args, name=payload.name
+                )  # type: StdioMcpConnection
 
-                    transport = await exit_stack.enter_async_context(
-                        stdio_client(server_params)
-                    )
-
-                read, write = transport
-
-                mcp_session: ClientSession = await exit_stack.enter_async_context(
-                    ClientSession(
-                        read_stream=read, write_stream=write, sampling_callback=None
-                    )
+                # Create the server parameters
+                server_params = StdioServerParameters(
+                    command=command,
+                    args=args,
+                    env=None,
                 )
 
-                # Initialize the session
-                await mcp_session.initialize()
-
-                # Store the session
-                session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
-
-                # Call the callback
-                await callback(mcp_connection, mcp_session)
-
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Could not connect to the MCP: {e!s}",
+                transport = await exit_stack.enter_async_context(
+                    stdio_client(server_params)
                 )
+
+            read, write = transport
+
+            mcp_session: ClientSession = await exit_stack.enter_async_context(
+                ClientSession(
+                    read_stream=read, write_stream=write, sampling_callback=None
+                )
+            )
+
+            # Initialize the session
+            await mcp_session.initialize()
+
+            # Store the session
+            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
+
+            # Call the callback
+            await on_mcp_connect(mcp_connection, mcp_session)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not connect to the MCP: {e!s}",
+            )
     else:
         raise HTTPException(
             status_code=404,
