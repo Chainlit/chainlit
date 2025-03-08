@@ -195,10 +195,7 @@ app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
-asgi_app = socketio.ASGIApp(
-    socketio_server=sio,
-    socketio_path="",
-)
+asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
@@ -302,6 +299,25 @@ if os.environ.get("TEAMS_APP_ID") and os.environ.get("TEAMS_APP_PASSWORD"):
 # -------------------------------------------------------------------------------
 #                               HTTP HANDLERS
 # -------------------------------------------------------------------------------
+
+
+@app.get("/set-session-cookie")
+async def set_session_cookie(session_id: str, response: Response, request: Request):
+    secure_cookie = request.client is not None and request.client.host not in [
+        "127.0.0.1",
+        "localhost",
+    ]
+
+    response.set_cookie(
+        key="X-Chainlit-Session-id",
+        value=session_id,
+        path="/",
+        httponly=True,
+        secure=secure_cookie,
+        samesite="none",
+    )
+
+    return {"message": "Session cookie set"}
 
 
 def replace_between_tags(
