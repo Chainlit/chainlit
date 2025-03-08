@@ -70,7 +70,7 @@ const Message = memo(
 
     return (
       <>
-        <div className="step my-2">
+        <div data-step-type={message.type} className="step py-2">
           <div
             className="flex flex-col"
             style={{
