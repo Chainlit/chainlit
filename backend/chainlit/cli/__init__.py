@@ -99,7 +99,6 @@ def run_chainlit(target: str):
             ws_per_message_deflate=ws_per_message_deflate,
             ssl_keyfile=ssl_keyfile,
             ssl_certfile=ssl_certfile,
-            root_path=root_path,
         )
         server = uvicorn.Server(config)
         await server.serve()

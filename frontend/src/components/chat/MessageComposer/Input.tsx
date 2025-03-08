@@ -159,7 +159,7 @@ const Input = forwardRef<InputMethods, Props>(
         // Find existing command span
         const existingCommandSpan = content.querySelector('.command-span');
 
-        if (selectedCommand) {
+        if (selectedCommand && !selectedCommand.button) {
           // Create new command block
           const newCommandBlock = document.createElement('div');
           newCommandBlock.className =
