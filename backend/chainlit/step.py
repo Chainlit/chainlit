@@ -397,6 +397,9 @@ class Step:
         Sends a token to the UI.
         Once all tokens have been streamed, call .send() to end the stream and persist the step if persistence is enabled.
         """
+        if not token:
+            return
+
         if is_sequence:
             if is_input:
                 self.input = token
