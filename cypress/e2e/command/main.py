@@ -2,7 +2,7 @@ import chainlit as cl
 
 commands = [
     {"id": "Picture", "icon": "image", "description": "Use DALL-E"},
-    {"id": "Search", "icon": "globe", "description": "Find on the web"},
+    {"id": "Search", "icon": "globe", "description": "Find on the web", "button": True},
     {
         "id": "Canvas",
         "icon": "pen-line",

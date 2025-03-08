@@ -257,6 +257,8 @@ class CommandDict(TypedDict):
     description: str
     # The lucide icon name
     icon: str
+    # Display the command as a button in the composer
+    button: Optional[bool]
 
 
 class FeedbackDict(TypedDict):

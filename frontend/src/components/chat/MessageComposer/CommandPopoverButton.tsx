@@ -28,7 +28,10 @@ interface Props {
   onCommandSelect: (command: ICommand) => void;
 }
 
-export const CommandButton = ({ disabled = false, onCommandSelect }: Props) => {
+export const CommandPopoverButton = ({
+  disabled = false,
+  onCommandSelect
+}: Props) => {
   const commands = useRecoilValue(commandsState);
 
   if (!commands.length) return null;
@@ -89,4 +92,4 @@ export const CommandButton = ({ disabled = false, onCommandSelect }: Props) => {
   );
 };
 
-export default CommandButton;
+export default CommandPopoverButton;

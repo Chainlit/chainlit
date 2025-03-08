@@ -2,7 +2,6 @@ import asyncio
 import os
 import re
 import uuid
-from datetime import datetime
 from functools import partial
 from typing import Dict, List, Optional, Union
 
@@ -339,12 +338,6 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
-    thread_id = str(
-        uuid.uuid5(
-            uuid.NAMESPACE_DNS,
-            message["channel"] + datetime.today().strftime("%Y-%m-%d"),
-        )
-    )
     thread_ts = message.get("thread_ts", message["ts"])
     thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 

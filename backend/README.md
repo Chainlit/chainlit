@@ -13,6 +13,7 @@
 </p>
 
 <p align="center">
+    <a href="https://chainlit.io"><b>Website</b></a>  •  
     <a href="https://docs.chainlit.io"><b>Documentation</b></a>  •  
     <a href="https://help.chainlit.io"><b>Chainlit Help</b></a>  •  
     <a href="https://github.com/Chainlit/cookbook"><b>Cookbook</b></a>
