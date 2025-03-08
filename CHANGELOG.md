@@ -4,6 +4,17 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+
+- Commands have a new optional boolean field `button` to turn them into buttons.
+
+### Fixed
+
+- Chainlit app using a custom root path should now work correctly when running in docker containers
+- Chat history time groups should now be sorted properly
+
 ## [2.2.1] - 2025-02-14
 
 ### Added

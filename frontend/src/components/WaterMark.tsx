@@ -13,7 +13,7 @@ export default function WaterMark() {
 
   return (
     <a
-      href="https://github.com/Chainlit/chainlit"
+      href="https://chainlit.io"
       target="_blank"
       className="watermark"
       style={{
