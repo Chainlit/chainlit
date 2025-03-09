@@ -8,13 +8,16 @@ import {
 } from 'react';
 import { Runner } from 'react-runner';
 import { useRecoilValue } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   ChainlitContext,
   IAction,
   ICustomElement,
   IElement,
-  sessionIdState
+  sessionIdState,
+  useAuth,
+  useChatInteract
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
@@ -24,6 +27,8 @@ import Imports from './Imports';
 const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   const apiClient = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
+  const { sendMessage } = useChatInteract();
+  const { user } = useAuth();
 
   const [sourceCode, setSourceCode] = useState<string>();
   const [error, setError] = useState<string>();
@@ -57,6 +62,21 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
     [sessionId, apiClient]
   );
 
+  const sendUserMessage = useCallback(
+    (message: string) => {
+      return sendMessage({
+        threadId: '',
+        id: uuidv4(),
+        name: user?.identifier || 'User',
+        type: 'user_message',
+        output: message,
+        createdAt: new Date().toISOString(),
+        metadata: { location: window.location.href }
+      });
+    },
+    [sendMessage, user]
+  );
+
   const props = useMemo(() => {
     return JSON.parse(JSON.stringify(element.props));
   }, [element.props]);
@@ -74,7 +94,8 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
           apiClient,
           updateElement,
           deleteElement,
-          callAction
+          callAction,
+          sendUserMessage
         }}
         onRendered={(error) => setError(error?.message)}
       />
