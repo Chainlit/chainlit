@@ -3,6 +3,7 @@ import json
 import mimetypes
 import shutil
 import uuid
+from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional, Union
 
 import aiofiles
@@ -11,6 +12,8 @@ from chainlit.logger import logger
 from chainlit.types import FileReference
 
 if TYPE_CHECKING:
+    from mcp import ClientSession
+
     from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
 
@@ -207,6 +210,8 @@ class WebsocketSession(BaseSession):
 
     to_clear: bool = False
 
+    mcp_sessions: dict[str, tuple["ClientSession", AsyncExitStack]]
+
     def __init__(
         self,
         # Id from the session cookie
@@ -254,6 +259,7 @@ class WebsocketSession(BaseSession):
         self.restored = False
 
         self.thread_queues: Dict[str, ThreadQueue] = {}
+        self.mcp_sessions = {}
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
@@ -267,12 +273,18 @@ class WebsocketSession(BaseSession):
         self.socket_id = new_socket_id
         self.restored = True
 
-    def delete(self):
+    async def delete(self):
         """Delete the session."""
         if self.files_dir.is_dir():
             shutil.rmtree(self.files_dir)
         ws_sessions_sid.pop(self.socket_id, None)
         ws_sessions_id.pop(self.id, None)
+
+        for _, exit_stack in self.mcp_sessions.values():
+            try:
+                await exit_stack.aclose()
+            except Exception:
+                pass
 
     async def flush_method_queue(self):
         for method_name, queue in self.thread_queues.items():
