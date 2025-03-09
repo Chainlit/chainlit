@@ -28,6 +28,7 @@ export default function ScrollContainer({
   const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
   const { messages } = useChatMessages();
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Calculate and update spacer height
   const updateSpacerHeight = useCallback(() => {
@@ -104,9 +105,10 @@ export default function ScrollContainer({
   const scrollToBottom = () => {
     if (!ref.current) return;
 
+    setIsScrolling(true);
     ref.current.scrollTo({
       top: ref.current.scrollHeight,
-      behavior: 'instant'
+      behavior: 'smooth'
     });
 
     if (autoScrollRef) {
@@ -114,6 +116,24 @@ export default function ScrollContainer({
     }
 
     setShowScrollButton(false);
+    const checkScrollEnd = () => {
+      if (!ref.current) return;
+      const prevScrollTop = ref.current.scrollTop;
+      setTimeout(() => {
+        if (!ref.current) return;
+        const currentScrollTop = ref.current.scrollTop;
+        if (currentScrollTop === prevScrollTop) {
+          setIsScrolling(false);
+          const { scrollTop, scrollHeight, clientHeight } = ref.current;
+          const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+          setShowScrollButton(!atBottom);
+        } else {
+          checkScrollEnd();
+        }
+      }, 100);
+    };
+
+    checkScrollEnd();
   };
 
   const scrollToPosition = () => {
@@ -129,7 +149,7 @@ export default function ScrollContainer({
   };
 
   const handleScroll = () => {
-    if (!ref.current) return;
+    if (!ref.current || isScrolling) return;
     const { scrollTop, scrollHeight, clientHeight } = ref.current;
     const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
 
