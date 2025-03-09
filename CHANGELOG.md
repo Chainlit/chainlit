@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Commands have a new optional boolean field `button` to turn them into buttons.
+- New user messages are now placed/scrolled to the top of the chat to enhance readability
+- Commands have a new optional boolean field `button` to turn them into buttons
 
 ### Fixed
 
