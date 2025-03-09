@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Ellipsis, Trash } from 'lucide-react';
+import { Ellipsis, Trash2 } from 'lucide-react';
 
 import { Pencil } from '@/components/icons/Pencil';
 import { buttonVariants } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export default function ThreadOptions({
           className="text-red-500 focus:text-red-500"
         >
           <Translator path="threadHistory.thread.menu.delete" />
-          <Trash className="ml-auto" />
+          <Trash2 className="ml-auto" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

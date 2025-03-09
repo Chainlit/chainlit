@@ -320,7 +320,7 @@ async def process_slack_message(
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 @slack_app.event("app_home_opened")
