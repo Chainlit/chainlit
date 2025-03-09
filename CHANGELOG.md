@@ -4,12 +4,13 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [2.3.0] - 2025-03-09
 
 ### Added
 
 - New user messages are now placed/scrolled to the top of the chat to enhance readability
 - Commands have a new optional boolean field `button` to turn them into buttons
+- Custom elements have access to a new API `sendUserMessage`
 
 ### Fixed
 
