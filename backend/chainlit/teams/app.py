@@ -297,7 +297,7 @@ async def process_teams_message(
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 async def handle_message(turn_context: TurnContext):
