@@ -102,6 +102,31 @@ export default function ScrollContainer({
     };
   }, [updateSpacerHeight]);
 
+  const checkScrollEnd = (
+    ref: React.RefObject<HTMLDivElement>,
+    setIsScrolling: (value: boolean) => void,
+    setShowScrollButton: (value: boolean) => void
+  ) => {
+    if (!ref.current) return;
+
+    const prevScrollTop = ref.current.scrollTop;
+
+    setTimeout(() => {
+      if (!ref.current) return;
+
+      const currentScrollTop = ref.current.scrollTop;
+      if (currentScrollTop === prevScrollTop) {
+        setIsScrolling(false);
+
+        const { scrollTop, scrollHeight, clientHeight } = ref.current;
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+        setShowScrollButton(!atBottom);
+      } else {
+        checkScrollEnd(ref, setIsScrolling, setShowScrollButton);
+      }
+    }, 100);
+  };
+
   const scrollToBottom = () => {
     if (!ref.current) return;
 
@@ -116,24 +141,7 @@ export default function ScrollContainer({
     }
 
     setShowScrollButton(false);
-    const checkScrollEnd = () => {
-      if (!ref.current) return;
-      const prevScrollTop = ref.current.scrollTop;
-      setTimeout(() => {
-        if (!ref.current) return;
-        const currentScrollTop = ref.current.scrollTop;
-        if (currentScrollTop === prevScrollTop) {
-          setIsScrolling(false);
-          const { scrollTop, scrollHeight, clientHeight } = ref.current;
-          const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-          setShowScrollButton(!atBottom);
-        } else {
-          checkScrollEnd();
-        }
-      }, 100);
-    };
-
-    checkScrollEnd();
+    checkScrollEnd(ref, setIsScrolling, setShowScrollButton);
   };
 
   const scrollToPosition = () => {
