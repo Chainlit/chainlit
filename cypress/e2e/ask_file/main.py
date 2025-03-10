@@ -17,7 +17,14 @@ async def start():
         ).send()
 
     files = await cl.AskFileMessage(
-        content="Please upload a python file to begin!", accept={"text/plain": [".py"]}
+        content="Please upload a python file to begin!",
+        accept={
+            "text/plain": [".py", ".txt"],
+            # Some browser / os report it as text/plain but some as text/x-python when doing drag&drop
+            "text/x-python": [".py"],
+            # Or even as application/octet-stream when using the select file dialog
+            "application/octet-stream": [".py"],
+        },
     ).send()
     py_file = files[0]
 
