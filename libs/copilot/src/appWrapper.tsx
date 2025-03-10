@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function AppWrapper({ widgetConfig, evoya }: Props) {
+  localStorage.setItem('chainlit_token',widgetConfig?.accessToken || '')
   const apiClient = makeApiClient(widgetConfig.chainlitServer);
   const [customThemeLoaded, setCustomThemeLoaded] = useState(false);
 
@@ -34,7 +35,11 @@ export default function AppWrapper({ widgetConfig, evoya }: Props) {
     let fontLoaded = false;
 
     apiClient
-      .get('/public/theme.json')
+      .get('/public/theme.json', {
+        headers: {
+          Authorization: `Bearer ${widgetConfig.accessToken}`,
+        }
+      })
       .then(async (res) => {
         try {
           const customTheme = await res.json();
@@ -69,14 +74,14 @@ export default function AppWrapper({ widgetConfig, evoya }: Props) {
 
   return (
     <ChainlitContext.Provider value={apiClient}>
-      <WidgetContext.Provider 
+      <WidgetContext.Provider
         value={{
           accessToken: widgetConfig.accessToken,
           evoya
-        }} 
+        }}
       >
         <RecoilRoot>
-          <App widgetConfig={widgetConfig}  />
+          <App widgetConfig={widgetConfig} />
         </RecoilRoot>
       </WidgetContext.Provider>
     </ChainlitContext.Provider>

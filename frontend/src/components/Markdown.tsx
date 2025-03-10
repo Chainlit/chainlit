@@ -268,6 +268,7 @@ const Markdown = ({
           return (
             <div
               {...omit(props, ['node'])}
+              style={{ lineHeight: '28px' }}
               className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
               role="article"
             />

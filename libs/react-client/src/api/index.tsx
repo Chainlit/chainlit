@@ -117,7 +117,6 @@ export class APIBase {
         headers['Content-Type'] = 'application/json';
         body = data ? JSON.stringify(data) : null;
       }
-      
       const res = await fetch(this.buildEndpoint(path), {
         method,
         credentials: 'include',
@@ -141,7 +140,11 @@ export class APIBase {
   }
 
   async get(endpoint: string) {
-    return await this.fetch('GET', endpoint);
+    const token = localStorage.getItem('chainlit_token');
+    const headers: Record<string, string> = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    return await this.fetch('GET', endpoint, undefined, undefined, headers);
   }
 
   async post(endpoint: string, data: Payload, signal?: AbortSignal) {
@@ -179,8 +182,10 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async getUser(): Promise<IUser> {
-    const res = await this.get(`/user`);
+  async getUser(token: string): Promise<IUser> {
+    const res = await this.fetch('GET', '/user', undefined, undefined, {
+      Authorization: `Bearer ${token}`
+    });
     return res.json();
   }
 

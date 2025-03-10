@@ -2,10 +2,32 @@
 
 import animate from "tailwindcss-animate";
 
+const px = (num) => `${num * 4}px`;
 export default {
 	darkMode: ["class"],
 	content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
 	theme: {
+		spacing: {
+			...Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`${i}`, px(i)])),
+			"1.5": "6px", 
+			"2.5": "10px", 
+			"3.5": "14px", 
+		  },
+		  lineHeight: {
+			...Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`${i}`, px(i)])), 
+			"7": "28px",
+		  },
+		  fontSize: {
+			xs: ["12px", { lineHeight: "16px" }],
+			sm: ["14px", { lineHeight: "20px" }],
+			base: ["16px", { lineHeight: "24px" }],
+			lg: ["18px", { lineHeight: "28px" }],
+			xl: ["20px", { lineHeight: "28px" }],
+			"2xl": ["24px", { lineHeight: "32px" }],
+			"3xl": ["30px", { lineHeight: "36px" }],
+			"4xl": ["36px", { lineHeight: "40px" }],
+			"5xl": ["48px", { lineHeight: "1" }],
+		  },
 		extend: {
 			borderRadius: {
 				lg: 'var(--radius)',
