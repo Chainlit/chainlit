@@ -67,6 +67,8 @@ from .callbacks import (
     on_chat_resume,
     on_chat_start,
     on_logout,
+    on_mcp_connect,
+    on_mcp_disconnect,
     on_message,
     on_settings_update,
     on_stop,
@@ -78,7 +80,6 @@ from .callbacks import (
 )
 
 if TYPE_CHECKING:
-    from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
     from chainlit.langchain.callbacks import (
         AsyncLangchainCallbackHandler,
         LangchainCallbackHandler,
@@ -111,7 +112,6 @@ __getattr__ = make_module_getattr(
         "LangchainCallbackHandler": "chainlit.langchain.callbacks",
         "AsyncLangchainCallbackHandler": "chainlit.langchain.callbacks",
         "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
-        "HaystackAgentCallbackHandler": "chainlit.haystack.callbacks",
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
     }
@@ -135,7 +135,6 @@ __all__ = [
     "ErrorMessage",
     "File",
     "GenerationMessage",
-    "HaystackAgentCallbackHandler",
     "Image",
     "InputAudioChunk",
     "LangchainCallbackHandler",
@@ -174,6 +173,8 @@ __all__ = [
     "on_chat_resume",
     "on_chat_start",
     "on_logout",
+    "on_mcp_connect",
+    "on_mcp_disconnect",
     "on_message",
     "on_settings_update",
     "on_stop",

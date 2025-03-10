@@ -178,6 +178,9 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
+        if not token:
+            return
+
         if is_sequence:
             self.content = token
         else:
