@@ -147,6 +147,7 @@ export default function ScrollContainer({
   const scrollToPosition = () => {
     if (!ref.current || !lastUserMessageRef.current) return;
 
+    setIsScrolling(true);
     // Scroll to position the last user message at the top with some padding
     const scrollPosition = lastUserMessageRef.current.offsetTop - 20;
 
@@ -154,6 +155,9 @@ export default function ScrollContainer({
       top: scrollPosition,
       behavior: 'smooth'
     });
+
+    setShowScrollButton(false);
+    checkScrollEnd(ref, setIsScrolling, setShowScrollButton);
   };
 
   const handleScroll = () => {
