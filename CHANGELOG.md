@@ -4,11 +4,23 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.4.0rc0] - 2025-03-09
+## [2.4.0] - 2025-03-11
+
+### Changed
+
+- Chainlit now requires python `>=3.10`
 
 ### Added
 
 - MCP support through `@cl.on_mcp_connect` and `@cl.on_mcp_disconnect`
+
+### Fixed
+
+- Pasting text/images into Chainlit Copilot should now work
+
+### Removed
+
+- Outdated Haystack integration
 
 ## [2.3.0] - 2025-03-09
 
