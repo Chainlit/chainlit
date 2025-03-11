@@ -1242,21 +1242,24 @@ async def upload_file(
 
     session.files_dir.mkdir(exist_ok=True)
 
-    content = await file.read()
-
-    assert file.filename, "No filename for uploaded file"
-    assert file.content_type, "No content type for uploaded file"
-
     try:
-        validate_file_upload(file)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        content = await file.read()
 
-    file_response = await session.persist_file(
-        name=file.filename, content=content, mime=file.content_type
-    )
+        assert file.filename, "No filename for uploaded file"
+        assert file.content_type, "No content type for uploaded file"
 
-    return JSONResponse(content=file_response)
+        try:
+            validate_file_upload(file)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        file_response = await session.persist_file(
+            name=file.filename, content=content, mime=file.content_type
+        )
+
+        return JSONResponse(content=file_response)
+    finally:
+        await file.close()
 
 
 def validate_file_upload(file: UploadFile):
