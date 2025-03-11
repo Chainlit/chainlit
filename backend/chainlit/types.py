@@ -126,6 +126,7 @@ class AskSpec(DataClassJsonMixin):
 
     timeout: int
     type: Literal["text", "file", "action"]
+    step_id: str
 
 
 @dataclass

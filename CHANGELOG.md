@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Pasting text/images into Chainlit Copilot should now work
 - OAuth redirection should work when submounting Chainlit with root path `/`
+- Successive AskUser messages should no longer collide
 
 ### Removed
 

@@ -19,6 +19,7 @@ export interface IAsk {
   callback: (payload: IStep | IFileRef[] | IAction) => void;
   spec: {
     type: 'text' | 'file' | 'action';
+    step_id: string;
     timeout: number;
   } & FileSpec &
     ActionSpec;

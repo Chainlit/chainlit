@@ -172,23 +172,23 @@ const _AskFileButton = ({
 };
 
 interface AskFileButtonProps {
+  messageId: string;
   onError: (error: string) => void;
 }
 
-const AskFileButton = ({ onError }: AskFileButtonProps) => {
+const AskFileButton = ({ messageId, onError }: AskFileButtonProps) => {
   const messageContext = useContext(MessageContext);
+  const belongsToMessage = messageContext.askUser?.spec.step_id === messageId;
+  const isAskFile = messageContext.askUser?.spec.type === 'file';
 
-  if (
-    messageContext.askUser?.spec.type !== 'file' ||
-    !messageContext?.uploadFile
-  )
+  if (!belongsToMessage || !isAskFile || !messageContext?.uploadFile)
     return null;
 
   return (
     <_AskFileButton
       onError={onError}
       uploadFile={messageContext.uploadFile}
-      askUser={messageContext.askUser}
+      askUser={messageContext.askUser!}
     />
   );
 };

@@ -41,7 +41,6 @@ const Message = memo(
   }: Props) => {
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
-    const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
     // Only keep tool calls if Chain of Thought is tool_call
@@ -129,15 +128,13 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      {!isRunning && isAsk ? (
-                        <>
-                          <AskFileButton onError={onError} />
-                          <AskActionButtons
-                            actions={actions}
-                            messageId={message.id}
-                          />
-                        </>
-                      ) : null}
+
+                      <AskFileButton messageId={message.id} onError={onError} />
+                      <AskActionButtons
+                        actions={actions}
+                        messageId={message.id}
+                      />
+
                       <MessageButtons
                         message={message}
                         actions={actions}
