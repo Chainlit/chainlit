@@ -1074,7 +1074,7 @@ async def connect_mcp(
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_npx_command
+    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1110,7 +1110,7 @@ async def connect_mcp(
                     sse_client(url=mcp_connection.url)
                 )
             elif payload.clientType == "stdio":
-                command, args = validate_npx_command(payload.fullCommand)
+                command, args = validate_mcp_command(payload.fullCommand)
                 mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
                     command=command, args=args, name=payload.name
                 )  # type: StdioMcpConnection
