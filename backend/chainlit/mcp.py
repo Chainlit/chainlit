@@ -21,7 +21,7 @@ McpConnection = Union[StdioMcpConnection, SseMcpConnection]
 
 def validate_mcp_command(command_string: str):
     """
-    Validates that a command string uses 'npx' or 'uv as the executable and returns
+    Validates that a command string uses 'npx' or 'uvx as the executable and returns
     the executable and list of arguments suitable for subprocess calls.
 
     This function handles potential command prefixes, flags, and options
@@ -32,11 +32,11 @@ def validate_mcp_command(command_string: str):
 
     Returns:
         tuple: (executable, args_list) where:
-            - executable (str): Always 'npx' or 'uv' if valid
+            - executable (str): Always 'npx' or 'uvx' if valid
             - args_list (list): List of command arguments
 
     Raises:
-        ValueError: If the command doesn't use 'npx' or 'uv' as the executable
+        ValueError: If the command doesn't use 'npx' or 'uvx' as the executable
     """
     # Split the command string into parts
     parts = command_string.strip().split()
@@ -54,13 +54,13 @@ def validate_mcp_command(command_string: str):
             executable = "npx"
             executable_index = i
             break
-        if base_exec == "uv":
-            executable = "uv"
+        if base_exec == "uvx":
+            executable = "uvx"
             executable_index = i
             break
 
     if executable is None or executable_index is None:
-        raise ValueError("Only 'npx' or 'uv' commands are allowed")
+        raise ValueError("Only 'npx' or 'uvx' commands are allowed")
 
     # Return 'npx' as the executable and everything after it as args
     args_list = parts[executable_index + 1 :]
