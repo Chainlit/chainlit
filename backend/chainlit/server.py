@@ -430,6 +430,7 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
 
     if redirect_to_callback:
         root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+        root_path = "" if root_path == "/" else root_path
         redirect_url = (
             f"{root_path}/login/callback?{urllib.parse.urlencode(response_dict)}"
         )
