@@ -63,9 +63,6 @@ const Widget = ({ config, error }: Props) => {
 
   }, []);
 
-
-
-
   const customClassName = config?.button?.className || '';
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

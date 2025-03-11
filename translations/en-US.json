@@ -388,6 +388,9 @@
                 "copy": {
                     "button": "Copy to clipboard",
                     "success": "Copied!"
+                },
+                "download": {
+                    "button": "Download this image"
                 }
             },
             "feedback": {

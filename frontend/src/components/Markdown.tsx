@@ -184,7 +184,7 @@ const Markdown = ({
         },
         img: (image: any) => {
           return (
-            <div className="relative sm:max-w-sm md:max-w-md">
+            <div className="relative">
               <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
                 <img
                   src={

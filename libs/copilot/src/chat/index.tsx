@@ -9,6 +9,7 @@ export default function ChatWrapper() {
   const { accessToken } = useContext(WidgetContext);
   const { connect, session } = useChatSession();
   const { sendMessage } = useChatInteract();
+  
   useEffect(() => {
     if (session?.socket?.connected) return;
     connect({

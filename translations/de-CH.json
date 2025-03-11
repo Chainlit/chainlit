@@ -388,6 +388,9 @@
                 "copy": {
                     "button": "In die Zwischenablage kopieren",
                     "success": "Kopiert!"
+                },
+                "download": {
+                    "button": "Dieses Bild herunterladen."
                 }
             },
             "feedback": {
