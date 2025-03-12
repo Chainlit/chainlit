@@ -87,6 +87,9 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
+# Autoscroll new user messages at the top of the window
+user_message_autoscroll = true
+
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
@@ -216,6 +219,7 @@ class FeaturesSettings(DataClassJsonMixin):
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     mcp: bool = False
     latex: bool = False
+    user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True
