@@ -101,6 +101,19 @@ export default function ScrollContainer({
     };
   }, [updateSpacerHeight]);
 
+  // Check scroll position on mount
+  useEffect(() => {
+    if (!ref.current) return;
+
+    setTimeout(() => {
+      if (!ref.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = ref.current;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+      setShowScrollButton(!atBottom);
+    }, 500);
+  }, []);
+
   const scrollToBottom = () => {
     if (!ref.current) return;
 
