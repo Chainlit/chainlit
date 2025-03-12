@@ -13,6 +13,7 @@ import { useChatMessages } from '@chainlit/react-client';
 import { Button } from '@/components/ui/button';
 
 interface Props {
+  autoScrollUserMessage?: boolean;
   autoScrollRef?: MutableRefObject<boolean>;
   children: React.ReactNode;
   className?: string;
@@ -20,6 +21,7 @@ interface Props {
 
 export default function ScrollContainer({
   autoScrollRef,
+  autoScrollUserMessage,
   children,
   className
 }: Props) {
@@ -31,40 +33,42 @@ export default function ScrollContainer({
 
   // Calculate and update spacer height
   const updateSpacerHeight = useCallback(() => {
-    if (!ref.current || !lastUserMessageRef.current) return;
+    if (!ref.current) return;
 
-    const containerHeight = ref.current.clientHeight;
-    const lastMessageHeight = lastUserMessageRef.current.offsetHeight;
+    if (autoScrollUserMessage && lastUserMessageRef.current) {
+      const containerHeight = ref.current.clientHeight;
+      const lastMessageHeight = lastUserMessageRef.current.offsetHeight;
 
-    // Calculate the height of all elements after the last user message
-    let afterMessagesHeight = 0;
-    let currentElement = lastUserMessageRef.current.nextElementSibling;
+      // Calculate the height of all elements after the last user message
+      let afterMessagesHeight = 0;
+      let currentElement = lastUserMessageRef.current.nextElementSibling;
 
-    // Iterate through all siblings after the last user message
-    while (currentElement && currentElement !== spacerRef.current) {
-      afterMessagesHeight += (currentElement as HTMLElement).offsetHeight;
-      currentElement = currentElement.nextElementSibling;
-    }
+      // Iterate through all siblings after the last user message
+      while (currentElement && currentElement !== spacerRef.current) {
+        afterMessagesHeight += (currentElement as HTMLElement).offsetHeight;
+        currentElement = currentElement.nextElementSibling;
+      }
 
-    // Position the last user message at the top with some padding
-    // Subtract both the message height and the height of any messages after it
-    const newSpacerHeight =
-      containerHeight - lastMessageHeight - afterMessagesHeight - 32;
+      // Position the last user message at the top with some padding
+      // Subtract both the message height and the height of any messages after it
+      const newSpacerHeight =
+        containerHeight - lastMessageHeight - afterMessagesHeight - 32;
 
-    // Only set a positive spacer height
-    if (spacerRef.current) {
-      spacerRef.current.style.height = `${Math.max(0, newSpacerHeight)}px`;
-    }
+      // Only set a positive spacer height
+      if (spacerRef.current) {
+        spacerRef.current.style.height = `${Math.max(0, newSpacerHeight)}px`;
+      }
 
-    // Scroll to position the message at the top
-    if (afterMessagesHeight === 0) {
-      scrollToPosition();
-    } else if (autoScrollRef?.current) {
-      if (ref.current) {
+      // Scroll to position the message at the top
+      if (afterMessagesHeight === 0) {
+        scrollToPosition();
+      } else if (autoScrollRef?.current) {
         ref.current.scrollTop = ref.current.scrollHeight;
       }
+    } else if (autoScrollRef?.current) {
+      ref.current.scrollTop = ref.current.scrollHeight;
     }
-  }, [autoScrollRef]);
+  }, [autoScrollUserMessage, autoScrollRef]);
 
   // Find and set a ref to the last user message element
   useEffect(() => {
@@ -87,6 +91,8 @@ export default function ScrollContainer({
 
   // Add window resize listener to update spacer height
   useEffect(() => {
+    if (!autoScrollUserMessage) return;
+
     const handleResize = () => {
       updateSpacerHeight();
     };
@@ -99,7 +105,7 @@ export default function ScrollContainer({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [updateSpacerHeight]);
+  }, [autoScrollUserMessage, updateSpacerHeight]);
 
   // Check scroll position on mount
   useEffect(() => {

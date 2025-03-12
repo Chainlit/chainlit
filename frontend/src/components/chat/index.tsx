@@ -202,7 +202,10 @@ const Chat = () => {
         </div>
       ) : null}
       <ErrorBoundary>
-        <ScrollContainer autoScrollRef={autoScrollRef}>
+        <ScrollContainer
+          autoScrollUserMessage={config?.features?.user_message_autoscroll}
+          autoScrollRef={autoScrollRef}
+        >
           <div
             className="flex flex-col mx-auto w-full flex-grow p-4"
             style={{
