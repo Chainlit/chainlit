@@ -1448,7 +1448,10 @@ def status_check():
 @router.get("/{full_path:path}")
 async def serve(request: Request):
     """Serve the UI files."""
-    html_template = get_html_template(os.getenv("CHAINLIT_ROOT_PATH", ""))
+    root_path = os.getenv("CHAINLIT_PARENT_ROOT_PATH", "") + os.getenv(
+        "CHAINLIT_ROOT_PATH", ""
+    )
+    html_template = get_html_template(root_path)
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response
