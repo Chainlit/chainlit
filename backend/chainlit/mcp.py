@@ -64,5 +64,13 @@ def validate_mcp_command(command_string: str):
 
     # Return 'npx' as the executable and everything after it as args
     args_list = parts[executable_index + 1 :]
+    env_list = parts[:executable_index]
+    env = {}
+    for env_var in env_list:
+        if "=" in env_var:
+            key, value = env_var.split("=", 1)
+            env[key] = value
+        else:
+            raise ValueError(f"Invalid environment variable format: {env_var}")
 
-    return executable, args_list
+    return env, executable, args_list
