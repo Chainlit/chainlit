@@ -430,6 +430,7 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
 
     if redirect_to_callback:
         root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+        root_path = "" if root_path == "/" else root_path
         redirect_url = (
             f"{root_path}/login/callback?{urllib.parse.urlencode(response_dict)}"
         )
@@ -1074,7 +1075,7 @@ async def connect_mcp(
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_npx_command
+    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1110,7 +1111,7 @@ async def connect_mcp(
                     sse_client(url=mcp_connection.url)
                 )
             elif payload.clientType == "stdio":
-                command, args = validate_npx_command(payload.fullCommand)
+                command, args = validate_mcp_command(payload.fullCommand)
                 mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
                     command=command, args=args, name=payload.name
                 )  # type: StdioMcpConnection
@@ -1241,21 +1242,24 @@ async def upload_file(
 
     session.files_dir.mkdir(exist_ok=True)
 
-    content = await file.read()
-
-    assert file.filename, "No filename for uploaded file"
-    assert file.content_type, "No content type for uploaded file"
-
     try:
-        validate_file_upload(file)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        content = await file.read()
 
-    file_response = await session.persist_file(
-        name=file.filename, content=content, mime=file.content_type
-    )
+        assert file.filename, "No filename for uploaded file"
+        assert file.content_type, "No content type for uploaded file"
 
-    return JSONResponse(content=file_response)
+        try:
+            validate_file_upload(file)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        file_response = await session.persist_file(
+            name=file.filename, content=content, mime=file.content_type
+        )
+
+        return JSONResponse(content=file_response)
+    finally:
+        await file.close()
 
 
 def validate_file_upload(file: UploadFile):
