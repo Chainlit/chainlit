@@ -4,6 +4,12 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Fixed
+
+- Submounting a Chainlit app to a FastAPI app with a root path should now work
+
 ## [2.4.0] - 2025-03-11
 
 ### Changed
