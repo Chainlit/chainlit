@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
 
+### Added
+
+- The user message auto scroll behavior is not a feature flag `config.features.user_message_autoscroll`
+
 ### Fixed
 
 - Submounting a Chainlit app to a FastAPI app with a root path should now work
