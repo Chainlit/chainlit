@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
+      - name: Build UI
+        run: pnpm run buildUi
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:

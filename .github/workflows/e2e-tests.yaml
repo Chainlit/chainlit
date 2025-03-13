@@ -27,6 +27,10 @@ jobs:
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           extra-install-args: .[tests]
+      - name: Build UI
+        run: pnpm run buildUi
+      - name: Install Chainlit
+        run: uv pip install ./backend
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
