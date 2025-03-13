@@ -1072,7 +1072,11 @@ async def connect_mcp(
 ):
     from mcp import ClientSession
     from mcp.client.sse import sse_client
-    from mcp.client.stdio import StdioServerParameters, stdio_client
+    from mcp.client.stdio import (
+        StdioServerParameters,
+        get_default_environment,
+        stdio_client,
+    )
 
     from chainlit.context import init_ws_context
     from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
@@ -1111,16 +1115,18 @@ async def connect_mcp(
                     sse_client(url=mcp_connection.url)
                 )
             elif payload.clientType == "stdio":
-                command, args = validate_mcp_command(payload.fullCommand)
+                env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
                 mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
                     command=command, args=args, name=payload.name
                 )  # type: StdioMcpConnection
 
+                env = get_default_environment()
+                env.update(env_from_cmd)
                 # Create the server parameters
                 server_params = StdioServerParameters(
                     command=command,
                     args=args,
-                    env=None,
+                    env=env,
                 )
 
                 transport = await exit_stack.enter_async_context(
