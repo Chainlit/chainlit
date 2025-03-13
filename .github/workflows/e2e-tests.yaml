@@ -30,7 +30,7 @@ jobs:
       - name: Build UI
         run: pnpm run buildUi
       - name: Install Chainlit
-        run: uv pip install ./backend
+        run: uv pip install --system ./backend
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
