@@ -44,7 +44,7 @@ runs:
       if: steps.cache-uv.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --version ${{ inputs.uv-version }}
+        curl -LsSf https://astral.sh/uv/install.sh | sh -s -- -v ${{ inputs.uv-version }}
         
     - name: Add uv to PATH
       shell: bash

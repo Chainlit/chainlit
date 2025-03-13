@@ -21,7 +21,7 @@ jobs:
         name: Install Python, uv and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          uv-working-directory: ${{ env.BACKEND_DIR }}
+          working-directory: ${{ env.BACKEND_DIR }}
           extra-install-args: .[tests,mypy,custom-data]
       - name: Install fastapi ${{ matrix.fastapi-version }}
         run: uv add fastapi@^${{ matrix.fastapi-version}}
