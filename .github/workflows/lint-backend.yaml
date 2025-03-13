@@ -11,11 +11,11 @@ jobs:
       BACKEND_DIR: ./backend
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python dependencies
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
         with:
-          poetry-install-args: --with tests --with mypy --with custom-data --no-root
-          poetry-working-directory: ${{ env.BACKEND_DIR }}
+          uv-working-directory: ${{ env.BACKEND_DIR }}
+          extra-install-args: .[tests,mypy,custom-data]
       - name: Lint with ruff
         uses: astral-sh/ruff-action@v1
         with:
@@ -30,5 +30,5 @@ jobs:
           changed-files: "true"
           args: "format --check"
       - name: Run Mypy
-        run: poetry run mypy chainlit/
+        run: uv run mypy chainlit/
         working-directory: ${{ env.BACKEND_DIR }}

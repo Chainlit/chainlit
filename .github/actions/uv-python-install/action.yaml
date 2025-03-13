@@ -1,0 +1,68 @@
+name: Install Python, uv and dependencies
+description: Install Python, uv and dependencies using cache
+
+inputs:
+  python-version:
+    description: Python version
+    required: true
+    default: '3.10'
+  uv-version:
+    description: uv version
+    required: false
+    default: '0.1.27'
+  requirements-file:
+    description: Path to requirements.txt or pyproject.toml
+    required: false
+    default: 'pyproject.toml'
+  working-directory:
+    description: Working directory for uv commands
+    required: false
+    default: .
+  extra-install-args:
+    description: Extra arguments for uv pip install
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      id: setup_python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+        cache-dependency-path: ${{ inputs.requirements-file }}
+        
+    - name: Cache uv
+      id: cache-uv
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/uv
+        key: uv-${{ runner.os }}-${{ inputs.uv-version }}
+        
+    - name: Install uv
+      if: steps.cache-uv.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --version ${{ inputs.uv-version }}
+        
+    - name: Add uv to PATH
+      shell: bash
+      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+    - name: Create Python venv using uv
+      shell: bash
+      run: |
+        cd ${{ inputs.working-directory }}
+        uv venv
+        
+    - name: Install dependencies with uv
+      shell: bash
+      run: |
+        cd ${{ inputs.working-directory }}
+        source .venv/bin/activate
+        if [[ "${{ inputs.requirements-file }}" == *"pyproject.toml" ]]; then
+          uv pip install -e . ${{ inputs.extra-install-args }}
+        else
+          uv pip install -r ${{ inputs.requirements-file }} ${{ inputs.extra-install-args }}
+        fi

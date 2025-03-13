@@ -26,7 +26,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 ### Requirements
 
 1. Python >= `3.10`
-2. Poetry ([See how to install](https://python-poetry.org/docs/#installation))
+2. Uv ([See how to install](https://github.com/astral-sh/uv?tab=readme-ov-file#installation))
 3. NodeJS >= `16` ([See how to install](https://nodejs.org/en/download))
 4. Pnpm ([See how to install](https://pnpm.io/installation))
 
@@ -74,7 +74,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-poetry install --with tests --with mypy --with dev
+uv pip install -e ".[tests,mypy,dev]"
 ```
 
 ## Start the Chainlit server from source
@@ -83,7 +83,6 @@ Start by running `backend/hello.py` as an example.
 
 ```sh
 cd backend
-poetry shell
 chainlit run chainlit/hello.py
 ```
 
@@ -127,7 +126,7 @@ pnpm test
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
-Make sure to run `poetry install` again whenever you've updated the frontend!
+Make sure to run `pnpm run buildUi` again whenever you've updated the frontend!
 
 ### Run one test
 
