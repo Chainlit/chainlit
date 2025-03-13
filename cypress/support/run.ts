@@ -41,7 +41,7 @@ export const runChainlitForTest = async (
     // Headless + CI mode
     const options = [
       'run',
-      '-C',
+      '--directory',
       BACKEND_DIR,
       'chainlit',
       'run',
@@ -50,7 +50,7 @@ export const runChainlitForTest = async (
       '-c'
     ];
 
-    const server = spawn('poetry', options, {
+    const server = spawn('uv', options, {
       cwd: dir
     });
 
