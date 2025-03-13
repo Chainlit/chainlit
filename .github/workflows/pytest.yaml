@@ -24,7 +24,7 @@ jobs:
           working-directory: ${{ env.BACKEND_DIR }}
           extra-install-args: .[tests,mypy,custom-data]
       - name: Install fastapi ${{ matrix.fastapi-version }}
-        run: uv add fastapi@^${{ matrix.fastapi-version}}
+        run: uv add fastapi --version ^${{ matrix.fastapi-version}}
         working-directory: ${{ env.BACKEND_DIR }}
       - name: Run Pytest
         run: uv run pytest --cov=chainlit/
