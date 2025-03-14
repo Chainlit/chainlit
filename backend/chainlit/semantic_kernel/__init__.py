@@ -64,7 +64,7 @@ class SemanticKernelFilter(BaseModel):
         Args:
             kernel: the Kernel to add the filter to.
         """
-        kernel.add_filter("function_invocation", self._function_invocation_filter)
+        kernel.add_filter("function_invocation", self._function_invocation_filter)  # type: ignore[arg-type]
 
     def parse_arguments(self, arguments: "KernelArguments") -> dict[str, Any] | str:
         """Parse the KernelArguments used for the function.
