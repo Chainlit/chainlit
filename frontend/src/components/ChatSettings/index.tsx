@@ -37,7 +37,10 @@ export default function ChatSettingsModal() {
     reset(chatSettingsValue);
   }, [chatSettingsValue, reset]);
 
-  const handleClose = () => setChatSettingsOpen(false);
+  const handleClose = () => {
+    setChatSettingsOpen(false);
+    reset(chatSettingsDefaultValue);
+  };
 
   const handleConfirm = handleSubmit((data) => {
     const processedValues = mapValues(data, (x: TFormInputValue) =>
