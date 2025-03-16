@@ -52,7 +52,7 @@ from chainlit.config import (
     reload_config,
 )
 from chainlit.data import get_data_layer
-from chainlit.data.acl import is_thread_author
+from chainlit.data.acl import has_thread_access, is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
@@ -858,10 +858,16 @@ async def get_thread(
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    await is_thread_author(current_user.identifier, thread_id)
+    # Check if user has access to the thread
+    has_access = await has_thread_access(current_user.identifier, thread_id)
+    if not has_access:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    res = await data_layer.get_thread(thread_id)
-    return JSONResponse(content=res)
+    thread = await data_layer.get_thread(thread_id)
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    return JSONResponse(content=thread)
 
 
 @router.get("/project/thread/{thread_id}/element/{element_id}")
@@ -1289,6 +1295,68 @@ async def serve(request: Request):
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response
+
+
+@router.post("/project/thread/{thread_id}/share")
+async def share_thread(
+    request: Request,
+    thread_id: str,
+    current_user: UserParam,
+):
+    """Share a thread by making it public."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # Get the original thread
+    thread = await data_layer.get_thread(thread_id)
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    # Get the thread author
+    thread_author = await data_layer.get_thread_author(thread_id)
+
+    # If the current user is not the author, create a copy of the thread
+    if thread_author != current_user.identifier:
+        # Create a new thread ID
+        import uuid
+
+        new_thread_id = str(uuid.uuid4())
+
+        # Copy the thread data
+        await data_layer.update_thread(
+            thread_id=new_thread_id,
+            name=thread.get("name"),
+            user_id=current_user.id
+            if isinstance(current_user, PersistedUser)
+            else None,
+            metadata={"is_public": True},
+            tags=thread.get("tags", []),
+        )
+
+        # Copy all steps
+        for step in thread.get("steps", []):
+            step["threadId"] = new_thread_id
+            await data_layer.create_step(step)
+
+        # Copy all elements
+        for element in thread.get("elements", []):
+            element["threadId"] = new_thread_id
+            await data_layer.create_element(element)
+
+        thread_id = new_thread_id
+    else:
+        # Update the original thread's metadata to mark it as public
+        await data_layer.update_thread(
+            thread_id=thread_id, metadata={"is_public": True}
+        )
+
+    return JSONResponse(content={"success": True, "threadId": thread_id})
 
 
 app.include_router(router)

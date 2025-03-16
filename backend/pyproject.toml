@@ -116,6 +116,9 @@ module = [
     "uptrace",
     "syncer",
     "azure.storage.filedatalake",
+    "azure.storage.blob",
+    "azure.storage.blob.aio",
+    "google.oauth2",
     "google-cloud-storage"
 ]
 ignore_missing_imports = true
