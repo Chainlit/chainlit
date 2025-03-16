@@ -15,7 +15,7 @@ async def has_thread_access(username: str, thread_id: str):
         raise HTTPException(status_code=404, detail="Thread not found")
 
     # Allow access if the thread is public
-    if thread.get("metadata", {}).get("is_public"):
+    if thread.get("metadata", {}).get("is_shared"):
         return True
 
     # Check author access if not public

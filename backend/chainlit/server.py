@@ -1303,7 +1303,7 @@ async def share_thread(
     thread_id: str,
     current_user: UserParam,
 ):
-    """Share a thread by making it public."""
+    """Share a thread to others."""
 
     data_layer = get_data_layer()
 
@@ -1321,39 +1321,47 @@ async def share_thread(
     # Get the thread author
     thread_author = await data_layer.get_thread_author(thread_id)
 
-    # If the current user is not the author, create a copy of the thread
-    if thread_author != current_user.identifier:
-        # Create a new thread ID
+    if (
+        thread.metadata.get("is_shared") == True
+        and thread_author != current_user.identifier
+    ):
         import uuid
 
         new_thread_id = str(uuid.uuid4())
 
-        # Copy the thread data
+        persisted_user = await data_layer.get_user(identifier=current_user.identifier)
+
         await data_layer.update_thread(
             thread_id=new_thread_id,
             name=thread.get("name"),
-            user_id=current_user.id
-            if isinstance(current_user, PersistedUser)
-            else None,
-            metadata={"is_public": True},
+            user_id=persisted_user.id,
+            metadata={"is_shared": True},
             tags=thread.get("tags", []),
         )
 
-        # Copy all steps
+        steps_id_mapping = {}
         for step in thread.get("steps", []):
+            new_step_id = str(uuid.uuid4())
+            steps_id_mapping[step["id"]] = new_step_id
             step["threadId"] = new_thread_id
+            step["id"] = new_step_id
+            step["parentId"] = steps_id_mapping.get(step.get("parentId"), None)
             await data_layer.create_step(step)
 
-        # Copy all elements
         for element in thread.get("elements", []):
+            element["id"] = str(uuid.uuid4())
+            element["forId"] = steps_id_mapping[step["forId"]]
             element["threadId"] = new_thread_id
             await data_layer.create_element(element)
 
-        thread_id = new_thread_id
+        root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+
+        return RedirectResponse(
+            url=f"{root_path}/project/thread/{new_thread_id}",
+        )
     else:
-        # Update the original thread's metadata to mark it as public
         await data_layer.update_thread(
-            thread_id=thread_id, metadata={"is_public": True}
+            thread_id=thread_id, metadata={"is_shared": True}
         )
 
     return JSONResponse(content={"success": True, "threadId": thread_id})
