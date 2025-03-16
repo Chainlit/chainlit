@@ -43,7 +43,7 @@ const MessageAvatar = ({ author, hide }: Props) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Avatar className="h-6 w-6 mt-[2px]">
+            <Avatar className="h-5 w-5 mt-[3px]">
               <AvatarImage
                 src={avatarUrl}
                 alt={`Avatar for ${author || 'default'}`}
