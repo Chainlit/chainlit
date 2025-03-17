@@ -82,6 +82,7 @@ def step(
     id: Optional[str] = None,
     parent_id: Optional[str] = None,
     tags: Optional[List[str]] = None,
+    metadata: Optional[Dict] = None,
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
     default_open: bool = False,
@@ -108,6 +109,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    metadata=metadata,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
@@ -136,6 +138,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    metadata=metadata,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)

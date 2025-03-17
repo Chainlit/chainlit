@@ -3,6 +3,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@radix-ui/react-popover';
+import { every } from 'lodash';
 import { useRecoilValue } from 'recoil';
 
 import { ICommand, commandsState } from '@chainlit/react-client';
@@ -33,8 +34,9 @@ export const CommandPopoverButton = ({
   onCommandSelect
 }: Props) => {
   const commands = useRecoilValue(commandsState);
+  const allButtons = every(commands.map((c) => !!c.button));
 
-  if (!commands.length) return null;
+  if (!commands.length || allButtons) return null;
 
   return (
     <Popover>
