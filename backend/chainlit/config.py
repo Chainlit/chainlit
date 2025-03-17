@@ -116,6 +116,11 @@ edit_message = true
     # Sample rate of the audio
     sample_rate = 24000
 
+[features.mcp]
+    # Only the executables in the allow list can be used for MCP stdio server.
+    # Only need the base name of the executable, e.g. "npx", not "/usr/bin/npx".
+    stdio_executable_allow_list = [ "npx", "uvx" ]
+
 [UI]
 # Name of the assistant.
 name = "Assistant"
@@ -213,11 +218,17 @@ class AudioFeature(DataClassJsonMixin):
     enabled: bool = False
 
 
+@dataclass
+class MCPFeature(DataClassJsonMixin):
+    enabled: bool = False
+    stdio_executable_allow_list: Optional[list[str]] = None
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
-    mcp: bool = False
+    mcp: MCPFeature = Field(default_factory=MCPFeature)
     latex: bool = False
     user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False

@@ -762,7 +762,7 @@ async def project_settings(
         config.features.audio.enabled = True
 
     if config.code.on_mcp_connect:
-        config.features.mcp = True
+        config.features.mcp.enabled = True
 
     debug_url = None
     data_layer = get_data_layer()
