@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- The user message auto scroll behavior is not a feature flag `config.features.user_message_autoscroll`
+- The user message auto scroll behavior is now a feature `config.features.user_message_autoscroll`
 - Stdio MCP commands now support environment variables
 
 ### Fixed
