@@ -1,8 +1,6 @@
 import { Translator } from 'components/i18n';
 
-import 'assets/logo_dark.svg';
 import LogoDark from 'assets/logo_dark.svg?react';
-import 'assets/logo_light.svg';
 import LogoLight from 'assets/logo_light.svg?react';
 
 import { useTheme } from './ThemeProvider';
@@ -13,26 +11,20 @@ export default function WaterMark() {
 
   return (
     <a
-      href="https://chainlit.io"
+      href="https://one.penguin-international.com/"
       target="_blank"
       className="watermark"
       style={{
         display: 'flex',
         alignItems: 'center',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        gap: '8px' // Add spacing between logo and text
       }}
     >
+      <Logo width={24} height={24} /> {/* Ensure logo is displayed */}
       <div className="text-xs text-muted-foreground">
-        <Translator path="chat.watermark" />
+        <p>Powered by PenguinOne ♥️</p>
       </div>
-      <Logo
-        style={{
-          width: 65,
-          height: 'auto',
-          filter: 'grayscale(1)',
-          marginLeft: '4px'
-        }}
-      />
     </a>
   );
 }
