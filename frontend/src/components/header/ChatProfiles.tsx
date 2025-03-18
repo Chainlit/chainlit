@@ -103,7 +103,7 @@ export default function ChatProfiles({ navigate }: Props) {
               : profile.icon;
 
             return (
-              <HoverCard openDelay={100} closeDelay={0} key={profile.name}>
+              <HoverCard openDelay={0} closeDelay={0} key={profile.name}>
                 <HoverCardTrigger asChild>
                   <SelectItem
                     data-test={`select-item:${profile.name}`}
