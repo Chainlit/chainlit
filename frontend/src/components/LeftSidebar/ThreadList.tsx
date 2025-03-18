@@ -117,13 +117,14 @@ export function ThreadList({
     );
   }
 
-  const handleDeleteThread = () => {
+  const handleDeleteThread = async () => {
     if (!threadIdToDelete) return;
     if (
       threadIdToDelete === idToResume ||
       threadIdToDelete === currentThreadId
     ) {
       clear();
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
     toast.promise(apiClient.deleteThread(threadIdToDelete), {
