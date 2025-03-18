@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
-  ICommand,
   IStep,
   useAuth,
   useChatData,
@@ -16,7 +15,11 @@ import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 
 import { chatSettingsOpenState } from '@/state/project';
-import { IAttachment, attachmentsState } from 'state/chat';
+import {
+  IAttachment,
+  attachmentsState,
+  persistentCommandState
+} from 'state/chat';
 
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
@@ -42,7 +45,9 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
-  const [selectedCommand, setSelectedCommand] = useState<ICommand>();
+  const [selectedCommand, setSelectedCommand] = useRecoilState(
+    persistentCommandState
+  );
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
