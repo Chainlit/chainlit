@@ -97,7 +97,9 @@ const Input = forwardRef<InputMethods, Props>(
     };
 
     const reset = () => {
-      setSelectedCommand(undefined);
+      if (!selectedCommand?.persistent) {
+        setSelectedCommand(undefined);
+      }
       setSelectedIndex(0);
       setCommandInput('');
       if (contentEditableRef.current) {
