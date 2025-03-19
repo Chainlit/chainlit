@@ -498,6 +498,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
                 step.metadata = {}
             step.metadata["language"] = language
 
+        step.tags = run.tags
         self.steps[str(run.id)] = step
 
         await step.send()
