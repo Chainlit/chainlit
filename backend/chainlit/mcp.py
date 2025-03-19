@@ -50,14 +50,11 @@ def validate_mcp_command(command_string: str):
     # Look for the actual executable in the command
     executable = None
     executable_index = None
-    allowed_executables = config.features.mcp.stdio_executable_allow_list or [
-        "npx",
-        "uvx",
-    ]
+    allowed_executables = config.features.mcp.stdio.allowed_executables
     for i, part in enumerate(parts):
         # Remove any path components to get the base executable name
         base_exec = part.split("/")[-1].split("\\")[-1]
-        if base_exec in allowed_executables:
+        if allowed_executables is None or base_exec in allowed_executables:
             executable = part
             executable_index = i
             break
@@ -65,6 +62,8 @@ def validate_mcp_command(command_string: str):
     if executable is None or executable_index is None:
         raise ValueError(
             f"Only commands in ({', '.join(allowed_executables)}) are allowed"
+            if allowed_executables
+            else "No allowed executables found"
         )
 
     # Return `executable` as the executable and everything after it as args
