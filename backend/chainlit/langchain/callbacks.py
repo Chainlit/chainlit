@@ -230,6 +230,8 @@ class GenerationHelper:
 
         model_keys = ["azure_deployment", "deployment_name", "model", "model_name"]
         model = next((settings[k] for k in model_keys if k in settings), None)
+        if isinstance(model, str):
+            model = model.replace("models/", "")
         tools = None
         if "functions" in settings:
             tools = [{"type": "function", "function": f} for f in settings["functions"]]
@@ -518,9 +520,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             generations = (run.outputs or {}).get("generations", [])
             generation = generations[0][0]
             variables = self.generation_inputs.get(str(run.parent_run_id), {})
-            variables = {
-                k: process_content(v) for k, v in variables.items() if v is not None
-            }
+            variables = {k: str(v) for k, v in variables.items() if v is not None}
             if message := generation.get("message"):
                 chat_start = self.chat_generations[str(run.id)]
                 duration = time.time() - chat_start["start"]
@@ -552,7 +552,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
                         ]
                         if custom_variables := m.additional_kwargs.get("variables"):
                             current_step.generation.variables = {
-                                k: process_content(v)
+                                k: str(v)
                                 for k, v in custom_variables.items()
                                 if v is not None
                             }

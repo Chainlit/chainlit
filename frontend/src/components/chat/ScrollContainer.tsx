@@ -74,6 +74,11 @@ export default function ScrollContainer({
   useEffect(() => {
     if (!ref.current) return;
 
+    if(messages.length === 0 && spacerRef.current) {
+      spacerRef.current.style.height = `0px`;
+      return
+    }
+
     // Get all message elements
     const userMessages = ref.current.querySelectorAll(
       '[data-step-type="user_message"]'

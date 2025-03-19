@@ -8,7 +8,7 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@/components/Markdown';
 import {
   HoverCard,
   HoverCardContent,
