@@ -4,17 +4,21 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [2.4.2] - 2025-03-19
 
 ### Added
 
 - Hide commands button if all commands are specified as button.
 
+### Fixed
+
+- Chat profiles tooltip should no longer freeze is hover rapidly
+
 ## [2.4.1] - 2025-03-13
 
 ### Added
 
-- The user message auto scroll behavior is not a feature flag `config.features.user_message_autoscroll`
+- The user message auto scroll behavior is now a feature `config.features.user_message_autoscroll`
 - Stdio MCP commands now support environment variables
 
 ### Fixed
