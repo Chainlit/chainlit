@@ -1053,7 +1053,7 @@ async def call_action(
     if callback:
         if not context.session.has_first_interaction:
             context.session.has_first_interaction = True
-            asyncio.create_task(context.emitter.init_thread(action.name))
+            await context.emitter.init_thread(action.name)
 
         response = await callback(action)
     else:

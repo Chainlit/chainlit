@@ -111,7 +111,7 @@ class MessageBase(ABC):
         data_layer = get_data_layer()
         if data_layer:
             try:
-                asyncio.create_task(data_layer.update_step(step_dict))
+                await data_layer.update_step(step_dict)
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -131,7 +131,7 @@ class MessageBase(ABC):
         data_layer = get_data_layer()
         if data_layer:
             try:
-                asyncio.create_task(data_layer.delete_step(step_dict["id"]))
+                await data_layer.delete_step(step_dict["id"])
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -146,7 +146,7 @@ class MessageBase(ABC):
         data_layer = get_data_layer()
         if data_layer and not self.persisted:
             try:
-                asyncio.create_task(data_layer.create_step(step_dict))
+                await data_layer.create_step(step_dict)
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:

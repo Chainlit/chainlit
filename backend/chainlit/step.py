@@ -325,7 +325,7 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.update_step(step_dict.copy()))
+                await data_layer.update_step(step_dict.copy())
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -352,7 +352,7 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.delete_step(self.id))
+                await data_layer.delete_step(self.id)
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -378,7 +378,7 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.create_step(step_dict.copy()))
+                await data_layer.create_step(step_dict.copy())
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:

@@ -365,7 +365,7 @@ async def audio_end(sid):
 
         if not session.has_first_interaction:
             session.has_first_interaction = True
-            asyncio.create_task(context.emitter.init_thread("audio"))
+            await context.emitter.init_thread("audio")
 
         if config.code.on_audio_end:
             await config.code.on_audio_end()
