@@ -31,6 +31,7 @@ const MessageAvatar = ({ author, hide }: Props) => {
   }, [config, chatProfile]);
 
   const avatarUrl = useMemo(() => {
+    if (config?.ui?.avatar_file_url) return config?.ui?.avatar_file_url;
     const isAssistant = !author || author === config?.ui.name;
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;

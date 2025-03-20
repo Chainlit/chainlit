@@ -39,6 +39,8 @@ export interface IChainlitConfig {
     custom_js?: string;
     custom_font?: string;
     custom_meta_image_url?: string;
+    logo_file_url?: string;
+    avatar_file_url?: string;
     header_links?: { name: string; icon_url: string; url: string }[];
   };
   features: {
