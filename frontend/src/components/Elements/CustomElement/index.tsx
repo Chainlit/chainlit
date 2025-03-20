@@ -23,6 +23,7 @@ import {
 import Alert from '@/components/Alert';
 
 import Imports from './Imports';
+import * as Renderer from './Renderer';
 
 const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   const apiClient = useContext(ChainlitContext);
@@ -89,7 +90,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
       <Runner
         code={sourceCode}
         scope={{
-          import: Imports,
+          import: { ...Imports, '@/components/renderer': Renderer },
           props,
           apiClient,
           updateElement,
