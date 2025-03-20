@@ -74,9 +74,9 @@ export default function ScrollContainer({
   useEffect(() => {
     if (!ref.current) return;
 
-    if(messages.length === 0 && spacerRef.current) {
+    if (messages.length === 0 && spacerRef.current) {
       spacerRef.current.style.height = `0px`;
-      return
+      return;
     }
 
     // Get all message elements
