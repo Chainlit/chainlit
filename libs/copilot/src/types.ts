@@ -9,4 +9,5 @@ export interface IWidgetConfig {
     className?: string;
   };
   customCssUrl?: string;
+  additionalQueryParamsForAPI?: Record<string, string>;
 }
