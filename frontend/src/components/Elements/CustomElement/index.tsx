@@ -86,7 +86,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   if (!sourceCode) return null;
 
   return (
-    <div className={`${element.display}-custom`}>
+    <div className={`${element.display}-custom flex flex-col flex-grow`}>
       <Runner
         code={sourceCode}
         scope={{

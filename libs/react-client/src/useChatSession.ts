@@ -331,27 +331,32 @@ const useChatSession = () => {
 
       socket.on('set_sidebar_title', (title: string) => {
         setSideView((prev) => {
+          if (prev?.title === title) return prev;
           return { title, elements: prev?.elements || [] };
         });
       });
 
-      socket.on('set_sidebar_elements', (elements: IMessageElement[]) => {
-        if (!elements.length) {
-          setSideView(undefined);
-        } else {
-          elements.forEach((element) => {
-            if (!element.url && element.chainlitKey) {
-              element.url = client.getElementUrl(
-                element.chainlitKey,
-                sessionId
-              );
-            }
-          });
-          setSideView((prev) => {
-            return { title: prev?.title || '', elements: elements };
-          });
+      socket.on(
+        'set_sidebar_elements',
+        ({ elements, key }: { elements: IMessageElement[]; key?: string }) => {
+          if (!elements.length) {
+            setSideView(undefined);
+          } else {
+            elements.forEach((element) => {
+              if (!element.url && element.chainlitKey) {
+                element.url = client.getElementUrl(
+                  element.chainlitKey,
+                  sessionId
+                );
+              }
+            });
+            setSideView((prev) => {
+              if (prev?.key === key) return prev;
+              return { title: prev?.title || '', elements: elements, key };
+            });
+          }
         }
-      });
+      );
 
       socket.on('element', (element: IElement) => {
         if (!element.url && element.chainlitKey) {
