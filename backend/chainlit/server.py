@@ -1091,8 +1091,8 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    on_mcp_connect = config.code.on_mcp_connect
-    if on_mcp_connect:
+    mcp_enabled = config.features.mcp.enabled and config.code.on_mcp_connect is not None
+    if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
             if on_mcp_disconnect := config.code.on_mcp_disconnect:
@@ -1157,7 +1157,7 @@ async def connect_mcp(
             session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
 
             # Call the callback
-            await on_mcp_connect(mcp_connection, mcp_session)
+            await config.code.on_mcp_connect(mcp_connection, mcp_session)
 
         except Exception as e:
             raise HTTPException(
