@@ -8,7 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Canvas mode for the element side bar if title == `canvas`
+- `key` parameter to `ElementSidebar.set_elements` method
+
+### Fixed
+
+- Literal AI should now correctly store custom elements props
+
+## [2.4.2] - 2025-03-19
+
+### Added
+
 - Hide commands button if all commands are specified as button.
+
+### Fixed
+
+- Chat profiles tooltip should no longer freeze is hover rapidly
 
 ## [2.4.1] - 2025-03-13
 
