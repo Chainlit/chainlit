@@ -78,23 +78,24 @@ export default function ElementSideView() {
       >
         <aside className="relative flex-grow overflow-y-auto mr-4 mb-4">
           <Card className="overflow-y-auto h-full relative flex flex-col">
-            <div
-              id="side-view-title"
-              className={cn(
-                'text-lg font-semibold text-foreground px-6 py-4 flex items-center',
-                isCanvas && 'absolute top-0 z-10 bg-transparent'
-              )}
-            >
-              <Button
-                className="-ml-2"
-                onClick={() => setSideView(undefined)}
-                size="icon"
-                variant={isCanvas ? 'default' : 'ghost'}
+            {isCanvas ? null : (
+              <div
+                id="side-view-title"
+                className={cn(
+                  'text-lg font-semibold text-foreground px-6 py-4 flex items-center'
+                )}
               >
-                <ArrowLeft />
-              </Button>
-              {isCanvas ? null : sideView.title}
-            </div>
+                <Button
+                  className="-ml-2"
+                  onClick={() => setSideView(undefined)}
+                  size="icon"
+                  variant="ghost"
+                >
+                  <ArrowLeft />
+                </Button>
+                {sideView.title}
+              </div>
+            )}
             <CardContent
               id="side-view-content"
               className={cn(
