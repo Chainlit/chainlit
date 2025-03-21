@@ -141,6 +141,12 @@ cot = "full"
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
+# Load assistant logo directly from URL.
+logo_file_url = ""
+
+# Load assistant avatar image directly from URL.
+avatar_file_url = ""
+
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
@@ -246,6 +252,10 @@ class UISettings(DataClassJsonMixin):
     custom_js: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
+    # Optional logo file url
+    logo_file_url: Optional[str] = None
+    # Optional avatar image file url
+    avatar_file_url: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
     # Optional header links
