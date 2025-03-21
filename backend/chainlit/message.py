@@ -178,6 +178,9 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
+        if not token:
+            return
+
         if is_sequence:
             self.content = token
         else:
@@ -389,7 +392,7 @@ class AskUserMessage(AskMessageBase):
 
         step_dict = await self._create()
 
-        spec = AskSpec(type="text", timeout=self.timeout)
+        spec = AskSpec(type="text", step_id=step_dict["id"], timeout=self.timeout)
 
         res = cast(
             Union[None, StepDict],
@@ -460,6 +463,7 @@ class AskFileMessage(AskMessageBase):
 
         spec = AskFileSpec(
             type="file",
+            step_id=step_dict["id"],
             accept=self.accept,
             max_size_mb=self.max_size_mb,
             max_files=self.max_files,
@@ -535,7 +539,12 @@ class AskActionMessage(AskMessageBase):
             action_keys.append(action.id)
             await action.send(for_id=str(step_dict["id"]))
 
-        spec = AskActionSpec(type="action", timeout=self.timeout, keys=action_keys)
+        spec = AskActionSpec(
+            type="action",
+            step_id=step_dict["id"],
+            timeout=self.timeout,
+            keys=action_keys,
+        )
 
         res = cast(
             Union[AskActionResponse, None],

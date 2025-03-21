@@ -56,6 +56,8 @@ async def resume_thread(session: WebsocketSession):
 
     if user_is_author:
         metadata = thread.get("metadata") or {}
+        if isinstance(metadata, str):
+            metadata = json.loads(metadata)
         user_sessions[session.id] = metadata.copy()
         if chat_profile := metadata.get("chat_profile"):
             session.chat_profile = chat_profile
@@ -226,21 +228,21 @@ async def disconnect(sid):
     if session.thread_id and session.has_first_interaction:
         await persist_user_session(session.thread_id, session.to_persistable())
 
-    def clear(_sid):
+    async def clear(_sid):
         if session := WebsocketSession.get(_sid):
             # Clean up the user session
             if session.id in user_sessions:
                 user_sessions.pop(session.id)
             # Clean up the session
-            session.delete()
+            await session.delete()
 
     if session.to_clear:
-        clear(sid)
+        await clear(sid)
     else:
 
         async def clear_on_timeout(_sid):
             await asyncio.sleep(config.project.session_timeout)
-            clear(_sid)
+            await clear(_sid)
 
         asyncio.ensure_future(clear_on_timeout(sid))
 

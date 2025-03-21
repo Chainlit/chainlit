@@ -292,7 +292,7 @@ async def process_discord_message(
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 @client.event

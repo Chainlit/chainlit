@@ -16,7 +16,7 @@ import {
 } from '@chainlit/react-client';
 
 import { Logo } from '@/components/Logo';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@/components/Markdown';
 
 import MessageComposer from './MessageComposer';
 import Starters from './Starters';

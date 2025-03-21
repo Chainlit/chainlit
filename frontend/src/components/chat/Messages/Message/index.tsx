@@ -41,7 +41,6 @@ const Message = memo(
   }: Props) => {
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
-    const isAsk = message.waitForAnswer;
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
     // Only keep tool calls if Chain of Thought is tool_call
@@ -70,7 +69,7 @@ const Message = memo(
 
     return (
       <>
-        <div className="step my-2">
+        <div data-step-type={message.type} className="step py-2">
           <div
             className="flex flex-col"
             style={{
@@ -96,7 +95,9 @@ const Message = memo(
               ) : (
                 <div className="ai-message flex gap-4 w-full">
                   {!isStep || !indent ? (
-                    <MessageAvatar author={message.name} />
+                    <MessageAvatar
+                      author={message.metadata?.avatarName || message.name}
+                    />
                   ) : null}
                   {/* Display the step and its children */}
                   {isStep ? (
@@ -129,15 +130,13 @@ const Message = memo(
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      {!isRunning && isAsk ? (
-                        <>
-                          <AskFileButton onError={onError} />
-                          <AskActionButtons
-                            actions={actions}
-                            messageId={message.id}
-                          />
-                        </>
-                      ) : null}
+
+                      <AskFileButton messageId={message.id} onError={onError} />
+                      <AskActionButtons
+                        actions={actions}
+                        messageId={message.id}
+                      />
+
                       <MessageButtons
                         message={message}
                         actions={actions}

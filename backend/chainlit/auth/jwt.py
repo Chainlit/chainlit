@@ -29,9 +29,12 @@ def create_jwt(data: User) -> str:
 
 
 def decode_jwt(token: str) -> User:
+    secret = get_jwt_secret()
+    assert secret
+
     dict = pyjwt.decode(
         token,
-        get_jwt_secret(),
+        secret,
         algorithms=["HS256"],
         options={"verify_signature": True},
     )
