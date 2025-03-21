@@ -239,12 +239,31 @@ class AzureADOAuthProvider(OAuthProvider):
                 # Ignore errors getting the photo
                 pass
 
+            try:
+                # Fetch group memberships
+                groups_response = await client.get(
+                    "https://graph.microsoft.com/v1.0/me/memberOf",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                groups_response.raise_for_status()
+
+                # Extract group data
+                groups_data = groups_response.json()
+                user_groups = [
+                    group["displayName"] for group in groups_data.get("value", [])
+                ]
+
+            except Exception:
+                # Ignore errors getting group memberships
+                pass
+
             user = User(
                 identifier=azure_user["userPrincipalName"],
                 metadata={
                     "image": azure_user.get("image"),
                     "provider": "azure-ad",
                     "refresh_token": getattr(self, "_refresh_token", None),
+                    "groups": user_groups,
                 },
             )
             return (azure_user, user)
