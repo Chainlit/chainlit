@@ -129,6 +129,24 @@ const useChatSession = () => {
       });
 
       socket.on('connect', () => {
+        fetch(`${uri}/set-session-cookie`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ session_id: sessionId })
+        })
+          .then((response) => {
+            if (!response.ok) {
+              console.error('Failed to set session cookie');
+            } else {
+              console.log('Session cookie set successfully');
+            }
+          })
+          .catch((error) => {
+            console.error('Error setting session cookie:', error);
+          });
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
         setMcps((prev) =>
@@ -438,23 +456,6 @@ const useChatSession = () => {
             toast(data.message);
             break;
         }
-      });
-
-      socket.on('set-cookie', (data) => {
-        fetch(`/set-session-cookie?session_id=${data.session_id}`, {
-          method: 'GET',
-          credentials: 'include'
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log('Session cookie set successfully');
-            } else {
-              console.error('Failed to set session cookie');
-            }
-          })
-          .catch((error) => {
-            console.error('Error setting session cookie:', error);
-          });
       });
     },
     [setSession, sessionId, idToResume, chatProfile]

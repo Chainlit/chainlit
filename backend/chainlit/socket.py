@@ -148,9 +148,6 @@ async def connect(sid, environ, auth):
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
 
-    if config.project.enable_session_cookie:
-        await sio.emit("set-cookie", {"session_id": session_id}, to=sid)
-
     WebsocketSession(
         id=session_id,
         socket_id=sid,
