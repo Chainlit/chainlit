@@ -69,6 +69,8 @@ class BaseSession:
         http_referer: Optional[str] = None,
         # Cookie
         http_cookie: Optional[str] = None,
+        # User-Agent
+        http_user_agent: Optional[str] = None,
     ):
         if thread_id:
             self.thread_id_to_resume = thread_id
@@ -81,6 +83,7 @@ class BaseSession:
         self.chat_profile = chat_profile
         self.http_referer = http_referer
         self.http_cookie = http_cookie
+        self.http_user_agent = http_user_agent
 
         self.files: Dict[str, FileDict] = {}
 
@@ -175,6 +178,8 @@ class HTTPSession(BaseSession):
         http_referer: Optional[str] = None,
         # Cookie
         http_cookie: Optional[str] = None,
+        # User-Agent
+        http_user_agent: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -185,6 +190,7 @@ class HTTPSession(BaseSession):
             user_env=user_env,
             http_referer=http_referer,
             http_cookie=http_cookie,
+            http_user_agent=http_user_agent,
         )
 
     async def delete(self):
@@ -239,6 +245,8 @@ class WebsocketSession(BaseSession):
         http_referer: Optional[str] = None,
         # Cookie
         http_cookie: Optional[str] = None,
+        # User-Agent
+        http_user_agent: Optional[str] = None,
     ):
         super().__init__(
             id=id,
@@ -250,6 +258,7 @@ class WebsocketSession(BaseSession):
             chat_profile=chat_profile,
             http_referer=http_referer,
             http_cookie=http_cookie,
+            http_user_agent=http_user_agent,
         )
 
         self.socket_id = socket_id

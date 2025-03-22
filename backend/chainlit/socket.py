@@ -143,6 +143,8 @@ async def connect(sid, environ, auth):
     client_type = auth.get("clientType")
     http_referer = environ.get("HTTP_REFERER")
     http_cookie = environ.get("HTTP_COOKIE")
+    http_user_agent = environ.get("HTTP_USER_AGENT")
+
     url_encoded_chat_profile = auth.get("chatProfile")
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
@@ -162,6 +164,7 @@ async def connect(sid, environ, auth):
         languages=environ.get("HTTP_ACCEPT_LANGUAGE"),
         http_referer=http_referer,
         http_cookie=http_cookie,
+        http_user_agent=http_user_agent,
     )
 
     trace_event("connection_successful")
