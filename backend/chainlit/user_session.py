@@ -30,6 +30,7 @@ class UserSession:
         user_session["http_referer"] = context.session.http_referer
         user_session["client_type"] = context.session.client_type
         user_session["http_cookie"] = context.session.http_cookie
+        user_session["http_user_agent"] = context.session.http_user_agent
 
         if isinstance(context.session, WebsocketSession):
             user_session["languages"] = context.session.languages
