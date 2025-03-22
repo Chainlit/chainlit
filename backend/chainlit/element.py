@@ -18,7 +18,6 @@ from typing import (
 import filetype
 from pydantic import Field
 from pydantic.dataclasses import dataclass
-from syncer import asyncio
 
 from chainlit.context import context
 from chainlit.data import get_data_layer
