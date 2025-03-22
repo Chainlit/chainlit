@@ -1,14 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Union
 
-from azure.storage.blob import (  # type: ignore
-    BlobSasPermissions,
-    ContentSettings,
-    generate_blob_sas,
-)
-from azure.storage.blob.aio import (  # type: ignore
-    BlobServiceClient as AsyncBlobServiceClient,
-)
+from azure.storage.blob import BlobSasPermissions, ContentSettings, generate_blob_sas
+from azure.storage.blob.aio import BlobServiceClient as AsyncBlobServiceClient
 
 from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
 from chainlit.logger import logger
