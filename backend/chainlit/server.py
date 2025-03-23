@@ -1166,7 +1166,7 @@ async def connect_mcp(
             )
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=400,
             detail="This app does not support MCP.",
         )
 

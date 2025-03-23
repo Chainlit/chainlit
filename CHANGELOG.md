@@ -4,16 +4,19 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [2.4.3] - 2025-03-23
 
 ### Added
 
 - Canvas mode for the element side bar if title == `canvas`
+- Allow list for MCP stdio commands
 - `key` parameter to `ElementSidebar.set_elements` method
 
 ### Fixed
 
 - Literal AI should now correctly store custom elements props
+- Element should correctly load from azure storage
+- Plotly elements should now take full width
 
 ## [2.4.2] - 2025-03-19
 
