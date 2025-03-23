@@ -117,7 +117,7 @@ edit_message = true
     sample_rate = 24000
 
 [features.mcp]
-    enabled = false
+    enabled = true
 
 [features.mcp.sse]
     enabled = true
@@ -239,7 +239,7 @@ class McpStdioFeature(DataClassJsonMixin):
 
 @dataclass
 class McpFeature(DataClassJsonMixin):
-    enabled: bool = False
+    enabled: bool = True
     sse: McpSseFeature = Field(default_factory=McpSseFeature)
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
 
