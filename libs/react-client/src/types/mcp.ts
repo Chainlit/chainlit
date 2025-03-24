@@ -4,5 +4,8 @@ export interface IMcp {
   status: 'connected' | 'connecting' | 'failed';
   clientType: 'sse' | 'stdio';
   command?: string;
+  args?: string;
+  envs?: string;
   url?: string;
+  headers?: string;
 }
