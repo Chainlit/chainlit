@@ -761,6 +761,9 @@ async def project_settings(
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
 
+    if config.code.on_mcp_connect:
+        config.features.mcp.enabled = True
+
     debug_url = None
     data_layer = get_data_layer()
 
@@ -1091,7 +1094,7 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    mcp_enabled = config.features.mcp.enabled and config.code.on_mcp_connect is not None
+    mcp_enabled = config.code.on_mcp_connect is not None
     if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]

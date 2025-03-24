@@ -32,11 +32,14 @@ const McpButton = ({ disabled }: Props) => {
   const { config } = useConfig();
   const [mcps] = useRecoilState(mcpState);
 
-  const isEnabled = !!config?.features.mcp;
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
 
-  if (!isEnabled) return null;
+  const allowSse = !!config?.features.mcp?.sse?.enabled;
+  const allowStdio = !!config?.features.mcp?.stdio?.enabled;
+  const allowMcp = !!config?.features.mcp?.enabled;
+
+  if (!allowMcp || (!allowSse && !allowStdio)) return null;
 
   const connectedMcps = mcps.filter((mcp) => mcp.status === 'connected');
 
@@ -90,6 +93,8 @@ const McpButton = ({ disabled }: Props) => {
             className="flex flex-col flex-grow gap-6 p-1"
           >
             <McpAddForm
+              allowSse={allowSse}
+              allowStdio={allowStdio}
               onSuccess={() => setActiveTab('list')}
               onCancel={() => setOpen(false)}
             />
