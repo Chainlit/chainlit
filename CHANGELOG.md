@@ -4,6 +4,12 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.4.301] - 2025-03-24
+
+### Fixed
+
+- Mcp button should not be displayed if `@on_mcp_connect` is not defined
+
 ## [2.4.3] - 2025-03-23
 
 ### Added
