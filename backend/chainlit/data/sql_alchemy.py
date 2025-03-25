@@ -345,6 +345,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Steps ######
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
+        await self.update_thread(step_dict["threadId"])
+
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
 
@@ -519,7 +521,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         columns = ", ".join(f'"{column}"' for column in element_dict_cleaned.keys())
         placeholders = ", ".join(f":{column}" for column in element_dict_cleaned.keys())
-        query = f"INSERT INTO elements ({columns}) VALUES ({placeholders})"
+        updates = ", ".join(
+            f'"{column}" = :{column}'
+            for column in element_dict_cleaned.keys()
+            if column != "id"
+        )
+        query = f"INSERT INTO elements ({columns}) VALUES ({placeholders}) ON CONFLICT (id) DO UPDATE SET {updates};"
         await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
@@ -627,7 +634,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 e."language" AS element_language,
                 e."page" AS element_page,
                 e."forId" AS element_forid,
-                e."mime" AS element_mime
+                e."mime" AS element_mime,
+                e."props" AS props
             FROM elements e
             WHERE e."threadId" IN {thread_ids}
         """
@@ -712,7 +720,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         autoPlay=element.get("element_autoPlay"),
                         playerConfig=element.get("element_playerconfig"),
                         page=element.get("element_page"),
-                        props=json.loads(element.get("props", "{}")),
+                        props=element.get("props", "{}"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),
                     )

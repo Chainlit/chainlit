@@ -50,8 +50,10 @@ export interface IChainlitConfig {
     };
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
+    user_message_autoscroll?: boolean;
     latex?: boolean;
     edit_message?: boolean;
+    mcp?: boolean;
   };
   debugUrl?: string;
   userEnv: string[];

@@ -126,6 +126,7 @@ class AskSpec(DataClassJsonMixin):
 
     timeout: int
     type: Literal["text", "file", "action"]
+    step_id: str
 
 
 @dataclass
@@ -217,6 +218,28 @@ class CallActionRequest(BaseModel):
     sessionId: str
 
 
+class ConnectStdioMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["stdio"]
+    name: str
+    fullCommand: str
+
+
+class ConnectSseMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["sse"]
+    name: str
+    url: str
+
+
+ConnectMCPRequest = Union[ConnectStdioMCPRequest, ConnectSseMCPRequest]
+
+
+class DisconnectMCPRequest(BaseModel):
+    sessionId: str
+    name: str
+
+
 class ElementRequest(BaseModel):
     element: Dict
     sessionId: str
@@ -257,6 +280,8 @@ class CommandDict(TypedDict):
     description: str
     # The lucide icon name
     icon: str
+    # Display the command as a button in the composer
+    button: Optional[bool]
 
 
 class FeedbackDict(TypedDict):

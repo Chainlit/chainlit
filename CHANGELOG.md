@@ -4,6 +4,67 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+
+- Hide commands button if all commands are specified as button.
+
+## [2.4.1] - 2025-03-13
+
+### Added
+
+- The user message auto scroll behavior is not a feature flag `config.features.user_message_autoscroll`
+- Stdio MCP commands now support environment variables
+
+### Fixed
+
+- Submounting a Chainlit app to a FastAPI app with a root path should now work
+
+## [2.4.0] - 2025-03-11
+
+### Changed
+
+- Chainlit now requires python `>=3.10`
+
+### Added
+
+- MCP support through `@cl.on_mcp_connect` and `@cl.on_mcp_disconnect`
+
+### Fixed
+
+- Pasting text/images into Chainlit Copilot should now work
+- OAuth redirection should work when submounting Chainlit with root path `/`
+- Successive AskUser messages should no longer collide
+
+### Removed
+
+- Outdated Haystack integration
+
+## [2.3.0] - 2025-03-09
+
+### Added
+
+- New user messages are now placed/scrolled to the top of the chat to enhance readability
+- Commands have a new optional boolean field `button` to turn them into buttons
+- Custom elements have access to a new API `sendUserMessage`
+
+### Fixed
+
+- Chainlit app using a custom root path should now work correctly when running in docker containers
+- Chat history time groups should now be sorted properly
+
+## [2.2.1] - 2025-02-14
+
+### Added
+
+- `default_open` parameter to the step decorator/class
+
+### Fixed
+- Input should not replace <,>,&
+- Starters should be disabled if no ws connection
+- Prevent orphaned thread record when deleting active conversation
+
 ## [2.2.0] - 2025-02-08
 
 ### Added

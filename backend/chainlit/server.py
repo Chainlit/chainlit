@@ -8,7 +8,7 @@ import re
 import shutil
 import urllib.parse
 import webbrowser
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
 from typing import List, Optional, Union, cast
 
@@ -59,8 +59,10 @@ from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
     CallActionRequest,
+    ConnectMCPRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    DisconnectMCPRequest,
     ElementRequest,
     GetThreadsRequest,
     Theme,
@@ -80,7 +82,7 @@ async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
     host = config.run.host
     port = config.run.port
-    root_path = config.run.root_path
+    root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
 
     if host == DEFAULT_HOST:
         url = f"http://localhost:{port}{root_path}"
@@ -200,7 +202,8 @@ asgi_app = socketio.ASGIApp(
     socketio_path="",
 )
 
-app.mount("/ws/socket.io", asgi_app)
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -210,7 +213,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+router = APIRouter(prefix=config.run.root_path)
 
 
 @router.get("/public/{filename:path}")
@@ -426,6 +430,7 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
 
     if redirect_to_callback:
         root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+        root_path = "" if root_path == "/" else root_path
         redirect_url = (
             f"{root_path}/login/callback?{urllib.parse.urlencode(response_dict)}"
         )
@@ -756,6 +761,9 @@ async def project_settings(
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
 
+    if config.code.on_mcp_connect:
+        config.features.mcp = True
+
     debug_url = None
     data_layer = get_data_layer()
 
@@ -1057,6 +1065,162 @@ async def call_action(
     return JSONResponse(content={"success": True, "response": response})
 
 
+@router.post("/mcp")
+async def connect_mcp(
+    payload: ConnectMCPRequest,
+    current_user: UserParam,
+):
+    from mcp import ClientSession
+    from mcp.client.sse import sse_client
+    from mcp.client.stdio import (
+        StdioServerParameters,
+        get_default_environment,
+        stdio_client,
+    )
+
+    from chainlit.context import init_ws_context
+    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+            )
+
+    on_mcp_connect = config.code.on_mcp_connect
+    if on_mcp_connect:
+        if payload.name in session.mcp_sessions:
+            old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
+            if on_mcp_disconnect := config.code.on_mcp_disconnect:
+                await on_mcp_disconnect(payload.name, old_client_session)
+            try:
+                await old_exit_stack.aclose()
+            except Exception:
+                pass
+
+        try:
+            exit_stack = AsyncExitStack()
+
+            if payload.clientType == "sse":
+                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
+
+                transport = await exit_stack.enter_async_context(
+                    sse_client(url=mcp_connection.url)
+                )
+            elif payload.clientType == "stdio":
+                env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
+                mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
+                    command=command, args=args, name=payload.name
+                )  # type: StdioMcpConnection
+
+                env = get_default_environment()
+                env.update(env_from_cmd)
+                # Create the server parameters
+                server_params = StdioServerParameters(
+                    command=command,
+                    args=args,
+                    env=env,
+                )
+
+                transport = await exit_stack.enter_async_context(
+                    stdio_client(server_params)
+                )
+
+            read, write = transport
+
+            mcp_session: ClientSession = await exit_stack.enter_async_context(
+                ClientSession(
+                    read_stream=read, write_stream=write, sampling_callback=None
+                )
+            )
+
+            # Initialize the session
+            await mcp_session.initialize()
+
+            # Store the session
+            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
+
+            # Call the callback
+            await on_mcp_connect(mcp_connection, mcp_session)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not connect to the MCP: {e!s}",
+            )
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="This app does not support MCP.",
+        )
+
+    tool_list = await mcp_session.list_tools()
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "mcp": {
+                "name": payload.name,
+                "tools": [{"name": t.name} for t in tool_list.tools],
+                "clientType": payload.clientType,
+                "command": payload.fullCommand
+                if payload.clientType == "stdio"
+                else None,
+                "url": payload.url if payload.clientType == "sse" else None,
+            },
+        }
+    )
+
+
+@router.delete("/mcp")
+async def disconnect_mcp(
+    payload: DisconnectMCPRequest,
+    current_user: UserParam,
+):
+    from chainlit.context import init_ws_context
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+            )
+
+    callback = config.code.on_mcp_disconnect
+    if payload.name in session.mcp_sessions:
+        try:
+            client_session, exit_stack = session.mcp_sessions[payload.name]
+            if callback:
+                await callback(payload.name, client_session)
+
+            try:
+                await exit_stack.aclose()
+            except Exception:
+                pass
+            del session.mcp_sessions[payload.name]
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not disconnect to the MCP: {e!s}",
+            )
+
+    return JSONResponse(content={"success": True})
+
+
 @router.post("/project/file")
 async def upload_file(
     current_user: UserParam,
@@ -1084,21 +1248,24 @@ async def upload_file(
 
     session.files_dir.mkdir(exist_ok=True)
 
-    content = await file.read()
-
-    assert file.filename, "No filename for uploaded file"
-    assert file.content_type, "No content type for uploaded file"
-
     try:
-        validate_file_upload(file)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        content = await file.read()
 
-    file_response = await session.persist_file(
-        name=file.filename, content=content, mime=file.content_type
-    )
+        assert file.filename, "No filename for uploaded file"
+        assert file.content_type, "No content type for uploaded file"
 
-    return JSONResponse(content=file_response)
+        try:
+            validate_file_upload(file)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        file_response = await session.persist_file(
+            name=file.filename, content=content, mime=file.content_type
+        )
+
+        return JSONResponse(content=file_response)
+    finally:
+        await file.close()
 
 
 def validate_file_upload(file: UploadFile):
@@ -1152,7 +1319,9 @@ def validate_file_mime_type(file: UploadFile):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
-                    if file.filename is not None and file.filename.endswith(extension):
+                    if file.filename is not None and file.filename.lower().endswith(
+                        extension.lower()
+                    ):
                         return
     raise ValueError("File type not allowed")
 
@@ -1285,7 +1454,10 @@ def status_check():
 @router.get("/{full_path:path}")
 async def serve(request: Request):
     """Serve the UI files."""
-    html_template = get_html_template(request.scope["root_path"])
+    root_path = os.getenv("CHAINLIT_PARENT_ROOT_PATH", "") + os.getenv(
+        "CHAINLIT_ROOT_PATH", ""
+    )
+    html_template = get_html_template(root_path)
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response

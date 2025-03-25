@@ -22,6 +22,7 @@ import {
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
+  mcpState,
   messagesState,
   resumeThreadErrorState,
   sessionIdState,
@@ -62,8 +63,10 @@ const useChatSession = () => {
   const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
   const setAudioConnection = useSetRecoilState(audioConnectionState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
+  const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const setMcps = useSetRecoilState(mcpState);
   const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
   const wavRecorder = useRecoilValue(wavRecorderState);
   const setMessages = useSetRecoilState(messagesState);
@@ -128,6 +131,43 @@ const useChatSession = () => {
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
+        setMcps((prev) =>
+          prev.map((mcp) => {
+            const promise =
+              mcp.clientType === 'sse'
+                ? client.connectSseMCP(sessionId, mcp.name, mcp.url!)
+                : client.connectStdioMCP(sessionId, mcp.name, mcp.command!);
+            promise
+              .then(async ({ success, mcp }) => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: success ? 'connected' : 'failed',
+                        tools: mcp ? mcp.tools : existingMcp.tools
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              })
+              .catch(() => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: 'failed'
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              });
+            return { ...mcp, status: 'connecting' };
+          })
+        );
       });
 
       socket.on('connect_error', (_) => {
@@ -192,6 +232,9 @@ const useChatSession = () => {
         }
         if (thread.metadata?.chat_profile) {
           setChatProfile(thread.metadata?.chat_profile);
+        }
+        if (thread.metadata?.chat_settings) {
+          setChatSettingsValue(thread.metadata?.chat_settings);
         }
         setMessages(messages);
         const elements = thread.elements || [];

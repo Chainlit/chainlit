@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from pydantic import Field
@@ -78,7 +77,7 @@ class Select(InputWidget):
     initial_index: Optional[int] = None
     initial_value: Optional[str] = None
     values: List[str] = Field(default_factory=list)
-    items: Dict[str, str] = Field(default_factory=lambda: defaultdict(dict))
+    items: Dict[str, str] = Field(default_factory=dict)
 
     def __post_init__(
         self,

@@ -254,6 +254,12 @@ export class ChainlitAPI extends APIBase {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
+          return;
+        }
+        const contentType = xhr.getResponseHeader('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          const response = JSON.parse(xhr.responseText);
+          reject(response.detail);
         } else {
           reject('Upload failed');
         }
@@ -284,6 +290,31 @@ export class ChainlitAPI extends APIBase {
   async deleteElement(element: IElement, sessionId: string) {
     const res = await this.delete(`/project/element`, { sessionId, element });
 
+    return res.json();
+  }
+
+  async connectStdioMCP(sessionId: string, name: string, fullCommand: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      fullCommand,
+      clientType: 'stdio'
+    });
+    return res.json();
+  }
+
+  async connectSseMCP(sessionId: string, name: string, url: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      clientType: 'sse'
+    });
+    return res.json();
+  }
+
+  async disconnectMcp(sessionId: string, name: string) {
+    const res = await this.delete(`/mcp`, { sessionId, name });
     return res.json();
   }
 

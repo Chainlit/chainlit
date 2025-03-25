@@ -112,7 +112,9 @@ const Chat = () => {
           .catch((error) => {
             toast.error(
               `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
-                error.message
+                typeof error === 'object' && error !== null
+                  ? error.message ?? error
+                  : error
               }`
             );
             setAttachments((prev) =>
@@ -200,7 +202,10 @@ const Chat = () => {
         </div>
       ) : null}
       <ErrorBoundary>
-        <ScrollContainer autoScrollRef={autoScrollRef}>
+        <ScrollContainer
+          autoScrollUserMessage={config?.features?.user_message_autoscroll}
+          autoScrollRef={autoScrollRef}
+        >
           <div
             className="flex flex-col mx-auto w-full flex-grow p-4"
             style={{

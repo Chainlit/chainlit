@@ -122,6 +122,14 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     from chainlit.server import app as chainlit_app
 
     config.run.debug = os.environ.get("CHAINLIT_DEBUG", False)
+    os.environ["CHAINLIT_ROOT_PATH"] = path
+
+    api_full_path = path
+
+    if app.root_path:
+        parent_root_path = app.root_path.rstrip("/")
+        api_full_path = parent_root_path + path
+        os.environ["CHAINLIT_PARENT_ROOT_PATH"] = parent_root_path
 
     check_file(target)
     # Load the module provided by the user
@@ -143,7 +151,7 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
         """
 
         async def dispatch(self, request: Request, call_next):
-            if not request.url.path.startswith(path):
+            if not request.url.path.startswith(api_full_path):
                 return JSONResponse(status_code=404, content={"detail": "Not found"})
 
             return await call_next(request)
