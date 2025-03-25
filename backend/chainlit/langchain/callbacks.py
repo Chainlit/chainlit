@@ -191,9 +191,9 @@ class GenerationHelper:
                 if tool_calls:
                     msg["tool_calls"] = tool_calls
                 if content_parts:
-                    msg["content"] = content_parts # type: ignore 
+                    msg["content"] = content_parts  # type: ignore
             else:
-                msg["content"] = content # type: ignore
+                msg["content"] = content  # type: ignore
 
         return msg
 
@@ -244,7 +244,7 @@ class GenerationHelper:
                 if tool_calls:
                     msg["tool_calls"] = tool_calls
                 if content_parts:
-                    msg["content"] = content_parts # type: ignore
+                    msg["content"] = content_parts  # type: ignore
             else:
                 msg["content"] = message.content  # type: ignore
 
