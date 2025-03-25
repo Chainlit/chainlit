@@ -35,6 +35,10 @@ export const router = createBrowserRouter(
       element: <AuthCallback />
     },
     {
+      path: '/share/:id',
+      element: <Thread />
+    },
+    {
       path: '*',
       element: <Navigate replace to="/" />
     }

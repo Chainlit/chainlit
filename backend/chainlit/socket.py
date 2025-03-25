@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 from urllib.parse import unquote
 
+from fastapi import HTTPException
 from starlette.requests import cookie_parser
 from typing_extensions import TypeAlias
 
@@ -65,6 +66,71 @@ async def resume_thread(session: WebsocketSession):
         trace_event("thread_resumed")
 
         return thread
+    elif thread.get("metadata").get("is_shared") == True:
+        new_thread = await copy_thread(
+            session=session, user=session.user, thread=thread
+        )
+        return new_thread
+
+
+async def copy_thread(session: WebsocketSession, user: User, thread: Dict):
+    import uuid
+
+    from chainlit.context import init_http_context
+    from chainlit.element import ElementDict
+    from chainlit.step import StepDict
+
+    data_layer = get_data_layer()
+    if not data_layer or not session.user or not session.thread_id_to_resume:
+        return
+
+    new_thread_id = str(uuid.uuid4())
+    init_http_context(thread_id=new_thread_id, user=user)
+
+    # Get the persisted user to get their ID
+    persisted_user = await data_layer.get_user(identifier=user.identifier)
+    if not persisted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Create a new thread with the same content
+    await data_layer.update_thread(
+        thread_id=new_thread_id,
+        name=thread.get("name"),
+        user_id=persisted_user.id,
+        metadata={},
+        tags=thread.get("tags", []),
+    )
+
+    # Copy all steps with new IDs and update parent references
+    steps_id_mapping: dict[str, str] = {}
+    for step in thread.get("steps", []):
+        parent_id = step.get("parentId")
+        new_step = StepDict(
+            id=str(uuid.uuid4()),
+            threadId=new_thread_id,
+            name=step.get("name"),
+            type=step.get("type"),
+            output=step.get("output"),
+            parentId=steps_id_mapping.get(parent_id) if parent_id else None,
+            metadata=step.get("metadata"),
+        )
+        steps_id_mapping[step["id"]] = new_step["id"]
+        await data_layer.create_step(step_dict=new_step)
+
+    # Copy all elements with new IDs and update references
+    for element in thread.get("elements", []):
+        element_copy = ElementDict(**element)
+        element_copy["id"] = str(uuid.uuid4())
+        if for_id := element_copy["forId"]:
+            element_copy["forId"] = steps_id_mapping[for_id]
+        element_copy["threadId"] = new_thread_id
+        await data_layer.create_element(element=element_copy)
+
+    thread = await data_layer.get_thread(new_thread_id)
+    if not thread:
+        raise HTTPException(status_code=404, detail="Shared thread not found")
+
+    return thread
 
 
 def load_user_env(user_env):

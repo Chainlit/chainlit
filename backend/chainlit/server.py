@@ -52,7 +52,7 @@ from chainlit.config import (
     reload_config,
 )
 from chainlit.data import get_data_layer
-from chainlit.data.acl import has_thread_access, is_thread_author
+from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
@@ -858,16 +858,10 @@ async def get_thread(
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # Check if user has access to the thread
-    has_access = await has_thread_access(current_user.identifier, thread_id)
-    if not has_access:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    await is_thread_author(current_user.identifier, thread_id)
 
-    thread = await data_layer.get_thread(thread_id)
-    if not thread:
-        raise HTTPException(status_code=404, detail="Thread not found")
-
-    return JSONResponse(content=thread)
+    res = await data_layer.get_thread(thread_id)
+    return JSONResponse(content=res)
 
 
 @router.get("/project/thread/{thread_id}/element/{element_id}")
@@ -1303,8 +1297,7 @@ async def share_thread(
     thread_id: str,
     current_user: UserParam,
 ):
-    """Share a thread to others."""
-
+    """Share a thread by making it public."""
     data_layer = get_data_layer()
 
     if not data_layer:
@@ -1318,52 +1311,9 @@ async def share_thread(
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
 
-    # Get the thread author
-    thread_author = await data_layer.get_thread_author(thread_id)
-
-    if (
-        thread.metadata.get("is_shared") == True
-        and thread_author != current_user.identifier
-    ):
-        import uuid
-
-        new_thread_id = str(uuid.uuid4())
-
-        persisted_user = await data_layer.get_user(identifier=current_user.identifier)
-
-        await data_layer.update_thread(
-            thread_id=new_thread_id,
-            name=thread.get("name"),
-            user_id=persisted_user.id,
-            metadata={"is_shared": True},
-            tags=thread.get("tags", []),
-        )
-
-        steps_id_mapping = {}
-        for step in thread.get("steps", []):
-            new_step_id = str(uuid.uuid4())
-            steps_id_mapping[step["id"]] = new_step_id
-            step["threadId"] = new_thread_id
-            step["id"] = new_step_id
-            step["parentId"] = steps_id_mapping.get(step.get("parentId"), None)
-            await data_layer.create_step(step)
-
-        for element in thread.get("elements", []):
-            element["id"] = str(uuid.uuid4())
-            element["forId"] = steps_id_mapping[step["forId"]]
-            element["threadId"] = new_thread_id
-            await data_layer.create_element(element)
-
-        root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
-
-        return RedirectResponse(
-            url=f"{root_path}/project/thread/{new_thread_id}",
-        )
-    else:
-        await data_layer.update_thread(
-            thread_id=thread_id, metadata={"is_shared": True}
-        )
-
+    await data_layer.update_thread(
+        thread_id=thread_id, metadata={**thread.get("metadata", {}), "is_shared": True}
+    )
     return JSONResponse(content={"success": True, "threadId": thread_id})
 
 

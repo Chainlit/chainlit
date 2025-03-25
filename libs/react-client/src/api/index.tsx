@@ -299,4 +299,11 @@ export class ChainlitAPI extends APIBase {
   getOAuthEndpoint(provider: string) {
     return this.buildEndpoint(`/auth/oauth/${provider}`);
   }
+
+  async shareThread(threadId: string, sessionId: string): Promise<any> {
+    const res = await this.post(`/project/thread/${threadId}/share`, {
+      sessionId
+    });
+    return res.json();
+  }
 }

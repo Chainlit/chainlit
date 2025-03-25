@@ -62,6 +62,7 @@ lazify = "^0.4.0"
 packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
+asyncpg = "0.29.0"
 
 [tool.poetry.group.tests]
 optional = true
@@ -122,6 +123,7 @@ module = [
     "google-cloud-storage"
 ]
 ignore_missing_imports = true
+
 
 
 
