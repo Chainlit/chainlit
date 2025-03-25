@@ -256,7 +256,7 @@ class FeaturesSettings(DataClassJsonMixin):
 @dataclass
 class HeaderLink(DataClassJsonMixin):
     name: str
-    icon_url: str
+    icon_url: Optional[str] = None
     url: str
 
 
