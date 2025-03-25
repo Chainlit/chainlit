@@ -223,7 +223,7 @@ const useChatSession = () => {
       });
 
       socket.on('resume_thread', (thread: IThread) => {
-        if (thread.id !== idToResume) {
+        if (idToResume && thread.id !== idToResume) {
           window.location.href = `/thread/${thread.id}`;
         }
         let messages: IStep[] = [];
