@@ -6470,12 +6470,6 @@ test = ["big-O", "importlib-resources ; python_version < \"3.9\"", "jaraco.funct
 type = ["pytest-mypy"]
 
 [metadata]
-<<<<<<< HEAD
-lock-version = "2.0"
-python-versions = ">=3.9,<4.0.0"
-content-hash = "570f6538989f6d9eab0aee9095cd98e217c12df9cbca259e2296c220a02064cd"
-=======
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0.0"
 content-hash = "0fe34074209888108c32e2c4b0fb94a4becfd9347dab281091e857ac7b718d96"
->>>>>>> main

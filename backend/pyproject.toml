@@ -64,7 +64,6 @@ lazify = "^0.4.0"
 packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
-asyncpg = "0.29.0"
 
 [tool.poetry.group.tests]
 optional = true
@@ -118,9 +117,6 @@ module = [
     "uptrace",
     "syncer",
     "azure.storage.filedatalake",
-    "azure.storage.blob",
-    "azure.storage.blob.aio",
-    "google.oauth2",
     "google-cloud-storage"
 ]
 ignore_missing_imports = true
