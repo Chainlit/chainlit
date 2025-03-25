@@ -1,4 +1,3 @@
-import json
 import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 from uuid import UUID
@@ -170,7 +169,31 @@ class GenerationHelper:
         if function_call:
             msg["function_call"] = function_call
         else:
-            msg["content"] = kwargs.get("content", "")
+            content = kwargs.get("content")
+            if isinstance(content, list):
+                tool_calls = []
+                content_parts = []
+                for item in content:
+                    if item.get("type") == "tool_use":
+                        tool_calls.append(
+                            {
+                                "id": item.get("id"),
+                                "type": "function",
+                                "function": {
+                                    "name": item.get("name"),
+                                    "arguments": item.get("input"),
+                                },
+                            }
+                        )
+                    elif item.get("type") == "text":
+                        content_parts.append({"type": "text", "text": item.get("text")})
+
+                if tool_calls:
+                    msg["tool_calls"] = tool_calls
+                if content_parts:
+                    msg["content"] = content_parts  # type: ignore
+            else:
+                msg["content"] = content  # type: ignore
 
         return msg
 
@@ -182,6 +205,7 @@ class GenerationHelper:
             return self._convert_message_dict(
                 message,
             )
+
         function_call = message.additional_kwargs.get("function_call")
 
         msg = GenerationMessage(
@@ -199,7 +223,32 @@ class GenerationHelper:
         if function_call:
             msg["function_call"] = function_call
         else:
-            msg["content"] = message.content  # type: ignore
+            if isinstance(message.content, list):
+                tool_calls = []
+                content_parts = []
+                for item in message.content:
+                    if isinstance(item, str):
+                        continue
+                    if item.get("type") == "tool_use":
+                        tool_calls.append(
+                            {
+                                "id": item.get("id"),
+                                "type": "function",
+                                "function": {
+                                    "name": item.get("name"),
+                                    "arguments": item.get("input"),
+                                },
+                            }
+                        )
+                    elif item.get("type") == "text":
+                        content_parts.append({"type": "text", "text": item.get("text")})
+
+                if tool_calls:
+                    msg["tool_calls"] = tool_calls
+                if content_parts:
+                    msg["content"] = content_parts  # type: ignore
+            else:
+                msg["content"] = message.content  # type: ignore
 
         return msg
 
@@ -236,7 +285,12 @@ class GenerationHelper:
         if "functions" in settings:
             tools = [{"type": "function", "function": f} for f in settings["functions"]]
         if "tools" in settings:
-            tools = settings["tools"]
+            tools = [
+                {"type": "function", "function": t}
+                if t.get("type") != "function"
+                else t
+                for t in settings["tools"]
+            ]
         return provider, model, tools, settings
 
 
@@ -492,11 +546,12 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
         )
         step.start = utc_now()
-        step.input, language = process_content(run.inputs)
-        if language is not None:
-            if step.metadata is None:
-                step.metadata = {}
-            step.metadata["language"] = language
+        if step.metadata is None:
+            step.metadata = {}
+        if step_type != "llm":
+            step.input, language = process_content(run.inputs)
+            if language is not None:
+                step.metadata["language"] = language
 
         step.tags = run.tags
         self.steps[str(run.id)] = step
@@ -560,9 +615,6 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
                     break
 
                 current_step.language = "json"
-                current_step.output = json.dumps(
-                    message_completion, indent=4, ensure_ascii=False
-                )
             else:
                 completion_start = self.completion_generations[str(run.id)]
                 completion = generation.get("text", "")
@@ -601,13 +653,14 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             output = outputs.get(output_keys[0], outputs)
 
         if current_step:
-            current_step.output = (
-                output[0]
-                if isinstance(output, Sequence)
-                and not isinstance(output, str)
-                and len(output)
-                else output
-            )
+            if current_step.type != "llm":
+                current_step.output = (
+                    output[0]
+                    if isinstance(output, Sequence)
+                    and not isinstance(output, str)
+                    and len(output)
+                    else output
+                )
             current_step.end = utc_now()
             await current_step.update()
 
