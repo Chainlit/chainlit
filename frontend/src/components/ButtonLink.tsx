@@ -28,15 +28,19 @@ export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
             className="text-muted-foreground hover:text-muted-foreground"
           >
             <a href={url} target="_blank">
-              <img
-                src={
-                  iconUrl?.startsWith('/public')
-                    ? apiClient.buildEndpoint(iconUrl)
-                    : iconUrl
-                }
-                className={'h-6 w-6'}
-                alt={name}
-              />
+              {iconUrl ? (
+                <img
+                  src={
+                    iconUrl.startsWith('/public')
+                      ? apiClient.buildEndpoint(iconUrl)
+                      : iconUrl
+                  }
+                  className={'h-6 w-6'}
+                  alt={name}
+                />
+              ) : (
+                <span>{name}</span>
+              )}
             </a>
           </Button>
         </TooltipTrigger>
