@@ -159,6 +159,7 @@ cot = "full"
 # Specify optional one or more custom links in the header.
 # [[UI.header_links]]
 #     name = "Issues"
+#     display_name = "Report Issue"
 #     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
 #     url = "https://github.com/Chainlit/chainlit/issues"
 
@@ -256,7 +257,8 @@ class FeaturesSettings(DataClassJsonMixin):
 @dataclass
 class HeaderLink(DataClassJsonMixin):
     name: str
-    icon_url: Optional[str] = None
+    display_name: Optional[str]
+    icon_url: str
     url: str
 
 
