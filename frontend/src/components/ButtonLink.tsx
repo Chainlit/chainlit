@@ -12,6 +12,7 @@ import {
 
 export interface ButtonLinkProps {
   name?: string;
+  displayName?: string;
   iconUrl?: string;
   url: string;
 }
@@ -36,7 +37,7 @@ export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
                 className={'h-6 w-6'}
                 alt={name}
               />
-              {name}
+              {displayName}
             </a>
           </Button>
         </TooltipTrigger>
