@@ -217,6 +217,10 @@ class AzureADOAuthProvider(OAuthProvider):
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
+            # Fetch user data
+            user_data = []
+            
+            # Call Graph API to get azure user
             response = await client.get(
                 "https://graph.microsoft.com/v1.0/me",
                 headers={"Authorization": f"Bearer {token}"},
@@ -226,6 +230,7 @@ class AzureADOAuthProvider(OAuthProvider):
             azure_user = response.json()
 
             try:
+                # Fetch user photo
                 photo_response = await client.get(
                     "https://graph.microsoft.com/v1.0/me/photos/48x48/$value",
                     headers={"Authorization": f"Bearer {token}"},
