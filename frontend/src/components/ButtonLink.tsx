@@ -17,7 +17,12 @@ export interface ButtonLinkProps {
   url: string;
 }
 
-export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
+export default function ButtonLink({
+  name,
+  displayName,
+  iconUrl,
+  url
+}: ButtonLinkProps) {
   const apiClient = useContext(ChainlitContext);
   return (
     <TooltipProvider>
@@ -27,7 +32,11 @@ export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
             variant="ghost"
             className="text-muted-foreground hover:text-muted-foreground"
           >
-            <a href={url} target="_blank" className="inline-flex items-center gap-1">
+            <a
+              href={url}
+              target="_blank"
+              className="inline-flex items-center gap-1"
+            >
               <img
                 src={
                   iconUrl?.startsWith('/public')
@@ -37,7 +46,7 @@ export default function ButtonLink({ name, iconUrl, url }: ButtonLinkProps) {
                 className={'h-6 w-6'}
                 alt={name}
               />
-              {displayName}
+              {displayName && <span>{displayName}</span>}
             </a>
           </Button>
         </TooltipTrigger>
