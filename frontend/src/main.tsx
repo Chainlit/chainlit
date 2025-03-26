@@ -17,6 +17,7 @@ const EVOYA_SESSION_STORAGE_KEY = 'session_token';
 const searchParams = new URLSearchParams(location.search);
 
 if (searchParams.get('access_token')) {
+  localStorage.setItem('chainlit_token', searchParams.get('access_token'))
   localStorage.removeItem(EVOYA_JWT_STORAGE_KEY);
   localStorage.removeItem(EVOYA_SESSION_STORAGE_KEY);
   localStorage.removeItem('input_history');

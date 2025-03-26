@@ -80,6 +80,8 @@ const useChatSession = () => {
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
 
+  const token = localStorage.getItem('chainlit_token') || '';
+
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
 
@@ -114,7 +116,18 @@ const useChatSession = () => {
           sessionId,
           threadId: idToResume || '',
           userEnv: JSON.stringify(userEnv),
+          Authorization:token,
           chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
+        },
+        extraHeaders: {
+          Authorization: `Bearer ${token}` || '',
+          'X-Chainlit-Client-Type': client.type,
+          'X-Chainlit-Session-Id': sessionId,
+          'X-Chainlit-Thread-Id': idToResume || '',
+          'user-env': JSON.stringify(userEnv),
+          'X-Chainlit-Chat-Profile': chatProfile
+            ? encodeURIComponent(chatProfile)
+            : ''
         }
       });
       setSession((old) => {

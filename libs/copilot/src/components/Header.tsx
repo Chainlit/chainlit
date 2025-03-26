@@ -11,6 +11,7 @@ import AudioPresence from '@chainlit/app/src/components/AudioPresence';
 import NewChatButton from '@chainlit/app/src/components/header/NewChat';
 import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
 import { useAudio, useConfig, useChatData, sessionIdState } from '@chainlit/react-client';
+import { useMediaQuery } from "react-responsive";
 
 import { WidgetContext } from '@/context';
 
@@ -30,6 +31,7 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
   const { loading } = useChatData();
   const { config } = useConfig();
   const { audioConnection } = useAudio();
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 768px)' })
 
   const apiClient = useContext(ChainlitContext);
   const { accessToken, evoya } = useContext(WidgetContext);
@@ -59,12 +61,12 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
       window.dispatchEvent(new CustomEvent('reload-chat-sidebar'));
 
     }
-  }, [firstInteraction, loading,evoya])
+  }, [firstInteraction, loading, evoya])
 
 
   return (
     <div style={evoya.type !== 'dashboard' ? { backgroundColor: evoya.chainlitConfig.style.bgcolor } : {}}
-      className={`flex align-center justify-between p-4 border-b border-[#f4f4f4] rounded-t-xl`}>
+      className={`flex align-center justify-between p-4 border-b border-[#f4f4f4] ${!isTabletOrMobile ? 'rounded-t-xl':''}`}>
       <div className="flex items-center gap-3">
         {hasChatProfiles ? <ChatProfiles /> : ''}
         {evoya?.type === 'dashboard' ? (<>
@@ -109,7 +111,7 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
         <Button
           size="icon"
           variant="ghost"
-          className={ evoya?.type !== 'dashboard' && 'hover:bg-transparent'}
+          className={evoya?.type !== 'dashboard' && 'hover:bg-transparent'}
           onClick={() => { setExpanded(!expanded); window.dispatchEvent(new CustomEvent('copilot-open-modal')); }}
         >
           {expanded ? (

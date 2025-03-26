@@ -27,7 +27,7 @@ declare global {
 }
 
 export default function App({ widgetConfig }: Props) {
-  const { isAuthenticated, data, user,setUser } = useAuth();
+  const { isAuthenticated, data, user, setUser } = useAuth();
   const [config, setConfig] = useRecoilState(configState);
   const { evoya } = useContext(WidgetContext)
   const apiClient = useContext(ChainlitContext);
@@ -59,17 +59,24 @@ export default function App({ widgetConfig }: Props) {
   }, [config]);
 
   useEffect(() => {
-    apiClient
-      .get(`/project/translations?language=${languageInUse}`)
-      .then((res) => res.json())
-      .then((data) => {
-        i18n.addResourceBundle(languageInUse, 'translation', data.translation);
-        i18n.changeLanguage(languageInUse);
-      })
-      .catch((err) => {
-        setFetchError(String(err));
-      });
+    loadTranslations();
   }, []);
+
+  const loadTranslations = async () => {
+    try {
+      const translations = await import(
+        `../../../translations/${languageInUse}.json`
+      );
+      i18n.addResourceBundle(languageInUse, 'translation', translations);
+      i18n.changeLanguage(languageInUse);
+    } catch (error) {
+      console.error(
+        `Could not load translations for ${languageInUse}:`,
+        error
+      );
+    }
+  };
+
 
   const defaultTheme = widgetConfig.theme || 'light';
 

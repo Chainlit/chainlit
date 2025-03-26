@@ -174,7 +174,6 @@ const Chat = () => {
         currentThreadId: threadId
       }));
     }
-    clear()
   }, []);
 
   const enableAttachments =

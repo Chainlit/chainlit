@@ -10,6 +10,9 @@ import {
 import BlinkingCursor from '@/components/BlinkingCursor';
 
 import { Message } from './Message';
+import { WidgetContext } from '@chainlit/copilot/src/context';
+import { firstUserInteraction, } from '@chainlit/react-client';
+import { useRecoilValue } from 'recoil';
 
 interface Props {
   messages: IStep[];
@@ -44,8 +47,9 @@ const checkToolStep = (step: IStep): boolean => {
 
 const Messages = memo(
   ({ messages, elements, actions, indent, isRunning, scorableRun }: Props) => {
+    const { evoya } = useContext(WidgetContext);
     const messageContext = useContext(MessageContext);
-
+    const firstInteraction = useRecoilValue(firstUserInteraction);
     const [isToolLoading, setToolLoading] = useState(false);
 
     useEffect(() => {
@@ -92,7 +96,7 @@ const Messages = memo(
                   />
                 ) : null}
                 {showToolCoTLoader || showHiddenCoTLoader ? (
-                  <div id='cursor-bliner'>
+                  <div className={(!!evoya === false && !!firstInteraction == false) && 'absolute'}>
                     <BlinkingCursor />
                   </div>
 

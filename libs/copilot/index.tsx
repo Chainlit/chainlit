@@ -3,11 +3,9 @@ import ReactDOM from 'react-dom/client';
 
 import { type IStep } from '@chainlit/react-client';
 
-// @ts-expect-error inline css
+// Change the imports to handle CSS properly
 import sonnercss from './sonner.css?inline';
-// @ts-expect-error inline css
 import tailwindcss from './src/index.css?inline';
-// @ts-expect-error inline css
 import hljscss from 'highlight.js/styles/monokai-sublime.css?inline';
 
 import AppWrapper from './src/appWrapper';
@@ -24,7 +22,7 @@ declare global {
       light: Record<string, string>;
       dark: Record<string, string>;
     };
-    mountChainlitWidget: (config: IWidgetConfig,  evoya: EvoyaConfig) => void;
+    mountChainlitWidget: (config: IWidgetConfig, evoya: EvoyaConfig) => void;
     unmountChainlitWidget: () => void;
     toggleChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
@@ -54,12 +52,34 @@ window.mountChainlitWidget = (config: IWidgetConfig, evoya: EvoyaConfig) => {
 
   window.cl_shadowRootElement = shadowRootElement;
 
+  const resetStyles = document.createElement('style');
+  resetStyles.textContent = `
+    :host {
+      all: initial;
+    }
+    #cl-shadow-root {
+      font-family: sans-serif;
+      color: inherit;
+      box-sizing: border-box;
+    }
+  `;
+  shadowContainer.appendChild(resetStyles);
+
+  const tailwindStyles = document.createElement('style');
+  tailwindStyles.textContent = tailwindcss.toString();
+  shadowContainer.appendChild(tailwindStyles);
+
+  const sonnerStyles = document.createElement('style');
+  sonnerStyles.textContent = sonnercss.toString();
+  shadowContainer.appendChild(sonnerStyles);
+
+  const hlStyles = document.createElement('style');
+  hlStyles.textContent = hljscss.toString();
+  shadowContainer.appendChild(hlStyles);
+
   root = ReactDOM.createRoot(shadowRootElement);
   root.render(
     <React.StrictMode>
-      <style type="text/css">{tailwindcss.toString()}</style>
-      <style type="text/css">{sonnercss.toString()}</style>
-      <style type="text/css">{hljscss.toString()}</style>
       <AppWrapper widgetConfig={config} evoya={evoya} />
     </React.StrictMode>
   );
@@ -70,6 +90,6 @@ window.unmountChainlitWidget = () => {
   document.getElementById(id)?.remove();
 };
 
-window.sendChainlitMessage = () => {
+window.sendChainlitMessage = (message: IStep) => {
   console.info('Copilot is not active. Please check if the widget is mounted.');
 };

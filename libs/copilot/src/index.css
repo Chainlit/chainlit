@@ -140,3 +140,9 @@
   height: 97.5vh;
   z-index: 1000;
 }
+
+@media screen and (max-width: 768px) {
+  [data-radix-popper-content-wrapper] {
+    transform: none !important;
+  }
+}
