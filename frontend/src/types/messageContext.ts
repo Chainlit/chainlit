@@ -19,6 +19,7 @@ interface IMessageContext {
   uiName: string;
   allowHtml?: boolean;
   latex?: boolean;
+  mermaid?: boolean;
   onElementRefClick?: (element: IMessageElement) => void;
   onFeedbackUpdated?: (
     message: IStep,

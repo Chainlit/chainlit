@@ -52,6 +52,7 @@ export interface IChainlitConfig {
     unsafe_allow_html?: boolean;
     user_message_autoscroll?: boolean;
     latex?: boolean;
+    mermaid?: boolean;
     edit_message?: boolean;
     mcp?: {
       enabled?: boolean;

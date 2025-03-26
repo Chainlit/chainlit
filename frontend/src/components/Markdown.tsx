@@ -1,10 +1,12 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { PluggableList } from 'react-markdown/lib';
+import { MarkdownHooks } from 'react-markdown';
+import { PluggableList } from 'unified';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+import rehypeMermaid from 'rehype-mermaid';
+import { RehypeMermaidOptions } from 'rehype-mermaid';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -37,6 +39,8 @@ import {
 interface Props {
   allowHtml?: boolean;
   latex?: boolean;
+  mermaid?: boolean;
+  prefix?: string;
   refElements?: IMessageElement[];
   children: string;
   className?: string;
@@ -91,6 +95,8 @@ const cursorPlugin = () => {
 const Markdown = ({
   allowHtml,
   latex,
+  mermaid,
+  prefix,
   refElements,
   className,
   children
@@ -105,8 +111,18 @@ const Markdown = ({
     if (latex) {
       rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
     }
+    if (mermaid) {
+      const mermaidOptions: RehypeMermaidOptions = {
+        errorFallback: ({ diagram }: any) => {
+          return diagram;
+        },
+        // a workaround of https://github.com/remarkjs/react-markdown/issues/902
+        prefix: prefix,
+      };
+      rehypePlugins = [[rehypeMermaid, mermaidOptions] as any, ...rehypePlugins];
+    }
     return rehypePlugins;
-  }, [allowHtml, latex]);
+  }, [allowHtml, latex, mermaid]);
 
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [
@@ -123,7 +139,7 @@ const Markdown = ({
   }, [latex]);
 
   return (
-    <ReactMarkdown
+    <MarkdownHooks
       className={cn('prose lg:prose-xl', className)}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
@@ -286,7 +302,7 @@ const Markdown = ({
       }}
     >
       {children}
-    </ReactMarkdown>
+    </MarkdownHooks>
   );
 };
 

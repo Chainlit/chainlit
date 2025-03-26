@@ -13,10 +13,11 @@ export interface Props {
   message: IStep;
   allowHtml?: boolean;
   latex?: boolean;
+  mermaid?: boolean;
 }
 
 const MessageContent = memo(
-  ({ message, elements, allowHtml, latex }: Props) => {
+  ({ message, elements, allowHtml, latex, mermaid }: Props) => {
     const outputContent =
       message.streaming && message.output
         ? message.output + CURSOR_PLACEHOLDER
@@ -45,6 +46,8 @@ const MessageContent = memo(
         <Markdown
           allowHtml={allowHtml}
           latex={latex}
+          mermaid={mermaid}
+          prefix={`output-${message.id}`}
           refElements={outputRefElements}
         >
           {output}
@@ -77,6 +80,8 @@ const MessageContent = memo(
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
+            mermaid={mermaid}
+            prefix={`input-${message.id}`}
             refElements={inputRefElements}
           >
             {input}
