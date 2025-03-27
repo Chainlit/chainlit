@@ -15,10 +15,9 @@ interface AttachmentProps {
   children?: React.ReactNode;
 }
 
-const Attachment: React.FC<AttachmentProps> = ({ name, mime, children }) => {
-  const extension = (
-    mime ? mime.split('/').pop() : 'txt'
-  ) as DefaultExtensionType;
+const Attachment: React.FC<AttachmentProps> = ({ name, children }) => {
+  const extensionFromName = name.includes('.') ? name.split('.').pop()!.toLowerCase() : 'txt';
+  const extension = extensionFromName as DefaultExtensionType;
 
   return (
     <TooltipProvider delayDuration={100}>
