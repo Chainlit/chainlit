@@ -137,9 +137,9 @@ const Widget = ({ config, error }: Props) => {
                 ? '98vw'
                 : `calc(${evoya?.chatBubbleConfig?.width.replace('%', '')}vw - 3vw)`
               : 'min(400px, 80vw)',
-          inset: isTabletOrMobile && `${visualViewportOffsetTop}px 0px ${window.innerHeight - visualViewportOffsetTop}px 0px !important`,
+          inset: isTabletOrMobile && `0 0 0 0`,
           height: isTabletOrMobile
-            ? `${visualViewportHeight}px`
+            ? `100dvh`
             : evoya?.chatBubbleConfig
               ? evoya?.chatBubbleConfig?.size === 'full_screen'
                 ? '98vh'
