@@ -151,30 +151,8 @@ cot = "full"
 # Custom login page image, relative to public directory or external URL
 # login_page_image = "/public/custom-background.jpg"
 
-# Custom login page image filter
-# Supported filter types with value ranges:
-# - brightness-[0-2], 1 is original, <1 dims, >1 brightens
-# - contrast-[0-2], 1 is original, <1 reduces, >1 increases
-# - opacity-[0-1], 0 transparent, 1 fully opaque
-# - grayscale-[0-1], 0 original, 1 full grayscale
-# - blur-[0-50px], pixel blur radius (px optional)
-# - saturate-[0-2], 1 is original, <1 desaturates, >1 intensifies
-# - sepia-[0-1], 0 original, 1 full sepia tone
-# - hue-rotate-[0-360deg], color hue rotation (deg optional)
-# - invert-[0-1], 0 original, 1 full color inversion
-#
-# Syntax: [light:|dark:]filter_name-[value]
-#
-# Examples:
-# 1. Soft dark mode with blur and reduced brightness:
-# login_page_image_filter = "dark:brightness-[0.7] dark:blur-[5] dark:grayscale-[0.3]"
-#
-# 2. Color transformation with hue rotation:
-# login_page_image_filter = "dark:hue-rotate-[90] dark:saturate-[1.2] dark:contrast-[1.1]"
-#
-# 3. Artistic cinematic effect (Recommended):
-# login_page_image_filter = "dark:brightness-[0.8] dark:sepia-[0.4] dark:blur-[3] dark:contrast-[1.2]"
-login_page_image_filter = "dark:brightness-[0.2] dark:grayscale"
+# Custom login page image filter (Tailwind internal filters, no dark/light variants)
+login_page_image_filter = "brightness-50 grayscale"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"

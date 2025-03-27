@@ -1,4 +1,3 @@
-import { generateFilterStyle } from '@/lib/utils';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -79,9 +78,6 @@ export default function Login() {
     }
   }, [config, user]);
 
-  const imageFilter = config?.ui?.login_page_image_filter;
-  const filterStyle = generateFilterStyle(imageFilter);
-
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -112,8 +108,9 @@ export default function Login() {
               apiClient.buildEndpoint('/favicon')
             }
             alt="Image"
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ filter: filterStyle, clipPath: 'inset(0)' }}
+            className={`absolute inset-0 h-full w-full object-cover ${
+              config?.ui?.login_page_image_filter ?? ''
+            }`}
           />
         </div>
       ) : null}
