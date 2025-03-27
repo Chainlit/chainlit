@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
@@ -7,6 +8,7 @@ import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
 import ChatSettingsModal from './components/ChatSettings';
 import { ThemeProvider } from './components/ThemeProvider';
+import { Loader } from '@/components/Loader';
 import { Toaster } from '@/components/ui/sonner';
 
 import { userEnvState } from 'state/user';
@@ -80,6 +82,15 @@ function App() {
 
       <ChatSettingsModal />
       <RouterProvider router={router} />
+
+      <div
+        className={cn(
+          'bg-[hsl(var(--background))] flex items-center justify-center fixed size-full p-2 top-0',
+          isReady && 'hidden'
+        )}
+      >
+        <Loader className="!size-6" />
+      </div>
     </ThemeProvider>
   );
 }
