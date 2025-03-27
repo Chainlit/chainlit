@@ -762,7 +762,7 @@ async def project_settings(
         config.features.audio.enabled = True
 
     if config.code.on_mcp_connect:
-        config.features.mcp = True
+        config.features.mcp.enabled = True
 
     debug_url = None
     data_layer = get_data_layer()
@@ -1094,8 +1094,8 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    on_mcp_connect = config.code.on_mcp_connect
-    if on_mcp_connect:
+    mcp_enabled = config.code.on_mcp_connect is not None
+    if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
             if on_mcp_disconnect := config.code.on_mcp_disconnect:
@@ -1109,12 +1109,24 @@ async def connect_mcp(
             exit_stack = AsyncExitStack()
 
             if payload.clientType == "sse":
+                if not config.features.mcp.sse.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="SSE MCP is not enabled",
+                    )
+
                 mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
 
                 transport = await exit_stack.enter_async_context(
                     sse_client(url=mcp_connection.url)
                 )
             elif payload.clientType == "stdio":
+                if not config.features.mcp.stdio.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Stdio MCP is not enabled",
+                    )
+
                 env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
                 mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
                     command=command, args=args, name=payload.name
@@ -1148,7 +1160,7 @@ async def connect_mcp(
             session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
 
             # Call the callback
-            await on_mcp_connect(mcp_connection, mcp_session)
+            await config.code.on_mcp_connect(mcp_connection, mcp_session)
 
         except Exception as e:
             raise HTTPException(
@@ -1157,7 +1169,7 @@ async def connect_mcp(
             )
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=400,
             detail="This app does not support MCP.",
         )
 
