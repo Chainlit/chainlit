@@ -134,6 +134,8 @@ name = "Assistant"
 
 # layout = "wide"
 
+# default_sidebar_state = "open"
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
 
@@ -268,6 +270,7 @@ class UISettings(DataClassJsonMixin):
     font_family: Optional[str] = None
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     layout: Optional[Literal["default", "wide"]] = "default"
+    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
     github: Optional[str] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
