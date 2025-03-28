@@ -152,7 +152,8 @@ cot = "full"
 # login_page_image = "/public/custom-background.jpg"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
-login_page_image_filter = "brightness-50 grayscale"
+# login_page_image_filter = "brightness-50 grayscale"
+# login_page_image_dark_filter = "contrast-200 blur-sm"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -281,6 +282,7 @@ class UISettings(DataClassJsonMixin):
     # Optional custom background image for login page
     login_page_image: Optional[str] = None
     login_page_image_filter: Optional[str] = None
+    login_page_image_dark_filter: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend

@@ -41,6 +41,7 @@ export interface IChainlitConfig {
     custom_font?: string;
     login_page_image?: string;
     login_page_image_filter?: string;
+    login_page_image_dark_filter?: string;
     custom_meta_image_url?: string;
     header_links?: { name: string; icon_url: string; url: string }[];
   };
