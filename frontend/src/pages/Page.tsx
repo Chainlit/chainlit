@@ -52,7 +52,9 @@ const Page = ({ children }: Props) => {
   const historyEnabled = config?.dataPersistence && data?.requireLogin;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      defaultOpen={config?.ui.default_sidebar_state !== 'closed'}
+    >
       {historyEnabled ? (
         <>
           <LeftSidebar />
