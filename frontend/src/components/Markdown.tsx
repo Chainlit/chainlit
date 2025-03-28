@@ -40,7 +40,6 @@ interface Props {
   allowHtml?: boolean;
   latex?: boolean;
   mermaid?: boolean;
-  prefix?: string;
   refElements?: IMessageElement[];
   children: string;
   className?: string;
@@ -96,7 +95,6 @@ const Markdown = ({
   allowHtml,
   latex,
   mermaid,
-  prefix,
   refElements,
   className,
   children
@@ -116,8 +114,6 @@ const Markdown = ({
         errorFallback: ({ diagram }: any) => {
           return diagram;
         },
-        // a workaround of https://github.com/remarkjs/react-markdown/issues/902
-        prefix: prefix,
       };
       rehypePlugins = [[rehypeMermaid, mermaidOptions] as any, ...rehypePlugins];
     }

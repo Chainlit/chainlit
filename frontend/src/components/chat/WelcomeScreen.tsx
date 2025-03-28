@@ -62,7 +62,7 @@ export default function WelcomeScreen(props: Props) {
               }
             />
             {currentChatProfile?.markdown_description ? (
-              <Markdown allowHtml={allowHtml} latex={latex} mermaid={mermaid} prefix="welcome">
+              <Markdown allowHtml={allowHtml} latex={latex} mermaid={mermaid}>
                 {currentChatProfile.markdown_description}
               </Markdown>
             ) : null}

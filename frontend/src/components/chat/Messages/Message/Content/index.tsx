@@ -47,7 +47,6 @@ const MessageContent = memo(
           allowHtml={allowHtml}
           latex={latex}
           mermaid={mermaid}
-          prefix={`output-${message.id}`}
           refElements={outputRefElements}
         >
           {output}
@@ -81,7 +80,6 @@ const MessageContent = memo(
             allowHtml={allowHtml}
             latex={latex}
             mermaid={mermaid}
-            prefix={`input-${message.id}`}
             refElements={inputRefElements}
           >
             {input}

@@ -45,7 +45,6 @@ export default function ReadmeButton() {
             allowHtml={config?.features?.unsafe_allow_html}
             latex={config?.features?.latex}
             mermaid={config?.features?.latex}
-            prefix="readme"
           >
             {config.markdown}
           </Markdown>

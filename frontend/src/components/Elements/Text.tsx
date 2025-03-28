@@ -42,7 +42,6 @@ const TextElement = ({ element }: TextElementProps) => {
       allowHtml={allowHtml}
       latex={latex}
       mermaid={mermaid}
-      prefix={element.id}
       className={`${element.display}-text`}
     >
       {content}
