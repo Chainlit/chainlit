@@ -111,8 +111,9 @@ const Markdown = ({
     }
     if (mermaid) {
       const mermaidOptions: RehypeMermaidOptions = {
-        errorFallback: ({ diagram }: any) => {
-          return diagram;
+        errorFallback: (element, diagram, error, file) => {
+          // If some error occurs, just show it as a code block instead of showing a error then removing the element.
+          return element;
         },
       };
       rehypePlugins = [[rehypeMermaid, mermaidOptions] as any, ...rehypePlugins];
