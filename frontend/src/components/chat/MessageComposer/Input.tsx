@@ -243,6 +243,9 @@ const Input = forwardRef<InputMethods, Props>(
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
           const escapedText = escapeHtml(textData);
+
+          document.execCommand('insertText', false, textData);
+
           const textWithNewLines = escapedText.replace(/\n/g, '<br>');
 
           // Get selection from the element's ownerDocument instead of window
@@ -407,7 +410,7 @@ const Input = forwardRef<InputMethods, Props>(
           contentEditable
           data-placeholder={placeholder}
           className={cn(
-            'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
+            'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
             className
           )}
           onInput={handleInput}
