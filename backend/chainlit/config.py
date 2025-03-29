@@ -322,7 +322,7 @@ class CodeSettings:
     set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
         None
     )
-    action_callbacks: Dict[str, Callable[["Action"], Any]]
+    action_callbacks: Dict[str, Callable[["Action"], Any]] = None
 
     # Auth callbacks
     password_auth_callback: Optional[
