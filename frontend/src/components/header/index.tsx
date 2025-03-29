@@ -67,6 +67,7 @@ const Header = memo(() => {
             <ButtonLink
               key={`${link.name}-${link.url}-${index}`}
               name={link.name}
+              displayName={link.display_name}
               iconUrl={link.icon_url}
               url={link.url}
             />
