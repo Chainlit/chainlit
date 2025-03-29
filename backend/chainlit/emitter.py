@@ -240,7 +240,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 )
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
-            asyncio.create_task(self.session.flush_method_queue())
+            await self.session.flush_method_queue()
 
     async def init_thread(self, interaction: str):
         await self.flush_thread_queues(interaction)
@@ -263,11 +263,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
         message.created_at = utc_now()
         chat_context.add(message)
 
-        asyncio.create_task(message._create())
-
         if not self.session.has_first_interaction:
             self.session.has_first_interaction = True
-            asyncio.create_task(self.init_thread(message.content))
+            await self.init_thread(message.content)
+
+        await message._create()
 
         if file_refs:
             files = [
@@ -296,7 +296,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                 for element in message.elements:
                     await element.send(for_id=message.id)
 
-            asyncio.create_task(send_elements())
+            await send_elements()
 
         return message
 
