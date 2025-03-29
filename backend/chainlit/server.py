@@ -80,6 +80,9 @@ mimetypes.add_type("text/css", ".css")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
+    if config.code.on_app_startup:
+        await config.code.on_app_startup()
+
     host = config.run.host
     port = config.run.port
     root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
@@ -145,6 +148,9 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         try:
+            if config.code.on_app_shutdown:
+                await config.code.on_app_shutdown()
+
             if watch_task:
                 stop_event.set()
                 watch_task.cancel()

@@ -296,11 +296,36 @@ class UISettings(DataClassJsonMixin):
 
 @dataclass()
 class CodeSettings:
-    # Developer defined callbacks for each action. Key is the action name, value is the callback function.
+    # App action functions
     action_callbacks: Dict[str, Callable[["Action"], Any]]
+
     # Module object loaded from the module_name
     module: Any = None
-    # Bunch of callbacks defined by the developer
+
+    # App life cycle callbacks
+    on_app_startup: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+    on_app_shutdown: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+
+    # Session life cycle callbacks
+    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
+    on_stop: Optional[Callable[[], Any]] = None
+    on_chat_start: Optional[Callable[[], Any]] = None
+    on_chat_end: Optional[Callable[[], Any]] = None
+    on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
+    on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_start: Optional[Callable[[], Any]] = None
+    on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[], Any]] = None
+    on_mcp_connect: Optional[Callable] = None
+    on_mcp_disconnect: Optional[Callable] = None
+    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
+    # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
@@ -310,27 +335,10 @@ class CodeSettings:
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
-    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
-    on_stop: Optional[Callable[[], Any]] = None
-    on_chat_start: Optional[Callable[[], Any]] = None
-    on_chat_end: Optional[Callable[[], Any]] = None
-    on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
-    on_message: Optional[Callable[["Message"], Any]] = None
-    on_window_message: Optional[Callable[[str], Any]] = None
-    on_audio_start: Optional[Callable[[], Any]] = None
-    on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
-    on_audio_end: Optional[Callable[[], Any]] = None
-    on_mcp_connect: Optional[Callable] = None
-    on_mcp_disconnect: Optional[Callable] = None
 
+    # Helpers
+    on_window_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], Awaitable[str]]] = None
-    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[
-        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
-    ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
     data_layer: Optional[Callable[[], BaseDataLayer]] = None
 
 
