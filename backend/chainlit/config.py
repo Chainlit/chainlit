@@ -74,7 +74,7 @@ session_timeout = 3600
 # Duration (in seconds) of the user session expiry
 user_session_timeout = 1296000  # 15 days
 
-# Enable third parties caching (e.g LangChain cache)
+# Enable third parties caching (e.g., LangChain cache)
 cache = false
 
 # Authorized origins
@@ -146,9 +146,16 @@ cot = "full"
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
-# Specify a Javascript file that can be used to customize the user interface.
-# The Javascript file can be served from the public directory.
+# Specify a JavaScript file that can be used to customize the user interface.
+# The JavaScript file can be served from the public directory.
 # custom_js = "/public/test.js"
+
+# Custom login page image, relative to public directory or external URL
+# login_page_image = "/public/custom-background.jpg"
+
+# Custom login page image filter (Tailwind internal filters, no dark/light variants)
+# login_page_image_filter = "brightness-50 grayscale"
+# login_page_image_dark_filter = "contrast-200 blur-sm"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -275,6 +282,10 @@ class UISettings(DataClassJsonMixin):
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_js: Optional[str] = None
+    # Optional custom background image for login page
+    login_page_image: Optional[str] = None
+    login_page_image_filter: Optional[str] = None
+    login_page_image_dark_filter: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional custom build directory for the frontend
