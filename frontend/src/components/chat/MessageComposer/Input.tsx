@@ -244,80 +244,17 @@ const Input = forwardRef<InputMethods, Props>(
         if (textData) {
           const escapedText = escapeHtml(textData);
 
-          const textWithNewLines = escapedText.replace(/\n/g, '<br>');
+          const htmlToInsert = escapedText.replace(/\n/g, '<br>');
 
-          // Get selection from the element's ownerDocument instead of window
-          // This works better with Shadow DOM
-          const ownerDoc = textarea.ownerDocument;
-          const selection = ownerDoc.getSelection();
+          document.execCommand('insertHTML', false, htmlToInsert);
 
-          if (selection && selection.rangeCount > 0) {
-            // Make sure we're operating on a range within our component
-            const range = selection.getRangeAt(0);
+          textarea.focus();
 
-            // Verify the range is within our contentEditable element
-            if (textarea.contains(range.commonAncestorContainer)) {
-              range.deleteContents();
-
-              // Create a document fragment using the ownerDocument
-              const fragment = ownerDoc.createDocumentFragment();
-              const tempDiv = ownerDoc.createElement('div');
-              tempDiv.innerHTML = textWithNewLines;
-
-              while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-              }
-
-              // Insert the fragment into the contenteditable element
-              range.insertNode(fragment);
-
-              // Move cursor to the end of the pasted content
-              range.collapse(false);
-              selection.removeAllRanges();
-              selection.addRange(range);
-
-              // Ensure focus remains within the contenteditable
-              textarea.focus();
-              textarea.scrollTop = textarea.scrollHeight;
-
-              // Trigger input event to update state
-              const inputEvent = new Event('input', {
-                bubbles: true,
-                composed: true
-              });
-              textarea.dispatchEvent(inputEvent);
-            } else {
-              // If selection is outside our element, focus and insert at the end
-              textarea.focus();
-              const newRange = ownerDoc.createRange();
-              if (textarea.lastChild) {
-                newRange.setStartAfter(textarea.lastChild);
-              } else {
-                newRange.setStart(textarea, 0);
-              }
-              newRange.collapse(true);
-
-              const fragment = ownerDoc.createDocumentFragment();
-              const tempDiv = ownerDoc.createElement('div');
-              tempDiv.innerHTML = textWithNewLines;
-
-              while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-              }
-
-              newRange.insertNode(fragment);
-              newRange.collapse(false);
-
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-
-              const inputEvent = new Event('input', {
-                bubbles: true,
-                composed: true
-              });
-              textarea.dispatchEvent(inputEvent);
-            }
-          }
+          const inputEvent = new Event('input', {
+            bubbles: true,
+            composed: true
+          });
+          textarea.dispatchEvent(inputEvent);
         }
         onPaste(event);
       };
