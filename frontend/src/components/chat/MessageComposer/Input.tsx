@@ -244,8 +244,6 @@ const Input = forwardRef<InputMethods, Props>(
         if (textData) {
           const escapedText = escapeHtml(textData);
 
-          document.execCommand('insertText', false, textData);
-
           const textWithNewLines = escapedText.replace(/\n/g, '<br>');
 
           // Get selection from the element's ownerDocument instead of window
