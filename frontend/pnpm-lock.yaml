@@ -114,9 +114,6 @@ importers:
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@18.3.1)
-      mermaid-isomorphic:
-        specifier: ^3.0.2
-        version: 3.0.2
       plotly.js:
         specifier: ^2.27.0
         version: 2.30.1(mapbox-gl@1.13.3)
@@ -3548,8 +3545,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  mermaid-isomorphic@3.0.2:
-    resolution: {integrity: sha512-5Gpr0cG+59MKYQD93fwZaGge0Le/MPQw/u27E/P6fmWxqRDVS6XmkD8L4FkZ8KVIKVz+ElcoZdWgTjLti/rtyw==}
+  mermaid-isomorphic@3.0.4:
+    resolution: {integrity: sha512-XQTy7H1XwHK3DPEHf+ZNWiqUEd9BwX3Xws38R9Fj2gx718srmgjlZoUzHr+Tca+O+dqJOJsAJaKzCoP65QDfDg==}
     peerDependencies:
       playwright: '1'
     peerDependenciesMeta:
@@ -8494,7 +8491,7 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  mermaid-isomorphic@3.0.2:
+  mermaid-isomorphic@3.0.4:
     dependencies:
       '@fortawesome/fontawesome-free': 6.7.2
       mermaid: 11.6.0
@@ -9413,7 +9410,7 @@ snapshots:
       '@types/hast': 3.0.4
       hast-util-from-html-isomorphic: 2.0.0
       hast-util-to-text: 4.0.0
-      mermaid-isomorphic: 3.0.2
+      mermaid-isomorphic: 3.0.4
       mini-svg-data-uri: 1.4.4
       space-separated-tokens: 2.0.2
       unified: 11.0.5

@@ -2,14 +2,14 @@ import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
 import { MarkdownHooks } from 'react-markdown';
-import { PluggableList } from 'unified';
 import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
 import rehypeMermaid from 'rehype-mermaid';
 import { RehypeMermaidOptions } from 'rehype-mermaid';
+import rehypeRaw from 'rehype-raw';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { PluggableList } from 'unified';
 import { visit } from 'unist-util-visit';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
@@ -111,12 +111,18 @@ const Markdown = ({
     }
     if (mermaid) {
       const mermaidOptions: RehypeMermaidOptions = {
-        errorFallback: (element, diagram, error, file) => {
+        errorFallback: (element, _diagram, _error, _file) => {
           // If some error occurs, just show it as a code block instead of showing a error then removing the element.
           return element;
         },
+        containerStyle: {
+          maxWidth: '100%'
+        }
       };
-      rehypePlugins = [[rehypeMermaid, mermaidOptions] as any, ...rehypePlugins];
+      rehypePlugins = [
+        [rehypeMermaid, mermaidOptions] as any,
+        ...rehypePlugins
+      ];
     }
     return rehypePlugins;
   }, [allowHtml, latex, mermaid]);
