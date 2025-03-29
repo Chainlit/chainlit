@@ -296,6 +296,9 @@ class UISettings(DataClassJsonMixin):
 
 @dataclass()
 class CodeSettings:
+    # App action functions
+    action_callbacks: Dict[str, Callable[["Action"], Any]]
+
     # Module object loaded from the module_name
     module: Any = None
 
@@ -322,8 +325,6 @@ class CodeSettings:
     set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
         None
     )
-    action_callbacks: Dict[str, Callable[["Action"], Any]] = None
-
     # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
