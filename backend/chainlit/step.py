@@ -50,6 +50,7 @@ class StepDict(TypedDict, total=False):
     threadId: str
     parentId: Optional[str]
     command: Optional[str]
+    toggleables: Optional[List[str]]
     streaming: bool
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
@@ -186,6 +187,8 @@ class Step:
     default_open: Optional[bool]
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
+    command: Optional[str]
+    toggleables: Optional[List[str]]
 
     def __init__(
         self,
@@ -200,6 +203,8 @@ class Step:
         default_open: Optional[bool] = False,
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
+        command: Optional[str] = None,
+        toggleables: Optional[List[str]] = None,
     ):
         trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
@@ -214,6 +219,8 @@ class Step:
         self.is_error = False
         self.show_input = show_input
         self.parent_id = parent_id
+        self.command = command
+        self.toggleables = toggleables
 
         self.language = language
         self.default_open = default_open
@@ -289,25 +296,28 @@ class Step:
         self._output = self._process_content(content, set_language=True)
 
     def to_dict(self) -> StepDict:
-        _dict: StepDict = {
-            "name": self.name,
-            "type": self.type,
+        _dict = {
             "id": self.id,
+            "type": self.type,
             "threadId": self.thread_id,
             "parentId": self.parent_id,
+            "name": self.name,
+            "input": self._input,
+            "output": self._output,
             "streaming": self.streaming,
-            "metadata": self.metadata,
-            "tags": self.tags,
-            "input": self.input,
+            "waitForAnswer": False,
             "isError": self.is_error,
-            "output": self.output,
+            "metadata": json.loads(json.dumps(self.metadata, default=str)),
+            "tags": self.tags,
             "createdAt": self.created_at,
             "start": self.start,
             "end": self.end,
-            "language": self.language,
             "defaultOpen": self.default_open,
+            "language": self.language,
             "showInput": self.show_input,
             "generation": self.generation.to_dict() if self.generation else None,
+            "command": self.command,
+            "toggleables": self.toggleables,
         }
         return _dict
 

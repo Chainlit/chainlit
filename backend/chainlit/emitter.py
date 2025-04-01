@@ -23,6 +23,7 @@ from chainlit.types import (
     OutputAudioChunk,
     ThreadDict,
     ToastType,
+    ToggleCommandDict,
 )
 from chainlit.user import PersistedUser
 
@@ -144,6 +145,10 @@ class BaseChainlitEmitter:
 
     def send_toast(self, message: str, type: Optional[ToastType] = "info"):
         """Stub method to send a toast message to the UI."""
+        pass
+
+    async def set_toggle_commands(self, commands: List[ToggleCommandDict]):
+        """Stub method to send the available toggle commands to the UI."""
         pass
 
 
@@ -422,6 +427,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Send the available commands to the UI."""
         return self.emit(
             "set_commands",
+            commands,
+        )
+
+    def set_toggle_commands(self, commands: List[ToggleCommandDict]):
+        """Send the available toggle commands to the UI."""
+        return self.emit(
+            "set_toggle_commands",
             commands,
         )
 

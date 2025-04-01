@@ -3,7 +3,7 @@ import { AtomEffect, DefaultValue, atom, selector } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ICommand } from './types/command';
+import { ICommand, IToggleCommand } from './types/command';
 
 import {
   IAction,
@@ -72,6 +72,11 @@ export const messagesState = atom<IStep[]>({
 
 export const commandsState = atom<ICommand[]>({
   key: 'Commands',
+  default: []
+});
+
+export const toggleCommandsState = atom<IToggleCommand[]>({
+  key: 'ToggleCommands',
   default: []
 });
 

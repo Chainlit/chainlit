@@ -286,6 +286,17 @@ class CommandDict(TypedDict):
     persistent: Optional[bool]
 
 
+class ToggleCommandDict(TypedDict):
+    # The identifier of the toggle command, will be displayed in the UI
+    id: str
+    # The description of the toggle command, will be displayed in the UI
+    description: str
+    # The lucide icon name
+    icon: str
+    # Whether the toggle command will be persistent unless the user resets it
+    persistent: Optional[bool]
+
+
 class FeedbackDict(TypedDict):
     forId: str
     id: Optional[str]

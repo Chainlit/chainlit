@@ -39,6 +39,7 @@ class MessageBase(ABC):
     persisted = False
     is_error = False
     command: Optional[str] = None
+    toggleables: Optional[List[str]] = None
     parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
@@ -67,6 +68,7 @@ class MessageBase(ABC):
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
             command=_dict.get("command"),
+            toggleables=_dict.get("toggleables"),
             type=type,  # type: ignore
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
@@ -79,6 +81,7 @@ class MessageBase(ABC):
             "parentId": self.parent_id,
             "createdAt": self.created_at,
             "command": self.command,
+            "toggleables": self.toggleables,
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
@@ -223,6 +226,7 @@ class Message(MessageBase):
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         command: Optional[str] = None,
+        toggleables: Optional[List[str]] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
@@ -248,7 +252,10 @@ class Message(MessageBase):
 
         if command:
             self.command = str(command)
-
+            
+        if toggleables:
+            self.toggleables = toggleables
+            
         if created_at:
             self.created_at = created_at
 
@@ -326,6 +333,7 @@ class ErrorMessage(MessageBase):
         self.type = "assistant_message"
         self.is_error = True
         self.fail_on_persist_error = fail_on_persist_error
+        self.toggleables = None
 
         super().__post_init__()
 
@@ -371,6 +379,7 @@ class AskUserMessage(AskMessageBase):
         self.timeout = timeout
         self.type = type
         self.raise_on_timeout = raise_on_timeout
+        self.toggleables = None
 
         super().__post_init__()
 
@@ -439,6 +448,7 @@ class AskFileMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
+        self.toggleables = None
 
         super().__post_init__()
 
@@ -511,6 +521,7 @@ class AskActionMessage(AskMessageBase):
         self.author = author
         self.timeout = timeout
         self.raise_on_timeout = raise_on_timeout
+        self.toggleables = None
 
         super().__post_init__()
 
