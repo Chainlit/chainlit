@@ -98,6 +98,7 @@ const Message = memo(
                   {!isStep || !indent ? (
                     <MessageAvatar
                       author={message.metadata?.avatarName || message.name}
+                      isError={message.isError}
                     />
                   ) : null}
                   {/* Display the step and its children */}
