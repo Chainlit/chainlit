@@ -125,7 +125,7 @@ export function ThreadHistory() {
   }, [shouldLoadMore, isLoadingMore, threadHistory]);
 
   return (
-    <SidebarContent onScroll={handleScroll} ref={scrollRef}>
+    <div className="h-full" onScroll={handleScroll} ref={scrollRef}>
       <SidebarGroup>
         <SidebarMenu>
           {threadHistory ? (
@@ -140,6 +140,6 @@ export function ThreadHistory() {
           ) : null}
         </SidebarMenu>
       </SidebarGroup>
-    </SidebarContent>
+    </div>
   );
 }

@@ -421,7 +421,12 @@ class ChainlitEmitter(BaseChainlitEmitter):
         )
 
     def set_chat_settings(self, settings: Dict[str, Any]):
-        self.session.chat_settings = settings
+        """Set the chat settings."""
+        for key, widget in settings.items():
+            settings[key] = (
+                widget.to_dict() if hasattr(widget, "to_dict") else widget
+            )
+        return self.emit("chat_settings", settings)
 
     def set_commands(self, commands: List[CommandDict]):
         """Send the available commands to the UI."""
@@ -447,3 +452,16 @@ class ChainlitEmitter(BaseChainlitEmitter):
         if type not in get_args(ToastType):
             raise ValueError(f"Invalid toast type: {type}")
         return self.emit("toast", {"message": message, "type": type})
+
+    async def set_info_panel(self, info_data: Dict[str, str], title: str = "信息面板"):
+        """Set information to display in the left sidebar info panel."""
+        logger.info(f"Emitting set_info_panel event with data: {info_data} and title: {title}")
+        result = await self.emit("set_info_panel", {"data": info_data, "title": title})
+        logger.info("set_info_panel event emitted")
+        return result
+
+    async def stream_token(self, token: str, step_id: str):
+        """Stream a token to the frontend."""
+        return await self.emit(
+            "stream_token", {"token": token, "id": step_id}
+        )

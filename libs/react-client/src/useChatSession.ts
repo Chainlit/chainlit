@@ -337,6 +337,12 @@ const useChatSession = () => {
         setToggleCommands(toggleCommands);
       });
 
+      socket.on('set_info_panel', (payload: {data: Record<string, string>; title: string}) => {
+        // 创建一个自定义事件，让InfoPanel组件可以订阅
+        const event = new CustomEvent('info_panel_update', { detail: payload });
+        window.dispatchEvent(event);
+      });
+
       socket.on('set_sidebar_title', (title: string) => {
         setSideView((prev) => {
           if (prev?.title === title) return prev;

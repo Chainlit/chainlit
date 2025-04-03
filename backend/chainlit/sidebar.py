@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from chainlit.context import context
 from chainlit.element import ElementBased
@@ -53,3 +53,23 @@ class ElementSidebar:
             "set_sidebar_elements",
             {"elements": [el.to_dict() for el in elements], "key": key},
         )
+
+
+class InfoPanelSidebar:
+    """Helper class to display custom information in the left sidebar."""
+    
+    @staticmethod
+    async def set_info_panel(info_data: Dict[str, str], title: str = "信息面板"):
+        """
+        Sets the information to display in the left sidebar info panel.
+        
+        Args:
+            info_data (Dict[str, str]): Key-value pairs of information to display.
+                For example: {"字段1": "值1", "字段2": "值2", "字段3": "值3"}
+            title (str, optional): The title to display at the top of the info panel.
+                Defaults to "信息面板".
+                
+        Returns:
+            None: This method does not return anything.
+        """
+        await context.emitter.set_info_panel(info_data, title)
