@@ -25,6 +25,18 @@ class Action(DataClassJsonMixin):
     forId: Optional[str] = None
     # The ID of the action
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    # 自定义CSS类名
+    className: Optional[str] = None
+    # 自定义背景色，CSS 颜色值，如 "#ff0000" 或 "rgb(255, 0, 0)"
+    bgColor: Optional[str] = None
+    # 自定义文本颜色，CSS 颜色值
+    textColor: Optional[str] = None
+    # 是否使用全宽按钮（单独一行显示）
+    fullWidth: bool = False
+    # 按钮变体: "default", "destructive", "outline", "secondary", "ghost", "link"
+    variant: str = "ghost"
+    # 按钮大小: "default", "sm", "lg", "icon"
+    size: str = "sm"
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")

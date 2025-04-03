@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useMemo, useState, useEffect } from 'react';
 
 import type { IStep } from '@chainlit/react-client';
 
@@ -21,6 +21,10 @@ export default function Step({
   children,
   isRunning
 }: PropsWithChildren<Props>) {
+  const [isOpen, setIsOpen] = useState<string | undefined>(
+    step.defaultOpen ? step.id : undefined
+  );
+
   const using = useMemo(() => {
     return isRunning && step.start && !step.end && !step.isError;
   }, [step, isRunning]);
@@ -28,6 +32,13 @@ export default function Step({
   const hasContent = step.input || step.output || step.steps?.length;
   const isError = step.isError;
   const stepName = step.name;
+
+  // 当步骤完成且设置了 collapse 时自动收起
+  useEffect(() => {
+    if (!using && step.end && step.collapse && isOpen) {
+      setIsOpen(undefined);
+    }
+  }, [using, step.end, step.collapse, isOpen]);
 
   // If there's no content, just render the status without accordion
   if (!hasContent) {
@@ -61,7 +72,8 @@ export default function Step({
       <Accordion
         type="single"
         collapsible
-        defaultValue={step.defaultOpen ? step.id : undefined}
+        value={isOpen}
+        onValueChange={setIsOpen}
         className="w-full"
       >
         <AccordionItem value={step.id} className="border-none">

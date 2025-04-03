@@ -13,10 +13,18 @@ interface InfoPanelPayload {
 // 本地存储键名
 const INFO_PANEL_STORAGE_KEY = 'chainlit_info_panel_data';
 const INFO_PANEL_TITLE_STORAGE_KEY = 'chainlit_info_panel_title';
+// 会话标志键，用于标记当前会话是否已收到数据
+const INFO_PANEL_SESSION_KEY = 'chainlit_info_panel_session';
 
 // 从本地存储获取数据的辅助函数
 const getStoredInfoData = (): InfoPanelData | null => {
   try {
+    // 检查当前会话是否已收到数据
+    const sessionReceived = localStorage.getItem(INFO_PANEL_SESSION_KEY);
+    if (!sessionReceived) {
+      return null; // 新会话，不读取旧数据
+    }
+    
     const storedData = localStorage.getItem(INFO_PANEL_STORAGE_KEY);
     if (!storedData) return null;
     const parsedData = JSON.parse(storedData);
@@ -30,6 +38,12 @@ const getStoredInfoData = (): InfoPanelData | null => {
 // 从本地存储获取标题的辅助函数
 const getStoredTitle = (): string => {
   try {
+    // 检查当前会话是否已收到数据
+    const sessionReceived = localStorage.getItem(INFO_PANEL_SESSION_KEY);
+    if (!sessionReceived) {
+      return "信息面板"; // 新会话，使用默认标题
+    }
+    
     return localStorage.getItem(INFO_PANEL_TITLE_STORAGE_KEY) || "信息面板";
   } catch (error) {
     console.error("Error reading stored info panel title:", error);
@@ -37,9 +51,19 @@ const getStoredTitle = (): string => {
   }
 };
 
+// 重置会话标志，在每次页面加载时调用
+const resetSessionFlag = () => {
+  localStorage.removeItem(INFO_PANEL_SESSION_KEY);
+};
+
 export default function InfoPanel() {
   const [infoData, setInfoData] = useState<InfoPanelData | null>(getStoredInfoData);
   const [title, setTitle] = useState<string>(getStoredTitle);
+
+  // 在组件加载时重置会话标志
+  useEffect(() => {
+    resetSessionFlag();
+  }, []);
 
   console.log("InfoPanel component rendered");
 
@@ -49,6 +73,9 @@ export default function InfoPanel() {
     const handleInfoUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<InfoPanelPayload>;
       console.log("InfoPanel: Received info data from window event:", customEvent.detail);
+      
+      // 标记当前会话已收到数据
+      localStorage.setItem(INFO_PANEL_SESSION_KEY, 'true');
       
       // 更新状态并保存到本地存储
       const newData = customEvent.detail.data;
@@ -71,6 +98,7 @@ export default function InfoPanel() {
         // 如果数据为空，清除存储
         localStorage.removeItem(INFO_PANEL_STORAGE_KEY);
         localStorage.removeItem(INFO_PANEL_TITLE_STORAGE_KEY);
+        localStorage.removeItem(INFO_PANEL_SESSION_KEY);
       }
     };
 

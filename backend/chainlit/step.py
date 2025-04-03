@@ -64,6 +64,7 @@ class StepDict(TypedDict, total=False):
     generation: Optional[Dict]
     showInput: Optional[Union[bool, str]]
     defaultOpen: Optional[bool]
+    collapse: Optional[bool]
     language: Optional[str]
     feedback: Optional[FeedbackDict]
 
@@ -87,6 +88,7 @@ def step(
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
     default_open: bool = False,
+    collapse: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -110,6 +112,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    collapse=collapse,
                     metadata=metadata,
                 ) as step:
                     try:
@@ -139,6 +142,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    collapse=collapse,
                     metadata=metadata,
                 ) as step:
                     try:
@@ -185,6 +189,7 @@ class Step:
     generation: Optional[BaseGeneration]
     language: Optional[str]
     default_open: Optional[bool]
+    collapse: Optional[bool]
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
     command: Optional[str]
@@ -201,6 +206,7 @@ class Step:
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
         default_open: Optional[bool] = False,
+        collapse: Optional[bool] = False,
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
         command: Optional[str] = None,
@@ -224,6 +230,7 @@ class Step:
 
         self.language = language
         self.default_open = default_open
+        self.collapse = collapse
         self.generation = None
         self.elements = elements or []
 
@@ -318,6 +325,7 @@ class Step:
             "generation": self.generation.to_dict() if self.generation else None,
             "command": self.command,
             "toggleables": self.toggleables,
+            "collapse": self.collapse,
         }
         return _dict
 
