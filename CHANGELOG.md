@@ -4,6 +4,15 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+
+- Avatars now support `.` in their name (will be replaced with `_`).
+- Hovering a past chat in the sidebar will display the full title of the chat in a tooltip
+- `cl.ErrorMessage` now have a different avatar
+- The copy button is now only displayed on the final message of a run, like feedback buttons
+
 ## [2.4.400] - 2025-03-29
 
 ### Added
