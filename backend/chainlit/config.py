@@ -287,7 +287,7 @@ class UISettings(DataClassJsonMixin):
     github: Optional[str] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
-    custom_css_attributes: Optional[str] = None
+    custom_css_attributes: Optional[str] = ""
     # Optional custom JS file that allows you to customize the UI
     custom_js: Optional[str] = None
     custom_js_attributes: Optional[str] = "defer"
