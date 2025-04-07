@@ -14,9 +14,6 @@ class GCSStorageClient(BaseStorageClient):
         self, project_id: str, client_email: str, private_key: str, bucket_name: str
     ):
         # Go to IAM & Admin, click on Service Accounts, and generate a new JSON key
-        private_key = base64.b64encode(private_key.encode("utf-8")).decode("utf-8")
-        private_key = base64.b64decode(private_key).decode("utf-8")
-
         credentials = service_account.Credentials.from_service_account_info(
             {
                 "type": "service_account",
