@@ -58,7 +58,7 @@ class GCSStorageClient(BaseStorageClient):
 
             return {
                 "object_key": object_key,
-                "url": f"gs://{self.bucket.name}/{object_key}",
+                "url": f"https://storage.googleapis.com/{self.bucket.name}/{object_key}",
             }
 
         except Exception as e:
