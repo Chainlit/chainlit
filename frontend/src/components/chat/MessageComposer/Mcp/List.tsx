@@ -225,7 +225,13 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
     if (mcp.clientType === 'stdio') {
       toast.promise(
         apiClient
-          .connectStdioMCP(sessionId, mcp.name, mcp.command!)
+          .connectStdioMCP(
+            sessionId,
+            mcp.name,
+            mcp.command!,
+            mcp.args,
+            mcp.envs
+          )
           .then(async ({ success, mcp: updatedMcp }) => {
             updateMcpStatus(success, updatedMcp);
           })
@@ -242,7 +248,7 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
     } else {
       toast.promise(
         apiClient
-          .connectSseMCP(sessionId, mcp.name, mcp.url!)
+          .connectSseMCP(sessionId, mcp.name, mcp.url!, mcp.headers)
           .then(async ({ success, mcp: updatedMcp }) => {
             updateMcpStatus(success, updatedMcp);
           })
