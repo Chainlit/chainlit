@@ -83,6 +83,7 @@ Start by running `backend/hello.py` as an example.
 
 ```sh
 cd backend
+poetry self add poetry-plugin-shell
 poetry shell
 chainlit run chainlit/hello.py
 ```
@@ -99,10 +100,10 @@ Then, start the UI.
 
 ```sh
 cd frontend
-pnpm run dev --port 5174
+pnpm run dev --port 5174 --host
 ```
 
-If you visit `http://127.0.0.1:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
+If you visit `http://localhost:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
 
 ## Run the tests
 
