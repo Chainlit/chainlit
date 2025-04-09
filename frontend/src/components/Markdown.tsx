@@ -1,13 +1,15 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { PluggableList } from 'react-markdown/lib';
+import { MarkdownHooks } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
+import rehypeMermaid from 'rehype-mermaid';
+import { RehypeMermaidOptions } from 'rehype-mermaid';
 import rehypeRaw from 'rehype-raw';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { PluggableList } from 'unified';
 import { visit } from 'unist-util-visit';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
@@ -37,6 +39,7 @@ import {
 interface Props {
   allowHtml?: boolean;
   latex?: boolean;
+  mermaid?: boolean;
   refElements?: IMessageElement[];
   children: string;
   className?: string;
@@ -91,6 +94,7 @@ const cursorPlugin = () => {
 const Markdown = ({
   allowHtml,
   latex,
+  mermaid,
   refElements,
   className,
   children
@@ -105,8 +109,23 @@ const Markdown = ({
     if (latex) {
       rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
     }
+    if (mermaid) {
+      const mermaidOptions: RehypeMermaidOptions = {
+        errorFallback: (element, _diagram, _error, _file) => {
+          // If some error occurs, just show it as a code block instead of showing a error then removing the element.
+          return element;
+        },
+        containerStyle: {
+          maxWidth: '100%'
+        }
+      };
+      rehypePlugins = [
+        [rehypeMermaid, mermaidOptions] as any,
+        ...rehypePlugins
+      ];
+    }
     return rehypePlugins;
-  }, [allowHtml, latex]);
+  }, [allowHtml, latex, mermaid]);
 
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [
@@ -123,7 +142,7 @@ const Markdown = ({
   }, [latex]);
 
   return (
-    <ReactMarkdown
+    <MarkdownHooks
       className={cn('prose lg:prose-xl', className)}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
@@ -286,7 +305,7 @@ const Markdown = ({
       }}
     >
       {children}
-    </ReactMarkdown>
+    </MarkdownHooks>
   );
 };
 

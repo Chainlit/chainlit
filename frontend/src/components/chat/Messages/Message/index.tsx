@@ -39,7 +39,7 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
-    const { allowHtml, cot, latex, onError } = useContext(MessageContext);
+    const { allowHtml, cot, latex, mermaid, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
@@ -89,6 +89,7 @@ const Message = memo(
                       message={message}
                       allowHtml={allowHtml}
                       latex={latex}
+                      mermaid={mermaid}
                     />
                   </UserMessage>
                 </div>
@@ -119,6 +120,7 @@ const Message = memo(
                         message={message}
                         allowHtml={allowHtml}
                         latex={latex}
+                        mermaid={mermaid}
                       />
                       <MessageButtons message={message} actions={actions} />
                     </Step>
@@ -130,6 +132,7 @@ const Message = memo(
                         message={message}
                         allowHtml={allowHtml}
                         latex={latex}
+                        mermaid={mermaid}
                       />
 
                       <AskFileButton messageId={message.id} onError={onError} />

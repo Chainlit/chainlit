@@ -47,10 +47,8 @@ describe('Copilot', () => {
     cy.contains('.step', 'Function called with: Call func!', opts).should(
       'be.visible'
     );
-    cy.contains(
-      '.step',
-      'System message received: Hello World!',
-      opts
-    ).should('be.visible');
+    cy.contains('.step', 'System message received: Hello World!', opts)
+      .scrollIntoView()
+      .should('be.visible');
   });
 });
