@@ -363,12 +363,10 @@ def get_html_template(root_path):
 
     css = None
     if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
+        css = f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}" {config.ui.custom_css_attributes}>"""
 
     if config.ui.custom_js:
-        js += f"""<script src="{config.ui.custom_js}" defer></script>"""
+        js += f"""<script src="{config.ui.custom_js}" {config.ui.custom_js_attributes}></script>"""
 
     font = None
     if custom_theme and custom_theme.get("custom_fonts"):

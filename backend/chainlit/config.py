@@ -146,9 +146,15 @@ cot = "full"
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
+# Specify additional attributes for a custom CSS file
+# custom_css_attributes = "media=\\\"print\\\""
+
 # Specify a JavaScript file that can be used to customize the user interface.
 # The JavaScript file can be served from the public directory.
 # custom_js = "/public/test.js"
+
+# Specify additional attributes for custom JS file
+# custom_js_attributes = "async type = \\\"module\\\""
 
 # Custom login page image, relative to public directory or external URL
 # login_page_image = "/public/custom-background.jpg"
@@ -281,7 +287,10 @@ class UISettings(DataClassJsonMixin):
     github: Optional[str] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_css_attributes: Optional[str] = ""
+    # Optional custom JS file that allows you to customize the UI
     custom_js: Optional[str] = None
+    custom_js_attributes: Optional[str] = "defer"
     # Optional custom background image for login page
     login_page_image: Optional[str] = None
     login_page_image_filter: Optional[str] = None
