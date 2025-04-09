@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,8 +17,10 @@ import { Button } from '@/components/ui/button';
 import { chatSettingsOpenState } from '@/state/project';
 import {
   IAttachment,
+  IToggleable,
   attachmentsState,
-  persistentCommandState
+  persistentCommandState,
+  toggleableStates
 } from 'state/chat';
 
 import { Attachments } from './Attachments';
@@ -27,6 +29,7 @@ import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
 import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
+import ToggleableButtons from './ToggleableButtons';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
 
@@ -50,6 +53,7 @@ export default function MessageComposer({
   );
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
+  const [toggleables, setToggleables] = useRecoilState(toggleableStates);
   const { t } = useTranslation();
 
   const { user } = useAuth();
@@ -57,6 +61,12 @@ export default function MessageComposer({
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
+  
+  // 在新对话开始时重置toggleables
+  useEffect(() => {
+    // 只重置非persistent的toggles
+    setToggleables(prevToggles => prevToggles.filter(toggle => toggle.persistent));
+  }, []);
 
   const onPaste = useCallback((event: ClipboardEvent) => {
     if (event.clipboardData && event.clipboardData.items) {
@@ -78,11 +88,13 @@ export default function MessageComposer({
     async (
       msg: string,
       attachments?: IAttachment[],
-      selectedCommand?: string
+      selectedCommand?: string,
+      activeToggleables?: IToggleable[]
     ) => {
       const message: IStep = {
         threadId: '',
         command: selectedCommand,
+        toggleables: activeToggleables?.filter(t => t.active)?.map(t => t.id) || [],
         id: uuidv4(),
         name: user?.identifier || 'User',
         type: 'user_message',
@@ -130,7 +142,9 @@ export default function MessageComposer({
     if (askUser) {
       onReply(value);
     } else {
-      onSubmit(value, attachments, selectedCommand?.id);
+      onSubmit(value, attachments, selectedCommand?.id, toggleables);
+      // 重置非persistent的toggles
+      setToggleables(prevToggles => prevToggles.filter(toggle => toggle.persistent));
     }
     setAttachments([]);
     inputRef.current?.reset();
@@ -141,6 +155,8 @@ export default function MessageComposer({
     askUser,
     attachments,
     selectedCommand,
+    toggleables,
+    setToggleables,
     setAttachments,
     onSubmit
   ]);
@@ -197,6 +213,7 @@ export default function MessageComposer({
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
+          <ToggleableButtons disabled={disabled} />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton

@@ -7,6 +7,12 @@ export interface IAction {
   onClick: () => void;
   tooltip: string;
   icon?: string;
+  className?: string;
+  bgColor?: string;
+  textColor?: string;
+  fullWidth?: boolean;
+  variant?: string;
+  size?: string;
 }
 
 export interface ICallFn {
