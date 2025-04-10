@@ -2,7 +2,7 @@ import base64
 from typing import Any, Dict, Union
 
 from google.cloud import storage  # type: ignore
-from google.oauth2 import service_account
+from google.oauth2 import service_account  # type: ignore
 
 from chainlit import make_async
 from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
