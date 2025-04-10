@@ -687,3 +687,93 @@ def test_project_translations_file_path_traversal(
 
     # Should give error status
     assert response.status_code == 422
+
+
+def test_set_session_cookie_authorized(
+    test_client, mock_get_current_user, mock_session_get_by_id_patched
+):
+    """
+    Test that a valid session cookie is set when the current user is authorized.
+    Using the existing fixtures, the patched WebsocketSession returns a session
+    when the session_id is "test_session_id".
+    """
+    # Create an authorized user object.
+    authorized_user = type("User", (), {"identifier": "user123"})()
+    # Set the session's user to match the authorized user.
+    mock_session_get_by_id_patched.user = authorized_user
+    # Override current user dependency.
+    mock_get_current_user.return_value = authorized_user
+
+    response = test_client.post(
+        "/set-session-cookie", json={"session_id": "test_session_id"}
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data.get("message") == "Session cookie set"
+
+    set_cookie = response.headers.get("set-cookie")
+    assert "X-Chainlit-Session-id=test_session_id" in set_cookie
+    assert "HttpOnly" in set_cookie
+    assert "Secure" in set_cookie
+    assert "SameSite=none" in set_cookie
+
+
+def test_set_session_cookie_session_not_found(test_client, mock_get_current_user):
+    """
+    Test that a POST with an unknown session_id returns a 404 error.
+    This is simulated by providing a session_id different from "test_session_id",
+    which the existing mock_session_get_by_id_patched fixture uses.
+    """
+    # Set a valid current user.
+    current_user = type("User", (), {"identifier": "user123"})()
+    mock_get_current_user.return_value = current_user
+
+    response = test_client.post(
+        "/set-session-cookie", json={"session_id": "invalid_session"}
+    )
+    assert response.status_code == 404
+
+
+def test_set_session_cookie_unauthorized(
+    test_client, mock_get_current_user, mock_session_get_by_id_patched
+):
+    """
+    Test that when the current user does not match the session's user,
+    a 401 error is returned.
+    """
+    # Create a session with a specific user.
+    session_user = type("User", (), {"identifier": "user123"})()
+    # Create a different (unauthorized) current user.
+    unauthorized_user = type("User", (), {"identifier": "different"})()
+    mock_session_get_by_id_patched.user = session_user
+    mock_get_current_user.return_value = unauthorized_user
+
+    response = test_client.post(
+        "/set-session-cookie", json={"session_id": "test_session_id"}
+    )
+    assert response.status_code == 401
+
+
+def test_set_session_cookie_no_current_user(
+    test_client, mock_get_current_user, mock_session_get_by_id_patched
+):
+    """
+    Test that if current_user is None (i.e. no user provided), the authorization check is skipped,
+    and the cookie is set.
+    """
+    # Set the session's user to any value.
+    session_user = type("User", (), {"identifier": "user123"})()
+    mock_session_get_by_id_patched.user = session_user
+    # Simulate absence of a current user.
+    mock_get_current_user.return_value = None
+
+    response = test_client.post(
+        "/set-session-cookie", json={"session_id": "test_session_id"}
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data.get("message") == "Session cookie set"
+    set_cookie = response.headers.get("set-cookie")
+    assert "X-Chainlit-Session-id=test_session_id" in set_cookie
+    assert "Secure" in set_cookie
+    assert "SameSite=none" in set_cookie
