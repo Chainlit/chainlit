@@ -29,7 +29,6 @@ class UserSession:
         user_session["chat_settings"] = context.session.chat_settings
         user_session["user"] = context.session.user
         user_session["chat_profile"] = context.session.chat_profile
-        user_session["environ"] = context.session.environ
         user_session["client_type"] = context.session.client_type
 
         return user_session.get(key, default)
