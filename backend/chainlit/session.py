@@ -187,7 +187,7 @@ class HTTPSession(BaseSession):
             http_cookie=http_cookie,
         )
 
-    def delete(self):
+    async def delete(self):
         """Delete the session."""
         if self.files_dir.is_dir():
             shutil.rmtree(self.files_dir)

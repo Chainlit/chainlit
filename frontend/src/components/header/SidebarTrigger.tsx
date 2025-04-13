@@ -18,6 +18,7 @@ export default function SidebarTrigger() {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            id="sidebar-trigger-button"
             onClick={() =>
               isMobile ? setOpenMobile(!openMobile) : setOpen(!open)
             }

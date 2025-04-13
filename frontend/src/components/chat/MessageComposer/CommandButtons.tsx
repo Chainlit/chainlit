@@ -32,10 +32,9 @@ export const CommandButtons = ({
     <div className="flex gap-2 ml-1 flex-wrap">
       <TooltipProvider>
         {commandButtons.map((command) => (
-          <Tooltip>
+          <Tooltip key={command.id}>
             <TooltipTrigger asChild>
               <Button
-                key={command.id}
                 id={`command-${command.id}`}
                 variant="ghost"
                 disabled={disabled}

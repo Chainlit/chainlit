@@ -1,4 +1,5 @@
 import { useCallback, useContext } from 'react';
+import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -12,12 +13,15 @@ import {
 
 import { Button } from '@/components/ui/button';
 
+import { persistentCommandState } from '@/state/chat';
+
 interface StarterProps {
   starter: IStarter;
 }
 
 export default function Starter({ starter }: StarterProps) {
   const apiClient = useContext(ChainlitContext);
+  const selectedCommand = useRecoilValue(persistentCommandState);
   const { sendMessage } = useChatInteract();
   const { loading, connected } = useChatData();
   const { user } = useAuth();
@@ -28,6 +32,7 @@ export default function Starter({ starter }: StarterProps) {
     const message: IStep = {
       threadId: '',
       id: uuidv4(),
+      command: selectedCommand?.id,
       name: user?.identifier || 'User',
       type: 'user_message',
       output: starter.message,
@@ -36,7 +41,7 @@ export default function Starter({ starter }: StarterProps) {
     };
 
     sendMessage(message, []);
-  }, [user, sendMessage, starter]);
+  }, [user, selectedCommand, sendMessage, starter]);
 
   return (
     <Button
