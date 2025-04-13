@@ -13,8 +13,7 @@ class GCSStorageClient(BaseStorageClient):
     def __init__(
         self, project_id: str, client_email: str, private_key: str, bucket_name: str
     ):
-        private_key = base64.b64decode(private_key).decode("utf-8")
-
+        # Go to IAM & Admin, click on Service Accounts, and generate a new JSON key
         credentials = service_account.Credentials.from_service_account_info(
             {
                 "type": "service_account",
@@ -59,7 +58,7 @@ class GCSStorageClient(BaseStorageClient):
 
             return {
                 "object_key": object_key,
-                "url": f"gs://{self.bucket.name}/{object_key}",
+                "url": f"https://storage.googleapis.com/{self.bucket.name}/{object_key}",
             }
 
         except Exception as e:

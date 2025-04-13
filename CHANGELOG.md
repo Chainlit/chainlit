@@ -8,13 +8,72 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Avatars now support `.` in their name (will be replaced with `_`).
+- Hovering a past chat in the sidebar will display the full title of the chat in a tooltip
+- `cl.ErrorMessage` now have a different avatar
+- The copy button is now only displayed on the final message of a run, like feedback buttons
+
+## [2.4.400] - 2025-03-29
+
+### Added
+
+- `@cl.on_app_startup` and `@cl.on_app_shutdown`
+- Configuration option for chat history default open state
+- Configuration option for login page background image and filter
+- Most commonly customized ui elements now have specific IDs
+
+### Fixed
+
+- App should no longer flicker on load
+- Attachments icons for microsoft files should now correctly display
+- Pasting should no longer be duplicated
+
+## [2.4.302] - 2025-03-26
+
+### Added
+
+- Add thinking token support to langchain callback handler
+
+### Fixed
+
+- Pasting issues in the chat input
+- Rename nl-NL.json to nl.json
+
+## [2.4.301] - 2025-03-24
+
+### Fixed
+
+- Mcp button should not be displayed if `@on_mcp_connect` is not defined
+
+## [2.4.3] - 2025-03-23
+
+### Added
+
+- Canvas mode for the element side bar if title == `canvas`
+- Allow list for MCP stdio commands
+- `key` parameter to `ElementSidebar.set_elements` method
+
+### Fixed
+
+- Literal AI should now correctly store custom elements props
+- Element should correctly load from azure storage
+- Plotly elements should now take full width
+
+## [2.4.2] - 2025-03-19
+
+### Added
+
 - Hide commands button if all commands are specified as button.
+
+### Fixed
+
+- Chat profiles tooltip should no longer freeze is hover rapidly
 
 ## [2.4.1] - 2025-03-13
 
 ### Added
 
-- The user message auto scroll behavior is not a feature flag `config.features.user_message_autoscroll`
+- The user message auto scroll behavior is now a feature `config.features.user_message_autoscroll`
 - Stdio MCP commands now support environment variables
 
 ### Fixed

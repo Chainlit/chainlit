@@ -73,7 +73,7 @@ export default function CodeSnippet({ ...props }: CodeProps) {
   );
 
   return (
-    <Card className="relative">
+    <Card className="relative my-2">
       <CardHeader className="flex flex-row items-center justify-between py-1 px-4">
         <span className="text-sm text-muted-foreground">
           {match?.[1] || 'Raw code'}

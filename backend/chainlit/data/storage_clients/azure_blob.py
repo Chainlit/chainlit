@@ -70,6 +70,8 @@ class AzureBlobStorageClient(BaseStorageClient):
 
             return {
                 "path": object_key,
+                "object_key": object_key,
+                "url": await self.get_read_url(object_key),
                 "size": properties.size,
                 "last_modified": properties.last_modified,
                 "etag": properties.etag,

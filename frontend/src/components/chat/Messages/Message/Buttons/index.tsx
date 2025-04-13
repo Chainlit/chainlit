@@ -24,12 +24,12 @@ const MessageButtons = ({ message, actions, run }: Props) => {
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
-  const showCopyButton = hasContent && !isUser && !isAsk;
+  const showCopyButton = !!run && hasContent && !isUser && !isAsk;
 
   const messageActions = actions.filter((a) => a.forId === message.id);
 
   const showDebugButton =
-    !!config?.debugUrl && !!message.threadId && !!firstInteraction;
+    !!config?.debugUrl && !!message.threadId && !!firstInteraction && !!run;
 
   const show = showCopyButton || showDebugButton || messageActions?.length;
 

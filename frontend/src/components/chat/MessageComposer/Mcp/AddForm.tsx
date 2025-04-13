@@ -23,15 +23,24 @@ import { Translator } from 'components/i18n';
 interface McpAddFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  allowStdio?: boolean;
+  allowSse?: boolean;
 }
 
-export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
+export const McpAddForm = ({
+  onSuccess,
+  onCancel,
+  allowStdio,
+  allowSse
+}: McpAddFormProps) => {
   const apiClient = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
   const setMcps = useSetRecoilState(mcpState);
 
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState<'stdio' | 'sse'>('stdio');
+  const [serverType, setServerType] = useState<'stdio' | 'sse'>(
+    allowStdio ? 'stdio' : 'sse'
+  );
   const [serverUrl, setServerUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +140,10 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sse">sse</SelectItem>
-                <SelectItem value="stdio">stdio</SelectItem>
+                {allowSse ? <SelectItem value="sse">sse</SelectItem> : null}
+                {allowStdio ? (
+                  <SelectItem value="stdio">stdio</SelectItem>
+                ) : null}
               </SelectContent>
             </Select>
           </div>

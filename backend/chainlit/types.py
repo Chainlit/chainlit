@@ -282,6 +282,8 @@ class CommandDict(TypedDict):
     icon: str
     # Display the command as a button in the composer
     button: Optional[bool]
+    # Whether the command will be persistent unless the user toggles it
+    persistent: Optional[bool]
 
 
 class FeedbackDict(TypedDict):
