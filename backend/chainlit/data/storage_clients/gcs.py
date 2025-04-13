@@ -1,4 +1,3 @@
-import base64
 from typing import Any, Dict, Union
 
 from google.cloud import storage  # type: ignore

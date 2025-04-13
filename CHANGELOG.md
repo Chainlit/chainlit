@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `cl.ErrorMessage` now have a different avatar
 - The copy button is now only displayed on the final message of a run, like feedback buttons
 
+### Changed
+
+- **[breaking]**: `http_referer`, `http_cookie` and `languages` are no longer directly available in the session object. Instead, `environ` is available containing all of those plus other HTTP headers.
+
 ## [2.4.400] - 2025-03-29
 
 ### Added
