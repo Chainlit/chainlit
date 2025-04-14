@@ -184,6 +184,13 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async stickyCookie(sessionId: string) {
+    const res = await this.fetch('POST', '/set-session-cookie', {
+      session_id: sessionId
+    });
+    return res.json();
+  }
+
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
     return res.json();

@@ -717,27 +717,9 @@ _language_pattern = (
 
 
 @router.post("/set-session-cookie")
-async def set_session_cookie(
-    request: Request, response: Response, current_user: UserParam
-):
+async def set_session_cookie(request: Request, response: Response):
     body = await request.json()
     session_id = body.get("session_id")
-
-    from chainlit.session import WebsocketSession
-
-    session = WebsocketSession.get_by_id(session_id)
-    if not session:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found",
-        )
-
-    if current_user:
-        if not session.user or session.user.identifier != current_user.identifier:
-            raise HTTPException(
-                status_code=401,
-                detail="You are not authorized to set a session cookie for this session",
-            )
 
     is_local = request.client and request.client.host in ["127.0.0.1", "localhost"]
 

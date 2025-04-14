@@ -4,18 +4,25 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [2.5.5] - 2025-04-14
 
 ### Added
 
 - Avatars now support `.` in their name (will be replaced with `_`).
+- Typed session accessors for user session
+- Allow set attributes for the tags of the custom_js or custom_css
 - Hovering a past chat in the sidebar will display the full title of the chat in a tooltip
+- The `X-Chainlit-Session-id` header is now automatically set to facilitate sticky sessions with websockets
 - `cl.ErrorMessage` now have a different avatar
 - The copy button is now only displayed on the final message of a run, like feedback buttons
+- CopilotFunction is now usable in custom JS
+- Header link now have an optional `display_name` to display text next to the icon
+- The default .env file loaded by chainlit is now configurable with `CHAINLIT_ENV_FILE`
 
 ### Changed
 
-- **[breaking]**: `http_referer`, `http_cookie` and `languages` are no longer directly available in the session object. Instead, `environ` is available containing all of those plus other HTTP headers.
+- **[breaking]**: `http_referer`, `http_cookie` and `languages` are no longer directly available in the session object. Instead, `environ` is available containing all of those plus other HTTP headers
+- The scroll to the bottom animation is now smooth
 
 ## [2.4.400] - 2025-03-29
 
