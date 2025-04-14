@@ -576,6 +576,7 @@ async def test_create_element(
                             "display": text_element.display,
                             "type": text_element.type,
                             "page": None,
+                            "props": None,
                         },
                         "mime": text_element.mime,
                         "url": None,

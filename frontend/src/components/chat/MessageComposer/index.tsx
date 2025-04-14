@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
-  ICommand,
   IStep,
   useAuth,
   useChatData,
@@ -16,7 +15,11 @@ import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 
 import { chatSettingsOpenState } from '@/state/project';
-import { IAttachment, attachmentsState } from 'state/chat';
+import {
+  IAttachment,
+  attachmentsState,
+  persistentCommandState
+} from 'state/chat';
 
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
@@ -42,7 +45,9 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
-  const [selectedCommand, setSelectedCommand] = useState<ICommand>();
+  const [selectedCommand, setSelectedCommand] = useRecoilState(
+    persistentCommandState
+  );
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -141,7 +146,10 @@ export default function MessageComposer({
   ]);
 
   return (
-    <div className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col">
+    <div
+      id="message-composer"
+      className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col"
+    >
       {attachments.length > 0 ? (
         <div className="mb-1">
           <Attachments />

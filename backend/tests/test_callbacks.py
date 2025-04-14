@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, Mock
 
 from chainlit import config
@@ -228,6 +229,96 @@ async def test_author_rename(test_config: config.ChainlitConfig):
 
     result = await test_config.code.author_rename("Human")
     assert result == "Human"
+
+
+async def test_on_app_startup(test_config: config.ChainlitConfig):
+    """Test the on_app_startup callback registration and execution for sync and async functions."""
+    from chainlit.callbacks import on_app_startup
+
+    # Test with synchronous function
+    sync_startup_called = False
+
+    @on_app_startup
+    def sync_startup():
+        nonlocal sync_startup_called
+        sync_startup_called = True
+
+    assert test_config.code.on_app_startup is not None, (
+        "Sync startup callback not registered"
+    )
+    # Call the wrapped function (which might be async due to wrap_user_function)
+    result = test_config.code.on_app_startup()
+    if asyncio.iscoroutine(result):
+        await result
+    assert sync_startup_called, "Sync startup function was not called"
+
+    # Reset for async test
+    test_config.code.on_app_startup = None  # Explicitly clear previous registration
+
+    # Test with asynchronous function
+    async_startup_called = False
+
+    @on_app_startup
+    async def async_startup():
+        nonlocal async_startup_called
+        await asyncio.sleep(0)  # Simulate async work
+        async_startup_called = True
+
+    assert test_config.code.on_app_startup is not None, (
+        "Async startup callback not registered"
+    )
+    # Call the wrapped function (which should be async)
+    result = test_config.code.on_app_startup()
+    assert asyncio.iscoroutine(result), (
+        "Async startup function did not return a coroutine"
+    )
+    await result
+    assert async_startup_called, "Async startup function was not called"
+
+
+async def test_on_app_shutdown(test_config: config.ChainlitConfig):
+    """Test the on_app_shutdown callback registration and execution for sync and async functions."""
+    from chainlit.callbacks import on_app_shutdown
+
+    # Test with synchronous function
+    sync_shutdown_called = False
+
+    @on_app_shutdown
+    def sync_shutdown():
+        nonlocal sync_shutdown_called
+        sync_shutdown_called = True
+
+    assert test_config.code.on_app_shutdown is not None, (
+        "Sync shutdown callback not registered"
+    )
+    # Call the wrapped function
+    result = test_config.code.on_app_shutdown()
+    if asyncio.iscoroutine(result):
+        await result
+    assert sync_shutdown_called, "Sync shutdown function was not called"
+
+    # Reset for async test
+    test_config.code.on_app_shutdown = None  # Explicitly clear previous registration
+
+    # Test with asynchronous function
+    async_shutdown_called = False
+
+    @on_app_shutdown
+    async def async_shutdown():
+        nonlocal async_shutdown_called
+        await asyncio.sleep(0)  # Simulate async work
+        async_shutdown_called = True
+
+    assert test_config.code.on_app_shutdown is not None, (
+        "Async shutdown callback not registered"
+    )
+    # Call the wrapped function
+    result = test_config.code.on_app_shutdown()
+    assert asyncio.iscoroutine(result), (
+        "Async shutdown function did not return a coroutine"
+    )
+    await result
+    assert async_shutdown_called, "Async shutdown function was not called"
 
 
 async def test_on_chat_start(mock_chainlit_context, test_config: config.ChainlitConfig):

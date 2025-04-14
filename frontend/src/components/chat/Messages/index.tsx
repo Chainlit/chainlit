@@ -72,7 +72,8 @@ const Messages = memo(
                     scorableRun={scorableRun}
                   />
                 ) : null}
-                {showToolCoTLoader || showHiddenCoTLoader ? (
+                {(showToolCoTLoader || showHiddenCoTLoader) &&
+                m.name !== 'on_chat_start' ? (
                   <BlinkingCursor />
                 ) : null}
               </React.Fragment>

@@ -93,6 +93,7 @@ export default function SearchChats() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              id="search-chats-button"
               onClick={() => setOpen(!open)}
               size="icon"
               variant="ghost"

@@ -95,7 +95,10 @@ const Message = memo(
               ) : (
                 <div className="ai-message flex gap-4 w-full">
                   {!isStep || !indent ? (
-                    <MessageAvatar author={message.metadata?.avatarName || message.name} />
+                    <MessageAvatar
+                      author={message.metadata?.avatarName || message.name}
+                      isError={message.isError}
+                    />
                   ) : null}
                   {/* Display the step and its children */}
                   {isStep ? (

@@ -48,6 +48,13 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar';
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+
 import { Translator } from '../i18n';
 import ThreadOptions from './ThreadOptions';
 
@@ -117,13 +124,14 @@ export function ThreadList({
     );
   }
 
-  const handleDeleteThread = () => {
+  const handleDeleteThread = async () => {
     if (!threadIdToDelete) return;
     if (
       threadIdToDelete === idToResume ||
       threadIdToDelete === currentThreadId
     ) {
       clear();
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
     toast.promise(apiClient.deleteThread(threadIdToDelete), {
@@ -275,6 +283,7 @@ export function ThreadList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <TooltipProvider delayDuration={300}>
       {sortedTimeGroupKeys.map((group) => {
         const items = threadHistory!.timeGroupedThreads![group];
         return (
@@ -289,6 +298,8 @@ export function ThreadList({
                     isResumed || threadHistory!.currentThreadId === thread.id;
                   return (
                     <SidebarMenuItem key={thread.id} id={`thread-${thread.id}`}>
+                      <Tooltip>
+                          <TooltipTrigger asChild>
                       <Link to={isResumed ? '' : `/thread/${thread.id}`}>
                         <SidebarMenuButton
                           isActive={isSelected}
@@ -315,6 +326,11 @@ export function ThreadList({
                           />
                         </SidebarMenuButton>
                       </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" align="center">
+                            <p>{thread.name}</p>
+                          </TooltipContent>
+                      </Tooltip>
                     </SidebarMenuItem>
                   );
                 })}
@@ -323,6 +339,7 @@ export function ThreadList({
           </SidebarGroup>
         );
       })}
+      </TooltipProvider>
       {isLoadingMore ? (
         <div className="flex items-center justify-center p-2">
           <Loader />

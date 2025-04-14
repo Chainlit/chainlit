@@ -4,7 +4,7 @@ import { memo } from 'react';
 import type { IMessageElement, IStep } from '@chainlit/react-client';
 
 import { CURSOR_PLACEHOLDER } from '@/components/BlinkingCursor';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@/components/Markdown';
 
 import { InlinedElements } from './InlinedElements';
 
