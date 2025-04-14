@@ -129,6 +129,24 @@ const useChatSession = () => {
       });
 
       socket.on('connect', () => {
+        fetch(`${uri}/set-session-cookie`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ session_id: sessionId })
+        })
+          .then((response) => {
+            if (!response.ok) {
+              console.error('Failed to set session cookie');
+            } else {
+              console.log('Session cookie set successfully');
+            }
+          })
+          .catch((error) => {
+            console.error('Error setting session cookie:', error);
+          });
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
         setMcps((prev) =>
