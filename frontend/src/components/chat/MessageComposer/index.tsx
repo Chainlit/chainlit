@@ -64,9 +64,14 @@ export default function MessageComposer({
   
   // 在新对话开始时重置toggleables
   useEffect(() => {
+    console.log("MessageComposer useEffect 执行，重置非持久化toggleables");
     // 只重置非persistent的toggles
-    setToggleables(prevToggles => prevToggles.filter(toggle => toggle.persistent));
-  }, []);
+    setToggleables(prevToggles => {
+      const persistentOnly = prevToggles.filter(toggle => toggle.persistent);
+      console.log("保留的持久化toggleables:", persistentOnly);
+      return persistentOnly;
+    });
+  }, []); // 空依赖数组，只在组件挂载时执行一次
 
   const onPaste = useCallback((event: ClipboardEvent) => {
     if (event.clipboardData && event.clipboardData.items) {
@@ -144,7 +149,12 @@ export default function MessageComposer({
     } else {
       onSubmit(value, attachments, selectedCommand?.id, toggleables);
       // 重置非persistent的toggles
-      setToggleables(prevToggles => prevToggles.filter(toggle => toggle.persistent));
+      console.log("提交消息后重置非持久化toggleables");
+      setToggleables(prevToggles => {
+        const persistentOnly = prevToggles.filter(toggle => toggle.persistent);
+        console.log("保留的持久化toggleables:", persistentOnly);
+        return persistentOnly;
+      });
     }
     setAttachments([]);
     inputRef.current?.reset();

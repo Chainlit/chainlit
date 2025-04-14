@@ -257,6 +257,8 @@ class Starter(DataClassJsonMixin):
     label: str
     message: str
     icon: Optional[str] = None
+    commands: Optional[List[str]] = None
+    toggle_commands: Optional[List[str]] = None
 
 
 @dataclass

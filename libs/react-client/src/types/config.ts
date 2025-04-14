@@ -2,6 +2,8 @@ export interface IStarter {
   label: string;
   message: string;
   icon?: string;
+  commands?: string[];
+  toggle_commands?: string[];
 }
 
 export interface ChatProfile {
