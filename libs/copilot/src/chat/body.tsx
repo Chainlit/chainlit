@@ -217,6 +217,7 @@ const Chat = () => {
               maxWidth: layoutMaxWidth
             }}
           >
+            <div id="evoya-creator-context-ref"></div>
             <ChatFooter
               showIfEmptyThread
               fileSpec={fileSpec}

@@ -1,4 +1,5 @@
 import { atom } from 'recoil';
+import { SectionItem } from 'evoya/types';
 
 
 export const privacyShieldEnabledState = atom<boolean>({

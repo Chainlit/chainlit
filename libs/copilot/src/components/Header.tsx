@@ -6,7 +6,7 @@ import { Maximize2, Minimize, X } from 'lucide-react';
 import { ChainlitContext } from '@chainlit/react-client';
 import { Button } from '@chainlit/app/src/components/ui/button';
 import { Logo } from '@chainlit/app/src/components/Logo';
-import { firstUserInteraction, } from '@chainlit/react-client';
+import { firstUserInteraction, evoyaCreatorEnabledState } from '@chainlit/react-client';
 import AudioPresence from '@chainlit/app/src/components/AudioPresence';
 import NewChatButton from '@chainlit/app/src/components/header/NewChat';
 import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
@@ -32,6 +32,8 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
   const { config } = useConfig();
   const { audioConnection } = useAudio();
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 768px)' })
+
+  const creatorEnabled = useRecoilValue(evoyaCreatorEnabledState);
 
   const apiClient = useContext(ChainlitContext);
   const { accessToken, evoya } = useContext(WidgetContext);
@@ -71,8 +73,13 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
         {hasChatProfiles ? <ChatProfiles /> : ''}
         {evoya?.type === 'dashboard' ? (<>
           <DashboardSidebarButton />
-          <NewChatButton />
-          <PrivacyShieldToggle />
+          {creatorEnabled && <div className="h-9 flex items-center font-bold">Chat</div>}
+          {!creatorEnabled &&
+            <>
+              <NewChatButton />
+              <PrivacyShieldToggle />
+            </>
+          }
         </>) : (
           evoya?.headerConfig && evoya?.headerConfig?.text_header
             ?
@@ -108,18 +115,20 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
             <ShareSessionButton sessionUuid={sessionUuid} />
           </>
         )}
-        <Button
-          size="icon"
-          variant="ghost"
-          className={evoya?.type !== 'dashboard' && 'hover:bg-transparent'}
-          onClick={() => { setExpanded(!expanded); window.dispatchEvent(new CustomEvent('copilot-open-modal')); }}
-        >
-          {expanded ? (
-            <X className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
-          ) : (
-            !isPopup && <Maximize2 className={`!size-5 text-muted-foreground`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
-          )}
-        </Button>
+        {!creatorEnabled &&
+          <Button
+            size="icon"
+            variant="ghost"
+            className={evoya?.type !== 'dashboard' && 'hover:bg-transparent'}
+            onClick={() => { setExpanded(!expanded); window.dispatchEvent(new CustomEvent('copilot-open-modal')); }}
+          >
+            {expanded ? (
+              <X className={`!size-5 'text-muted-foreground'}`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
+            ) : (
+              !isPopup && <Maximize2 className={`!size-5 text-muted-foreground`} style={{ color: evoya?.type !== 'dashboard' && evoya.chainlitConfig.style.color }} />
+            )}
+          </Button>
+        }
       </div>
     </div>
   );

@@ -46,7 +46,8 @@ import {
   addMessage,
   deleteMessageById,
   updateMessageById,
-  updateMessageContentById
+  updateMessageContentById,
+  findMessageById,
 } from 'src/utils/message';
 
 import { OutputAudioChunk } from './types/audio';
@@ -219,8 +220,34 @@ const useChatSession = () => {
         setThreadResumeError(error);
       });
 
+      // socket.on('new_message', (message: IStep) => {
+      //   setMessages((oldMessages) => addMessage(oldMessages, message));
+      // });
       socket.on('new_message', (message: IStep) => {
-        setMessages((oldMessages) => addMessage(oldMessages, message));
+        /*if (message.type === 'assistant_message' && message.output !== "") {
+          // @ts-expect-error is not a valid prop
+          window.updateEvoyaCreator(message, findMessageById(oldMessages, message.parentId));
+          // window.updateEvoyaCreator(message.output);
+        }*/
+        setMessages((oldMessages) => {
+          let newOutput = message.output;
+          // @ts-expect-error is not a valid prop
+          if (message.type === 'assistant_message' && message.output !== "" && window.evoyaCreatorEnabled) {
+            console.log(oldMessages);
+            const directParent = findMessageById(oldMessages, message.parentId || '');
+            let messageParent = directParent;
+            if (directParent?.parentId) {
+              messageParent = findMessageById(oldMessages, directParent.parentId);
+            }
+            // @ts-expect-error is not a valid prop
+            newOutput = window.updateEvoyaCreator(message, findMessageById(oldMessages, message.parentId)) || message.output;
+            // window.updateEvoyaCreator(message.output);
+          }
+
+          // console.log('feedback', newOutput);
+          return addMessage(oldMessages, {...message, output: newOutput});
+          // return addMessage(oldMessages, message);
+        });
       });
 
       socket.on(

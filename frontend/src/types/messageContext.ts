@@ -15,6 +15,7 @@ interface IMessageContext {
   askUser?: IAsk;
   loading: boolean;
   showFeedbackButtons: boolean;
+  showEvoyaCreatorButton?: boolean;
   uiName: string;
   allowHtml?: boolean;
   latex?: boolean;

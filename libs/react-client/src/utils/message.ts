@@ -220,5 +220,6 @@ export {
   isLastMessage,
   nestMessages,
   updateMessageById,
-  updateMessageContentById
+  updateMessageContentById,
+  findMessageById,
 };

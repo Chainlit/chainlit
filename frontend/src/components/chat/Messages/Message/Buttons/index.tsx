@@ -10,6 +10,7 @@ import CopyButton from '@/components/CopyButton';
 import MessageActions from './Actions';
 import { DebugButton } from './DebugButton';
 import { FeedbackButtons } from './FeedbackButtons';
+import { EvoyaCreatorButton } from './EvoyaCreatorButton';
 
 interface Props {
   message: IStep;
@@ -40,6 +41,7 @@ const MessageButtons = ({ message, actions, run }: Props) => {
   return (
     <div className="-ml-1.5 flex items-center flex-wrap">
       {showCopyButton ? <CopyButton content={message.output} /> : null}
+      <EvoyaCreatorButton message={message} />
       {run ? <FeedbackButtons message={run} /> : null}
       {messageActions.length ? (
         <MessageActions actions={messageActions} />

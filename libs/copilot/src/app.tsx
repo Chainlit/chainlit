@@ -48,6 +48,7 @@ export default function App({ widgetConfig }: Props) {
     if (config && config?.ui && config?.ui?.cot !== 'hidden') {
       setConfig({
         ...config,
+        showEvoyaCreatorButton: evoya?.evoyaCreator?.enabled,
         ...{
           ui: {
             ...config?.ui,

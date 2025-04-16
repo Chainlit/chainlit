@@ -1,0 +1,135 @@
+.mdxeditor .mdxeditor-toolbar {
+    border-radius: 0;
+}
+
+.mdxeditor-popup-container {
+    z-index: 1020;
+}
+
+.evoya-creator-editor {
+    
+}
+
+.mermaidBlockWrapper {
+    border-radius: var(--radius-medium);
+    /* padding: 1rem;
+    background-color: #eceff4; */
+    display: flex;
+    gap: 1rem;
+    margin-bottom: var(--spacing-5);
+    position: relative;
+
+    .mermaidEditorWrapper, .mermaidPreviewWrapper {
+        flex: 1 1 0%;
+    }
+
+    .mermaidPreviewWrapper {
+        border: 1px solid var(--baseLine);
+        border-radius: var(--radius-medium);
+        background-color: #ffffff;
+
+        > div {
+            padding: .5rem;
+        }
+    }
+
+    .mermaidEditorWrapper {
+        flex-grow: 1;
+
+        > div {
+            padding: 2.5rem .5rem .25rem .5rem;
+            height: 100%;
+            background-color: #ffffff;
+            margin-bottom: 0;
+
+            > div:first-child {
+                border-bottom: 1px solid var(--baseLine);
+                border-radius: 0;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                background-color: var(--baseBg);
+            }
+        }
+    }
+
+    .mermaidBlockAction {
+        color: #0038FF;
+        background-color: #ffffff;
+        height: 1.5rem;
+        width: 1.5rem;
+        border-radius: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -.5rem;
+        left: -.5rem;
+        border: 1px solid #c3c3c3;
+        z-index: 5;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #eeeeee;
+        }
+    }
+}
+
+.codeBlockWrapper {
+    display: flex;
+    margin-bottom: var(--spacing-5);
+    position: relative;
+
+    .codeEditorWrapper {
+        flex-grow: 1;
+
+        > div {
+            padding: 2.5rem .5rem .25rem .5rem;
+            height: 100%;
+            background-color: #ffffff;
+            margin-bottom: 0;
+
+            > div:first-child {
+                border-bottom: 1px solid var(--baseLine);
+                border-radius: 0;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                background-color: var(--baseBg);
+            }
+        }
+    }
+
+    .codeBlockAction {
+        color: #0038FF;
+        background-color: #ffffff;
+        height: 1.5rem;
+        width: 1.5rem;
+        border-radius: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -.5rem;
+        left: -.5rem;
+        border: 1px solid #c3c3c3;
+        z-index: 5;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #eeeeee;
+        }
+    }
+}
+
+.cm-editor {
+    .cm-gutters {
+        .cm-lineNumbers {
+            .cm-gutterElement {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+    }
+}

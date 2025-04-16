@@ -59,4 +59,5 @@ export interface IChainlitConfig {
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
   translation: object;
+  showEvoyaCreatorButton?: boolean;
 }

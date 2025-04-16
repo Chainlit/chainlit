@@ -1,6 +1,6 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useMemo } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -14,7 +14,8 @@ import {
   useChatData,
   useChatInteract,
   useChatMessages,
-  useConfig
+  useConfig,
+  evoyaCreatorEnabledState,
 } from '@chainlit/react-client';
 
 import { Messages } from '@/components/chat/Messages';
@@ -32,6 +33,7 @@ const MessagesContainer = ({ navigate }: Props) => {
   const { uploadFile: _uploadFile } = useChatInteract();
   const setMessages = useSetRecoilState(messagesState);
   const setSideView = useSetRecoilState(sideViewState);
+  const creatorEnabled = useRecoilValue(evoyaCreatorEnabledState);
 
   const { t } = useTranslation();
 
@@ -123,6 +125,7 @@ const MessagesContainer = ({ navigate }: Props) => {
       allowHtml: config?.features?.unsafe_allow_html,
       latex: config?.features?.latex,
       loading,
+      showEvoyaCreatorButton: config?.showEvoyaCreatorButton && !creatorEnabled,
       showFeedbackButtons: enableFeedback,
       uiName: config?.ui?.name || '',
       cot: config?.ui?.cot || 'hidden',

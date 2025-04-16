@@ -22,7 +22,7 @@ function escapeBrackets(text: string) {
       if (codeBlock) {
         return codeBlock;
       } else if (squareBracket) {
-        return `$$${squareBracket}$$`;
+        return `$$\n${squareBracket}\n$$`;
       } else if (roundBracket) {
         return `$${roundBracket}$`;
       } else if (dollarSign) {

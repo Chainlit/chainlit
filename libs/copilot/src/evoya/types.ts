@@ -11,7 +11,12 @@ export interface EvoyaConfig {
   additionalInfo?: EvoyaAdditionalInfo;
   chatBubbleConfig?:EvoyaChatBubble;
   headerConfig?:EvoyaHeaderConfig;
-  chainlitConfig?:EvoyaChainlitConfig
+  chainlitConfig?:EvoyaChainlitConfig;
+  evoyaCreator?: EvoyaCreatorConfig;
+}
+
+export interface EvoyaCreatorConfig {
+  enabled?: boolean;
 }
 
 export interface EvoyaChainlitConfig {

@@ -2,4 +2,5 @@ packages:
   - frontend/
   - libs/react-components/
   - libs/react-client/
+  - 'libs/evoya-creator/'
   - libs/copilot/

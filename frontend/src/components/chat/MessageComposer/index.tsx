@@ -93,7 +93,14 @@ export default function MessageComposer({
         .map((a) => ({ id: a.serverId! }));
 
       setAutoScroll(true);
-      sendMessage(message, fileReferences);
+      
+      // @ts-expect-error is not a valid prop
+      if (window.sendCreatorMessage) {
+        // @ts-expect-error is not a valid prop
+        window.sendCreatorMessage(message)
+      } else {
+        sendMessage(message, fileReferences);
+      }
     },
     [user, sendMessage]
   );
