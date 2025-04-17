@@ -30,6 +30,7 @@ export default function ButtonLink({
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
+            size={displayName ? 'default' : 'icon'}
             className="text-muted-foreground hover:text-muted-foreground"
           >
             <a
