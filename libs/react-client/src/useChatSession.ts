@@ -141,8 +141,19 @@ const useChatSession = () => {
           prev.map((mcp) => {
             const promise =
               mcp.clientType === 'sse'
-                ? client.connectSseMCP(sessionId, mcp.name, mcp.url!)
-                : client.connectStdioMCP(sessionId, mcp.name, mcp.command!);
+                ? client.connectSseMCP(
+                    sessionId,
+                    mcp.name,
+                    mcp.url!,
+                    mcp.headers
+                  )
+                : client.connectStdioMCP(
+                    sessionId,
+                    mcp.name,
+                    mcp.command!,
+                    mcp.args,
+                    mcp.envs
+                  );
             promise
               .then(async ({ success, mcp }) => {
                 setMcps((prev) =>

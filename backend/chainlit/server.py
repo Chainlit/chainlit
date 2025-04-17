@@ -1099,7 +1099,10 @@ async def connect_mcp(
     )
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
+    from chainlit.mcp import (
+        build_sse_mcp_connection,
+        build_stdio_mcp_connection,
+    )
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1135,10 +1138,10 @@ async def connect_mcp(
                         detail="SSE MCP is not enabled",
                     )
 
-                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
+                mcp_connection = build_sse_mcp_connection(payload)
 
                 transport = await exit_stack.enter_async_context(
-                    sse_client(url=mcp_connection.url)
+                    sse_client(url=mcp_connection.url, headers=mcp_connection.headers)
                 )
             elif payload.clientType == "stdio":
                 if not config.features.mcp.stdio.enabled:
@@ -1147,17 +1150,13 @@ async def connect_mcp(
                         detail="Stdio MCP is not enabled",
                     )
 
-                env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
-                mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
-                    command=command, args=args, name=payload.name
-                )  # type: StdioMcpConnection
-
+                mcp_connection = build_stdio_mcp_connection(payload)
                 env = get_default_environment()
-                env.update(env_from_cmd)
+                env.update(mcp_connection.envs)
                 # Create the server parameters
                 server_params = StdioServerParameters(
-                    command=command,
-                    args=args,
+                    command=mcp_connection.command,
+                    args=mcp_connection.args,
                     env=env,
                 )
 
@@ -1202,10 +1201,11 @@ async def connect_mcp(
                 "name": payload.name,
                 "tools": [{"name": t.name} for t in tool_list.tools],
                 "clientType": payload.clientType,
-                "command": payload.fullCommand
-                if payload.clientType == "stdio"
-                else None,
+                "command": payload.command if payload.clientType == "stdio" else None,
+                "args": payload.args if payload.clientType == "stdio" else None,
+                "envs": payload.envs if payload.clientType == "stdio" else None,
                 "url": payload.url if payload.clientType == "sse" else None,
+                "headers": payload.headers if payload.clientType == "sse" else None,
             },
         }
     )
