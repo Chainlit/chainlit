@@ -39,6 +39,7 @@ export default function WelcomeScreen(props: Props) {
 
   const allowHtml = config?.features?.unsafe_allow_html;
   const latex = config?.features?.latex;
+  const mermaid = config?.features?.mermaid;
 
   useEffect(() => {
     setIsVisible(true);
@@ -61,7 +62,7 @@ export default function WelcomeScreen(props: Props) {
               }
             />
             {currentChatProfile?.markdown_description ? (
-              <Markdown allowHtml={allowHtml} latex={latex}>
+              <Markdown allowHtml={allowHtml} latex={latex} mermaid={mermaid}>
                 {currentChatProfile.markdown_description}
               </Markdown>
             ) : null}
