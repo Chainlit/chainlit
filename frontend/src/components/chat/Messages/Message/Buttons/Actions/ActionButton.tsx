@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface ActionProps {
   action: IAction;
@@ -30,11 +31,7 @@ const ActionButton = ({ action }: ActionProps) => {
   const [isRunning, setIsRunning] = useState(false);
 
   const content = useMemo(() => {
-    return action.icon
-      ? action.label
-      : action.label
-      ? action.label
-      : action.name;
+    return action.label ? action.label : action.name;
   }, [action]);
 
   const icon = useMemo(() => {
@@ -59,13 +56,28 @@ const ActionButton = ({ action }: ActionProps) => {
 
   if (ignore) return null;
 
+  // 创建自定义样式对象
+  const customStyle = {};
+  if (action.bgColor) {
+    customStyle['backgroundColor'] = action.bgColor;
+  }
+  if (action.textColor) {
+    customStyle['color'] = action.textColor;
+  }
+
   const button = (
     <Button
       id={action.id}
       onClick={handleClick}
-      size="sm"
-      variant="ghost"
-      className="text-muted-foreground"
+      size={action.size as any || "sm"}
+      variant={action.variant as any || "ghost"}
+      className={cn(
+        action.fullWidth ? "w-full justify-start" : "",
+        action.className,
+        "text-muted-foreground",
+        icon ? "gap-2" : ""
+      )}
+      style={customStyle}
       disabled={loading || isRunning}
     >
       {icon}

@@ -32,7 +32,8 @@ import {
   threadIdToResumeState,
   tokenCountState,
   wavRecorderState,
-  wavStreamPlayerState
+  wavStreamPlayerState,
+  toggleCommandsState
 } from 'src/state';
 import {
   IAction,
@@ -54,6 +55,8 @@ import { OutputAudioChunk } from './types/audio';
 
 import { ChainlitContext } from './context';
 import type { IToken } from './useChatData';
+import { useConfig } from './useConfig';
+import { IToggleCommand } from './types/command';
 
 const useChatSession = () => {
   const client = useContext(ChainlitContext);
@@ -82,6 +85,7 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+  const setToggleCommands = useSetRecoilState(toggleCommandsState);
 
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
@@ -333,6 +337,16 @@ const useChatSession = () => {
 
       socket.on('set_commands', (commands: ICommand[]) => {
         setCommands(commands);
+      });
+
+      socket.on('set_toggle_commands', (toggleCommands: IToggleCommand[]) => {
+        setToggleCommands(toggleCommands);
+      });
+
+      socket.on('set_info_panel', (payload: {data: Record<string, string>; title: string}) => {
+        // 创建一个自定义事件，让InfoPanel组件可以订阅
+        const event = new CustomEvent('info_panel_update', { detail: payload });
+        window.dispatchEvent(event);
       });
 
       socket.on('set_sidebar_title', (title: string) => {

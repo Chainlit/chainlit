@@ -257,6 +257,8 @@ class Starter(DataClassJsonMixin):
     label: str
     message: str
     icon: Optional[str] = None
+    commands: Optional[List[str]] = None
+    toggle_commands: Optional[List[str]] = None
 
 
 @dataclass
@@ -283,6 +285,17 @@ class CommandDict(TypedDict):
     # Display the command as a button in the composer
     button: Optional[bool]
     # Whether the command will be persistent unless the user toggles it
+    persistent: Optional[bool]
+
+
+class ToggleCommandDict(TypedDict):
+    # The identifier of the toggle command, will be displayed in the UI
+    id: str
+    # The description of the toggle command, will be displayed in the UI
+    description: str
+    # The lucide icon name
+    icon: str
+    # Whether the toggle command will be persistent unless the user resets it
     persistent: Optional[bool]
 
 

@@ -5,3 +5,10 @@ export interface ICommand {
   button?: boolean;
   persistent?: boolean;
 }
+
+export interface IToggleCommand {
+  id: string;
+  icon: string;
+  description: string;
+  persistent?: boolean;
+}
