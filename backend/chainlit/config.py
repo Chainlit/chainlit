@@ -170,7 +170,7 @@ cot = "full"
 logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
-avatar_file_url = ""
+default_avatar_file_url = ""
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
@@ -308,7 +308,7 @@ class UISettings(DataClassJsonMixin):
     # Optional logo file url
     logo_file_url: Optional[str] = None
     # Optional avatar image file url
-    avatar_file_url: Optional[str] = None
+    default_avatar_file_url: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
     # Optional header links
