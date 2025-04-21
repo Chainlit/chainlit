@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from fastapi import Request, Response
 from mcp import ClientSession
@@ -17,6 +17,52 @@ from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
+
+
+@trace
+def on_app_startup(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application starts.
+    Useful for initializing resources, loading models, setting up database connections, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The startup hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_startup
+        async def startup():
+            print("Application is starting!")
+            # Initialize resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated startup hook.
+    """
+    config.code.on_app_startup = wrap_user_function(func, with_task=False)
+    return func
+
+
+@trace
+def on_app_shutdown(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application shuts down.
+    Useful for cleaning up resources, closing connections, saving state, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The shutdown hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_shutdown
+        async def shutdown():
+            print("Application is shutting down!")
+            # Clean up resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated shutdown hook.
+    """
+    config.code.on_app_shutdown = wrap_user_function(func, with_task=False)
+    return func
 
 
 @trace
