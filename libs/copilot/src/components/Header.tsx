@@ -18,6 +18,7 @@ import { WidgetContext } from '@/context';
 import ShareSessionButton from '@/evoya/ShareSessionButton';
 import FavoriteSessionButton from '@/evoya/FavoriteSessionButton';
 import DashboardSidebarButton from '@/evoya/DashboardSidebarButton';
+import EvoyaCreatorButton from '@/evoya/EvoyaCreatorButton';
 import PrivacyShieldToggle from '@/evoya/privacyShield/PrivacyShieldToggle';
 
 const sessionTokenKey = 'session_token';
@@ -77,6 +78,7 @@ const Header = ({ expanded, setExpanded, isPopup }: Props): JSX.Element => {
           {!creatorEnabled &&
             <>
               <NewChatButton />
+              {evoya?.evoyaCreator?.enabled && <EvoyaCreatorButton />}
               <PrivacyShieldToggle />
             </>
           }

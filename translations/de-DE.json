@@ -20,6 +20,9 @@
             "maximizeChatButton": {
                 "maximizeChat": "Chat Overlay"
             },
+            "evoyaCreatorButton": {
+                "label": "Creator Öffnen"
+            },
             "shareSession": {
                 "openButton": "Chat teilen",
                 "closeButton": "Schliessen",

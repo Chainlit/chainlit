@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { Translator } from '@/components/i18n';
 
 interface Props {
   message: IStep;
@@ -70,7 +71,7 @@ export function EvoyaCreatorButton({ message }: Props) {
           </TooltipTrigger>
           <TooltipContent>
             <p>
-            Open Evoya Creator with Text
+              <Translator path="components.molecules.evoyaCreatorButton.label" />
             </p>
           </TooltipContent>
         </Tooltip>
