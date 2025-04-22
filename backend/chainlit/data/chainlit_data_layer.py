@@ -570,7 +570,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
 
-    def _extract_feedback_dict_from_step_row(self, row: Dict) -> FeedbackDict:
+    def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
         if row["feedback_id"] is not None:
             return FeedbackDict(
                 forId=row["id"],
