@@ -14,12 +14,12 @@ from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.types import (
     Feedback,
+    FeedbackDict,
     PageInfo,
     PaginatedResponse,
     Pagination,
     ThreadDict,
     ThreadFilter,
-    FeedbackDict
 )
 from chainlit.user import PersistedUser, User
 
@@ -569,14 +569,14 @@ class ChainlitDataLayer(BaseDataLayer):
         """
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
-        
+
     def _extract_feedback_dict_from_step_row(self, row: Dict) -> FeedbackDict:
-        if row['feedback_id'] is not None:
+        if row["feedback_id"] is not None:
             return FeedbackDict(
                 forId=row["id"],
                 id=row["feedback_id"],
-                value=row['feedback_value'],
-                comment=row['feedback_comment']
+                value=row["feedback_value"],
+                comment=row["feedback_comment"],
             )
         return None
 
