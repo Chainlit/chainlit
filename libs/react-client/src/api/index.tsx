@@ -341,7 +341,8 @@ export class ChainlitAPI extends APIBase {
     return this.buildEndpoint(`/project/file/${id}${queryParams}`);
   }
 
-  getLogoEndpoint(theme: string) {
+  getLogoEndpoint(theme: string, configuredLogoUrl?: string) {
+    if (configuredLogoUrl) return configuredLogoUrl;
     return this.buildEndpoint(`/logo?theme=${theme}`);
   }
 
