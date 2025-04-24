@@ -95,6 +95,10 @@ class BaseChainlitEmitter:
     async def init_thread(self, interaction: str):
         pass
 
+    async def refresh_chat_history(self):
+        """Stub method to request the UI to refresh the chat history."""
+        pass
+
     async def process_message(self, payload: MessagePayload) -> Message:
         """Stub method to process user message."""
         return Message(content="")
@@ -207,6 +211,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
         await self.emit("element", element_dict)
+
+    async def refresh_chat_history(self):
+        """Request the UI to refresh the chat history."""
+        await self.emit("refresh_chat_history", {})
+        logger.info("已发送刷新历史记录事件")
 
     def send_step(self, step_dict: StepDict):
         """Send a message to the UI."""

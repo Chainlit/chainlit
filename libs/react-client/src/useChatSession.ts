@@ -453,6 +453,13 @@ const useChatSession = () => {
             break;
         }
       });
+
+      socket.on('refresh_chat_history', () => {
+        // 创建一个自定义事件，让ThreadHistory组件可以订阅
+        const event = new CustomEvent('refresh_thread_history');
+        window.dispatchEvent(event);
+        console.log('收到刷新历史记录事件，已触发自定义事件');
+      });
     },
     [setSession, sessionId, idToResume, chatProfile]
   );
