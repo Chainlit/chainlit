@@ -1,10 +1,10 @@
 from typing import Any, Dict, Union
 
 import boto3  # type: ignore
-from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
-from chainlit.logger import logger
 
 from chainlit import make_async
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
+from chainlit.logger import logger
 
 
 class S3StorageClient(BaseStorageClient):

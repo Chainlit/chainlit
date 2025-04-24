@@ -1,11 +1,11 @@
 from typing import Any, Dict, Union
 
-from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
-from chainlit.logger import logger
 from google.cloud import storage  # type: ignore
 from google.oauth2 import service_account
 
 from chainlit import make_async
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
+from chainlit.logger import logger
 
 
 class GCSStorageClient(BaseStorageClient):
