@@ -550,6 +550,7 @@ class AWSCognitoOAuthProvider(OAuthProvider):
         "OAUTH_COGNITO_CLIENT_ID",
         "OAUTH_COGNITO_CLIENT_SECRET",
         "OAUTH_COGNITO_DOMAIN",
+        "OAUTH_COGNITO_SCOPE",
     ]
     authorize_url = f"https://{os.environ.get('OAUTH_COGNITO_DOMAIN')}/login"
     token_url = f"https://{os.environ.get('OAUTH_COGNITO_DOMAIN')}/oauth2/token"
@@ -557,10 +558,11 @@ class AWSCognitoOAuthProvider(OAuthProvider):
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_COGNITO_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_COGNITO_CLIENT_SECRET")
+        self.scopes = os.environ.get("OAUTH_COGNITO_SCOPE", "openid profile email")
         self.authorize_params = {
             "response_type": "code",
             "client_id": self.client_id,
-            "scope": "openid profile email",
+            "scope": self.scopes,
         }
 
         if prompt := self.get_prompt():
