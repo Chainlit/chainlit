@@ -1,0 +1,34 @@
+name: LintBackend
+
+on: [workflow_call]
+
+permissions: read-all
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_DIR: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/poetry-python-install
+        name: Install Python, poetry and Python dependencies
+        with:
+          poetry-install-args: --with tests --with mypy --with custom-data --no-root
+          poetry-working-directory: ${{ env.BACKEND_DIR }}
+      - name: Lint with ruff
+        uses: astral-sh/ruff-action@v1
+        with:
+          version-file: "backend/pyproject.toml"
+          src: ${{ env.BACKEND_DIR }}
+          changed-files: "true"
+      - name: Check formatting with ruff
+        uses: astral-sh/ruff-action@v1
+        with:
+          version-file: "backend/pyproject.toml"
+          src: ${{ env.BACKEND_DIR }}
+          changed-files: "true"
+          args: "format --check"
+      - name: Run Mypy
+        run: poetry run mypy chainlit/
+        working-directory: ${{ env.BACKEND_DIR }}

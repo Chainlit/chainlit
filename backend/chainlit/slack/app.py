@@ -2,11 +2,14 @@ import asyncio
 import os
 import re
 import uuid
-from datetime import datetime
 from functools import partial
 from typing import Dict, List, Optional, Union
 
 import httpx
+from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
+from slack_bolt.async_app import AsyncApp
+
 from chainlit.config import config
 from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
@@ -18,9 +21,6 @@ from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
-from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
-from slack_bolt.async_app import AsyncApp
 
 
 class SlackEmitter(BaseChainlitEmitter):
@@ -246,9 +246,21 @@ async def download_slack_files(session: HTTPSession, files, token):
         session.files[file["id"]] for file in file_refs if file["id"] in session.files
     ]
 
-    file_elements = [Element.from_dict(file_dict) for file_dict in files_dicts]
+    elements = [
+        Element.from_dict(
+            {
+                "id": file["id"],
+                "name": file["name"],
+                "path": str(file["path"]),
+                "chainlitKey": file["id"],
+                "display": "inline",
+                "type": Element.infer_type_from_mime(file["type"]),
+            }
+        )
+        for file in files_dicts
+    ]
 
-    return file_elements
+    return elements
 
 
 async def process_slack_message(
@@ -319,7 +331,7 @@ async def process_slack_message(
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 @slack_app.event("app_home_opened")
@@ -337,12 +349,6 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
-    thread_id = str(
-        uuid.uuid5(
-            uuid.NAMESPACE_DNS,
-            message["channel"] + datetime.today().strftime("%Y-%m-%d"),
-        )
-    )
     thread_ts = message.get("thread_ts", message["ts"])
     thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 

@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 import discord
 import filetype
 import httpx
+from discord.ui import Button, View
+
 from chainlit.config import config
 from chainlit.context import ChainlitContext, HTTPSession, context, context_var
 from chainlit.data import get_data_layer
@@ -23,7 +25,6 @@ from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
-from discord.ui import Button, View
 
 
 class FeedbackView(View):
@@ -202,9 +203,21 @@ async def download_discord_files(
         session.files[file["id"]] for file in file_refs if file["id"] in session.files
     ]
 
-    file_elements = [Element.from_dict(file_dict) for file_dict in files_dicts]
+    elements = [
+        Element.from_dict(
+            {
+                "id": file["id"],
+                "name": file["name"],
+                "path": str(file["path"]),
+                "chainlitKey": file["id"],
+                "display": "inline",
+                "type": Element.infer_type_from_mime(file["type"]),
+            }
+        )
+        for file in files_dicts
+    ]
 
-    return file_elements
+    return elements
 
 
 def clean_content(message: discord.Message):
@@ -279,7 +292,7 @@ async def process_discord_message(
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 @client.event

@@ -25,6 +25,7 @@ from pydantic.dataclasses import dataclass
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
 ]
+ToastType = Literal["info", "success", "warning", "error"]
 
 
 class ThreadDict(TypedDict):
@@ -79,7 +80,7 @@ T = TypeVar("T", covariant=True)
 class HasFromDict(Protocol[T]):
     @classmethod
     def from_dict(cls, obj_dict: Any) -> T:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 @dataclass
@@ -125,6 +126,7 @@ class AskSpec(DataClassJsonMixin):
 
     timeout: int
     type: Literal["text", "file", "action"]
+    step_id: str
 
 
 @dataclass
@@ -168,10 +170,12 @@ class InputAudioChunk:
     elapsedTime: float
     data: bytes
 
+
 class OutputAudioChunk(TypedDict):
     track: str
     mimeType: str
     data: bytes
+
 
 @dataclass
 class AskFileResponse:
@@ -184,12 +188,16 @@ class AskFileResponse:
 
 class AskActionResponse(TypedDict):
     name: str
-    value: str
+    payload: Dict
     label: str
-    description: str
+    tooltip: str
     forId: str
     id: str
-    collapsed: bool
+
+
+class UpdateThreadRequest(BaseModel):
+    threadId: str
+    name: str
 
 
 class DeleteThreadRequest(BaseModel):
@@ -203,6 +211,38 @@ class DeleteFeedbackRequest(BaseModel):
 class GetThreadsRequest(BaseModel):
     pagination: Pagination
     filter: ThreadFilter
+
+
+class CallActionRequest(BaseModel):
+    action: Dict
+    sessionId: str
+
+
+class ConnectStdioMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["stdio"]
+    name: str
+    fullCommand: str
+
+
+class ConnectSseMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["sse"]
+    name: str
+    url: str
+
+
+ConnectMCPRequest = Union[ConnectStdioMCPRequest, ConnectSseMCPRequest]
+
+
+class DisconnectMCPRequest(BaseModel):
+    sessionId: str
+    name: str
+
+
+class ElementRequest(BaseModel):
+    element: Dict
+    sessionId: str
 
 
 class Theme(str, Enum):
@@ -231,6 +271,19 @@ class ChatProfile(DataClassJsonMixin):
 
 
 FeedbackStrategy = Literal["BINARY"]
+
+
+class CommandDict(TypedDict):
+    # The identifier of the command, will be displayed in the UI
+    id: str
+    # The description of the command, will be displayed in the UI
+    description: str
+    # The lucide icon name
+    icon: str
+    # Display the command as a button in the composer
+    button: Optional[bool]
+    # Whether the command will be persistent unless the user toggles it
+    persistent: Optional[bool]
 
 
 class FeedbackDict(TypedDict):

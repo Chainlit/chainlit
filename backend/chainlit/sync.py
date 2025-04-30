@@ -10,8 +10,9 @@ import asyncio
 import threading
 
 from asyncer import asyncify
-from chainlit.context import context_var
 from syncer import sync
+
+from chainlit.context import context_var
 
 make_async = asyncify
 

@@ -4,10 +4,14 @@
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,

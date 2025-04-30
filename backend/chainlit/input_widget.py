@@ -1,9 +1,10 @@
 from abc import abstractmethod
-from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
+from pydantic import Field
+from pydantic.dataclasses import dataclass
+
 from chainlit.types import InputWidgetType
-from pydantic.dataclasses import Field, dataclass
 
 
 @dataclass
@@ -75,8 +76,8 @@ class Select(InputWidget):
     initial: Optional[str] = None
     initial_index: Optional[int] = None
     initial_value: Optional[str] = None
-    values: List[str] = Field(default_factory=lambda: [])
-    items: Dict[str, str] = Field(default_factory=lambda: defaultdict(dict))
+    values: List[str] = Field(default_factory=list)
+    items: Dict[str, str] = Field(default_factory=dict)
 
     def __post_init__(
         self,
@@ -167,8 +168,8 @@ class Tags(InputWidget):
     """Useful to create an input for an array of strings."""
 
     type: InputWidgetType = "tags"
-    initial: List[str] = Field(default_factory=lambda: [])
-    values: List[str] = Field(default_factory=lambda: [])
+    initial: List[str] = Field(default_factory=list)
+    values: List[str] = Field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {

@@ -40,7 +40,7 @@ async def mock_literal_client(monkeypatch: pytest.MonkeyPatch):
     client = Mock(spec=AsyncLiteralClient)
     client.api = AsyncMock(spec=AsyncLiteralAPI)
     monkeypatch.setattr("literalai.AsyncLiteralClient", client)
-    yield client
+    return client
 
 
 @pytest.fixture
@@ -576,6 +576,7 @@ async def test_create_element(
                             "display": text_element.display,
                             "type": text_element.type,
                             "page": None,
+                            "props": None,
                         },
                         "mime": text_element.mime,
                         "url": None,
@@ -777,14 +778,16 @@ async def test_update_step(
 
 def test_steptype_to_steptype():
     assert (
-        LiteralToChainlitConverter.steptype_to_steptype("user_message") == "undefined"
+        LiteralToChainlitConverter.steptype_to_steptype("user_message")
+        == "user_message"
     )
     assert (
         LiteralToChainlitConverter.steptype_to_steptype("assistant_message")
-        == "undefined"
+        == "assistant_message"
     )
     assert (
-        LiteralToChainlitConverter.steptype_to_steptype("system_message") == "undefined"
+        LiteralToChainlitConverter.steptype_to_steptype("system_message")
+        == "system_message"
     )
     assert LiteralToChainlitConverter.steptype_to_steptype("tool") == "tool"
     assert LiteralToChainlitConverter.steptype_to_steptype(None) == "undefined"
@@ -990,7 +993,7 @@ def test_step_to_step():
     assert isinstance(chainlit_step, Step)
     assert chainlit_step.id == "test_step_id"
     assert chainlit_step.thread_id == "test_thread_id"
-    assert chainlit_step.type == "undefined"
+    assert chainlit_step.type == "user_message"
     assert chainlit_step.name == "Test Step"
     assert chainlit_step.input == "test input"
     assert chainlit_step.output == "test output"

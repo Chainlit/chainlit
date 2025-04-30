@@ -13,9 +13,9 @@ function toolStream(tool: string) {
   const toolCall = cy.get(`#step-${tool}`);
   toolCall.click();
   for (const token of tokenList) {
-    toolCall.parent().should('contain', token);
+    toolCall.parent().parent().should('contain', token);
   }
-  toolCall.parent().should('contain', tokenList.join(' '));
+  toolCall.parent().parent().should('contain', tokenList.join(' '));
 }
 
 describe('Streaming', () => {

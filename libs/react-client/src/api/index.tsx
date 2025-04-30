@@ -1,6 +1,6 @@
-import { IThread } from 'src/types';
-import { removeToken } from 'src/utils/token';
+import { IElement, IThread, IUser } from 'src/types';
 
+import { IAction } from 'src/types/action';
 import { IFeedback } from 'src/types/feedback';
 
 export * from './hooks/auth';
@@ -22,10 +22,12 @@ export interface IPagination {
 }
 
 export class ClientError extends Error {
+  status: number;
   detail?: string;
 
-  constructor(message: string, detail?: string) {
+  constructor(message: string, status: number, detail?: string) {
     super(message);
+    this.status = status;
     this.detail = detail;
   }
 
@@ -44,39 +46,80 @@ export class APIBase {
   constructor(
     public httpEndpoint: string,
     public type: 'webapp' | 'copilot' | 'teams' | 'slack' | 'discord',
+    public additionalQueryParams?: Record<string, string>,
     public on401?: () => void,
     public onError?: (error: ClientError) => void
   ) {}
 
   buildEndpoint(path: string) {
+    let fullUrl = `${this.httpEndpoint}${path}`;
     if (this.httpEndpoint.endsWith('/')) {
       // remove trailing slash on httpEndpoint
-      return `${this.httpEndpoint.slice(0, -1)}${path}`;
-    } else {
-      return `${this.httpEndpoint}${path}`;
+      fullUrl = `${this.httpEndpoint.slice(0, -1)}${path}`;
     }
+
+    const url = new URL(fullUrl);
+
+    // Add additionalQueryParams for all API calls
+    if (this.additionalQueryParams) {
+      const params = new URLSearchParams(this.additionalQueryParams);
+      const separator = url.search ? '&' : '?';
+      url.search = url.search + `${separator}${params.toString()}`;
+    }
+
+    return url.toString();
   }
 
-  checkToken(token: string) {
-    const prefix = 'Bearer ';
-    if (token.startsWith(prefix)) {
-      return token;
-    } else {
-      return prefix + token;
+  private async getDetailFromErrorResponse(
+    res: Response
+  ): Promise<string | undefined> {
+    try {
+      const body = await res.json();
+      return body?.detail;
+    } catch (error: any) {
+      console.error('Unable to parse error response', error);
     }
+    return undefined;
   }
 
+  private handleRequestError(error: any) {
+    if (error instanceof ClientError) {
+      if (error.status === 401 && this.on401) {
+        this.on401();
+      }
+      if (this.onError) {
+        this.onError(error);
+      }
+    }
+    console.error(error);
+  }
+
+  /**
+   * Low-level HTTP request handler for direct API interactions.
+   * Provides full control over HTTP methods, request configuration, and error handling.
+   *
+   * Key features:
+   * - Supports all HTTP methods (GET, POST, PUT, PATCH, DELETE)
+   * - Handles both FormData and JSON payloads
+   * - Manages authentication headers
+   * - Custom error handling with ClientError class
+   * - Support for request cancellation via AbortSignal
+   *
+   * @param method - HTTP method to use (GET, POST, etc.)
+   * @param path - API endpoint path
+   * @param data - Optional request payload (FormData or JSON-serializable data)
+   * @param signal - Optional AbortSignal for request cancellation
+   * @returns Promise<Response>
+   * @throws ClientError for HTTP errors, including 401 unauthorized
+   */
   async fetch(
     method: string,
     path: string,
-    token?: string,
     data?: Payload,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    headers: { Authorization?: string; 'Content-Type'?: string } = {}
   ): Promise<Response> {
     try {
-      const headers: { Authorization?: string; 'Content-Type'?: string } = {};
-      if (token) headers['Authorization'] = this.checkToken(token); // Assuming token is a bearer token
-
       let body;
 
       if (data instanceof FormData) {
@@ -88,53 +131,43 @@ export class APIBase {
 
       const res = await fetch(this.buildEndpoint(path), {
         method,
+        credentials: 'include',
         headers,
         signal,
         body
       });
 
       if (!res.ok) {
-        const body = await res.json();
-        if (res.status === 401 && this.on401) {
-          removeToken();
-          this.on401();
-        }
-        throw new ClientError(res.statusText, body.detail);
+        const detail = await this.getDetailFromErrorResponse(res);
+
+        throw new ClientError(res.statusText, res.status, detail);
       }
 
       return res;
     } catch (error: any) {
-      if (error instanceof ClientError && this.onError) {
-        this.onError(error);
-      }
-      console.error(error);
+      this.handleRequestError(error);
       throw error;
     }
   }
 
-  async get(endpoint: string, token?: string) {
-    return await this.fetch('GET', endpoint, token);
+  async get(endpoint: string) {
+    return await this.fetch('GET', endpoint);
   }
 
-  async post(
-    endpoint: string,
-    data: Payload,
-    token?: string,
-    signal?: AbortSignal
-  ) {
-    return await this.fetch('POST', endpoint, token, data, signal);
+  async post(endpoint: string, data: Payload, signal?: AbortSignal) {
+    return await this.fetch('POST', endpoint, data, signal);
   }
 
-  async put(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('PUT', endpoint, token, data);
+  async put(endpoint: string, data: Payload) {
+    return await this.fetch('PUT', endpoint, data);
   }
 
-  async patch(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('PATCH', endpoint, token, data);
+  async patch(endpoint: string, data: Payload) {
+    return await this.fetch('PATCH', endpoint, data);
   }
 
-  async delete(endpoint: string, data: Payload, token?: string) {
-    return await this.fetch('DELETE', endpoint, token, data);
+  async delete(endpoint: string, data: Payload) {
+    return await this.fetch('DELETE', endpoint, data);
   }
 }
 
@@ -144,8 +177,27 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async jwtAuth(token: string) {
+    const res = await this.fetch('POST', '/auth/jwt', undefined, undefined, {
+      Authorization: `Bearer ${token}`
+    });
+    return res.json();
+  }
+
+  async stickyCookie(sessionId: string) {
+    const res = await this.fetch('POST', '/set-session-cookie', {
+      session_id: sessionId
+    });
+    return res.json();
+  }
+
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
+    return res.json();
+  }
+
+  async getUser(): Promise<IUser> {
+    const res = await this.get(`/user`);
     return res.json();
   }
 
@@ -155,40 +207,37 @@ export class ChainlitAPI extends APIBase {
   }
 
   async setFeedback(
-    feedback: IFeedback,
-    accessToken?: string
+    feedback: IFeedback
   ): Promise<{ success: boolean; feedbackId: string }> {
-    const res = await this.put(`/feedback`, { feedback }, accessToken);
+    const res = await this.put(`/feedback`, { feedback });
     return res.json();
   }
 
-  async deleteFeedback(
-    feedbackId: string,
-    accessToken?: string
-  ): Promise<{ success: boolean }> {
-    const res = await this.delete(`/feedback`, { feedbackId }, accessToken);
+  async deleteFeedback(feedbackId: string): Promise<{ success: boolean }> {
+    const res = await this.delete(`/feedback`, { feedbackId });
     return res.json();
   }
 
   async listThreads(
     pagination: IPagination,
-    filter: IThreadFilters,
-    accessToken?: string
+    filter: IThreadFilters
   ): Promise<{
     pageInfo: IPageInfo;
     data: IThread[];
   }> {
-    const res = await this.post(
-      `/project/threads`,
-      { pagination, filter },
-      accessToken
-    );
+    const res = await this.post(`/project/threads`, { pagination, filter });
 
     return res.json();
   }
 
-  async deleteThread(threadId: string, accessToken?: string) {
-    const res = await this.delete(`/project/thread`, { threadId }, accessToken);
+  async renameThread(threadId: string, name: string) {
+    const res = await this.put(`/project/thread`, { threadId, name });
+
+    return res.json();
+  }
+
+  async deleteThread(threadId: string) {
+    const res = await this.delete(`/project/thread`, { threadId });
 
     return res.json();
   }
@@ -196,10 +245,10 @@ export class ChainlitAPI extends APIBase {
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
-    sessionId: string,
-    token?: string
+    sessionId: string
   ) {
     const xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
 
     const promise = new Promise<{ id: string }>((resolve, reject) => {
       const formData = new FormData();
@@ -210,10 +259,6 @@ export class ChainlitAPI extends APIBase {
         this.buildEndpoint(`/project/file?session_id=${sessionId}`),
         true
       );
-
-      if (token) {
-        xhr.setRequestHeader('Authorization', this.checkToken(token));
-      }
 
       // Track the progress of the upload
       xhr.upload.onprogress = function (event) {
@@ -227,6 +272,12 @@ export class ChainlitAPI extends APIBase {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
+          return;
+        }
+        const contentType = xhr.getResponseHeader('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          const response = JSON.parse(xhr.responseText);
+          reject(response.detail);
         } else {
           reject('Upload failed');
         }
@@ -242,12 +293,56 @@ export class ChainlitAPI extends APIBase {
     return { xhr, promise };
   }
 
+  async callAction(action: IAction, sessionId: string) {
+    const res = await this.post(`/project/action`, { sessionId, action });
+
+    return res.json();
+  }
+
+  async updateElement(element: IElement, sessionId: string) {
+    const res = await this.put(`/project/element`, { sessionId, element });
+
+    return res.json();
+  }
+
+  async deleteElement(element: IElement, sessionId: string) {
+    const res = await this.delete(`/project/element`, { sessionId, element });
+
+    return res.json();
+  }
+
+  async connectStdioMCP(sessionId: string, name: string, fullCommand: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      fullCommand,
+      clientType: 'stdio'
+    });
+    return res.json();
+  }
+
+  async connectSseMCP(sessionId: string, name: string, url: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      clientType: 'sse'
+    });
+    return res.json();
+  }
+
+  async disconnectMcp(sessionId: string, name: string) {
+    const res = await this.delete(`/mcp`, { sessionId, name });
+    return res.json();
+  }
+
   getElementUrl(id: string, sessionId: string) {
     const queryParams = `?session_id=${sessionId}`;
     return this.buildEndpoint(`/project/file/${id}${queryParams}`);
   }
 
-  getLogoEndpoint(theme: string) {
+  getLogoEndpoint(theme: string, configuredLogoUrl?: string) {
+    if (configuredLogoUrl) return configuredLogoUrl;
     return this.buildEndpoint(`/logo?theme=${theme}`);
   }
 

@@ -3,8 +3,9 @@ import uuid
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from chainlit.session import ClientType, HTTPSession, WebsocketSession
 from lazify import LazyProxy
+
+from chainlit.session import ClientType, HTTPSession, WebsocketSession
 
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
@@ -55,8 +56,9 @@ class ChainlitContext:
 
 
 context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
-local_steps: ContextVar[Optional[List["Step"]]] = ContextVar("local_steps")
-local_steps.set(None)
+local_steps: ContextVar[Optional[List["Step"]]] = ContextVar(
+    "local_steps", default=None
+)
 
 
 def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitContext:
@@ -104,7 +106,7 @@ def get_context() -> ChainlitContext:
     try:
         return context_var.get()
     except LookupError as e:
-        raise ChainlitContextException() from e
+        raise ChainlitContextException from e
 
 
 context: ChainlitContext = LazyProxy(get_context, enable_cache=False)

@@ -1,31 +1,32 @@
-# Welcome to Chainlit by Literal AI 👋
-
-[![](https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat)](https://discord.gg/k73SQ3FyUh)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io)](https://twitter.com/chainlit_io)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/chainlit)
-[![GitHub Contributors](https://img.shields.io/github/contributors/chainlit/chainlit)](https://github.com/chainlit/chainlit/graphs/contributors)
-[![CI](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml)
-
-**Build production-ready Conversational AI applications in minutes, not weeks ⚡️**
-
-Chainlit is an open-source async Python framework which allows developers to build scalable Conversational AI or agentic applications.
-
-- ✅ ChatGPT-like application
-- ✅ Embedded Chatbot & Software Copilot
-- ✅ Slack & Discord
-- ✅ Custom frontend (build your own agentic experience)
-- ✅ API Endpoint
-
-Full documentation is available [here](https://docs.chainlit.io). You can ask Chainlit related questions to [Chainlit Help](https://help.chainlit.io/), an app built using Chainlit!
-
-> [!NOTE]
-> Check out [Literal AI](https://literalai.com), our product to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/data-persistence/overview) with Chainlit by adding a `LITERAL_API_KEY` in your project.
->
-> Chainlit is developed and maintained by the Literal AI team, which is currently focused on expanding the capabilities of Literal AI. While we continue to support and maintain Chainlit, we are also committed to enabling the community to contribute, particularly in areas like integrations and data layers.
+<h1 align="center">Welcome to Chainlit by Literal AI 👋</h1>
 
 <p align="center">
-    <img src="https://github.com/Chainlit/chainlit/assets/13104895/0c2cc7a9-766c-41d3-aae2-117a2d0eb8ed" alt="Chainlit user interface" width="80%"></img>
+<b>Build python production-ready conversational AI applications in minutes, not weeks ⚡️</b>
+
 </p>
+<p align="center">
+    <a href="https://discord.gg/k73SQ3FyUh" rel="nofollow"><img alt="Discord" src="https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat" style="max-width:100%;"></a>
+    <a href="https://twitter.com/chainlit_io" rel="nofollow"><img alt="Twitter" src="https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io" style="max-width:100%;"></a>
+    <a href="https://pypistats.org/packages/chainlit" rel="nofollow"><img alt="Downloads" src="https://img.shields.io/pypi/dm/chainlit" style="max-width:100%;"></a>
+        <a href="https://github.com/chainlit/chainlit/graphs/contributors" rel="nofollow"><img alt="Contributors" src="https://img.shields.io/github/contributors/chainlit/chainlit" style="max-width:100%;"></a>
+    <a href="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml" rel="nofollow"><img alt="CI" src="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg" style="max-width:100%;"></a>
+</p>
+
+<p align="center">
+    <a href="https://chainlit.io"><b>Website</b></a>  •  
+    <a href="https://docs.chainlit.io"><b>Documentation</b></a>  •  
+    <a href="https://help.chainlit.io"><b>Chainlit Help</b></a>  •  
+    <a href="https://github.com/Chainlit/cookbook"><b>Cookbook</b></a>
+</p>
+
+<p align="center">
+    <a href="https://trendshift.io/repositories/6708" target="_blank"><img src="https://trendshift.io/api/badge/repositories/6708" alt="Chainlit%2Fchainlit | Trendshift" style="width: 250px; height: 45px;" width="250" height="45"/></a>
+</p>
+
+https://github.com/user-attachments/assets/b3738aba-55c0-42fa-ac00-6efd1ee0d148
+
+> [!NOTE]
+> Chainlit is maintained by [Literal AI](https://literalai.com), an LLMOps platform to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/llmops/literalai) with Chainlit. For enterprise support, please fill this [form](https://docs.google.com/forms/d/e/1FAIpQLSdPVGqfuaWSC2DfunR6cY4C7kUHl0c2W7DnhzsF9bmMxrVpkg/viewform?usp=header).
 
 ## Installation
 
@@ -93,24 +94,6 @@ chainlit run demo.py -w
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
 
-## 🎉 Key Features and Integrations
-
-Full documentation is available [here](https://docs.chainlit.io). Key features:
-
-- [💬 Multi Modal chats](https://docs.chainlit.io/advanced-features/multi-modal)
-- [💭 Chain of Thought visualization](https://docs.chainlit.io/concepts/step)
-- [💾 Data persistence + human feedback](https://docs.chainlit.io/data-persistence/overview)
-- [🐛 Debug Mode](https://docs.chainlit.io/data-persistence/enterprise#debug-mode)
-- [👤 Authentication](https://docs.chainlit.io/authentication/overview)
-
-Chainlit is compatible with all Python programs and libraries. That being said, it comes with integrations for:
-
-- [LangChain](https://docs.chainlit.io/integrations/langchain)
-- [Llama Index](https://docs.chainlit.io/integrations/llama-index)
-- [Autogen](https://github.com/Chainlit/cookbook/tree/main/pyautogen)
-- [OpenAI Assistant](https://github.com/Chainlit/cookbook/tree/main/openai-assistant)
-- [Haystack](https://docs.chainlit.io/integrations/haystack)
-
 ## 📚 More Examples - Cookbook
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
@@ -121,7 +104,7 @@ Tell us what you would like to see added in Chainlit using the Github issues or 
 
 As an open-source initiative in a rapidly evolving domain, we welcome contributions, be it through the addition of new features or the improvement of documentation.
 
-For detailed information on how to contribute, see [here](.github/CONTRIBUTING.md).
+For detailed information on how to contribute, see [here](/CONTRIBUTING.md).
 
 ## 📃 License
 

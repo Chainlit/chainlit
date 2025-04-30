@@ -41,6 +41,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.pnpm-store
 dist
 dist-ssr
 *.local
@@ -60,5 +61,5 @@ dist-ssr
 .coverage
 
 backend/README.md
-node_modules
-.pnpm-store
+backend/.dmypy.json
+

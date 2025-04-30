@@ -5,6 +5,9 @@ import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
+from literalai.helper import utc_now
+from literalai.observability.step import MessageStepType
+
 from chainlit.action import Action
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -22,8 +25,6 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
-from literalai.helper import utc_now
-from literalai.observability.step import MessageStepType
 
 
 class MessageBase(ABC):
@@ -37,12 +38,12 @@ class MessageBase(ABC):
     fail_on_persist_error: bool = False
     persisted = False
     is_error = False
+    command: Optional[str] = None
     parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
     wait_for_answer = False
-    indent: Optional[int] = None
 
     def __post_init__(self) -> None:
         trace_event(f"init {self.__class__.__name__}")
@@ -65,6 +66,7 @@ class MessageBase(ABC):
             created_at=_dict["createdAt"],
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
+            command=_dict.get("command"),
             type=type,  # type: ignore
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
@@ -76,6 +78,7 @@ class MessageBase(ABC):
             "threadId": self.thread_id,
             "parentId": self.parent_id,
             "createdAt": self.created_at,
+            "command": self.command,
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
@@ -85,7 +88,6 @@ class MessageBase(ABC):
             "streaming": self.streaming,
             "isError": self.is_error,
             "waitForAnswer": self.wait_for_answer,
-            "indent": self.indent,
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
@@ -113,7 +115,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message update: {str(e)}")
+                logger.error(f"Failed to persist message update: {e!s}")
 
         await context.emitter.update_step(step_dict)
 
@@ -133,7 +135,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message deletion: {str(e)}")
+                logger.error(f"Failed to persist message deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -149,7 +151,7 @@ class MessageBase(ABC):
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist message creation: {str(e)}")
+                logger.error(f"Failed to persist message creation: {e!s}")
 
         return step_dict
 
@@ -176,6 +178,9 @@ class MessageBase(ABC):
         Sends a token to the UI. This is useful for streaming messages.
         Once all tokens have been streamed, call .send() to end the stream and persist the message if persistence is enabled.
         """
+        if not token:
+            return
+
         if is_sequence:
             self.content = token
         else:
@@ -217,6 +222,7 @@ class Message(MessageBase):
         tags: Optional[List[str]] = None,
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
+        command: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
@@ -239,6 +245,9 @@ class Message(MessageBase):
 
         if parent_id:
             self.parent_id = str(parent_id)
+
+        if command:
+            self.command = str(command)
 
         if created_at:
             self.created_at = created_at
@@ -383,7 +392,7 @@ class AskUserMessage(AskMessageBase):
 
         step_dict = await self._create()
 
-        spec = AskSpec(type="text", timeout=self.timeout)
+        spec = AskSpec(type="text", step_id=step_dict["id"], timeout=self.timeout)
 
         res = cast(
             Union[None, StepDict],
@@ -454,6 +463,7 @@ class AskFileMessage(AskMessageBase):
 
         spec = AskFileSpec(
             type="file",
+            step_id=step_dict["id"],
             accept=self.accept,
             max_size_mb=self.max_size_mb,
             max_files=self.max_files,
@@ -529,7 +539,12 @@ class AskActionMessage(AskMessageBase):
             action_keys.append(action.id)
             await action.send(for_id=str(step_dict["id"]))
 
-        spec = AskActionSpec(type="action", timeout=self.timeout, keys=action_keys)
+        spec = AskActionSpec(
+            type="action",
+            step_id=step_dict["id"],
+            timeout=self.timeout,
+            keys=action_keys,
+        )
 
         res = cast(
             Union[AskActionResponse, None],
@@ -541,7 +556,7 @@ class AskActionMessage(AskMessageBase):
         if res is None:
             self.content = "Timed out: no action was taken"
         else:
-            self.content = f'**Selected:** {res["label"]}'
+            self.content = f"**Selected:** {res['label']}"
 
         self.wait_for_answer = False
 

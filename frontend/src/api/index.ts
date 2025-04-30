@@ -1,5 +1,5 @@
+import getRouterBasename from '@/lib/router';
 import { toast } from 'sonner';
-import getRouterBasename from 'utils/router';
 
 import { ChainlitAPI, ClientError } from '@chainlit/react-client';
 
@@ -25,6 +25,7 @@ const onError = (error: ClientError) => {
 export const apiClient = new ChainlitAPI(
   httpEndpoint,
   'webapp',
+  {}, // Optional - additionalQueryParams property.
   on401,
   onError
 );

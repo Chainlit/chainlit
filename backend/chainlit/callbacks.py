@@ -1,8 +1,15 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+
+from fastapi import Request, Response
+from mcp import ClientSession
+from starlette.datastructures import Headers
 
 from chainlit.action import Action
 from chainlit.config import config
+from chainlit.context import context
+from chainlit.data.base import BaseDataLayer
+from chainlit.mcp import McpConnection
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
@@ -10,13 +17,57 @@ from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
-from fastapi import Request, Response
-from starlette.datastructures import Headers
+
+
+@trace
+def on_app_startup(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application starts.
+    Useful for initializing resources, loading models, setting up database connections, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The startup hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_startup
+        async def startup():
+            print("Application is starting!")
+            # Initialize resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated startup hook.
+    """
+    config.code.on_app_startup = wrap_user_function(func, with_task=False)
+    return func
+
+
+@trace
+def on_app_shutdown(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application shuts down.
+    Useful for cleaning up resources, closing connections, saving state, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The shutdown hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_shutdown
+        async def shutdown():
+            print("Application is shutting down!")
+            # Clean up resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated shutdown hook.
+    """
+    config.code.on_app_shutdown = wrap_user_function(func, with_task=False)
+    return func
 
 
 @trace
 def password_auth_callback(
-    func: Callable[[str, str], Awaitable[Optional[User]]]
+    func: Callable[[str, str], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user.
@@ -38,7 +89,7 @@ def password_auth_callback(
 
 @trace
 def header_auth_callback(
-    func: Callable[[Headers], Awaitable[Optional[User]]]
+    func: Callable[[Headers], Awaitable[Optional[User]]],
 ) -> Callable:
     """
     Framework agnostic decorator to authenticate the user via a header
@@ -124,6 +175,33 @@ def on_message(func: Callable) -> Callable:
 
 
 @trace
+async def send_window_message(data: Any):
+    """
+    Send custom data to the host window via a window.postMessage event.
+
+    Args:
+        data (Any): The data to send with the event.
+    """
+    await context.emitter.send_window_message(data)
+
+
+@trace
+def on_window_message(func: Callable[[str], Any]) -> Callable:
+    """
+    Hook to react to javascript postMessage events coming from the UI.
+
+    Args:
+        func (Callable[[str], Any]): The function to be called when a window message is received.
+                                     Takes the message content as a string parameter.
+
+    Returns:
+        Callable[[str], Any]: The decorated on_window_message function.
+    """
+    config.code.on_window_message = wrap_user_function(func)
+    return func
+
+
+@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -177,7 +255,7 @@ def set_chat_profiles(
 
 @trace
 def set_starters(
-    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
@@ -221,6 +299,7 @@ def on_audio_start(func: Callable) -> Callable:
     config.code.on_audio_start = wrap_user_function(func, with_task=False)
     return func
 
+
 @trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
@@ -254,7 +333,7 @@ def on_audio_end(func: Callable) -> Callable:
 
 @trace
 def author_rename(
-    func: Callable[[str], Awaitable[str]]
+    func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:
     """
     Useful to rename the author of message to display more friendly author names in the UI.
@@ -266,6 +345,26 @@ def author_rename(
     """
 
     config.code.author_rename = wrap_user_function(func)
+    return func
+
+
+@trace
+def on_mcp_connect(func: Callable[[McpConnection, ClientSession], None]) -> Callable:
+    """
+    Called everytime an MCP is connected
+    """
+
+    config.code.on_mcp_connect = wrap_user_function(func)
+    return func
+
+
+@trace
+def on_mcp_disconnect(func: Callable[[str, ClientSession], None]) -> Callable:
+    """
+    Called everytime an MCP is disconnected
+    """
+
+    config.code.on_mcp_disconnect = wrap_user_function(func)
     return func
 
 
@@ -294,7 +393,7 @@ def action_callback(name: str) -> Callable:
     """
 
     def decorator(func: Callable[[Action], Any]):
-        config.code.action_callbacks[name] = wrap_user_function(func, with_task=True)
+        config.code.action_callbacks[name] = wrap_user_function(func, with_task=False)
         return func
 
     return decorator
@@ -314,4 +413,18 @@ def on_settings_update(
     """
 
     config.code.on_settings_update = wrap_user_function(func, with_task=True)
+    return func
+
+
+def data_layer(
+    func: Callable[[], BaseDataLayer],
+) -> Callable[[], BaseDataLayer]:
+    """
+    Hook to configure custom data layer.
+    """
+
+    # We don't use wrap_user_function here because:
+    # 1. We don't need to support async here and;
+    # 2. We don't want to change the API for get_data_layer() to be async, everywhere (at this point).
+    config.code.data_layer = func
     return func

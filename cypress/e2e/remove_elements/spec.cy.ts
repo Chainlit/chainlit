@@ -10,6 +10,7 @@ describe('remove_elements', () => {
     cy.get('#step-tool1').click();
     cy.get('#step-tool1')
       .parent()
+      .parent()
       .find('.inline-image')
       .should('have.length', 1);
 

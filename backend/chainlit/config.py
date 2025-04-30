@@ -17,22 +17,30 @@ from typing import (
 )
 
 import tomli
+from dataclasses_json import DataClassJsonMixin
+from pydantic import Field
+from pydantic.dataclasses import dataclass
+from starlette.datastructures import Headers
+
+from chainlit.data.base import BaseDataLayer
 from chainlit.logger import logger
 from chainlit.translations import lint_translation_json
 from chainlit.version import __version__
-from dataclasses_json import DataClassJsonMixin
-from pydantic.dataclasses import Field, dataclass
-from starlette.datastructures import Headers
 
 from ._utils import is_path_inside
 
 if TYPE_CHECKING:
-    from chainlit.action import Action
-    from chainlit.message import Message
-    from chainlit.types import InputAudioChunk, ChatProfile, Starter, ThreadDict
-    from chainlit.user import User
     from fastapi import Request, Response
 
+    from chainlit.action import Action
+    from chainlit.message import Message
+    from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
+    from chainlit.user import User
+else:
+    # Pydantic needs to resolve forward annotations. Because all of these are used
+    # within `typing.Callable`, alias to `Any` as Pydantic does not perform validation
+    # of callable argument/return types anyway.
+    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Any  # fmt: off
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -47,6 +55,7 @@ FILES_DIRECTORY = Path(APP_ROOT) / ".files"
 FILES_DIRECTORY.mkdir(exist_ok=True)
 
 config_dir = os.path.join(APP_ROOT, ".chainlit")
+public_dir = os.path.join(APP_ROOT, "public")
 config_file = os.path.join(config_dir, "config.toml")
 config_translation_dir = os.path.join(config_dir, "translations")
 
@@ -65,14 +74,11 @@ session_timeout = 3600
 # Duration (in seconds) of the user session expiry
 user_session_timeout = 1296000  # 15 days
 
-# Enable third parties caching (e.g LangChain cache)
+# Enable third parties caching (e.g., LangChain cache)
 cache = false
 
 # Authorized origins
 allow_origins = ["*"]
-
-# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-# follow_symlink = false
 
 [features]
 # Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
@@ -80,6 +86,9 @@ unsafe_allow_html = false
 
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
+
+# Autoscroll new user messages at the top of the window
+user_message_autoscroll = true
 
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
@@ -90,6 +99,15 @@ edit_message = true
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
+    # Define accepted file types using MIME types
+    # Examples:
+    # 1. For specific file types:
+    #    accept = ["image/jpeg", "image/png", "application/pdf"]
+    # 2. For all files of certain type:
+    #    accept = ["image/*", "audio/*", "video/*"]
+    # 3. For specific file extensions:
+    #    accept = {{ "application/octet-stream" = [".xyz", ".pdb"] }}
+    # Note: Using "*/*" is not recommended as it may cause browser warnings
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
@@ -98,70 +116,73 @@ edit_message = true
     # Sample rate of the audio
     sample_rate = 24000
 
+[features.mcp.sse]
+    enabled = true
+
+[features.mcp.stdio]
+    enabled = true
+    # Only the executables in the allow list can be used for MCP stdio server.
+    # Only need the base name of the executable, e.g. "npx", not "/usr/bin/npx".
+    # Please don't comment this line for now, we need it to parse the executable name.
+    allowed_executables = [ "npx", "uvx" ]
+
 [UI]
 # Name of the assistant.
 name = "Assistant"
 
+# default_theme = "dark"
+
+# layout = "wide"
+
+# default_sidebar_state = "open"
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
 
-# Large size content are by default collapsed for a cleaner ui
-default_collapse_content = true
-
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
-
-# Link to your github repo. This will add a github button in the UI's header.
-# github = ""
 
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
-# Specify a Javascript file that can be used to customize the user interface.
-# The Javascript file can be served from the public directory.
+# Specify additional attributes for a custom CSS file
+# custom_css_attributes = "media=\\\"print\\\""
+
+# Specify a JavaScript file that can be used to customize the user interface.
+# The JavaScript file can be served from the public directory.
 # custom_js = "/public/test.js"
 
-# Specify a custom font url.
-# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+# Specify additional attributes for custom JS file
+# custom_js_attributes = "async type = \\\"module\\\""
+
+# Custom login page image, relative to public directory or external URL
+# login_page_image = "/public/custom-background.jpg"
+
+# Custom login page image filter (Tailwind internal filters, no dark/light variants)
+# login_page_image_filter = "brightness-50 grayscale"
+# login_page_image_dark_filter = "contrast-200 blur-sm"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+
+# Load assistant logo directly from URL.
+logo_file_url = ""
+
+# Load assistant avatar image directly from URL.
+default_avatar_file_url = ""
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
-[UI.theme]
-    default = "dark"
-    #layout = "wide"
-    #font_family = "Inter, sans-serif"
-# Override default MUI light theme. (Check theme.ts)
-[UI.theme.light]
-    #background = "#FAFAFA"
-    #paper = "#FFFFFF"
-
-    [UI.theme.light.primary]
-        #main = "#F80061"
-        #dark = "#980039"
-        #light = "#FFE7EB"
-    [UI.theme.light.text]
-        #primary = "#212121"
-        #secondary = "#616161"
-
-# Override default MUI dark theme. (Check theme.ts)
-[UI.theme.dark]
-    #background = "#FAFAFA"
-    #paper = "#FFFFFF"
-
-    [UI.theme.dark.primary]
-        #main = "#F80061"
-        #dark = "#980039"
-        #light = "#FFE7EB"
-    [UI.theme.dark.text]
-        #primary = "#EEEEEE"
-        #secondary = "#BDBDBD"
+# Specify optional one or more custom links in the header.
+# [[UI.header_links]]
+#     name = "Issues"
+#     display_name = "Report Issue"
+#     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
+#     url = "https://github.com/Chainlit/chainlit/issues"
 
 [meta]
 generated_by = "{__version__}"
@@ -210,15 +231,6 @@ class Palette(DataClassJsonMixin):
     text: Optional[TextOptions] = None
 
 
-@dataclass()
-class Theme(DataClassJsonMixin):
-    font_family: Optional[str] = None
-    default: Optional[Literal["light", "dark"]] = "dark"
-    layout: Optional[Literal["default", "wide"]] = "default"
-    light: Optional[Palette] = None
-    dark: Optional[Palette] = None
-
-
 @dataclass
 class SpontaneousFileUploadFeature(DataClassJsonMixin):
     enabled: Optional[bool] = None
@@ -233,14 +245,42 @@ class AudioFeature(DataClassJsonMixin):
     enabled: bool = False
 
 
+@dataclass
+class McpSseFeature(DataClassJsonMixin):
+    enabled: bool = True
+
+
+@dataclass
+class McpStdioFeature(DataClassJsonMixin):
+    enabled: bool = True
+    allowed_executables: Optional[list[str]] = None
+
+
+@dataclass
+class McpFeature(DataClassJsonMixin):
+    enabled: bool = False
+    sse: McpSseFeature = Field(default_factory=McpSseFeature)
+    stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
+
+
 @dataclass()
 class FeaturesSettings(DataClassJsonMixin):
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
+    mcp: McpFeature = Field(default_factory=McpFeature)
     latex: bool = False
+    user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True
+
+
+@dataclass
+class HeaderLink(DataClassJsonMixin):
+    name: str
+    icon_url: str
+    url: str
+    display_name: Optional[str] = None
 
 
 @dataclass()
@@ -248,36 +288,46 @@ class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
-    # Large size content are by default collapsed for a cleaner ui
-    default_collapse_content: bool = True
+    font_family: Optional[str] = None
+    default_theme: Optional[Literal["light", "dark"]] = "dark"
+    layout: Optional[Literal["default", "wide"]] = "default"
+    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
     github: Optional[str] = None
-    theme: Optional[Theme] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_css_attributes: Optional[str] = ""
+    # Optional custom JS file that allows you to customize the UI
     custom_js: Optional[str] = None
-    custom_font: Optional[str] = None
+    custom_js_attributes: Optional[str] = "defer"
+    # Optional custom background image for login page
+    login_page_image: Optional[str] = None
+    login_page_image_filter: Optional[str] = None
+    login_page_image_dark_filter: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
+    # Optional logo file url
+    logo_file_url: Optional[str] = None
+    # Optional avatar image file url
+    default_avatar_file_url: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
+    # Optional header links
+    header_links: Optional[List[HeaderLink]] = None
 
 
 @dataclass()
 class CodeSettings:
-    # Developer defined callbacks for each action. Key is the action name, value is the callback function.
+    # App action functions
     action_callbacks: Dict[str, Callable[["Action"], Any]]
+
     # Module object loaded from the module_name
     module: Any = None
-    # Bunch of callbacks defined by the developer
-    password_auth_callback: Optional[
-        Callable[[str, str], Awaitable[Optional["User"]]]
-    ] = None
-    header_auth_callback: Optional[
-        Callable[[Headers], Awaitable[Optional["User"]]]
-    ] = None
-    oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
-    ] = None
+
+    # App life cycle callbacks
+    on_app_startup: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+    on_app_shutdown: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+
+    # Session life cycle callbacks
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
@@ -287,20 +337,37 @@ class CodeSettings:
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
-
-    author_rename: Optional[Callable[[str], Awaitable[str]]] = None
+    on_mcp_connect: Optional[Callable] = None
+    on_mcp_disconnect: Optional[Callable] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
+    # Auth callbacks
+    password_auth_callback: Optional[
+        Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
+    header_auth_callback: Optional[Callable[[Headers], Awaitable[Optional["User"]]]] = (
+        None
+    )
+    oauth_callback: Optional[
+        Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
+    ] = None
+
+    # Helpers
+    on_window_message: Optional[Callable[[str], Any]] = None
+    author_rename: Optional[Callable[[str], Awaitable[str]]] = None
+    data_layer: Optional[Callable[[], BaseDataLayer]] = None
 
 
 @dataclass()
 class ProjectSettings(DataClassJsonMixin):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
+    # Socket.io client transports option
+    transports: Optional[List[str]] = None
     enable_telemetry: bool = True
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
@@ -308,13 +375,11 @@ class ProjectSettings(DataClassJsonMixin):
     lc_cache_path: Optional[str] = None
     # Path to the local chat db
     # Duration (in seconds) during which the session is saved when the connection is lost
-    session_timeout: int = 3600
+    session_timeout: int = 300
     # Duration (in seconds) of the user session expiry
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
-    # Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
-    follow_symlink: bool = False
 
 
 @dataclass()
@@ -395,7 +460,7 @@ def init_config(log=False):
             dst = os.path.join(config_translation_dir, file)
             if not os.path.exists(dst):
                 src = os.path.join(TRANSLATIONS_DIR, file)
-                with open(src, "r", encoding="utf-8") as f:
+                with open(src, encoding="utf-8") as f:
                     translation = json.load(f)
                     with open(dst, "w", encoding="utf-8") as f:
                         json.dump(translation, f, indent=4)
@@ -510,7 +575,7 @@ def load_config():
 def lint_translations():
     # Load the ground truth (en-US.json file from chainlit source code)
     src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
-    with open(src, "r", encoding="utf-8") as f:
+    with open(src, encoding="utf-8") as f:
         truth = json.load(f)
 
         # Find the local app translations
@@ -518,7 +583,7 @@ def lint_translations():
             if file.endswith(".json"):
                 # Load the translation file
                 to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, "r", encoding="utf-8") as f:
+                with open(to_lint, encoding="utf-8") as f:
                     translation = json.load(f)
 
                     # Lint the translation file

@@ -6,7 +6,6 @@
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": [
     "pages/(.*)$",
-    "@mui/(.*)$",
     "@chainlit/(.*)$",
     "components/(.*)$",
     "assets/(.*)$",

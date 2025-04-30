@@ -7,6 +7,10 @@ from copy import deepcopy
 from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
+from literalai import BaseGeneration
+from literalai.helper import utc_now
+from literalai.observability.step import StepType, TrueStepType
+
 from chainlit.config import config
 from chainlit.context import CL_RUN_NAMES, context, local_steps
 from chainlit.data import get_data_layer
@@ -14,9 +18,6 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
-from literalai import BaseGeneration
-from literalai.helper import utc_now
-from literalai.observability.step import StepType, TrueStepType
 
 
 def check_add_step_in_cot(step: "Step"):
@@ -48,6 +49,7 @@ class StepDict(TypedDict, total=False):
     id: str
     threadId: str
     parentId: Optional[str]
+    command: Optional[str]
     streaming: bool
     waitForAnswer: Optional[bool]
     isError: Optional[bool]
@@ -60,8 +62,8 @@ class StepDict(TypedDict, total=False):
     end: Optional[str]
     generation: Optional[Dict]
     showInput: Optional[Union[bool, str]]
+    defaultOpen: Optional[bool]
     language: Optional[str]
-    indent: Optional[int]
     feedback: Optional[FeedbackDict]
 
 
@@ -80,8 +82,10 @@ def step(
     id: Optional[str] = None,
     parent_id: Optional[str] = None,
     tags: Optional[List[str]] = None,
+    metadata: Optional[Dict] = None,
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
+    default_open: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -104,11 +108,13 @@ def step(
                     tags=tags,
                     language=language,
                     show_input=show_input,
+                    default_open=default_open,
+                    metadata=metadata,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.exception(e)
                     result = await func(*args, **kwargs)
                     try:
                         if result and not step.output:
@@ -131,11 +137,13 @@ def step(
                     tags=tags,
                     language=language,
                     show_input=show_input,
+                    default_open=default_open,
+                    metadata=metadata,
                 ) as step:
                     try:
                         step.input = flatten_args_kwargs(func, args, kwargs)
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.exception(e)
                     result = func(*args, **kwargs)
                     try:
                         if result and not step.output:
@@ -175,6 +183,7 @@ class Step:
     end: Union[str, None]
     generation: Optional[BaseGeneration]
     language: Optional[str]
+    default_open: Optional[bool]
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
 
@@ -188,6 +197,7 @@ class Step:
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
+        default_open: Optional[bool] = False,
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
     ):
@@ -206,6 +216,7 @@ class Step:
         self.parent_id = parent_id
 
         self.language = language
+        self.default_open = default_open
         self.generation = None
         self.elements = elements or []
 
@@ -294,6 +305,7 @@ class Step:
             "start": self.start,
             "end": self.end,
             "language": self.language,
+            "defaultOpen": self.default_open,
             "showInput": self.show_input,
             "generation": self.generation.to_dict() if self.generation else None,
         }
@@ -317,7 +329,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step update: {str(e)}")
+                logger.error(f"Failed to persist step update: {e!s}")
 
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
@@ -344,7 +356,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step deletion: {str(e)}")
+                logger.error(f"Failed to persist step deletion: {e!s}")
 
         await context.emitter.delete_step(step_dict)
 
@@ -371,7 +383,7 @@ class Step:
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
-                logger.error(f"Failed to persist step creation: {str(e)}")
+                logger.error(f"Failed to persist step creation: {e!s}")
 
         tasks = [el.send(for_id=self.id) for el in self.elements]
         await asyncio.gather(*tasks)
@@ -388,6 +400,9 @@ class Step:
         Sends a token to the UI.
         Once all tokens have been streamed, call .send() to end the stream and persist the step if persistence is enabled.
         """
+        if not token:
+            return
+
         if is_sequence:
             if is_input:
                 self.input = token

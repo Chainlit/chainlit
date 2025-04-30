@@ -4,16 +4,16 @@ import type {
   IFileRef,
   IMessageElement,
   IStep
-} from 'client-types/';
+} from '@chainlit/react-client';
 
 interface IMessageContext {
   uploadFile?: (
     file: File,
     onProgress: (progress: number) => void
   ) => { xhr: XMLHttpRequest; promise: Promise<IFileRef> };
+  cot: 'hidden' | 'tool_call' | 'full';
   askUser?: IAsk;
-  defaultCollapseContent: boolean;
-  highlightedMessage: string | null;
+  editable: boolean;
   loading: boolean;
   showFeedbackButtons: boolean;
   uiName: string;

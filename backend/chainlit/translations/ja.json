@@ -1,0 +1,214 @@
+{
+    "common": {
+      "actions": {
+        "cancel": "キャンセル",
+        "confirm": "確認",
+        "continue": "続ける",
+        "goBack": "戻る",
+        "reset": "リセット",
+        "submit": "送信"
+      },
+      "status": {
+        "loading": "読み込み中...",
+        "error": {
+          "default": "エラーが発生しました",
+          "serverConnection": "サーバーに接続できませんでした"
+        }
+      }
+    },
+    "auth": {
+      "login": {
+        "title": "アプリにログイン",
+        "form": {
+          "email": {
+            "label": "メールアドレス",
+            "required": "メールアドレスは必須項目です"
+          },
+          "password": {
+            "label": "パスワード",
+            "required": "パスワードは必須項目です"
+          },
+          "actions": {
+            "signin": "サインイン"
+          },
+          "alternativeText": {
+            "or": "または"
+          }
+        },
+        "errors": {
+          "default": "サインインできません",
+          "signin": "別のアカウントでサインインしてください",
+          "oauthSignin": "別のアカウントでサインインしてください",
+          "redirectUriMismatch": "リダイレクトURIがOAuthアプリの設定と一致しません",
+          "oauthCallback": "別のアカウントでサインインしてください",
+          "oauthCreateAccount": "別のアカウントでサインインしてください",
+          "emailCreateAccount": "別のアカウントでサインインしてください",
+          "callback": "別のアカウントでサインインしてください",
+          "oauthAccountNotLinked": "本人確認のため、最初に使用したのと同じアカウントでサインインしてください",
+          "emailSignin": "メールを送信できませんでした",
+          "emailVerify": "メールアドレスを確認してください。新しいメールが送信されました",
+          "credentialsSignin": "サインインに失敗しました。入力した情報が正しいか確認してください",
+          "sessionRequired": "このページにアクセスするにはサインインしてください"
+        }
+      },
+      "provider": {
+        "continue": "{{provider}}で続ける"
+      }
+    },
+    "chat": {
+      "input": {
+        "placeholder": "メッセージを入力してください...",
+        "actions": {
+          "send": "メッセージを送信",
+          "stop": "タスクを停止",
+          "attachFiles": "ファイルを添付"
+        }
+      },
+      "speech": {
+        "start": "録音開始",
+        "stop": "録音停止",
+        "connecting": "接続中"
+      },
+      "fileUpload": {
+        "dragDrop": "ここにファイルをドラッグ＆ドロップ",
+        "browse": "ファイルを参照",
+        "sizeLimit": "制限：",
+        "errors": {
+          "failed": "アップロードに失敗しました",
+          "cancelled": "アップロードをキャンセルしました："
+        }
+      },
+      "messages": {
+        "status": {
+          "using": "使用中",
+          "used": "使用済み"
+        },
+        "actions": {
+          "copy": {
+            "button": "クリップボードにコピー",
+            "success": "コピーしました！"
+          }
+        },
+        "feedback": {
+          "positive": "役に立った",
+          "negative": "役に立たなかった",
+          "edit": "フィードバックを編集",
+          "dialog": {
+            "title": "コメントを追加",
+            "submit": "フィードバックを送信"
+          },
+          "status": {
+            "updating": "更新中",
+            "updated": "フィードバックを更新しました"
+          }
+        }
+      },
+      "history": {
+        "title": "最近の入力",
+        "empty": "何もありません...",
+        "show": "履歴を表示"
+      },
+      "settings": {
+        "title": "設定パネル"
+      },
+      "watermark": "開発元："
+    },
+    "threadHistory": {
+      "sidebar": {
+        "title": "過去のチャット",
+        "filters": {
+          "search": "検索",
+          "placeholder": "Search conversations..."
+        },
+        "timeframes": {
+          "today": "今日",
+          "yesterday": "昨日",
+          "previous7days": "過去7日間",
+          "previous30days": "過去30日間"
+        },
+        "empty": "スレッドが見つかりません",
+        "actions": {
+          "close": "サイドバーを閉じる",
+          "open": "サイドバーを開く"
+        }
+      },
+      "thread": {
+        "untitled": "無題の会話",
+        "menu": {
+          "rename": "Rename",
+          "delete": "Delete"
+        },
+        "actions": {
+          "delete": {
+            "title": "削除の確認",
+            "description": "このスレッドとそのメッセージ、要素が削除されます。この操作は取り消せません",
+            "success": "チャットを削除しました",
+            "inProgress": "チャットを削除中"
+          },
+          "rename": {
+            "title": "スレッドの名前を変更",
+            "description": "このスレッドの新しい名前を入力してください",
+            "form": {
+              "name": {
+                "label": "名前",
+                "placeholder": "新しい名前を入力"
+              }
+            },
+            "success": "スレッド名を変更しました！",
+            "inProgress": "スレッド名を変更中"
+          }
+        }
+      }
+    },
+    "navigation": {
+      "header": {
+        "chat": "チャット",
+        "readme": "説明書",
+        "theme": {
+          "light": "Light Theme",
+          "dark": "Dark Theme",
+          "system": "Follow System"
+        }
+      },
+      "newChat": {
+        "button": "新規チャット",
+        "dialog": {
+          "title": "新規チャットの作成",
+          "description": "現在のチャット履歴がクリアされます。続行しますか？",
+          "tooltip": "新規チャット"
+        }
+      },
+      "user": {
+        "menu": {
+          "settings": "設定",
+          "settingsKey": "S",
+          "apiKeys": "APIキー",
+          "logout": "ログアウト"
+        }
+      }
+    },
+    "apiKeys": {
+      "title": "必要なAPIキー",
+      "description": "このアプリを使用するには、以下のAPIキーが必要です。キーはお使いのデバイスのローカルストレージに保存されます。",
+      "success": {
+        "saved": "保存が完了しました"
+      }
+    },
+  "alerts": {
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
+  }
+  }

@@ -1,16 +1,14 @@
-import createCache from '@emotion/cache';
-import { CacheProvider } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-// @ts-expect-error inlined
-import clStyles from '@chainlit/app/src/App.css?inline';
-import { IStep } from '@chainlit/react-client';
+import { type IStep } from '@chainlit/react-client';
 
-// @ts-expect-error inlined
-import sonnerCss from './sonner.css?inline';
-// @ts-expect-error inlined
-import hljsStyles from 'highlight.js/styles/monokai-sublime.css?inline';
+// @ts-expect-error inline css
+import sonnercss from './sonner.css?inline';
+// @ts-expect-error inline css
+import tailwindcss from './src/index.css?inline';
+// @ts-expect-error inline css
+import hljscss from 'highlight.js/styles/monokai-sublime.css?inline';
 
 import AppWrapper from './src/appWrapper';
 import { IWidgetConfig } from './src/types';
@@ -21,8 +19,13 @@ let root: ReactDOM.Root | null = null;
 declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
+    theme?: {
+      light: Record<string, string>;
+      dark: Record<string, string>;
+    };
     mountChainlitWidget: (config: IWidgetConfig) => void;
     unmountChainlitWidget: () => void;
+    toggleChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
   }
 }
@@ -37,25 +40,15 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
   shadowRootElement.id = 'cl-shadow-root';
   shadowContainer.appendChild(shadowRootElement);
 
-  const cache = createCache({
-    key: 'css',
-    prepend: true,
-    container: shadowContainer
-  });
-
   window.cl_shadowRootElement = shadowRootElement;
 
   root = ReactDOM.createRoot(shadowRootElement);
   root.render(
     <React.StrictMode>
-      <CacheProvider value={cache}>
-        <style type="text/css">
-          {clStyles}
-          {hljsStyles}
-          {sonnerCss}
-        </style>
-        <AppWrapper widgetConfig={config} />
-      </CacheProvider>
+      <style type="text/css">{tailwindcss.toString()}</style>
+      <style type="text/css">{sonnercss.toString()}</style>
+      <style type="text/css">{hljscss.toString()}</style>
+      <AppWrapper widgetConfig={config} />
     </React.StrictMode>
   );
 };

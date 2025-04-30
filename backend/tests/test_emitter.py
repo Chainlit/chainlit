@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+
 from chainlit.element import ElementDict
 from chainlit.emitter import ChainlitEmitter
 from chainlit.step import StepDict
@@ -26,6 +27,7 @@ async def test_send_element(
         "size": None,
         "language": None,
         "page": None,
+        "props": None,
         "autoPlay": None,
         "playerConfig": None,
         "forId": None,
@@ -108,13 +110,6 @@ async def test_set_chat_settings(emitter, mock_websocket_session):
     assert emitter.session.chat_settings == settings
 
 
-async def test_send_action_response(emitter, mock_websocket_session):
-    await emitter.send_action_response("test_id", True, "Success")
-    mock_websocket_session.emit.assert_called_once_with(
-        "action_response", {"id": "test_id", "status": True, "response": "Success"}
-    )
-
-
 async def test_update_token_count(emitter, mock_websocket_session):
     count = 100
     await emitter.update_token_count(count)
@@ -142,3 +137,29 @@ async def test_stream_start(
     }
     await emitter.stream_start(step_dict)
     mock_websocket_session.emit.assert_called_once_with("stream_start", step_dict)
+
+
+async def test_send_toast(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    message = "This is a test message"
+    await emitter.send_toast(message)
+    mock_websocket_session.emit.assert_called_once_with(
+        "toast", {"message": message, "type": "info"}
+    )
+
+
+async def test_send_toast_with_type(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    message = "This is a test message"
+    await emitter.send_toast(message, type="error")
+    mock_websocket_session.emit.assert_called_once_with(
+        "toast", {"message": message, "type": "error"}
+    )
+
+
+async def test_send_toast_invalid_type(emitter: ChainlitEmitter) -> None:
+    message = "This is a test message"
+    with pytest.raises(ValueError, match="Invalid toast type: invalid"):
+        await emitter.send_toast(message, type="invalid")  # type: ignore[arg-type]

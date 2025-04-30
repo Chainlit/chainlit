@@ -7,6 +7,7 @@ import {
   useSetRecoilState
 } from 'recoil';
 import io from 'socket.io-client';
+import { toast } from 'sonner';
 import {
   actionState,
   askUserState,
@@ -15,14 +16,18 @@ import {
   chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  commandsState,
   currentThreadIdState,
   elementState,
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
+  mcpState,
   messagesState,
+  resumeThreadErrorState,
   sessionIdState,
   sessionState,
+  sideViewState,
   tasklistState,
   threadIdToResumeState,
   tokenCountState,
@@ -31,6 +36,7 @@ import {
 } from 'src/state';
 import {
   IAction,
+  ICommand,
   IElement,
   IMessageElement,
   IStep,
@@ -57,14 +63,17 @@ const useChatSession = () => {
   const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
   const setAudioConnection = useSetRecoilState(audioConnectionState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
+  const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const setMcps = useSetRecoilState(mcpState);
   const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
   const wavRecorder = useRecoilValue(wavRecorderState);
   const setMessages = useSetRecoilState(messagesState);
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
-
+  const setCommands = useSetRecoilState(commandsState);
+  const setSideView = useSetRecoilState(sideViewState);
   const setElements = useSetRecoilState(elementState);
   const setTasklists = useSetRecoilState(tasklistState);
   const setActions = useSetRecoilState(actionState);
@@ -72,26 +81,25 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
+  const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
 
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {
     if (session?.socket) {
-      session.socket.io.opts.extraHeaders!['X-Chainlit-Thread-Id'] =
-        currentThreadId || '';
+      session.socket.auth['threadId'] = currentThreadId || '';
     }
   }, [currentThreadId]);
 
   const _connect = useCallback(
-    ({
-      userEnv,
-      accessToken,
-      requireWebSocket = false
+    async ({
+      transports,
+      userEnv
     }: {
+      transports?: string[];
       userEnv: Record<string, string>;
-      accessToken?: string;
-      requireWebSocket?: boolean;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -100,17 +108,22 @@ const useChatSession = () => {
           ? `${pathname}/ws/socket.io`
           : '/ws/socket.io';
 
+      try {
+        await client.stickyCookie(sessionId);
+      } catch (err) {
+        console.error(`Failed to set sticky session cookie: ${err}`);
+      }
+
       const socket = io(uri, {
         path,
-        extraHeaders: {
-          Authorization: accessToken || '',
-          'X-Chainlit-Client-Type': client.type,
-          'X-Chainlit-Session-Id': sessionId,
-          'X-Chainlit-Thread-Id': idToResume || '',
-          'user-env': JSON.stringify(userEnv),
-          'X-Chainlit-Chat-Profile': chatProfile
-            ? encodeURIComponent(chatProfile)
-            : ''
+        withCredentials: true,
+        transports,
+        auth: {
+          clientType: client.type,
+          sessionId,
+          threadId: idToResume || '',
+          userEnv: JSON.stringify(userEnv),
+          chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
         }
       });
       setSession((old) => {
@@ -121,49 +134,51 @@ const useChatSession = () => {
         };
       });
 
-      const onConnect = () => {
+      socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
-      };
+        setMcps((prev) =>
+          prev.map((mcp) => {
+            const promise =
+              mcp.clientType === 'sse'
+                ? client.connectSseMCP(sessionId, mcp.name, mcp.url!)
+                : client.connectStdioMCP(sessionId, mcp.name, mcp.command!);
+            promise
+              .then(async ({ success, mcp }) => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: success ? 'connected' : 'failed',
+                        tools: mcp ? mcp.tools : existingMcp.tools
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              })
+              .catch(() => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: 'failed'
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              });
+            return { ...mcp, status: 'connecting' };
+          })
+        );
+      });
 
-      const onConnectError = () => {
+      socket.on('connect_error', (_) => {
         setSession((s) => ({ ...s!, error: true }));
-      };
-
-      // https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
-      // Require WebSocket when connecting to backend
-      if (requireWebSocket) {
-        // https://socket.io/docs/v4/client-socket-instance/#socketio
-        // 'connect' event is emitted when the underlying connection is established with polling transport
-        // 'upgrade' event is emitted when the underlying connection is upgraded to WebSocket and polling request is stopped.
-        const engine = socket.io.engine;
-        // https://github.com/socketio/socket.io/tree/main/packages/engine.io-client#events
-        engine.once('upgrade', () => {
-          // Set session on connect event, otherwise user can not interact with text input UI.
-          // Upgrade event is required to make sure user won't interact with the session before websocket upgrade success
-          socket.on('connect', onConnect);
-        });
-        // Socket.io will not retry upgrade request.
-        // Retry upgrade to websocket when error can only be done via reconnect.
-        // This will not be an issue for users if they are using persistent sticky session.
-        // In case they are using soft session affinity like Istio, then sometimes upgrade request will fail
-        engine.once('upgradeError', () => {
-          onConnectError();
-          setTimeout(() => {
-            socket.removeAllListeners();
-            socket.close();
-            _connect({
-              userEnv,
-              accessToken,
-              requireWebSocket
-            });
-          }, 500);
-        });
-      } else {
-        socket.on('connect', onConnect);
-      }
-
-      socket.on('connect_error', onConnectError);
+      });
 
       socket.on('task_start', () => {
         setLoading(true);
@@ -221,6 +236,9 @@ const useChatSession = () => {
         if (thread.metadata?.chat_profile) {
           setChatProfile(thread.metadata?.chat_profile);
         }
+        if (thread.metadata?.chat_settings) {
+          setChatSettingsValue(thread.metadata?.chat_settings);
+        }
         setMessages(messages);
         const elements = thread.elements || [];
         setTasklists(
@@ -231,6 +249,10 @@ const useChatSession = () => {
             (e) => ['avatar', 'tasklist'].indexOf(e.type) === -1
           )
         );
+      });
+
+      socket.on('resume_thread_error', (error?: string) => {
+        setThreadResumeError(error);
       });
 
       socket.on('new_message', (message: IStep) => {
@@ -309,6 +331,39 @@ const useChatSession = () => {
         resetChatSettingsValue();
       });
 
+      socket.on('set_commands', (commands: ICommand[]) => {
+        setCommands(commands);
+      });
+
+      socket.on('set_sidebar_title', (title: string) => {
+        setSideView((prev) => {
+          if (prev?.title === title) return prev;
+          return { title, elements: prev?.elements || [] };
+        });
+      });
+
+      socket.on(
+        'set_sidebar_elements',
+        ({ elements, key }: { elements: IMessageElement[]; key?: string }) => {
+          if (!elements.length) {
+            setSideView(undefined);
+          } else {
+            elements.forEach((element) => {
+              if (!element.url && element.chainlitKey) {
+                element.url = client.getElementUrl(
+                  element.chainlitKey,
+                  sessionId
+                );
+              }
+            });
+            setSideView((prev) => {
+              if (prev?.key === key) return prev;
+              return { title: prev?.title || '', elements: elements, key };
+            });
+          }
+        }
+      );
+
       socket.on('element', (element: IElement) => {
         if (!element.url && element.chainlitKey) {
           element.url = client.getElementUrl(element.chainlitKey, sessionId);
@@ -359,8 +414,39 @@ const useChatSession = () => {
       socket.on('token_usage', (count: number) => {
         setTokenCount((old) => old + count);
       });
+
+      socket.on('window_message', (data: any) => {
+        if (window.parent) {
+          window.parent.postMessage(data, '*');
+        }
+      });
+
+      socket.on('toast', (data: { message: string; type: string }) => {
+        if (!data.message) {
+          console.warn('No message received for toast.');
+          return;
+        }
+
+        switch (data.type) {
+          case 'info':
+            toast.info(data.message);
+            break;
+          case 'error':
+            toast.error(data.message);
+            break;
+          case 'success':
+            toast.success(data.message);
+            break;
+          case 'warning':
+            toast.warning(data.message);
+            break;
+          default:
+            toast(data.message);
+            break;
+        }
+      });
     },
-    [setSession, sessionId, chatProfile]
+    [setSession, sessionId, idToResume, chatProfile]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);

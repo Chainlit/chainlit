@@ -4,9 +4,10 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import httpx
+from fastapi import HTTPException
+
 from chainlit.secret import random_secret
 from chainlit.user import User
-from fastapi import HTTPException
 
 
 class OAuthProvider:
@@ -22,10 +23,10 @@ class OAuthProvider:
         return all([os.environ.get(env) for env in self.env])
 
     async def get_token(self, code: str, url: str) -> str:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def get_user_info(self, token: str) -> Tuple[Dict[str, str], User]:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_env_prefix(self) -> str:
         """Return environment prefix, like AZURE_AD."""
@@ -182,7 +183,7 @@ class AzureADOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_TENANT_ID"),
             "response_type": "code",
-            "scope": "https://graph.microsoft.com/User.Read",
+            "scope": "https://graph.microsoft.com/User.Read offline_access",
             "response_mode": "query",
         }
 
@@ -206,10 +207,12 @@ class AzureADOAuthProvider(OAuthProvider):
             json = response.json()
 
             token = json["access_token"]
+            refresh_token = json.get("refresh_token")
             if not token:
                 raise HTTPException(
                     status_code=400, detail="Failed to get the access token"
                 )
+            self._refresh_token = refresh_token
             return token
 
     async def get_user_info(self, token: str):
@@ -238,7 +241,11 @@ class AzureADOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
+                metadata={
+                    "image": azure_user.get("image"),
+                    "provider": "azure-ad",
+                    "refresh_token": getattr(self, "_refresh_token", None),
+                },
             )
             return (azure_user, user)
 
@@ -268,7 +275,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_HYBRID_TENANT_ID"),
             "response_type": "code id_token",
-            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid",
+            "scope": "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid offline_access",
             "response_mode": "form_post",
             "nonce": nonce,
         }
@@ -293,10 +300,12 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             json = response.json()
 
             token = json["access_token"]
+            refresh_token = json.get("refresh_token")
             if not token:
                 raise HTTPException(
                     status_code=400, detail="Failed to get the access token"
                 )
+            self._refresh_token = refresh_token
             return token
 
     async def get_user_info(self, token: str):
@@ -325,7 +334,11 @@ class AzureADHybridOAuthProvider(OAuthProvider):
 
             user = User(
                 identifier=azure_user["userPrincipalName"],
-                metadata={"image": azure_user.get("image"), "provider": "azure-ad"},
+                metadata={
+                    "image": azure_user.get("image"),
+                    "provider": "azure-ad",
+                    "refresh_token": getattr(self, "_refresh_token", None),
+                },
             )
             return (azure_user, user)
 
@@ -664,6 +677,137 @@ class GitlabOAuthProvider(OAuthProvider):
             return (gitlab_user, user)
 
 
+class KeycloakOAuthProvider(OAuthProvider):
+    env = [
+        "OAUTH_KEYCLOAK_CLIENT_ID",
+        "OAUTH_KEYCLOAK_CLIENT_SECRET",
+        "OAUTH_KEYCLOAK_REALM",
+        "OAUTH_KEYCLOAK_BASE_URL",
+    ]
+    id = os.environ.get("OAUTH_KEYCLOAK_NAME", "keycloak")
+
+    def __init__(self):
+        self.client_id = os.environ.get("OAUTH_KEYCLOAK_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_KEYCLOAK_CLIENT_SECRET")
+        self.realm = os.environ.get("OAUTH_KEYCLOAK_REALM")
+        self.base_url = os.environ.get("OAUTH_KEYCLOAK_BASE_URL")
+        self.authorize_url = (
+            f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/auth"
+        )
+
+        self.authorize_params = {
+            "scope": "profile email openid",
+            "response_type": "code",
+        }
+
+        if prompt := self.get_prompt():
+            self.authorize_params["prompt"] = prompt
+
+    async def get_token(self, code: str, url: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": url,
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/token",
+                data=payload,
+            )
+            response.raise_for_status()
+            json = response.json()
+            token = json.get("access_token")
+            if not token:
+                raise httpx.HTTPStatusError(
+                    "Failed to get the access token",
+                    request=response.request,
+                    response=response,
+                )
+            return token
+
+    async def get_user_info(self, token: str):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{self.base_url}/realms/{self.realm}/protocol/openid-connect/userinfo",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            response.raise_for_status()
+            kc_user = response.json()
+            user = User(
+                identifier=kc_user["email"],
+                metadata={"provider": "keycloak"},
+            )
+            return (kc_user, user)
+
+
+class GenericOAuthProvider(OAuthProvider):
+    env = [
+        "OAUTH_GENERIC_CLIENT_ID",
+        "OAUTH_GENERIC_CLIENT_SECRET",
+        "OAUTH_GENERIC_AUTH_URL",
+        "OAUTH_GENERIC_TOKEN_URL",
+        "OAUTH_GENERIC_USER_INFO_URL",
+        "OAUTH_GENERIC_SCOPES",
+    ]
+    id = os.environ.get("OAUTH_GENERIC_NAME", "generic")
+
+    def __init__(self):
+        self.client_id = os.environ.get("OAUTH_GENERIC_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_GENERIC_CLIENT_SECRET")
+        self.authorize_url = os.environ.get("OAUTH_GENERIC_AUTH_URL")
+        self.token_url = os.environ.get("OAUTH_GENERIC_TOKEN_URL")
+        self.user_info_url = os.environ.get("OAUTH_GENERIC_USER_INFO_URL")
+        self.scopes = os.environ.get("OAUTH_GENERIC_SCOPES")
+        self.user_identifier = os.environ.get("OAUTH_GENERIC_USER_IDENTIFIER", "email")
+
+        self.authorize_params = {
+            "scope": self.scopes,
+            "response_type": "code",
+        }
+
+        if prompt := self.get_prompt():
+            self.authorize_params["prompt"] = prompt
+
+    async def get_token(self, code: str, url: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": url,
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.post(self.token_url, data=payload)
+            response.raise_for_status()
+            json = response.json()
+            token = json.get("access_token")
+            if not token:
+                raise httpx.HTTPStatusError(
+                    "Failed to get the access token",
+                    request=response.request,
+                    response=response,
+                )
+            return token
+
+    async def get_user_info(self, token: str):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                self.user_info_url,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            response.raise_for_status()
+            server_user = response.json()
+            user = User(
+                identifier=server_user.get(self.user_identifier),
+                metadata={
+                    "provider": self.id,
+                },
+            )
+            return (server_user, user)
+
+
 providers = [
     GithubOAuthProvider(),
     GoogleOAuthProvider(),
@@ -674,6 +818,8 @@ providers = [
     DescopeOAuthProvider(),
     AWSCognitoOAuthProvider(),
     GitlabOAuthProvider(),
+    KeycloakOAuthProvider(),
+    GenericOAuthProvider(),
 ]
 
 
