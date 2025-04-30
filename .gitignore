@@ -60,3 +60,5 @@ dist-ssr
 .coverage
 
 backend/README.md
+node_modules
+.pnpm-store
