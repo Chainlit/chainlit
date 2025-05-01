@@ -204,8 +204,10 @@ class TestGCSStorageClient:
         # Configure blob to indicate file exists
         mock_gcs_client["blob"].exists.return_value = True
 
-        # Test with overwrite=False - add specific match for better exception handling
-        with pytest.raises(ValueError, match="already exists and overwrite is False"):
+        with pytest.raises(
+            Exception,
+            match="Failed to upload file to GCS: File test/path/existing.txt already exists and overwrite is False",
+        ):
             client.sync_upload_file(
                 object_key="test/path/existing.txt",
                 data=b"test content",
@@ -233,9 +235,8 @@ class TestGCSStorageClient:
             "Upload failed"
         )
 
-        # Use a more specific error pattern in the match parameter
         with pytest.raises(
-            ValueError, match="Failed to upload file to GCS.*Upload failed"
+            Exception, match="Failed to upload file to GCS: Upload failed"
         ):
             client.sync_upload_file(
                 object_key="test/path/file.txt", data=b"test content"
