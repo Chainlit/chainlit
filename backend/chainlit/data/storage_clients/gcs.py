@@ -55,9 +55,10 @@ class GCSStorageClient(BaseStorageClient):
 
             blob.upload_from_string(data, content_type=mime)
 
+            # Return signed URL
             return {
                 "object_key": object_key,
-                "url": f"https://storage.googleapis.com/{self.bucket.name}/{object_key}",
+                "url": self.sync_get_read_url(object_key),
             }
 
         except Exception as e:
@@ -79,7 +80,7 @@ class GCSStorageClient(BaseStorageClient):
             self.bucket.blob(object_key).delete()
             return True
         except Exception as e:
-            logger.warn(f"GCSStorageClient, delete_file error: {e}")
+            logger.warning(f"GCSStorageClient, delete_file error: {e}")
             return False
 
     async def delete_file(self, object_key: str) -> bool:
