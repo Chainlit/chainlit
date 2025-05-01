@@ -4,7 +4,7 @@ from google.cloud import storage  # type: ignore
 from google.oauth2 import service_account
 
 from chainlit import make_async
-from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
 from chainlit.logger import logger
 
 
@@ -29,7 +29,7 @@ class GCSStorageClient(BaseStorageClient):
 
     def sync_get_read_url(self, object_key: str) -> str:
         return self.bucket.blob(object_key).generate_signed_url(
-            version="v4", expiration=EXPIRY_TIME, method="GET"
+            version="v4", expiration=storage_expiry_time, method="GET"
         )
 
     async def get_read_url(self, object_key: str) -> str:
