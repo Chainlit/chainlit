@@ -44,7 +44,6 @@ from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
     DEFAULT_HOST,
-    FILES_DIRECTORY,
     PACKAGE_ROOT,
     config,
     load_module,
@@ -144,6 +143,9 @@ async def lifespan(app: FastAPI):
 
         discord_task = asyncio.create_task(client.start(discord_bot_token))
 
+    files_dir = Path(config.features.spontaneous_file_upload.files_dir)
+    files_dir.mkdir(parents=True, exist_ok=True)
+
     try:
         yield
     finally:
@@ -162,8 +164,8 @@ async def lifespan(app: FastAPI):
         except asyncio.exceptions.CancelledError:
             pass
 
-        if FILES_DIRECTORY.is_dir():
-            shutil.rmtree(FILES_DIRECTORY)
+        if files_dir.is_dir():
+            shutil.rmtree(files_dir)
 
         # Force exit the process to avoid potential AnyIO threads still running
         os._exit(0)
