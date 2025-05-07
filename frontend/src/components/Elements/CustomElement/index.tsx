@@ -36,7 +36,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
 
   useEffect(() => {
     apiClient
-      .get(`/public/elements/${element.name}.jsx`)
+      .get(`/public/elements/${element.element_name}.jsx`)
       .then(async (res) => setSourceCode(await res.text()))
       .catch((err) => setError(String(err)));
   }, [element.name, apiClient]);
