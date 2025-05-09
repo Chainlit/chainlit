@@ -8,6 +8,7 @@ export * from './api';
 export * from './types';
 export * from './context';
 export * from './utils/message';
+export * from './store';
 
 export { Socket } from 'socket.io-client';
 
