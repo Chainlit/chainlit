@@ -550,7 +550,6 @@ class AWSCognitoOAuthProvider(OAuthProvider):
         "OAUTH_COGNITO_CLIENT_ID",
         "OAUTH_COGNITO_CLIENT_SECRET",
         "OAUTH_COGNITO_DOMAIN",
-        "OAUTH_COGNITO_SCOPE",
     ]
     authorize_url = f"https://{os.environ.get('OAUTH_COGNITO_DOMAIN')}/login"
     token_url = f"https://{os.environ.get('OAUTH_COGNITO_DOMAIN')}/oauth2/token"
