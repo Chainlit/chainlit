@@ -1,6 +1,7 @@
 export * from './auth';
 export * from './chat';
 export * from './config';
+export * from './mcp';
 export * from './messages';
 export * from './session';
 export * from './thread';

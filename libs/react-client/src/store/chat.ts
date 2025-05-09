@@ -25,15 +25,21 @@ interface ChatState {
   setCommands: (commands: ICommand[]) => void;
   setSideView: (
     sideViewOrSetter?:
-      | { title: string; elements: IMessageElement[] }
-      | ((old?: { title: string; elements: IMessageElement[] }) =>
+      | { title: string; elements: IMessageElement[]; key?: string }
+      | ((old?: {
+          title: string;
+          elements: IMessageElement[];
+          key?: string;
+        }) =>
           | {
               title: string;
               elements: IMessageElement[];
+              key?: string;
             }
           | undefined)
   ) => void;
   setChatProfile: (chatProfile: string) => void;
+  setChatSettingsValue: (chatSettingsValue: any) => void;
   resetChatSettingsInputs: () => void;
   resetChatSettingsValue: () => void;
 }
@@ -85,6 +91,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setChatProfile: (chatProfile) => {
     set({ chatProfile });
+  },
+
+  setChatSettingsValue: (chatSettingsValue) => {
+    set({ chatSettingsValue });
   },
 
   resetChatSettingsInputs: () => {

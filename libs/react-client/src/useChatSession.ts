@@ -6,6 +6,7 @@ import {
   IAction,
   ICommand,
   IElement,
+  IMcp,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -22,6 +23,7 @@ import { OutputAudioChunk } from './types/audio';
 
 import { ChainlitContext } from './context';
 import { useChatStore } from './store/chat';
+import { useMcpStore } from './store/mcp';
 import { useMessagesStore } from './store/messages';
 import { useSessionState } from './store/session';
 import { useThreadStore } from './store/thread';
@@ -122,7 +124,7 @@ const useChatSession = () => {
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
-        setMcps((prev) =>
+        setMcps((prev: IMcp[]) =>
           prev.map((mcp) => {
             const promise =
               mcp.clientType === 'sse'
