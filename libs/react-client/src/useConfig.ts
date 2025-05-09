@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState } from './state';
+import { useConfigStore } from './store/config';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {
-  const [config, setConfig] = useRecoilState(configState);
+  const { config, setConfig } = useConfigStore();
   const { isAuthenticated } = useAuth();
   const language = navigator.language || 'en-US';
 
