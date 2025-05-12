@@ -38,6 +38,7 @@ const useChatSession = () => {
   const setSession = useSessionState((s) => s.setSession);
   const setIsAiSpeaking = useChatStore((s) => s.setIsAiSpeaking);
   const setAudioConnection = useChatStore((s) => s.setAudioConnection);
+  const setChatSettingsInputs = useChatStore((s) => s.setChatSettingsInputs);
   const resetChatSettingsValue = useChatStore((s) => s.resetChatSettingsValue);
   const setChatSettingsValue = useChatStore((s) => s.setChatSettingsValue);
   const setFirstUserInteraction = useUserState(
@@ -55,7 +56,6 @@ const useChatSession = () => {
   const setElements = useMessagesStore((s) => s.setElements);
   const setTasklists = useMessagesStore((s) => s.setTaskList);
   const setActions = useMessagesStore((s) => s.setActions);
-  const setChatSettingsInputs = useMessagesStore((s) => s.setChatInputs);
   const setTokenCount = useMessagesStore((s) => s.setTokenCount);
   const chatProfile = useChatStore((s) => s.chatProfile);
   const setChatProfile = useChatStore((s) => s.setChatProfile);

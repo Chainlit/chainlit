@@ -4,6 +4,8 @@ import { create } from 'zustand';
 
 import { stateOrSetter } from './utils';
 
+// import { subscribeWithSelector } from 'zustand/middleware/subscribeWithSelector';
+
 interface ChatState {
   isAiSpeaking: boolean;
   audioConnection: 'connecting' | 'on' | 'off';
@@ -39,31 +41,22 @@ interface ChatState {
           | undefined)
   ) => void;
   setChatProfile: (chatProfile: string) => void;
+  setChatSettingsInputs: (chatSettingsInputs: any[]) => void;
   setChatSettingsValue: (chatSettingsValue: any) => void;
   resetChatSettingsInputs: () => void;
   resetChatSettingsValue: () => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
-  isAiSpeaking: false,
+  isAiSpeaking: false as boolean,
   audioConnection: 'off',
   loading: false,
   wavStreamPlayer: new WavStreamPlayer(),
   wavRecorder: new WavRecorder(),
   commands: [],
   chatSettingsInputs: [],
-  chatSettingsValue: [].reduce(
-    (form: { [key: string]: any }, input: any) => (
-      (form[input.id] = input.initial), form
-    ),
-    {}
-  ),
-  chatSettingsDefaultValue: [].reduce(
-    (form: { [key: string]: any }, input: any) => (
-      (form[input.id] = input.initial), form
-    ),
-    {}
-  ),
+  chatSettingsValue: [],
+  chatSettingsDefaultValue: [],
 
   setIsAiSpeaking: (isAiSpeaking) => {
     set({ isAiSpeaking });
@@ -93,6 +86,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ chatProfile });
   },
 
+  setChatSettingsInputs: (chatSettingsInputs) => {
+    set({ chatSettingsInputs });
+  },
+
   setChatSettingsValue: (chatSettingsValue) => {
     set({ chatSettingsValue });
   },
@@ -112,3 +109,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ chatSettingsValue });
   }
 }));
+
+// useChatStore.subscribe((state, prevState) => {
+//   const chatSettingsDefaultValue = state.chatSettingsInputs.reduce(
+//     (form: { [key: string]: any }, input: any) => (
+//       (form[input.id] = input.initial), form
+//     ),
+//     {}
+//   );
+//
+//   useChatStore.setState({chatSettingsDefaultValue });
+// })

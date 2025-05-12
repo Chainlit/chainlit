@@ -8,7 +8,6 @@ interface MessagesState {
   elements: IMessageElement[];
   taskList: ITasklistElement[];
   actions: IAction[];
-  chatInputs: any[];
   tokenCount: number;
 
   setMessages: (setterFnOrItems: ((old: IStep[]) => IStep[]) | IStep[]) => void;
@@ -25,7 +24,6 @@ interface MessagesState {
   setActions: (
     setterFnOrItems: ((old: IAction[]) => IAction[]) | IAction[]
   ) => void;
-  setChatInputs: (chatInputs: any[]) => void;
   setTokenCount: (setterFnOrCount: ((old: number) => number) | number) => void;
 }
 
@@ -34,7 +32,6 @@ export const useMessagesStore = create<MessagesState>((set) => ({
   elements: [],
   taskList: [],
   actions: [],
-  chatInputs: [],
   tokenCount: 0,
 
   setMessages: (setterFnOrItems) => {
@@ -51,10 +48,6 @@ export const useMessagesStore = create<MessagesState>((set) => ({
 
   setActions: (actions) => {
     stateOrSetter(set, 'actions', actions);
-  },
-
-  setChatInputs: (chatInputs) => {
-    set({ chatInputs });
   },
 
   setTokenCount: (tokenCount) => {
