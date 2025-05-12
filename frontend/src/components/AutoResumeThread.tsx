@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
-  resumeThreadErrorState,
   useChatInteract,
   useChatSession,
-  useConfig
+  useConfig,
+  useThreadStore
 } from '@chainlit/react-client';
 
 interface Props {
@@ -19,8 +18,9 @@ export default function AutoResumeThread({ id }: Props) {
   const { config } = useConfig();
   const { clear, setIdToResume } = useChatInteract();
   const { session, idToResume } = useChatSession();
-  const [resumeThreadError, setResumeThreadError] = useRecoilState(
-    resumeThreadErrorState
+  const resumeThreadError = useThreadStore((state) => state.resumeThreadError);
+  const setResumeThreadError = useThreadStore(
+    (state) => state.setResumeThreadError
   );
 
   useEffect(() => {

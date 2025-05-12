@@ -1,13 +1,8 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { MessageCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useCallback, useContext, useState } from 'react';
-import { useRecoilValue } from 'recoil';
 
-import {
-  IStep,
-  firstUserInteraction,
-  useChatSession
-} from '@chainlit/react-client';
+import { IStep, useChatSession, useUserState } from '@chainlit/react-client';
 
 import Translator from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
@@ -42,7 +37,8 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
   );
   const [showDialog, setShowDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
-  const firstInteraction = useRecoilValue(firstUserInteraction);
+  const firstInteraction = useUserState((state) => state.firstUserInteraction);
+
   const { idToResume } = useChatSession();
 
   if (!showFeedbackButtons) {

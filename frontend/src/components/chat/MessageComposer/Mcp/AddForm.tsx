@@ -1,11 +1,10 @@
 import { useContext, useState } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
-  mcpState,
-  sessionIdState
+  useMcpStore,
+  useSessionState
 } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
@@ -34,8 +33,8 @@ export const McpAddForm = ({
   allowSse
 }: McpAddFormProps) => {
   const apiClient = useContext(ChainlitContext);
-  const sessionId = useRecoilValue(sessionIdState);
-  const setMcps = useSetRecoilState(mcpState);
+  const sessionId = useSessionState((state) => state.sessionId);
+  const setMcps = useMcpStore((state) => state.setMcps);
 
   const [serverName, setServerName] = useState('');
   const [serverType, setServerType] = useState<'stdio' | 'sse'>(

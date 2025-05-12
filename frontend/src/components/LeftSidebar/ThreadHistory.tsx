@@ -1,11 +1,10 @@
 import { uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
 
 import {
   ChainlitContext,
-  threadHistoryState,
+  useAuthStore,
   useChatMessages
 } from '@chainlit/react-client';
 
@@ -25,7 +24,9 @@ export function ThreadHistory() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const apiClient = useContext(ChainlitContext);
   const { firstInteraction, messages, threadId } = useChatMessages();
-  const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
+  const threadHistory = useAuthStore((state) => state.threadHistory);
+  const setThreadHistory = useAuthStore((state) => state.setThreadHistory);
+
   const [error, setError] = useState<string>();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);

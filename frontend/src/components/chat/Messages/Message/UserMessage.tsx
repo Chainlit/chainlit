@@ -1,13 +1,12 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useMemo, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
 
 import {
   IMessageElement,
   IStep,
-  messagesState,
-  useChatInteract
+  useChatInteract,
+  useMessagesStore
 } from '@chainlit/react-client';
 
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
@@ -29,7 +28,8 @@ export default function UserMessage({
 }: React.PropsWithChildren<Props>) {
   const { askUser, loading, editable } = useContext(MessageContext);
   const { editMessage } = useChatInteract();
-  const setMessages = useSetRecoilState(messagesState);
+  const setMessages = useMessagesStore((state) => state.setMessages);
+
   const disabled = loading || !!askUser;
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');

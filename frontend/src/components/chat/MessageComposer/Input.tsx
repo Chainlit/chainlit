@@ -6,9 +6,8 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { useRecoilValue } from 'recoil';
 
-import { ICommand, commandsState } from '@chainlit/react-client';
+import { ICommand, useChatStore } from '@chainlit/react-client';
 
 import Icon from '@/components/Icon';
 import {
@@ -58,7 +57,7 @@ const Input = forwardRef<InputMethods, Props>(
     },
     ref
   ) => {
-    const commands = useRecoilValue(commandsState);
+    const commands = useChatStore((s) => s.commands);
     const [isComposing, setIsComposing] = useState(false);
     const [showCommands, setShowCommands] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);

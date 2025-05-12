@@ -1,12 +1,11 @@
 import { MessageContext } from 'contexts/MessageContext';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
   type IAction,
-  sessionIdState
+  useSessionState
 } from '@chainlit/react-client';
 
 import Icon from '@/components/Icon';
@@ -26,7 +25,7 @@ interface ActionProps {
 const ActionButton = ({ action }: ActionProps) => {
   const { loading, askUser } = useContext(MessageContext);
   const apiClient = useContext(ChainlitContext);
-  const sessionId = useRecoilValue(sessionIdState);
+  const sessionId = useSessionState((state) => state.sessionId);
   const [isRunning, setIsRunning] = useState(false);
 
   const content = useMemo(() => {

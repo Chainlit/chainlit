@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 
 import Page from 'pages/Page';
 
 import {
-  threadHistoryState,
+  useAuthStore,
   useChatMessages,
   useConfig
 } from '@chainlit/react-client';
@@ -19,17 +18,16 @@ export default function ThreadPage() {
   const { id } = useParams();
   const { config } = useConfig();
 
-  const setThreadHistory = useSetRecoilState(threadHistoryState);
+  const threadHistory = useAuthStore((state) => state.threadHistory);
+  const setThreadHistory = useAuthStore((state) => state.setThreadHistory);
 
   const { threadId } = useChatMessages();
 
   const isCurrentThread = threadId === id;
 
   useEffect(() => {
-    setThreadHistory((prev) => {
-      if (prev?.currentThreadId === id) return prev;
-      return { ...prev, currentThreadId: id };
-    });
+    if (threadHistory?.currentThreadId === id) return;
+    setThreadHistory({ currentThreadId: id });
   }, [id]);
 
   return (
