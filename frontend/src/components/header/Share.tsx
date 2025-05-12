@@ -1,5 +1,5 @@
 import { hasMessage } from '@/lib/utils';
-import { Share2 } from 'lucide-react';
+import { Share } from 'lucide-react';
 import { useContext, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
@@ -98,7 +98,7 @@ export default function ShareButton() {
               className="text-muted-foreground hover:text-muted-foreground"
               onClick={() => setIsOpen(true)}
             >
-              <Share2 className="!size-4" />
+              <Share className="!size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
