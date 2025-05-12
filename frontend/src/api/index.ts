@@ -25,6 +25,7 @@ const onError = (error: ClientError) => {
 export const apiClient = new ChainlitAPI(
   httpEndpoint,
   'webapp',
+  {}, // Optional - additionalQueryParams property.
   on401,
   onError
 );

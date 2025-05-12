@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 
 # ruff: noqa: E402
 # Keep this here to ensure imports have environment available.
-env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+env_file = os.getenv("CHAINLIT_ENV_FILE", ".env")
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), env_file))
 
 from chainlit.logger import logger
 
 if env_found:
-    logger.info("Loaded .env file")
+    logger.info(f"Loaded {env_file} file")
 
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
@@ -60,6 +61,8 @@ from .callbacks import (
     data_layer,
     header_auth_callback,
     oauth_callback,
+    on_app_shutdown,
+    on_app_startup,
     on_audio_chunk,
     on_audio_end,
     on_audio_start,
@@ -169,6 +172,8 @@ __all__ = [
     "instrument_openai",
     "make_async",
     "oauth_callback",
+    "on_app_shutdown",
+    "on_app_startup",
     "on_audio_chunk",
     "on_audio_end",
     "on_audio_start",

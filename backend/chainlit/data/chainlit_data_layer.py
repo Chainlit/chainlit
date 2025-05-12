@@ -14,6 +14,7 @@ from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.types import (
     Feedback,
+    FeedbackDict,
     PageInfo,
     PaginatedResponse,
     Pagination,
@@ -483,10 +484,14 @@ class ChainlitDataLayer(BaseDataLayer):
 
         thread = results[0]
 
-        # Get steps
+        # Get steps and related feedback
         steps_query = """
-        SELECT * FROM "Step" 
-        WHERE "threadId" = $1 
+        SELECT  s.*, 
+                f.id feedback_id, 
+                f.value feedback_value, 
+                f."comment" feedback_comment
+        FROM "Step" s left join "Feedback" f on s.id = f."stepId"
+        WHERE s."threadId" = $1
         ORDER BY "startTime"
         """
         steps_results = await self.execute_query(steps_query, {"thread_id": thread_id})
@@ -565,6 +570,16 @@ class ChainlitDataLayer(BaseDataLayer):
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
 
+    def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
+        if row["feedback_id"] is not None:
+            return FeedbackDict(
+                forId=row["id"],
+                id=row["feedback_id"],
+                value=row["feedback_value"],
+                comment=row["feedback_comment"],
+            )
+        return None
+
     def _convert_step_row_to_dict(self, row: Dict) -> StepDict:
         return StepDict(
             id=str(row["id"]),
@@ -580,6 +595,7 @@ class ChainlitDataLayer(BaseDataLayer):
             showInput=row.get("showInput"),
             isError=row.get("isError"),
             end=row["endTime"].isoformat() if row.get("endTime") else None,
+            feedback=self._extract_feedback_dict_from_step_row(row),
         )
 
     def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:

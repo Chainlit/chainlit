@@ -1,11 +1,10 @@
-import base64
 from typing import Any, Dict, Union
 
 from google.cloud import storage  # type: ignore
 from google.oauth2 import service_account
 
 from chainlit import make_async
-from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
 from chainlit.logger import logger
 
 
@@ -13,8 +12,7 @@ class GCSStorageClient(BaseStorageClient):
     def __init__(
         self, project_id: str, client_email: str, private_key: str, bucket_name: str
     ):
-        private_key = base64.b64decode(private_key).decode("utf-8")
-
+        # Go to IAM & Admin, click on Service Accounts, and generate a new JSON key
         credentials = service_account.Credentials.from_service_account_info(
             {
                 "type": "service_account",
@@ -31,7 +29,7 @@ class GCSStorageClient(BaseStorageClient):
 
     def sync_get_read_url(self, object_key: str) -> str:
         return self.bucket.blob(object_key).generate_signed_url(
-            version="v4", expiration=EXPIRY_TIME, method="GET"
+            version="v4", expiration=storage_expiry_time, method="GET"
         )
 
     async def get_read_url(self, object_key: str) -> str:
@@ -59,7 +57,7 @@ class GCSStorageClient(BaseStorageClient):
 
             return {
                 "object_key": object_key,
-                "url": f"gs://{self.bucket.name}/{object_key}",
+                "url": f"https://storage.googleapis.com/{self.bucket.name}/{object_key}",
             }
 
         except Exception as e:

@@ -3,4 +3,5 @@ export interface ICommand {
   icon: string;
   description: string;
   button?: boolean;
+  persistent?: boolean;
 }
