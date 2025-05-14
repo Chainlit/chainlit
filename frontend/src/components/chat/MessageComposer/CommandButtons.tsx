@@ -50,7 +50,9 @@ export const CommandButtons = ({
                 }
               >
                 <Icon name={command.icon} className="!h-5 !w-5" />
-                {command.id}
+                <span className="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap flex-shrink md:flex-shrink-0 transition-all duration-200 max-sm:hidden">
+                  {command.id}
+                </span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
