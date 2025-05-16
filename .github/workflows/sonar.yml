@@ -1,0 +1,22 @@
+name: SonarQube Scan
+description: SonarQube Scan for PRs and main branch
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  
+permissions:
+  id-token: write   
+  contents: write
+
+jobs:
+  sonar:
+   runs-on: org-runner
+   steps:
+      - name: SonarQube Scan
+        uses: AngelOneWealth/ci-common/.github/actions/sonarQube@main
+        with:
+           sonar-host : ${{ github.ref == 'refs/heads/gamma' && vars.SONAR_QUBE_HOST || vars.SONAR_QUBE_DEV_HOST }}
+           sonar-token: ${{ secrets.SONAR_QUBE_ORG_TOKEN }}
