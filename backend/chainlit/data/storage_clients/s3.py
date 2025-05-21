@@ -3,7 +3,7 @@ from typing import Any, Dict, Union
 import boto3  # type: ignore
 
 from chainlit import make_async
-from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
 from chainlit.logger import logger
 
 
@@ -25,7 +25,7 @@ class S3StorageClient(BaseStorageClient):
             url = self.client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket, "Key": object_key},
-                ExpiresIn=EXPIRY_TIME,
+                ExpiresIn=storage_expiry_time,
             )
             return url
         except Exception as e:

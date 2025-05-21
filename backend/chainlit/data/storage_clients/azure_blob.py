@@ -4,7 +4,7 @@ from typing import Any, Dict, Union
 from azure.storage.blob import BlobSasPermissions, ContentSettings, generate_blob_sas
 from azure.storage.blob.aio import BlobServiceClient as AsyncBlobServiceClient
 
-from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
 from chainlit.logger import logger
 
 
@@ -33,7 +33,7 @@ class AzureBlobStorageClient(BaseStorageClient):
 
         sas_permissions = BlobSasPermissions(read=True)
         start_time = datetime.now(tz=timezone.utc)
-        expiry_time = start_time + timedelta(seconds=EXPIRY_TIME)
+        expiry_time = start_time + timedelta(seconds=storage_expiry_time)
 
         sas_token = generate_blob_sas(
             account_name=self.storage_account,

@@ -94,7 +94,7 @@ const useChatSession = () => {
   }, [currentThreadId]);
 
   const _connect = useCallback(
-    ({
+    async ({
       transports,
       userEnv
     }: {
@@ -107,6 +107,12 @@ const useChatSession = () => {
         pathname && pathname !== '/'
           ? `${pathname}/ws/socket.io`
           : '/ws/socket.io';
+
+      try {
+        await client.stickyCookie(sessionId);
+      } catch (err) {
+        console.error(`Failed to set sticky session cookie: ${err}`);
+      }
 
       const socket = io(uri, {
         path,
