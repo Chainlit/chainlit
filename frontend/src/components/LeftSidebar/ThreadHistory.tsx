@@ -92,11 +92,10 @@ export function ThreadHistory() {
       );
 
       if (allThreads) {
-        setThreadHistory((prev) => ({
-          ...prev,
+        setThreadHistory({
           pageInfo,
           threads: allThreads
-        }));
+        });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
