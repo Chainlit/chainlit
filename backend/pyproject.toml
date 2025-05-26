@@ -1,6 +1,7 @@
 [tool.poetry]
-name = "chainlit"
-version = "2.5.5"
+name = "chainlit-chandru20"
+version = "2.5.6"
+packages = [{include = "chainlit"}]
 keywords = [
     'LLM',
     'Agents',
@@ -13,8 +14,8 @@ keywords = [
     'langchain',
     'conversational ai',
 ]
-description = "Build Conversational AI."
-authors = ["Willy Douhard", "Dan Andre Constantini"]
+description = "Build Conversational AI. (Fork with element sidebar toggle fix)"
+authors = ["Willy Douhard", "Dan Andre Constantini", "chandru20"]
 license = "Apache-2.0"
 homepage = "https://chainlit.io/"
 documentation = "https://docs.chainlit.io/"
@@ -27,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Environment :: Web Environment"
 ]
-repository = "https://github.com/Chainlit/chainlit"
+repository = "https://github.com/chandru20/chainlit"
 readme = "README.md"
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
 include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
