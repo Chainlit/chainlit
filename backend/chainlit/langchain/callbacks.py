@@ -447,14 +447,28 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
         if start["tt_first_token"] is None:
             start["tt_first_token"] = (time.time() - start["start"]) * 1000
 
+        # Process token to ensure it's a string, as strip() will be called on it.
+        processed_token: str
+        # Handle case where token is a list (can occur with some model outputs).
+        # Join all elements into a single string to maintain compatibility with downstream processing.
+        if isinstance(token, list):
+            # If token is a list, join its elements (converted to strings) into a single string.
+            processed_token = "".join(map(str, token))
+        elif not isinstance(token, str):
+            # If token is neither a list nor a string, convert it to a string.
+            processed_token = str(token)
+        else:
+            # If token is already a string, use it as is.
+            processed_token = token
+
         if self.stream_final_answer:
-            self._append_to_last_tokens(token)
+            self._append_to_last_tokens(processed_token)
 
             if self.answer_reached:
                 if not self.final_stream:
                     self.final_stream = Message(content="")
                     await self.final_stream.send()
-                await self.final_stream.stream_token(token)
+                await self.final_stream.stream_token(processed_token)
                 self.has_streamed_final_answer = True
             else:
                 self.answer_reached = self._check_if_answer_reached()
