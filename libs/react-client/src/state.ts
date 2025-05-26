@@ -210,6 +210,11 @@ export const sideViewState = atom<
   default: undefined
 });
 
+export const elementSidebarVisibilityState = atom<boolean>({
+  key: 'ElementSidebarVisibility',
+  default: false
+});
+
 export const currentThreadIdState = atom<string | undefined>({
   key: 'CurrentThreadId',
   default: undefined
