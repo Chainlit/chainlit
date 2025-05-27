@@ -44,15 +44,10 @@ class MessageBase(ABC):
     language: Optional[str] = None
     metadata: Optional[Dict] = None
     tags: Optional[List[str]] = None
-    custom_widgets: Optional[Dict[str, Any]] = None # Added custom_widgets
     wait_for_answer = False
 
     def __post_init__(self) -> None:
         self.thread_id = context.session.thread_id
-
-        # Populate custom_widgets from metadata if metadata exists
-        if self.metadata and "custom_widgets" in self.metadata:
-            self.custom_widgets = self.metadata["custom_widgets"]
 
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
@@ -65,7 +60,7 @@ class MessageBase(ABC):
     @classmethod
     def from_dict(self, _dict: StepDict):
         type = _dict.get("type", "assistant_message")
-        instance = Message( # Changed to instance = Message(...)
+        return Message(
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
@@ -76,10 +71,6 @@ class MessageBase(ABC):
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
         )
-        # Populate custom_widgets from metadata after instance creation
-        if instance.metadata and "custom_widgets" in instance.metadata:
-            instance.custom_widgets = instance.metadata["custom_widgets"]
-        return instance
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {
@@ -268,10 +259,6 @@ class Message(MessageBase):
         self.elements = elements if elements is not None else []
 
         super().__post_init__()
-
-        # Also populate custom_widgets in __init__ for direct instantiations
-        if self.metadata and "custom_widgets" in self.metadata:
-            self.custom_widgets = self.metadata["custom_widgets"]
 
     async def send(self):
         """

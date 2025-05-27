@@ -13,8 +13,6 @@ from chainlit.auth import (
 )
 from chainlit.chat_context import chat_context
 from chainlit.config import config
-from chainlit.custom_widgets import COMPOSER_WIDGETS_CONFIG
-from chainlit.element import CustomElement
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -189,20 +187,6 @@ async def connection_successful(sid):
             return
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
-
-    # Send custom input widgets
-    for widget_config in COMPOSER_WIDGETS_CONFIG:
-        element = CustomElement(
-            thread_id=context.session.thread_id,
-            name=widget_config["name"],
-            display=widget_config["display"],
-            props=widget_config["props"],
-            type=widget_config["type"], # Make sure type is passed
-        )
-        # The CustomElement class should ideally handle its own ID.
-        # If props["id"] is meant to be the HTML ID, it's correctly in props.
-        # element.id = widget_config["props"]["id"] # This would override the element's unique ID, which might not be intended.
-        await element.send(for_id="COMPOSER_WIDGET", persist=False)
 
     if config.code.on_chat_start:
         task = asyncio.create_task(config.code.on_chat_start())
