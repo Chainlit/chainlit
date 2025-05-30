@@ -1,14 +1,32 @@
-import { NotificationCountProps } from './NotificationCount';
+export type InputWidgetType =
+  | 'switch'
+  | 'slider'
+  | 'select'
+  | 'textinput'
+  | 'numberinput'
+  | 'tags';
 
-interface IInput {
-  className?: string;
-  description?: string;
-  disabled?: boolean;
-  hasError?: boolean;
-  id: string;
-  label?: string;
-  notificationsProps?: NotificationCountProps;
-  tooltip?: string;
+export interface IInputItem {
+  label: string;
+  value: string;
 }
 
-export type { IInput };
+export interface IInputWidget {
+  type: InputWidgetType;
+  id: string;
+  label: string;
+  initial?: any;
+  tooltip?: string;
+  description?: string;
+  // Slider specific
+  min?: number;
+  max?: number;
+  step?: number;
+  // Select specific
+  items?: IInputItem[];
+  // TextInput specific
+  placeholder?: string;
+  multiline?: boolean;
+  // Tags specific
+  // initial?: string[]; // Already covered by initial?: any;
+}

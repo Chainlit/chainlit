@@ -13,6 +13,7 @@ import {
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
+import InputWidgetsBar from '@/components/InputWidgetsBar';
 
 import { chatSettingsOpenState } from '@/state/project';
 import {
@@ -200,6 +201,9 @@ export default function MessageComposer({
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
+        </div>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <InputWidgetsBar />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton

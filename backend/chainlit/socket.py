@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import json
 from typing import Any, Dict, Literal, Optional, Tuple, Union
 from urllib.parse import unquote
@@ -379,3 +380,36 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@sio.on("input_widget_change")  # pyright: ignore [reportOptionalCall]
+async def on_input_widget_change(sid, data):
+    """Handle a widget value change from the client."""
+    widget_id = None  # Initialize widget_id to None for broader scope in error logging
+    try:
+        context = init_ws_context(sid)
+
+        widget_id = data.get("id")
+        new_value = data.get("value")
+
+        if not widget_id:
+            logger.warning("Received input_widget_change event without widget_id")
+            return
+
+        callbacks = getattr(context.session, "input_widget_callbacks", {})
+        callback = callbacks.get(widget_id)
+
+        if callback:
+            if inspect.iscoroutinefunction(callback):
+                await callback(new_value)
+            else:
+                callback(new_value)
+            logger.debug(
+                f"Executed on_change for widget {widget_id} with value {new_value}"
+            )
+        else:
+            logger.warning(f"No on_change callback found for widget {widget_id}")
+    except Exception as e:
+        logger.error(
+            f"Error processing input_widget_change for {widget_id}: {e}", exc_info=True
+        )

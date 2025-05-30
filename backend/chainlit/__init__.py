@@ -18,7 +18,15 @@ from typing import TYPE_CHECKING, Any, Dict
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from pydantic.dataclasses import dataclass
 
-import chainlit.input_widget as input_widget
+from chainlit.input_widget import ( # Added specific imports
+    InputWidget,
+    Slider,
+    Select,
+    Switch,
+    TextInput,
+    NumberInput,
+    Tags,
+)
 from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
@@ -55,6 +63,7 @@ from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
 from chainlit.version import __version__
+from chainlit.input_bar import InputBar
 
 from .callbacks import (
     action_callback,
@@ -142,6 +151,14 @@ __all__ = [
     "ElementSidebar",
     "ErrorMessage",
     "File",
+    "InputBar",
+    "InputWidget", # Added
+    "Slider", # Added
+    "Select", # Added
+    "Switch", # Added
+    "TextInput", # Added
+    "NumberInput", # Added
+    "Tags", # Added
     "GenerationMessage",
     "Image",
     "InputAudioChunk",
@@ -170,7 +187,7 @@ __all__ = [
     "context",
     "data_layer",
     "header_auth_callback",
-    "input_widget",
+    # "input_widget", # Removed module export, replaced by class exports
     "instrument_mistralai",
     "instrument_openai",
     "make_async",

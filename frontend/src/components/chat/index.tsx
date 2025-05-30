@@ -25,6 +25,7 @@ import { IAttachment, attachmentsState } from 'state/chat';
 
 import { ErrorBoundary } from '../ErrorBoundary';
 import ChatFooter from './Footer';
+import InputWidgetsBar from '@/components/InputWidgetsBar'; // Added import
 import MessagesContainer from './MessagesContainer';
 import ScrollContainer from './ScrollContainer';
 import WelcomeScreen from './WelcomeScreen';
