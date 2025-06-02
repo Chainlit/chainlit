@@ -59,7 +59,7 @@ export default function Login() {
     formData.append('password', password);
 
     const jsonPromise = apiClient.passwordAuth(formData);
-    handleAuth(jsonPromise);
+    await handleAuth(jsonPromise);
   };
 
   useEffect(() => {
