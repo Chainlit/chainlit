@@ -16,14 +16,14 @@ export const useUserManagement = () => {
 
   useEffect(() => {
     if (userData) {
+      console.log('[useUserManagement] A');
       setUser(userData);
-    } else if (isLoading) {
-      setUser(undefined);
     }
   }, [userData, isLoading, setUser]);
 
   useEffect(() => {
     if (error) {
+      console.log('[useUserManagement] C');
       setUser(null);
     }
   }, [error]);
