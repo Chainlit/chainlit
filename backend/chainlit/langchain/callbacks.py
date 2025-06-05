@@ -546,12 +546,10 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
         )
         step.start = utc_now()
-        if step.metadata is None:
-            step.metadata = {}
         if step_type != "llm":
             step.input, language = process_content(run.inputs)
             if language is not None:
-                step.metadata["language"] = language
+                step.language = language
 
         step.tags = run.tags
         self.steps[str(run.id)] = step
