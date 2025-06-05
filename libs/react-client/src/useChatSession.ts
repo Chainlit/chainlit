@@ -29,6 +29,7 @@ import {
   sessionState,
   sideViewState,
   tasklistState,
+  threadHistoryState,
   threadIdToResumeState,
   tokenCountState,
   wavRecorderState,
@@ -82,6 +83,7 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+  const setThreadHistory = useSetRecoilState(threadHistoryState);
 
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
@@ -445,6 +447,25 @@ const useChatSession = () => {
             break;
         }
       });
+
+      // listen to thread_renamed event
+      socket.on(
+        'thread_renamed',
+        (data: { thread_id: string; new_name: string }) => {
+          setThreadHistory((prev) => {
+            if (!prev?.threads) return prev;
+            const updatedThreads = prev.threads.map((thread) =>
+              thread.id === data.thread_id
+                ? { ...thread, name: data.new_name }
+                : thread
+            );
+            return {
+              ...prev,
+              threads: updatedThreads
+            };
+          });
+        }
+      );
     },
     [setSession, sessionId, idToResume, chatProfile]
   );
