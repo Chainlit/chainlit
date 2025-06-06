@@ -1,0 +1,20 @@
+name: PR Sonar Scan
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  sonarcloud-scan:
+    uses: AngelOneWealth/ci-common/.github/workflows/sonar-scan.yml@main
+    with:
+      pull-request-key: ${{ github.event.pull_request.number }}
+      pull-request-branch: ${{ github.head_ref }}
+      pull-request-base: ${{ github.base_ref }}
+      scm-revision: ${{ github.event.pull_request.head.sha }}
+    secrets:
+      SONAR_QUBE_ORG_TOKEN: ${{ secrets.SONAR_QUBE_ORG_TOKEN }}
