@@ -179,24 +179,33 @@ const ReadOnlyThread = ({ id }: Props) => {
   }
 
   return (
-    <div className="flex w-full flex-col flex-grow relative overflow-y-auto">
-      <ErrorBoundary>
-        <MessageContext.Provider value={memoizedContext}>
-          <div
-            className="flex flex-col mx-auto w-full flex-grow p-4"
-            style={{
-              maxWidth: layoutMaxWidth
-            }}
-          >
-            <Messages
-              indent={0}
-              messages={messages}
-              elements={elements as any}
-              actions={actions}
-            />
-          </div>
-        </MessageContext.Provider>
-      </ErrorBoundary>
+    <div className="flex-1">
+      <div className="flex w-full flex-col flex-grow relative overflow-y-auto">
+        <ErrorBoundary>
+          <MessageContext.Provider value={memoizedContext}>
+            <div
+              className="flex flex-col mx-auto w-full flex-grow p-4"
+              style={{
+                maxWidth: layoutMaxWidth
+              }}
+            >
+              <Messages
+                indent={0}
+                messages={messages}
+                elements={elements as any}
+                actions={actions}
+              />
+            </div>
+          </MessageContext.Provider>
+        </ErrorBoundary>
+      </div>
+      <div className="px-6 py-6 md:py-12 flex justify-center items-center">
+        <div className="text-center text-sm bg-sidebar text-sidebar-foreground rounded-lg p-5">
+          This session has ended.
+          <br />
+          Continue with your latest session or start a new one.
+        </div>
+      </div>
     </div>
   );
 };
