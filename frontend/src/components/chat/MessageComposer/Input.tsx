@@ -242,7 +242,10 @@ const Input = forwardRef<InputMethods, Props>(
 
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
-          const escapedText = escapeHtml(textData);
+          const normalizedText = textData
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n');
+          const escapedText = escapeHtml(normalizedText);
 
           const htmlToInsert = escapedText.replace(/\n/g, '<br>');
 
