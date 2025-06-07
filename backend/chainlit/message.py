@@ -22,6 +22,7 @@ from chainlit.types import (
     AskActionSpec,
     AskFileResponse,
     AskFileSpec,
+    AskElementResponse,
     AskElementSpec,
     AskSpec,
     FileDict,
@@ -585,7 +586,7 @@ class AskElementMessage(AskMessageBase):
 
         super().__post_init__()
 
-    async def send(self) -> Union[Dict[str, Any], None]:
+    async def send(self) -> Union[AskElementResponse, None]:
         """Send the custom element to the UI and wait for the reply."""
         trace_event("send_ask_element")
 
@@ -612,7 +613,7 @@ class AskElementMessage(AskMessageBase):
         )
 
         res = cast(
-            Union[Dict[str, Any], None],
+            Union[AskElementResponse, None],
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
