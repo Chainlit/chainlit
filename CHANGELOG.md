@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CopilotFunction is now usable in custom JS
 - Header link now have an optional `display_name` to display text next to the icon
 - The default .env file loaded by chainlit is now configurable with `CHAINLIT_ENV_FILE`
+- `cl.AskElementMessage` allows waiting for user submission of a custom element
 
 ### Changed
 

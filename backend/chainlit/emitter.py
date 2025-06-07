@@ -353,6 +353,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
                     action_res = cast(AskActionResponse, user_res)
                     final_res = action_res
                     interaction = action_res["name"]
+                elif spec.type == "element":
+                    final_res = cast(Dict[str, Any], user_res)
+                    interaction = "custom_element"
 
                 if not self.session.has_first_interaction and interaction:
                     self.session.has_first_interaction = True

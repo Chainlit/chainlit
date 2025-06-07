@@ -42,6 +42,7 @@ from chainlit.element import (
 from chainlit.message import (
     AskActionMessage,
     AskFileMessage,
+    AskElementMessage,
     AskUserMessage,
     ErrorMessage,
     Message,
@@ -126,6 +127,7 @@ __all__ = [
     "Action",
     "AskActionMessage",
     "AskFileMessage",
+    "AskElementMessage",
     "AskUserMessage",
     "AsyncLangchainCallbackHandler",
     "Audio",

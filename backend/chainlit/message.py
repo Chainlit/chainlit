@@ -13,7 +13,7 @@ from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
-from chainlit.element import ElementBased
+from chainlit.element import CustomElement, ElementBased
 from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.telemetry import trace_event
@@ -22,6 +22,7 @@ from chainlit.types import (
     AskActionSpec,
     AskFileResponse,
     AskFileSpec,
+    AskElementSpec,
     AskSpec,
     FileDict,
 )
@@ -561,5 +562,60 @@ class AskActionMessage(AskMessageBase):
         self.wait_for_answer = False
 
         await self.update()
+
+        return res
+
+
+class AskElementMessage(AskMessageBase):
+    """Ask the user to submit a custom element."""
+
+    def __init__(
+        self,
+        content: str,
+        element: CustomElement,
+        author=config.ui.name,
+        timeout=90,
+        raise_on_timeout=False,
+    ):
+        self.content = content
+        self.element = element
+        self.author = author
+        self.timeout = timeout
+        self.raise_on_timeout = raise_on_timeout
+
+        super().__post_init__()
+
+    async def send(self) -> Union[Dict[str, Any], None]:
+        """Send the custom element to the UI and wait for the reply."""
+        trace_event("send_ask_element")
+
+        if not self.created_at:
+            self.created_at = utc_now()
+
+        if self.streaming:
+            self.streaming = False
+
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
+        self.wait_for_answer = True
+
+        step_dict = await self._create()
+
+        await self.element.send(for_id=str(step_dict["id"]))
+
+        spec = AskElementSpec(
+            type="element",
+            step_id=step_dict["id"],
+            timeout=self.timeout,
+            element_id=self.element.id,
+        )
+
+        res = cast(
+            Union[Dict[str, Any], None],
+            await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
+        )
+
+        self.wait_for_answer = False
 
         return res
