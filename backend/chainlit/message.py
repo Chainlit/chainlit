@@ -620,8 +620,10 @@ class AskElementMessage(AskMessageBase):
 
         if res is None:
             self.content = "Timed out"
-        else:
+        elif res.get("submitted"):
             self.content = "Thanks for submitting"
+        else:
+            self.content = "Cancelled"
 
         self.wait_for_answer = False
 

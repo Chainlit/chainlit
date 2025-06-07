@@ -87,11 +87,20 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
         askUser?.spec.type === 'element' &&
         askUser.spec.step_id === element.forId
       ) {
-        askUser.callback(props);
+        askUser.callback({ submitted: true, ...props });
       }
     },
     [askUser, element.forId]
   );
+
+  const cancelElement = useCallback(() => {
+    if (
+      askUser?.spec.type === 'element' &&
+      askUser.spec.step_id === element.forId
+    ) {
+      askUser.callback({ submitted: false });
+    }
+  }, [askUser, element.forId]);
 
   const props = useMemo(() => {
     return JSON.parse(JSON.stringify(element.props));
@@ -112,7 +121,8 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
           deleteElement,
           callAction,
           sendUserMessage,
-          submitElement
+          submitElement,
+          cancelElement
         }}
         onRendered={(error) => setError(error?.message)}
       />
