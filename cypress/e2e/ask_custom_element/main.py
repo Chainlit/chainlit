@@ -9,7 +9,7 @@ async def on_start():
         props={
             "timeout": 20,
             "fields": [
-                {"id": "summary", "label": "Summary", "type": "text"},
+                {"id": "summary", "label": "Summary", "type": "text", "required": True},
                 {"id": "description", "label": "Description", "type": "textarea"},
                 {
                     "id": "due",
@@ -22,6 +22,7 @@ async def on_start():
                     "type": "select",
                     "options": ["Low", "Medium", "High"],
                     "value": "Medium",
+                    "required": True,
                 },
             ],
         },

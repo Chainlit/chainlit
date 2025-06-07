@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The default .env file loaded by chainlit is now configurable with `CHAINLIT_ENV_FILE`
 - `cl.AskElementMessage` allows waiting for user submission of a custom element
 - Element answers now include a `submitted` flag and allow canceling the prompt
+- Custom element forms can mark fields as required; the JIRA ticket example now
+  disables submission until mandatory fields are filled
 
 ### Changed
 

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export default function JiraTicket() {
   const [timeLeft, setTimeLeft] = useState(props.timeout || 30);
@@ -15,6 +15,15 @@ export default function JiraTicket() {
     });
     return init;
   });
+
+  const allValid = useMemo(() => {
+    if (!props.fields) return true;
+    return props.fields.every((f) => {
+      if (!f.required) return true;
+      const val = values[f.id];
+      return val !== undefined && val !== '';
+    });
+  }, [props.fields, values]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -65,7 +74,10 @@ export default function JiraTicket() {
       <CardContent className="col-span-2 grid grid-cols-2 gap-4">
         {props.fields.map((field) => (
           <div key={field.id} className="flex flex-col gap-2">
-            <Label htmlFor={field.id}>{field.label}</Label>
+            <Label htmlFor={field.id}>
+              {field.label}
+              {field.required && <span className="text-red-500">*</span>}
+            </Label>
             {renderField(field)}
           </div>
         ))}
@@ -74,7 +86,11 @@ export default function JiraTicket() {
         <Button id="ticket-cancel" variant="outline" onClick={() => cancelElement()}>
           Cancel
         </Button>
-        <Button id="ticket-submit" onClick={() => submitElement({ submitted: true, ...values })}>
+        <Button
+          id="ticket-submit"
+          disabled={!allValid}
+          onClick={() => submitElement({ submitted: true, ...values })}
+        >
           Submit
         </Button>
       </CardFooter>
