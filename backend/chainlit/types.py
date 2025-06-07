@@ -201,6 +201,10 @@ class AskActionResponse(TypedDict):
     id: str
 
 
+class AskElementResponse(TypedDict, total=False):
+    submitted: bool
+
+
 class UpdateThreadRequest(BaseModel):
     threadId: str
     name: str

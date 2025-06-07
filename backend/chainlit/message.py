@@ -3,7 +3,7 @@ import json
 import time
 import uuid
 from abc import ABC
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
 from literalai.helper import utc_now
 from literalai.observability.step import MessageStepType
@@ -20,9 +20,10 @@ from chainlit.telemetry import trace_event
 from chainlit.types import (
     AskActionResponse,
     AskActionSpec,
+    AskElementResponse,
+    AskElementSpec,
     AskFileResponse,
     AskFileSpec,
-    AskElementSpec,
     AskSpec,
     FileDict,
 )
@@ -585,7 +586,7 @@ class AskElementMessage(AskMessageBase):
 
         super().__post_init__()
 
-    async def send(self) -> Union[Dict[str, Any], None]:
+    async def send(self) -> Union[AskElementResponse, None]:
         """Send the custom element to the UI and wait for the reply."""
         trace_event("send_ask_element")
 
@@ -612,7 +613,7 @@ class AskElementMessage(AskMessageBase):
         )
 
         res = cast(
-            Union[Dict[str, Any], None],
+            Union[AskElementResponse, None],
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 

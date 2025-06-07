@@ -87,7 +87,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
         askUser?.spec.type === 'element' &&
         askUser.spec.step_id === element.forId
       ) {
-        askUser.callback({ submitted: true, ...props });
+        askUser.callback({ ...props, submitted: true });
       }
     },
     [askUser, element.forId]

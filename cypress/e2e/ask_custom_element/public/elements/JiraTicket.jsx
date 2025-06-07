@@ -89,7 +89,7 @@ export default function JiraTicket() {
         <Button
           id="ticket-submit"
           disabled={!allValid}
-          onClick={() => submitElement({ submitted: true, ...values })}
+          onClick={() => submitElement(values)}
         >
           Submit
         </Button>
