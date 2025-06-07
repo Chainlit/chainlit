@@ -3,7 +3,7 @@ import json
 import time
 import uuid
 from abc import ABC
-from typing import Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from literalai.helper import utc_now
 from literalai.observability.step import MessageStepType
@@ -616,6 +616,15 @@ class AskElementMessage(AskMessageBase):
             await context.emitter.send_ask_user(step_dict, spec, self.raise_on_timeout),
         )
 
+        await self.element.remove()
+
+        if res is None:
+            self.content = "Timed out"
+        else:
+            self.content = "Thanks for submitting"
+
         self.wait_for_answer = False
+
+        await self.update()
 
         return res
