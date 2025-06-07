@@ -39,7 +39,8 @@ const useChatData = () => {
     !connected ||
     loading ||
     askUser?.spec.type === 'file' ||
-    askUser?.spec.type === 'action';
+    askUser?.spec.type === 'action' ||
+    askUser?.spec.type === 'element';
 
   return {
     actions,

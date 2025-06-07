@@ -125,7 +125,7 @@ class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file", "action"]
+    type: Literal["text", "file", "action", "element"]
     step_id: str
 
 
@@ -138,6 +138,12 @@ class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
 class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user an action"""
 
+
+@dataclass
+class AskElementSpec(AskSpec, DataClassJsonMixin):
+    """Specification for asking the user a custom element"""
+
+    element_id: str
 
 class FileReference(TypedDict):
     id: str
