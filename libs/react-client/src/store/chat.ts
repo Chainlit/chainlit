@@ -17,8 +17,8 @@ interface ChatState {
   sideView?: { title: string; elements: IMessageElement[] };
   chatProfile?: string;
   chatSettingsInputs: any[];
-  chatSettingsDefaultValue: any;
-  chatSettingsValue: any;
+  chatSettingsDefaultValue: Record<any, any>;
+  chatSettingsValue: Record<any, any>;
 
   setIsAiSpeaking: (isAiSpeaking: boolean) => void;
   setAudioConnection: (audioConnection: 'connecting' | 'on' | 'off') => void;
@@ -42,7 +42,7 @@ interface ChatState {
   ) => void;
   setChatProfile: (chatProfile: string) => void;
   setChatSettingsInputs: (chatSettingsInputs: any[]) => void;
-  setChatSettingsValue: (chatSettingsValue: any) => void;
+  setChatSettingsValue: (chatSettingsValue: Record<any, any>) => void;
   resetChatSettingsInputs: () => void;
   resetChatSettingsValue: () => void;
 }
@@ -55,8 +55,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   wavRecorder: new WavRecorder(),
   commands: [],
   chatSettingsInputs: [],
-  chatSettingsValue: [],
-  chatSettingsDefaultValue: [],
+  chatSettingsValue: {},
+  chatSettingsDefaultValue: {},
 
   setIsAiSpeaking: (isAiSpeaking) => {
     set({ isAiSpeaking });
@@ -87,7 +87,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   setChatSettingsInputs: (chatSettingsInputs) => {
-    set({ chatSettingsInputs });
+    // Collect default values of all inputs
+    const chatSettingsDefaultValue = chatSettingsInputs.reduce(
+      (form: { [key: string]: any }, input: any) => (
+        (form[input.id] = input.initial), form
+      ),
+      {}
+    );
+
+    set({ chatSettingsInputs, chatSettingsDefaultValue });
   },
 
   setChatSettingsValue: (chatSettingsValue) => {
@@ -109,14 +117,3 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ chatSettingsValue });
   }
 }));
-
-// useChatStore.subscribe((state, prevState) => {
-//   const chatSettingsDefaultValue = state.chatSettingsInputs.reduce(
-//     (form: { [key: string]: any }, input: any) => (
-//       (form[input.id] = input.initial), form
-//     ),
-//     {}
-//   );
-//
-//   useChatStore.setState({chatSettingsDefaultValue });
-// })
