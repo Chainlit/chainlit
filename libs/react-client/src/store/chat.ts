@@ -42,7 +42,7 @@ interface ChatState {
   ) => void;
   setChatProfile: (chatProfile: string) => void;
   setChatSettingsInputs: (chatSettingsInputs: any[]) => void;
-  setChatSettingsValue: (chatSettingsValue: Record<any, any>) => void;
+  setChatSettingsValue: (chatSettingsValue: Partial<Record<any, any>>) => void;
   resetChatSettingsInputs: () => void;
   resetChatSettingsValue: () => void;
 }
@@ -98,8 +98,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ chatSettingsInputs, chatSettingsDefaultValue });
   },
 
-  setChatSettingsValue: (chatSettingsValue) => {
-    set({ chatSettingsValue });
+  setChatSettingsValue: (newValue) => {
+    set(({ chatSettingsValue }) => ({
+      chatSettingsValue: { ...chatSettingsValue, newValue }
+    }));
   },
 
   resetChatSettingsInputs: () => {
