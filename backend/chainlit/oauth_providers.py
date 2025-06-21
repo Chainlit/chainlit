@@ -821,12 +821,13 @@ class ZitadelOAuthProvider(OAuthProvider):
         self.client_id = os.environ.get("OAUTH_ZITADEL_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_ZITADEL_CLIENT_SECRET")
         self.base_url = os.environ.get("OAUTH_ZITADEL_BASE_URL")
-        self.authorize_url = (
-            f"{self.base_url}/oauth/v2/authorize"
-        )
+
+        self.authorize_url = f"{self.base_url}/oauth/v2/authorize"
+        self.token_url = f"{self.base_url}/oauth/v2/token"
+        self.userinfo_url = f"{self.base_url}/oidc/v1/userinfo"
 
         self.authorize_params = {
-            "scope": "profile email openid",
+            "scope": "openid profile email",
             "response_type": "code",
         }
 
@@ -864,12 +865,19 @@ class ZitadelOAuthProvider(OAuthProvider):
                 headers={"Authorization": f"Bearer {token}"},
             )
             response.raise_for_status()
-            kc_user = response.json()
+            zitadel_user = response.json()
             user = User(
-                identifier=kc_user["email"],
-                metadata={"provider": "zitadel"},
+                identifier=zitadel_user["email"],
+                metadata={
+                    "provider": "zitadel",
+                    "sub": zitadel_user.get("sub"),
+                    "name": zitadel_user.get("name"),
+                    "given_name": zitadel_user.get("given_name"),
+                    "family_name": zitadel_user.get("family_name"),
+                    "preferred_username": zitadel_user.get("preferred_username"),
+                },
             )
-            return (kc_user, user)
+            return (zitadel_user, user)
         
 
 providers = [
