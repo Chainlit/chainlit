@@ -47,7 +47,7 @@ class S3StorageClient(BaseStorageClient):
             self.client.put_object(
                 Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime
             )
-            url = f"https://{self.bucket}.s3.{os.environ["DEV_AWS_ENDPOINT"]}/{object_key}"
+            url = f"https://{self.bucket}.s3.{os.environ.get("DEV_AWS_ENDPOINT", "amazonaws.com")}/{object_key}"
             return {"object_key": object_key, "url": url}
         except Exception as e:
             logger.warn(f"S3StorageClient, upload_file error: {e}")
