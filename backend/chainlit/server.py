@@ -71,6 +71,14 @@ from chainlit.types import (
 )
 from chainlit.user import PersistedUser, User
 
+# Google OAuth Integration imports
+import os
+import logging
+from typing import Optional
+
+# Add this after the existing imports section
+logger = logging.getLogger(__name__)
+
 from ._utils import is_path_inside
 
 mimetypes.add_type("application/javascript", ".js")
@@ -1490,6 +1498,71 @@ def status_check():
     """Check if the site is operational."""
     return {"message": "Site is operational"}
 
+# ============================================================
+# --- GENERIC OAUTH CALLBACK ROUTE ---
+# ============================================================
+
+@router.get("/auth/{provider}/callback")
+async def generic_oauth_callback(provider: str, request: Request):
+    """
+    Generic OAuth callback handler that delegates to client application.
+    This route must be registered before the catch-all route.
+
+    Supports any OAuth provider (google, github, microsoft, etc.)
+    Client applications can register handlers via config.code.oauth_external_callback
+    """
+    logger.info(f"OAuth Callback triggered for provider '{provider}'. URL: {request.url}")
+
+    try:
+        # Get standard OAuth parameters
+        code = request.query_params.get("code")
+        state = request.query_params.get("state")
+        error = request.query_params.get("error")
+
+        # Basic validation
+        if error:
+            logger.error(f"OAuth error for provider '{provider}': {error}")
+            return RedirectResponse(url=f"/?error=oauth_failed&provider={provider}")
+
+        if not code:
+            logger.error(f"No authorization code received for provider '{provider}'")
+            return RedirectResponse(url=f"/?error=no_code&provider={provider}")
+
+        if not state:
+            logger.error(f"No state token received for provider '{provider}'")
+            return RedirectResponse(url=f"/?error=no_state&provider={provider}")
+
+        # Check if client application has registered an external OAuth handler
+        if hasattr(config.code, 'oauth_external_callback') and config.code.oauth_external_callback:
+            try:
+                # Call the client's OAuth handler with all the information
+                result = await config.code.oauth_external_callback(
+                    provider=provider,
+                    code=code,
+                    state=state,
+                    request=request,
+                    query_params=dict(request.query_params)
+                )
+
+                # Client handler should return a Response object or redirect URL
+                if isinstance(result, str):
+                    return RedirectResponse(url=result)
+                elif hasattr(result, 'status_code'):  # It's a Response object
+                    return result
+                else:
+                    logger.error(f"Invalid return type from oauth_external_callback: {type(result)}")
+                    return RedirectResponse(url=f"/?error=handler_error&provider={provider}")
+
+            except Exception as handler_err:
+                logger.error(f"Client OAuth handler failed for provider '{provider}': {handler_err}", exc_info=True)
+                return RedirectResponse(url=f"/?error=handler_exception&provider={provider}")
+        else:
+            logger.warning(f"No external OAuth handler registered for provider '{provider}'")
+            return RedirectResponse(url=f"/?error=no_handler&provider={provider}")
+
+    except Exception as e:
+        logger.error(f"Error in OAuth callback for provider '{provider}': {e}", exc_info=True)
+        return RedirectResponse(url=f"/?error=callback_error&provider={provider}")
 
 @router.get("/{full_path:path}")
 async def serve(request: Request):
