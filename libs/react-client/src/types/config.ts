@@ -2,6 +2,7 @@ export interface IStarter {
   label: string;
   message: string;
   icon?: string;
+  command?: string;
 }
 
 export interface ChatProfile {
