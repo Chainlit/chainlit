@@ -138,7 +138,7 @@ class ChainlitDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if not self.storage_client:
-            logger.warn(
+            logger.warning(
                 "Data Layer: create_element error. No cloud storage configured!"
             )
             return

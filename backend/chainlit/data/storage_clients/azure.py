@@ -53,7 +53,7 @@ class AzureStorageClient(BaseStorageClient):
             self.sas_token = sas_token
             logger.info("AzureStorageClient initialized")
         except Exception as e:
-            logger.warn(f"AzureStorageClient initialization error: {e}")
+            logger.warning(f"AzureStorageClient initialization error: {e}")
 
     async def upload_file(
         self,
@@ -77,5 +77,5 @@ class AzureStorageClient(BaseStorageClient):
             )
             return {"object_key": object_key, "url": url}
         except Exception as e:
-            logger.warn(f"AzureStorageClient, upload_file error: {e}")
+            logger.warning(f"AzureStorageClient, upload_file error: {e}")
             return {}

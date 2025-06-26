@@ -79,7 +79,7 @@ class GCSStorageClient(BaseStorageClient):
             self.bucket.blob(object_key).delete()
             return True
         except Exception as e:
-            logger.warn(f"GCSStorageClient, delete_file error: {e}")
+            logger.warning(f"GCSStorageClient, delete_file error: {e}")
             return False
 
     async def delete_file(self, object_key: str) -> bool:

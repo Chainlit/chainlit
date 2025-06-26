@@ -87,5 +87,5 @@ class AzureBlobStorageClient(BaseStorageClient):
             await blob_client.delete_blob()
             return True
         except Exception as e:
-            logger.warn(f"AzureBlobStorageClient, delete_file error: {e}")
+            logger.warning(f"AzureBlobStorageClient, delete_file error: {e}")
             return False
