@@ -50,10 +50,6 @@ TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 # Get the directory the script is running from
 APP_ROOT = os.getenv("CHAINLIT_APP_ROOT", os.getcwd())
 
-# Create the directory to store the uploaded files
-FILES_DIRECTORY = Path(APP_ROOT) / ".files"
-FILES_DIRECTORY.mkdir(exist_ok=True)
-
 config_dir = os.path.join(APP_ROOT, ".chainlit")
 public_dir = os.path.join(APP_ROOT, "public")
 config_file = os.path.join(config_dir, "config.toml")
@@ -237,6 +233,7 @@ class SpontaneousFileUploadFeature(DataClassJsonMixin):
     accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
+    files_dir: str = ".files"
 
 
 @dataclass

@@ -118,11 +118,17 @@ def check_file(target: str):
 
 
 def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
+    from pathlib import Path
+
     from chainlit.config import config, load_module
     from chainlit.server import app as chainlit_app
 
     config.run.debug = os.environ.get("CHAINLIT_DEBUG", False)
     os.environ["CHAINLIT_ROOT_PATH"] = path
+
+    Path(config.features.spontaneous_file_upload.files_dir).mkdir(
+        parents=True, exist_ok=True
+    )
 
     api_full_path = path
 
