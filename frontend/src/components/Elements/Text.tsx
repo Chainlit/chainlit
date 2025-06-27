@@ -15,6 +15,7 @@ const TextElement = ({ element }: TextElementProps) => {
   const { config } = useConfig();
   const allowHtml = config?.features?.unsafe_allow_html;
   const latex = config?.features?.latex;
+  const mermaid = config?.features?.mermaid;
 
   let content = '';
 
@@ -40,6 +41,7 @@ const TextElement = ({ element }: TextElementProps) => {
     <Markdown
       allowHtml={allowHtml}
       latex={latex}
+      mermaid={mermaid}
       className={`${element.display}-text`}
     >
       {content}

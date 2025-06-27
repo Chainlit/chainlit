@@ -76,6 +76,7 @@ export default function ChatProfiles({ navigate }: Props) {
 
   const allowHtml = config?.features?.unsafe_allow_html;
   const latex = config?.features?.latex;
+  const mermaid = config?.features?.mermaid;
 
   return (
     <div className="relative">
@@ -129,7 +130,7 @@ export default function ChatProfiles({ navigate }: Props) {
                   className="w-80 overflow-visible"
                   sideOffset={10}
                 >
-                  <Markdown allowHtml={allowHtml} latex={latex}>
+                  <Markdown allowHtml={allowHtml} latex={latex} mermaid={mermaid}>
                     {profile.markdown_description}
                   </Markdown>
                 </HoverCardContent>
