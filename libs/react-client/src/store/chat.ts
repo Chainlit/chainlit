@@ -100,7 +100,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setChatSettingsValue: (newValue) => {
     set(({ chatSettingsValue }) => ({
-      chatSettingsValue: { ...chatSettingsValue, newValue }
+      chatSettingsValue: { ...chatSettingsValue, ...newValue }
     }));
   },
 
