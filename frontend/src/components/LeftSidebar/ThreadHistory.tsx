@@ -60,6 +60,22 @@ export function ThreadHistory() {
     handleFirstInteraction();
   }, [firstInteraction]);
 
+  // 添加对自定义事件'refresh_thread_history'的监听
+  useEffect(() => {
+    const handleRefreshThreadHistory = () => {
+      console.log('ThreadHistory组件收到刷新事件，立即刷新线程列表');
+      fetchThreads(undefined, true);
+    };
+
+    // 添加事件监听
+    window.addEventListener('refresh_thread_history', handleRefreshThreadHistory);
+
+    // 清理事件监听
+    return () => {
+      window.removeEventListener('refresh_thread_history', handleRefreshThreadHistory);
+    };
+  }, []);
+
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const { scrollHeight, clientHeight, scrollTop } = scrollRef.current;
@@ -125,7 +141,7 @@ export function ThreadHistory() {
   }, [shouldLoadMore, isLoadingMore, threadHistory]);
 
   return (
-    <SidebarContent onScroll={handleScroll} ref={scrollRef}>
+    <div className="h-full" onScroll={handleScroll} ref={scrollRef}>
       <SidebarGroup>
         <SidebarMenu>
           {threadHistory ? (
@@ -140,6 +156,6 @@ export function ThreadHistory() {
           ) : null}
         </SidebarMenu>
       </SidebarGroup>
-    </SidebarContent>
+    </div>
   );
 }

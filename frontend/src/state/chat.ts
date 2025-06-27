@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { ICommand } from 'client-types/*';
+import { ICommand, IToggleCommand } from 'client-types/*';
 
 export interface IAttachment {
   id: string;
@@ -22,4 +22,16 @@ export const attachmentsState = atom<IAttachment[]>({
 export const persistentCommandState = atom<ICommand | undefined>({
   key: 'PersistentCommand',
   default: undefined
+});
+
+// 新增的可切换按钮状态
+export interface IToggleable {
+  id: string;
+  active: boolean;
+  persistent?: boolean;
+}
+
+export const toggleableStates = atom<IToggleable[]>({
+  key: 'ToggleableStates',
+  default: []
 });
