@@ -123,7 +123,7 @@ edit_message = true
     enabled = true
     # Only the executables in the allow list can be used for MCP stdio server.
     # Only need the base name of the executable, e.g. "npx", not "/usr/bin/npx".
-    # Please don't comment this line for now, we need it to parse the executable name.
+    # Comment this line to allow any executable.
     allowed_executables = [ "npx", "uvx" ]
 
 [UI]
