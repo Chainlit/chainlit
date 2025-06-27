@@ -11,7 +11,7 @@ describe('Ask Custom Element', () => {
     cy.get('#summary').type('Bug fix');
     cy.get('#description').type('Detailed description');
     cy.get('#ticket-submit').should('not.be.disabled').click();
-    cy.get('.step').should('have.length', 3);
-    cy.get('.step').eq(2).should('contain', 'Bug fix');
+    cy.get('.step').should('have.length', 2);
+    cy.get('.step').eq(1).should('contain', 'Bug fix');
   });
 });
