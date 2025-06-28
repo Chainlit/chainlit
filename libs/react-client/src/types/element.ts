@@ -77,5 +77,6 @@ export type ITasklistElement = TElement<'tasklist'>;
 export type IDataframeElement = TMessageElement<'dataframe'>;
 
 export interface ICustomElement extends TMessageElement<'custom'> {
+  element_name: string;
   props: Record<string, unknown>;
 }
