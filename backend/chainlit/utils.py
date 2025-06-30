@@ -15,7 +15,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
 from chainlit.logger import logger
-from chainlit.message import ErrorMessage
 
 
 def utc_now():
@@ -63,6 +62,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         except Exception as e:
             logger.exception(e)
             if with_task:
+                from chainlit.message import ErrorMessage
+
                 await ErrorMessage(
                     content=str(e) or e.__class__.__name__, author="Error"
                 ).send()
