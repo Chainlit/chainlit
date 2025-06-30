@@ -18,8 +18,6 @@ MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
 StepType = Union[TrueStepType, MessageStepType]
 
-MessageStepType = Literal["user_message", "assistant_message", "system_message"]
-
 GenerationMessageRole = Literal["user", "assistant", "tool", "function", "system"]
 
 
@@ -122,13 +120,13 @@ class BaseGeneration(Utils):
     def from_dict(
         cls, generation_dict: Dict
     ) -> Union["ChatGeneration", "CompletionGeneration"]:
-        type = GenerationType(generation_dict.get("type"))
-        if type == GenerationType.CHAT:
+        _type = GenerationType(generation_dict.get("type"))
+        if _type == GenerationType.CHAT:
             return ChatGeneration.from_dict(generation_dict)
-        elif type == GenerationType.COMPLETION:
+        elif _type == GenerationType.COMPLETION:
             return CompletionGeneration.from_dict(generation_dict)
         else:
-            raise ValueError(f"Unknown generation type: {type}")
+            raise ValueError(f"Unknown generation type: {_type}")
 
     def to_dict(self):
         _dict = {
