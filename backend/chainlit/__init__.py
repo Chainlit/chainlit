@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 
@@ -101,6 +102,16 @@ def sleep(duration: int):
         duration (int): The duration in seconds.
     """
     return asyncio.sleep(duration)
+
+
+def utc_now():
+    dt = datetime.now(timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
+
+
+def timestamp_utc(timestamp: float):
+    dt = datetime.fromtimestamp(timestamp, timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
 
 
 @dataclass()
