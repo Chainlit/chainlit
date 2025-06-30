@@ -8,9 +8,9 @@ from langchain.schema import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from langchain_core.tracers.base import AsyncBaseTracer
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
-from literalai.helper import utc_now
 from literalai.observability.step import TrueStepType
 
+from chainlit import utc_now
 from chainlit.context import context_var
 from chainlit.message import Message
 from chainlit.step import Step
