@@ -10,10 +10,10 @@ from langchain_core.tracers.base import AsyncBaseTracer
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.observability.step import TrueStepType
 
-from chainlit import utc_now
 from chainlit.context import context_var
 from chainlit.message import Message
 from chainlit.step import Step
+from chainlit.utils import utc_now
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
