@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-
+from datetime import datetime, timezone
 # ruff: noqa: E402
 # Keep this here to ensure imports have environment available.
 env_file = os.getenv("CHAINLIT_ENV_FILE", ".env")
@@ -15,7 +15,7 @@ if env_found:
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
 
-from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
+from chainlit.generation import ChatGeneration, CompletionGeneration, GenerationMessage
 from pydantic.dataclasses import dataclass
 
 import chainlit.input_widget as input_widget
@@ -101,6 +101,9 @@ def sleep(duration: int):
     """
     return asyncio.sleep(duration)
 
+def utc_now():
+    dt = datetime.now(timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
 
 @dataclass()
 class CopilotFunction:
