@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Literal, Optional, Union, cast, get_args
 
 from socketio.exceptions import TimeoutError
 
-from chainlit import utc_now
 from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.data import get_data_layer
@@ -25,6 +24,7 @@ from chainlit.types import (
     ToastType,
 )
 from chainlit.user import PersistedUser
+from chainlit.utils import utc_now
 
 
 class BaseChainlitEmitter:
