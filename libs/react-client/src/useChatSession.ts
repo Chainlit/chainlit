@@ -6,7 +6,6 @@ import {
   IAction,
   ICommand,
   IElement,
-  IMcp,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -75,12 +74,10 @@ const useChatSession = () => {
   const _connect = useCallback(
     async ({
       transports,
-      userEnv,
-      authToken
+      userEnv
     }: {
       transports?: string[];
       userEnv: Record<string, string>;
-      authToken?: string;
     }) => {
       const { protocol, host, pathname } = new URL(client.httpEndpoint);
       const uri = `${protocol}//${host}`;
@@ -100,31 +97,27 @@ const useChatSession = () => {
         withCredentials: true,
         transports,
         auth: {
-          token: authToken,
           clientType: client.type,
           sessionId,
           threadId: idToResume || '',
           userEnv: JSON.stringify(userEnv),
           chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
-        },
-        extraHeaders: authToken
-          ? {
-              Authorization: `Bearer ${authToken}`
-            }
-          : {}
+        }
       });
 
       setSession((old) => {
         old?.socket?.removeAllListeners();
         old?.socket?.close();
 
-        return { socket };
+        return {
+          socket
+        };
       });
 
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
-        setMcps((prev: IMcp[]) =>
+        setMcps((prev) =>
           prev.map((mcp) => {
             const promise =
               mcp.clientType === 'sse'
