@@ -7,7 +7,6 @@ from typing import Dict, List, Optional, Union, cast
 
 from literalai.observability.step import MessageStepType
 
-from chainlit import utc_now
 from chainlit.action import Action
 from chainlit.chat_context import chat_context
 from chainlit.config import config
@@ -27,6 +26,7 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
+from chainlit.utils import utc_now
 
 
 class MessageBase(ABC):
