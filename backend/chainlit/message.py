@@ -5,15 +5,14 @@ import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
-from literalai.helper import utc_now
-from literalai.observability.step import MessageStepType
-
+from chainlit import utc_now
 from chainlit.action import Action
 from chainlit.chat_context import chat_context
 from chainlit.config import config
 from chainlit.context import context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import ElementBased
+from chainlit.generation import MessageStepType
 from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.telemetry import trace_event

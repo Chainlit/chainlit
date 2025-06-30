@@ -1,24 +1,37 @@
 # This file exists to remove the LiteralAI dependency and maintain compatability.
 # Copied from https://github.com/Chainlit/literalai-python/blob/main/literalai/observability/generation.py and https://github.com/Chainlit/literalai-python/blob/main/literalai/my_types.py
 
+import json
 from abc import abstractmethod
 from enum import Enum, unique
 from typing import Dict, List, Literal, Optional, Union
-import json
 
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 from typing_extensions import TypedDict
 
+TrueStepType = Literal[
+    "run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"
+]
+
+MessageStepType = Literal["user_message", "assistant_message", "system_message"]
+
+StepType = Union[TrueStepType, MessageStepType]
+
+MessageStepType = Literal["user_message", "assistant_message", "system_message"]
+
 GenerationMessageRole = Literal["user", "assistant", "tool", "function", "system"]
+
 
 class ImageUrlContent(TypedDict, total=False):
     type: Literal["image_url"]
     image_url: Dict
 
+
 class TextContent(TypedDict, total=False):
     type: Literal["text"]
     text: str
+
 
 class Utils:
     def __str__(self):
@@ -30,6 +43,7 @@ class Utils:
     @abstractmethod
     def to_dict(self):
         pass
+
 
 @unique
 class GenerationType(str, Enum):
@@ -92,10 +106,10 @@ class BaseGeneration(Utils):
     provider: Optional[str] = None
     model: Optional[str] = None
     error: Optional[str] = None
-    settings: Optional[Dict] = Field(default_factory=lambda: {})
-    variables: Optional[Dict] = Field(default_factory=lambda: {})
-    tags: Optional[List[str]] = Field(default_factory=lambda: [])
-    metadata: Optional[Dict] = Field(default_factory=lambda: {})
+    settings: Optional[Dict] = Field(default_factory=dict)
+    variables: Optional[Dict] = Field(default_factory=dict)
+    tags: Optional[List[str]] = Field(default_factory=list)
+    metadata: Optional[Dict] = Field(default_factory=dict)
     tools: Optional[List[Dict]] = None
     token_count: Optional[int] = None
     input_token_count: Optional[int] = None
@@ -200,7 +214,7 @@ class ChatGeneration(BaseGeneration, Utils):
     """
 
     type = GenerationType.CHAT
-    messages: Optional[List[GenerationMessage]] = Field(default_factory=lambda: [])
+    messages: Optional[List[GenerationMessage]] = Field(default_factory=list)
     message_completion: Optional[GenerationMessage] = None
 
     def to_dict(self):

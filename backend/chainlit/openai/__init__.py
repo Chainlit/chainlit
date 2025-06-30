@@ -1,10 +1,9 @@
 import asyncio
 from typing import Union
 
-from literalai import ChatGeneration, CompletionGeneration
-from literalai.helper import timestamp_utc
-
+from chainlit import timestamp_utc
 from chainlit.context import local_steps
+from chainlit.generation import ChatGeneration, CompletionGeneration
 from chainlit.step import Step
 from chainlit.utils import check_module_version
 

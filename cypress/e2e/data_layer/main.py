@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 
 import chainlit as cl
 import chainlit.data as cl_data
+from chainlit import utc_now
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import Element, ElementDict
 from chainlit.socket import persist_user_session
@@ -16,7 +17,6 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from literalai.helper import utc_now
 
 now = utc_now()
 
