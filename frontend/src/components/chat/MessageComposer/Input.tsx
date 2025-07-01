@@ -243,80 +243,18 @@ const Input = forwardRef<InputMethods, Props>(
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
           const escapedText = escapeHtml(textData);
-          const textWithNewLines = escapedText.replace(/\n/g, '<br>');
 
-          // Get selection from the element's ownerDocument instead of window
-          // This works better with Shadow DOM
-          const ownerDoc = textarea.ownerDocument;
-          const selection = ownerDoc.getSelection();
+          const htmlToInsert = escapedText.replace(/\n/g, '<br>');
 
-          if (selection && selection.rangeCount > 0) {
-            // Make sure we're operating on a range within our component
-            const range = selection.getRangeAt(0);
+          document.execCommand('insertHTML', false, htmlToInsert);
 
-            // Verify the range is within our contentEditable element
-            if (textarea.contains(range.commonAncestorContainer)) {
-              range.deleteContents();
+          textarea.focus();
 
-              // Create a document fragment using the ownerDocument
-              const fragment = ownerDoc.createDocumentFragment();
-              const tempDiv = ownerDoc.createElement('div');
-              tempDiv.innerHTML = textWithNewLines;
-
-              while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-              }
-
-              // Insert the fragment into the contenteditable element
-              range.insertNode(fragment);
-
-              // Move cursor to the end of the pasted content
-              range.collapse(false);
-              selection.removeAllRanges();
-              selection.addRange(range);
-
-              // Ensure focus remains within the contenteditable
-              textarea.focus();
-              textarea.scrollTop = textarea.scrollHeight;
-
-              // Trigger input event to update state
-              const inputEvent = new Event('input', {
-                bubbles: true,
-                composed: true
-              });
-              textarea.dispatchEvent(inputEvent);
-            } else {
-              // If selection is outside our element, focus and insert at the end
-              textarea.focus();
-              const newRange = ownerDoc.createRange();
-              if (textarea.lastChild) {
-                newRange.setStartAfter(textarea.lastChild);
-              } else {
-                newRange.setStart(textarea, 0);
-              }
-              newRange.collapse(true);
-
-              const fragment = ownerDoc.createDocumentFragment();
-              const tempDiv = ownerDoc.createElement('div');
-              tempDiv.innerHTML = textWithNewLines;
-
-              while (tempDiv.firstChild) {
-                fragment.appendChild(tempDiv.firstChild);
-              }
-
-              newRange.insertNode(fragment);
-              newRange.collapse(false);
-
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-
-              const inputEvent = new Event('input', {
-                bubbles: true,
-                composed: true
-              });
-              textarea.dispatchEvent(inputEvent);
-            }
-          }
+          const inputEvent = new Event('input', {
+            bubbles: true,
+            composed: true
+          });
+          textarea.dispatchEvent(inputEvent);
         }
         onPaste(event);
       };
@@ -407,7 +345,7 @@ const Input = forwardRef<InputMethods, Props>(
           contentEditable
           data-placeholder={placeholder}
           className={cn(
-            'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
+            'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
             className
           )}
           onInput={handleInput}

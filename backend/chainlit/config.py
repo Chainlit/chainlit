@@ -74,7 +74,7 @@ session_timeout = 3600
 # Duration (in seconds) of the user session expiry
 user_session_timeout = 1296000  # 15 days
 
-# Enable third parties caching (e.g LangChain cache)
+# Enable third parties caching (e.g., LangChain cache)
 cache = false
 
 # Authorized origins
@@ -116,9 +116,6 @@ edit_message = true
     # Sample rate of the audio
     sample_rate = 24000
 
-[features.mcp]
-    enabled = true
-
 [features.mcp.sse]
     enabled = true
 
@@ -137,6 +134,8 @@ name = "Assistant"
 
 # layout = "wide"
 
+# default_sidebar_state = "open"
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
 
@@ -147,12 +146,35 @@ cot = "full"
 # The CSS file can be served from the public directory or via an external link.
 # custom_css = "/public/test.css"
 
-# Specify a Javascript file that can be used to customize the user interface.
-# The Javascript file can be served from the public directory.
+# Specify additional attributes for a custom CSS file
+# custom_css_attributes = "media=\\\"print\\\""
+
+# Specify a JavaScript file that can be used to customize the user interface.
+# The JavaScript file can be served from the public directory.
 # custom_js = "/public/test.js"
+
+# The style of alert boxes. Can be "classic" or "modern".
+alert_style = "classic"
+
+# Specify additional attributes for custom JS file
+# custom_js_attributes = "async type = \\\"module\\\""
+
+# Custom login page image, relative to public directory or external URL
+# login_page_image = "/public/custom-background.jpg"
+
+# Custom login page image filter (Tailwind internal filters, no dark/light variants)
+# login_page_image_filter = "brightness-50 grayscale"
+# login_page_image_dark_filter = "contrast-200 blur-sm"
+
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+
+# Load assistant logo directly from URL.
+logo_file_url = ""
+
+# Load assistant avatar image directly from URL.
+default_avatar_file_url = ""
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
@@ -162,6 +184,7 @@ cot = "full"
 # Specify optional one or more custom links in the header.
 # [[UI.header_links]]
 #     name = "Issues"
+#     display_name = "Report Issue"
 #     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
 #     url = "https://github.com/Chainlit/chainlit/issues"
 
@@ -239,7 +262,7 @@ class McpStdioFeature(DataClassJsonMixin):
 
 @dataclass
 class McpFeature(DataClassJsonMixin):
-    enabled: bool = True
+    enabled: bool = False
     sse: McpSseFeature = Field(default_factory=McpSseFeature)
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
 
@@ -261,6 +284,7 @@ class HeaderLink(DataClassJsonMixin):
     name: str
     icon_url: str
     url: str
+    display_name: Optional[str] = None
 
 
 @dataclass()
@@ -271,12 +295,27 @@ class UISettings(DataClassJsonMixin):
     font_family: Optional[str] = None
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     layout: Optional[Literal["default", "wide"]] = "default"
+    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
     github: Optional[str] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
+    custom_css_attributes: Optional[str] = ""
+    # Optional custom JS file that allows you to customize the UI
     custom_js: Optional[str] = None
+
+    alert_style: Optional[Literal["classic", "modern"]] = "classic"
+    custom_js_attributes: Optional[str] = "defer"
+    # Optional custom background image for login page
+    login_page_image: Optional[str] = None
+    login_page_image_filter: Optional[str] = None
+    login_page_image_dark_filter: Optional[str] = None
+
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
+    # Optional logo file url
+    logo_file_url: Optional[str] = None
+    # Optional avatar image file url
+    default_avatar_file_url: Optional[str] = None
     # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
     # Optional header links
@@ -285,11 +324,36 @@ class UISettings(DataClassJsonMixin):
 
 @dataclass()
 class CodeSettings:
-    # Developer defined callbacks for each action. Key is the action name, value is the callback function.
+    # App action functions
     action_callbacks: Dict[str, Callable[["Action"], Any]]
+
     # Module object loaded from the module_name
     module: Any = None
-    # Bunch of callbacks defined by the developer
+
+    # App life cycle callbacks
+    on_app_startup: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+    on_app_shutdown: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+
+    # Session life cycle callbacks
+    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
+    on_stop: Optional[Callable[[], Any]] = None
+    on_chat_start: Optional[Callable[[], Any]] = None
+    on_chat_end: Optional[Callable[[], Any]] = None
+    on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
+    on_message: Optional[Callable[["Message"], Any]] = None
+    on_audio_start: Optional[Callable[[], Any]] = None
+    on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
+    on_audio_end: Optional[Callable[[], Any]] = None
+    on_mcp_connect: Optional[Callable] = None
+    on_mcp_disconnect: Optional[Callable] = None
+    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    set_chat_profiles: Optional[
+        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+    ] = None
+    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
+        None
+    )
+    # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
     ] = None
@@ -299,27 +363,10 @@ class CodeSettings:
     oauth_callback: Optional[
         Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
     ] = None
-    on_logout: Optional[Callable[["Request", "Response"], Any]] = None
-    on_stop: Optional[Callable[[], Any]] = None
-    on_chat_start: Optional[Callable[[], Any]] = None
-    on_chat_end: Optional[Callable[[], Any]] = None
-    on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
-    on_message: Optional[Callable[["Message"], Any]] = None
-    on_window_message: Optional[Callable[[str], Any]] = None
-    on_audio_start: Optional[Callable[[], Any]] = None
-    on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
-    on_audio_end: Optional[Callable[[], Any]] = None
-    on_mcp_connect: Optional[Callable] = None
-    on_mcp_disconnect: Optional[Callable] = None
 
+    # Helpers
+    on_window_message: Optional[Callable[[str], Any]] = None
     author_rename: Optional[Callable[[str], Awaitable[str]]] = None
-    on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
-    set_chat_profiles: Optional[
-        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
-    ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
     data_layer: Optional[Callable[[], BaseDataLayer]] = None
 
 

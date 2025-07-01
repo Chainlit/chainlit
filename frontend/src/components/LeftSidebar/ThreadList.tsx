@@ -47,6 +47,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 import { Translator } from '../i18n';
 import ThreadOptions from './ThreadOptions';
@@ -276,54 +282,70 @@ export function ThreadList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {sortedTimeGroupKeys.map((group) => {
-        const items = threadHistory!.timeGroupedThreads![group];
-        return (
-          <SidebarGroup key={group}>
-            <SidebarGroupLabel>{getTimeGroupLabel(group)}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {items.map((thread) => {
-                  const isResumed =
-                    idToResume === thread.id && !threadHistory!.currentThreadId;
-                  const isSelected =
-                    isResumed || threadHistory!.currentThreadId === thread.id;
-                  return (
-                    <SidebarMenuItem key={thread.id} id={`thread-${thread.id}`}>
-                      <Link to={isResumed ? '' : `/thread/${thread.id}`}>
-                        <SidebarMenuButton
-                          isActive={isSelected}
-                          className="relative truncate h-9 group/thread"
-                        >
-                          {thread.name || (
-                            <Translator path="threadHistory.thread.untitled" />
-                          )}
-                          <div
-                            className={cn(
-                              'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
-                            )}
-                          />
-                          <ThreadOptions
-                            onDelete={() => setThreadIdToDelete(thread.id)}
-                            onRename={() => {
-                              setThreadIdToRename(thread.id);
-                              setThreadNewName(thread.name);
-                            }}
-                            className={cn(
-                              'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
-                              isSelected && 'bg-sidebar-accent opacity-100'
-                            )}
-                          />
-                        </SidebarMenuButton>
-                      </Link>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        );
-      })}
+      <TooltipProvider delayDuration={300}>
+        {sortedTimeGroupKeys.map((group) => {
+          const items = threadHistory!.timeGroupedThreads![group];
+          return (
+            <SidebarGroup key={group}>
+              <SidebarGroupLabel>{getTimeGroupLabel(group)}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {items.map((thread) => {
+                    const isResumed =
+                      idToResume === thread.id &&
+                      !threadHistory!.currentThreadId;
+                    const isSelected =
+                      isResumed || threadHistory!.currentThreadId === thread.id;
+                    return (
+                      <SidebarMenuItem
+                        key={thread.id}
+                        id={`thread-${thread.id}`}
+                      >
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link to={isResumed ? '' : `/thread/${thread.id}`}>
+                              <SidebarMenuButton
+                                isActive={isSelected}
+                                className="relative truncate h-9 group/thread"
+                              >
+                                {thread.name || (
+                                  <Translator path="threadHistory.thread.untitled" />
+                                )}
+                                <div
+                                  className={cn(
+                                    'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
+                                  )}
+                                />
+                                <ThreadOptions
+                                  onDelete={() =>
+                                    setThreadIdToDelete(thread.id)
+                                  }
+                                  onRename={() => {
+                                    setThreadIdToRename(thread.id);
+                                    setThreadNewName(thread.name);
+                                  }}
+                                  className={cn(
+                                    'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
+                                    isSelected &&
+                                      'bg-sidebar-accent opacity-100'
+                                  )}
+                                />
+                              </SidebarMenuButton>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" align="center">
+                            <p>{thread.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
+      </TooltipProvider>
       {isLoadingMore ? (
         <div className="flex items-center justify-center p-2">
           <Loader />

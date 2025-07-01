@@ -77,6 +77,7 @@ export default function WelcomeScreen(props: Props) {
 
   return (
     <div
+      id="welcome-screen"
       className={cn(
         'flex flex-col -mt-[60px] gap-4 w-full flex-grow items-center justify-center welcome-screen mx-auto transition-opacity duration-500 opacity-0 delay-100',
         isVisible && 'opacity-100'

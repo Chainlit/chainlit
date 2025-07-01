@@ -80,6 +80,9 @@ mimetypes.add_type("text/css", ".css")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
+    if config.code.on_app_startup:
+        await config.code.on_app_startup()
+
     host = config.run.host
     port = config.run.port
     root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
@@ -145,6 +148,9 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         try:
+            if config.code.on_app_shutdown:
+                await config.code.on_app_shutdown()
+
             if watch_task:
                 stop_event.set()
                 watch_task.cancel()
@@ -197,10 +203,7 @@ app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
-asgi_app = socketio.ASGIApp(
-    socketio_server=sio,
-    socketio_path="",
-)
+asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
@@ -357,12 +360,10 @@ def get_html_template(root_path):
 
     css = None
     if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
+        css = f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}" {config.ui.custom_css_attributes}>"""
 
     if config.ui.custom_js:
-        js += f"""<script src="{config.ui.custom_js}" defer></script>"""
+        js += f"""<script src="{config.ui.custom_js}" {config.ui.custom_js_attributes}></script>"""
 
     font = None
     if custom_theme and custom_theme.get("custom_fonts"):
@@ -715,6 +716,25 @@ _language_pattern = (
 )
 
 
+@router.post("/set-session-cookie")
+async def set_session_cookie(request: Request, response: Response):
+    body = await request.json()
+    session_id = body.get("session_id")
+
+    is_local = request.client and request.client.host in ["127.0.0.1", "localhost"]
+
+    response.set_cookie(
+        key="X-Chainlit-Session-id",
+        value=session_id,
+        path="/",
+        httponly=True,
+        secure=not is_local,
+        samesite="lax" if is_local else "none",
+    )
+
+    return {"message": "Session cookie set"}
+
+
 @router.get("/project/translations")
 async def project_translations(
     language: str = Query(
@@ -760,6 +780,9 @@ async def project_settings(
 
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
+
+    if config.code.on_mcp_connect:
+        config.features.mcp.enabled = True
 
     debug_url = None
     data_layer = get_data_layer()
@@ -1094,7 +1117,7 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    mcp_enabled = config.features.mcp.enabled and config.code.on_mcp_connect is not None
+    mcp_enabled = config.code.on_mcp_connect is not None
     if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
@@ -1430,13 +1453,13 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 @router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
     """Get the avatar for the user based on the avatar_id."""
-    if not re.match(r"^[a-zA-Z0-9_ -]+$", avatar_id):
+    if not re.match(r"^[a-zA-Z0-9_ .-]+$", avatar_id):
         raise HTTPException(status_code=400, detail="Invalid avatar_id")
 
     if avatar_id == "default":
         avatar_id = config.ui.name
 
-    avatar_id = avatar_id.strip().lower().replace(" ", "_")
+    avatar_id = avatar_id.strip().lower().replace(" ", "_").replace(".", "_")
 
     base_path = Path(APP_ROOT) / "public" / "avatars"
     avatar_pattern = f"{avatar_id}.*"
@@ -1446,7 +1469,6 @@ async def get_avatar(avatar_id: str):
     if avatar_path := next(matching_files, None):
         if not is_path_inside(avatar_path, base_path):
             raise HTTPException(status_code=400, detail="Invalid filename")
-
         media_type, _ = mimetypes.guess_type(str(avatar_path))
 
         return FileResponse(avatar_path, media_type=media_type)

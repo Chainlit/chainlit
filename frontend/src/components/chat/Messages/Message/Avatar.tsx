@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 import { useContext, useMemo } from 'react';
 
 import {
@@ -19,9 +20,10 @@ import {
 interface Props {
   author?: string;
   hide?: boolean;
+  isError?: boolean;
 }
 
-const MessageAvatar = ({ author, hide }: Props) => {
+const MessageAvatar = ({ author, hide, isError }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
@@ -31,12 +33,19 @@ const MessageAvatar = ({ author, hide }: Props) => {
   }, [config, chatProfile]);
 
   const avatarUrl = useMemo(() => {
+    if (config?.ui?.default_avatar_file_url) return config?.ui?.default_avatar_file_url;
     const isAssistant = !author || author === config?.ui.name;
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;
     }
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
   }, [apiClient, selectedChatProfile, config, author]);
+
+  if (isError) {
+    return (
+      <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+    );
+  }
 
   return (
     <span className={cn('inline-block', hide && 'invisible')}>
