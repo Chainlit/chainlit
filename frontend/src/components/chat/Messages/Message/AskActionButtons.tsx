@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 const AskActionButton = ({ action }: { action: IAction }) => {
   const { loading, askUser } = useContext(MessageContext);
@@ -28,14 +29,30 @@ const AskActionButton = ({ action }: { action: IAction }) => {
     return null;
   }, [action]);
 
+  // 创建自定义样式对象
+  const customStyle = {};
+  if (action.bgColor) {
+    customStyle['backgroundColor'] = action.bgColor;
+  }
+  if (action.textColor) {
+    customStyle['color'] = action.textColor;
+  }
+
   const button = (
     <Button
-      className="break-words h-auto min-h-10 whitespace-normal"
+      className={cn(
+        "break-words h-auto min-h-10 whitespace-normal",
+        action.fullWidth ? "w-full justify-start" : "",
+        action.className,
+        icon ? "gap-2" : ""
+      )}
       id={action.id}
       onClick={() => {
         askUser?.callback(action);
       }}
-      variant="outline"
+      variant={action.variant as any || "outline"}
+      size={action.size as any || "default"}
+      style={customStyle}
       disabled={loading}
     >
       {icon}
@@ -76,8 +93,14 @@ const AskActionButtons = ({
 
   if (!belongsToMessage || !isAskingAction || !actions.length) return null;
 
+  // 检查是否有任何按钮设置了fullWidth属性
+  const hasFullWidthButtons = filteredActions.some(a => a.fullWidth);
+
   return (
-    <div className="flex items-center gap-1 flex-wrap">
+    <div className={cn(
+      "flex gap-1",
+      hasFullWidthButtons ? "flex-col w-full" : "items-center flex-wrap"
+    )}>
       {filteredActions.map((a) => (
         <AskActionButton key={a.id} action={a} />
       ))}

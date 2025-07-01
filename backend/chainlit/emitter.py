@@ -24,6 +24,7 @@ from chainlit.types import (
     OutputAudioChunk,
     ThreadDict,
     ToastType,
+    ToggleCommandDict,
 )
 from chainlit.user import PersistedUser
 
@@ -95,6 +96,10 @@ class BaseChainlitEmitter:
     async def init_thread(self, interaction: str):
         pass
 
+    async def refresh_chat_history(self):
+        """Stub method to request the UI to refresh the chat history."""
+        pass
+
     async def process_message(self, payload: MessagePayload) -> Message:
         """Stub method to process user message."""
         return Message(content="")
@@ -147,6 +152,10 @@ class BaseChainlitEmitter:
 
     def send_toast(self, message: str, type: Optional[ToastType] = "info"):
         """Stub method to send a toast message to the UI."""
+        pass
+
+    async def set_toggle_commands(self, commands: List[ToggleCommandDict]):
+        """Stub method to send the available toggle commands to the UI."""
         pass
 
 
@@ -205,6 +214,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
     async def send_element(self, element_dict: ElementDict):
         """Stub method to send an element to the UI."""
         await self.emit("element", element_dict)
+
+    async def refresh_chat_history(self):
+        """Request the UI to refresh the chat history."""
+        await self.emit("refresh_chat_history", {})
+        logger.info("已发送刷新历史记录事件")
 
     def send_step(self, step_dict: StepDict):
         """Send a message to the UI."""
@@ -423,12 +437,24 @@ class ChainlitEmitter(BaseChainlitEmitter):
         )
 
     def set_chat_settings(self, settings: Dict[str, Any]):
-        self.session.chat_settings = settings
+        """Set the chat settings."""
+        for key, widget in settings.items():
+            settings[key] = (
+                widget.to_dict() if hasattr(widget, "to_dict") else widget
+            )
+        return self.emit("chat_settings", settings)
 
     def set_commands(self, commands: List[CommandDict]):
         """Send the available commands to the UI."""
         return self.emit(
             "set_commands",
+            commands,
+        )
+
+    def set_toggle_commands(self, commands: List[ToggleCommandDict]):
+        """Send the available toggle commands to the UI."""
+        return self.emit(
+            "set_toggle_commands",
             commands,
         )
 
@@ -442,3 +468,16 @@ class ChainlitEmitter(BaseChainlitEmitter):
         if type not in get_args(ToastType):
             raise ValueError(f"Invalid toast type: {type}")
         return self.emit("toast", {"message": message, "type": type})
+
+    async def set_info_panel(self, info_data: Dict[str, str], title: str = "信息面板"):
+        """Set information to display in the left sidebar info panel."""
+        logger.info(f"Emitting set_info_panel event with data: {info_data} and title: {title}")
+        result = await self.emit("set_info_panel", {"data": info_data, "title": title})
+        logger.info("set_info_panel event emitted")
+        return result
+
+    async def stream_token(self, token: str, step_id: str):
+        """Stream a token to the frontend."""
+        return await self.emit(
+            "stream_token", {"token": token, "id": step_id}
+        )
