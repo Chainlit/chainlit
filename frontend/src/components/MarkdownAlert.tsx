@@ -18,6 +18,8 @@ import {
 // used here to find and transform ::: alert syntax into Alert components
 import { visit } from 'unist-util-visit';
 
+import { useConfig } from '@chainlit/react-client';
+
 import { useTranslation } from '@/components/i18n/Translator';
 
 export interface AlertProps {
@@ -166,7 +168,114 @@ const variantStyles = {
   //    Icon: Heart
   //  }
 };
-
+const modernVariantStyles = {
+  // Basic alerts
+  info: {
+    container:
+      'bg-blue-50/80 rounded-2xl border border-blue-200 dark:bg-slate-800/30 dark:border-slate-500/40',
+    icon: 'text-blue-500 dark:text-blue-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Info
+  },
+  note: {
+    container:
+      'bg-gray-50/80 rounded-2xl border border-gray-300 dark:bg-gray-800/30 dark:border-gray-500/40',
+    icon: 'text-gray-500 dark:text-gray-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: BellRing
+  },
+  tip: {
+    container:
+      'bg-green-50/80 rounded-2xl border border-green-200 dark:bg-green-800/30 dark:border-green-600/30',
+    icon: 'text-green-500 dark:text-green-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: CheckCircle
+  },
+  important: {
+    container:
+      'bg-purple-50/80 rounded-2xl border border-purple-200 dark:bg-purple-800/20 dark:border-purple-600/30',
+    icon: 'text-purple-500 dark:text-purple-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: AlertCircle
+  },
+  warning: {
+    container:
+      'bg-yellow-50/80 rounded-2xl border border-yellow-200 dark:bg-yellow-800/30 dark:border-yellow-600/30',
+    icon: 'text-yellow-500 dark:text-yellow-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: AlertTriangle
+  },
+  caution: {
+    container:
+      'bg-red-50/80 rounded-2xl border border-red-200 dark:bg-red-900/30 dark:border-red-600/30',
+    icon: 'text-red-500 dark:text-red-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: AlertTriangle
+  },
+  debug: {
+    container:
+      'bg-gray-50/80 rounded-2xl border border-gray-300 dark:bg-gray-800/30 dark:border-gray-500/40',
+    icon: 'text-gray-500 dark:text-gray-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Bug
+  },
+  example: {
+    container:
+      'bg-indigo-50/80 rounded-2xl border border-indigo-200 dark:bg-indigo-800/30 dark:border-indigo-600/30',
+    icon: 'text-indigo-500 dark:text-indigo-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: BookOpen
+  },
+  success: {
+    container:
+      'bg-green-50/80 rounded-2xl border border-green-200 dark:bg-green-800/30 dark:border-green-600/30',
+    icon: 'text-green-500 dark:text-green-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: CheckCircle
+  },
+  help: {
+    container:
+      'bg-blue-50/80 rounded-2xl border border-blue-200 dark:bg-blue-800/30 dark:border-blue-600/30',
+    icon: 'text-blue-500 dark:text-blue-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: HelpCircle
+  },
+  idea: {
+    container:
+      'bg-yellow-50/80 rounded-2xl border border-yellow-200 dark:bg-yellow-800/30 dark:border-yellow-600/30',
+    icon: 'text-yellow-500 dark:text-yellow-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Lightbulb
+  },
+  pending: {
+    container:
+      'bg-orange-50/80 rounded-2xl border border-orange-200 dark:bg-orange-900/30 dark:border-orange-600/30',
+    icon: 'text-orange-500 dark:text-orange-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Clock
+  },
+  security: {
+    container:
+      'bg-slate-50/80 rounded-2xl border border-slate-300 dark:bg-slate-800/30 dark:border-slate-500/40',
+    icon: 'text-slate-500 dark:text-slate-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Shield
+  },
+  beta: {
+    container:
+      'bg-violet-50/80 rounded-2xl border border-violet-200 dark:bg-violet-800/20 dark:border-violet-600/30',
+    icon: 'text-violet-500 dark:text-violet-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Rocket
+  },
+  'best-practice': {
+    container:
+      'bg-teal-50/80 rounded-2xl border border-teal-200 dark:bg-teal-800/30 dark:border-teal-600/30',
+    icon: 'text-teal-500 dark:text-teal-400',
+    text: 'text-slate-700 dark:text-slate-200',
+    Icon: Heart
+  }
+};
 // Alert component
 const AlertComponent = ({
   variant,
@@ -176,7 +285,10 @@ const AlertComponent = ({
   children: React.ReactNode;
 }) => {
   const { t } = useTranslation();
-  const style = variantStyles[variant];
+  const configData = useConfig();
+  const useModernStyle = configData?.config?.ui?.alert_style === 'modern';
+  const styleSet = useModernStyle ? modernVariantStyles : variantStyles;
+  const style = styleSet[variant];
   const Icon = style.Icon;
 
   return (
