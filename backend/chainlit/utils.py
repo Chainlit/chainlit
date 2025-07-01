@@ -3,6 +3,7 @@ import importlib
 import inspect
 import os
 from asyncio import CancelledError
+from datetime import datetime, timezone
 from typing import Callable
 
 import click
@@ -14,7 +15,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
 from chainlit.logger import logger
-from chainlit.message import ErrorMessage
+
+
+def utc_now():
+    dt = datetime.now(timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
+
+
+def timestamp_utc(timestamp: float):
+    dt = datetime.fromtimestamp(timestamp, timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
@@ -52,6 +62,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         except Exception as e:
             logger.exception(e)
             if with_task:
+                from chainlit.message import ErrorMessage
+
                 await ErrorMessage(
                     content=str(e) or e.__class__.__name__, author="Error"
                 ).send()
