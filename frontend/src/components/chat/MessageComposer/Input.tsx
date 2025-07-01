@@ -242,8 +242,10 @@ const Input = forwardRef<InputMethods, Props>(
 
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
+          const escapedText = escapeHtml(textData);
+          
           // Remove trailing newlines to prevent extra line breaks
-          const trimmedText = textData.replace(/\n+$/, '');
+          const trimmedText = escapedText.replace(/\n+$/, '');
           
           // Insert as plain text to avoid browser adding extra formatting
           document.execCommand('insertText', false, trimmedText);
