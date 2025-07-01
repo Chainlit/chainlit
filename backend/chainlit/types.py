@@ -267,6 +267,7 @@ class Starter(DataClassJsonMixin):
 
     label: str
     message: str
+    command: Optional[str] = None
     icon: Optional[str] = None
 
 
