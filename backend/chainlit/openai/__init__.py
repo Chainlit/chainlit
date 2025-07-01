@@ -43,11 +43,11 @@ def instrument_openai():
         )
 
         if isinstance(generation, ChatGeneration):
-            step.input = generation.messages
+            step.input = generation.messages  # type: ignore
             step.output = generation.message_completion  # type: ignore
         else:
-            step.input = generation.prompt
-            step.output = generation.completion
+            step.input = generation.prompt  # type: ignore
+            step.output = generation.completion  # type: ignore
 
         asyncio.create_task(step.send())
 
