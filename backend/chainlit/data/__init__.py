@@ -53,9 +53,7 @@ def get_data_layer():
                 gcs_project_id = os.getenv("APP_GCS_PROJECT_ID")
                 gcs_client_email = os.getenv("APP_GCS_CLIENT_EMAIL")
                 gcs_private_key = os.getenv("APP_GCS_PRIVATE_KEY")
-                is_using_gcs = bool(
-                    gcs_project_id and gcs_client_email and gcs_private_key
-                )
+                is_using_gcs = bool(gcs_project_id)
 
                 # Azure Storage
                 azure_storage_account = os.getenv("APP_AZURE_STORAGE_ACCOUNT")
