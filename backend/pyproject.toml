@@ -120,6 +120,7 @@ module = [
     "google-cloud-storage",
     "azure.storage.blob",
     "azure.storage.blob.aio",
+    "google.auth",
     "google.oauth2"
 ]
 
