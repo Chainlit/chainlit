@@ -18,7 +18,7 @@ class S3StorageClient(BaseStorageClient):
             self.client = boto3.client("s3", **kwargs)
             logger.info("S3StorageClient initialized")
         except Exception as e:
-            logger.warn(f"S3StorageClient initialization error: {e}")
+            logger.warning(f"S3StorageClient initialization error: {e}")
 
     def sync_get_read_url(self, object_key: str) -> str:
         try:
@@ -29,7 +29,7 @@ class S3StorageClient(BaseStorageClient):
             )
             return url
         except Exception as e:
-            logger.warn(f"S3StorageClient, get_read_url error: {e}")
+            logger.warning(f"S3StorageClient, get_read_url error: {e}")
             return object_key
 
     async def get_read_url(self, object_key: str) -> str:
@@ -49,7 +49,7 @@ class S3StorageClient(BaseStorageClient):
             url = f"https://{self.bucket}.s3.amazonaws.com/{object_key}"
             return {"object_key": object_key, "url": url}
         except Exception as e:
-            logger.warn(f"S3StorageClient, upload_file error: {e}")
+            logger.warning(f"S3StorageClient, upload_file error: {e}")
             return {}
 
     async def upload_file(
@@ -68,7 +68,7 @@ class S3StorageClient(BaseStorageClient):
             self.client.delete_object(Bucket=self.bucket, Key=object_key)
             return True
         except Exception as e:
-            logger.warn(f"S3StorageClient, delete_file error: {e}")
+            logger.warning(f"S3StorageClient, delete_file error: {e}")
             return False
 
     async def delete_file(self, object_key: str) -> bool:
