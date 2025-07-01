@@ -2,8 +2,8 @@ import asyncio
 from typing import Union
 
 from literalai import ChatGeneration, CompletionGeneration
-from literalai.helper import timestamp_utc
 
+from chainlit import timestamp_utc
 from chainlit.context import local_steps
 from chainlit.step import Step
 from chainlit.utils import check_module_version
@@ -43,11 +43,11 @@ def instrument_openai():
         )
 
         if isinstance(generation, ChatGeneration):
-            step.input = generation.messages
+            step.input = generation.messages  # type: ignore
             step.output = generation.message_completion  # type: ignore
         else:
-            step.input = generation.prompt
-            step.output = generation.completion
+            step.input = generation.prompt  # type: ignore
+            step.output = generation.completion  # type: ignore
 
         asyncio.create_task(step.send())
 
