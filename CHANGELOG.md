@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Breaking
 - **LiteralAI** is being sunset and will be removed in the next release. Please migrate to the official data layer instead.
+- Telemetry is now opt-in by default and will be removed in the next release.
 
 ## [2.5.5] - 2025-04-14
 
