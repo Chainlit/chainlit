@@ -243,10 +243,12 @@ const Input = forwardRef<InputMethods, Props>(
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
           const escapedText = escapeHtml(textData);
-
-          const htmlToInsert = escapedText.replace(/\n/g, '<br>');
-
-          document.execCommand('insertHTML', false, htmlToInsert);
+          
+          // Remove trailing newlines to prevent extra line breaks
+          const trimmedText = escapedText.replace(/\n+$/, '');
+          
+          // Insert as plain text to avoid browser adding extra formatting
+          document.execCommand('insertText', false, trimmedText);
 
           textarea.focus();
 
