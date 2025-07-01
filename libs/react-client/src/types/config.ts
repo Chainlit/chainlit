@@ -2,6 +2,7 @@ export interface IStarter {
   label: string;
   message: string;
   icon?: string;
+  command?: string;
 }
 
 export interface ChatProfile {
@@ -40,6 +41,7 @@ export interface IChainlitConfig {
     custom_css?: string;
     custom_js?: string;
     custom_font?: string;
+    alert_style?: 'classic' | 'modern';
     login_page_image?: string;
     login_page_image_filter?: string;
     login_page_image_dark_filter?: string;
