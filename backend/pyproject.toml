@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.5.5"
+version = "2.6.0"
 keywords = [
     'LLM',
     'Agents',
@@ -42,7 +42,6 @@ script = "build.py"
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0.0"
 httpx = ">=0.23.0"
-literalai = "0.1.201"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.115.3,<0.116"
 starlette = ">=0.41.2"
@@ -136,6 +135,7 @@ ignore_missing_imports = true
 optional = true
 
 [tool.poetry.group.custom-data.dependencies]
+literalai = "0.1.300"
 asyncpg = "^0.29.0"
 SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"

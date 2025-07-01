@@ -5,4 +5,4 @@ try:
 except metadata.PackageNotFoundError:
     # Case where package metadata is not available, default to a 'non-outdated' version.
     # Ref: config.py::load_settings()
-    __version__ = "2.5.5"
+    __version__ = "2.6.0"
