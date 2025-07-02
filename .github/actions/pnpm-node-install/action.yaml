@@ -6,10 +6,6 @@ inputs:
     description: Node.js version
     required: true
     default: '23.3.0'
-  pnpm-version:
-    description: pnpm version
-    required: true
-    default: '9.7.0'
   pnpm-skip-install:
     description: Skip install.
     required: false
@@ -21,14 +17,17 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: pnpm/action-setup@v4
-      with:
-        version: ${{ inputs.pnpm-version }}
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: pnpm
+    - name: Enable corepack
+      run: corepack enable
+      shell: bash
+    - name: Install pnpm
+      run: corepack install
+      shell: bash
     - name: Install JS dependencies
       run: pnpm install ${{ inputs.pnpm-install-args }}
       shell: bash
