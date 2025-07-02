@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: '23.3.0'
+    default: '24.3.0' # Switch to 'lts' as soon as Node 24 reaches LTS status.
   pnpm-skip-install:
     description: Skip install.
     required: false
