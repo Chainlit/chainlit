@@ -5,7 +5,6 @@ import uuid
 from abc import ABC
 from typing import Dict, List, Optional, Union, cast
 
-from literalai.helper import utc_now
 from literalai.observability.step import MessageStepType
 
 from chainlit.action import Action
@@ -27,6 +26,7 @@ from chainlit.types import (
     AskSpec,
     FileDict,
 )
+from chainlit.utils import utc_now
 
 
 class MessageBase(ABC):
