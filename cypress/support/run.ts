@@ -41,7 +41,7 @@ export const runChainlitForTest = async (
     // Headless + CI mode
     const options = [
       'run',
-      '-C',
+      '--project',
       BACKEND_DIR,
       'chainlit',
       'run',
@@ -53,6 +53,7 @@ export const runChainlitForTest = async (
     const server = spawn('poetry', options, {
       cwd: dir
     });
+    console.log(options);
 
     server.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
