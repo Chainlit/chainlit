@@ -22,10 +22,13 @@ interface Props {
 
 const CL_RUN_NAMES = ['on_chat_start', 'on_message', 'on_audio_end'];
 
-const hasToolStep = (step: IStep): boolean => {
+const hasActiveToolStep = (step: IStep): boolean => {
   return (
     step.steps?.some(
-      (s) => s.type === 'tool' || s.type.includes('message') || hasToolStep(s)
+      (s) =>
+        (s.type === 'tool' && s.start && !s.end && !s.isError) ||
+        s.type.includes('message') ||
+        hasActiveToolStep(s)
     ) || false
   );
 };
@@ -51,7 +54,7 @@ const Messages = memo(
             const isHiddenCoT = messageContext.cot === 'hidden';
 
             const showToolCoTLoader = isToolCallCoT
-              ? isRunning && !hasToolStep(m)
+              ? isRunning && !hasActiveToolStep(m)
               : false;
 
             const showHiddenCoTLoader = isHiddenCoT
