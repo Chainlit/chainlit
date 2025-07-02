@@ -61,8 +61,8 @@ config_translation_dir = os.path.join(config_dir, "translations")
 
 # Default config file created if none exists
 DEFAULT_CONFIG_STR = f"""[project]
-# Whether to enable telemetry (default: true). No personal data is collected.
-enable_telemetry = true
+# Whether to enable telemetry (default: false). No personal data is collected.
+enable_telemetry = false
 
 
 # List of environment variables to be provided by each user to use the app.
@@ -375,7 +375,7 @@ class ProjectSettings(DataClassJsonMixin):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
     # Socket.io client transports option
     transports: Optional[List[str]] = None
-    enable_telemetry: bool = True
+    enable_telemetry: bool = False
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
