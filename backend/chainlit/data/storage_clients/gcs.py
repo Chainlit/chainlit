@@ -68,9 +68,10 @@ class GCSStorageClient(BaseStorageClient):
 
             blob.upload_from_string(data, content_type=mime)
 
+            # Return signed URL
             return {
                 "object_key": object_key,
-                "url": f"https://storage.googleapis.com/{self.bucket.name}/{object_key}",
+                "url": self.sync_get_read_url(object_key),
             }
 
         except Exception as e:
