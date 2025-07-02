@@ -99,12 +99,20 @@ const Input = forwardRef<InputMethods, Props>(
     const reset = () => {
       if (!selectedCommand?.persistent) {
         setSelectedCommand(undefined);
+        if (contentEditableRef.current) {
+          contentEditableRef.current.innerHTML = '';
+        }
+      }else if(contentEditableRef.current){
+        // if selectedCommand?.persistent is true , keep .command-span tag and clear content
+        const commandSpan = contentEditableRef.current.querySelector('.command-span');
+        if (commandSpan) {
+          contentEditableRef.current.innerHTML = commandSpan.outerHTML;
+          // Zero-width space
+          contentEditableRef.current.appendChild(document.createTextNode('\u200B'));
+        }
       }
       setSelectedIndex(0);
       setCommandInput('');
-      if (contentEditableRef.current) {
-        contentEditableRef.current.innerHTML = '';
-      }
       onChange('');
     };
 
