@@ -7,5 +7,5 @@ module.exports = {
     'poetry run -C backend ruff format',
     () => 'pnpm run lintPython'
   ],
-  '.github/{workflows}/**': ['actionlint']
+  '.github/workflows/**': ['actionlint']
 };
