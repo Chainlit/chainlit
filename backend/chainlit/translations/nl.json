@@ -6,7 +6,8 @@
         "continue": "Doorgaan",
         "goBack": "Terug",
         "reset": "Herstellen",
-        "submit": "Versturen"
+        "submit": "Versturen",
+        "share": "Delen"
       },
       "status": {
         "loading": "Laden...",
@@ -136,7 +137,8 @@
         "untitled": "Naamloos gesprek",
         "menu": {
           "rename": "Rename",
-          "delete": "Delete"
+          "delete": "Delete",
+          "share": "Delen"
         },
         "actions": {
           "delete": {
