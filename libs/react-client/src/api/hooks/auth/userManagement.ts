@@ -17,8 +17,6 @@ export const useUserManagement = () => {
   useEffect(() => {
     if (userData) {
       setUser(userData);
-    } else if (isLoading) {
-      setUser(undefined);
     }
   }, [userData, isLoading, setUser]);
 
