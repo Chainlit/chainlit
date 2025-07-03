@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  threadHistoryState,
   useAuth,
+  useAuthStore,
   useChatData,
   useChatInteract,
   useChatMessages,
@@ -33,7 +33,7 @@ const Chat = () => {
   const { user } = useAuth();
   const { config } = useConfig();
   const setAttachments = useSetRecoilState(attachmentsState);
-  const setThreads = useSetRecoilState(threadHistoryState);
+  const setThreads = useAuthStore((state) => state.setThreadHistory);
 
   const autoScrollRef = useRef(true);
   const { error, disabled, callFn } = useChatData();
@@ -180,10 +180,9 @@ const Chat = () => {
     ) {
       navigate(`/thread/${threadId}`);
     } else {
-      setThreads((prev) => ({
-        ...prev,
+      setThreads({
         currentThreadId: threadId
-      }));
+      });
     }
   }, []);
 

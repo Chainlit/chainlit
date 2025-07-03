@@ -1,10 +1,10 @@
 {
   "name": "@chainlit/react-client",
   "description": "Websocket client to connect to your chainlit app.",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "scripts": {
-    "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
-    "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
+    "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external zustand --minify --sourcemap --treeshake",
+    "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external zustand --minify --sourcemap --treeshake",
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noemit",
     "format": "prettier '**/*.{ts,tsx}' --write",
     "test": "echo no tests yet",
@@ -31,33 +31,35 @@
   "types": "dist/index.d.ts",
   "devDependencies": {
     "@swc/core": "^1.3.86",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/lodash": "^4.14.199",
     "@types/uuid": "^9.0.3",
     "@vitejs/plugin-react": "^4.0.4",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "jsdom": "^22.1.0",
     "tslib": "^2.6.2",
-    "tsup": "^7.2.0",
+    "tsup": "^8.4.0",
     "typescript": "^5.2.2",
     "vite": "^5.4.14",
     "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.34.4"
   },
   "peerDependencies": {
-    "@types/react": "^18.3.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "recoil": "^0.7.7"
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.3"
   },
   "dependencies": {
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "socket.io-client": "^4.7.2",
     "sonner": "^1.7.1",
-    "swr": "^2.2.2",
-    "uuid": "^9.0.0"
+    "swr": "^2.3.0",
+    "uuid": "^9.0.0",
+    "zustand": "^5.0.3"
   },
   "pnpm": {
     "overrides": {
