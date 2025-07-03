@@ -118,6 +118,7 @@ class Element:
                 "display": self.display,
                 "objectKey": getattr(self, "object_key", None),
                 "size": getattr(self, "size", None),
+                "element_name": getattr(self, "element_name", None),
                 "props": getattr(self, "props", None),
                 "page": getattr(self, "page", None),
                 "autoPlay": getattr(self, "auto_play", None),
@@ -182,7 +183,8 @@ class Element:
             return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
 
         elif type == "custom":
-            return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+            # For backwards compatibility, the name is used as the element_name
+            return CustomElement(element_name=e_dict.get("element_name", name), props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
@@ -447,9 +449,13 @@ class CustomElement(Element):
 
     type: ClassVar[ElementType] = "custom"
     mime: str = "application/json"
+    element_name: str = Field(default=None)
     props: Dict = Field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        # Backwards compatibility
+        if self.element_name is None:
+            self.element_name = self.name
         self.content = json.dumps(self.props)
         super().__post_init__()
         self.updatable = True
