@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, Union
 
 import boto3  # type: ignore
@@ -46,7 +47,8 @@ class S3StorageClient(BaseStorageClient):
             self.client.put_object(
                 Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime
             )
-            url = f"https://{self.bucket}.s3.amazonaws.com/{object_key}"
+            endpoint = os.environ.get("DEV_AWS_ENDPOINT", "amazonaws.com")
+            url = f"https://{self.bucket}.s3.{endpoint}/{object_key}"
             return {"object_key": object_key, "url": url}
         except Exception as e:
             logger.warning(f"S3StorageClient, upload_file error: {e}")
