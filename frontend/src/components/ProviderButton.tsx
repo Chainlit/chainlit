@@ -7,6 +7,7 @@ import { Gitlab } from 'components/icons/Gitlab';
 import { Google } from 'components/icons/Google';
 import { Microsoft } from 'components/icons/Microsoft';
 import { Okta } from 'components/icons/Okta';
+import { Zitadel } from 'components/icons/Zitadel';
 
 import { Button } from './ui/button';
 
@@ -27,6 +28,8 @@ function getProviderName(provider: string) {
       return 'Descope';
     case 'aws-cognito':
       return 'Cognito';
+    case 'zitadel':
+      return 'Zitadel';      
     default:
       return capitalizeFirstLetter(provider);
   }
@@ -51,6 +54,8 @@ function renderProviderIcon(provider: string) {
       return <Cognito />;
     case 'gitlab':
       return <Gitlab />;
+    case 'zitadel':
+      return <Zitadel />;      
     default:
       return null;
   }

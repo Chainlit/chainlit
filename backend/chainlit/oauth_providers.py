@@ -809,6 +809,78 @@ class GenericOAuthProvider(OAuthProvider):
             return (server_user, user)
 
 
+
+class ZitadelOAuthProvider(OAuthProvider):
+    env = [
+        "OAUTH_ZITADEL_CLIENT_ID",
+        "OAUTH_ZITADEL_CLIENT_SECRET",
+        "OAUTH_ZITADEL_BASE_URL",
+    ]
+    id = os.environ.get("OAUTH_ZITADEL_NAME", "zitadel")
+
+    def __init__(self):
+        self.client_id = os.environ.get("OAUTH_ZITADEL_CLIENT_ID")
+        self.client_secret = os.environ.get("OAUTH_ZITADEL_CLIENT_SECRET")
+        self.base_url = os.environ.get("OAUTH_ZITADEL_BASE_URL")
+
+        self.authorize_url = f"{self.base_url}/oauth/v2/authorize"
+        self.token_url = f"{self.base_url}/oauth/v2/token"
+        self.userinfo_url = f"{self.base_url}/oidc/v1/userinfo"
+
+        self.authorize_params = {
+            "scope": "openid profile email",
+            "response_type": "code",
+        }
+
+        if prompt := self.get_prompt():
+            self.authorize_params["prompt"] = prompt
+
+    async def get_token(self, code: str, url: str):
+        payload = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": url,
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/oauth/v2/token",
+                data=payload,
+            )
+            response.raise_for_status()
+            json = response.json()
+            token = json.get("access_token")
+            if not token:
+                raise httpx.HTTPStatusError(
+                    "Failed to get the access token",
+                    request=response.request,
+                    response=response,
+                )
+            return token
+
+    async def get_user_info(self, token: str):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{self.base_url}/oidc/v1/userinfo",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            response.raise_for_status()
+            zitadel_user = response.json()
+            user = User(
+                identifier=zitadel_user["email"],
+                metadata={
+                    "provider": "zitadel",
+                    "sub": zitadel_user.get("sub"),
+                    "name": zitadel_user.get("name"),
+                    "given_name": zitadel_user.get("given_name"),
+                    "family_name": zitadel_user.get("family_name"),
+                    "preferred_username": zitadel_user.get("preferred_username"),
+                },
+            )
+            return (zitadel_user, user)
+        
+
 providers = [
     GithubOAuthProvider(),
     GoogleOAuthProvider(),
@@ -820,6 +892,7 @@ providers = [
     AWSCognitoOAuthProvider(),
     GitlabOAuthProvider(),
     KeycloakOAuthProvider(),
+    ZitadelOAuthProvider(),
     GenericOAuthProvider(),
 ]
 
