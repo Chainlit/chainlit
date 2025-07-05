@@ -3,9 +3,9 @@ from typing import Union
 
 from literalai import ChatGeneration, CompletionGeneration
 
-from chainlit import timestamp_utc
 from chainlit.context import get_context
 from chainlit.step import Step
+from chainlit.utils import timestamp_utc
 
 
 def instrument_mistralai():

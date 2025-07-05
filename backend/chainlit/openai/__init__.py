@@ -3,10 +3,9 @@ from typing import Union
 
 from literalai import ChatGeneration, CompletionGeneration
 
-from chainlit import timestamp_utc
 from chainlit.context import local_steps
 from chainlit.step import Step
-from chainlit.utils import check_module_version
+from chainlit.utils import check_module_version, timestamp_utc
 
 
 def instrument_openai():
