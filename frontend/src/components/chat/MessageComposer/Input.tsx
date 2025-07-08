@@ -72,19 +72,19 @@ const Input = forwardRef<InputMethods, Props>(
       if (commandSpan) {
         commandSpan.remove();
       }
+      const html = clone.innerHTML;
 
-      return (
-        clone.innerHTML
-          ?.replace(/<br\s*\/?>/g, '\n') // Convert <br> to newlines
-          .replace(/<div>/g, '\n') // Convert <div> to newlines
-          .replace(/<\/div>/g, '') // Remove closing div tags
-          .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
-          .replace(/<[^>]*>/g, '') // Remove any other HTML tags
-          .replace(/&lt;/g, '<') // Convert &lt; back to
-          .replace(/&gt;/g, '>') // Convert &gt; back to >
-          .replace(/&amp;/g, '&')
-          .replace('\u200B', '') || ''
-      );
+      let text = html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<div>/gi, '\n')
+        .replace(/<\/div>/gi, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+
+      text = text.replace(/<[^>]*>/g, '');
+      return text.replace('\u200B', '');
     };
 
     const reset = () => {
@@ -243,44 +243,22 @@ const Input = forwardRef<InputMethods, Props>(
         event.preventDefault();
 
         const textData = event.clipboardData?.getData('text/plain');
-        if (textData) {
-          const lines = textData.split(/\r?\n/);
-          const fragment = document.createDocumentFragment();
+        if (!textData) return;
 
-          lines.forEach((line, index) => {
-            fragment.appendChild(document.createTextNode(line));
-            if (index !== lines.length - 1) {
-              fragment.appendChild(document.createElement('br'));
-            }
-          });
+        const htmlString = textData
+          .split(/\r?\n/)
+          .map((line) => line.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+          .join('<br>');
 
-          const selection = window.getSelection();
-          if (!selection?.rangeCount) return;
-
-          const range = selection.getRangeAt(0);
-          range.deleteContents();
-          range.insertNode(fragment);
-
-          range.collapse(false);
-          selection.removeAllRanges();
-          selection.addRange(range);
-
-          textarea.focus();
-
-          const inputEvent = new Event('input', {
-            bubbles: true,
-            composed: true
-          });
-          textarea.dispatchEvent(inputEvent);
-        }
+        document.execCommand('insertHTML', false, htmlString);
         onPaste(event);
       };
 
       // Use the capture phase to ensure we catch the event before it can bubble
-      textarea.addEventListener('paste', handlePaste);
+      textarea.addEventListener('paste', handlePaste, true);
 
       return () => {
-        textarea.removeEventListener('paste', handlePaste);
+        textarea.removeEventListener('paste', handlePaste, true);
       };
     }, [onPaste]);
 
