@@ -16,7 +16,7 @@ export default function ElementSideView() {
 
   return (
     <Dialog open onOpenChange={(open) => !open && setSideView(undefined)}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <DialogContent className="max-w-[80%]">
         <DialogHeader>
           <DialogTitle>{sideView.title}</DialogTitle>
         </DialogHeader>
