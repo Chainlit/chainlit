@@ -818,6 +818,9 @@ async def update_feedback(
 
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
+
+        if config.code.on_feedback:
+            await config.code.on_feedback(update.feedback)
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=500) from e
 
