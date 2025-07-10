@@ -113,7 +113,6 @@ module = [
     "plotly",
     "nest_asyncio",
     "socketio.*",
-    "uptrace",
     "syncer",
     "azure.storage.filedatalake",
     "google-cloud-storage",
