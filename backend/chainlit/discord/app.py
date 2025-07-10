@@ -21,7 +21,6 @@ from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import Message, StepDict
-from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
@@ -131,7 +130,6 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 
-@trace
 def init_discord_context(
     session: HTTPSession,
     channel: "MessageableChannel",

@@ -16,7 +16,6 @@ from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import Message, StepDict
-from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
@@ -126,7 +125,6 @@ slack_app = AsyncApp(
 )
 
 
-@trace
 def init_slack_context(
     session: HTTPSession,
     slack_channel_id: str,

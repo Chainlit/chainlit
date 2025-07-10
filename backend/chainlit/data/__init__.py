@@ -25,15 +25,12 @@ def get_data_layer():
 
         else:
             from chainlit.config import config
-            from chainlit.telemetry import trace_event
 
             if config.code.data_layer:
                 # When @data_layer is configured, call it to get data layer.
                 _data_layer = config.code.data_layer()
             elif database_url := os.environ.get("DATABASE_URL"):
                 from .chainlit_data_layer import ChainlitDataLayer
-
-                trace_event("Init Chainlit official data layer")
 
                 if os.environ.get("LITERAL_API_KEY"):
                     warnings.warn(
@@ -102,8 +99,6 @@ def get_data_layer():
             elif api_key := os.environ.get("LITERAL_API_KEY"):
                 # When LITERAL_API_KEY is defined, use Literal AI data layer
                 from .literalai import LiteralDataLayer
-
-                trace_event("Init Literal AI data layer")
 
                 # support legacy LITERAL_SERVER variable as fallback
                 server = os.environ.get("LITERAL_API_URL") or os.environ.get(

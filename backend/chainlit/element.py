@@ -23,7 +23,6 @@ from syncer import asyncio
 from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
-from chainlit.telemetry import trace_event
 
 mime_types = {
     "text": "text/plain",
@@ -99,7 +98,6 @@ class Element:
     mime: Optional[str] = None
 
     def __post_init__(self) -> None:
-        trace_event(f"init {self.__class__.__name__}")
         self.persisted = False
         self.updatable = False
 
@@ -228,7 +226,6 @@ class Element:
         return True
 
     async def remove(self):
-        trace_event(f"remove {self.__class__.__name__}")
         data_layer = get_data_layer()
         if data_layer:
             await data_layer.delete_element(self.id, self.thread_id)
@@ -252,7 +249,6 @@ class Element:
         if not self.url and not self.chainlit_key:
             raise ValueError("Must provide url or chainlit key to send element")
 
-        trace_event(f"send {self.__class__.__name__}")
         await context.emitter.send_element(self.to_dict())
 
 
