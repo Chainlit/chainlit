@@ -428,3 +428,25 @@ def data_layer(
     # 2. We don't want to change the API for get_data_layer() to be async, everywhere (at this point).
     config.code.data_layer = func
     return func
+
+
+@trace
+def on_feedback(func: Callable) -> Callable:
+    """
+    Hook to react to user feedback events from the UI.
+    The decorated function is called every time feedback is received.
+
+    Args:
+        func (Callable[[Feedback], Any]): The function to be called when feedback is received. Takes a cl.Feedback object.
+
+    Example:
+        @cl.on_feedback
+        async def on_feedback(feedback: Feedback):
+            print(f"Received feedback: {feedback.value} for step {feedback.forId}")
+            # Handle feedback here
+
+    Returns:
+        Callable[[Feedback], Any]: The decorated on_feedback function.
+    """
+    config.code.on_feedback = wrap_user_function(func)
+    return func
