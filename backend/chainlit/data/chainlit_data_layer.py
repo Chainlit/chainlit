@@ -548,7 +548,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "name": thread_name,
             "userId": user_id,
             "tags": tags,
-            "metadata": json.dumps(metadata) if metadata is not None else None,
+            "metadata": json.dumps(metadata or {}),
         }
 
         # Remove None values
