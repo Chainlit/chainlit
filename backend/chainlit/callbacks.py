@@ -408,7 +408,6 @@ def data_layer(
     return func
 
 
-@trace
 def on_feedback(func: Callable) -> Callable:
     """
     Hook to react to user feedback events from the UI.
