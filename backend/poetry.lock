@@ -3679,22 +3679,6 @@ deprecated = ">=1.2.6"
 importlib-metadata = ">=6.0,<8.7.0"
 
 [[package]]
-name = "opentelemetry-exporter-otlp"
-version = "1.31.1"
-description = "OpenTelemetry Collector Exporters"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "opentelemetry_exporter_otlp-1.31.1-py3-none-any.whl", hash = "sha256:36286c28709cbfba5177129ec30bfe4de67bdec8f375c1703014e0eea44322c6"},
-    {file = "opentelemetry_exporter_otlp-1.31.1.tar.gz", hash = "sha256:004db12bfafb9e07b79936783d91db214b1e208a152b5c36b1f2ef2264940692"},
-]
-
-[package.dependencies]
-opentelemetry-exporter-otlp-proto-grpc = "1.31.1"
-opentelemetry-exporter-otlp-proto-http = "1.31.1"
-
-[[package]]
 name = "opentelemetry-exporter-otlp-proto-common"
 version = "1.31.1"
 description = "OpenTelemetry Protobuf encoding"
@@ -6762,24 +6746,6 @@ files = [
 ]
 
 [[package]]
-name = "uptrace"
-version = "1.31.0"
-description = "OpenTelemetry Python distribution for Uptrace"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "uptrace-1.31.0-py3-none-any.whl", hash = "sha256:8be5710442dbea47bffe1fab0ffb3c57ad529f1a35cb4b62cb4bfc790f93f1f4"},
-    {file = "uptrace-1.31.0.tar.gz", hash = "sha256:8fad08ec159b7f93e4aa04e834005875f602b9ea369c99c9778d0e87ea0deca6"},
-]
-
-[package.dependencies]
-opentelemetry-api = ">=1.31.0,<1.32.0"
-opentelemetry-exporter-otlp = ">=1.31.0,<1.32.0"
-opentelemetry-instrumentation = ">=0.52b0,<1.0"
-opentelemetry-sdk = ">=1.31.0,<1.32.0"
-
-[[package]]
 name = "urllib3"
 version = "2.3.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -7185,4 +7151,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0.0"
-content-hash = "2717f73222c39784f0077385a239408179d1759729e2b05fc7a81d201399f512"
+content-hash = "abe8769422ab6425eb4bc375bf5870b04e27f89dfab219df740fa9ddda884c07"

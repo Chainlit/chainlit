@@ -15,7 +15,6 @@ from chainlit.data import get_data_layer
 from chainlit.element import CustomElement, ElementBased
 from chainlit.logger import logger
 from chainlit.step import StepDict
-from chainlit.telemetry import trace_event
 from chainlit.types import (
     AskActionResponse,
     AskActionSpec,
@@ -48,7 +47,6 @@ class MessageBase(ABC):
     wait_for_answer = False
 
     def __post_init__(self) -> None:
-        trace_event(f"init {self.__class__.__name__}")
         self.thread_id = context.session.thread_id
 
         previous_steps = local_steps.get() or []
@@ -102,7 +100,6 @@ class MessageBase(ABC):
         """
         Update a message already sent to the UI.
         """
-        trace_event("update_message")
 
         if self.streaming:
             self.streaming = False
@@ -127,7 +124,6 @@ class MessageBase(ABC):
         """
         Remove a message already sent to the UI.
         """
-        trace_event("remove_message")
         chat_context.remove(self)
         step_dict = self.to_dict()
         data_layer = get_data_layer()
@@ -269,7 +265,6 @@ class Message(MessageBase):
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
         """
-        trace_event("send_message")
         await super().send()
 
         # Create tasks for all actions and elements
@@ -286,7 +281,6 @@ class Message(MessageBase):
         Send the message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
         """
-        trace_event("send_message")
         await super().update()
 
         # Update tasks for all actions and elements
@@ -336,7 +330,6 @@ class ErrorMessage(MessageBase):
         Send the error message to the UI and persist it in the cloud if a project ID is configured.
         Return the ID of the message.
         """
-        trace_event("send_error_message")
         return await super().send()
 
 
@@ -380,7 +373,6 @@ class AskUserMessage(AskMessageBase):
         """
         Sends the question to ask to the UI and waits for the reply.
         """
-        trace_event("send_ask_user")
         if not self.created_at:
             self.created_at = utc_now()
 
@@ -448,8 +440,6 @@ class AskFileMessage(AskMessageBase):
         """
         Sends the message to request a file from the user to the UI and waits for the reply.
         """
-        trace_event("send_ask_file")
-
         if not self.created_at:
             self.created_at = utc_now()
 
@@ -520,8 +510,6 @@ class AskActionMessage(AskMessageBase):
         """
         Sends the question to ask to the UI and waits for the reply
         """
-        trace_event("send_ask_action")
-
         if not self.created_at:
             self.created_at = utc_now()
 
@@ -588,8 +576,6 @@ class AskElementMessage(AskMessageBase):
 
     async def send(self) -> Union[AskElementResponse, None]:
         """Send the custom element to the UI and wait for the reply."""
-        trace_event("send_ask_element")
-
         if not self.created_at:
             self.created_at = utc_now()
 
