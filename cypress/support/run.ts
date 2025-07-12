@@ -38,9 +38,6 @@ export const runChainlitForTest = async (
     if (mode === ExecutionMode.Async) file = 'main_async.py';
     if (mode === ExecutionMode.Sync) file = 'main_sync.py';
 
-    // Use the full path to the file
-    const fullPath = join(dir, file);
-
     // Headless + CI mode
     const options = [
       'run',
@@ -48,9 +45,9 @@ export const runChainlitForTest = async (
       BACKEND_DIR,
       'chainlit',
       'run',
-      fullPath,
+      file,
       '-h',
-      '--ci'
+      '-c'
     ];
 
     const server = spawn('poetry', options, {
