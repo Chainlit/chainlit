@@ -41,7 +41,7 @@ export const runChainlitForTest = async (
     // Headless + CI mode
     const options = [
       'run',
-      '-C',
+      '--project',
       BACKEND_DIR,
       'chainlit',
       'run',
