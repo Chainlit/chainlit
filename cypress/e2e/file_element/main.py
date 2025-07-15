@@ -22,25 +22,21 @@ async def start():
         cl.File(
             name="example.mp4",
             path=mp4_path,
-            display="inline",
             mime="video/mp4",
         ),
         cl.File(
             name="cat.jpeg",
             path=jpeg_path,
-            display="inline",
             mime="image/jpg",
         ),
         cl.File(
             name="hello.py",
             path=python_file_path,
-            display="inline",
             mime="plain/py",
         ),
         cl.File(
             name="example.mp3",
             path=mp3_path,
-            display="inline",
             mime="audio/mp3",
         ),
     ]

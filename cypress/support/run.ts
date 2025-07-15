@@ -42,10 +42,18 @@ export const runChainlitForTest = async (
 
     const command = 'poetry';
 
-    const options = ['run', 'chainlit', 'run', fullPath, '-h', '--ci'];
+    const options = [
+      '--project',
+      BACKEND_DIR,
+      'run',
+      'chainlit',
+      'run',
+      fullPath,
+      '-h',
+      '--ci'
+    ];
 
     const spawnOptions: SpawnOptionsWithoutStdio = {
-      cwd: BACKEND_DIR,
       env: {
         ...process.env,
         CHAINLIT_APP_ROOT: testDir

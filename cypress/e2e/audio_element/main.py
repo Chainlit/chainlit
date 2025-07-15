@@ -10,6 +10,6 @@ audio_path = os.path.join(script_directory, "../../fixtures/example.mp3")
 
 @cl.on_chat_start
 async def start():
-    elements = [cl.Audio(name="example.mp3", path=audio_path, display="inline")]
+    elements = [cl.Audio(name="example.mp3", path=audio_path)]
 
     await cl.Message(content="This message has an audio", elements=elements).send()

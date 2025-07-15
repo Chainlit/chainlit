@@ -29,7 +29,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 
 1. Python >= `3.10`
 2. Poetry ([See how to install](https://python-poetry.org/docs/#installation))
-3. NodeJS >= `16` ([See how to install](https://nodejs.org/en/download))
+3. NodeJS >= `24` ([See how to install](https://nodejs.org/en/download))
 4. Pnpm ([See how to install](https://pnpm.io/installation))
 
 > **Note**
