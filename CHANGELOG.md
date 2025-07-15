@@ -4,6 +4,25 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.1] - 2025-07-15
+
+### Added
+- New `on_feedback` callback
+- Relaxed restriction on number of starters (now more than 4 can be displayed)
+
+### Fixed
+- Command persistence when `"button": True` is missing from command definition
+- `openai` and `mistralai` sub-modules fail due to incorrect `timestamp_utc` import
+- Temporarily reverted fix caused the following issues with Chainlit data layer:
+  - `null value in column "metadata" of relation "Thread"`
+  - `syntax error at or near ";"`
+- Google Cloud Storage private bucket support in Chainlit data layer
+- Portals (popups, dialogs, etc.) now render correctly inside Copilot’s shadow DOM
+
+### Other
+- Removed telemetry
+- Updated versions for Node.js, Poetry, and pnpm; added Corepack support
+
 ## [2.6.0] - 2025-07-01
 
 ### Added
@@ -28,7 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Only update thread metadata when not empty
 
 ### Breaking
-- **LiteralAI** is being sunset and will be removed in the next release. Please migrate to the official data layer instead.
+- **LiteralAI** is being sunset and will be removed in one of the next releases. Please migrate to the official data layer instead.
 - Telemetry is now opt-in by default and will be removed in the next release.
 
 ## [2.5.5] - 2025-04-14
