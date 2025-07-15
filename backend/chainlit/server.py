@@ -1106,9 +1106,10 @@ async def connect_mcp(
         get_default_environment,
         stdio_client,
     )
+    from mcp.client.streamable_http import streamablehttp_client 
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
+    from chainlit.mcp import McpConnection, SseMcpConnection, StdioMcpConnection, HttpMcpConnection, validate_mcp_command
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1144,7 +1145,7 @@ async def connect_mcp(
                         detail="SSE MCP is not enabled",
                     )
 
-                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
+                mcp_connection: McpConnection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
 
                 transport = await exit_stack.enter_async_context(
                     sse_client(url=mcp_connection.url)
@@ -1157,9 +1158,11 @@ async def connect_mcp(
                     )
 
                 env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
-                mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
-                    command=command, args=args, name=payload.name
-                )  # type: StdioMcpConnection
+                mcp_connection: McpConnection = StdioMcpConnection(
+                    command=command,
+                    args=args,
+                    name=payload.name
+                )
 
                 env = get_default_environment()
                 env.update(env_from_cmd)
@@ -1167,11 +1170,22 @@ async def connect_mcp(
                 server_params = StdioServerParameters(
                     command=command,
                     args=args,
-                    env=env,
+                    env=env
                 )
 
                 transport = await exit_stack.enter_async_context(
                     stdio_client(server_params)
+                )
+
+            elif payload.clientType == "streamable-http":
+                if not config.features.mcp.http.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="HTTP MCP is not enabled",
+                    )
+                mcp_connection: McpConnection = HttpMcpConnection(url=payload.url, name=payload.name)
+                transport = await exit_stack.enter_async_context(
+                    streamablehttp_client(url=mcp_connection.url)
                 )
 
             read, write = transport

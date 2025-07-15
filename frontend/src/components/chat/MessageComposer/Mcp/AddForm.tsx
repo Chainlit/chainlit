@@ -25,23 +25,26 @@ interface McpAddFormProps {
   onCancel: () => void;
   allowStdio?: boolean;
   allowSse?: boolean;
+  allowHttp?: boolean;
 }
 
 export const McpAddForm = ({
   onSuccess,
   onCancel,
   allowStdio,
-  allowSse
+  allowSse,
+  allowHttp
 }: McpAddFormProps) => {
   const apiClient = useContext(ChainlitContext);
   const sessionId = useRecoilValue(sessionIdState);
   const setMcps = useSetRecoilState(mcpState);
 
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState<'stdio' | 'sse'>(
-    allowStdio ? 'stdio' : 'sse'
+  const [serverType, setServerType] = useState<'stdio' | 'sse' | 'streamable-http'>(
+    allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http'
   );
   const [serverUrl, setServerUrl] = useState('');
+  const [httpUrl, setHttpUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,16 +54,20 @@ export const McpAddForm = ({
 
     if (serverType === 'stdio') {
       return !!serverCommand.trim();
-    } else {
+    } else if (serverType === 'sse') {
       return !!serverUrl.trim();
+    } else if (serverType === 'streamable-http') {
+      return !!httpUrl.trim();
     }
+    return false;
   };
 
   const resetForm = () => {
     setServerName('');
-    setServerType('stdio');
+    setServerType(allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http');
     setServerUrl('');
     setServerCommand('');
+    setHttpUrl('');
   };
 
   const addMcp = () => {
@@ -84,10 +91,28 @@ export const McpAddForm = ({
           error: (err) => <span>{err.message}</span>
         }
       );
-    } else {
+    } else if (serverType === 'sse') {
       toast.promise(
         apiClient
           .connectSseMCP(sessionId, serverName, serverUrl)
+          .then(async ({ success, mcp }) => {
+            if (success && mcp) {
+              setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
+            }
+            resetForm();
+            onSuccess();
+          })
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Adding MCP...',
+          success: () => 'MCP added!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    } else if (serverType === 'streamable-http') {
+      toast.promise(
+        apiClient
+          .connectStreamableHttpMCP(sessionId, serverName, httpUrl)
           .then(async ({ success, mcp }) => {
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
@@ -141,40 +166,62 @@ export const McpAddForm = ({
               </SelectTrigger>
               <SelectContent>
                 {allowSse ? <SelectItem value="sse">sse</SelectItem> : null}
-                {allowStdio ? (
-                  <SelectItem value="stdio">stdio</SelectItem>
-                ) : null}
+                {allowStdio ? <SelectItem value="stdio">stdio</SelectItem> : null}
+                {allowHttp ? <SelectItem value="streamable-http">streamable-http</SelectItem> : null}
               </SelectContent>
             </Select>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label
-            htmlFor="server-endpoint"
-            className="text-foreground/70 text-sm"
-          >
-            {serverType === 'sse' ? 'Server URL *' : 'Command *'}
-          </Label>
-          <Input
-            id="server-endpoint"
-            placeholder={
-              serverType === 'sse'
-                ? 'Example: http://localhost:5000'
-                : 'Example: npx -y @stripe/mcp --tools=all --api-key=YOUR_STRIPE_SECRET_KEY'
-            }
-            className="w-full bg-background text-foreground border-input"
-            value={serverType === 'sse' ? serverUrl : serverCommand}
-            onChange={(e) => {
-              if (serverType === 'sse') {
-                setServerUrl(e.target.value);
-              } else {
-                setServerCommand(e.target.value);
-              }
-            }}
-            required
-            disabled={isLoading}
-          />
+          {serverType === 'stdio' && (
+            <>
+              <Label htmlFor="server-command" className="text-foreground/70 text-sm">
+                Command *
+              </Label>
+              <Input
+                id="server-command"
+                placeholder="Example: npx -y @stripe/mcp --tools=all --api-key=YOUR_STRIPE_SECRET_KEY"
+                className="w-full bg-background text-foreground border-input"
+                value={serverCommand}
+                onChange={(e) => setServerCommand(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {serverType === 'sse' && (
+            <>
+              <Label htmlFor="server-url" className="text-foreground/70 text-sm">
+                Server URL *
+              </Label>
+              <Input
+                id="server-url"
+                placeholder="Example: http://localhost:5000"
+                className="w-full bg-background text-foreground border-input"
+                value={serverUrl}
+                onChange={(e) => setServerUrl(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {serverType === 'streamable-http' && (
+            <>
+              <Label htmlFor="http-url" className="text-foreground/70 text-sm">
+                HTTP URL *
+              </Label>
+              <Input
+                id="http-url"
+                placeholder="Example: http://localhost:8000/stream"
+                className="w-full bg-background text-foreground border-input"
+                value={httpUrl}
+                onChange={(e) => setHttpUrl(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
         </div>
       </div>
 

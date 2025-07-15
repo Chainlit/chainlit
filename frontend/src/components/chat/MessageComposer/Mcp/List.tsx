@@ -114,10 +114,16 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
         <div className="font-medium text-sm text-muted-foreground flex items-center">
           {mcp.clientType === 'stdio' ? (
             <SquareTerminal className="h-4 w-4 mr-2" />
+          ) : mcp.clientType === 'streamable-http' ? (
+            <Link className="h-4 w-4 mr-2 text-blue-500" />
           ) : (
             <Link className="h-4 w-4 mr-2" />
           )}
-          {mcp.clientType === 'stdio' ? 'Command' : 'URL'}
+          {mcp.clientType === 'stdio'
+            ? 'Command'
+            : mcp.clientType === 'streamable-http'
+            ? 'HTTP URL'
+            : 'URL'}
         </div>
         <div className="flex items-center w-full bg-accent px-3 py-1 rounded gap-2">
           <pre className="text-sm font-mono flex-grow truncate">
@@ -226,6 +232,23 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
       toast.promise(
         apiClient
           .connectStdioMCP(sessionId, mcp.name, mcp.command!)
+          .then(async ({ success, mcp: updatedMcp }) => {
+            updateMcpStatus(success, updatedMcp);
+          })
+          .catch(() => {
+            updateMcpStatus(false);
+          })
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Reconnecting MCP...',
+          success: () => 'MCP reconnected!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    } else if (mcp.clientType === 'streamable-http') {
+      toast.promise(
+        apiClient
+          .connectStreamableHttpMCP(sessionId, mcp.name, mcp.url!)
           .then(async ({ success, mcp: updatedMcp }) => {
             updateMcpStatus(success, updatedMcp);
           })

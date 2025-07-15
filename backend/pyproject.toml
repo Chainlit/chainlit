@@ -25,7 +25,7 @@ classifiers = [
     "Programming Language :: JavaScript",
     "Topic :: Software Development :: User Interfaces",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Environment :: Web Environment"
+    "Environment :: Web Environment",
 ]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
@@ -51,7 +51,7 @@ python-socketio = "^5.11.0"
 aiofiles = ">=23.1.0,<25.0.0"
 syncer = "^2.0.3"
 asyncer = "^0.0.8"
-mcp = "^1.3.0"
+mcp = "^1.11.0"
 nest-asyncio = "^1.6.0"
 click = "^8.1.3"
 tomli = "^2.0.1"
@@ -119,15 +119,10 @@ module = [
     "azure.storage.blob",
     "azure.storage.blob.aio",
     "google.auth",
-    "google.oauth2"
+    "google.oauth2",
 ]
 
 ignore_missing_imports = true
-
-
-
-
-
 
 
 [tool.poetry.group.custom-data]
@@ -139,7 +134,7 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
-azure-storage-blob="^12.24.0"
+azure-storage-blob = "^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]
@@ -155,8 +150,35 @@ asyncio_mode = "auto"
 target-version = "py39"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "LOG", "UP", "T10", "ISC", "ICN", "LOG", "G", "PIE", "PT", "Q", "RSE", "FURB", "RUF"]
-ignore = ["E712", "E501", "UP006", "UP035","PIE790", "RUF005", "RUF006", "RUF012", "ISC001"]
+select = [
+    "E",
+    "F",
+    "I",
+    "LOG",
+    "UP",
+    "T10",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "E712",
+    "E501",
+    "UP006",
+    "UP035",
+    "PIE790",
+    "RUF005",
+    "RUF006",
+    "RUF012",
+    "ISC001",
+]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
