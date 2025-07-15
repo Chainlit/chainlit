@@ -53,7 +53,6 @@ export const runChainlitForTest = async (
     const server = spawn('poetry', options, {
       cwd: dir
     });
-    console.log(options);
 
     server.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
