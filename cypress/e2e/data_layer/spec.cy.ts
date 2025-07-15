@@ -107,8 +107,11 @@ describe('Data Layer', () => {
 
   afterEach(() => {
     cy.get('@threadHistoryFile').then((threadHistoryFile) => {
-      // Clean up the thread history file
-      cy.exec(`rm -f ${threadHistoryFile}`);
+      const isWin = Cypress.platform === 'win32';
+      const deleteCmd = isWin
+        ? `del /f "${threadHistoryFile}"`
+        : `rm -f "${threadHistoryFile}"`;
+      cy.exec(deleteCmd);
     });
   });
 
