@@ -3,102 +3,134 @@ import { sep } from 'path';
 import { runTestServer, submitMessage } from '../../support/testUtils';
 import { ExecutionMode } from '../../support/utils';
 
-function login() {
-  cy.get("[id='email']").type('admin');
-  cy.get("[id='password']").type('admin{enter}');
+// Constants for selectors and timeouts
+const SELECTORS = {
+  EMAIL_INPUT: '#email',
+  PASSWORD_INPUT: '#password',
+  POSITIVE_FEEDBACK: '.positive-feedback-off',
+  NEGATIVE_FEEDBACK: '.negative-feedback-off',
+  SUBMIT_FEEDBACK: '#submit-feedback',
+  POSITIVE_FEEDBACK_ACTIVE: '.positive-feedback-on',
+  STEP: '.step',
+  THREAD_TEST1: '#thread-test1',
+  THREAD_TEST2: '#thread-test2',
+  THREAD_OPTIONS: '#thread-options',
+  DELETE_THREAD: '#delete-thread',
+  CONFIRM_BUTTON: "[role='alertdialog'] button.bg-primary",
+  NEW_CHAT_BUTTON: '#new-chat-button',
+  CONFIRM_NEW: '#confirm'
+} as const;
+
+const TIMEOUTS = {
+  SHORT: 100,
+  MEDIUM: 1000,
+  LONG: 2000
+} as const;
+
+// Types
+interface ServerEnv {
+  THREAD_HISTORY_PICKLE_PATH: string;
+  [key: string]: string;
 }
 
-function feedback() {
-  cy.location('pathname').should((loc) => {
-    expect(loc).to.eq('/');
-  });
+// Utility functions
+const login = () => {
+  cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
+  cy.get(SELECTORS.PASSWORD_INPUT).should('be.visible').type('admin{enter}');
+};
+
+const verifyFeedback = () => {
+  cy.location('pathname').should('eq', '/');
   submitMessage('Hello');
-  cy.location('pathname').should((loc) => {
-    // starts with /thread/
-    expect(loc).to.match(/^\/thread\//);
-  });
-  cy.get('.negative-feedback-off').should('have.length', 1);
-  cy.get('.positive-feedback-off').should('have.length', 1).eq(0).click();
-  cy.get('#submit-feedback').click();
-  cy.get('.positive-feedback-on').should('have.length', 1);
-}
+  cy.location('pathname').should('match', /^\/thread\//);
 
-function threadQueue() {
-  cy.get('.step').eq(1).should('contain', 'Create step counter: 0');
-  cy.get('.step').eq(3).should('contain', 'Create step counter: 5');
-  cy.get('.step').eq(6).should('contain', 'Create step counter: 8');
-}
+  cy.get(SELECTORS.NEGATIVE_FEEDBACK).should('have.length', 1);
+  cy.get(SELECTORS.POSITIVE_FEEDBACK).should('have.length', 1).first().click();
+  cy.get(SELECTORS.SUBMIT_FEEDBACK).should('be.visible').click();
+  cy.get(SELECTORS.POSITIVE_FEEDBACK_ACTIVE).should('have.length', 1);
+};
 
-function threadList() {
-  cy.get('#thread-test1').should('contain', 'thread 1');
-  cy.get('#thread-test2').should('contain', 'thread 2');
+const verifyThreadQueue = () => {
+  cy.get(SELECTORS.STEP).eq(1).should('contain.text', 'Create step counter: 0');
+  cy.get(SELECTORS.STEP).eq(3).should('contain.text', 'Create step counter: 5');
+  cy.get(SELECTORS.STEP).eq(6).should('contain.text', 'Create step counter: 8');
+};
+
+const verifyThreadList = () => {
+  cy.get(SELECTORS.THREAD_TEST1).should('contain.text', 'thread 1');
+  cy.get(SELECTORS.THREAD_TEST2).should('contain.text', 'thread 2');
 
   // Test thread page
-  cy.get('#thread-test1').click();
-  cy.get('.step').should('have.length', 2);
-  cy.get('.step').eq(0).should('contain', 'Message 1');
-  cy.get('.step').eq(1).should('contain', 'Message 2');
+  cy.get(SELECTORS.THREAD_TEST1).click();
+  cy.get(SELECTORS.STEP).should('have.length', 2);
+  cy.get(SELECTORS.STEP).eq(0).should('contain.text', 'Message 1');
+  cy.get(SELECTORS.STEP).eq(1).should('contain.text', 'Message 2');
 
-  // Test thread delete
-  cy.get('#thread-test1').find('#thread-options').click();
-  cy.wait(100);
-  cy.get('#delete-thread').click();
-  cy.wait(100);
-  cy.get("[role='alertdialog'] button.bg-primary").click();
-  cy.wait(100);
-  cy.get('#thread-test1').should('not.exist');
-  // Close the thread options popover
+  // Test thread deletion
+  cy.get(SELECTORS.THREAD_TEST1).find(SELECTORS.THREAD_OPTIONS).click();
+  cy.wait(TIMEOUTS.SHORT);
+  cy.get(SELECTORS.DELETE_THREAD).click();
+  cy.wait(TIMEOUTS.SHORT);
+  cy.get(SELECTORS.CONFIRM_BUTTON).click();
+  cy.wait(TIMEOUTS.SHORT);
+  cy.get(SELECTORS.THREAD_TEST1).should('not.exist');
   cy.get('body').type('{esc}');
-}
+};
 
-function resumeThread() {
-  // Go to the "thread 2" thread and resume it
-  cy.get('#thread-test2').click();
-  cy.wait(1000);
-  // back to the "hello" thread
+const verifyThreadResume = () => {
+  cy.get(SELECTORS.THREAD_TEST2).click();
+  cy.wait(TIMEOUTS.MEDIUM);
   cy.get('a').contains('Hello').click();
-  cy.wait(1000);
+  cy.wait(TIMEOUTS.MEDIUM);
 
-  cy.get('.step').should('have.length', 10);
+  cy.get(SELECTORS.STEP).should('have.length', 10);
+  cy.get(SELECTORS.STEP).eq(0).should('contain.text', 'Hello');
+  cy.get(SELECTORS.STEP).eq(7).should('contain.text', 'Welcome back to Hello');
+  cy.get(SELECTORS.STEP).eq(8).should('contain.text', 'chat_profile');
+};
 
-  cy.get('.step').eq(0).should('contain', 'Hello');
-  cy.get('.step').eq(7).should('contain', 'Welcome back to Hello');
-  cy.get('.step').eq(8).should('contain', 'chat_profile');
-}
-
-function restartServer(
-  mode: ExecutionMode = undefined,
-  env?: Record<string, string>
-) {
+const restartServer = (mode: ExecutionMode | undefined, env: ServerEnv) => {
   const pathItems = Cypress.spec.absolute.split(sep);
   const testName = pathItems[pathItems.length - 2];
-  cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`, {
-    env
+
+  cy.exec(
+    `pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode || ''}`,
+    {
+      env,
+      failOnNonZeroExit: false
+    }
+  ).then((result) => {
+    if (result.code !== 0) {
+      throw new Error(`Server restart failed: ${result.stderr}`);
+    }
   });
-}
+};
 
-function continueThread() {
-  cy.get('.step').eq(7).should('contain', 'Welcome back to Hello');
-
+const verifyContinueThread = () => {
+  cy.get(SELECTORS.STEP).eq(7).should('contain.text', 'Welcome back to Hello');
   submitMessage('Hello after restart');
 
-  // Verify that new step counter messages have been added
-  cy.get('.step').eq(11).should('contain', 'Create step counter: 14');
-  cy.get('.step').eq(14).should('contain', 'Create step counter: 17');
-}
+  cy.get(SELECTORS.STEP)
+    .eq(11)
+    .should('contain.text', 'Create step counter: 14');
+  cy.get(SELECTORS.STEP)
+    .eq(14)
+    .should('contain.text', 'Create step counter: 17');
+};
 
-function newThread() {
-  cy.get('#new-chat-button').click();
-  cy.get('#confirm').click();
-}
+const startNewThread = () => {
+  cy.get(SELECTORS.NEW_CHAT_BUTTON).click();
+  cy.get(SELECTORS.CONFIRM_NEW).click();
+};
 
 describe('Data Layer', () => {
+  let threadHistoryFile: string;
+
   beforeEach(() => {
-    // Set up the thread history file
+    // Setup thread history file
     const pathItems = Cypress.spec.absolute.split(sep);
     pathItems[pathItems.length - 1] = 'thread_history.pickle';
-    const threadHistoryFile = pathItems.join(sep);
-    cy.wrap(threadHistoryFile).as('threadHistoryFile');
+    threadHistoryFile = pathItems.join(sep);
 
     runTestServer(undefined, {
       THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
@@ -106,41 +138,35 @@ describe('Data Layer', () => {
   });
 
   afterEach(() => {
-    cy.get('@threadHistoryFile').then((threadHistoryFile) => {
-      // Clean up the thread history file
-      cy.exec(`rm -f ${threadHistoryFile}`);
-    });
+    // Clean up thread history file
+    cy.exec(`rm -f ${threadHistoryFile}`, { failOnNonZeroExit: false });
   });
 
-  describe('Data Features with persistence', () => {
-    it('should login, submit feedback, wait for user input to create steps, browse thread history, delete a thread and then resume a thread', () => {
+  describe('Data Features with Persistence', () => {
+    it('Verifies login, feedback, thread queue, thread list, and thread resume functionality', () => {
       login();
-      cy.wait(1000);
-      feedback();
-      threadQueue();
-      threadList();
-      resumeThread();
+      cy.wait(TIMEOUTS.MEDIUM);
+      verifyFeedback();
+      verifyThreadQueue();
+      verifyThreadList();
+      verifyThreadResume();
     });
 
-    it('should continue the thread after backend restarts and work with new thread as usual', () => {
+    it('Verifies thread continuation after server restart and new thread creation', () => {
       login();
-      cy.wait(1000);
-      feedback();
-      threadQueue();
+      cy.wait(TIMEOUTS.MEDIUM);
+      verifyFeedback();
+      verifyThreadQueue();
 
-      cy.get('@threadHistoryFile').then((threadHistoryFile) => {
-        restartServer(undefined, {
-          THREAD_HISTORY_PICKLE_PATH: `${threadHistoryFile}`
-        });
+      restartServer(undefined, {
+        THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
       });
-      // Continue the thread and verify that the step counter is not reset
-      continueThread();
 
-      // Create a new thread and verify that the step counter is reset
-      newThread();
-      cy.wait(1000);
-      feedback();
-      threadQueue();
+      verifyContinueThread();
+      startNewThread();
+      cy.wait(TIMEOUTS.MEDIUM);
+      verifyFeedback();
+      verifyThreadQueue();
     });
   });
 });

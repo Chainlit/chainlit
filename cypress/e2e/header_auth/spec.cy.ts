@@ -19,7 +19,7 @@ describe('Header auth', () => {
     const setupInterceptors = () => {
       cy.intercept('/auth/header', (req) => {
         req.headers['test-header'] = 'test header value';
-        req.continue();
+        req.reply();
       }).as('auth');
 
       // Only intercept /user _after_ we're logged in.
