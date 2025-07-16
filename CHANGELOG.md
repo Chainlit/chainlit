@@ -4,6 +4,10 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.2] - 2025-07-16
+
+Technical release due to missed `frontend` and `copilot` folders in previous one.
+
 ## [2.6.1] - 2025-07-15
 
 ### Added
