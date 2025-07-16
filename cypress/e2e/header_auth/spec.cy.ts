@@ -35,6 +35,9 @@ describe('Header auth', () => {
     const shouldBeLoggedIn = () => {
       it('should have an access_token cookie in /auth/header response', () => {
         cy.wait('@auth').then((interception) => {
+          expect(interception.response, 'Intercepted response').to.satisfy(
+            () => true
+          );
           expect(interception.response.statusCode).to.equal(200);
 
           // Response contains `Authorization` cookie, starting with Bearer
@@ -57,6 +60,9 @@ describe('Header auth', () => {
 
     it('should request and have access to /user', () => {
       cy.wait('@user').then((interception) => {
+        expect(interception.response, 'Intercepted response').to.satisfy(
+          () => true
+        );
         expect(interception.response.statusCode).to.equal(200);
       });
     });

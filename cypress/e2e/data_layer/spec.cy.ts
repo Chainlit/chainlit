@@ -78,6 +78,7 @@ const verifyThreadList = () => {
 };
 
 const verifyThreadResume = () => {
+  cy.get('body').should('have.css', 'pointer-events', 'auto');
   cy.get(SELECTORS.THREAD_TEST2).click();
   cy.wait(TIMEOUTS.MEDIUM);
   cy.get('a').contains('Hello').click();
