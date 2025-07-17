@@ -138,9 +138,15 @@ describe('Data Layer', () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    const { platform } = await import('os');
+
     // Clean up thread history file
-    cy.exec(`rm -f ${threadHistoryFile}`, { failOnNonZeroExit: false });
+    const command =
+      platform() === 'win32'
+        ? `del /f "${threadHistoryFile}"`
+        : `rm -f "${threadHistoryFile}"`;
+    cy.exec(command, { failOnNonZeroExit: false });
   });
 
   describe('Data Features with Persistence', () => {
