@@ -17,8 +17,8 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          pnpm-skip-install: true
-      - name: Install depdendencies and Cypress
+          pnpm-skip-install: false
+      - name: Install dependencies and Cypress
         uses: cypress-io/github-action@v6
         with:
           runTests: false

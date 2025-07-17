@@ -27,10 +27,8 @@ runs:
     - name: Install pnpm
       run: corepack install
       shell: bash
-    - name: Add pnpm to PATH
-      run: echo "$(corepack which pnpm)" >> $GITHUB_PATH
-      shell: bash
     - name: Install JS dependencies
       run: pnpm install ${{ inputs.pnpm-install-args }}
       shell: bash
+      # Skip install if pnpm-skip-install is true
       if: ${{ inputs.pnpm-skip-install != 'true' }}
