@@ -5,7 +5,6 @@ import chainlit as cl
 async def on_start():
     element = cl.CustomElement(
         name="JiraTicket",
-        display="inline",
         props={
             "timeout": 20,
             "fields": [
