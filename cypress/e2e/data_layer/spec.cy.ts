@@ -168,6 +168,7 @@ describe('Data Layer', () => {
       restartServer(undefined, {
         THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
       });
+      cy.reload();
 
       verifyContinueThread();
       startNewThread();
