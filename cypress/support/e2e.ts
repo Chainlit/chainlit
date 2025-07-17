@@ -12,10 +12,16 @@ async function main() {
 
   // Start the Chainlit server
   const pnpmCmd = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+  let spawnOptions: any;
+  if (process.platform === 'win32') {
+    spawnOptions = { stdio: 'inherit', shell: true };
+  } else {
+    spawnOptions = { stdio: 'inherit' };
+  }
   const server: ChildProcess = spawn(
     pnpmCmd,
     ['exec', 'ts-node', './cypress/support/run.ts', 'action'],
-    { stdio: 'inherit' }
+    spawnOptions
   );
 
   // Wait for the server to start
