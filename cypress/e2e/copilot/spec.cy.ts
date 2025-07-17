@@ -8,6 +8,7 @@ describe('Copilot', () => {
       const script = document.createElement('script');
       script.src = `${document.location.origin}/copilot/index.js`;
       document.body.appendChild(script);
+      cy.window().should('have.property', 'mountChainlitWidget');
     });
 
     // Wait for the script to load and execute the initialization

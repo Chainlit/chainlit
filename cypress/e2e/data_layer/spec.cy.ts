@@ -128,7 +128,7 @@ describe('Data Layer', () => {
   let threadHistoryFile: string;
 
   beforeEach(() => {
-    // Setup thread history file
+    // Set up the thread history file
     const pathItems = Cypress.spec.absolute.split(sep);
     pathItems[pathItems.length - 1] = 'thread_history.pickle';
     threadHistoryFile = pathItems.join(sep);
