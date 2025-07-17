@@ -17,13 +17,13 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          pnpm-skip-install: false
-      - name: Install dependencies and Cypress
+          pnpm-skip-install: true
+      - name: Install Cypress
         uses: cypress-io/github-action@v6
         with:
           runTests: false
       - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python dependencies
+        name: Install Python, poetry and Python & pnpm (poetry does it automatically) dependencies
         with:
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
