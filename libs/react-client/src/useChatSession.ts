@@ -105,7 +105,7 @@ const useChatSession = () => {
       const uri = `${protocol}//${host}`;
       const path =
         pathname && pathname !== '/'
-          ? `${pathname}/ws/socket.io`
+          ? `${pathname}ws/socket.io`
           : '/ws/socket.io';
 
       try {
