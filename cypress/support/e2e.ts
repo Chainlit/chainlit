@@ -11,8 +11,9 @@ async function main() {
   const matchName = process.env.SINGLE_TEST || '*';
 
   // Start the Chainlit server
+  const pnpmCmd = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
   const server: ChildProcess = spawn(
-    'pnpm',
+    pnpmCmd,
     ['exec', 'ts-node', './cypress/support/run.ts', 'action'],
     { stdio: 'inherit' }
   );
