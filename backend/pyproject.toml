@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.6.0"
+version = "2.6.2"
 keywords = [
     'LLM',
     'Agents',
@@ -30,7 +30,10 @@ classifiers = [
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
-include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
+include = [
+    { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
+    { path = "chainlit/copilot/dist/**/*", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
@@ -143,7 +146,7 @@ azure-storage-blob="^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]
-requires = ["poetry-core==1.9.1"]
+requires = ["poetry-core==2.1.3"]
 build-backend = "poetry.core.masonry.api"
 
 
