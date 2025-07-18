@@ -121,6 +121,9 @@ edit_message = true
 [features.mcp.sse]
     enabled = true
 
+[features.mcp.streamable-http]
+    enabled = true
+
 [features.mcp.stdio]
     enabled = true
     # Only the executables in the allow list can be used for MCP stdio server.
