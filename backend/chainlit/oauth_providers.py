@@ -217,6 +217,10 @@ class AzureADOAuthProvider(OAuthProvider):
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
+            # Fetch user data
+            user_data = []
+            
+            # Call Graph API to get azure user
             response = await client.get(
                 "https://graph.microsoft.com/v1.0/me",
                 headers={"Authorization": f"Bearer {token}"},
@@ -226,6 +230,7 @@ class AzureADOAuthProvider(OAuthProvider):
             azure_user = response.json()
 
             try:
+                # Fetch user photo
                 photo_response = await client.get(
                     "https://graph.microsoft.com/v1.0/me/photos/48x48/$value",
                     headers={"Authorization": f"Bearer {token}"},
@@ -239,12 +244,31 @@ class AzureADOAuthProvider(OAuthProvider):
                 # Ignore errors getting the photo
                 pass
 
+            try:
+                # Fetch group memberships
+                groups_response = await client.get(
+                    "https://graph.microsoft.com/v1.0/me/memberOf",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                groups_response.raise_for_status()
+
+                # Extract group data
+                groups_data = groups_response.json()
+                user_groups = [
+                    group["displayName"] for group in groups_data.get("value", [])
+                ]
+
+            except Exception:
+                # Ignore errors getting group memberships
+                pass
+
             user = User(
                 identifier=azure_user["userPrincipalName"],
                 metadata={
                     "image": azure_user.get("image"),
                     "provider": "azure-ad",
                     "refresh_token": getattr(self, "_refresh_token", None),
+                    "groups": user_groups,
                 },
             )
             return (azure_user, user)
