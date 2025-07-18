@@ -10,13 +10,13 @@ export const useCopilotInteract = () => {
   const chatInteract = useChatInteract();
   const setCopilotThreadId = useSetRecoilState(copilotThreadIdState);
 
-  const startNewChat = useCallback(() => {
-    chatInteract.clear();
-
-    const newThreadId = uuidv4();
-
-    setCopilotThreadId(newThreadId);
-  }, [chatInteract, setCopilotThreadId]);
+  const startNewChat = useCallback(
+    (newThreadId?: string) => {
+      chatInteract.clear();
+      setCopilotThreadId(newThreadId || uuidv4());
+    },
+    [chatInteract, setCopilotThreadId]
+  );
 
   return {
     ...chatInteract,
