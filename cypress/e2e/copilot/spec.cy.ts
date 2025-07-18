@@ -6,8 +6,9 @@ describe('Copilot', () => {
     cy.document().then((document) => {
       document.body.innerHTML = '<div id="root"><h1>Copilot test!</h1></div>';
       const script = document.createElement('script');
-      script.src = 'http://localhost:8000/copilot/index.js';
+      script.src = `${document.location.origin}/copilot/index.js`;
       document.body.appendChild(script);
+      cy.window().should('have.property', 'mountChainlitWidget');
     });
 
     // Wait for the script to load and execute the initialization
@@ -15,7 +16,7 @@ describe('Copilot', () => {
       cy.wait(1000).then(() => {
         // @ts-expect-error is not a valid prop
         win.mountChainlitWidget({
-          chainlitServer: 'http://localhost:8000'
+          chainlitServer: window.location.origin
         });
 
         win.addEventListener('chainlit-call-fn', (e) => {
@@ -47,10 +48,8 @@ describe('Copilot', () => {
     cy.contains('.step', 'Function called with: Call func!', opts).should(
       'be.visible'
     );
-    cy.contains(
-      '.step',
-      'System message received: Hello World!',
-      opts
-    ).should('be.visible');
+    cy.contains('.step', 'System message received: Hello World!', opts).should(
+      'be.visible'
+    );
   });
 });
