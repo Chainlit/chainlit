@@ -29,7 +29,7 @@ export const CommandButtons = ({
   if (!commandButtons.length) return null;
 
   return (
-    <div className="flex gap-2 ml-1 flex-wrap">
+    <div className="flex gap-0 ml-1 flex-wrap">
       <TooltipProvider>
         {commandButtons.map((command) => (
           <Tooltip key={command.id}>
@@ -50,7 +50,15 @@ export const CommandButtons = ({
                 }
               >
                 <Icon name={command.icon} className="!h-5 !w-5" />
-                {command.id}
+                <span
+                  className={cn(
+                    selectedCommandId === command.id
+                      ? 'max-w-full overflow-visible text-clip whitespace-normal'
+                      : 'max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap max-sm:hidden'
+                  )}
+                >
+                  {command.id}
+                </span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>

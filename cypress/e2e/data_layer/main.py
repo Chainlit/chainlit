@@ -16,7 +16,7 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from literalai.helper import utc_now
+from chainlit.utils import utc_now
 
 now = utc_now()
 

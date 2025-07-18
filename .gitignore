@@ -63,3 +63,4 @@ dist-ssr
 backend/README.md
 backend/.dmypy.json
 
+.history
