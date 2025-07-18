@@ -20,6 +20,8 @@ declare global {
       light: Record<string, string>;
       dark: Record<string, string>;
     };
+    getCopilotThreadId: () => string | null;
+    clearCopilotThreadId: () => void;
   }
 }
 

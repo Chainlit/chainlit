@@ -11,6 +11,10 @@ import tailwindcss from './src/index.css?inline';
 import hljscss from 'highlight.js/styles/monokai-sublime.css?inline';
 
 import AppWrapper from './src/appWrapper';
+import {
+  clearChainlitCopilotThreadId,
+  getChainlitCopilotThreadId
+} from './src/state';
 import { IWidgetConfig } from './src/types';
 
 const id = 'chainlit-copilot';
@@ -27,6 +31,8 @@ declare global {
     unmountChainlitWidget: () => void;
     toggleChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
+    getChainlitCopilotThreadId: () => string | null;
+    clearChainlitCopilotThreadId: () => void;
   }
 }
 
@@ -60,3 +66,6 @@ window.unmountChainlitWidget = () => {
 window.sendChainlitMessage = () => {
   console.info('Copilot is not active. Please check if the widget is mounted.');
 };
+
+window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
+window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
