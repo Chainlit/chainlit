@@ -34,15 +34,6 @@ export interface InputMethods {
   reset: () => void;
 }
 
-const escapeHtml = (unsafe: string) => {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-};
-
 const Input = forwardRef<InputMethods, Props>(
   (
     {
@@ -81,19 +72,19 @@ const Input = forwardRef<InputMethods, Props>(
       if (commandSpan) {
         commandSpan.remove();
       }
+      const html = clone.innerHTML;
 
-      return (
-        clone.innerHTML
-          ?.replace(/<br\s*\/?>/g, '\n') // Convert <br> to newlines
-          .replace(/<div>/g, '\n') // Convert <div> to newlines
-          .replace(/<\/div>/g, '') // Remove closing div tags
-          .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
-          .replace(/<[^>]*>/g, '') // Remove any other HTML tags
-          .replace(/&lt;/g, '<') // Convert &lt; back to
-          .replace(/&gt;/g, '>') // Convert &gt; back to >
-          .replace(/&amp;/g, '&')
-          .replace('\u200B', '') || ''
-      );
+      let text = html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<div>/gi, '\n')
+        .replace(/<\/div>/gi, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+
+      text = text.replace(/<[^>]*>/g, '');
+      return text.replace('\u200B', '');
     };
 
     const reset = () => {
@@ -102,13 +93,16 @@ const Input = forwardRef<InputMethods, Props>(
         if (contentEditableRef.current) {
           contentEditableRef.current.innerHTML = '';
         }
-      }else if(contentEditableRef.current){
+      } else if (contentEditableRef.current) {
         // if selectedCommand?.persistent is true , keep .command-span tag and clear content
-        const commandSpan = contentEditableRef.current.querySelector('.command-span');
+        const commandSpan =
+          contentEditableRef.current.querySelector('.command-span');
         if (commandSpan) {
           contentEditableRef.current.innerHTML = commandSpan.outerHTML;
           // Zero-width space
-          contentEditableRef.current.appendChild(document.createTextNode('\u200B'));
+          contentEditableRef.current.appendChild(
+            document.createTextNode('\u200B')
+          );
         }
       }
       setSelectedIndex(0);
@@ -249,31 +243,22 @@ const Input = forwardRef<InputMethods, Props>(
         event.preventDefault();
 
         const textData = event.clipboardData?.getData('text/plain');
-        if (textData) {
-          const escapedText = escapeHtml(textData);
-          
-          // Remove trailing newlines to prevent extra line breaks
-          const trimmedText = escapedText.replace(/\n+$/, '');
-          
-          // Insert as plain text to avoid browser adding extra formatting
-          document.execCommand('insertText', false, trimmedText);
+        if (!textData) return;
 
-          textarea.focus();
+        const htmlString = textData
+          .split(/\r?\n/)
+          .map((line) => line.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+          .join('<br>');
 
-          const inputEvent = new Event('input', {
-            bubbles: true,
-            composed: true
-          });
-          textarea.dispatchEvent(inputEvent);
-        }
+        document.execCommand('insertHTML', false, htmlString);
         onPaste(event);
       };
 
       // Use the capture phase to ensure we catch the event before it can bubble
-      textarea.addEventListener('paste', handlePaste);
+      textarea.addEventListener('paste', handlePaste, true);
 
       return () => {
-        textarea.removeEventListener('paste', handlePaste);
+        textarea.removeEventListener('paste', handlePaste, true);
       };
     }, [onPaste]);
 
