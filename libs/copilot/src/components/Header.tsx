@@ -7,6 +7,8 @@ import NewChatButton from '@chainlit/app/src/components/header/NewChat';
 import { Button } from '@chainlit/app/src/components/ui/button';
 import { useAudio, useConfig } from '@chainlit/react-client';
 
+import { useCopilotInteract } from '../hooks';
+
 interface Props {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
@@ -15,6 +17,7 @@ interface Props {
 const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
   const { config } = useConfig();
   const { audioConnection } = useAudio();
+  const { startNewChat } = useCopilotInteract();
 
   const hasChatProfiles = !!config?.chatProfiles.length;
 
@@ -33,7 +36,10 @@ const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
             barSpacing={2}
           />
         ) : null}
-        <NewChatButton className="text-muted-foreground mt-[1.5px]" />
+        <NewChatButton
+          className="text-muted-foreground mt-[1.5px]"
+          onConfirm={startNewChat}
+        />
         <Button
           size="icon"
           variant="ghost"
