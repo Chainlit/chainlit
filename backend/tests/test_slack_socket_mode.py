@@ -18,15 +18,15 @@ async def test_start_socket_mode_starts_handler(monkeypatch):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-fake-bot")
     monkeypatch.setenv("SLACK_WEBSOCKET_TOKEN", token)
 
-    # Patch BEFORE importing chainlit.slack.app so the module sees our fake class
-    with patch(
-        "chainlit.slack.app.AsyncSocketModeHandler", autospec=True
+    # Import the module first to avoid lazy import registry issues
+    slack_app_mod = importlib.import_module("chainlit.slack.app")
+
+    # Patch the object directly instead of using string path
+    with patch.object(
+        slack_app_mod, "AsyncSocketModeHandler", autospec=True
     ) as handler_cls:
         handler_instance = AsyncMock()
         handler_cls.return_value = handler_instance
-
-        # (Re-)import the module under the patched context
-        slack_app_mod = importlib.import_module("chainlit.slack.app")
 
         # Run: should build handler + await start_async
         await slack_app_mod.start_socket_mode()
