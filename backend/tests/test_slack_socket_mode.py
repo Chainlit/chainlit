@@ -1,5 +1,4 @@
 # tests/test_slack_socket_mode.py
-import asyncio
 import importlib
 from unittest.mock import AsyncMock, patch
 
@@ -41,7 +40,7 @@ def test_slack_http_route_registered(monkeypatch):
     When only the classic HTTP tokens are set (no websocket token),
     the FastAPI app should expose POST /slack/events.
     """
-    #  HTTP-only environment
+    # HTTP-only environment
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-fake-bot")
     monkeypatch.setenv("SLACK_SIGNING_SECRET", "shhh-fake-secret")
     monkeypatch.delenv("SLACK_WEBSOCKET_TOKEN", raising=False)
