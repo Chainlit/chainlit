@@ -1,6 +1,6 @@
 import type { ITextElement } from '@chainlit/react-client';
 
-import { TextElement } from '@/components/Elements/Text';
+import { SmartTextElement } from '@/components/Elements/SmartTextElement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Props {
@@ -16,7 +16,7 @@ const InlinedTextList = ({ items }: Props) => (
             <CardTitle>{el.name}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TextElement element={el} />
+            <SmartTextElement element={el} />
           </CardContent>
         </Card>
       );

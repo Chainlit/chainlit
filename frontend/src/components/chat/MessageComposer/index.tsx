@@ -167,7 +167,7 @@ export default function MessageComposer({
         onChange={setValue}
         onPaste={onPaste}
         onEnter={submit}
-        placeholder={t('chat.input.placeholder')}
+        placeholder={t('Batlabs AI is here to help you')}
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
