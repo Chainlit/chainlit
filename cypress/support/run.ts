@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { SpawnOptionsWithoutStdio, spawn } from 'child_process';
 import * as kill from 'kill-port';
 import { join } from 'path';
 import sh from 'shell-exec';
@@ -33,30 +33,40 @@ export const runChainlitForTest = async (
     console.log(`Could not kill process on port ${CHAINLIT_PORT}. ${error}.`);
   }
   return new Promise((resolve, reject) => {
-    const dir = join(E2E_DIR, testName);
+    const testDir = join(E2E_DIR, testName);
     let file = 'main.py';
     if (mode === ExecutionMode.Async) file = 'main_async.py';
     if (mode === ExecutionMode.Sync) file = 'main_sync.py';
 
-    // Headless + CI mode
+    const fullPath = join(testDir, file);
+
+    const command = 'poetry';
+
     const options = [
-      'run',
       '--project',
       BACKEND_DIR,
+      'run',
       'chainlit',
       'run',
-      file,
+      fullPath,
       '-h',
-      '-c'
+      '--ci'
     ];
 
-    const server = spawn('poetry', options, {
-      cwd: dir
-    });
+    const spawnOptions: SpawnOptionsWithoutStdio = {
+      env: {
+        ...process.env,
+        CHAINLIT_APP_ROOT: testDir
+      }
+    };
+
+    const server = spawn(command, options, spawnOptions);
 
     server.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-      if (data.toString().includes('Your app is available at')) {
+      const output = data.toString();
+      console.log(`[Chainlit STDOUT] ${output}`);
+      if (output.includes('Your app is available at')) {
+        console.log('Chainlit server ready.');
         resolve(server);
       }
     });
@@ -77,9 +87,10 @@ export const runChainlitForTest = async (
 
 runChainlitForTest(process.argv[2], process.argv[3] as ExecutionMode)
   .then(() => {
+    console.log('run.ts finished successfully.');
     process.exit(0);
   })
   .catch((error) => {
-    console.error(error);
+    console.error('run.ts failed:', error);
     process.exit(1);
   });
