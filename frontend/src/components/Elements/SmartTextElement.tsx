@@ -33,7 +33,6 @@ const debugLog = (message: string, data?: any) => {
   }
 };
 
-// Function to check if content contains Bokeh plot data
 const isBokehData = (content: string): boolean => {
   try {
     debugLog('Checking if content is Bokeh data');
