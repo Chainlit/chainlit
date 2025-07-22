@@ -149,6 +149,7 @@ async def lifespan(app: FastAPI):
     # Slack Socket Handler if env variable SLACK_WEBSOCKET_TOKEN is set
     if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_WEBSOCKET_TOKEN"):
         from chainlit.slack.app import start_socket_mode
+
         slack_task = asyncio.create_task(start_socket_mode())
 
     try:
@@ -289,7 +290,11 @@ async def serve_copilot_file(
 #                               SLACK HTTP HANDLER
 # -------------------------------------------------------------------------------
 
-if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET") and not os.environ.get("SLACK_WEBSOCKET_TOKEN"):
+if (
+    os.environ.get("SLACK_BOT_TOKEN")
+    and os.environ.get("SLACK_SIGNING_SECRET")
+    and not os.environ.get("SLACK_WEBSOCKET_TOKEN")
+):
     from chainlit.slack.app import slack_app_handler
 
     @router.post("/slack/events")
