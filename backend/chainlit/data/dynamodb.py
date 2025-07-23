@@ -5,6 +5,7 @@ import os
 import random
 from dataclasses import asdict
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
@@ -63,14 +64,35 @@ class DynamoDBDataLayer(BaseDataLayer):
     def _get_current_timestamp(self) -> str:
         return datetime.now().isoformat() + "Z"
 
-    def _serialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def _serialize_item(self, item: dict[str, Any]) -> dict[str, Any]:
+        def convert_floats(obj):
+            if isinstance(obj, float):
+                return Decimal(str(obj))
+            elif isinstance(obj, dict):
+                return {k: convert_floats(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_floats(v) for v in obj]
+            else:
+                return obj
+
         return {
-            key: self._type_serializer.serialize(value) for key, value in item.items()
+            key: self._type_serializer.serialize(convert_floats(value))
+            for key, value in item.items()
         }
 
-    def _deserialize_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def _deserialize_item(self, item: dict[str, Any]) -> dict[str, Any]:
+        def convert_decimals(obj):
+            if isinstance(obj, Decimal):
+                return float(obj)
+            elif isinstance(obj, dict):
+                return {k: convert_decimals(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_decimals(v) for v in obj]
+            else:
+                return obj
+
         return {
-            key: self._type_deserializer.deserialize(value)
+            key: convert_decimals(self._type_deserializer.deserialize(value))
             for key, value in item.items()
         }
 
