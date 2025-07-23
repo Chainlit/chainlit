@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.5.5"
+version = "2.6.2"
 keywords = [
     'LLM',
     'Agents',
@@ -30,7 +30,10 @@ classifiers = [
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
-include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
+include = [
+    { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
+    { path = "chainlit/copilot/dist/**/*", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
@@ -45,7 +48,7 @@ httpx = ">=0.23.0"
 literalai = "0.1.201"
 dataclasses_json = "^0.6.7"
 fastapi = ">=0.115.3,<0.116"
-starlette = "^0.41.2"
+starlette = ">=0.41.2"
 uvicorn = ">=0.25.0"
 python-socketio = "^5.11.0"
 aiofiles = ">=23.1.0,<25.0.0"
@@ -57,7 +60,6 @@ click = "^8.1.3"
 tomli = "^2.0.1"
 pydantic = ">=2.7.2,<3"
 python-dotenv = "^1.0.0"
-uptrace = "^1.29.0"
 watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
@@ -114,12 +116,12 @@ module = [
     "plotly",
     "nest_asyncio",
     "socketio.*",
-    "uptrace",
     "syncer",
     "azure.storage.filedatalake",
     "google-cloud-storage",
     "azure.storage.blob",
     "azure.storage.blob.aio",
+    "google.auth",
     "google.oauth2"
 ]
 
@@ -135,7 +137,7 @@ ignore_missing_imports = true
 optional = true
 
 [tool.poetry.group.custom-data.dependencies]
-asyncpg = "^0.29.0"
+asyncpg = "^0.30.0"
 SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
@@ -144,7 +146,7 @@ azure-storage-blob="^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]
-requires = ["poetry-core==1.9.1"]
+requires = ["poetry-core==2.1.3"]
 build-backend = "poetry.core.masonry.api"
 
 

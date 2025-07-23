@@ -2,7 +2,6 @@ import asyncio
 import uuid
 from typing import Any, Dict, List, Literal, Optional, Union, cast, get_args
 
-from literalai.helper import utc_now
 from socketio.exceptions import TimeoutError
 
 from chainlit.chat_context import chat_context
@@ -26,6 +25,7 @@ from chainlit.types import (
     ToastType,
 )
 from chainlit.user import PersistedUser
+from chainlit.utils import utc_now
 
 
 class BaseChainlitEmitter:
@@ -288,6 +288,7 @@ class ChainlitEmitter(BaseChainlitEmitter):
                         "chainlitKey": file["id"],
                         "display": "inline",
                         "type": Element.infer_type_from_mime(file["type"]),
+                        "mime": file["type"],
                     }
                 )
                 for file in files
