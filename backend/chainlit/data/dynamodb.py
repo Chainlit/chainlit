@@ -544,6 +544,10 @@ class DynamoDBDataLayer(BaseDataLayer):
                 thread_dict = item
 
             elif item["SK"].startswith("ELEMENT"):
+                if self.storage_provider is not None:
+                    item["url"] = await self.storage_provider.get_read_url(
+                        object_key=item["objectKey"],
+                    )
                 elements.append(item)
 
             elif item["SK"].startswith("STEP"):
