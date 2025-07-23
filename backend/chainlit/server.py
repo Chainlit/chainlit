@@ -714,7 +714,7 @@ async def get_user(current_user: UserParam) -> GenericUser:
 
 
 _language_pattern = (
-    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,3})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,4})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
 )
 
 
@@ -820,6 +820,15 @@ async def update_feedback(
 
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
+
+        if config.code.on_feedback:
+            try:
+                await config.code.on_feedback(update.feedback)
+            except Exception as callback_error:
+                logger.error(
+                    f"Error in user-provided on_feedback callback: {callback_error}"
+                )
+                # Optionally, you could continue without raising an exception to avoid disrupting the endpoint.
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=500) from e
 

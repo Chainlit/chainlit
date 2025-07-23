@@ -8,7 +8,6 @@ from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union
 
 from literalai import BaseGeneration
-from literalai.helper import utc_now
 from literalai.observability.step import StepType, TrueStepType
 
 from chainlit.config import config
@@ -16,8 +15,8 @@ from chainlit.context import CL_RUN_NAMES, context, local_steps
 from chainlit.data import get_data_layer
 from chainlit.element import Element
 from chainlit.logger import logger
-from chainlit.telemetry import trace_event
 from chainlit.types import FeedbackDict
+from chainlit.utils import utc_now
 
 
 def check_add_step_in_cot(step: "Step"):
@@ -201,7 +200,6 @@ class Step:
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
     ):
-        trace_event(f"init {self.__class__.__name__} {type}")
         time.sleep(0.001)
         self._input = ""
         self._output = ""
@@ -315,8 +313,6 @@ class Step:
         """
         Update a step already sent to the UI.
         """
-        trace_event("update_step")
-
         if self.streaming:
             self.streaming = False
 
@@ -345,8 +341,6 @@ class Step:
         """
         Remove a step already sent to the UI.
         """
-        trace_event("remove_step")
-
         step_dict = self.to_dict()
         data_layer = get_data_layer()
 

@@ -41,6 +41,7 @@ from chainlit.element import (
 )
 from chainlit.message import (
     AskActionMessage,
+    AskElementMessage,
     AskFileMessage,
     AskUserMessage,
     ErrorMessage,
@@ -69,6 +70,7 @@ from .callbacks import (
     on_chat_end,
     on_chat_resume,
     on_chat_start,
+    on_feedback,
     on_logout,
     on_mcp_connect,
     on_mcp_disconnect,
@@ -125,6 +127,7 @@ __getattr__ = make_module_getattr(
 __all__ = [
     "Action",
     "AskActionMessage",
+    "AskElementMessage",
     "AskFileMessage",
     "AskUserMessage",
     "AsyncLangchainCallbackHandler",
@@ -180,6 +183,7 @@ __all__ = [
     "on_chat_end",
     "on_chat_resume",
     "on_chat_start",
+    "on_feedback",
     "on_logout",
     "on_mcp_connect",
     "on_mcp_disconnect",

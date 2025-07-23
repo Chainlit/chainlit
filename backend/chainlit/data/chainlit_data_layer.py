@@ -138,7 +138,7 @@ class ChainlitDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if not self.storage_client:
-            logger.warn(
+            logger.warning(
                 "Data Layer: create_element error. No cloud storage configured!"
             )
             return
@@ -561,12 +561,19 @@ class ChainlitDataLayer(BaseDataLayer):
 
         update_sets = [f'"{k}" = EXCLUDED."{k}"' for k in data.keys() if k != "id"]
 
-        query = f"""
-            INSERT INTO "Thread" ({", ".join(columns)})
-            VALUES ({", ".join(placeholders)})
-            ON CONFLICT (id) DO UPDATE
-            SET {", ".join(update_sets)};
-        """
+        if update_sets:
+            query = f"""
+                INSERT INTO "Thread" ({", ".join(columns)})
+                VALUES ({", ".join(placeholders)})
+                ON CONFLICT (id) DO UPDATE
+                SET {", ".join(update_sets)};
+            """
+        else:
+            query = f"""
+                INSERT INTO "Thread" ({", ".join(columns)})
+                VALUES ({", ".join(placeholders)})
+                ON CONFLICT (id) DO NOTHING
+            """
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
 

@@ -20,6 +20,8 @@ import {
   useChatInteract
 } from '@chainlit/react-client';
 
+import { MessageContext } from 'contexts/MessageContext';
+
 import Alert from '@/components/Alert';
 
 import Imports from './Imports';
@@ -30,6 +32,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   const sessionId = useRecoilValue(sessionIdState);
   const { sendMessage } = useChatInteract();
   const { user } = useAuth();
+  const { askUser } = useContext(MessageContext);
 
   const [sourceCode, setSourceCode] = useState<string>();
   const [error, setError] = useState<string>();
@@ -78,6 +81,27 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
     [sendMessage, user]
   );
 
+  const submitElement = useCallback(
+    (props: Record<string, unknown>) => {
+      if (
+        askUser?.spec.type === 'element' &&
+        askUser.spec.step_id === element.forId
+      ) {
+        askUser.callback({ ...props, submitted: true });
+      }
+    },
+    [askUser, element.forId]
+  );
+
+  const cancelElement = useCallback(() => {
+    if (
+      askUser?.spec.type === 'element' &&
+      askUser.spec.step_id === element.forId
+    ) {
+      askUser.callback({ submitted: false });
+    }
+  }, [askUser, element.forId]);
+
   const props = useMemo(() => {
     return JSON.parse(JSON.stringify(element.props));
   }, [element.props]);
@@ -96,7 +120,9 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
           updateElement,
           deleteElement,
           callAction,
-          sendUserMessage
+          sendUserMessage,
+          submitElement,
+          cancelElement
         }}
         onRendered={(error) => setError(error?.message)}
       />

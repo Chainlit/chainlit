@@ -4,6 +4,56 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.2] - 2025-07-16
+
+Technical release due to missed `frontend` and `copilot` folders in previous one.
+
+## [2.6.1] - 2025-07-15
+
+### Added
+- New `on_feedback` callback
+- Relaxed restriction on number of starters (now more than 4 can be displayed)
+
+### Fixed
+- Command persistence when `"button": True` is missing from command definition
+- `openai` and `mistralai` sub-modules fail due to incorrect `timestamp_utc` import
+- Temporarily reverted fix caused the following issues with Chainlit data layer:
+  - `null value in column "metadata" of relation "Thread"`
+  - `syntax error at or near ";"`
+- Google Cloud Storage private bucket support in Chainlit data layer
+- Portals (popups, dialogs, etc.) now render correctly inside Copilot’s shadow DOM
+
+### Other
+- Removed telemetry
+- Updated versions for Node.js, Poetry, and pnpm; added Corepack support
+
+## [2.6.0] - 2025-07-01
+
+### Added
+- Add commands to starters
+- Collapse command buttons to icons for small screens
+- Add timegated custom elements
+- Added ADC support for google cloud storage adapter
+- Added scope as env variable (`OAUTH_COGNITO_SCOPE`) to Cognito auth provider
+- Add MarkdownAlert Style Switcher. Control via `alert_style` in `config.toml`.
+- Allow custom s3 endpoint for the official data layer
+- Added container prop to dialog portal in Copilot shadow DOM
+- Bump dependencies
+- Add python 3.13 support
+
+### Fixed
+- Fix chat input double-spacing issue
+- Resolve python deprecation warning for utc_now() and logger.warn
+- Fixed an issue where the portal for the ChatProfiles selector was being rendered outside the Copilot shadow DOM
+- Add mime type to element emitter
+- Handle float/Decimal conversion for DynamoDB persistence
+- Fix cancel button in Chat settings
+- Only update thread metadata when not empty
+
+### Breaking
+- **LiteralAI** is being sunset and will be removed in one of the next releases. Please migrate to the official data layer instead.
+- Telemetry is now opt-in by default and will be removed in the next release.
+
 ## [2.5.5] - 2025-04-14
 
 ### Added
@@ -18,6 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CopilotFunction is now usable in custom JS
 - Header link now have an optional `display_name` to display text next to the icon
 - The default .env file loaded by chainlit is now configurable with `CHAINLIT_ENV_FILE`
+
 
 ### Changed
 
