@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
-    "build": "vite build",
+    "build": "node --max-old-space-size=4096 ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
     "format": "prettier 'src/**/*.{ts,tsx,css}' --write",
@@ -14,6 +14,7 @@
     "prepublishOnly": "pnpm run build && pnpm test"
   },
   "dependencies": {
+    "@bokeh/bokehjs": "^3.7.3",
     "@chainlit/react-client": "workspace:^",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",

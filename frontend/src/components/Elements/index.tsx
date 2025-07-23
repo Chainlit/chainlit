@@ -7,7 +7,7 @@ import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
 import { PDFElement } from './PDF';
 import { PlotlyElement } from './Plotly';
-import { TextElement } from './Text';
+import { SmartTextElement } from './SmartTextElement';
 import { VideoElement } from './Video';
 
 interface ElementProps {
@@ -21,7 +21,7 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
     case 'image':
       return <ImageElement element={element} />;
     case 'text':
-      return <TextElement element={element} />;
+      return <SmartTextElement element={element} />;
     case 'pdf':
       return <PDFElement element={element} />;
     case 'audio':

@@ -7,6 +7,7 @@ export type IElement =
   | IVideoElement
   | IFileElement
   | IPlotlyElement
+  | IBokehElement
   | IDataframeElement
   | ICustomElement;
 
@@ -18,6 +19,7 @@ export type IMessageElement =
   | IVideoElement
   | IFileElement
   | IPlotlyElement
+  | IBokehElement
   | IDataframeElement
   | ICustomElement;
 
@@ -71,6 +73,8 @@ export interface IFileElement extends TMessageElement<'file'> {
 }
 
 export type IPlotlyElement = TMessageElement<'plotly'>;
+
+export type IBokehElement = TMessageElement<'bokeh'>;
 
 export type ITasklistElement = TElement<'tasklist'>;
 
