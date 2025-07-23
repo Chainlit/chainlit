@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.6.0"
+version = "2.6.2"
 keywords = [
     'LLM',
     'Agents',
@@ -30,7 +30,10 @@ classifiers = [
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
-include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
+include = [
+    { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
+    { path = "chainlit/copilot/dist/**/*", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
