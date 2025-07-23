@@ -17,6 +17,7 @@ This document outlines the steps for maintainers to create a new release of the 
 2. **Bump the package version**:
 
    - Update `version` in `[tool.poetry]` of `backend/pyproject.toml`.
+   - Update `version` in `backend/chainlit/version.py`.
 
 3. **Update the changelog**:
 
