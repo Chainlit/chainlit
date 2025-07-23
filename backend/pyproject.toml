@@ -66,7 +66,7 @@ lazify = "^0.4.0"
 packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
-audioop-lts = { version = "...", python = "^3.13" }
+audioop-lts = { version = "0.2.1", python = "^3.13" }
 
 
 [tool.poetry.group.tests]
