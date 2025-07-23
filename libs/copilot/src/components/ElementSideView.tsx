@@ -20,7 +20,10 @@ export default function ElementSideView() {
         <DialogHeader>
           <DialogTitle>{sideView.title}</DialogTitle>
         </DialogHeader>
-        <div className="mt-4 overflow-y-auto min-h-[50vh] max-h-[80vh] flex flex-col gap-4">
+        <div
+          className="mt-4 overflow-y-auto overscroll-contain min-h-[50vh] max-h-[80vh] flex flex-col gap-4"
+          onWheel={(e) => e.stopPropagation()}
+        >
           {sideView.elements.map((e) => (
             <Element key={e.id} element={e} />
           ))}
