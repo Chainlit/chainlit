@@ -243,14 +243,14 @@ const Input = forwardRef<InputMethods, Props>(
         event.preventDefault();
 
         const textData = event.clipboardData?.getData('text/plain');
-        if (!textData) return;
-
-        const htmlString = textData
-          .split(/\r?\n/)
-          .map((line) => line.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
-          .join('<br>');
-
-        document.execCommand('insertHTML', false, htmlString);
+        if (textData) {
+          document.execCommand('insertText', false, textData);
+          const inputEvent = new Event('input', {
+            bubbles: true,
+            composed: true
+          });
+          textarea.dispatchEvent(inputEvent);
+        }
         onPaste(event);
       };
 
@@ -337,7 +337,7 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
+          contentEditable="plaintext-only"
           data-placeholder={placeholder}
           className={cn(
             'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
