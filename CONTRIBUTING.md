@@ -1,6 +1,6 @@
 # Contribute to Chainlit
 
-To contribute to Chainlit, you first need to setup the project on your local machine.
+To contribute to Chainlit, you first need to set up the project on your local machine.
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 > **Note**
 > If you are on windows, some pnpm commands like `pnpm run formatPython` won't work. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
 
-### Setup the repo
+### Set up the repo
 
 With this setup you can easily code in your fork and fetch updates from the main repository.
 
@@ -74,7 +74,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-poetry install --with tests --with mypy --with dev
+poetry install --with tests --with mypy --with dev --with custom-data
 ```
 
 ## Start the Chainlit server from source
@@ -83,8 +83,7 @@ Start by running `backend/hello.py` as an example.
 
 ```sh
 cd backend
-poetry self add poetry-plugin-shell
-poetry shell
+poetry env activate
 chainlit run chainlit/hello.py
 ```
 
@@ -113,12 +112,12 @@ This will run the backend's unit tests.
 
 ```sh
 cd backend
-pytest
+poetry run pytest --cov=chainlit
 ```
 
 ### E2E tests
 
-This will run end to end tests, assessing both the frontend, the backend and their interaction:
+This will run end to end tests, assessing both the frontend, the backend and their interaction. First install cypress with `pnpm exec cypress install`, and then run:
 
 ```sh
 pnpm test
@@ -143,4 +142,3 @@ Extremely useful for debugging!
 ```sh
 SINGLE_TEST=password_auth CYPRESS_OPTIONS='--headed --no-exit' pnpm test
 ```
-
