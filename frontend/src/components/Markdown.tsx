@@ -88,6 +88,23 @@ const cursorPlugin = () => {
   };
 };
 
+// Convert LaTeX-style delimiters to dollar-style delimiters for compatibility with remark-math
+const normalizeLatexDelimiters = (content: string): string => {
+  if (!content) return content;
+  
+  // Convert display math: \[...\] to $$...$$
+  content = content.replace(/\\\[([\s\S]*?)\\\]/g, (match, p1) => {
+    return `$$\n${p1}\n$$`;
+  });
+  
+  // Convert inline math: \(...\) to $...$
+  content = content.replace(/\\\(([\s\S]*?)\\\)/g, (match, p1) => {
+    return `$${p1}$`;
+  });
+  
+  return content;
+};
+
 const Markdown = ({
   allowHtml,
   latex,
@@ -121,6 +138,10 @@ const Markdown = ({
     }
     return remarkPlugins;
   }, [latex]);
+
+  const normalizedChildren = useMemo(() => {
+    return latex ? normalizeLatexDelimiters(children) : children;
+  }, [children, latex]);
 
   return (
     <ReactMarkdown
@@ -285,7 +306,7 @@ const Markdown = ({
         }
       }}
     >
-      {children}
+      {normalizedChildren}
     </ReactMarkdown>
   );
 };
