@@ -60,7 +60,7 @@ const Header = memo(() => {
 
       <div />
       <div className="flex items-center gap-1">
-        <ReadmeButton />
+        {/* <ReadmeButton /> */}
         <ApiKeys />
         {links &&
           links.map((link, index) => (
