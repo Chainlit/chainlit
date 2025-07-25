@@ -111,7 +111,7 @@
     "settings": {
       "title": "Settings panel"
     },
-    "watermark": "LLMs can make mistakes. Consider checking important information."
+    "watermark": "LLMs can make mistakes. Check important info."
   },
   "threadHistory": {
     "sidebar": {
