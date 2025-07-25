@@ -29,7 +29,7 @@ const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPortal container={window.cl_shadowRootElement || document.body}>
+  <AlertDialogPortal container={window.cl_shadowRootElement}>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}

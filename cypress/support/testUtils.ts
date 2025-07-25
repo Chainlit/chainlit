@@ -2,24 +2,28 @@ import { sep } from 'path';
 
 import { ExecutionMode } from './utils';
 
-const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/
+const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/;
 Cypress.on('uncaught:exception', (err) => {
-    /* returning false here prevents Cypress from failing the test */
-    if (resizeObserverLoopErrRe.test(err.message)) {
-        return false
-    }
-})
+  /* returning false here prevents Cypress from failing the test */
+  if (resizeObserverLoopErrRe.test(err.message)) {
+    return false;
+  }
+});
 
 export function submitMessage(message: string) {
   cy.get(`#chat-input`).should('not.be.disabled').type(`${message}`);
-  cy.get(`#chat-submit`).should('not.be.disabled').click()
+  cy.get(`#chat-submit`).should('not.be.disabled').click();
 }
 
 export function submitMessageCopilot(message: string) {
   cy.get(`#chat-input`, { includeShadowDom: true })
+    .should('be.visible')
+    .should('have.attr', 'contenteditable', 'true')
     .should('not.be.disabled')
-    .type(`${message}{enter}`, {
-      scrollBehavior: false
+    .then(($el) => {
+      cy.wrap($el).click().type(`${message}{enter}`, {
+        scrollBehavior: false
+      });
     });
 }
 
