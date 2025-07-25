@@ -1,6 +1,8 @@
-from typing import List, Callable # Ensure Callable is imported
-from chainlit.input_widget import InputWidget
+from typing import List  # Ensure Callable is imported
+
 from chainlit.context import context
+from chainlit.input_widget import InputWidget
+
 
 class InputBar:
     @staticmethod
@@ -16,12 +18,13 @@ class InputBar:
             raise TypeError("All items in 'widgets' must be instances of InputWidget.")
 
         if not hasattr(context.session, "input_widget_callbacks"):
-            context.session.input_widget_callbacks = {}
+            setattr(context.session, "input_widget_callbacks", {})
 
+        callbacks = getattr(context.session, "input_widget_callbacks", {})
         for widget in widgets:
             if widget.on_change:
-                context.session.input_widget_callbacks[widget.id] = widget.on_change
+                callbacks[widget.id] = widget.on_change
 
         widget_dicts = [widget.to_dict() for widget in widgets]
-        
+
         await context.emitter.emit("set_input_widgets", widget_dicts)

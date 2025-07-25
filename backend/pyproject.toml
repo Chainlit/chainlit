@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "chainlit"
-version = "2.6.2"
+name = "chainlit-chandru20"
+version = "2.6.3"
 keywords = [
     'LLM',
     'Agents',
@@ -13,8 +13,8 @@ keywords = [
     'langchain',
     'conversational ai',
 ]
-description = "Build Conversational AI."
-authors = ["Willy Douhard", "Dan Andre Constantini"]
+description = "Build Conversational AI. (Fork with custom fixes)"
+authors = ["Willy Douhard", "Dan Andre Constantini", "chandru20"]
 license = "Apache-2.0"
 homepage = "https://chainlit.io/"
 documentation = "https://docs.chainlit.io/"
@@ -27,8 +27,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Environment :: Web Environment"
 ]
-repository = "https://github.com/Chainlit/chainlit"
+repository = "https://github.com/chandru20/chainlit"
 readme = "README.md"
+packages = [{include = "chainlit"}]
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
 include = [
     { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
@@ -108,21 +109,48 @@ python_version = "3.10"
 
 [[tool.mypy.overrides]]
 module = [
-    "boto3.dynamodb.types",
-    "botbuilder.*",
-    "filetype",
-    "langflow",
-    "lazify",
-    "plotly",
-    "nest_asyncio",
-    "socketio.*",
-    "syncer",
-    "azure.storage.filedatalake",
-    "google-cloud-storage",
+    "azure.core.credentials",
     "azure.storage.blob",
     "azure.storage.blob.aio",
+    "azure.storage.filedatalake",
+    "boto3.dynamodb.types",
+    "botbuilder.*",
+    "discord",
+    "discord.abc",
+    "discord.ui",
+    "filetype",
     "google.auth",
-    "google.oauth2"
+    "google.oauth2",
+    "google-cloud-storage",
+    "langchain.cache",
+    "langchain.callbacks.tracers.schemas",
+    "langchain.globals",
+    "langchain.schema",
+    "langchain_core.outputs",
+    "langchain_core.tracers.base",
+    "langflow",
+    "lazify",
+    "llama_index.core.callbacks",
+    "llama_index.core.callbacks.schema",
+    "llama_index.core.llms",
+    "llama_index.core.tools.types",
+    "matplotlib.figure",
+    "moto",
+    "nest_asyncio",
+    "plotly",
+    "pytest",
+    "pytest_asyncio",
+    "semantic_kernel",
+    "semantic_kernel.filters",
+    "semantic_kernel.functions",
+    "slack_bolt.adapter.fastapi.async_handler",
+    "slack_bolt.async_app",
+    "socketio.*",
+    "sqlalchemy",
+    "sqlalchemy.exc",
+    "sqlalchemy.ext.asyncio",
+    "sqlalchemy.orm",
+    "syncer",
 ]
 
 ignore_missing_imports = true
