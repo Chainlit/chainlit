@@ -2,7 +2,6 @@ import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -13,8 +12,8 @@ import {
   IStep,
   IThread,
   nestMessages,
-  sideViewState,
   useApi,
+  useChatStore,
   useConfig
 } from '@chainlit/react-client';
 
@@ -38,7 +37,8 @@ const ReadOnlyThread = ({ id }: Props) => {
     revalidateOnFocus: false
   });
   const navigate = useNavigate();
-  const setSideView = useSetRecoilState(sideViewState);
+  const setSideView = useChatStore((state) => state.setSideView);
+
   const [steps, setSteps] = useState<IStep[]>([]);
   const apiClient = useContext(ChainlitContext);
   const { t } = useTranslation();

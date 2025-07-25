@@ -1,9 +1,8 @@
 import { cn } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
 
-import { sideViewState } from '@chainlit/react-client';
+import { useChatStore } from '@chainlit/react-client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
@@ -20,7 +19,9 @@ import { Element } from './Elements';
 import { Button } from './ui/button';
 
 export default function ElementSideView() {
-  const [sideView, setSideView] = useRecoilState(sideViewState);
+  const sideView = useChatStore((state) => state.sideView);
+  const setSideView = useChatStore((state) => state.setSideView);
+
   const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(false);
 

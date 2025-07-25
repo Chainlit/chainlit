@@ -15,7 +15,7 @@ import { useLayoutMaxWidth } from '@chainlit/app/src/hooks/useLayoutMaxWidth';
 import { useUpload } from '@chainlit/app/src/hooks/useUpload';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
-  threadHistoryState,
+  useAuthStore,
   useChatData,
   useChatInteract,
   useConfig
@@ -28,7 +28,7 @@ const Chat = () => {
   const { config } = useConfig();
   const layoutMaxWidth = useLayoutMaxWidth();
   const setAttachments = useSetRecoilState(attachmentsState);
-  const setThreads = useSetRecoilState(threadHistoryState);
+  const setThreads = useAuthStore((state) => state.setThreadHistory);
   const autoScrollRef = useRef(true);
   const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
@@ -139,10 +139,9 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
+    setThreads({
       currentThreadId: undefined
-    }));
+    });
   }, []);
 
   const enableAttachments =
