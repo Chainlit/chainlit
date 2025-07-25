@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { expect, it } from 'vitest';
 
 import { MessageContent } from 'components/chat/Messages/Message/Content';
+import { Markdown } from 'components/Markdown';
 
 // Import the toBeInTheDocument function
 import type { ITextElement } from '@chainlit/react-client';
@@ -103,4 +104,37 @@ it('highlights sources containing regex characters correctly', () => {
   expect(getByRole('link', { name: 'Document[1]' })).toBeInTheDocument();
   expect(getByRole('link', { name: 'source(12)' })).toBeInTheDocument();
   expect(getByRole('link', { name: 'page{12}' })).toBeInTheDocument();
+});
+
+it('renders KaTeX math expressions when latex is enabled', () => {
+  const { container } = render(
+    <Markdown latex={true}>
+      {'This is an inline math expression: $E = mc^2$ and a block expression:\n\n$$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$'}
+    </Markdown>
+  );
+  
+  // Check that KaTeX rendered math elements are present
+  const mathElements = container.querySelectorAll('.katex');
+  expect(mathElements.length).toBeGreaterThan(0);
+  
+  // Check that the equations were properly rendered
+  expect(container.textContent).toContain('E'); // Inline math rendered
+  expect(container.textContent).toContain('∫'); // Block math rendered with integral symbol
+  expect(container.textContent).toContain('π'); // Block math rendered with pi symbol
+});
+
+it('does not render KaTeX math expressions when latex is disabled', () => {
+  const { container } = render(
+    <Markdown latex={false}>
+      {'This is an inline math expression: $E = mc^2$ and a block expression:\n\n$$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$'}
+    </Markdown>
+  );
+  
+  // Check that no KaTeX elements are present
+  const mathElements = container.querySelectorAll('.katex');
+  expect(mathElements.length).toBe(0);
+  
+  // The raw text should still be present
+  expect(container.textContent).toContain('$E = mc^2$');
+  expect(container.textContent).toContain('$$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$');
 });

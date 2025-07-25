@@ -87,7 +87,7 @@ allow_origins = ["*"]
 unsafe_allow_html = false
 
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
-latex = false
+latex = true
 
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
@@ -274,7 +274,7 @@ class FeaturesSettings(DataClassJsonMixin):
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     mcp: McpFeature = Field(default_factory=McpFeature)
-    latex: bool = False
+    latex: bool = True
     user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
