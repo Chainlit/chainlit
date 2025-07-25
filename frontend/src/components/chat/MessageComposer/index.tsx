@@ -124,7 +124,10 @@ export default function MessageComposer({
   );
 
   const submit = useCallback(() => {
-    if (disabled || (value === '' && attachments.length === 0)) {
+    if (
+      disabled ||
+      (value === '' && attachments.length === 0 && !selectedCommand)
+    ) {
       return;
     }
     if (askUser) {
@@ -201,7 +204,7 @@ export default function MessageComposer({
         <div className="flex items-center gap-1">
           <SubmitButton
             onSubmit={submit}
-            disabled={disabled || !value.trim()}
+            disabled={disabled || (!value.trim() && !selectedCommand)}
           />
         </div>
       </div>
