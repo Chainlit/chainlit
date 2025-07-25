@@ -6,7 +6,8 @@
       "continue": "继续",
       "goBack": "返回",
       "reset": "重置",
-      "submit": "提交"
+      "submit": "提交",
+      "share": "分享"
     },
     "status": {
       "loading": "加载中...",
@@ -135,9 +136,10 @@
     "thread": {
       "untitled": "未命名对话",
       "menu": {
-          "rename": "重命名",
-          "delete": "删除"
-        },
+        "rename": "重命名",
+        "delete": "删除",
+        "share": "分享"
+      },
       "actions": {
         "delete": {
           "title": "确认删除",

@@ -229,6 +229,9 @@ const useChatSession = () => {
       });
 
       socket.on('resume_thread', (thread: IThread) => {
+        if (idToResume && thread.id !== idToResume) {
+          window.location.href = `/thread/${thread.id}`;
+        }
         let messages: IStep[] = [];
         for (const step of thread.steps) {
           messages = addMessage(messages, step);
