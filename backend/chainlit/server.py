@@ -1166,18 +1166,14 @@ async def connect_mcp(
 
                 env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
                 mcp_connection = StdioMcpConnection(
-                    command=command,
-                    args=args,
-                    name=payload.name
+                    command=command, args=args, name=payload.name
                 )
 
                 env = get_default_environment()
                 env.update(env_from_cmd)
                 # Create the server parameters
                 server_params = StdioServerParameters(
-                    command=command,
-                    args=args,
-                    env=env
+                    command=command, args=args, env=env
                 )
 
                 transport = await exit_stack.enter_async_context(
@@ -1235,7 +1231,9 @@ async def connect_mcp(
                 "command": payload.fullCommand
                 if payload.clientType == "stdio"
                 else None,
-                "url": getattr(payload, 'url', None) if payload.clientType in ["sse", "streamable-http"] else None,
+                "url": getattr(payload, "url", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
             },
         }
     )
