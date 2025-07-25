@@ -18,7 +18,13 @@ class SseMcpConnection(BaseModel):
     clientType: Literal["sse"] = "sse"
 
 
-McpConnection = Union[StdioMcpConnection, SseMcpConnection]
+class HttpMcpConnection(BaseModel):
+    name: str
+    url: str
+    clientType: Literal["streamable-http"] = "streamable-http"
+
+
+McpConnection = Union[StdioMcpConnection, SseMcpConnection, HttpMcpConnection]
 
 
 def validate_mcp_command(command_string: str):

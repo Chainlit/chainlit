@@ -331,6 +331,16 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async connectStreamableHttpMCP(sessionId: string, name: string, url: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      clientType: 'streamable-http'
+    });
+    return res.json();
+  }
+
   async disconnectMcp(sessionId: string, name: string) {
     const res = await this.delete(`/mcp`, { sessionId, name });
     return res.json();

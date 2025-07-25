@@ -72,6 +72,9 @@ export interface IChainlitConfig {
       sse?: {
         enabled?: boolean;
       };
+      streamable_http?: {
+        enabled?: boolean;
+      };
       stdio?: {
         enabled?: boolean;
       };
