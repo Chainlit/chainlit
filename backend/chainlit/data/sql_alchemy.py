@@ -38,7 +38,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     def __init__(
         self,
         conninfo: str,
-        connect_args: Optional[dict[str, any]] = {}, #for additional connection arguments such as the schema to use for a postgres connection
+        connect_args: Optional[dict[str, Any]] = None,
         ssl_require: bool = False,
         storage_provider: Optional[BaseStorageClient] = None,
         user_thread_limit: Optional[int] = 1000,
@@ -47,6 +47,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         self.show_logger = show_logger
+        if connect_args is None:
+            connect_args = {}
         if ssl_require:
             # Create an SSL context to require an SSL connection
             ssl_context = ssl.create_default_context()

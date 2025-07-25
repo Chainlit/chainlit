@@ -12,9 +12,7 @@ export default function WaterMark() {
   const Logo = variant === 'light' ? LogoLight : LogoDark;
 
   return (
-    <a
-      href="https://chainlit.io"
-      target="_blank"
+    <div
       className="watermark"
       style={{
         display: 'flex',
@@ -33,6 +31,6 @@ export default function WaterMark() {
           marginLeft: '4px'
         }}
       />
-    </a>
+    </div>
   );
 }
