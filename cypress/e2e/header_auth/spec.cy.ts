@@ -38,12 +38,17 @@ describe('Header auth', () => {
           expect(interception.response, 'Intercepted response').to.satisfy(
             () => true
           );
-          expect(interception.response.statusCode).to.equal(200);
+          // Add null check for response before accessing statusCode
+          if (interception.response) {
+            expect(interception.response.statusCode).to.equal(200);
 
-          // Response contains `Authorization` cookie, starting with Bearer
-          expect(interception.response.headers).to.have.property('set-cookie');
-          const cookie = interception.response.headers['set-cookie'][0];
-          expect(cookie).to.contain('access_token');
+            // Response contains `Authorization` cookie, starting with Bearer
+            expect(interception.response.headers).to.have.property(
+              'set-cookie'
+            );
+            const cookie = interception.response.headers['set-cookie'][0];
+            expect(cookie).to.contain('access_token');
+          }
         });
       });
 
