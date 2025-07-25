@@ -78,6 +78,19 @@ def build():
         backend_dir = pathlib.Path(__file__).resolve().parent
         project_root = backend_dir.parent
 
+        # Check if frontend and copilot dist directories already exist and have content
+        backend_frontend_dist = backend_dir / "chainlit" / "frontend" / "dist"
+        backend_copilot_dist = backend_dir / "chainlit" / "copilot" / "dist"
+
+        if (
+            backend_frontend_dist.exists()
+            and any(backend_frontend_dist.iterdir())
+            and backend_copilot_dist.exists()
+            and any(backend_copilot_dist.iterdir())
+        ):
+            print("-- Frontend assets already exist, skipping build")
+            return
+
         pnpm = shutil.which("pnpm")
         if not pnpm:
             raise BuildError("pnpm not found!")
