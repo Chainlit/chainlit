@@ -1106,10 +1106,16 @@ async def connect_mcp(
         get_default_environment,
         stdio_client,
     )
-    from mcp.client.streamable_http import streamablehttp_client 
+    from mcp.client.streamable_http import streamablehttp_client
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import McpConnection, SseMcpConnection, StdioMcpConnection, HttpMcpConnection, validate_mcp_command
+    from chainlit.mcp import (
+        HttpMcpConnection,
+        McpConnection,
+        SseMcpConnection,
+        StdioMcpConnection,
+        validate_mcp_command,
+    )
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1137,6 +1143,7 @@ async def connect_mcp(
 
         try:
             exit_stack = AsyncExitStack()
+            mcp_connection: McpConnection
 
             if payload.clientType == "sse":
                 if not config.features.mcp.sse.enabled:
@@ -1145,7 +1152,7 @@ async def connect_mcp(
                         detail="SSE MCP is not enabled",
                     )
 
-                mcp_connection: McpConnection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
+                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)
 
                 transport = await exit_stack.enter_async_context(
                     sse_client(url=mcp_connection.url)
@@ -1158,7 +1165,7 @@ async def connect_mcp(
                     )
 
                 env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
-                mcp_connection: McpConnection = StdioMcpConnection(
+                mcp_connection = StdioMcpConnection(
                     command=command,
                     args=args,
                     name=payload.name
@@ -1183,7 +1190,7 @@ async def connect_mcp(
                         status_code=400,
                         detail="HTTP MCP is not enabled",
                     )
-                mcp_connection: McpConnection = HttpMcpConnection(url=payload.url, name=payload.name)
+                mcp_connection = HttpMcpConnection(url=payload.url, name=payload.name)
                 transport = await exit_stack.enter_async_context(
                     streamablehttp_client(url=mcp_connection.url)
                 )
@@ -1228,7 +1235,7 @@ async def connect_mcp(
                 "command": payload.fullCommand
                 if payload.clientType == "stdio"
                 else None,
-                "url": payload.url if payload.clientType in ["sse", "streamable-http"] else None,
+                "url": getattr(payload, 'url', None) if payload.clientType in ["sse", "streamable-http"] else None,
             },
         }
     )
