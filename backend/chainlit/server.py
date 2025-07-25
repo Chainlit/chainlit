@@ -144,6 +144,14 @@ async def lifespan(app: FastAPI):
 
         discord_task = asyncio.create_task(client.start(discord_bot_token))
 
+    slack_task = None
+
+    # Slack Socket Handler if env variable SLACK_WEBSOCKET_TOKEN is set
+    if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_WEBSOCKET_TOKEN"):
+        from chainlit.slack.app import start_socket_mode
+
+        slack_task = asyncio.create_task(start_socket_mode())
+
     try:
         yield
     finally:
@@ -159,6 +167,10 @@ async def lifespan(app: FastAPI):
             if discord_task:
                 discord_task.cancel()
                 await discord_task
+
+            if slack_task:
+                slack_task.cancel()
+                await slack_task
         except asyncio.exceptions.CancelledError:
             pass
 
@@ -275,10 +287,14 @@ async def serve_copilot_file(
 
 
 # -------------------------------------------------------------------------------
-#                               SLACK HANDLER
+#                               SLACK HTTP HANDLER
 # -------------------------------------------------------------------------------
 
-if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
+if (
+    os.environ.get("SLACK_BOT_TOKEN")
+    and os.environ.get("SLACK_SIGNING_SECRET")
+    and not os.environ.get("SLACK_WEBSOCKET_TOKEN")
+):
     from chainlit.slack.app import slack_app_handler
 
     @router.post("/slack/events")
