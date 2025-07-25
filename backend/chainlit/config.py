@@ -260,6 +260,11 @@ class McpSseFeature(DataClassJsonMixin):
 
 
 @dataclass
+class McpStreamableHttpFeature(DataClassJsonMixin):
+    enabled: bool = True
+
+
+@dataclass
 class McpStdioFeature(DataClassJsonMixin):
     enabled: bool = True
     allowed_executables: Optional[list[str]] = None
@@ -269,6 +274,7 @@ class McpStdioFeature(DataClassJsonMixin):
 class McpFeature(DataClassJsonMixin):
     enabled: bool = False
     sse: McpSseFeature = Field(default_factory=McpSseFeature)
+    streamable_http: McpStreamableHttpFeature = Field(default_factory=McpStreamableHttpFeature)
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
 
 

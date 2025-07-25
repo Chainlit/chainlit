@@ -1178,7 +1178,7 @@ async def connect_mcp(
                 )
 
             elif payload.clientType == "streamable-http":
-                if not config.features.mcp.http.enabled:
+                if not config.features.mcp.streamable_http.enabled:
                     raise HTTPException(
                         status_code=400,
                         detail="HTTP MCP is not enabled",
@@ -1228,7 +1228,7 @@ async def connect_mcp(
                 "command": payload.fullCommand
                 if payload.clientType == "stdio"
                 else None,
-                "url": payload.url if payload.clientType == "sse" else None,
+                "url": payload.url if payload.clientType in ["sse", "streamable-http"] else None,
             },
         }
     )

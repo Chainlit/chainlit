@@ -44,7 +44,8 @@ export const apiClient = {
       body: JSON.stringify({
         clientType: 'streamable-http',
         name,
-        url
+        url,
+        sessionId
       })
     })
       .then(async (res) => {

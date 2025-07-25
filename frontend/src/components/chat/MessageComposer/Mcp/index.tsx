@@ -38,7 +38,7 @@ const McpButton = ({ disabled }: Props) => {
 
   const allowSse = !!config?.features.mcp?.sse?.enabled;
   const allowStdio = !!config?.features.mcp?.stdio?.enabled;
-  const allowHttp = !!config?.features.mcp?.http?.enabled;
+  const allowHttp = !!config?.features.mcp?.streamable_http?.enabled;
   const allowMcp = !!config?.features.mcp?.enabled;
 
   if (!allowMcp || (!allowSse && !allowStdio && !allowHttp)) return null;
