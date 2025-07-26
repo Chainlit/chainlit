@@ -25,7 +25,7 @@ const onError = (error: ClientError) => {
 class ExtendedChainlitAPI extends ChainlitAPI {
   connectStreamableHttpMCP(sessionId: string, name: string, url: string) {
     // Assumes the backend expects { clientType, name, url }
-    return fetch(`${this.httpEndpoint}api/mcp`, {
+    return fetch(`${this.httpEndpoint}mcp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,11 +37,10 @@ class ExtendedChainlitAPI extends ChainlitAPI {
         url,
         sessionId
       })
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        return { success: res.ok, mcp: data.mcp, error: data.detail };
-      });
+    }).then(async (res) => {
+      const data = await res.json();
+      return { success: res.ok, mcp: data.mcp, error: data.detail };
+    });
   }
 }
 
