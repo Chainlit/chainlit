@@ -9,6 +9,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 import ApiKeys from './ApiKeys';
 import ChatProfiles from './ChatProfiles';
+import ElementSidebarToggleButton from './ElementSidebarToggleButton';
 import NewChatButton from './NewChat';
 import ReadmeButton from './Readme';
 import SidebarTrigger from './SidebarTrigger';
@@ -72,6 +73,7 @@ const Header = memo(() => {
               url={link.url}
             />
           ))}
+        <ElementSidebarToggleButton />
         <ThemeToggle />
         <UserNav />
       </div>

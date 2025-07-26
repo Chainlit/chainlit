@@ -1,9 +1,12 @@
 import { cn } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { sideViewState } from '@chainlit/react-client';
+import {
+  elementSidebarVisibilityState,
+  sideViewState
+} from '@chainlit/react-client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable';
@@ -20,14 +23,16 @@ import { Element } from './Elements';
 import { Button } from './ui/button';
 
 export default function ElementSideView() {
-  const [sideView, setSideView] = useRecoilState(sideViewState);
+  const sideView = useRecoilValue(sideViewState);
+  const [isElementSidebarVisible, setIsElementSidebarVisible] = useRecoilState(
+    elementSidebarVisibilityState
+  );
   const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(false);
-
   const isCanvas = sideView?.title === 'canvas';
 
   useEffect(() => {
-    if (sideView) {
+    if (sideView && isElementSidebarVisible) {
       // Delay setting visibility to trigger animation
       requestAnimationFrame(() => {
         setIsVisible(true);
@@ -35,13 +40,16 @@ export default function ElementSideView() {
     } else {
       setIsVisible(false);
     }
-  }, [sideView]);
+  }, [sideView, isElementSidebarVisible]);
 
-  if (!sideView) return null;
+  if (!sideView || !isElementSidebarVisible) return null;
 
   if (isMobile) {
     return (
-      <Sheet open onOpenChange={(open) => !open && setSideView(undefined)}>
+      <Sheet
+        open
+        onOpenChange={(open) => !open && setIsElementSidebarVisible(false)}
+      >
         <SheetContent
           className={cn('md:hidden flex flex-col', isCanvas && 'p-0')}
         >
@@ -87,7 +95,7 @@ export default function ElementSideView() {
             >
               <Button
                 className="-ml-2"
-                onClick={() => setSideView(undefined)}
+                onClick={() => setIsElementSidebarVisible(false)}
                 size="icon"
                 variant={isCanvas ? 'default' : 'ghost'}
               >
