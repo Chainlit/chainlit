@@ -1191,7 +1191,10 @@ async def connect_mcp(
                     streamablehttp_client(url=mcp_connection.url)
                 )
 
-            read, write = transport
+            # The transport can return (read, write) for stdio, sse
+            # Or (read, write, get_session_id) for streamable-http
+            # We are only interested in the read and write streams here.
+            read, write = transport[:2]
 
             mcp_session: ClientSession = await exit_stack.enter_async_context(
                 ClientSession(
