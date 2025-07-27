@@ -35,15 +35,8 @@ interface ServerEnv {
 
 // Utility functions
 const login = () => {
-  // If currently on /login perform the login flow, else continue.
-  cy.location('pathname').then((path) => {
-    if (path.endsWith('/login')) {
-      cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
-      cy.get(SELECTORS.PASSWORD_INPUT)
-        .should('be.visible')
-        .type('admin{enter}');
-    }
-  });
+  cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
+  cy.get(SELECTORS.PASSWORD_INPUT).should('be.visible').type('admin{enter}');
 };
 
 const verifyFeedback = () => {
