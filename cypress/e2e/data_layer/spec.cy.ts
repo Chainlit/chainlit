@@ -35,9 +35,9 @@ interface ServerEnv {
 
 // Utility functions
 const login = () => {
-  // If the email input is present, perform login, otherwise assume already logged in.
-  cy.get('body').then(($body) => {
-    if ($body.find(SELECTORS.EMAIL_INPUT).length) {
+  // If currently on /login perform the login flow, else continue.
+  cy.location('pathname').then((path) => {
+    if (path.endsWith('/login')) {
       cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
       cy.get(SELECTORS.PASSWORD_INPUT)
         .should('be.visible')
