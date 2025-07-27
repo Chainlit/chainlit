@@ -40,9 +40,18 @@ export const McpAddForm = ({
   const setMcps = useSetRecoilState(mcpState);
 
   const [serverName, setServerName] = useState('');
+  // Pick the first protocol enabled by the parent component.
+  const defaultType: 'stdio' | 'sse' | 'streamable-http' = allowStdio
+    ? 'stdio'
+    : allowSse
+    ? 'sse'
+    : allowHttp
+    ? 'streamable-http'
+    : 'stdio';
+
   const [serverType, setServerType] = useState<
     'stdio' | 'sse' | 'streamable-http'
-  >(allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http');
+  >(defaultType);
   const [serverUrl, setServerUrl] = useState('');
   const [httpUrl, setHttpUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
@@ -65,7 +74,7 @@ export const McpAddForm = ({
 
   const resetForm = () => {
     setServerName('');
-    setServerType(allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http');
+    setServerType(defaultType);
     setServerUrl('');
     setServerCommand('');
     setHttpUrl('');
