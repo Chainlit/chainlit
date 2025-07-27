@@ -46,6 +46,7 @@ export const McpAddForm = ({
   const [serverUrl, setServerUrl] = useState('');
   const [httpUrl, setHttpUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
+  const [headersInput, setHeadersInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Form validation function
@@ -68,16 +69,30 @@ export const McpAddForm = ({
     setServerUrl('');
     setServerCommand('');
     setHttpUrl('');
+    setHeadersInput('');
   };
 
   const addMcp = () => {
     setIsLoading(true);
 
+    // Helper to parse the optional headers JSON
+    let headersObj: Record<string, string> | undefined;
+    if (headersInput.trim()) {
+      try {
+        headersObj = JSON.parse(headersInput.trim());
+      } catch (_err) {
+        toast.error('Headers must be valid JSON');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     if (serverType === 'stdio') {
       toast.promise(
         apiClient
           .connectStdioMCP(sessionId, serverName, serverCommand)
-          .then(async ({ success, mcp }) => {
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
@@ -93,9 +108,10 @@ export const McpAddForm = ({
       );
     } else if (serverType === 'sse') {
       toast.promise(
-        apiClient
-          .connectSseMCP(sessionId, serverName, serverUrl)
-          .then(async ({ success, mcp }) => {
+        (apiClient as any)
+          .connectSseMCP(sessionId, serverName, serverUrl, headersObj)
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
@@ -111,9 +127,10 @@ export const McpAddForm = ({
       );
     } else if (serverType === 'streamable-http') {
       toast.promise(
-        apiClient
-          .connectStreamableHttpMCP(sessionId, serverName, httpUrl)
-          .then(async ({ success, mcp }) => {
+        (apiClient as any)
+          .connectStreamableHttpMCP(sessionId, serverName, httpUrl, headersObj)
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
@@ -230,6 +247,21 @@ export const McpAddForm = ({
                 value={httpUrl}
                 onChange={(e) => setHttpUrl(e.target.value)}
                 required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {(serverType === 'sse' || serverType === 'streamable-http') && (
+            <>
+              <Label htmlFor="headers" className="text-foreground/70 text-sm">
+                Headers (JSON, optional)
+              </Label>
+              <Input
+                id="headers"
+                placeholder='Example: {"Authorization": "Bearer TOKEN"}'
+                className="w-full bg-background text-foreground border-input font-mono"
+                value={headersInput}
+                onChange={(e) => setHeadersInput(e.target.value)}
                 disabled={isLoading}
               />
             </>

@@ -321,21 +321,33 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async connectSseMCP(sessionId: string, name: string, url: string) {
+  async connectSseMCP(
+    sessionId: string,
+    name: string,
+    url: string,
+    headers?: Record<string, string>
+  ) {
     const res = await this.post(`/mcp`, {
       sessionId,
       name,
       url,
+      ...(headers ? { headers } : {}),
       clientType: 'sse'
     });
     return res.json();
   }
 
-  async connectStreamableHttpMCP(sessionId: string, name: string, url: string) {
+  async connectStreamableHttpMCP(
+    sessionId: string,
+    name: string,
+    url: string,
+    headers?: Record<string, string>
+  ) {
     const res = await this.post(`/mcp`, {
       sessionId,
       name,
       url,
+      ...(headers ? { headers } : {}),
       clientType: 'streamable-http'
     });
     return res.json();

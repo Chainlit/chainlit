@@ -232,7 +232,8 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
       toast.promise(
         apiClient
           .connectStdioMCP(sessionId, mcp.name, mcp.command!)
-          .then(async ({ success, mcp: updatedMcp }) => {
+          .then(async (resp: any) => {
+            const { success, mcp: updatedMcp } = resp;
             updateMcpStatus(success, updatedMcp);
           })
           .catch(() => {
@@ -247,9 +248,15 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
       );
     } else if (mcp.clientType === 'streamable-http') {
       toast.promise(
-        apiClient
-          .connectStreamableHttpMCP(sessionId, mcp.name, mcp.url!)
-          .then(async ({ success, mcp: updatedMcp }) => {
+        (apiClient as any)
+          .connectStreamableHttpMCP(
+            sessionId,
+            mcp.name,
+            mcp.url!,
+            (mcp as any).headers
+          )
+          .then(async (resp: any) => {
+            const { success, mcp: updatedMcp } = resp;
             updateMcpStatus(success, updatedMcp);
           })
           .catch(() => {
@@ -264,9 +271,10 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
       );
     } else {
       toast.promise(
-        apiClient
-          .connectSseMCP(sessionId, mcp.name, mcp.url!)
-          .then(async ({ success, mcp: updatedMcp }) => {
+        (apiClient as any)
+          .connectSseMCP(sessionId, mcp.name, mcp.url!, (mcp as any).headers)
+          .then(async (resp: any) => {
+            const { success, mcp: updatedMcp } = resp;
             updateMcpStatus(success, updatedMcp);
           })
           .catch(() => {
