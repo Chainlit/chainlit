@@ -40,9 +40,9 @@ export const McpAddForm = ({
   const setMcps = useSetRecoilState(mcpState);
 
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState<'stdio' | 'sse' | 'streamable-http'>(
-    allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http'
-  );
+  const [serverType, setServerType] = useState<
+    'stdio' | 'sse' | 'streamable-http'
+  >(allowStdio ? 'stdio' : allowSse ? 'sse' : 'streamable-http');
   const [serverUrl, setServerUrl] = useState('');
   const [httpUrl, setHttpUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
@@ -166,8 +166,14 @@ export const McpAddForm = ({
               </SelectTrigger>
               <SelectContent>
                 {allowSse ? <SelectItem value="sse">sse</SelectItem> : null}
-                {allowStdio ? <SelectItem value="stdio">stdio</SelectItem> : null}
-                {allowHttp ? <SelectItem value="streamable-http">streamable-http</SelectItem> : null}
+                {allowStdio ? (
+                  <SelectItem value="stdio">stdio</SelectItem>
+                ) : null}
+                {allowHttp ? (
+                  <SelectItem value="streamable-http">
+                    streamable-http
+                  </SelectItem>
+                ) : null}
               </SelectContent>
             </Select>
           </div>
@@ -176,7 +182,10 @@ export const McpAddForm = ({
         <div className="flex flex-col gap-2">
           {serverType === 'stdio' && (
             <>
-              <Label htmlFor="server-command" className="text-foreground/70 text-sm">
+              <Label
+                htmlFor="server-command"
+                className="text-foreground/70 text-sm"
+              >
                 Command *
               </Label>
               <Input
@@ -192,7 +201,10 @@ export const McpAddForm = ({
           )}
           {serverType === 'sse' && (
             <>
-              <Label htmlFor="server-url" className="text-foreground/70 text-sm">
+              <Label
+                htmlFor="server-url"
+                className="text-foreground/70 text-sm"
+              >
                 Server URL *
               </Label>
               <Input
@@ -213,7 +225,7 @@ export const McpAddForm = ({
               </Label>
               <Input
                 id="http-url"
-                placeholder="Example: http://localhost:8000/stream"
+                placeholder="Example: http://localhost:8000/mcp"
                 className="w-full bg-background text-foreground border-input"
                 value={httpUrl}
                 onChange={(e) => setHttpUrl(e.target.value)}
